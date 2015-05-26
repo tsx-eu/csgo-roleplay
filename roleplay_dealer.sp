@@ -109,7 +109,8 @@ public Action Cmd_ItemDrugs(int args) {
 	else if( StrEqual(arg0, "ecstasy") ) {
 		int kevlar;
 		rp_getClientInt(client, i_Kevlar, kevlar);
-		if(kevlar >= 250){
+		if ( kevlar >= 250 ) {
+			ITEM_CANCEL(client, item_id);
 			return Plugin_Handled;
 		}
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdEcstasy, DRUG_DURATION);
