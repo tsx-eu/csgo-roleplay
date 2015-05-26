@@ -57,6 +57,7 @@ public Action Cmd_ItemDrugs(int args) {
 		}
 		if( !rp_IsTutorialOver(target) ) {
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N n'a pas terminé le tutorial.", target);
+			ITEM_CANCEL(client, item_id);
 			return Plugin_Handled;
 		}
 		
