@@ -5,7 +5,7 @@
  * Pour accéder à une copie de cette licence, merci de vous rendre à l'adresse suivante
  * http://creativecommons.org/licenses/by-nc-sa/4.0/ .
  *
- * Merci de respecter le travail fournis par le ou les auteurs 
+ * Merci de respecter le travail fourni par le ou les auteurs 
  * https://www.ts-x.eu/ - kossolax@ts-x.eu
  */
 #pragma semicolon 1
