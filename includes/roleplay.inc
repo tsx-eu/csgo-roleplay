@@ -47,6 +47,14 @@ native void rp_Effect_ShakingVision(int client, float duration = 30.0);
 
 native void rp_IncrementSuccess(int client, rp_success_list success, int amount = 1);
 
+native void rp_ClientRespawn(int client, float time=0.1);
+
+native int rp_GetPlayerZone(int client, float cache = 0.25);
+native int rp_GetZoneBit(int client, float cache = 300.0);
+native bool rp_IsInPVP(int entity);
+
+native void rp_MakeRadiusPush(float center[3], float radius, float speed, int ignore = -1);
+
 
 
 
@@ -297,3 +305,26 @@ enum rp_success_list {
 #define ACCESS_DENIED(%1)	CPrintToChat(%1, "{lightblue}[TSX-RP]{default} Vous n'avez pas accès à cette commande.");	return Plugin_Handled
 #define ITEM_CANCEL(%1,%2)	rp_giveClientItem(%1,%2); rp_setClientFloat(%1, fl_CoolDown, 0.05)
 
+#define BITZONE_DEFAULT		(0)		// https://www.ts-x.eu/shared_public/bit.html
+#define BITZONE_PEACEFULL	(1<<0)
+#define BITZONE_PVP			(1<<1)
+#define BITZONE_DENY		(1<<2)
+#define BITZONE_BLOCKITEM	(1<<3)
+#define BITZONE_BLOCKSELL	(1<<4)
+#define BITZONE_BLOCKCHIRU	(1<<5)
+#define BITZONE_BLOCKSTEAL	(1<<6)
+#define BITZONE_BLOCKBUILD	(1<<7)
+#define BITZONE_BLOCKFORCE	(1<<8)
+#define BITZONE_BLOCKTALK	(1<<9)
+#define BITZONE_BLOCKOUT	(1<<10)
+#define BITZONE_BLOCKJAIL	(1<<11)
+#define BITZONE_BLOCKSPEAK	(1<<12)
+#define BITZONE_PARKING		(1<<15)
+#define BITZONE_JUSTICEITEM	(1<<18)
+#define BITZONE_POLICEFORCE	(1<<19)
+#define BITZONE_JAIL		(1<<20)
+#define BITZONE_HAUTESECU	(1<<21)
+#define BITZONE_LACOURS		(1<<22)
+#define BITZONE_EVENT		(1<<23)
+#define BITZONE_VENTE		(1<<24)
+#define	BITZONE_PERQUIZ		(1<<25)
