@@ -107,15 +107,16 @@ public Action Cmd_ItemDrugs(int args) {
 		rp_HookEvent(client, RP_PreHUDColorize, fwdCrystal2, DRUG_DURATION);
 	}
 	else if( StrEqual(arg0, "ecstasy") ) {
-		rp_HookEvent(client, RP_PrePlayerPhysic, fwdEcstasy, DRUG_DURATION);
-		
 		int kevlar;
 		rp_getClientInt(client, i_Kevlar, kevlar);
+		if(kevlar == 250){
+			return Plugin_Handled;
+		}
+		rp_HookEvent(client, RP_PrePlayerPhysic, fwdEcstasy, DRUG_DURATION);
 		kevlar += 120; if (kevlar > 250)kevlar = 250;
 		
 		rp_setClientInt(client, i_Kevlar, kevlar);
 		rp_setClientBool(client, b_KeyReverse, true);
-		
 	}
 	else if( StrEqual(arg0, "beuh") ) {
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdBeuh, DRUG_DURATION);
