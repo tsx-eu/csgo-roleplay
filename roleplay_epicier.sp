@@ -112,7 +112,7 @@ public Action fwdCigSpeed(int client, float& speed, float& gravity) {
 	#if defined DEBUG
 	PrintToServer("fwdCigSpeed");
 	#endif
-	speed += 0.25;
+	speed += 0.15;
 	
 	return Plugin_Changed;
 }
@@ -120,7 +120,7 @@ public Action fwdCigGravity(int client, float& speed, float& gravity) {
 	#if defined DEBUG
 	PrintToServer("fwdCigGravity");
 	#endif
-	gravity -= 0.25;
+	gravity -= 0.15;
 	
 	return Plugin_Changed;
 }
