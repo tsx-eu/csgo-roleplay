@@ -55,6 +55,14 @@ native bool rp_IsInPVP(int entity);
 
 native void rp_MakeRadiusPush(float center[3], float radius, float speed, int ignore = -1);
 
+native void rp_SetWeaponSkin(int wepID, int client);
+native void rp_SetWeaponGroupID(int wepID, int groupID);
+native void rp_SetWeaponBallType(int wepID, enum_ball_type groupID);
+native enum_ball_type rp_GetWeaponBallType(int wepID);
+
+
+native int rp_GetClientGroupID(int client);
+
 
 
 
@@ -221,7 +229,7 @@ enum sz_user_data {
 	String:sz_Skin,
 	
 	sz_udata_max
-}
+};
 enum sick_type {
 	sick_type_none,
 	
@@ -231,7 +239,7 @@ enum sick_type {
 	sick_type_hemoragie,
 	
 	sick_type_max
-}
+};
 enum rp_success_list {	
 	success_list_police,
 	success_list_hopital,
@@ -328,3 +336,16 @@ enum rp_success_list {
 #define BITZONE_EVENT		(1<<23)
 #define BITZONE_VENTE		(1<<24)
 #define	BITZONE_PERQUIZ		(1<<25)
+
+
+enum enum_ball_type {
+	ball_type_none,
+	ball_type_fire,
+	ball_type_caoutchouc,
+	ball_type_poison,
+	ball_type_vampire,
+	ball_type_paintball,
+	ball_type_reflexive,
+	ball_type_explode,
+	ball_type_max
+};
