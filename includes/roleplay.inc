@@ -13,21 +13,31 @@
 #endif
 #define _tsxrp_included_
 
+// Tout les hook sont exécuté uniquement en dehors de la zone event.
 enum rp_event {
-	RP_PreTakeDamage,
+	RP_PreTakeDamage,													
 	RP_PostTakeDamageWeapon,
 	RP_PostTakeDamageKnife,
 	RP_PrePlayerPhysic,
 	RP_PreHUDColorize,
+	RP_OnFrameSeconde,
+	RP_OnAssurance,
+	RP_OnPlayerSpawn,
+	RP_OnPlayerDead,
 	
 	RP_EventMax
 }
 typeset rp_event_enum {
-	function Action(int victim, int attacker, float &damage); 			/* RP_PreTakeDamage */
+	function Action(int victim, int attacker, float &damage); 			/* RP_PreTakeDamage  == return Plugin_Handled = aucun dégat */
 	function Action(int victim, int attacker, float &damage, int wepID);/* RP_PostTakeDamageWeapon */
 	function Action(int victim, int attacker, float &damage); 			/* RP_PostTakeDamageKnife */
 	function Action(int client, float &speed, float &gravity); 			/* RP_PrePlayerPhysic */
 	function Action(int client, int color[4]); 							/* RP_PreHUDColorize */
+	function Action(int client);										/* RP_OnFrameSeconde */
+	function Action(int client, int& amount);							/* RP_OnAssurance */
+	function Action(int client);										/* RP_OnPlayerSpawn */
+	function Action(int victim, int attacker);							/* RP_OnPlayerDead == return Plugin_Handled = cacher des logs */
+	
 };
 
 native bool rp_HookEvent(int client, rp_event eventID, rp_event_enum hook, float duration=-1.0);
@@ -46,6 +56,7 @@ native bool rp_IsTutorialOver(int client);
 native void rp_Effect_Smoke(int client, float duration = 30.0);
 native void rp_Effect_VisionTrouble(int client, float duration = 30.0);
 native void rp_Effect_ShakingVision(int client, float duration = 30.0);
+native void rp_Effect_Particle(int entity, char[] effect, float duration = 0.0001);
 
 native void rp_IncrementSuccess(int client, rp_success_list success, int amount = 1);
 
@@ -143,6 +154,10 @@ enum bool_user_data {
 	b_HasGrave,
 	b_SpawnToGrave,
 	b_Pissing,
+	b_ChiruRegen,
+	b_ChiruMaxHeal,
+	b_ChiruKevlar,
+	b_ChiruYeux,
 	
 	b_udata_max
 };
