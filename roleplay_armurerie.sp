@@ -11,11 +11,10 @@
 #pragma semicolon 1
 
 #include <sourcemod>
-#include <sdkhooks>
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
 
-#define __LAST_REV__ 		"v:0.1.0"
+#define __LAST_REV__ 		"v:0.1.1"
 
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
@@ -28,15 +27,18 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-
+float vecNull[3];
+int g_cBeam;
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
 	RegServerCmd("rp_giveitem",			Cmd_GiveItem,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_giveitem_pvp",		Cmd_GiveItemPvP,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_balltype",	Cmd_ItemBallType,		"RP-ITEM",	FCVAR_UNREGISTERED);
 }
+public void OnMapStart() {
+	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt");
+}
 // ----------------------------------------------------------------------------
-
 public Action Cmd_GiveItem(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_GiveItem");
@@ -65,8 +67,7 @@ public Action Cmd_GiveItemPvP(int args) {
 	int group = rp_GetClientGroupID(client);
 	rp_SetWeaponGroupID(wpnID, group);
 }
-
-
+// ----------------------------------------------------------------------------
 public Action Cmd_ItemBallType(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemBallType");
@@ -116,3 +117,71 @@ public Action Cmd_ItemBallType(int args) {
 	
 	return Plugin_Handled;
 }
+public void OnClientPostAdminCheck(int client) {
+	rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdWeapon);
+}
+public void OnClientDisconnect(int client) {
+	rp_UnhookEvent(client, RP_PostTakeDamageWeapon, fwdWeapon);
+}
+public Action fwdWeapon(int victim, int attacker, float &damage, int wepID) {
+	bool changed = true;
+	
+	switch( rp_GetWeaponBallType(wepID) ) {
+		case ball_type_fire: {
+			rp_ClientIgnite(victim, 10.0, attacker);
+			changed = false;
+		}
+		case ball_type_caoutchouc: {
+			damage *= 0.0;
+			if( rp_IsInPVP(victim) ) {
+				TeleportEntity(victim, NULL_VECTOR, NULL_VECTOR, vecNull);
+				damage *= 0.5;
+			}
+			
+			rp_SetClientFloat(victim, fl_FrozenTime, GetGameTime() + 1.5);
+			ServerCommand("sm_effect_flash %d 1.5 180", victim);
+		}
+		case ball_type_poison: {
+			damage *= 0.66;
+			rp_ClientPoison(victim, 30.0, attacker);
+		}
+		case ball_type_vampire: {
+			damage *= 0.75;
+			int current = GetClientHealth(attacker);
+			if( current < 500 ) {
+				current += RoundToFloor(damage*0.2);
+
+				if( current > 500 )
+					current = 500;
+
+				SetEntityHealth(attacker, current);
+				
+				float vecOrigin[3], vecOrigin2[3];
+				GetClientEyePosition(attacker, vecOrigin);
+				GetClientEyePosition(victim, vecOrigin2);
+				
+				vecOrigin[2] -= 20.0; vecOrigin2[2] -= 20.0;
+				
+				TE_SetupBeamPoints(vecOrigin, vecOrigin2, g_cBeam, 0, 0, 0, 0.1, 10.0, 10.0, 0, 10.0, {250, 50, 50, 250}, 10);
+				TE_SendToAll();
+			}
+		}
+		case ball_type_paintball: {
+			damage *= 1.0;
+		}
+		case ball_type_reflexive: {
+			damage = 0.9;
+		}
+		case ball_type_explode: {
+			damage *= 0.8;
+		}
+		default: {
+			changed = false;
+		}
+	}
+	
+	if( changed )
+		return Plugin_Changed;
+	return Plugin_Continue;
+}
+// ----------------------------------------------------------------------------

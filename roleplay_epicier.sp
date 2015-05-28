@@ -91,7 +91,7 @@ public Action Cmd_ItemCigarette(int args) {
 		delete g_hCigarette[client];
 	
 	g_hCigarette[client] = CreateTimer( 30.0, ItemStopCig, client);
-	rp_setClientBool(client, b_Smoking, true);
+	rp_SetClientBool(client, b_Smoking, true);
 	
 	return Plugin_Handled;
 }
@@ -106,7 +106,7 @@ public Action ItemStopCig(Handle timer, any client) {
 	PrintToServer("ItemStopCig");
 	#endif
 	
-	rp_setClientBool(client, b_Smoking, false);
+	rp_SetClientBool(client, b_Smoking, false);
 }
 public Action fwdCigSpeed(int client, float& speed, float& gravity) {
 	#if defined DEBUG
@@ -243,14 +243,13 @@ public Action Cmd_ItemCrayons(int args) {
 	
 	int client = GetCmdArgInt(1);
 	
-	bool crayon;
-	rp_getClientBool(client, b_Crayon, crayon);
+	bool crayon = rp_GetClientBool(client, b_Crayon);
 	
 	if( !crayon ) {
 		rp_IncrementSuccess(client, success_list_rainbow);
 	}
-	rp_setClientBool(client, b_Crayon, true);
 	
+	rp_SetClientBool(client, b_Crayon, true);
 }
 public Action Cmd_ItemMaps(int args) {
 	#if defined DEBUG
@@ -258,7 +257,7 @@ public Action Cmd_ItemMaps(int args) {
 	#endif
 	
 	int client = GetCmdArgInt(1);
-	rp_setClientBool(client, b_Map, true);
+	rp_SetClientBool(client, b_Map, true);
 }
 // ----------------------------------------------------------------------------
 void UningiteEntity(int entity) {

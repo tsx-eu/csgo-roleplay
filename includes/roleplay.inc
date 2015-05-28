@@ -15,28 +15,30 @@
 
 enum rp_event {
 	RP_PreTakeDamage,
+	RP_PostTakeDamageWeapon,
+	RP_PostTakeDamageKnife,
 	RP_PrePlayerPhysic,
 	RP_PreHUDColorize,
 	
 	RP_EventMax
 }
 typeset rp_event_enum {
-	function Action(int victim, int attacker, float &damage);
-	function Action(int client, float &speed, float &gravity);
-	function Action(int client, int color[4]);
+	function Action(int victim, int attacker, float &damage); /* RP_PreTakeDamage */
+	function Action(int victim, int attacker, float &damage, int wepID); /* RP_PostTakeDamageWeapon */
+	function Action(int victim, int attacker, float &damage); /* RP_PostTakeDamageKnife */
+	function Action(int client, float &speed, float &gravity); /* RP_PrePlayerPhysic */
+	function Action(int client, int color[4]); /* RP_PreHUDColorize */
 };
 
 native bool rp_HookEvent(int client, rp_event eventID, rp_event_enum hook, float duration=-1.0);
 native bool rp_UnhookEvent(int client, rp_event eventID, rp_event_enum hook);
 
-native void rp_giveClientItem(int client, int itemID, int amount=1, bool toBank = false);
-
-native void rp_getClientFloat(int client, float_user_data prop, float &value);
-native void rp_setClientFloat(int client, float_user_data prop, float value);
-native void rp_getClientInt(int client, int_user_data prop, int &value);
-native void rp_setClientInt(int client, int_user_data prop, int value);
-native void rp_getClientBool(int client, bool_user_data prop, bool &value);
-native void rp_setClientBool(int client, bool_user_data prop, bool value);
+native int rp_GetClientInt(int client, int_user_data prop);
+native bool rp_GetClientBool(int client, bool_user_data prop);
+native float rp_GetClientFloat(int client, float_user_data prop);
+native void rp_SetClientInt(int client, int_user_data prop, int value);
+native void rp_SetClientBool(int client, bool_user_data prop, bool value);
+native void rp_SetClientFloat(int client, float_user_data prop, float value);
 
 native bool rp_IsEntitiesNear(int ent1, int ent2, bool tresProche = false, float cache = 0.25);
 native bool rp_IsTutorialOver(int client);
@@ -47,7 +49,12 @@ native void rp_Effect_ShakingVision(int client, float duration = 30.0);
 
 native void rp_IncrementSuccess(int client, rp_success_list success, int amount = 1);
 
+native void rp_ClientGiveItem(int client, int itemID, int amount=1, bool toBank = false);
 native void rp_ClientRespawn(int client, float time=0.1);
+native void rp_ClientIgnite(int client, float time=10.0, int attacker=0);
+native void rp_ClientPoison(int client, float time=10.0, int attacker=0);
+native void rp_ClientDamage(int client, int damage, int attacker, char[] weapon = "point_hurt", int damageType = DMG_GENERIC);
+
 
 native int rp_GetPlayerZone(int client, float cache = 0.25);
 native int rp_GetZoneBit(int client, float cache = 300.0);
@@ -59,7 +66,8 @@ native void rp_SetWeaponSkin(int wepID, int client);
 native void rp_SetWeaponGroupID(int wepID, int groupID);
 native void rp_SetWeaponBallType(int wepID, enum_ball_type groupID);
 native enum_ball_type rp_GetWeaponBallType(int wepID);
-
+native void rp_SetClientKnifeType(int client, enum_ball_type groupID);
+native enum_ball_type rp_GetClientKnifeType(int client);
 
 native int rp_GetClientGroupID(int client);
 
@@ -311,7 +319,7 @@ enum rp_success_list {
 };
 
 #define ACCESS_DENIED(%1)	CPrintToChat(%1, "{lightblue}[TSX-RP]{default} Vous n'avez pas accès à cette commande.");	return Plugin_Handled
-#define ITEM_CANCEL(%1,%2)	rp_giveClientItem(%1,%2); rp_setClientFloat(%1, fl_CoolDown, 0.05)
+#define ITEM_CANCEL(%1,%2)	rp_ClientGiveItem(%1,%2); rp_SetClientFloat(%1, fl_CoolDown, 0.05)
 
 #define BITZONE_DEFAULT		(0)		// https://www.ts-x.eu/shared_public/bit.html
 #define BITZONE_PEACEFULL	(1<<0)

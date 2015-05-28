@@ -87,7 +87,7 @@ public Action Cmd_ItemDrugs(int args) {
 		rp_Effect_ShakingVision(client);
 	}
 	else if( StrEqual(arg0, "cannabis2") ) {
-		rp_setClientFloat(client, fl_invisibleTime, GetGameTime() + DRUG_DURATION);
+		rp_SetClientFloat(client, fl_invisibleTime, GetGameTime() + DRUG_DURATION);
 	}
 	else if( StrEqual(arg0, "heroine") ) {
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdHeroine, DRUG_DURATION);
@@ -101,15 +101,14 @@ public Action Cmd_ItemDrugs(int args) {
 	else if( StrEqual(arg0, "champigions") ) {
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdChampi, DRUG_DURATION);
 		
-		rp_setClientFloat(client, fl_HallucinationTime, GetGameTime() + DRUG_DURATION);
+		rp_SetClientFloat(client, fl_HallucinationTime, GetGameTime() + DRUG_DURATION);
 	}
 	else if( StrEqual(arg0, "crystal") ) {
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdCrystal, DRUG_DURATION);
 		rp_HookEvent(client, RP_PreHUDColorize, fwdCrystal2, DRUG_DURATION);
 	}
 	else if( StrEqual(arg0, "ecstasy") ) {
-		int kevlar;
-		rp_getClientInt(client, i_Kevlar, kevlar);
+		int kevlar = rp_GetClientInt(client, i_Kevlar);
 		if ( kevlar >= 250 ) {
 			ITEM_CANCEL(client, item_id);
 			return Plugin_Handled;
@@ -117,8 +116,8 @@ public Action Cmd_ItemDrugs(int args) {
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdEcstasy, DRUG_DURATION);
 		kevlar += 120; if (kevlar > 250)kevlar = 250;
 		
-		rp_setClientInt(client, i_Kevlar, kevlar);
-		rp_setClientBool(client, b_KeyReverse, true);
+		rp_SetClientInt(client, i_Kevlar, kevlar);
+		rp_SetClientBool(client, b_KeyReverse, true);
 	}
 	else if( StrEqual(arg0, "beuh") ) {
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdBeuh, DRUG_DURATION);
@@ -128,8 +127,7 @@ public Action Cmd_ItemDrugs(int args) {
 		rp_Effect_Smoke(client, DRUG_DURATION);
 	}
 	
-	bool drugged;
-	rp_getClientBool(client, b_Drugged, drugged);
+	bool drugged = rp_GetClientBool(client, b_Drugged);
 	
 	if( drugged ) {
 		
@@ -141,13 +139,13 @@ public Action Cmd_ItemDrugs(int args) {
 				
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes en état d'overdose.");			
 				
-				rp_setClientInt(client, i_Sick, Math_GetRandomInt((view_as<int>sick_type_none)+1, (view_as<int>sick_type_max)-1));
+				rp_SetClientInt(client, i_Sick, Math_GetRandomInt((view_as<int>sick_type_none)+1, (view_as<int>sick_type_max)-1));
 				
 			}
 		}
 	}
 	
-	rp_setClientBool(client, b_Drugged, true);
+	rp_SetClientBool(client, b_Drugged, true);
 	g_hDrugTimer[client] = CreateTimer( 0.001, ItemDrugStop, client);
 	
 	return Plugin_Handled;
@@ -159,8 +157,8 @@ public Action ItemDrugStop(Handle time, any client) {
 	if( !IsValidClient(client) )
 		return Plugin_Continue;
 
-	rp_setClientBool(client, b_Drugged, false);
-	rp_setClientBool(client, b_KeyReverse, false);
+	rp_SetClientBool(client, b_Drugged, false);
+	rp_SetClientBool(client, b_KeyReverse, false);
 	
 	return Plugin_Continue;
 }
