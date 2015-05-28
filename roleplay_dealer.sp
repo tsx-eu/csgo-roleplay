@@ -79,7 +79,7 @@ public Action Cmd_ItemDrugs(int args) {
 			return Plugin_Handled;
 		}
 		
-		rp_HookEvent(client, RP_PrePlayerPhysic, fwdPCP, DRUG_DURATION);
+		rp_HookEvent(target, RP_PrePlayerPhysic, fwdPCP, DRUG_DURATION);
 		client = target;
 	}
 	else if( StrEqual(arg0, "crack2") ) {
@@ -168,7 +168,7 @@ public Action ItemDrugStop(Handle time, any client) {
 
 
 // ----------------------------------------------------------------------------
-public Action fwdCrack(int attacker, int victim, float& damage) {
+public Action fwdCrack(int victim, int attacker, float& damage) {
 	#if defined DEBUG
 	PrintToServer("fwdCrack");
 	#endif

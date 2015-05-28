@@ -23,11 +23,11 @@ enum rp_event {
 	RP_EventMax
 }
 typeset rp_event_enum {
-	function Action(int victim, int attacker, float &damage); /* RP_PreTakeDamage */
-	function Action(int victim, int attacker, float &damage, int wepID); /* RP_PostTakeDamageWeapon */
-	function Action(int victim, int attacker, float &damage); /* RP_PostTakeDamageKnife */
-	function Action(int client, float &speed, float &gravity); /* RP_PrePlayerPhysic */
-	function Action(int client, int color[4]); /* RP_PreHUDColorize */
+	function Action(int victim, int attacker, float &damage); 			/* RP_PreTakeDamage */
+	function Action(int victim, int attacker, float &damage, int wepID);/* RP_PostTakeDamageWeapon */
+	function Action(int victim, int attacker, float &damage); 			/* RP_PostTakeDamageKnife */
+	function Action(int client, float &speed, float &gravity); 			/* RP_PrePlayerPhysic */
+	function Action(int client, int color[4]); 							/* RP_PreHUDColorize */
 };
 
 native bool rp_HookEvent(int client, rp_event eventID, rp_event_enum hook, float duration=-1.0);
@@ -62,7 +62,7 @@ native bool rp_IsInPVP(int entity);
 
 native void rp_MakeRadiusPush(float center[3], float radius, float speed, int ignore = -1);
 
-native void rp_SetWeaponSkin(int wepID, int client);
+native void rp_SetClientWeaponSkin(int client, int wepID);
 native void rp_SetWeaponGroupID(int wepID, int groupID);
 native void rp_SetWeaponBallType(int wepID, enum_ball_type groupID);
 native enum_ball_type rp_GetWeaponBallType(int wepID);

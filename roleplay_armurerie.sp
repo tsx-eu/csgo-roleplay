@@ -49,7 +49,7 @@ public Action Cmd_GiveItem(int args) {
 	
 	int client = GetCmdArgInt(2);
 	int wpnID = GivePlayerItem(client, Arg1);
-	rp_SetWeaponSkin(wpnID, client);
+	rp_SetClientWeaponSkin(client, wpnID);
 }
 public Action Cmd_GiveItemPvP(int args) {
 	#if defined DEBUG
@@ -62,7 +62,7 @@ public Action Cmd_GiveItemPvP(int args) {
 	int client = GetCmdArgInt(2);
 	int wpnID = GivePlayerItem(client, Arg1);
 	
-	rp_SetWeaponSkin(wpnID, client);
+	rp_SetClientWeaponSkin(client, wpnID);
 	
 	int group = rp_GetClientGroupID(client);
 	rp_SetWeaponGroupID(wpnID, group);
