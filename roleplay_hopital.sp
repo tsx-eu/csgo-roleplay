@@ -63,6 +63,8 @@ public void OnClientPostAdminCheck(int client) {
 }
 public void OnClientDisconnect(int client) {
 	rp_UnhookEvent(client, RP_PreTakeDamage, fwdChiruForce);
+	rp_UnhookEvent(client, RP_OnAssurance,	fwdAssurance);
+	rp_UnhookEvent(client, RP_OnPlayerDead,	fwdDeath);
 	
 	if( g_bChirurgie[client][ch_Speed] )
 		rp_UnhookEvent(client, RP_PrePlayerPhysic,	fwdChiruSpeed);
