@@ -35,6 +35,7 @@ int g_iKnifeThrowID = -1;
 public void OnPluginStart() {
 	RegServerCmd("rp_item_cut_1",		Cmd_ItemCut_1,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_cut_10",		Cmd_ItemCut_10,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_cut_100",		Cmd_ItemCut_100,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_lancercut",	Cmd_ItemCutThrow,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_cutnone",		Cmd_ItemCutRemove,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_esquive",		Cmd_ItemCut_Esquive,	"RP-ITEM",	FCVAR_UNREGISTERED);
@@ -81,12 +82,40 @@ public Action Cmd_ItemCut_10(int args) {
 		int add = rp_GetClientInt(client, i_KnifeTrain) - 100;
 		rp_ClientGiveItem(client, item_id - 1, add);
 		
+		rp_IncrementSuccess(client, success_list_coach, 10-add);
 		rp_SetClientInt(client, i_KnifeTrain, 100);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre entraînement est déjà maximal.");
 		return Plugin_Handled;
 	}
 	
 	rp_IncrementSuccess(client, success_list_coach, 10);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre entraînement est maintenent de %i/100.", rp_GetClientInt(client, i_KnifeTrain));
+	return Plugin_Handled;
+}
+public Action Cmd_ItemCut_100(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemCut_100");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+	int item_id = GetCmdArgInt(args);
+	
+	rp_SetClientInt(client, i_KnifeTrain, rp_GetClientInt(client, i_KnifeTrain) + 100);
+	
+	if( rp_GetClientInt(client, i_KnifeTrain) > 100 ) {
+		int add = rp_GetClientInt(client, i_KnifeTrain) - 100;
+		int add10 = RoundToFloor(add / 10);
+		int add1 = add % 10;
+		rp_ClientGiveItem(client, item_id - 1, add10);
+		rp_ClientGiveItem(client, item_id - 2, add1);
+		
+		rp_IncrementSuccess(client, success_list_coach, 100-add);
+		rp_SetClientInt(client, i_KnifeTrain, 100);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre entraînement est déjà maximal.");
+		return Plugin_Handled;
+	}
+	
+	rp_IncrementSuccess(client, success_list_coach, 100);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre entraînement est maintenent de %i/100.", rp_GetClientInt(client, i_KnifeTrain));
 	return Plugin_Handled;
 }
