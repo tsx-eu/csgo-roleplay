@@ -47,7 +47,7 @@ public Action Cmd_ItemDrugs(int args) {
 	
 	if( StrEqual(arg0, "lsd2") ) {
 		int target = GetClientTarget(client);
-		if( target == 0 || !IsValidEdict(target) || !IsValidEntity(target) ) {
+		if( target == 0 || !IsValidEdict(target) || !IsValidEntity(target) || client == target ) {
 			ITEM_CANCEL(client, item_id);
 			return Plugin_Handled;
 		}
@@ -66,7 +66,7 @@ public Action Cmd_ItemDrugs(int args) {
 	}
 	else if( StrEqual(arg0, "pcp2") ) {
 		int target = GetClientTarget(client);
-		if( target == 0 || !IsValidEdict(target) || !IsValidEntity(target) ) {
+		if( target == 0 || !IsValidEdict(target) || !IsValidEntity(target) || client == target ) {
 			ITEM_CANCEL(client, item_id);
 			return Plugin_Handled;
 		}
@@ -140,7 +140,6 @@ public Action Cmd_ItemDrugs(int args) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes en état d'overdose.");			
 				
 				rp_SetClientInt(client, i_Sick, Math_GetRandomInt((view_as<int>sick_type_none)+1, (view_as<int>sick_type_max)-1));
-				
 			}
 		}
 	}
