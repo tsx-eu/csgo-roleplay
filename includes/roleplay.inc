@@ -13,7 +13,6 @@
 #endif
 #define _tsxrp_included_
 
-// Tout les hook sont exécuté uniquement en dehors de la zone event.
 enum rp_event {
 	RP_PreTakeDamage,													
 	RP_PostTakeDamageWeapon,
@@ -43,13 +42,15 @@ typeset rp_event_enum {
 native bool rp_HookEvent(int client, rp_event eventID, rp_event_enum hook, float duration=-1.0);
 native bool rp_UnhookEvent(int client, rp_event eventID, rp_event_enum hook);
 
-native int rp_GetClientInt(int client, int_user_data prop);
+native int	rp_GetClientInt(int client, int_user_data prop);
 native bool rp_GetClientBool(int client, bool_user_data prop);
 native float rp_GetClientFloat(int client, float_user_data prop);
 native void rp_SetClientInt(int client, int_user_data prop, int value);
 native void rp_SetClientBool(int client, bool_user_data prop, bool value);
 native void rp_SetClientFloat(int client, float_user_data prop, float value);
+native int rp_GetClientGroupID(int client); /* return le numéro du groupe auquel il appartient. 1, 11, 21, 31... */
 
+native bool rp_IsInPVP(int entity);
 native bool rp_IsEntitiesNear(int ent1, int ent2, bool tresProche = false, float cache = 0.25);
 native bool rp_IsTutorialOver(int client);
 
@@ -69,18 +70,19 @@ native void rp_ClientDamage(int client, int damage, int attacker, char[] weapon 
 
 native int rp_GetPlayerZone(int client, float cache = 0.25);
 native int rp_GetZoneBit(int client, float cache = 300.0);
-native bool rp_IsInPVP(int entity);
+
+
 
 native void rp_MakeRadiusPush(float center[3], float radius, float speed, int ignore = -1);
 
 native void rp_SetClientWeaponSkin(int client, int wepID);
 native void rp_SetWeaponGroupID(int wepID, int groupID);
-native void rp_SetWeaponBallType(int wepID, enum_ball_type groupID);
+native void rp_SetWeaponBallType(int wepID, enum_ball_type typeID);
+native void rp_SetClientKnifeType(int client, enum_ball_type typeID);
 native enum_ball_type rp_GetWeaponBallType(int wepID);
-native void rp_SetClientKnifeType(int client, enum_ball_type groupID);
 native enum_ball_type rp_GetClientKnifeType(int client);
 
-native int rp_GetClientGroupID(int client);
+
 
 
 
