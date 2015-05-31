@@ -104,7 +104,7 @@ public Action Cmd_ItemCut_100(int args) {
 	
 	if( rp_GetClientInt(client, i_KnifeTrain) > 100 ) {
 		int add = rp_GetClientInt(client, i_KnifeTrain) - 100;
-		int add10 = RoundToFloor(add / 10);
+		int add10 = RoundToFloor(float(add) / 10.0);
 		int add1 = add % 10;
 		rp_ClientGiveItem(client, item_id - 1, add10);
 		rp_ClientGiveItem(client, item_id - 2, add1);
