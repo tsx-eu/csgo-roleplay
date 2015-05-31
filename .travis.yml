@@ -16,7 +16,7 @@ install:
     - wget --input-file=sourcemod --base=http://sourcemod.net/smdrop/$SMVERSION/
     - tar -xzf $(cat sourcemod)
     - wget "https://github.com/bcserv/smlib/archive/master.zip" -O tmp.zip && unzip tmp.zip
-    - cp -R smlib-master/scripting/include/ ./addons/sourcemod/scripting/includes/
+    - cp -R smlib-master/scripting/include/ ./addons/sourcemod/scripting/
     
 before_script:
     - cd addons/sourcemod/scripting/
