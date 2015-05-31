@@ -52,19 +52,20 @@ public Action Cmd_ItemCut(int args) {
 	int amount = GetCmdArgInt(1);
 	int client = GetCmdArgInt(2);
 	int item_id = GetCmdArgInt(args);
-
+	int item_id_1, item_id_10;
+	
 	switch(amount){
 		case 1: {
-			int item_id_10= item_id+1;
-			int item_id_1= item_id;
+			item_id_10= item_id+1;
+			item_id_1= item_id;
 		}
 		case 10: {
-			int item_id_10= item_id;
-			int item_id_1= item_id-1;
+			item_id_10= item_id;
+			item_id_1= item_id-1;
 		}
 		case 100: {
-			int item_id_10= item_id-1;
-			int item_id_1= item_id-2;
+			item_id_10= item_id-1;
+			item_id_1= item_id-2;
 		}
 		default: {
 			return Plugin_Handled;
