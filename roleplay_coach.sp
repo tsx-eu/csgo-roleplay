@@ -81,9 +81,9 @@ public Action Cmd_ItemCut(int args) {
 		int add1 = add % 10;
 
 		if(add10 > 0)
-			rp_ClientGiveItem(client, item_id - 1, add10);
+			rp_ClientGiveItem(client, item_id_10 , add10);
 
-		rp_ClientGiveItem(client, item_id - 2, add1);
+		rp_ClientGiveItem(client, item_id_1 , add1);
 		
 		rp_IncrementSuccess(client, success_list_coach, amount-add);
 		rp_SetClientInt(client, i_KnifeTrain, 100);
