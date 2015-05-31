@@ -1,0 +1,27 @@
+#Use the new container-based infrastructure
+sudo: false
+
+#Install some apt packages needed for spcomp
+addons:
+    apt_packages:
+        - lib32stdc++6
+
+#Set the build environment
+env:
+    - SMVERSION=1.7
+
+#And compile!
+install:
+    - wget http://sourcemod.net/smdrop/$SMVERSION/ -O - | grep "\.tar\.gz" | sed 's/^.*"sourcemod/sourcemod/;s/\.tar\.gz".*$/.tar.gz/' | tail --lines=1 > sourcemod
+    - wget --input-file=sourcemod --base=http://sourcemod.net/smdrop/$SMVERSION/
+    - tar -xzf $(cat sourcemod)
+    - wget "https://github.com/bcserv/smlib/archive/master.zip" -O tmp.zip && unzip tmp.zip
+    - cp -R smlib-master/scripting/include/ ./addons/sourcemod/scripting/includes/
+    
+before_script:
+    - cd addons/sourcemod/scripting/
+    - wget "https://raw.githubusercontent.com/kossolax/TSX-RP/master/includes/colors_csgo.inc" -O include/colors_csgo.inc
+    - wget "https://raw.githubusercontent.com/kossolax/TSX-RP/master/includes/roleplay.inc" -O include/roleplay.inc
+    - chmod +x spcomp
+
+script: ./compile.sh *.sp
