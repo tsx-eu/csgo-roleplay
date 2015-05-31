@@ -88,7 +88,11 @@ public Action Cmd_ItemCut(int args) {
 		
 		rp_IncrementSuccess(client, success_list_coach, amount-add);
 		rp_SetClientInt(client, i_KnifeTrain, 100);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre entraînement est de 100/100, %i niveaux d'entrainement vous ont été remboursés.", amount-add);
+		if(amount - add == 1)
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre entraînement est de 100/100, un niveau d'entrainement vous a été remboursé.");
+		else
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre entraînement est de 100/100, %i niveaux d'entrainement vous ont été remboursés.", amount-add);
+		
 		return Plugin_Handled;
 	}
 
