@@ -23,6 +23,5 @@ before_script:
     - wget "https://raw.githubusercontent.com/kossolax/TSX-RP/master/includes/colors_csgo.inc" -O include/colors_csgo.inc
     - wget "https://raw.githubusercontent.com/kossolax/TSX-RP/master/includes/roleplay.inc" -O include/roleplay.inc
     - chmod +x spcomp
-    - ls -l ./../../../*
 
-script: compile.sh ./../../../*.sp
+script: ./compile.sh ./../../../*.sp
