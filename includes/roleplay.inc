@@ -82,8 +82,16 @@ native void rp_SetClientKnifeType(int client, enum_ball_type typeID);
 native enum_ball_type rp_GetWeaponBallType(int wepID);
 native enum_ball_type rp_GetClientKnifeType(int client);
 
+native void rp_GetItemData(int itemID, rp_item_type typeID, char[] str, int length);
+public int rp_GetItemInt(int itemID, int typeID) {
+	char tmp[32];
+	rp_GetItemData(itemID, view_as<rp_item_type>typeID, tmp, sizeof(tmp));
+	return StringToInt(tmp);
+}
 
+native bool rp_IsClientLucky(int client);
 
+native void rp_ScheduleEntityInput(int entity, float time, char[] input);
 
 
 
@@ -124,6 +132,10 @@ public int GetClientTarget(int client) {
 }
 public bool FilterToOne(int entity, int mask, any data) {
 	return (data != entity);
+}
+// BUG min=1 sinon ça fait dla merde
+int Math_GetRandomPow(int min, int max) {
+	return RoundToFloor( float( min + (max - min)  ) * ( Pow(GetRandomFloat(0.0, 1.0), (1.0/0.5) )  )) + 1;
 }
 enum bool_user_data {
 	b_isConnected,	// Money,bank, item
@@ -373,4 +385,21 @@ enum enum_ball_type {
 	ball_type_reflexive,
 	ball_type_explode,
 	ball_type_max
+};
+
+#define MAX_ITEMS	330
+
+enum rp_item_type {
+	item_type_name = 0,
+	item_type_extra_cmd,
+	item_type_give_hp,
+	item_type_reuse_delay,
+	item_type_job_id,
+	item_type_prix,
+	item_type_auto,
+	item_type_dead,
+	
+	item_type_ordered_id,
+	
+	item_type_max
 };

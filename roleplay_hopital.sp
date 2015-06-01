@@ -226,7 +226,7 @@ public Action fwdAssurance(int client, int& amount) {
 public Action fwdSpawn(int client) {
 	if( GetClientTeam(client) == CS_TEAM_T ) {
 		Entity_SetMaxHealth(client, 200);
-		SetEntityHealth(client, 500);
+		SetEntityHealth(client, 200);
 	}
 }
 // ----------------------------------------------------------------------------
