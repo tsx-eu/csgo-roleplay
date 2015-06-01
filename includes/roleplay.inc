@@ -49,6 +49,7 @@ native void rp_SetClientInt(int client, int_user_data prop, int value);
 native void rp_SetClientBool(int client, bool_user_data prop, bool value);
 native void rp_SetClientFloat(int client, float_user_data prop, float value);
 native int rp_GetClientGroupID(int client); /* return le numéro du groupe auquel il appartient. 1, 11, 21, 31... */
+native int rp_GetClientJopID(int client); /* return le numéro du job auquel il appartient. 1, 11, 21, 31... */
 
 native bool rp_IsInPVP(int entity);
 native bool rp_IsEntitiesNear(int ent1, int ent2, bool tresProche = false, float cache = 0.25);
@@ -63,6 +64,7 @@ native void rp_IncrementSuccess(int client, rp_success_list success, int amount 
 
 native void rp_ClientGiveItem(int client, int itemID, int amount=1, bool toBank = false);
 native void rp_ClientRespawn(int client, float time=0.1);
+native void rp_ClientSave(int client);
 native void rp_ClientIgnite(int client, float time=10.0, int attacker=0);
 native void rp_ClientPoison(int client, float time=10.0, int attacker=0);
 native void rp_ClientDamage(int client, int damage, int attacker, char[] weapon = "point_hurt", int damageType = DMG_GENERIC);
@@ -70,8 +72,6 @@ native void rp_ClientDamage(int client, int damage, int attacker, char[] weapon 
 
 native int rp_GetPlayerZone(int client, float cache = 0.25);
 native int rp_GetZoneBit(int client, float cache = 300.0);
-
-
 
 native void rp_MakeRadiusPush(float center[3], float radius, float speed, int ignore = -1);
 
@@ -90,11 +90,20 @@ public int rp_GetItemInt(int itemID, int typeID) {
 }
 
 native bool rp_IsClientLucky(int client);
+native bool rp_IncrementLuck(int client);
 
 native void rp_ScheduleEntityInput(int entity, float time, char[] input);
 
 
+native int rp_GetJobCapital(int jobID);
+native int rp_SetJobCapital(int jobID, int amount);
 
+native Handle rp_GetDatabase();
+
+// BUG min=1 sinon ça fait dla merde
+public int Math_GetRandomPow(int min, int max) {
+	return RoundToFloor( float( min + (max - min)  ) * ( Pow(GetRandomFloat(0.0, 1.0), (1.0/0.5) )  )) + 1;
+}
 public float GetCmdArgFloat(int index) {
 	char arg[32];
 	GetCmdArg(index, arg, sizeof(arg));
@@ -133,10 +142,12 @@ public int GetClientTarget(int client) {
 public bool FilterToOne(int entity, int mask, any data) {
 	return (data != entity);
 }
-// BUG min=1 sinon ça fait dla merde
-int Math_GetRandomPow(int min, int max) {
-	return RoundToFloor( float( min + (max - min)  ) * ( Pow(GetRandomFloat(0.0, 1.0), (1.0/0.5) )  )) + 1;
+public void SQL_QueryCallBack(Handle owner, Handle handle, const char[] error, any data) {
+	if( strlen(error) >= 1  ) {
+		LogError("[SQL] [ERROR] %s - %f - %i", error, data, data);
+	}
 }
+
 enum bool_user_data {
 	b_isConnected,	// Money,bank, item
 	b_isConnected2, // Success
@@ -374,7 +385,7 @@ enum rp_success_list {
 #define BITZONE_VENTE		(1<<24)
 #define	BITZONE_PERQUIZ		(1<<25)
 
-
+#define MAX_ITEMS	330
 enum enum_ball_type {
 	ball_type_none,
 	ball_type_fire,
@@ -386,9 +397,6 @@ enum enum_ball_type {
 	ball_type_explode,
 	ball_type_max
 };
-
-#define MAX_ITEMS	330
-
 enum rp_item_type {
 	item_type_name = 0,
 	item_type_extra_cmd,
