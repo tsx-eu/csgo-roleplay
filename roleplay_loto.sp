@@ -66,7 +66,7 @@ public Action Cmd_ItemLoto(int args) {
 	}
 	int luck = 100;
 	
-	if( rp_GetClientJopID(client) == 171 ) // Pas de cheat inter job.
+	if( rp_GetClientJobID(client) == 171 ) // Pas de cheat inter job.
 		luck += 40;
 	if( !rp_IsClientLucky(client) )
 		luck += 40;

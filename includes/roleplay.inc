@@ -49,7 +49,7 @@ native void rp_SetClientInt(int client, int_user_data prop, int value);
 native void rp_SetClientBool(int client, bool_user_data prop, bool value);
 native void rp_SetClientFloat(int client, float_user_data prop, float value);
 native int rp_GetClientGroupID(int client); /* return le numéro du groupe auquel il appartient. 1, 11, 21, 31... */
-native int rp_GetClientJopID(int client); /* return le numéro du job auquel il appartient. 1, 11, 21, 31... */
+native int rp_GetClientJobID(int client); /* return le numéro du job auquel il appartient. 1, 11, 21, 31... */
 
 native bool rp_IsInPVP(int entity);
 native bool rp_IsEntitiesNear(int ent1, int ent2, bool tresProche = false, float cache = 0.25);
