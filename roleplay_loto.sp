@@ -78,7 +78,12 @@ public Action Cmd_ItemLoto(int args) {
 			
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Félicitations! Vous avez gagné %i$.", (amount*100));
 		LogToGame("[TSX-RP] [LOTO] %N gagne: %d$", client, (amount*100));
-			
+		
+		char szQuery[1024];
+		Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_sell` (`id`, `steamid`, `job_id`, `timestamp`, `item_type`, `item_id`, `item_name`, `amount`) VALUES (NULL, '%s', '%i', '%i', '4', '%i', '%s', '%i');",
+		szSteamID, 171, GetTime(), -1, "LOTO", amount*100);			
+		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
+		
 		rp_IncrementSuccess(client, success_list_loterie, (amount*100));			
 		rp_Effect_Particle(client, "weapon_confetti_balloons", 10.0);
 			
