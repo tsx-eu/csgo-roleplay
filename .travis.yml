@@ -19,7 +19,7 @@ install:
     - cp -R smlib-master/scripting/include/ ./addons/sourcemod/scripting/
     
 before_script:
-    - cp includes/*.inc addons/sourcemod/scripting/includes/
+    - cp includes/*.inc addons/sourcemod/scripting/include/
     - cd addons/sourcemod/scripting/
     - chmod +x spcomp
 
