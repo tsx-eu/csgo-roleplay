@@ -50,15 +50,21 @@ native void rp_SetClientBool(int client, bool_user_data prop, bool value);
 native void rp_SetClientFloat(int client, float_user_data prop, float value);
 native int rp_GetClientGroupID(int client); /* return le numéro du groupe auquel il appartient. 1, 11, 21, 31... */
 native int rp_GetClientJobID(int client); /* return le numéro du job auquel il appartient. 1, 11, 21, 31... */
+native int rp_GetClientPvPBonus(int client, rp_capture_zone typeID);
 
 native bool rp_IsInPVP(int entity);
 native bool rp_IsEntitiesNear(int ent1, int ent2, bool tresProche = false, float cache = 0.25);
 native bool rp_IsTutorialOver(int client);
+native bool rp_IsBuildingAllowed(int client, bool silent = false);
 
 native void rp_Effect_Smoke(int client, float duration = 30.0);
 native void rp_Effect_VisionTrouble(int client, float duration = 30.0);
 native void rp_Effect_ShakingVision(int client, float duration = 30.0);
 native void rp_Effect_Particle(int entity, char[] effect, float duration = 0.0001);
+native void rp_Effect_Tazer(int client, int target);
+native void rp_Effect_SpawnMoney(float origin[3], bool high = false);
+
+native int rp_Effect_Explode(float origin[3], float damage, float length, int entity=0, char[] weapon = "");
 
 native void rp_IncrementSuccess(int client, rp_success_list success, int amount = 1);
 
@@ -68,10 +74,12 @@ native void rp_ClientSave(int client);
 native void rp_ClientIgnite(int client, float time=10.0, int attacker=0);
 native void rp_ClientPoison(int client, float time=10.0, int attacker=0);
 native void rp_ClientDamage(int client, int damage, int attacker, char[] weapon = "point_hurt", int damageType = DMG_GENERIC);
+native void rp_ClientColorize(int client, int color[4]={-1,-1,-1,-1});
 
-
+native int rp_GetPlayerZoneAppart(int client);
 native int rp_GetPlayerZone(int client, float cache = 0.25);
 native int rp_GetZoneBit(int client, float cache = 300.0);
+native int rp_GetRandomCapital(int jobID);
 
 native void rp_MakeRadiusPush(float center[3], float radius, float speed, int ignore = -1);
 
@@ -100,6 +108,10 @@ native int rp_SetJobCapital(int jobID, int amount);
 
 native Handle rp_GetDatabase();
 
+native void rp_ClientRemoveProp(int client, int target, int item_id);
+native void rp_SetBuildingData(int ent, building_prop_data typeID, float data);
+native float rp_GetBuildingData(int ent, building_prop_data typeID);
+
 // BUG min=1 sinon ça fait dla merde
 public int Math_GetRandomPow(int min, int max) {
 	return RoundToFloor( float( min + (max - min)  ) * ( Pow(GetRandomFloat(0.0, 1.0), (1.0/0.5) )  )) + 1;
@@ -122,6 +134,48 @@ public bool IsValidClient(int client) {
 		return false;
 	
 	return true;
+}
+public bool rp_IsRemoveAble(int target) {
+	#if defined DEBUG
+	PrintToServer("IsRemoveAble");
+	#endif
+	if( !IsValidEdict(target) )
+		return false;
+	if( !IsValidEntity(target) )
+		return false;
+	
+	char classname[128];
+	GetEdictClassname(target, classname, sizeof(classname));
+	
+	if( StrEqual(classname, "prop_dynamic") ) {
+		if( Entity_GetParent(target) >= 1 ) {
+			return false;
+		}
+		return true;
+	}
+	if( StrEqual(classname, "rp_mine") ) {
+		return true;
+	}
+	if( StrContains(classname, "weapon_") == 0 ) {
+		return true;
+	}
+	if( StrContains(classname, "item_") == 0 ) {
+		return true;
+	}
+	if( StrContains(classname, "rp_cashmachine_") == 0 ) {
+		return true;
+	}
+	if( StrContains(classname, "rp_plant_") == 0 ) {
+		return true;
+	}
+	if( StrContains(classname, "prop_physics") == 0 ) {
+		return true;
+	}
+	if( StrContains(classname, "rp_grave") == 0 ) {
+		return true;
+	}
+	
+	return false;
 }
 public int GetClientTarget(int client) {
 	float vecStart[3], vecAngles[3];
@@ -183,7 +237,7 @@ enum bool_user_data {
 	b_ChiruMaxHeal,
 	b_ChiruKevlar,
 	b_ChiruYeux,
-	
+	b_IsAFK,
 	b_udata_max
 };
 enum int_user_data {
@@ -243,6 +297,8 @@ enum int_user_data {
 	i_AppartCount,
 	i_LastKillTime,
 	i_AddToPay,
+	i_TimeAFK,
+	i_TimeAFK_total,
 	
 	i_udata_max
 };
@@ -356,6 +412,20 @@ enum rp_success_list {
 	success_list_quota,
 	success_list_cpt,
 	success_list_all
+};
+enum building_prop_data {
+	Float:BD_started,
+	Float:BD_count,
+	Float:BD_max,
+	Float:BD_owner,
+	
+	building_prop_data_max
+};
+enum rp_capture_zone {
+	cap_nuclear =  0,
+	cap_tower,
+	cap_villa,
+	capture_max
 };
 
 #define ACCESS_DENIED(%1)	CPrintToChat(%1, "{lightblue}[TSX-RP]{default} Vous n'avez pas accès à cette commande.");	return Plugin_Handled

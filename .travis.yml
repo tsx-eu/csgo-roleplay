@@ -20,6 +20,7 @@ install:
     
 before_script:
     - cp includes/*.inc addons/sourcemod/scripting/include/
+    - wget "https://forums.alliedmods.net/attachment.php?attachmentid=131610&d=1395237361" -O include/emitsoundany.inc
     - cd addons/sourcemod/scripting/
     - chmod +x spcomp
 

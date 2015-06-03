@@ -33,6 +33,7 @@ Handle g_hDrugTimer[65];
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
 	RegServerCmd("rp_item_drug", 		Cmd_ItemDrugs,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_engrais",		Cmd_ItemEngrais,		"RP-ITEM",	FCVAR_UNREGISTERED);
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemDrugs(int args) {
@@ -258,5 +259,38 @@ public Action fwdBeuh(int client, float& speed, float& gravity) {
 	
 	return Plugin_Changed;
 }
-
-
+// ----------------------------------------------------------------------------
+public Action Cmd_ItemEngrais(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemEngrais");
+	#endif
+	int client = GetCmdArgInt(1);
+	int target = GetClientTarget(client);
+	int item_id = GetCmdArgInt(args);
+	
+	if( target == 0 || !IsValidEdict(target) || !IsValidEntity(target) ) {
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
+	
+	char classname[64];
+	GetEdictClassname(target, classname, sizeof(classname));
+	if( StrContains(classname, "rp_plant_") != 0 ) {
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
+	
+	float cpt = rp_GetBuildingData(target, BD_max);
+	
+	if( cpt >= 10.0 ) {
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
+	
+	cpt += 1.0;
+	rp_SetBuildingData(target, BD_max, cpt);
+	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce plant peut maintenant contenir %d drogues", RoundFloat(cpt) );
+	
+	return Plugin_Handled;
+}
