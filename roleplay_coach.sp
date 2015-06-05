@@ -229,7 +229,8 @@ public void OnClientDisconnect(int client) {
 }
 public Action fwdWeapon(int victim, int attacker, float &damage, int wepID) {
 	bool changed = true;
-	GetEdictClassname(wepid, classname, sizeof(classname));
+	char classname[64];
+	GetEdictClassname(wepID, classname, sizeof(classname));
 	if( StrContains(classname, "weapon_bayonet") == 0 || StrContains(classname, "weapon_knife") == 0 ) {
 		switch( rp_GetClientKnifeType(attacker) ) {
 			case ball_type_fire: {
