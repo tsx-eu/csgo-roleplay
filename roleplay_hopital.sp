@@ -561,7 +561,7 @@ public void BuildingHealBox_break(const char[] output, int caller, int activator
 	rp_Effect_Explode(vecOrigin, 100.0, 400.0, client);
 }
 public Action Frame_HealBox(Handle timer, any ent) {
-	ent = EntRefToEntIndex(ent);
+	ent = EntRefToEntIndex(ent); if( ent == -1 ) { return Plugin_Handled; }
 	#if defined DEBUG
 	PrintToServer("Frame_HealBox");
 	#endif

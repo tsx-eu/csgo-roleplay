@@ -497,7 +497,7 @@ public void BuildingCashMachine_break(const char[] output, int caller, int activ
 	}
 }
 public Action Frame_CashMachine(Handle timer, any ent) {
-	ent = EntRefToEntIndex(ent);
+	ent = EntRefToEntIndex(ent); if( ent == -1 ) { return Plugin_Handled; }
 	#if defined DEBUG
 	PrintToServer("Frame_CashMachine");
 	#endif

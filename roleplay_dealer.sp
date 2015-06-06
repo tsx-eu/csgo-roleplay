@@ -528,7 +528,7 @@ void Plant_Destroy(int entity) {
 }
 
 public Action Frame_BuildingPlant(Handle timer, any ent) {
-	ent = EntRefToEntIndex(ent);
+	ent = EntRefToEntIndex(ent); if( ent == -1 ) { return Plugin_Handled; }
 	#if defined DEBUG
 	PrintToServer("Frame_BuildingPlant");
 	#endif
