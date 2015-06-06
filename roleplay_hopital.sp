@@ -602,6 +602,11 @@ public Action Frame_HealBox(Handle timer, any ent) {
 		if( dist > maxDist )
 			continue;
 		
+		toHeal = RoundFloat((maxDist - dist) * fallOff);
+		heal = GetClientHealth(client);
+		if( heal >= 500 )
+			continue;
+		
 		Handle trace = TR_TraceRayFilterEx(vecOrigin, vecOrigin2, MASK_SHOT, RayType_EndPoint, FilterToOne, ent);
 		
 		if( TR_DidHit(trace) ) {
@@ -613,14 +618,8 @@ public Action Frame_HealBox(Handle timer, any ent) {
 		
 		CloseHandle(trace);
 		
-		
-		toHeal = RoundFloat((maxDist - dist) * fallOff);
-		heal = GetClientHealth(client);
-		if( heal >= 500 )
-			continue;
-		
 		if( inPvP || rp_IsInPVP(client) )
-			heal += toHeal/2;
+			heal += (toHeal/2);
 		else
 			heal += toHeal;
 		
@@ -629,9 +628,7 @@ public Action Frame_HealBox(Handle timer, any ent) {
 		if( heal > 500 )
 			heal = 500;
 		
-		rp_Effect_Particle(ent, "blood_pool");
-		rp_Effect_Particle(client, "blood_pool");
-		
+		rp_Effect_Particle(client, "blood_pool");		
 		SetEntityHealth(client, heal);
 	}
 	boxHeal += 10;

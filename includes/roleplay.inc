@@ -24,6 +24,7 @@ enum rp_event {
 	RP_OnPlayerSpawn,
 	RP_OnPlayerDead,
 	RP_OnPlayerBuild,
+	RP_OnPlayerUse,
 	
 	RP_EventMax
 }
@@ -38,7 +39,7 @@ typeset rp_event_enum {
 	function Action(int client);										/* RP_OnPlayerSpawn */
 	function Action(int victim, int attacker);							/* RP_OnPlayerDead == return Plugin_Handled = cacher des logs */
 	function Action(int client, float& cooldown);						/* RP_OnPlayerBuild */
-	
+	function Action(int client);										/* RP_OnPlayerUse */	
 };
 
 native bool rp_HookEvent(int client, rp_event eventID, rp_event_enum hook, float duration=-1.0);
@@ -65,6 +66,7 @@ native void rp_Effect_ShakingVision(int client, float duration = 30.0);
 native void rp_Effect_Particle(int entity, char[] effect, float duration = 0.0001);
 native void rp_Effect_Tazer(int client, int target);
 native void rp_Effect_SpawnMoney(float origin[3], bool high = false);
+native void rp_Effect_BeamBox(int client, int target = -1, float origin[3] = NULL_VECTOR, int red = 0, int green = 255, int blue = 0);
 
 native int rp_Effect_Explode(float origin[3], float damage, float length, int entity=0, char[] weapon = "");
 

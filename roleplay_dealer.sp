@@ -11,16 +11,19 @@
 #pragma semicolon 1
 
 #include <sourcemod>
+#include <sdkhooks>
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
+#include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
 
-#define __LAST_REV__ 		"v:0.1.0"
+#define __LAST_REV__ 		"v:0.2.0"
 
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
 #define DRUG_DURATION 90.0
+#define MODEL_PLANT	"models/props/cs_office/plant01_static.mdl"
 
 public Plugin myinfo = {
 	name = "Jobs: DEALER", author = "KoSSoLaX",
@@ -28,12 +31,26 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-
+int g_cExplode;
 Handle g_hDrugTimer[65];
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
 	RegServerCmd("rp_item_drug", 		Cmd_ItemDrugs,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_engrais",		Cmd_ItemEngrais,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	
+	RegServerCmd("rp_item_plant",		Cmd_ItemPlant,			"RP-ITEM",	FCVAR_UNREGISTERED);
+}
+public void OnMapStart() {
+	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt");
+	PrecacheModel(MODEL_PLANT);
+}
+public void OnClientPostAdminCheck(int client) {
+	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
+	rp_HookEvent(client, RP_OnPlayerUse,	fwdOnPlayerUse);
+}
+public void OnClientDisconnect(int client) {
+	rp_UnhookEvent(client, RP_OnPlayerBuild,fwdOnPlayerBuild);
+	rp_UnhookEvent(client, RP_OnPlayerUse,	fwdOnPlayerUse);
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemDrugs(int args) {
@@ -163,11 +180,6 @@ public Action ItemDrugStop(Handle time, any client) {
 	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------
-
-
-
-
-// ----------------------------------------------------------------------------
 public Action fwdCrack(int victim, int attacker, float& damage) {
 	#if defined DEBUG
 	PrintToServer("fwdCrack");
@@ -293,4 +305,367 @@ public Action Cmd_ItemEngrais(int args) {
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce plant peut maintenant contenir %d drogues", cpt );
 	
 	return Plugin_Handled;
+}
+// ----------------------------------------------------------------------------
+public Action Cmd_ItemPlant(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemPlant");
+	#endif
+	
+	int type = GetCmdArgInt(1);
+	int client = GetCmdArgInt(2);
+	
+	if( BuildingPlant(client, type) == 0 ) {
+		int item_id = GetCmdArgInt(args);
+		ITEM_CANCEL(client, item_id);
+	}
+	
+	return Plugin_Handled;
+}
+
+int BuildingPlant(int client, int type) {
+	#if defined DEBUG
+	PrintToServer("BuildingPlant");
+	#endif
+	
+	if( !rp_IsBuildingAllowed(client) )
+		return 0;
+	
+	char classname[64];
+	Format(classname, sizeof(classname), "rp_plant_%i_%i", client, type);
+	char tmp2[64];
+	Format(tmp2, sizeof(tmp2), "rp_plant_%i_", client);
+	
+	float vecOrigin[3];
+	GetClientAbsOrigin(client, vecOrigin);
+	
+	int count, max = 3;
+	
+	switch( rp_GetClientInt(client, i_Job) ) {
+		case 81: max = 14;
+		case 82: max = 10;
+		case 83: max = 6;
+		case 84: max = 4;
+		case 85: max = 2;
+	}
+	for(int i=1; i<=2048; i++) {
+		if( !IsValidEdict(i) )
+			continue;
+		if( !IsValidEntity(i) )
+			continue;
+		
+		char tmp[64];
+		GetEdictClassname(i, tmp, 63);
+		
+		
+		if( StrContains(tmp, tmp2) == 0 ) {
+			count++;
+			
+			float vecOrigin2[3];
+			Entity_GetAbsOrigin(i, vecOrigin2);
+			
+			
+			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 24 ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas construire aussi proche d'une autre plante à vous.");
+				return 0;
+			}
+		}
+	}
+	
+	// TODO
+	/*
+	int appart = getZoneAppart(client);
+	if( appart > 0 && g_iDoorOwner_v2[client][appart] ) {
+		if( g_iAppartBonus[appart][appart_bonus_coffre] == 1 ) {
+			max += 1;
+		}
+	}*/
+	
+	if( count >= max ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez trop de plants actifs.");
+		return 0;
+	}
+	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Construction en cours...");
+	
+	EmitSoundToAllAny("player/ammo_pack_use.wav", client, _, _, _, 0.66);
+	
+	int ent = CreateEntityByName("prop_physics");
+	
+	DispatchKeyValue(ent, "classname", classname);
+	DispatchKeyValue(ent, "model", MODEL_PLANT);
+	DispatchSpawn(ent);
+	ActivateEntity(ent);
+	
+	SetEntityModel(ent, MODEL_PLANT);
+	
+	SetEntProp( ent, Prop_Data, "m_iHealth", 250);
+	SetEntProp( ent, Prop_Data, "m_takedamage", 0);
+	
+	SetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity", client);
+	
+	TeleportEntity(ent, vecOrigin, NULL_VECTOR, NULL_VECTOR);
+	
+	SetEntityRenderMode(ent, RENDER_NONE);
+	ServerCommand("sm_effect_fading \"%i\" \"3.0\" \"0\"", ent);
+	
+	
+	SetEntityMoveType(client, MOVETYPE_NONE);
+	SetEntityMoveType(ent, MOVETYPE_NONE);
+	
+	
+	rp_SetBuildingData(ent, BD_started, GetTime());
+	rp_SetBuildingData(ent, BD_max, 3);
+	rp_SetBuildingData(ent, BD_owner, client);
+	
+	CreateTimer(3.0, BuildingPlant_post, ent);
+	
+	return 1;
+}
+public Action BuildingPlant_post(Handle timer, any entity) {
+	#if defined DEBUG
+	PrintToServer("BuildingPlant_post");
+	#endif
+	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
+	SetEntityMoveType(client, MOVETYPE_WALK);
+	
+	rp_Effect_BeamBox(client, entity, NULL_VECTOR, 255, 255, 0);
+	SetEntProp(entity, Prop_Data, "m_takedamage", 2);
+	
+	
+	rp_SetBuildingData(entity, BD_max, 3);
+	HookSingleEntityOutput(entity, "OnBreak", BuildingPlant_break);
+	
+	SDKHook(entity, SDKHook_OnTakeDamage, DamagePlant);
+	CreateTimer(10.0, Frame_BuildingPlant, EntIndexToEntRef(entity));
+	return Plugin_Handled;
+}
+public Action DamagePlant(int victim, int &attacker, int &inflictor, float &damage, int &damagetype) {
+	#if defined DEBUG
+	PrintToServer("DamagePlant");
+	#endif
+	if( IsValidClient(attacker) && attacker == inflictor ) {
+		
+		char sWeapon[32];
+		GetClientWeapon(attacker, sWeapon, sizeof(sWeapon));
+		int wep_id = GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon");
+		
+		
+		if( StrContains(sWeapon, "weapon_knife") == 0 ||
+			StrContains(sWeapon, "weapon_bayonet") == 0 ) {
+			if( rp_GetClientKnifeType(attacker) == ball_type_fire ) {
+				damage = float( rp_GetClientInt(attacker, i_KnifeTrain) );
+				damage *= 0.5;
+				
+				if( damage >= 0.1 ) {
+					IgniteEntity(victim, damage/10.0);
+				}
+				
+				return Plugin_Changed;
+			}
+			else {
+				return Plugin_Handled;
+			}
+		}
+		else if( StrContains(sWeapon, "weapon_") == 0 && StrContains(sWeapon, "weapon_knife") == -1 ) {
+			if( rp_GetWeaponBallType(wep_id) == ball_type_fire ) {
+				
+				if( damage >= 0.1 ) {
+					IgniteEntity(victim, damage/10.0);
+				}
+				
+				return Plugin_Continue;
+			}
+			else {
+				return Plugin_Handled;
+			}
+		}
+	}
+	else {
+		return Plugin_Handled;
+	}
+	
+	return Plugin_Continue;
+}
+public void BuildingPlant_break(const char[] output, int caller, int activator, float delay) {
+	#if defined DEBUG
+	PrintToServer("BuildingPlant_break");
+	#endif
+	Plant_Destroy(caller);
+	
+	if( IsValidClient(activator) ) {
+		rp_IncrementSuccess(activator, success_list_no_tech);
+		
+		if( rp_IsInPVP(caller) ) {
+			int owner = GetEntPropEnt(caller, Prop_Send, "m_hOwnerEntity");
+			if( rp_GetClientGroupID(activator) > 0 && rp_GetClientGroupID(owner) > 0 && rp_GetClientGroupID(activator) != rp_GetClientGroupID(owner) ) {
+				Plant_Destroy(caller);
+			}
+		}
+	}
+}
+void Plant_Destroy(int entity) {
+	#if defined DEBUG
+	PrintToServer("Plant_Destroy");
+	#endif
+	float vecOrigin[3];
+	Entity_GetAbsOrigin(entity, vecOrigin);
+	
+	if( rp_GetBuildingData(entity, BD_started)+120 < GetTime() ) {
+		rp_Effect_SpawnMoney(vecOrigin, true);
+	}
+	
+	TE_SetupExplosion(vecOrigin, g_cExplode, 0.5, 2, 1, 25, 25);
+	TE_SendToAll();
+	
+	int owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
+	if( IsValidClient(owner) ) {
+		CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos plantations a été detruite.");
+		if( rp_GetBuildingData(entity, BD_started)+120 < GetTime() ) {
+			rp_SetClientInt(owner, i_Bank, rp_GetClientInt(owner, i_Bank)-125);
+		}
+	}
+}
+
+public Action Frame_BuildingPlant(Handle timer, any ent) {
+	ent = EntRefToEntIndex(ent);
+	#if defined DEBUG
+	PrintToServer("Frame_BuildingPlant");
+	#endif
+	
+	int client = GetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity");
+	if( !IsValidClient(client) ) {
+		AcceptEntityInput(ent, "Kill");
+		return Plugin_Handled;
+	}
+	
+	if( !rp_GetClientBool(client, b_IsAFK) && rp_GetClientInt(client, i_TimeAFK) <= 60 ) {
+		
+		int cpt = rp_GetBuildingData(ent, BD_count);
+		
+		if( cpt < rp_GetBuildingData(ent, BD_max) )
+			cpt++;
+		
+		rp_SetBuildingData(ent, BD_count, cpt);
+		
+		rp_Effect_BeamBox(client, ent, NULL_VECTOR, 255, 255, 0);
+		
+		char tmp2[64];
+		Format(tmp2, sizeof(tmp2), "rp_plant_%i_", client);
+		char tmp[64];
+		GetEdictClassname(ent, tmp, sizeof(tmp));
+		
+		ReplaceString(tmp, sizeof(tmp), tmp2, "");
+		ReplaceString(tmp, sizeof(tmp), "_", "");
+		
+		int sub = StringToInt(tmp);
+		
+		rp_GetItemData(sub, item_type_name, tmp, sizeof(tmp));
+		
+		if( cpt == 0 ) 
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le plant %s est prêt pour 1 utilisation.", tmp);
+		else
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le plant %s est prêt pour %i utilisations.", tmp, cpt);
+	}
+	
+	CreateTimer(Math_GetRandomFloat(110.0, 120.0), Frame_BuildingPlant, EntIndexToEntRef(ent));
+	
+	return Plugin_Handled;
+}
+public Action fwdOnPlayerUse(int client) {
+	#if defined DEBUG
+	PrintToServer("BuildingPlant_use");
+	#endif
+	char tmp[64], tmp2[64];
+	Format(tmp2, sizeof(tmp2), "rp_plant_%i_", client);
+	
+	float vecOrigin[3];
+	GetClientAbsOrigin(client, vecOrigin);
+	
+	for(int i=1; i<=2048; i++) {
+		if( !IsValidEdict(i) )
+			continue;
+		if( !IsValidEntity(i) )
+			continue;
+		
+		
+		GetEdictClassname(i, tmp, 63);
+		
+		
+		if( StrContains(tmp, tmp2) == 0 ) {
+			float vecOrigin2[3];
+			Entity_GetAbsOrigin(i, vecOrigin2);
+			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 50 && rp_GetBuildingData(i, BD_count) > 0.0 ) {
+				
+				ReplaceString(tmp, sizeof(tmp), tmp2, "");
+				ReplaceString(tmp, sizeof(tmp), "_", "");
+				
+				int sub = StringToInt(tmp);
+				if( sub <= 0 && sub > MAX_ITEMS )
+					continue;
+					
+				rp_IncrementSuccess(client, success_list_trafiquant, rp_GetBuildingData(i, BD_count) );
+				rp_ClientGiveItem(client, sub, rp_GetBuildingData(i, BD_count));
+				rp_SetBuildingData(i, BD_count, 0);
+				
+				rp_Effect_BeamBox(client, i, NULL_VECTOR, 255, 255, 0);
+				FakeClientCommand(client, "say /item");
+			}
+		}
+	}
+}
+
+public Action fwdOnPlayerBuild(int client, float& cooldown) {
+	if( rp_GetClientJobID(client) != 81 )
+		return Plugin_Continue;
+	
+	Handle menu = CreateMenu(MenuBuildingDealer);
+	char tmp[12], tmp2[64];
+			
+	SetMenuTitle(menu, " Menu des dealers");
+	
+	for(int i = 0; i < MAX_ITEMS; i++) {
+		
+		rp_GetItemData(i, item_type_extra_cmd, tmp2, sizeof(tmp2));
+		
+		if( StrContains(tmp2, "rp_item_drug") != 0 )
+			continue;
+		
+		rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2));
+		
+		
+		Format(tmp, sizeof(tmp), "%d", i);
+		Format(tmp2, sizeof(tmp2), "%s %d$", tmp2, rp_GetItemInt(i, item_type_prix) * 3);
+		AddMenuItem(menu, tmp, tmp2);
+		
+	}
+	
+	SetMenuExitButton(menu, true);
+	DisplayMenu(menu, client, 30);
+	
+	cooldown = 10.0;
+	return Plugin_Stop;
+}
+public int MenuBuildingDealer(Handle menu, MenuAction action, int client, int param ) {
+	#if defined DEBUG
+	PrintToServer("MenuBuildingDealer");
+	#endif
+	
+	if( action == MenuAction_Select ) {
+		char szMenuItem[64];
+		
+		if( GetMenuItem(menu, param, szMenuItem, sizeof(szMenuItem)) ) {
+			
+			int ent = BuildingPlant(client, StringToInt(szMenuItem));
+			if( ent > 0 ) {
+				
+				int mnt = rp_GetItemInt(StringToInt(szMenuItem), item_type_prix) * 3;
+				rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - mnt);
+				rp_SetJobCapital(81, rp_GetJobCapital(81) + mnt);
+			}
+		}
+	}
+	else if( action == MenuAction_End ) {
+		CloseHandle(menu);
+	}
 }
