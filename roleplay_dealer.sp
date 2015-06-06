@@ -280,17 +280,17 @@ public Action Cmd_ItemEngrais(int args) {
 		return Plugin_Handled;
 	}
 	
-	float cpt = rp_GetBuildingData(target, BD_max);
+	int cpt = rp_GetBuildingData(target, BD_max);
 	
-	if( cpt >= 10.0 ) {
+	if( cpt >= 10 ) {
 		ITEM_CANCEL(client, item_id);
 		return Plugin_Handled;
 	}
 	
-	cpt += 1.0;
+	cpt++;
 	rp_SetBuildingData(target, BD_max, cpt);
 	
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce plant peut maintenant contenir %d drogues", RoundFloat(cpt) );
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce plant peut maintenant contenir %d drogues", cpt );
 	
 	return Plugin_Handled;
 }

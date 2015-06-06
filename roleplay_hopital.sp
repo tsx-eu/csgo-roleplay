@@ -14,6 +14,7 @@
 #include <cstrike>
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
+#include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
 
 #define __LAST_REV__ 		"v:0.1.0"
 
@@ -42,7 +43,7 @@ enum chiruList {
 bool g_bChirurgie[65][ch_Max];
 int g_iSuccess_last_faster_dead[65];
 // ----------------------------------------------------------------------------
-public void OnPluginStart() {
+public void OnPluginStart() {	
 	RegServerCmd("rp_chirurgie",		Cmd_ItemChirurgie,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	
 	RegServerCmd("rp_item_adrenaline",	Cmd_ItemAdrenaline,		"RP-ITEM",	FCVAR_UNREGISTERED);
@@ -51,6 +52,8 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_fullheal",	Cmd_ItemFullHeal,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_respawn",		Cmd_ItemRespawn,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_sick",		Cmd_ItemSick,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	
+	RegServerCmd("rp_item_healbox",		Cmd_ItemHealBox,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt");
@@ -60,11 +63,13 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_PreTakeDamage,	fwdChiruForce);
 	rp_HookEvent(client, RP_OnAssurance,	fwdAssurance);
 	rp_HookEvent(client, RP_OnPlayerDead,	fwdDeath);
+	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
 }
 public void OnClientDisconnect(int client) {
 	rp_UnhookEvent(client, RP_PreTakeDamage, fwdChiruForce);
 	rp_UnhookEvent(client, RP_OnAssurance,	fwdAssurance);
 	rp_UnhookEvent(client, RP_OnPlayerDead,	fwdDeath);
+	rp_UnhookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
 	
 	if( g_bChirurgie[client][ch_Speed] )
 		rp_UnhookEvent(client, RP_PrePlayerPhysic,	fwdChiruSpeed);
@@ -427,3 +432,219 @@ public Action ItemDrugStop(Handle time, any client) {
 	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------
+public Action Cmd_ItemHealBox(int args) {
+	int client = GetCmdArgInt(1);
+	
+	if( BuildingHealBox(client) == 0 ) {
+		int item_id = GetCmdArgInt(args);
+		
+		ITEM_CANCEL(client, item_id);
+	}
+}
+public Action fwdOnPlayerBuild(int client, float& cooldown) {
+	if( rp_GetClientJobID(client) != 11 )
+		return Plugin_Continue;
+	
+	int ent = BuildingHealBox(client);
+	if( ent > 0 ) {
+		cooldown = 30.0;
+	}
+	else {
+		cooldown = 3.0;
+	}
+	return Plugin_Stop;
+}
+
+int BuildingHealBox(int client) {
+	#if defined DEBUG 
+	PrintToServer("BuildingHealBox");
+	#endif
+	
+	if( !rp_IsBuildingAllowed(client) )
+		return 0;
+	
+	char classname[64], tmp[64];
+	Format(classname, sizeof(classname), "rp_healbox_%i", client);
+	
+	float vecOrigin[3], vecOrigin2[3];
+	GetClientAbsOrigin(client, vecOrigin);
+	
+	for(int i=1; i<=2048; i++) {
+		if( !IsValidEdict(i) )
+			continue;
+		if( !IsValidEntity(i) )
+			continue;
+			
+		GetEdictClassname(i, tmp, 63);
+		
+		if( StrEqual(classname, tmp) ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà une healbox.");
+			return 0;
+		}
+		if( StrContains(tmp, "rp_healbox_") == 0 ) {
+			Entity_GetAbsOrigin(i, vecOrigin2);
+			if( GetVectorDistance(vecOrigin, vecOrigin2) < 600 ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il existe une autre healbox à proximité.");
+				return 0;
+			}
+		}
+	}
+	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Construction en cours...");
+	
+	EmitSoundToAllAny("player/ammo_pack_use.wav", client, _, _, _, 0.66);
+	
+	int ent = CreateEntityByName("prop_physics");
+	
+	DispatchKeyValue(ent, "classname", classname);
+	DispatchKeyValue(ent, "model", "models/pg_props/pg_hospital/pg_ekg.mdl");
+	DispatchSpawn(ent);
+	ActivateEntity(ent);
+	
+	SetEntityModel(ent,"models/pg_props/pg_hospital/pg_ekg.mdl");
+	SetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity", client);
+	SetEntProp( ent, Prop_Data, "m_takedamage", 2);
+	SetEntProp( ent, Prop_Data, "m_iHealth", 1000);
+	
+	
+	TeleportEntity(ent, vecOrigin, NULL_VECTOR, NULL_VECTOR);
+	
+	SetEntityRenderMode(ent, RENDER_NONE);
+	ServerCommand("sm_effect_fading \"%i\" \"2.5\" \"0\"", ent);
+	
+	SetEntityMoveType(client, MOVETYPE_NONE);
+	SetEntityMoveType(ent, MOVETYPE_NONE);
+	
+	
+	rp_SetBuildingData(ent, BD_started, GetTime());
+	rp_SetBuildingData(ent, BD_owner, client );
+	
+	CreateTimer(3.0, BuildingHealBox_post, ent);
+	return ent;
+	
+}
+public Action BuildingHealBox_post(Handle timer, any entity) {
+	#if defined DEBUG
+	PrintToServer("BuildingHealBox_post");
+	#endif
+	if( !IsValidEdict(entity) && !IsValidEntity(entity) )
+		return Plugin_Handled;
+	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
+	
+	SetEntityMoveType(client, MOVETYPE_WALK);
+	
+	if( rp_IsInPVP(entity) ) {
+		rp_ClientColorize(entity);
+	}
+	
+	SetEntProp( entity, Prop_Data, "m_takedamage", 2);
+	SetEntProp( entity, Prop_Data, "m_iHealth", 1000);
+	HookSingleEntityOutput(entity, "OnBreak", BuildingHealBox_break);
+	
+	CreateTimer(1.0, Frame_HealBox, EntIndexToEntRef(entity));
+	
+	return Plugin_Handled;
+}
+public void BuildingHealBox_break(const char[] output, int caller, int activator, float delay) {
+	#if defined DEBUG
+	PrintToServer("BuildingHealBox_break");
+	#endif
+	
+	int client = GetEntPropEnt(caller, Prop_Send, "m_hOwnerEntity");
+	CPrintToChat(client,"{lightblue}[TSX-RP]{default} Votre Heal Box a été détruite");
+	
+	float vecOrigin[3];
+	Entity_GetAbsOrigin(caller,vecOrigin);
+	TE_SetupSparks(vecOrigin, view_as<float>{0.0,0.0,1.0},120,40);
+	TE_SendToAll();
+	
+	rp_Effect_Explode(vecOrigin, 100.0, 400.0, client);
+}
+public Action Frame_HealBox(Handle timer, any ent) {
+	ent = EntRefToEntIndex(ent);
+	#if defined DEBUG
+	PrintToServer("Frame_HealBox");
+	#endif
+	
+	float vecOrigin[3], vecOrigin2[3];
+	Entity_GetAbsOrigin(ent, vecOrigin);
+	vecOrigin[2] += 12.0;
+	
+	bool inPvP = rp_IsInPVP(ent);
+	float maxDist = 240.0;
+	if( inPvP )
+		maxDist = 180.0;
+	
+	float fallOff = (25.0 / maxDist), dist;
+	int boxHeal = GetEntProp(ent, Prop_Data, "m_iHealth");
+	int toHeal, heal;
+	
+	int owner = GetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity");	
+	if( !IsValidClient(owner) ) {
+		rp_ScheduleEntityInput(ent, 60.0, "Kill");
+		return Plugin_Handled;
+	}
+	int gOWNER = rp_GetClientGroupID(owner);
+	
+	for(int client=1; client<=MaxClients; client++) {
+		
+		if( !IsValidClient(client) )
+			continue;
+		if( boxHeal < 100 )
+			break;
+		if( inPvP && rp_GetClientGroupID(client) != gOWNER )
+			continue;
+		
+		GetClientAbsOrigin(client, vecOrigin2);
+		vecOrigin2[2] += 24.0;
+		
+		dist = GetVectorDistance(vecOrigin, vecOrigin2);
+		if( dist > maxDist )
+			continue;
+		
+		Handle trace = TR_TraceRayFilterEx(vecOrigin, vecOrigin2, MASK_SHOT, RayType_EndPoint, FilterToOne, ent);
+		
+		if( TR_DidHit(trace) ) {
+			if( TR_GetEntityIndex(trace) != client ) {
+				CloseHandle(trace);
+				continue;
+			}
+		}
+		
+		CloseHandle(trace);
+		
+		
+		toHeal = RoundFloat((maxDist - dist) * fallOff);
+		heal = GetClientHealth(client);
+		if( heal >= 500 )
+			continue;
+		
+		if( inPvP || rp_IsInPVP(client) )
+			heal += toHeal/2;
+		else
+			heal += toHeal;
+		
+		boxHeal -= toHeal;
+		
+		if( heal > 500 )
+			heal = 500;
+		
+		rp_Effect_Particle(ent, "blood_pool");
+		rp_Effect_Particle(client, "blood_pool");
+		
+		SetEntityHealth(client, heal);
+	}
+	boxHeal += 10;
+	if( boxHeal > 2500 )
+		boxHeal = 2500;
+	if( !inPvP )
+		boxHeal += Math_GetRandomInt(10, 30);
+	
+	SetEntProp(ent, Prop_Data, "m_iHealth", boxHeal);
+	
+	TE_SetupBeamRingPoint(vecOrigin, 1.0, maxDist*2.0, g_cBeam, g_cBeam, 1, 20, 1.0, 20.0, 0.0, {0, 255, 0, 128}, 10, 0);
+	TE_SendToAll();
+	
+	CreateTimer(1.0, Frame_HealBox, EntIndexToEntRef(ent));
+	return Plugin_Handled;
+}

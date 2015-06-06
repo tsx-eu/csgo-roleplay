@@ -62,9 +62,11 @@ public void OnMapStart() {
 // ------------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnAssurance,	fwdAssurance);
+	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
 }
 public void OnClientDisconnect(int client) {
 	rp_UnhookEvent(client, RP_OnAssurance,	fwdAssurance);
+	rp_UnhookEvent(client, RP_OnPlayerBuild,fwdOnPlayerBuild);
 	
 	if( g_bBionique[client][ch_Kevlar] )
 		rp_UnhookEvent(client, RP_OnFrameSeconde,	fwdRegenKevlar);
@@ -342,7 +344,19 @@ public Action Cmd_ItemCash(int args) {
 	
 	return Plugin_Handled;
 }
-
+public Action fwdOnPlayerBuild(int client, float& cooldown) {
+	if( rp_GetClientJobID(client) != 221 )
+		return Plugin_Continue;
+	
+	int ent = BuildingCashMachine(client);
+	if( ent > 0 ) {
+		cooldown = 30.0;
+	}
+	else {
+		cooldown = 3.0;
+	}
+	return Plugin_Stop;
+}
 int BuildingCashMachine(int client) {
 	#if defined DEBUG
 	PrintToServer("BuildingCashMachine");
@@ -440,8 +454,8 @@ int BuildingCashMachine(int client) {
 	SetEntityMoveType(ent, MOVETYPE_NONE);
 	
 	
-	rp_SetBuildingData(ent, BD_started, GetGameTime());
-	rp_SetBuildingData(ent, BD_owner, float(client) );
+	rp_SetBuildingData(ent, BD_started, GetTime());
+	rp_SetBuildingData(ent, BD_owner, client );
 	
 	CreateTimer(3.0, BuildingCashMachine_post, ent);
 
@@ -512,7 +526,7 @@ public Action Frame_CashMachine(Handle timer, any ent) {
 			rp_SetJobCapital( 221, rp_GetJobCapital(221)+1 );
 		}
 		
-		if( rp_GetBuildingData(ent, BD_started)+(48*60) < GetGameTime() ) {
+		if( rp_GetBuildingData(ent, BD_started)+(48*60) < GetTime() ) {
 			rp_IncrementSuccess(client, success_list_technicien, 48);
 		}
 		
@@ -542,7 +556,7 @@ void CashMachine_Destroy(int entity) {
 	Entity_GetAbsOrigin(entity, vecOrigin);
 	
 	
-	if( rp_GetBuildingData(entity, BD_started)+120.0 < GetGameTime() ) {
+	if( rp_GetBuildingData(entity, BD_started)+120 < GetTime() ) {
 		rp_Effect_SpawnMoney(vecOrigin, true);
 	}
 	
@@ -553,7 +567,7 @@ void CashMachine_Destroy(int entity) {
 	if( IsValidClient(owner) ) {
 		CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos machines a faux billet a été détruite.");
 		
-		if( rp_GetBuildingData(entity, BD_started)+120.0 < GetGameTime() ) {
+		if( rp_GetBuildingData(entity, BD_started)+120 < GetTime() ) {
 			rp_SetClientInt(owner, i_Bank, rp_GetClientInt(owner, i_Bank)-25);
 		}
 	}
@@ -585,7 +599,7 @@ public void PropsTouched(int touched, int toucher) {
 	#if defined DEBUG
 	PrintToServer("PropsTouched");
 	#endif
-	if( IsValidClient(toucher) && toucher != RoundFloat(rp_GetBuildingData(touched, BD_owner)) ) {
+	if( IsValidClient(toucher) && toucher != rp_GetBuildingData(touched, BD_owner) ) {
 		ExplodeProp(touched);
 	}
 }

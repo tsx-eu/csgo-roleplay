@@ -23,6 +23,7 @@ enum rp_event {
 	RP_OnAssurance,
 	RP_OnPlayerSpawn,
 	RP_OnPlayerDead,
+	RP_OnPlayerBuild,
 	
 	RP_EventMax
 }
@@ -36,6 +37,7 @@ typeset rp_event_enum {
 	function Action(int client, int& amount);							/* RP_OnAssurance */
 	function Action(int client);										/* RP_OnPlayerSpawn */
 	function Action(int victim, int attacker);							/* RP_OnPlayerDead == return Plugin_Handled = cacher des logs */
+	function Action(int client, float& cooldown);						/* RP_OnPlayerBuild */
 	
 };
 
@@ -109,8 +111,8 @@ native int rp_SetJobCapital(int jobID, int amount);
 native Handle rp_GetDatabase();
 
 native void rp_ClientRemoveProp(int client, int target, int item_id);
-native void rp_SetBuildingData(int ent, building_prop_data typeID, float data);
-native float rp_GetBuildingData(int ent, building_prop_data typeID);
+native void rp_SetBuildingData(int ent, building_prop_data typeID, int data);
+native int rp_GetBuildingData(int ent, building_prop_data typeID);
 
 // BUG min=1 sinon ça fait dla merde
 public int Math_GetRandomPow(int min, int max) {
@@ -414,10 +416,10 @@ enum rp_success_list {
 	success_list_all
 };
 enum building_prop_data {
-	Float:BD_started,
-	Float:BD_count,
-	Float:BD_max,
-	Float:BD_owner,
+	BD_started,
+	BD_count,
+	BD_max,
+	BD_owner,
 	
 	building_prop_data_max
 };
