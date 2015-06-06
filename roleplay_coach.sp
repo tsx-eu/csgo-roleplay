@@ -222,12 +222,12 @@ public Action Cmd_ItemKnifeType(int args) {
 	return Plugin_Handled;
 }
 public void OnClientPostAdminCheck(int client) {
-	rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdWeapon);
+	rp_HookEvent(client, RP_PostTakeDamageKnife, fwdWeapon);
 }
 public void OnClientDisconnect(int client) {
-	rp_UnhookEvent(client, RP_PostTakeDamageWeapon, fwdWeapon);
+	rp_UnhookEvent(client, RP_PostTakeDamageKnife, fwdWeapon);
 }
-public Action fwdWeapon(int victim, int attacker, float &damage, int wepID) {
+public Action fwdWeapon(int victim, int attacker, float &damage) {
 	bool changed = true;
 	
 	switch( rp_GetClientKnifeType(attacker) ) {
