@@ -201,10 +201,11 @@ public Action Cmd_ItemHamburger(int args) {
 		}
 		
 		int item_id = iItemRand[ Math_GetRandomInt(0, amount-1) ];
-		rp_ClientGiveItem(client, item_id, 7+Math_GetRandomPow(1, 5), true);
+		int rnd = 7+Math_GetRandomPow(1, 5);
+		rp_ClientGiveItem(client, item_id, rnd, true);
 		
 		rp_GetItemData(item_id, item_type_name, cmd, sizeof(cmd));
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu comme cadeau: %s", cmd);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu comme cadeau: %dx %s", rnd, cmd);
 	}
 	else if( StrEqual(arg1, "spacy") ) {
 		rp_SetClientKnifeType(client, ball_type_fire);
