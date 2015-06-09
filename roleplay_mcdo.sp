@@ -241,7 +241,7 @@ public Action Cmd_ItemBanane(int args) {
 	
 	SetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity", client);
 	
-	SetEntityRenderMode(client, RENDER_NONE);
+	SetEntityRenderMode(ent, RENDER_NONE);
 	
 	TeleportEntity(ent, vecOrigin, NULL_VECTOR, NULL_VECTOR);
 	

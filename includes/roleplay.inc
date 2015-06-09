@@ -45,7 +45,7 @@ typeset rp_event_enum {
 native bool rp_HookEvent(int client, rp_event eventID, rp_event_enum hook, float duration=-1.0);
 native bool rp_UnhookEvent(int client, rp_event eventID, rp_event_enum hook);
 
-native int	rp_GetClientInt(int client, int_user_data prop);
+native int rp_GetClientInt(int client, int_user_data prop);
 native bool rp_GetClientBool(int client, bool_user_data prop);
 native float rp_GetClientFloat(int client, float_user_data prop);
 native void rp_SetClientInt(int client, int_user_data prop, int value);
@@ -84,6 +84,7 @@ native int rp_GetPlayerZoneAppart(int client);
 native int rp_GetPlayerZone(int client, float cache = 0.25);
 native int rp_GetZoneBit(int client, float cache = 300.0);
 native int rp_GetRandomCapital(int jobID);
+native int rp_GetClientItem(int client, int itemID, bool fromBank = false);
 
 native void rp_MakeRadiusPush(float center[3], float radius, float speed, int ignore = -1);
 
@@ -94,6 +95,7 @@ native void rp_SetClientKnifeType(int client, enum_ball_type typeID);
 native enum_ball_type rp_GetWeaponBallType(int wepID);
 native enum_ball_type rp_GetClientKnifeType(int client);
 
+native void rp_GetJobData(int jobID, rp_job_type typeID, char[] str, int length);
 native void rp_GetItemData(int itemID, rp_item_type typeID, char[] str, int length);
 public int rp_GetItemInt(int itemID, int typeID) {
 	char tmp[32];
@@ -111,6 +113,7 @@ native int rp_GetJobCapital(int jobID);
 native int rp_SetJobCapital(int jobID, int amount);
 
 native Handle rp_GetDatabase();
+native Handle rp_CreateSellingMenu();
 
 native void rp_ClientRemoveProp(int client, int target, int item_id);
 native void rp_SetBuildingData(int ent, building_prop_data typeID, int data);
@@ -460,6 +463,8 @@ enum rp_capture_zone {
 #define	BITZONE_PERQUIZ		(1<<25)
 
 #define MAX_ITEMS	330
+#define MAX_JOBS	230
+
 enum enum_ball_type {
 	ball_type_none,
 	ball_type_fire,
@@ -484,4 +489,18 @@ enum rp_item_type {
 	item_type_ordered_id,
 	
 	item_type_max
+};
+enum rp_job_type {
+	job_type_name = 0,
+	job_type_isboss,
+	job_type_ownboss,
+	job_type_pay,
+	job_type_capital,
+	job_type_subside,
+	job_type_quota,
+	job_type_current,
+	job_type_tag,
+	job_type_cochef,
+	
+	job_type_max
 };
