@@ -14,7 +14,7 @@
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
 
-#define __LAST_REV__ 		"v:0.1.0"
+#define __LAST_REV__ 		"v:0.2.0"
 
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
@@ -229,7 +229,8 @@ public int MenuCheque2(Handle p_hItemMenu, MenuAction p_oAction, int client, int
 			int price = rp_GetItemInt(item_id, item_type_prix);
 			int auto = rp_GetItemInt(item_id, item_type_auto);
 			
-			char tmp[255], tmp2[255];
+			char tmp[255], tmp2[255], tmp3[255];
+			rp_GetItemData(item_id, item_type_name, tmp3, sizeof(tmp3));
 			
 			// Setup menu
 			Handle hGiveMenu = rp_CreateSellingMenu();			
@@ -245,8 +246,8 @@ public int MenuCheque2(Handle p_hItemMenu, MenuAction p_oAction, int client, int
 				
 				amount++;
 				
-				rp_GetItemData(i, item_type_name, tmp, sizeof(tmp));
-				Format(tmp2, sizeof(tmp2), "%s - %d [%d$]", tmp, i, price * i );
+				
+				Format(tmp2, sizeof(tmp2), "%s - %d [%d$]", tmp3, i, price * i );
 				Format(tmp, sizeof(tmp), "%d_%d_%s_%s_%s_%s", item_id, i, data[1], data[2], data[3], data[4]); // id,amount,itemTYPE=0,param,ClientFromMenu,reduction
 
 				AddMenuItem(hGiveMenu, tmp, tmp2);
