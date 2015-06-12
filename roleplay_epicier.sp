@@ -67,7 +67,7 @@ public Action Cmd_ItemCigarette(int args) {
 		float origin[3];
 		GetClientAbsOrigin(client, origin);
 		origin[2] -= 1.0;
-		rp_MakeRadiusPush(origin, 500.0, 1000.0, client);
+		rp_Effect_Push(origin, 500.0, 1000.0, client);
 	}
 	else if( StrEqual(Arg1, "flame") ) {
 		UningiteEntity(client);

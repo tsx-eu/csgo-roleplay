@@ -84,7 +84,7 @@ public void OnClientDisconnect(int client) {
 		g_bChirurgie[client][i] = false;
 	}
 }
-public Action fwdDeath(int victim, int attacker) {
+public Action fwdDeath(int victim, int attacker, float& respawn) {
 	if( g_iSuccess_last_faster_dead[attacker] +1 >= GetTime() ) {
 		rp_IncrementSuccess(attacker, success_list_faster_dead);
 		return Plugin_Handled;

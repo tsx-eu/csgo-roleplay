@@ -141,7 +141,7 @@ public Action task_cheque(Handle timer, any client) {
 			continue;
 		
 		int job = rp_GetClientJobID(i);
-		if( job == 1 || job == 41 || job == 91 || job == 101 || job == 181 ) // Police, tueur, mafia, tribunal, 18th
+		if( job == 1 || job == 91 || job == 101 || job == 181 ) // Police, mafia, tribunal, 18th
 			continue;
 		
 		bJob[job] = true;
@@ -195,6 +195,10 @@ public int MenuCheque(Handle p_hItemMenu, MenuAction p_oAction, int client, int 
 				
 				// Chirurgie
 				if( StrContains(tmp, "rp_chirurgie", false) == 0 )
+					continue;
+				if( StrContains(tmp, "rp_item_contrat", false) == 0 )
+					continue;
+				if( StrContains(tmp, "rp_item_conprotect", false) == 0 )
 					continue;
 				
 				rp_GetItemData(i, item_type_name, tmp, sizeof(tmp));
