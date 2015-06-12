@@ -13,6 +13,7 @@
 #endif
 #define _tsxrp_included_
 
+// ----------------------------------------------------------------------------
 enum rp_event {
 	RP_PreTakeDamage,													
 	RP_PostTakeDamageWeapon,
@@ -25,25 +26,28 @@ enum rp_event {
 	RP_OnPlayerDead,
 	RP_OnPlayerBuild,
 	RP_OnPlayerUse,
+	RP_OnPlayerCommand,
 	
 	RP_EventMax
 }
 typeset rp_event_enum {
-	function Action(int victim, int attacker, float &damage); 			/* RP_PreTakeDamage  == return Plugin_Handled = aucun dégat */
-	function Action(int victim, int attacker, float &damage, int wepID);/* RP_PostTakeDamageWeapon */
-	function Action(int victim, int attacker, float &damage); 			/* RP_PostTakeDamageKnife */
-	function Action(int client, float &speed, float &gravity); 			/* RP_PrePlayerPhysic */
+	function Action(int victim, int attacker, float& damage); 			/* RP_PreTakeDamage  == return Plugin_Handled = aucun dégat */
+	function Action(int victim, int attacker, float& damage, int wepID);/* RP_PostTakeDamageWeapon */
+	function Action(int victim, int attacker, float& damage); 			/* RP_PostTakeDamageKnife */
+	function Action(int client, float& speed, float& gravity); 			/* RP_PrePlayerPhysic */
 	function Action(int client, int color[4]); 							/* RP_PreHUDColorize */
 	function Action(int client);										/* RP_OnFrameSeconde */
 	function Action(int client, int& amount);							/* RP_OnAssurance */
 	function Action(int client);										/* RP_OnPlayerSpawn */
-	function Action(int victim, int attacker);							/* RP_OnPlayerDead == return Plugin_Handled = cacher des logs */
+	function Action(int victim, int attacker, float& respawn);			/* RP_OnPlayerDead == return Plugin_Handled = cacher des logs */
 	function Action(int client, float& cooldown);						/* RP_OnPlayerBuild */
-	function Action(int client);										/* RP_OnPlayerUse */	
+	function Action(int client);										/* RP_OnPlayerUse */
+	function Action(int client, char[] command);						/* RP_OnPlayerCommand */
+	
 };
-
 native bool rp_HookEvent(int client, rp_event eventID, rp_event_enum hook, float duration=-1.0);
 native bool rp_UnhookEvent(int client, rp_event eventID, rp_event_enum hook);
+// ----------------------------------------------------------------------------
 
 native int rp_GetClientInt(int client, int_user_data prop);
 native bool rp_GetClientBool(int client, bool_user_data prop);
@@ -51,15 +55,19 @@ native float rp_GetClientFloat(int client, float_user_data prop);
 native void rp_SetClientInt(int client, int_user_data prop, int value);
 native void rp_SetClientBool(int client, bool_user_data prop, bool value);
 native void rp_SetClientFloat(int client, float_user_data prop, float value);
-native int rp_GetClientGroupID(int client); /* return le numéro du groupe auquel il appartient. 1, 11, 21, 31... */
+// ----------------------------------------------------------------------------
 native int rp_GetClientJobID(int client); /* return le numéro du job auquel il appartient. 1, 11, 21, 31... */
+native int rp_GetClientGroupID(int client); /* return le numéro du groupe auquel il appartient. 1, 11, 21, 31... */
 native int rp_GetClientPvPBonus(int client, rp_capture_zone typeID);
-
+// ----------------------------------------------------------------------------
 native bool rp_IsInPVP(int entity);
 native bool rp_IsEntitiesNear(int ent1, int ent2, bool tresProche = false, float cache = 0.25);
 native bool rp_IsTutorialOver(int client);
 native bool rp_IsBuildingAllowed(int client, bool silent = false);
-
+native bool rp_IsClientLucky(int client);
+native bool rp_IncrementLuck(int client);
+native bool rp_IsTargetSeen(int client, int target);
+// ----------------------------------------------------------------------------
 native void rp_Effect_Smoke(int client, float duration = 30.0);
 native void rp_Effect_VisionTrouble(int client, float duration = 30.0);
 native void rp_Effect_ShakingVision(int client, float duration = 30.0);
@@ -67,34 +75,39 @@ native void rp_Effect_Particle(int entity, char[] effect, float duration = 0.000
 native void rp_Effect_Tazer(int client, int target);
 native void rp_Effect_SpawnMoney(float origin[3], bool high = false);
 native void rp_Effect_BeamBox(int client, int target = -1, float origin[3] = NULL_VECTOR, int red = 0, int green = 255, int blue = 0);
-
+// ----------------------------------------------------------------------------
 native int rp_Effect_Explode(float origin[3], float damage, float length, int entity=0, char[] weapon = "");
-
+native void rp_Effect_Push(float origin[3], float radius, float speed, int ignore = -1);
+// ----------------------------------------------------------------------------
 native void rp_IncrementSuccess(int client, rp_success_list success, int amount = 1);
-
+// ----------------------------------------------------------------------------
+native int rp_GetClientItem(int client, int itemID, bool fromBank = false);
 native void rp_ClientGiveItem(int client, int itemID, int amount=1, bool toBank = false);
+// ----------------------------------------------------------------------------
 native void rp_ClientRespawn(int client, float time=0.1);
 native void rp_ClientSave(int client);
 native void rp_ClientIgnite(int client, float time=10.0, int attacker=0);
 native void rp_ClientPoison(int client, float time=10.0, int attacker=0);
 native void rp_ClientDamage(int client, int damage, int attacker, char[] weapon = "point_hurt", int damageType = DMG_GENERIC);
 native void rp_ClientColorize(int client, int color[4]={-1,-1,-1,-1});
-
+native void rp_ClientSendToSpawn(int client, bool nearest = false);
+// ----------------------------------------------------------------------------
 native int rp_GetPlayerZoneAppart(int client);
 native int rp_GetPlayerZone(int client, float cache = 0.25);
 native int rp_GetZoneBit(int client, float cache = 300.0);
+// ----------------------------------------------------------------------------
 native int rp_GetRandomCapital(int jobID);
-native int rp_GetClientItem(int client, int itemID, bool fromBank = false);
-
-native void rp_MakeRadiusPush(float center[3], float radius, float speed, int ignore = -1);
-
+native int rp_GetJobCapital(int jobID);
+native int rp_SetJobCapital(int jobID, int amount);
+// ----------------------------------------------------------------------------
 native void rp_SetClientWeaponSkin(int client, int wepID);
 native void rp_SetWeaponGroupID(int wepID, int groupID);
 native void rp_SetWeaponBallType(int wepID, enum_ball_type typeID);
 native void rp_SetClientKnifeType(int client, enum_ball_type typeID);
 native enum_ball_type rp_GetWeaponBallType(int wepID);
 native enum_ball_type rp_GetClientKnifeType(int client);
-
+// ----------------------------------------------------------------------------
+native void rp_GetZoneData(int zoneID, zone_type typeID, char[] str, int length);
 native void rp_GetJobData(int jobID, rp_job_type typeID, char[] str, int length);
 native void rp_GetItemData(int itemID, rp_item_type typeID, char[] str, int length);
 public int rp_GetItemInt(int itemID, int typeID) {
@@ -102,23 +115,29 @@ public int rp_GetItemInt(int itemID, int typeID) {
 	rp_GetItemData(itemID, view_as<rp_item_type>typeID, tmp, sizeof(tmp));
 	return StringToInt(tmp);
 }
-
-native bool rp_IsClientLucky(int client);
-native bool rp_IncrementLuck(int client);
-
+public int rp_GetJobInt(int jobID, int typeID) {
+	char tmp[32];
+	rp_GetJobData(jobID, view_as<rp_job_type>typeID, tmp, sizeof(tmp));
+	return StringToInt(tmp);
+}
+public int rp_GetZoneInt(int zoneID, int typeID) {
+	char tmp[32];
+	rp_GetZoneData(zoneID, view_as<zone_type>typeID, tmp, sizeof(tmp));
+	return StringToInt(tmp);
+}
+// ----------------------------------------------------------------------------
 native void rp_ScheduleEntityInput(int entity, float time, char[] input);
-
-
-native int rp_GetJobCapital(int jobID);
-native int rp_SetJobCapital(int jobID, int amount);
-
+// ----------------------------------------------------------------------------
 native Handle rp_GetDatabase();
 native Handle rp_CreateSellingMenu();
-
+// ----------------------------------------------------------------------------
 native void rp_ClientRemoveProp(int client, int target, int item_id);
+// ----------------------------------------------------------------------------
 native void rp_SetBuildingData(int ent, building_prop_data typeID, int data);
 native int rp_GetBuildingData(int ent, building_prop_data typeID);
-
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // BUG min=1 sinon ça fait dla merde
 public int Math_GetRandomPow(int min, int max) {
 	return RoundToFloor( float( min + (max - min)  ) * ( Pow(GetRandomFloat(0.0, 1.0), (1.0/0.5) )  )) + 1;
@@ -209,6 +228,39 @@ public void SQL_QueryCallBack(Handle owner, Handle handle, const char[] error, a
 	}
 }
 
+// ----------------------------------------------------------------------------
+
+#define ACCESS_DENIED(%1)	CPrintToChat(%1, "{lightblue}[TSX-RP]{default} Vous n'avez pas accès à cette commande.");	return Plugin_Handled
+#define ITEM_CANCEL(%1,%2)	rp_ClientGiveItem(%1,%2); rp_SetClientFloat(%1, fl_CoolDown, 0.05)
+
+#define BITZONE_DEFAULT		(0)		// https://www.ts-x.eu/shared_public/bit.html
+#define BITZONE_PEACEFULL	(1<<0)
+#define BITZONE_PVP			(1<<1)
+#define BITZONE_DENY		(1<<2)
+#define BITZONE_BLOCKITEM	(1<<3)
+#define BITZONE_BLOCKSELL	(1<<4)
+#define BITZONE_BLOCKCHIRU	(1<<5)
+#define BITZONE_BLOCKSTEAL	(1<<6)
+#define BITZONE_BLOCKBUILD	(1<<7)
+#define BITZONE_BLOCKFORCE	(1<<8)
+#define BITZONE_BLOCKTALK	(1<<9)
+#define BITZONE_BLOCKOUT	(1<<10)
+#define BITZONE_BLOCKJAIL	(1<<11)
+#define BITZONE_BLOCKSPEAK	(1<<12)
+#define BITZONE_PARKING		(1<<15)
+#define BITZONE_JUSTICEITEM	(1<<18)
+#define BITZONE_POLICEFORCE	(1<<19)
+#define BITZONE_JAIL		(1<<20)
+#define BITZONE_HAUTESECU	(1<<21)
+#define BITZONE_LACOURS		(1<<22)
+#define BITZONE_EVENT		(1<<23)
+#define BITZONE_VENTE		(1<<24)
+#define	BITZONE_PERQUIZ		(1<<25)
+
+#define MAX_ITEMS	330
+#define MAX_JOBS	230
+
+// ----------------------------------------------------------------------------
 enum bool_user_data {
 	b_isConnected,	// Money,bank, item
 	b_isConnected2, // Success
@@ -434,37 +486,6 @@ enum rp_capture_zone {
 	cap_villa,
 	capture_max
 };
-
-#define ACCESS_DENIED(%1)	CPrintToChat(%1, "{lightblue}[TSX-RP]{default} Vous n'avez pas accès à cette commande.");	return Plugin_Handled
-#define ITEM_CANCEL(%1,%2)	rp_ClientGiveItem(%1,%2); rp_SetClientFloat(%1, fl_CoolDown, 0.05)
-
-#define BITZONE_DEFAULT		(0)		// https://www.ts-x.eu/shared_public/bit.html
-#define BITZONE_PEACEFULL	(1<<0)
-#define BITZONE_PVP			(1<<1)
-#define BITZONE_DENY		(1<<2)
-#define BITZONE_BLOCKITEM	(1<<3)
-#define BITZONE_BLOCKSELL	(1<<4)
-#define BITZONE_BLOCKCHIRU	(1<<5)
-#define BITZONE_BLOCKSTEAL	(1<<6)
-#define BITZONE_BLOCKBUILD	(1<<7)
-#define BITZONE_BLOCKFORCE	(1<<8)
-#define BITZONE_BLOCKTALK	(1<<9)
-#define BITZONE_BLOCKOUT	(1<<10)
-#define BITZONE_BLOCKJAIL	(1<<11)
-#define BITZONE_BLOCKSPEAK	(1<<12)
-#define BITZONE_PARKING		(1<<15)
-#define BITZONE_JUSTICEITEM	(1<<18)
-#define BITZONE_POLICEFORCE	(1<<19)
-#define BITZONE_JAIL		(1<<20)
-#define BITZONE_HAUTESECU	(1<<21)
-#define BITZONE_LACOURS		(1<<22)
-#define BITZONE_EVENT		(1<<23)
-#define BITZONE_VENTE		(1<<24)
-#define	BITZONE_PERQUIZ		(1<<25)
-
-#define MAX_ITEMS	330
-#define MAX_JOBS	230
-
 enum enum_ball_type {
 	ball_type_none,
 	ball_type_fire,
@@ -503,4 +524,20 @@ enum rp_job_type {
 	job_type_cochef,
 	
 	job_type_max
+};
+enum zone_type {
+	zone_type_name = 0,
+	
+	zone_type_min_x,
+	zone_type_min_y,
+	zone_type_min_z,
+	
+	zone_type_max_x,
+	zone_type_max_y,
+	zone_type_max_z,
+	
+	zone_type_type,	
+	zone_type_bit,
+	
+	zone_type_max
 };

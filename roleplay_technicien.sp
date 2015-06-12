@@ -236,7 +236,7 @@ public Action Cmd_ItemNano(int args) {
 		GetClientEyePosition(client, vecStart);
 		vecStart[2] -= 20.0;
 		
-		rp_MakeRadiusPush(vecStart, 500.0, -2000.0, client);		
+		rp_Effect_Push(vecStart, 500.0, -2000.0, client);		
 	}
 	else if( StrEqual(arg1, "flash") ) {
 		float vecStart[3];
