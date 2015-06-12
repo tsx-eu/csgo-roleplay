@@ -78,7 +78,6 @@ public void OnClientDisconnect(int client) {
 		}
 	}
 }
-
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemContrat(int args) {
 	#if defined DEBUG
@@ -121,6 +120,7 @@ public Action Cmd_ItemContrat(int args) {
 	rp_HookEvent(vendeur, RP_OnPlayerDead, fwdTueurDead);
 	rp_HookEvent(target, RP_OnPlayerDead, fwdTueurKill);
 	rp_HookEvent(vendeur, RP_OnFrameSeconde, fwdFrame);
+	rp_HookEvent(target, RP_PreTakeDamage, fwdDamage);
 	SDKHook(vendeur, SDKHook_WeaponDrop, OnWeaponDrop);
 	
 	
@@ -151,7 +151,6 @@ public Action fwdFrame(int client) {
 }
 public Action fwdTueurKill(int client, int attacker, float& respawn) {
 	if( rp_GetClientInt(attacker, i_ToKill) == client ) {
-	
 		CPrintToChat(attacker, "{lightblue}[TSX-RP]{default} Vous avez rempli votre contrat pour avoir tué %N.", client);
 		rp_SetClientInt(attacker, i_AddToPay, rp_GetClientInt(attacker, i_AddToPay) + 100);
 		
@@ -218,6 +217,28 @@ public Action OnWeaponDrop(int client, int weapon) {
 	}
 
 	return Plugin_Continue;
+}
+public Action fwdDamage(int victim, int attacker, float& damage) {
+
+	int target = rp_GetClientInt(attacker, i_ToKill);
+	
+	if( target > 0 && target == victim ) {
+		if( !rp_IsTargetSeen(victim, target) )
+			damage *= 2.0;
+			
+		damage *= 2.0;
+		return Plugin_Changed;
+	}
+	if( target > 0 && target != victim ) {
+		damage /= 2.0;
+		return Plugin_Changed;
+	}
+		
+	return Plugin_Continue;
+}
+public Action fwdSpeed(int client, float& speed, float& gravity) {
+	speed += 0.5;
+	return Plugin_Changed;
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemConProtect(int args) {
@@ -355,6 +376,7 @@ public int AddCompetanceToAssassin(Handle menu, MenuAction action, int client, i
 		}
 		else if( StrEqual(options, "vit", false) ) {
 			g_iKillerPoint[client][competance_vitesse] = 1;
+			rp_HookEvent(client, RP_PrePlayerPhysic, fwdSpeed);
 		}
 		
 		g_iKillerPoint[client][competance_left]--;
@@ -399,6 +421,9 @@ void RestoreAssassinNormal(int client) {
 		
 		FakeClientCommand(client, "use weapon_knife");
 	}
+	if( g_iKillerPoint[client][competance_vitesse] ) {
+		rp_UnhookEvent(client, RP_PrePlayerPhysic, fwdSpeed);
+	}
 	
 	g_iKillerPoint[client][competance_cut] = 0;
 	g_iKillerPoint[client][competance_tir] = 0;
@@ -411,6 +436,7 @@ void RestoreAssassinNormal(int client) {
 	rp_UnhookEvent(client, RP_OnPlayerDead, fwdTueurDead);
 	rp_UnhookEvent(client, RP_OnFrameSeconde, fwdFrame);
 	
+	rp_UnhookEvent( rp_GetClientInt(client, i_ToKill), RP_PreTakeDamage, fwdDamage);
 	rp_UnhookEvent( rp_GetClientInt(client, i_ToKill), RP_OnPlayerDead, fwdTueurKill);
 	
 	rp_SetClientInt(client, i_ToKill, 0);
@@ -486,7 +512,7 @@ public Action SendToTueur(Handle timer, any client) {
 		
 		GetEdictClassname(i, classname, sizeof(classname));
 		
-		if( StrContains(classname, "door") &&
+		if( StrContains(classname, "door") != -1 &&
 			rp_GetZoneInt(rp_GetPlayerZone(i, 60.0) , zone_type_type) == 41
 			) {
 			AcceptEntityInput(i, "Close");
@@ -564,12 +590,16 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 				int entity = StringToInt(tmp[0]) + MaxClients;
 				
 				rp_ScheduleEntityInput(entity, time, "Unlock");
-				rp_ScheduleEntityInput(entity, time+0.01, "Unlock");
+				rp_ScheduleEntityInput(entity, time+0.1, "Open");
+				rp_ScheduleEntityInput(entity, time+30.0, "Close");
+				rp_ScheduleEntityInput(entity, time+30.1, "Lock");
 				
 				if( dble == 2 ) {
 					entity = StringToInt(tmp[1]) + MaxClients;
 					rp_ScheduleEntityInput(entity, time, "Unlock");
-					rp_ScheduleEntityInput(entity, time+0.01, "Unlock");
+					rp_ScheduleEntityInput(entity, time+0.1, "Open");
+					rp_ScheduleEntityInput(entity, time+30.0, "Close");
+					rp_ScheduleEntityInput(entity, time+30.1, "Lock");
 				}
 				
 				time += delay;

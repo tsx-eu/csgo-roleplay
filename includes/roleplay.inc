@@ -66,6 +66,7 @@ native bool rp_IsTutorialOver(int client);
 native bool rp_IsBuildingAllowed(int client, bool silent = false);
 native bool rp_IsClientLucky(int client);
 native bool rp_IncrementLuck(int client);
+native bool rp_IsTargetSeen(int client, int target);
 // ----------------------------------------------------------------------------
 native void rp_Effect_Smoke(int client, float duration = 30.0);
 native void rp_Effect_VisionTrouble(int client, float duration = 30.0);
