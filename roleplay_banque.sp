@@ -279,14 +279,14 @@ public Action Cmd_ItemForward(int args) {
 	char tmp[64];
 	int mnt = rp_GetClientItem(client, item_id);
 	rp_ClientGiveItem(client, item_id, -mnt, false);
-	rp_ClientGiveItem(client, item_id+1, mnt, true);
+	rp_ClientGiveItem(client, item_id, mnt+1, true);
 	
 	rp_GetItemData(item_id, item_type_name, tmp, sizeof(tmp));
 	
 	if( mnt+1 == 1 )
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %d %s a été transféré en banque.", mnt, tmp);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %d %s a été transféré en banque.", mnt+1, tmp);
 	else
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %d %s ont été transférés en banque.", mnt, tmp);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %d %s ont été transférés en banque.", mnt+1, tmp);
 	
 	return;
 }
