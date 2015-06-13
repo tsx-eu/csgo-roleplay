@@ -229,45 +229,51 @@ public void OnClientDisconnect(int client) {
 }
 public Action fwdWeapon(int victim, int attacker, float &damage) {
 	bool changed = true;
-	
-	switch( rp_GetClientKnifeType(attacker) ) {
-		case ball_type_fire: {
-			rp_ClientIgnite(victim, 10.0, attacker);
-			changed = false;
-		}
-		case ball_type_caoutchouc: {
-			damage *= 0.0;
+	char classname[64];
+	GetEdictClassname(wepID, classname, sizeof(classname));
+	if( StrContains(classname, "weapon_bayonet") == 0 || StrContains(classname, "weapon_knife") == 0 ) {
+		switch( rp_GetClientKnifeType(attacker) ) {
+			case ball_type_fire: {
+				rp_ClientIgnite(victim, 10.0, attacker);
+				changed = false;
+			}
+			case ball_type_caoutchouc: {
+				damage *= 0.0;
 
-			rp_SetClientFloat(victim, fl_FrozenTime, GetGameTime() + 1.5);
-			ServerCommand("sm_effect_flash %d 1.5 180", victim);
-		}
-		case ball_type_poison: {
-			damage *= 0.40;
-			rp_ClientPoison(victim, 20.0, attacker);
-		}
-		case ball_type_vampire: {
-			damage *= 0.75;
-			int current = GetClientHealth(attacker);
-			if( current < 500 ) {
-				current += RoundToFloor(damage*0.2);
+				rp_SetClientFloat(victim, fl_FrozenTime, GetGameTime() + 1.5);
+				ServerCommand("sm_effect_flash %d 1.5 180", victim);
+			}
+			case ball_type_poison: {
+				damage *= 0.40;
+				rp_ClientPoison(victim, 20.0, attacker);
+			}
+			case ball_type_vampire: {
+				damage *= 0.75;
+				int current = GetClientHealth(attacker);
+				if( current < 500 ) {
+					current += RoundToFloor(damage*0.2);
 
-				if( current > 500 )
-					current = 500;
+					if( current > 500 )
+						current = 500;
 
-				SetEntityHealth(attacker, current);
-				float vecOrigin[3], vecOrigin2[3];
-				GetClientEyePosition(attacker, vecOrigin);
-				GetClientEyePosition(victim, vecOrigin2);
-				
-				vecOrigin[2] -= 20.0; vecOrigin2[2] -= 20.0;
-				
-				TE_SetupBeamPoints(vecOrigin, vecOrigin2, g_cBeam, 0, 0, 0, 0.1, 10.0, 10.0, 0, 10.0, {250, 50, 50, 250}, 10);
-				TE_SendToAll();
+					SetEntityHealth(attacker, current);
+					float vecOrigin[3], vecOrigin2[3];
+					GetClientEyePosition(attacker, vecOrigin);
+					GetClientEyePosition(victim, vecOrigin2);
+					
+					vecOrigin[2] -= 20.0; vecOrigin2[2] -= 20.0;
+					
+					TE_SetupBeamPoints(vecOrigin, vecOrigin2, g_cBeam, 0, 0, 0, 0.1, 10.0, 10.0, 0, 10.0, {250, 50, 50, 250}, 10);
+					TE_SendToAll();
+				}
+			}
+			default: {
+				changed = false;
 			}
 		}
-		default: {
-			changed = false;
-		}
+	}
+	else{
+		changed = false;
 	}	
 	
 	if( changed )
