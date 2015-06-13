@@ -613,7 +613,7 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 			for(int i=1; i<=MaxClients; i++) {
 				if( !IsValidClient(i) )
 					continue;
-				if( rp_GetClientJobID(i) == 1 || rp_GetClientJobID(i) == 101 )
+				if( rp_GetClientJobID(i) != 1 && rp_GetClientJobID(i) != 101 )
 					continue;
 				
 				CPrintToChat(i, "{lightblue}[TSX-RP]{default} Un enlevement a eut lieu. Vous devez libérer %N dans %s.", client, dest);
