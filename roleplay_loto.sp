@@ -50,7 +50,10 @@ public Action Cmd_ItemLoto(int args) {
 	
 	int amount = GetCmdArgInt(1);
 	int client = GetCmdArgInt(2);
-	
+
+	if( amount > 1000)
+		return Plugin_Handled;
+
 	char szSteamID[32];
 	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID), false);
 	
