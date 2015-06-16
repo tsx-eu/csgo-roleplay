@@ -68,6 +68,14 @@ native bool rp_IsClientLucky(int client);
 native bool rp_IncrementLuck(int client);
 native bool rp_IsTargetSeen(int client, int target);
 // ----------------------------------------------------------------------------
+native bool rp_IsValidVehicle(int entity);
+native void rp_SetClientKeyVehicle(int client, int vehicleID, bool status=false);
+native bool rp_GetClientKeyVehicle(int client, int vehicleID);
+native void rp_SetClientVehiclePassager(int client, int vehicleID, bool status=false);
+native bool rp_GetClientVehiclePassager(int client, int vehicleID);
+native void rp_SetVehicleInt(int vehicleID, car_data typeID, int value);
+native int rp_GetVehicleInt(int vehicleID, car_data typeID);
+// ----------------------------------------------------------------------------
 native void rp_Effect_Smoke(int client, float duration = 30.0);
 native void rp_Effect_VisionTrouble(int client, float duration = 30.0);
 native void rp_Effect_ShakingVision(int client, float duration = 30.0);
@@ -136,9 +144,7 @@ native void rp_ClientRemoveProp(int client, int target, int item_id);
 native void rp_SetBuildingData(int ent, building_prop_data typeID, int data);
 native int rp_GetBuildingData(int ent, building_prop_data typeID);
 // ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-// BUG min=1 sinon ça fait dla merde
+// TODO: BUG min=1 sinon ça fait dla merde
 public int Math_GetRandomPow(int min, int max) {
 	return RoundToFloor( float( min + (max - min)  ) * ( Pow(GetRandomFloat(0.0, 1.0), (1.0/0.5) )  )) + 1;
 }
@@ -541,3 +547,225 @@ enum zone_type {
 	
 	zone_type_max
 };
+enum car_data {
+	car_light_left_id = 0,
+	car_light_right_id,
+	car_light_middle_id,
+	car_light_is_on,
+	car_thirdperson_id,
+	car_klaxon,
+	car_owner,
+	car_item_id,
+	car_health,
+	car_awayTick,
+	
+	car_data_max,
+};
+// ----------------------------------------------------------------------------
+stock int rp_CreateVehicle(float origin[3], float angle[3], char[] model, int skin, int client=0) {
+	// Thanks blodia: https://forums.alliedmods.net/showthread.php?p=1268368#post1268368
+	LogToGame("[PRE] Vehicle Spawning from %N", client);
+	
+	int ent = CreateEntityByName("prop_vehicle_driveable");
+	if( ent == -1) { return 0; } // Tout le monde sait que ça n'arrive jamais...
+	
+	char ScriptPath[PLATFORM_MAX_PATH], szSkin[12], buffer[8][64];
+	int amount = ExplodeString(model, "/", buffer, sizeof(buffer), sizeof(buffer[]));
+	if( amount > 0 ) {
+		ReplaceString(buffer[amount-1], sizeof(buffer[]), ".mdl", "");
+		// TODO: Vérifier que le fichier existe. Si pas utiliser jeep.txt
+		Format(ScriptPath, sizeof(ScriptPath), "scripts/vehicles/%s.txt", buffer[amount-1]);		
+	}
+	else {
+		Format(ScriptPath, sizeof(ScriptPath), "scripts/vehicles/jeep.txt");
+	}
+	
+	char TargetName[32];
+	Format(TargetName, sizeof(TargetName), "vh_%d_%d",EntIndexToEntRef(ent), Math_GetRandomInt(100, 999));
+	
+	DispatchKeyValue(ent, "targetname", 		TargetName);
+	DispatchKeyValue(ent, "model", 				model);
+	DispatchKeyValue(ent, "vehiclescript", 		ScriptPath);
+	DispatchKeyValue(ent, "solid",				"6");
+	DispatchKeyValue(ent, "actionScale",		"1");
+	DispatchKeyValue(ent, "EnableGun",			"0");
+	DispatchKeyValue(ent, "ignorenormals",		"0");
+	DispatchKeyValue(ent, "fadescale",			"1");
+	DispatchKeyValue(ent, "fademindist",		"-1");
+	DispatchKeyValue(ent, "VehicleLocked",		"0");
+	DispatchKeyValue(ent, "screenspacefade",	"0");
+	DispatchKeyValue(ent, "spawnflags", 		"256" );
+	DispatchKeyValue(ent, "setbodygroup", 		"511" );
+	DispatchKeyValueFloat(ent, "MaxPitch", 		360.00);
+	DispatchKeyValueFloat(ent, "MinPitch", 		-360.00);
+	DispatchKeyValueFloat(ent, "MaxYaw", 		90.00);
+	
+	IntToString(skin, szSkin, sizeof(szSkin));
+	DispatchKeyValue(ent, "skin", szSkin);
+	DispatchSpawn(ent);
+	
+	// check if theres space to spawn the vehicle.
+	float MinHull[3],  MaxHull[3];
+	GetEntPropVector(ent, Prop_Send, "m_vecMins", MinHull);
+	GetEntPropVector(ent, Prop_Send, "m_vecMaxs", MaxHull);
+	
+	
+	// TODO: TR_TraceHullEx + TR_TraceHullFilterEx
+	if( client == 0 )
+		TR_TraceHull(origin, origin, MinHull, MaxHull, MASK_SOLID);
+	else
+		TR_TraceHullFilter(origin, origin, MinHull, MaxHull, MASK_SOLID, FilterToOne, client);
+	
+	if( TR_DidHit() ) {
+		AcceptEntityInput(ent, "Kill");	return 0;
+	}
+	
+	TeleportEntity(ent, origin, angle, NULL_VECTOR);
+	int left, right, cam;
+	rp_CreateVehicleLighting(ent, left, right);
+	cam = rp_CreateVehicleCamera(ent);
+	
+	rp_SetVehicleInt(ent, car_light_left_id, left);
+	rp_SetVehicleInt(ent, car_light_right_id, right);
+	rp_SetVehicleInt(ent, car_light_is_on, 0);
+	rp_SetVehicleInt(ent, car_thirdperson_id, cam);
+	rp_SetVehicleInt(ent, car_health, 1000);
+	rp_SetVehicleInt(ent, car_klaxon, Math_GetRandomInt(1, 6));
+	
+	SetEntProp(ent, Prop_Data, "m_takedamage", DAMAGE_NO); // Nope
+	SetEntProp(ent, Prop_Data, "m_nNextThinkTick", -1);
+	SetEntProp(ent, Prop_Data, "m_bHasGun", 0);
+	
+//	AcceptEntityInput(ent, "HandBrakeOn");
+	AcceptEntityInput(ent, "TurnOff");
+	
+	if( IsValidClient(client) ) {
+		
+		rp_SetVehicleInt(ent, car_owner, client);
+		rp_SetClientKeyVehicle(client, ent, true);
+	
+		rp_SetClientVehicle(client, ent, true);
+		 // PLEASE CHECK AGAIN SERVER WAS SLOW OK?
+		Handle dp;
+		CreateDataTimer(0.1, rp_SetClientVehicleTask, dp, TIMER_DATA_HNDL_CLOSE);
+		WritePackCell(dp, client);
+		WritePackCell(dp, ent);
+	}
+	
+	LogToGame("[POST] Vehicle Spawning from %N", client);
+	return ent;
+}
+stock void rp_SetClientVehicle(int client, int vehicleID, bool force=false) {
+	
+	if( !rp_GetClientKeyVehicle(client, vehicleID) )
+		return;
+		
+	if( force ) {
+		float origin[3], angles[3];
+		Entity_GetAbsOrigin(vehicleID, origin);
+		Entity_GetAbsAngles(vehicleID, angles);
+		
+		
+		angles[1] += 90.0;
+		float x = -60.0,y=20.0, radian = DegToRad(angles[1]);
+		origin[0] +=   (x*Sine(radian)) +   (y*Cosine(radian));
+		origin[1] +=  -(x*Cosine(radian)) + (y*Sine(radian));
+		origin[2] += 0.0; // TODO: ??? Y a un truc à faire avec angles[0], ou angles[2]. Qql à la formule? "Rotation point origine matrice angles"
+		
+		TeleportEntity(client, origin, angles, NULL_VECTOR);
+	}
+	
+	SetEntProp(vehicleID, Prop_Data, "m_bLocked", 0);
+	AcceptEntityInput(vehicleID, "Use", client);
+	FakeClientCommand(client, "use weapon_knife");
+	FakeClientCommand(client, "use weapon_knifegg");
+	
+	if( force )
+		rp_ScheduleEntityInput(vehicleID, 0.1, "Lock");
+}
+public void rp_CreateVehicleLighting(int vehicle, int& left, int& right) {
+	
+	float origin[3], angles[3], MaxHull[3];
+	Entity_GetAbsOrigin(vehicle, origin);
+	Entity_GetAbsAngles(vehicle, angles);
+	Entity_GetMaxSize(vehicle, MaxHull);
+	
+	origin[1] += 90.0; // Je sais plus pourquoi...
+	
+	float x = 25.0, y = MaxHull[1], z = 30.0, radian = DegToRad(angles[1]);
+	float LightOrigin[3];
+	
+	LightOrigin[0] = origin[0] + (x*Sine(radian)) + (y*Cosine(radian));
+	LightOrigin[1] = origin[1] - (x*Cosine(radian)) + (y*Sine(radian));
+	LightOrigin[2] = origin[2] + z;
+	angles[0] += 15.0;
+	
+	// TODO: Check failed
+	left = CreateEntityByName("point_spotlight");
+	ActivateEntity(left);
+	
+	DispatchKeyValue(left, "spotlightlength",	"500");
+	DispatchKeyValue(left, "spotlightwidth",		"200");
+	DispatchKeyValue(left, "rendercolor",		"255 255 255 5000");
+	DispatchKeyValue(left, "spawnflags", 		"0");
+	DispatchSpawn(left);
+	
+	TeleportEntity(left, LightOrigin, angles, NULL_VECTOR);
+	
+	SetVariantString("!activator");
+	AcceptEntityInput(left, "SetParent", vehicle);
+	AcceptEntityInput(left, "LightOff");
+	
+	x = -25.0;
+	LightOrigin[0] = origin[0] + (x*Sine(radian)) + (y*Cosine(radian));
+	LightOrigin[1] = origin[1] - (x*Cosine(radian)) + (y*Sine(radian));
+	LightOrigin[2] = origin[2] + z;
+	
+	// TODO: Check failed
+	right = CreateEntityByName("point_spotlight");
+	ActivateEntity( right);
+	
+	DispatchKeyValue( right, "spotlightlength",	"500");
+	DispatchKeyValue( right, "spotlightwidth",	"200");
+	DispatchKeyValue( right, "rendercolor",		"255 255 255 5000");
+	DispatchKeyValue( right, "spawnflags",		"0");	
+	DispatchSpawn( right);
+	TeleportEntity( right, LightOrigin, angles, NULL_VECTOR);
+	
+	SetVariantString("!activator");
+	AcceptEntityInput(right, "SetParent", vehicle);
+	AcceptEntityInput(right, "LightOff");	
+}
+public int rp_CreateVehicleCamera(int vehicle) {
+	
+	float origin[3], angles[3];
+	Entity_GetAbsOrigin(vehicle, origin);
+	Entity_GetAbsAngles(vehicle, angles);
+	
+	float x = 0.0, y = -200.0, z = 120.0 , radian = DegToRad(angles[1]);
+	origin[0] += (x*Sine(radian)) + (y*Cosine(radian));
+	origin[1] += (x*Cosine(radian)) + (y*Sine(radian));
+	origin[2] += z;
+	angles[0] -= 10.0;
+	
+	int ent = CreateEntityByName("env_fire");
+	
+	DispatchSpawn(ent);
+	ActivateEntity(ent);
+	
+	TeleportEntity(ent, origin, angles, NULL_VECTOR);
+	
+	SetVariantString("!activator");
+	AcceptEntityInput(ent, "SetParent", vehicle);
+	return ent;
+}
+public Action rp_SetClientVehicleTask(Handle timer, Handle dp) {
+	#if defined DEBUG
+	PrintToServer("ForceJoinCar");
+	#endif
+	ResetPack(dp);
+	int client = ReadPackCell(dp);
+	int car = ReadPackCell(dp);
+	rp_SetClientVehicle(client, car, true);
+}
+
