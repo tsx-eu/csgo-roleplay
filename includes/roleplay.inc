@@ -144,29 +144,6 @@ native void rp_ClientRemoveProp(int client, int target, int item_id);
 native void rp_SetBuildingData(int ent, building_prop_data typeID, int data);
 native int rp_GetBuildingData(int ent, building_prop_data typeID);
 // ----------------------------------------------------------------------------
-// TODO: BUG min=1 sinon ça fait dla merde
-public int Math_GetRandomPow(int min, int max) {
-	return RoundToFloor( float( min + (max - min)  ) * ( Pow(GetRandomFloat(0.0, 1.0), (1.0/0.5) )  )) + 1;
-}
-public float GetCmdArgFloat(int index) {
-	char arg[32];
-	GetCmdArg(index, arg, sizeof(arg));
-	return StringToFloat(arg);
-}
-public int GetCmdArgInt(int index) {
-	char arg[32];
-	GetCmdArg(index, arg, sizeof(arg));
-	return StringToInt(arg);
-}
-public bool IsValidClient(int client) {
-	if( client <= 0 || client > MaxClients )
-		return false;
-	
-	if( !IsValidEdict(client) || !IsClientConnected(client) )
-		return false;
-	
-	return true;
-}
 public bool rp_IsRemoveAble(int target) {
 	#if defined DEBUG
 	PrintToServer("IsRemoveAble");
@@ -208,30 +185,6 @@ public bool rp_IsRemoveAble(int target) {
 	}
 	
 	return false;
-}
-public int GetClientTarget(int client) {
-	float vecStart[3], vecAngles[3];
-	GetClientEyePosition(client, vecStart);
-	GetClientEyeAngles(client, vecAngles);
-	
-	Handle trace = TR_TraceRayFilterEx(vecStart, vecAngles, MASK_SOLID, RayType_Infinite, FilterToOne, client);
-	if( !TR_DidHit(trace) ) {
-		CloseHandle(trace);
-		return 0;
-	}
-	
-	int ent = TR_GetEntityIndex(trace);
-	CloseHandle(trace);
-	
-	return ent;
-}
-public bool FilterToOne(int entity, int mask, any data) {
-	return (data != entity);
-}
-public void SQL_QueryCallBack(Handle owner, Handle handle, const char[] error, any data) {
-	if( strlen(error) >= 1  ) {
-		LogError("[SQL] [ERROR] %s - %f - %i", error, data, data);
-	}
 }
 
 // ----------------------------------------------------------------------------
