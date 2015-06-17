@@ -35,12 +35,22 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_vehicle2", 	Cmd_ItemVehicle,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_carstuff", 	Cmd_ItemVehicleStuff,	"RP-ITEM",	FCVAR_UNREGISTERED);
 	g_hMAX_CAR = CreateConVar("rp_max_car",	"20", "Nombre de voiture maximum sur le serveur", 0, true, 0.0, true, 50.0);
+	
+	// Reload:
+	for (int i = 1; i <= MaxClients; i++) {
+		if( IsValidClient(i) )
+			OnClientPostAdminCheck(i);
+	}
 }
 public void OnMapStart() {
 	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt");
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt");
 }
+public void OnClientPostAdminCheck(int client) {
+	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);
+}
 public void OnClientDisconnect(int client) {
+	rp_UnhookEvent(client, RP_OnPlayerUse, fwdUse);
 	for (int i = MaxClients; i <= 2048; i++) {
 		if( !IsValidEdict(i) )
 			continue;
@@ -49,6 +59,30 @@ public void OnClientDisconnect(int client) {
 		if( rp_GetVehicleInt(i, car_owner) == client) {
 			VehicleRemove(i);
 			
+		}
+	}
+}
+public Action fwdUse(int client) {
+	
+	
+	int target = GetClientTarget(client);
+	int vehicle = GetEntPropEnt(client, Prop_Send, "m_hVehicle");
+	
+	if( vehicle > 0 ) {
+		int speed = GetEntProp(vehicle, Prop_Data, "m_nSpeed");
+		int buttons = GetClientButtons(client);
+			
+		if( speed <= 20 && !(buttons & IN_DUCK) )
+			rp_ClientVehicleExit(client, vehicle);
+	}
+	else if( rp_IsValidVehicle(target) && rp_IsEntitiesNear(client, target, true) ) {
+		
+		int driver = GetEntPropEnt(target, Prop_Send, "m_hPlayer");
+		if( driver > 0 ) {
+			// TODO:
+		}
+		else {
+			rp_SetClientVehicle(client, target, true);
 		}
 	}
 }
@@ -111,10 +145,6 @@ public Action Cmd_ItemVehicle(int args) {
 	rp_SetVehicleInt(car, car_owner, client);
 	rp_SetVehicleInt(car, car_item_id, item_id);
 	rp_SetClientKeyVehicle(client, car, true);
-	for (int i = 1; i <= MaxClients; i++) {
-		if( IsValidClient(i) )
-			rp_SetClientKeyVehicle(i, car, false);
-	}
 	
 	CreateTimer(3.5, Timer_VehicleRemoveCheck, car);
 	
@@ -305,7 +335,7 @@ public Action Cmd_ItemVehicleStuff(int args) {
 	return Plugin_Handled;
 }
 // ----------------------------------------------------------------------------
-stock int rp_CreateVehicle(float origin[3], float angle[3], char[] model, int skin, int client=0) {
+int rp_CreateVehicle(float origin[3], float angle[3], char[] model, int skin, int client=0) {
 	// Thanks blodia: https://forums.alliedmods.net/showthread.php?p=1268368#post1268368
 	LogToGame("[PRE] Vehicle Spawning from %N", client);
 	
@@ -394,34 +424,6 @@ stock int rp_CreateVehicle(float origin[3], float angle[3], char[] model, int sk
 	LogToGame("[POST] Vehicle Spawning from %N", client);
 	return ent;
 }
-void rp_SetClientVehicle(int client, int vehicleID, bool force=false) {
-	
-	if( !rp_GetClientKeyVehicle(client, vehicleID) )
-		return;
-		
-	if( force ) {
-		float origin[3], angles[3];
-		Entity_GetAbsOrigin(vehicleID, origin);
-		Entity_GetAbsAngles(vehicleID, angles);
-		
-		
-		angles[1] += 90.0;
-		float x = -60.0,y=20.0, radian = DegToRad(angles[1]);
-		origin[0] +=   (x*Sine(radian)) +   (y*Cosine(radian));
-		origin[1] +=  -(x*Cosine(radian)) + (y*Sine(radian));
-		origin[2] += 0.0; // TODO: ??? Y a un truc à faire avec angles[0], ou angles[2]. Qql à la formule? "Rotation point origine matrice angles"
-		
-		TeleportEntity(client, origin, angles, NULL_VECTOR);
-	}
-	
-	SetEntProp(vehicleID, Prop_Data, "m_bLocked", 0);
-	AcceptEntityInput(vehicleID, "Use", client);
-	FakeClientCommand(client, "use weapon_knife");
-	FakeClientCommand(client, "use weapon_knifegg");
-	
-	if( force )
-		rp_ScheduleEntityInput(vehicleID, 0.1, "Lock");
-}
 void rp_CreateVehicleLighting(int vehicle, int& left, int& right) {
 	
 	float origin[3], angles[3], MaxHull[3];
@@ -429,7 +431,7 @@ void rp_CreateVehicleLighting(int vehicle, int& left, int& right) {
 	Entity_GetAbsAngles(vehicle, angles);
 	Entity_GetMaxSize(vehicle, MaxHull);
 	
-	origin[1] += 90.0; // Je sais plus pourquoi...
+	angles[1] += 90.0;
 	
 	float x = 25.0, y = MaxHull[1], z = 30.0, radian = DegToRad(angles[1]);
 	float LightOrigin[3];
@@ -480,6 +482,7 @@ int rp_CreateVehicleCamera(int vehicle) {
 	float origin[3], angles[3];
 	Entity_GetAbsOrigin(vehicle, origin);
 	Entity_GetAbsAngles(vehicle, angles);
+	angles[1] += 90.0;
 	
 	float x = 0.0, y = -200.0, z = 120.0 , radian = DegToRad(angles[1]);
 	origin[0] += (x*Sine(radian)) + (y*Cosine(radian));
@@ -505,7 +508,7 @@ void VehicleRemove(int vehicle, bool explode = false) {
 	CreateTimer(0.1, BatchLeave, vehicle);
 	
 	for(int i=1; i<=MaxClients+1; i++)
-		rp_SetClientKeyVehicle(i, false);
+		rp_SetClientKeyVehicle(i, vehicle, false);
 	
 	if( explode ) {
 		IgniteEntity(vehicle, 1.75);
@@ -540,6 +543,7 @@ void VehicleRemove(int vehicle, bool explode = false) {
 	ServerCommand("sm_effect_fading %i 2.5 1", vehicle);
 	rp_ScheduleEntityInput(vehicle, 2.5, "Kill");
 }
+// ----------------------------------------------------------------------------
 public Action rp_SetClientVehicleTask(Handle timer, Handle dp) {
 	#if defined DEBUG
 	PrintToServer("rp_SetClientVehicleTask");
@@ -629,3 +633,16 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 	CreateTimer(1.1, Timer_VehicleRemoveCheck, ent);
 	return Plugin_Continue;
 }
+// ----------------------------------------------------------------------------
+void MatriceRotation(float origin[3], float angles[3], float vecteur[3]) {
+	
+	
+	float radX =  DegToRad(angles[2]); // X
+	float radY = DegToRad(angles[0]); // Z
+	float radZ = DegToRad(angles[1]); // Y
+	
+	origin[0] = (Cosine(radY) * Cosine(radZ) * vecteur[0]) + (Cosine(radY) * -Sine(radZ) * vecteur[1]) + (-Sine(radY) * vecteur[2]) + (origin[0]);
+	origin[1] = ((-Sine(radX) * Sine(radY) * Cosine(radZ)) + (Cosine(radX) * Sine(radZ)) * vecteur[0]) + ((-Sine(radX) * Sine(radY) * -Sine(radZ)) + (Cosine(radX) * Cosine(radZ)) * vecteur[1]) + (-Sine(radX) * Cosine(radY) * vecteur[2]) + origin[1];
+	origin[2] = ((Cosine(radX) * Sine(radY) * Cosine(radZ)) + (Sine(radX) * Sine(radZ)) * vecteur[0]) + ((Cosine(radX) * Sine(radY) * -Sine(radZ)) + (Sine(radX) * Cosine(radZ)) * vecteur[1]) + (Cosine(radX) * Cosine(radY) * vecteur[2]) + origin[2];
+}
+// ----------------------------------------------------------------------------
