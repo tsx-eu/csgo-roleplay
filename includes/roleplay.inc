@@ -13,6 +13,8 @@
 #endif
 #define _tsxrp_included_
 
+#include <rp_tools.inc>
+
 // ----------------------------------------------------------------------------
 enum rp_event {
 	RP_PreTakeDamage,													
