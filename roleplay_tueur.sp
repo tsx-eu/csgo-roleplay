@@ -469,7 +469,7 @@ void SetContratFail(int client, bool time = false) { // time = retro-compatibili
 		int reduction = rp_GetClientInt(client, i_Reduction);
 		
 		rp_SetClientInt(target, i_Bank, rp_GetClientInt(target, i_Bank) + prix - (RoundFloat((float(prix) / 100.0) * float(reduction)) / 2));
-		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(target, i_AddToPay) - (prix - RoundFloat( (float(prix) / 100.0) * float(reduction))) / 2);
+		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) - (prix - RoundFloat( (float(prix) / 100.0) * float(reduction))) / 2);
 		rp_SetJobCapital(41, rp_GetJobCapital(41) - (prix / 2));
 	}
 	else {
