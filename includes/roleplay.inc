@@ -77,6 +77,7 @@ native void rp_ClientVehicleExit(int client, int vehicleID, bool forced=false);
 native bool rp_GetClientVehiclePassager(int client, int vehicleID);
 native void rp_SetVehicleInt(int vehicleID, car_data typeID, int value);
 native int rp_GetVehicleInt(int vehicleID, car_data typeID);
+native void rp_SetClientVehicle(int client, int vehicleID, bool force=false);
 // ----------------------------------------------------------------------------
 native void rp_Effect_Smoke(int client, float duration = 30.0);
 native void rp_Effect_VisionTrouble(int client, float duration = 30.0);
@@ -101,6 +102,7 @@ native void rp_ClientPoison(int client, float time=10.0, int attacker=0);
 native void rp_ClientDamage(int client, int damage, int attacker, char[] weapon = "point_hurt", int damageType = DMG_GENERIC);
 native void rp_ClientColorize(int client, int color[4]={-1,-1,-1,-1});
 native void rp_ClientSendToSpawn(int client, bool nearest = false);
+native void rp_ClientGiveKnife(int client);
 // ----------------------------------------------------------------------------
 native int rp_GetPlayerZoneAppart(int client);
 native int rp_GetPlayerZone(int client, float cache = 0.25);
@@ -513,6 +515,7 @@ enum car_data {
 	car_item_id,
 	car_health,
 	car_awayTick,
+	car_maxPassager,
 	
 	car_data_max,
 };
