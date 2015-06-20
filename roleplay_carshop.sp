@@ -73,13 +73,18 @@ public Action fwdUse(int client) {
 	
 	int target = GetClientTarget(client);
 	int vehicle = GetEntPropEnt(client, Prop_Send, "m_hVehicle");
+	int passager = rp_GetClientVehiclePassager(client);
 	
+	//
 	if( vehicle > 0 ) {
 		int speed = GetEntProp(vehicle, Prop_Data, "m_nSpeed");
 		int buttons = GetClientButtons(client);
 			
 		if( speed <= 20 && !(buttons & IN_DUCK) )
 			rp_ClientVehicleExit(client, vehicle);
+	}
+	else if( passager > 0 ) {
+		LeaveVehiclePassager(client, passager);
 	}
 	else if( rp_IsValidVehicle(target) && rp_IsEntitiesNear(client, target, true) ) {
 		
@@ -205,23 +210,7 @@ public Action Cmd_ItemVehicleStuff(int args) {
 		offset = GetEntSendPropOffs(target, "m_clrRender", true);
 	}
 	
-	if( StrEqual(arg1, "repair") ) {
-		
-		if( Vehicle_GetDriver(target) != client) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible d'utiliser cet item dans une voiture.");
-			ITEM_CANCEL(client, item_id);
-			return Plugin_Handled;
-		}
-		
-		// TODO: Rembourser si pas de soin
-		int heal = rp_GetVehicleInt(target, car_health) + 1000;
-		if( heal >= 2500 ) {
-			heal = 2500;
-		}
-		
-		rp_SetVehicleInt(target, car_health, heal);
-	}
-	else if( StrEqual(arg1, "key") ) {
+	if( StrEqual(arg1, "key") ) {
 		
 		if( Vehicle_GetDriver(target) != client) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez utiliser cet item dans votre voiture.");
@@ -239,7 +228,7 @@ public Action Cmd_ItemVehicleStuff(int args) {
 		for(int i=1; i<=MaxClients; i++) {
 			if( !IsValidClient(i) )
 				continue;
-			if( rp_GetClientVehiclePassager(i, target) )
+			if( rp_GetClientVehiclePassager(i) == target )
 				continue;
 			if( rp_GetClientKeyVehicle(i, target) )
 				continue;
@@ -296,56 +285,6 @@ public Action Cmd_ItemVehicleStuff(int args) {
 			ITEM_CANCEL(client, item_id);
 			return Plugin_Handled;
 		}
-	}
-	
-	else {
-		int color[4];
-		
-		for(int i=0; i<3; i++) {
-			color[i] = GetEntData(target, offset+i, 1);
-		}
-		
-		if( color[0] >= 250 && color[1] >= 250 && color[2] >= 250 && last[client] != target ) {
-			rp_IncrementSuccess(client, success_list_carshop);
-		}
-		
-		last[client] = target;
-		
-		if( StrEqual(arg1, "red") ) {
-			color[0] += 64;
-			color[1] -= 64;
-			color[2] -= 64;
-		}
-		else if( StrEqual(arg1, "green") ) {
-			color[0] -= 64;
-			color[1] += 64;
-			color[2] -= 64;
-		}
-		else if( StrEqual(arg1, "bleue") ) {
-			color[0] -= 64;
-			color[1] -= 64;
-			color[2] += 64;
-		}
-		else if( StrEqual(arg1, "white") ) {
-			color[0] += 64;
-			color[1] += 64;
-			color[2] += 64;
-		}
-		else if( StrEqual(arg1, "black") ) {
-			color[0] -= 64;
-			color[1] -= 64;
-			color[2] -= 64;
-		}
-		
-		for(int i=0; i<3; i++) {
-			if( color[i] > 255 )
-				color[i] = 255;
-			if( color[i] < 0 )
-				color[i] = 0;
-		}
-		
-		SetEntityRenderMode(target, RENDER_TRANSCOLOR);
-		SetEntityRenderColor(target, color[0], color[1], color[2], color[3]);
 	}
 	
 	return Plugin_Handled;
@@ -603,7 +542,7 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 			if( !IsValidClient(client) )
 				continue;
 			
-			if( rp_GetClientVehiclePassager(client, ent) ) {
+			if( rp_GetClientVehiclePassager(client) == ent ) {
 				IsNear = true;
 				break;
 			}
@@ -719,7 +658,7 @@ public int AskToJoinCar_Menu(Handle p_hItemMenu, MenuAction p_oAction, int clien
 					return;
 				}
 				
-				rp_SetClientVehiclePassager(client, vehicle);
+				rp_SetClientVehiclePassager(request, vehicle);
 				ClientCommand(request, "firstperson");
 			}
 			else if( type == 2 ) {
@@ -739,13 +678,13 @@ public int AskToJoinCar_Menu(Handle p_hItemMenu, MenuAction p_oAction, int clien
 	}
 }
 
-int GetPassagerInVehicle(int vehicle) {
+int CountPassagerInVehicle(int vehicle) {
 	int cpt = 0;
 	
 	for (int i = 1; i <= MaxClients; i++) {
 		if( !IsValidClient(i) )
 			continue;
-		if (rp_GetClientVehiclePassager(i, vehicle) )
+		if ( rp_GetClientVehiclePassager(i) == vehicle )
 			cpt++;
 	}
 	return cpt;
