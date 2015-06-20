@@ -31,7 +31,7 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-int g_cExplode;
+int g_cBeam, g_cExplode;
 Handle g_hDrugTimer[65];
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
@@ -41,6 +41,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_plant",		Cmd_ItemPlant,			"RP-ITEM",	FCVAR_UNREGISTERED);
 }
 public void OnMapStart() {
+	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt");
 	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt");
 	PrecacheModel(MODEL_PLANT);
 }
@@ -63,8 +64,15 @@ public Action Cmd_ItemDrugs(int args) {
 	int client = GetCmdArgInt(2);
 	int item_id = GetCmdArgInt(args);
 	
-	if( StrEqual(arg0, "lsd2") ) {
+	if( StrEqual(arg0, "lsd2") || StrEqual(arg0, "pcp2") {
 		int target = GetClientTarget(client);
+	
+		if( rp_GetZoneBit( rp_GetPlayerZone(client) ) & BITZONE_PEACEFULL ) {
+			ITEM_CANCEL(client, item_id);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit où vous êtes.");
+			return Plugin_Handled;
+		}
+		
 		if( target == 0 || !IsValidEdict(target) || !IsValidEntity(target) || client == target ) {
 			ITEM_CANCEL(client, item_id);
 			return Plugin_Handled;
@@ -79,25 +87,23 @@ public Action Cmd_ItemDrugs(int args) {
 			return Plugin_Handled;
 		}
 		
-		rp_Effect_VisionTrouble(target);
-		client = target;
-	}
-	else if( StrEqual(arg0, "pcp2") ) {
-		int target = GetClientTarget(client);
-		if( target == 0 || !IsValidEdict(target) || !IsValidEntity(target) || client == target ) {
-			ITEM_CANCEL(client, item_id);
-			return Plugin_Handled;
-		}
-		if( !rp_IsEntitiesNear(client, target) ) {
-			ITEM_CANCEL(client, item_id);
-			return Plugin_Handled;
-		}
-		if( !rp_IsTutorialOver(target) ) {
-			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N n'a pas terminé le tutorial.", target);
-			return Plugin_Handled;
-		}
+		//Initialisation des positions pour le laser (cf. laser des chiru)
+		float pos1[3], pos2[3];
+		GetClientEyePosition(client, pos1);
+		GetClientEyePosition(vendeur, pos2);
+		pos1[2] -= 20.0; pos2[2] -= 20.0;
 		
-		rp_HookEvent(target, RP_PrePlayerPhysic, fwdPCP, DRUG_DURATION);
+		//Effets des drogues
+		if( StrEqual(arg0, "lsd2") rp_Effect_VisionTrouble(target);  //Si c'est de la LSD
+		else rp_HookEvent(target, RP_PrePlayerPhysic, fwdPCP, DRUG_DURATION); //Si c'est du PCP
+		
+		//Affichage du laser entre le client et la cible (cf. laser des chiru)
+	    TE_SetupBeamPoints(pos1, pos2, g_cBeam, 0, 0, 0, 0.5, 10.0, 10.0, 1, 0.5, {255, 155, 0, 250}, 0);
+	    TE_SendToAll(0.1);
+	    
+	    //Envoie de messages d'information
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez drogué %N.", target);
+		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été drogué.");
 		client = target;
 	}
 	else if( StrEqual(arg0, "crack2") ) {
