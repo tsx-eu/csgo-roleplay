@@ -100,8 +100,8 @@ public Action Cmd_ItemDrugs(int args) {
 		//Affichage du laser entre le client et la cible (cf. laser des chiru)
 		TE_SetupBeamPoints(pos1, pos2, g_cBeam, 0, 0, 0, 0.5, 10.0, 10.0, 1, 0.5, {255, 155, 0, 250}, 0);
 		TE_SendToAll(0.1);
-	    
-	    //Envoie de messages d'information
+		
+		//Envoie de messages d'information
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez drogué %N.", target);
 		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été drogué.");
 		client = target;
