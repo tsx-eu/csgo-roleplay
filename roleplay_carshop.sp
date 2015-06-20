@@ -20,6 +20,8 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
+#define MENU_TIME_DURATION 	30
+#define CONTACT_DIST		500
 
 public Plugin myinfo = {
 	name = "Jobs: CARSHOP", author = "KoSSoLaX",
@@ -29,6 +31,8 @@ public Plugin myinfo = {
 
 Handle g_hMAX_CAR;
 int g_cExplode, g_cBeam;
+int g_iBlockedTime[65][65];
+
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
 	RegServerCmd("rp_item_vehicle", 	Cmd_ItemVehicle,		"RP-ITEM",	FCVAR_UNREGISTERED);
@@ -48,6 +52,8 @@ public void OnMapStart() {
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);
+	for (int i = 1; i < 65; i++)
+		g_iBlockedTime[client][i] = 0;
 }
 public void OnClientDisconnect(int client) {
 	rp_UnhookEvent(client, RP_OnPlayerUse, fwdUse);
@@ -79,7 +85,11 @@ public Action fwdUse(int client) {
 		
 		int driver = GetEntPropEnt(target, Prop_Send, "m_hPlayer");
 		if( driver > 0 ) {
-			// TODO:
+			
+			if( rp_GetVehicleInt(target, car_owner) == client && driver != client ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez éjecter le conducteur avec la commande /out");
+			}
+			AskToJoinCar(client, target);			
 		}
 		else {
 			rp_SetClientVehicle(client, target, true);
@@ -98,6 +108,7 @@ public Action Cmd_ItemVehicle(int args) {
 	int skinid = GetCmdArgInt(2);
 	int client = GetCmdArgInt(3);
 	int item_id = GetCmdArgInt(args);
+	int max = 2;
 	
 	if( rp_GetZoneBit( rp_GetPlayerZone(client) ) & BITZONE_PEACEFULL ) {
 		ITEM_CANCEL(client, item_id);
@@ -112,6 +123,10 @@ public Action Cmd_ItemVehicle(int args) {
 			return;
 		}
 	}
+	if( StrContains(arg1, "hummer") != -1 )
+		max = 4;
+	if( StrContains(arg1, "crownvic") != -1 )
+		max = 4;
 	
 	int count = 0;
 	for(int i=1; i<=2048; i++) {
@@ -144,6 +159,7 @@ public Action Cmd_ItemVehicle(int args) {
 	
 	rp_SetVehicleInt(car, car_owner, client);
 	rp_SetVehicleInt(car, car_item_id, item_id);
+	rp_SetVehicleInt(car, car_maxPassager, max);
 	rp_SetClientKeyVehicle(client, car, true);
 	
 	CreateTimer(3.5, Timer_VehicleRemoveCheck, car);
@@ -633,16 +649,104 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 	CreateTimer(1.1, Timer_VehicleRemoveCheck, ent);
 	return Plugin_Continue;
 }
+
 // ----------------------------------------------------------------------------
-void MatriceRotation(float origin[3], float angles[3], float vecteur[3]) {
+void AskToJoinCar(int client, int vehicle) {
+	#if defined DEBUG
+	PrintToServer("AskToJoinCar");
+	#endif
 	
+	if( rp_GetVehicleInt(vehicle, car_maxPassager) <= GetPassagerInVehicle(vehicle) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a plus de place dans cette voiture.");
+		return;
+	}
 	
-	float radX =  DegToRad(angles[2]); // X
-	float radY = DegToRad(angles[0]); // Z
-	float radZ = DegToRad(angles[1]); // Y
+	int driver = GetEntPropEnt(vehicle, Prop_Send, "m_hPlayer");
+	if( g_iBlockedTime[driver][client] != 0 ) {
+		if( (g_iBlockedTime[driver][client]+(6*60)) >= GetTime() ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce conducteur ne vous repondera pas.");
+			return;
+		}
+	}
+	char tmp[255];	
+	Handle menu = CreateMenu(AskToJoinCar_Menu);
 	
-	origin[0] = (Cosine(radY) * Cosine(radZ) * vecteur[0]) + (Cosine(radY) * -Sine(radZ) * vecteur[1]) + (-Sine(radY) * vecteur[2]) + (origin[0]);
-	origin[1] = ((-Sine(radX) * Sine(radY) * Cosine(radZ)) + (Cosine(radX) * Sine(radZ)) * vecteur[0]) + ((-Sine(radX) * Sine(radY) * -Sine(radZ)) + (Cosine(radX) * Cosine(radZ)) * vecteur[1]) + (-Sine(radX) * Cosine(radY) * vecteur[2]) + origin[1];
-	origin[2] = ((Cosine(radX) * Sine(radY) * Cosine(radZ)) + (Sine(radX) * Sine(radZ)) * vecteur[0]) + ((Cosine(radX) * Sine(radY) * -Sine(radZ)) + (Sine(radX) * Cosine(radZ)) * vecteur[1]) + (Cosine(radX) * Cosine(radY) * vecteur[2]) + origin[2];
+	Format(tmp, sizeof(tmp), "%N souhaite entrer dans votre voiture.\n L'acceptez-vous?", client);
+	SetMenuTitle(menu, tmp);
+	
+	Format(tmp, sizeof(tmp), "%i_%i_1", client, vehicle);	AddMenuItem(menu, tmp, "J'accepte");
+	Format(tmp, sizeof(tmp), "%i_%i_2", client, vehicle);	AddMenuItem(menu, tmp, "Je refuse");
+	AddMenuItem(menu, "vide", "-----------------", ITEMDRAW_DISABLED);
+	Format(tmp, sizeof(tmp), "%i_%i_3", client, vehicle);	AddMenuItem(menu, tmp, "Ignorer ce joueur");
+	
+	SetMenuExitButton(menu, true);
+	DisplayMenu(menu, driver, MENU_TIME_DURATION);
 }
-// ----------------------------------------------------------------------------
+public int AskToJoinCar_Menu(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
+	#if defined DEBUG
+	PrintToServer("AskToJoinCar_Menu");
+	#endif
+	if (p_oAction == MenuAction_Select) {
+		char szMenuItem[32];
+		
+		if (GetMenuItem(p_hItemMenu, p_iParam2, szMenuItem, sizeof(szMenuItem))) {
+			
+			char data[3][32];
+			ExplodeString(szMenuItem, "_", data, sizeof(data), sizeof(data[]));
+			
+			int request = StringToInt(data[0]);
+			int vehicle = StringToInt(data[1]);
+			int type = StringToInt(data[2]);
+			
+			if( type == 1 ) {
+				if( rp_GetVehicleInt(vehicle, car_maxPassager) <= GetPassagerInVehicle(vehicle) ) {
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a plus de place dans cette voiture.");
+					CPrintToChat(request, "{lightblue}[TSX-RP]{default} Il n'y a plus de place dans cette voiture.");
+					
+					return;
+				}
+				if( !IsPlayerAlive(request) ) {
+					CPrintToChat(request, "{lightblue}[TSX-RP]{default} Vous êtes mort.");
+					return;
+				}
+				if( Vehicle_GetDriver(vehicle) != client  ) {
+					CPrintToChat(request, "{lightblue}[TSX-RP]{default} Le conducteur n'est plus dans sa voiture.");
+					return;
+				}
+				
+				if( Entity_GetDistance(request, vehicle) >= (CONTACT_DIST) ) {
+					CPrintToChat(request, "{lightblue}[TSX-RP]{default} La voiture est trop éloignée.");
+					return;
+				}
+				
+				rp_SetClientVehiclePassager(client, vehicle);
+				ClientCommand(request, "firstperson");
+			}
+			else if( type == 2 ) {
+				CPrintToChat(request, "{lightblue}[TSX-RP]{default} Le conducteur a refusé votre demande.");
+				return;
+			}
+			else if( type == 3 ) {
+				g_iBlockedTime[client][request] = GetTime();
+				CPrintToChat(request, "{lightblue}[TSX-RP]{default} Le conducteur a refusé, et vous ignorera.");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ignorerez les demandes de %N pour 6 heures", request);
+				return;
+			}
+		}
+	}
+	else if (p_oAction == MenuAction_End) {
+		CloseHandle(p_hItemMenu);
+	}
+}
+
+int GetPassagerInVehicle(int vehicle) {
+	int cpt = 0;
+	
+	for (int i = 1; i <= MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		if (rp_GetClientVehiclePassager(i, vehicle) )
+			cpt++;
+	}
+	return cpt;
+}

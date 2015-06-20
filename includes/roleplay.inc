@@ -75,6 +75,7 @@ native void rp_SetClientKeyVehicle(int client, int vehicleID, bool status=false)
 native bool rp_GetClientKeyVehicle(int client, int vehicleID);
 native void rp_ClientVehicleExit(int client, int vehicleID, bool forced=false);
 native bool rp_GetClientVehiclePassager(int client, int vehicleID);
+native void rp_SetClientVehiclePassager(int client, int vehicleID);
 native void rp_SetVehicleInt(int vehicleID, car_data typeID, int value);
 native int rp_GetVehicleInt(int vehicleID, car_data typeID);
 native void rp_SetClientVehicle(int client, int vehicleID, bool force=false);
