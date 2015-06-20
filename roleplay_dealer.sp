@@ -64,7 +64,7 @@ public Action Cmd_ItemDrugs(int args) {
 	int client = GetCmdArgInt(2);
 	int item_id = GetCmdArgInt(args);
 	
-	if( StrEqual(arg0, "lsd2") || StrEqual(arg0, "pcp2") {
+	if( StrEqual(arg0, "lsd2") || StrEqual(arg0, "pcp2") ){
 		int target = GetClientTarget(client);
 	
 		if( rp_GetZoneBit( rp_GetPlayerZone(client) ) & BITZONE_PEACEFULL ) {
@@ -90,11 +90,11 @@ public Action Cmd_ItemDrugs(int args) {
 		//Initialisation des positions pour le laser (cf. laser des chiru)
 		float pos1[3], pos2[3];
 		GetClientEyePosition(client, pos1);
-		GetClientEyePosition(vendeur, pos2);
+		GetClientEyePosition(target, pos2);
 		pos1[2] -= 20.0; pos2[2] -= 20.0;
 		
 		//Effets des drogues
-		if( StrEqual(arg0, "lsd2") rp_Effect_VisionTrouble(target);  //Si c'est de la LSD
+		if( StrEqual(arg0, "lsd2")) rp_Effect_VisionTrouble(target);  //Si c'est de la LSD
 		else rp_HookEvent(target, RP_PrePlayerPhysic, fwdPCP, DRUG_DURATION); //Si c'est du PCP
 		
 		//Affichage du laser entre le client et la cible (cf. laser des chiru)
