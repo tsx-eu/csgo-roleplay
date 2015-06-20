@@ -84,7 +84,7 @@ public Action fwdUse(int client) {
 			rp_ClientVehicleExit(client, vehicle);
 	}
 	else if( passager > 0 ) {
-		LeaveVehiclePassager(client, passager);
+		rp_ClientVehiclePassagerExit(client, passager);
 	}
 	else if( rp_IsValidVehicle(target) && rp_IsEntitiesNear(client, target, true) ) {
 		
@@ -184,9 +184,7 @@ public Action Cmd_ItemVehicleStuff(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemVehicleStuff");
 	#endif
-	static int offset = -1;
-	static int last[65];
-	
+	static int offset = -1;	
 	
 	char arg1[12];
 	GetCmdArg(1, arg1, sizeof(arg1));
@@ -595,7 +593,7 @@ void AskToJoinCar(int client, int vehicle) {
 	PrintToServer("AskToJoinCar");
 	#endif
 	
-	if( rp_GetVehicleInt(vehicle, car_maxPassager) <= GetPassagerInVehicle(vehicle) ) {
+	if( rp_GetVehicleInt(vehicle, car_maxPassager) <= CountPassagerInVehicle(vehicle) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a plus de place dans cette voiture.");
 		return;
 	}
@@ -638,7 +636,7 @@ public int AskToJoinCar_Menu(Handle p_hItemMenu, MenuAction p_oAction, int clien
 			int type = StringToInt(data[2]);
 			
 			if( type == 1 ) {
-				if( rp_GetVehicleInt(vehicle, car_maxPassager) <= GetPassagerInVehicle(vehicle) ) {
+				if( rp_GetVehicleInt(vehicle, car_maxPassager) <= CountPassagerInVehicle(vehicle) ) {
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a plus de place dans cette voiture.");
 					CPrintToChat(request, "{lightblue}[TSX-RP]{default} Il n'y a plus de place dans cette voiture.");
 					
