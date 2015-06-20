@@ -163,7 +163,7 @@ public Action Cmd_ItemDrugs(int args) {
 	}
 	
 	rp_SetClientBool(client, b_Drugged, true);
-	g_hDrugTimer[client] = CreateTimer( 0.001, ItemDrugStop, client);
+	g_hDrugTimer[client] = CreateTimer( DRUG_DURATION, ItemDrugStop, client);
 	
 	return Plugin_Handled;
 }
