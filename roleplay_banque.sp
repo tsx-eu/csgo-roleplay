@@ -37,6 +37,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_forward",		Cmd_ItemForward,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_noAction",	Cmd_ItemNoAction,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_cheque",		Cmd_ItemCheque,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_packdebutant",Cmd_ItemPackDebutant, 	"RP-ITEM", 	FCVAR_UNREGISTERED);
 }
 // ----------------------------------------------------------------------------
 
@@ -57,7 +58,7 @@ public Action Cmd_ItemBankKey(int args) {
 	
 	int client = GetCmdArgInt(1);
 	rp_SetClientBool(client, b_HaveAccount, true);
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre compte bancaire est maintenant active.");
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre compte banquaire est maintenant actif.");
 }
 public Action Cmd_ItemBankSwap(int args) {
 	#if defined DEBUG
@@ -67,7 +68,7 @@ public Action Cmd_ItemBankSwap(int args) {
 	
 	int client = GetCmdArgInt(1);
 	rp_SetClientBool(client, b_PayToBank, true);
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous recevrez maintenent votre paye en banque.");
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous recevrez maintenant votre paye en banque.");
 }
 
 public Action Cmd_ItemAssurance(int args) {
@@ -289,4 +290,16 @@ public Action Cmd_ItemForward(int args) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %d %s ont été transférés en banque.", mnt+1, tmp);
 	
 	return;
+}
+public Action Cmd_ItemPackDebutant(int args) { //Permet d'avoir la CB, le compte & le RIB
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemPackDebutant");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+	rp_SetClientBool(client, b_HaveCard, true);
+	rp_SetClientBool(client, b_PayToBank, true);
+	rp_SetClientBool(client, b_HaveAccount, true);
+	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre carte banquaire, votre compte banquaire et votre RIB sont maintenant actifs.");
 }
