@@ -52,7 +52,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_fullheal",	Cmd_ItemFullHeal,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_respawn",		Cmd_ItemRespawn,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_sick",		Cmd_ItemSick,			"RP-ITEM",	FCVAR_UNREGISTERED);
-	RegServerCmd("rp_item_curedesintox",Cmd_ItemCureDesintox,	"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_curedesintox",	Cmd_ItemCureDesintox,	"RP-ITEM",	FCVAR_UNREGISTERED);
 	
 	RegServerCmd("rp_item_healbox",		Cmd_ItemHealBox,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 }
