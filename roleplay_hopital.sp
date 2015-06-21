@@ -52,6 +52,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_fullheal",	Cmd_ItemFullHeal,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_respawn",		Cmd_ItemRespawn,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_sick",		Cmd_ItemSick,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_curedesintox",Cmd_ItemCureDesintox,	"RP-ITEM",	FCVAR_UNREGISTERED);
 	
 	RegServerCmd("rp_item_healbox",		Cmd_ItemHealBox,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 }
@@ -372,6 +373,22 @@ public Action Cmd_ItemRespawn(int args) {
 	TeleportEntity(client, vecOrigin, NULL_VECTOR, NULL_VECTOR);
 	
 	return Plugin_Handled;
+}
+public Action Cmd_ItemCureDesintox(int args) { //Permet de devenir sobre si on est saoul
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemCureDesintox");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+
+	if( rp_GetClientFloat(client, fl_Alcool) ) { //Si le taux d'alcool n'est pas nul
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes maintenant sobre.");
+		rp_SetClientFloat(client, fl_Alcool, 0.0);
+	}
+	else {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes pas saoul.");
+		ITEM_CANCEL(client, GetCmdArgInt(args));
+	}
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemAdrenaline(int args) {
