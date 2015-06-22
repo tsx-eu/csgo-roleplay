@@ -14,7 +14,7 @@
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
 
-#define __LAST_REV__ 		"v:0.1.0"
+#define __LAST_REV__ 		"v:0.1.1"
 
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
@@ -226,7 +226,7 @@ public Action Cmd_ItemVehicleStuff(int args) {
 		for(int i=1; i<=MaxClients; i++) {
 			if( !IsValidClient(i) )
 				continue;
-			if( rp_GetClientVehiclePassager(i) == target )
+			if( rp_GetClientVehiclePassager(i) != target )
 				continue;
 			if( rp_GetClientKeyVehicle(i, target) )
 				continue;

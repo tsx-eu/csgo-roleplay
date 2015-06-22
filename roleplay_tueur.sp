@@ -16,7 +16,7 @@
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
 
-#define __LAST_REV__ 		"v:0.1.0"
+#define __LAST_REV__ 		"v:0.2.0"
 
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
@@ -27,7 +27,8 @@
 // TODO: Si un tueur change de job pendant contrat
 // TODO: Annuler contrat quand capture activé
 // TODO: Trouver astuce pour bypass menu vente et définir les types de contrat ici.
-
+// TODO: Utiliser une CVAR pour la gestion des portes
+// TODO: Afficher appartement dans enquête
 
 public Plugin myinfo = {
 	name = "Jobs: Mercenaire", author = "KoSSoLaX",
@@ -57,6 +58,10 @@ int g_iKillerPoint_stored[65][competance_max];
 public void OnPluginStart() {
 	RegServerCmd("rp_item_contrat",		Cmd_ItemContrat,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_conprotect",	Cmd_ItemConProtect,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_enquete_menu",Cmd_ItemEnqueteMenu,	"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_enquete",		Cmd_ItemEnquete,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_camera",		Cmd_ItemCamera,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_cryptage",	Cmd_ItemCryptage,		"RP-ITEM",	FCVAR_UNREGISTERED);
 }
 // ----------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
@@ -687,3 +692,237 @@ public Action FreeKidnapping(Handle timer, any client) {
 	
 	rp_SetClientInt(client, i_KidnappedBy, 0);
 }
+
+// ----------------------------------------------------------------------------
+
+public Action Cmd_ItemEnqueteMenu(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemEnqueteMenu");
+	#endif
+	char arg1[12];
+	GetCmdArg(1, arg1, 11);
+	
+	int client = StringToInt(arg1);
+	
+	Handle menu = CreateMenu(Cmd_ItemEnqueteMenu_2);
+	SetMenuTitle(menu, "Sélectionner sur qui récupérer des informations:");
+	
+	char name[128], tmp[64];
+	GetClientName(client, name, 127);
+	Format(tmp, 64, "%i", client);
+	
+	AddMenuItem(menu, tmp, name);
+	
+	for(int i = 1; i <= MaxClients; i++) {
+		
+		if( !IsValidClient(i) )
+			continue;
+		if( !IsClientConnected(i) )
+			continue;
+		if( i == client )
+			continue;
+		
+		GetClientName(i, name, 127);
+		Format(tmp, 64, "%i", i);
+		
+		AddMenuItem(menu, tmp, name);		
+	}
+	
+	SetMenuExitButton(menu, true);
+	DisplayMenu(menu, client, MENU_TIME_DURATION);
+}
+public Action Cmd_ItemCryptage(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemCryptage");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+	int level = rp_GetClientInt(client, i_Cryptage) + 1;
+	
+	if( level > 5 )
+		level = 5;
+		
+	rp_SetClientInt(client, i_Cryptage, level);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Les détectives vous couvre, vous avez %i de chance d'être caché", level*20);
+}
+public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
+	#if defined DEBUG
+	PrintToServer("MenuNothing");
+	#endif
+	
+	if( action == MenuAction_Select ) {
+		if( menu != INVALID_HANDLE )
+			CloseHandle(menu);
+	}
+	else if( action == MenuAction_End ) {
+		if( menu != INVALID_HANDLE )
+			CloseHandle(menu);
+	}
+}
+void AddMenu_Blank(int client, Handle menu, const char[] myString , any ...) {
+	#if defined DEBUG
+	PrintToServer("AddMenu_Blank");
+	#endif
+	char[] str = new char[ strlen(myString)+255 ];
+	VFormat(str, (strlen(myString)+255), myString, 3);
+	
+	AddMenuItem(menu, "none", str, ITEMDRAW_DISABLED);
+	PrintToConsole(client, str);
+}
+public Action Cmd_ItemEnquete(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemEnquete");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+	int target = GetCmdArgInt(2);
+	char tmp[255];
+	
+	
+	rp_IncrementSuccess(client, success_list_detective);
+	
+	// Setup menu
+	Handle menu = CreateMenu(MenuNothing);
+	SetMenuTitle(menu, "Information sur %N:", target);
+	
+	PrintToConsole(client, "\n\n\n\n\n -------------------------------------------------------------------------------------------- ");
+	
+	rp_GetZoneData(rp_GetPlayerZone(target), zone_type_name, tmp, sizeof(tmp));
+	
+	AddMenu_Blank(client, menu, "Localisation: %s", tmp);	
+	
+	int killedBy = rp_GetClientInt(target, i_LastKilled_Reverse);
+	if( IsValidClient(killedBy) ) {
+		if( Math_GetRandomInt(1, 100) < rp_GetClientInt(target, i_Cryptage)*20 ) {
+			
+			String_GetRandom(tmp, sizeof(tmp), 24);
+			
+			AddMenu_Blank(client, menu, "Il a tué: %s", tmp);
+			CPrintToChat(killedBy, "{lightblue}[TSX-RP]{default} Votre pot de vin envers un détective privé vient de vous sauver.");
+		}
+		else {	
+			AddMenu_Blank(client, menu, "Il a tué: %s", killedBy);	
+		}
+	}
+	
+	if( rp_GetClientInt(target, i_KillingSpread) > 0 )
+		AddMenu_Blank(client, menu, "Meurtre consécutif: %i", rp_GetClientInt(target, i_KillingSpread) );
+	
+	int killed = rp_GetClientInt(target, i_LastKilled);
+	if( IsValidClient(killed) ) {
+		
+		if( Math_GetRandomInt(1, 100) < rp_GetClientInt(killed, i_Cryptage)*20 ) {	
+			
+			String_GetRandom(tmp, sizeof(tmp), 24);
+			
+			AddMenu_Blank(client, menu, "%s, l'a tué", tmp);
+			CPrintToChat(killedBy, "{lightblue}[TSX-RP]{default} Votre pot de vin envers un détective privé vient de vous sauver.");
+		}
+		else {
+			AddMenu_Blank(client, menu, "%N, l'a tué", killed);
+		}
+	}
+	
+	if( IsValidClient(rp_GetClientInt(target, i_LastVol)) ) 
+		AddMenu_Blank(client, menu, "%N, l'a volé", rp_GetClientInt(target, i_LastVol) );
+	
+	AddMenu_Blank(client, menu, "--------------------------------");
+	
+	AddMenu_Blank(client, menu, "Niveau d'entraînement: %i", rp_GetClientInt(target, i_KnifeTrain));
+	AddMenu_Blank(client, menu, "Précision de tir: %.2f", rp_GetClientFloat(target, fl_WeaponTrain));
+	
+	int count=0;
+	Format(tmp, sizeof(tmp), "Permis possédé:");
+	
+	if( rp_GetClientBool(target, b_License1) ) {	Format(tmp, sizeof(tmp), "%s léger", tmp);	count++;	}
+	if( rp_GetClientBool(target, b_License2) ) {	Format(tmp, sizeof(tmp), "%s lourd", tmp);	count++;	}
+	if( rp_GetClientBool(target, b_LicenseSell) ) {	Format(tmp, sizeof(tmp), "%s vente", tmp);	count++;	}
+	
+	if( count == 0 ) {
+		Format(tmp, sizeof(tmp), "%s Aucun", tmp);
+	}
+	AddMenu_Blank(client, menu, "%s.", tmp);
+	
+	AddMenu_Blank(client, menu, "Argent: %i$ - Banque: %i$", rp_GetClientInt(target, i_Money), rp_GetClientInt(target, i_Bank));
+	
+	// TODO:
+	/* Format(tmp, sizeof(tmp), "Appartement possédé: ");
+	count = 0;
+	for(int a=0; a<MAX_KEYSELL; a++) {
+		if( g_iDoorOwner_v2[target][a] ) {
+			count++;
+			Format(tmp, sizeof(tmp), "%s %s", tmp, g_szSellingKeys[a][key_type_name]);
+		}
+	}
+	if( count == 0 ) {
+		Format(tmp, sizeof(tmp), "%s Aucun", tmp);
+	}
+	PrintToConsole(client, tmp);
+	AddMenu_Blank(menu, "%s.", tmp);*/
+	
+	
+	AddMenu_Blank(client, menu, "Taux d'alcoolémie: %.3f", rp_GetClientFloat(client, fl_Alcool));
+	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ces informations ont été envoyées dans votre console.");
+	
+	SetMenuExitButton(menu, true);
+	DisplayMenu(menu, client, MENU_TIME_DURATION);
+}
+
+public Action Cmd_ItemCamera(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemCamera");
+	#endif
+	char arg1[12];
+	GetCmdArg(1, arg1, 11);
+	
+	int client = StringToInt(arg1);
+	int target = GetClientAimTarget(client, false);
+	
+
+	int item_id = GetCmdArgInt(args);
+	
+	if( !IsValidClient(target) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez vous raprocher pour lui coller une caméra.");
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
+	
+	
+	if( rp_GetClientInt(client, i_Camera) > 0 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible de mettre une caméra sur ce joueur pour le moment.");
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
+	
+	rp_SetClientInt(client, i_Camera, target);
+	
+	SetEntPropEnt(client, Prop_Send, "m_hViewEntity", target);
+	SetEntProp(client, Prop_Send, "m_bShouldDrawPlayerWhileUsingViewEntity", 1);
+	SetEntProp(client, Prop_Send, "m_iDefaultFOV", 130);
+	
+	if( rp_GetClientInt(client, i_ThirdPerson) == 1 ) {
+		ClientCommand(client, "firstperson");
+	}
+	return Plugin_Handled;
+}
+
+public int Cmd_ItemEnqueteMenu_2(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemEnqueteMenu_2");
+	#endif
+	if (p_oAction == MenuAction_Select) {
+		
+		char szMenuItem[64];
+		if( GetMenuItem(p_hItemMenu, p_iParam2, szMenuItem, sizeof(szMenuItem)) ) {
+			
+			int target = StringToInt(szMenuItem);
+			ServerCommand("rp_item_enquete \"%i\" \"%i\"", client, target);
+		}		
+	}
+	else if (p_oAction == MenuAction_End) {
+		CloseHandle(p_hItemMenu);
+	}
+}
+
+

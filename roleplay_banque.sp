@@ -38,9 +38,35 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_noAction",	Cmd_ItemNoAction,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_cheque",		Cmd_ItemCheque,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_packdebutant",Cmd_ItemPackDebutant, 	"RP-ITEM", 	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_permi",		Cmd_ItemPermi,			"RP-ITEM",	FCVAR_UNREGISTERED);
 }
 // ----------------------------------------------------------------------------
 
+public Action Cmd_ItemPermi(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemPermi");
+	#endif
+	
+	char Arg1[12];
+	GetCmdArg(1, Arg1, 11);
+	
+	int client = GetCmdArgInt(2);
+	
+	if( StrEqual(Arg1, "lege") ) {
+		rp_SetClientBool(client, b_License1, true);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez maintenant le permis de port d'arme légère.");
+	}
+	else if( StrEqual(Arg1, "lourd") ) {
+		rp_SetClientBool(client, b_License2, true);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez maintenant le permis de port d'arme lourde.");
+	}
+	else if( StrEqual(Arg1, "vente") ) {
+		rp_SetClientBool(client, b_LicenseSell, true);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez maintenant le permis de vente.");
+	}
+	
+	rp_ClientSave(client);
+}
 public Action Cmd_ItemBankCard(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemBankCard");
@@ -50,6 +76,7 @@ public Action Cmd_ItemBankCard(int args) {
 	rp_SetClientBool(client, b_HaveCard, true);
 	
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre carte banquaire est maintenant active.");
+	rp_ClientSave(client);
 }
 public Action Cmd_ItemBankKey(int args) {
 	#if defined DEBUG
@@ -59,6 +86,7 @@ public Action Cmd_ItemBankKey(int args) {
 	int client = GetCmdArgInt(1);
 	rp_SetClientBool(client, b_HaveAccount, true);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre compte banquaire est maintenant actif.");
+	rp_ClientSave(client);
 }
 public Action Cmd_ItemBankSwap(int args) {
 	#if defined DEBUG
@@ -69,6 +97,7 @@ public Action Cmd_ItemBankSwap(int args) {
 	int client = GetCmdArgInt(1);
 	rp_SetClientBool(client, b_PayToBank, true);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous recevrez maintenant votre paye en banque.");
+	rp_ClientSave(client);
 }
 
 public Action Cmd_ItemAssurance(int args) {
@@ -85,6 +114,8 @@ public Action Cmd_ItemAssurance(int args) {
 	
 	rp_SetClientBool(client, b_Assurance, true);
 	FakeClientCommand(client, "say /assu");
+	
+	rp_ClientSave(client);
 	
 	return Plugin_Handled;
 }
@@ -302,4 +333,6 @@ public Action Cmd_ItemPackDebutant(int args) { //Permet d'avoir la CB, le compte
 	rp_SetClientBool(client, b_HaveAccount, true);
 	
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre carte banquaire, votre compte banquaire et votre RIB sont maintenant actifs.");
+	
+	rp_ClientSave(client);
 }
