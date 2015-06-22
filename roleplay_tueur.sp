@@ -40,6 +40,8 @@ enum competance {
 	competance_cut,
 	competance_tir,
 	competance_usp,
+	competance_awp,
+	competance_pompe,
 	competance_invis,
 	competance_hp,
 	competance_vitesse,
@@ -211,7 +213,7 @@ public Action fwdTueurDead(int client, int attacker, float& respawn) {
 }
 public Action OnWeaponDrop(int client, int weapon) {
 	
-	if( rp_GetClientJobID(client) == 41 && g_iKillerPoint[client][competance_usp] ) {
+	if( rp_GetClientJobID(client) == 41 && (g_iKillerPoint[client][competance_usp] || g_iKillerPoint[client][competance_awp] || g_iKillerPoint[client][competance_pompe]) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas lâcher vos armes en contrat.");
 		return Plugin_Handled;
 	}
@@ -301,8 +303,14 @@ void OpenSelectSkill(int client) {
 	if( !g_iKillerPoint[client][competance_tir] ) {
 		AddMenuItem(menu, "tir", "Precision Maximum");
 	}
-	if( !g_iKillerPoint[client][competance_usp] ) {
-		AddMenuItem(menu, "usp", "Armes");
+	if( !g_iKillerPoint[client][competance_usp] && ( !g_iKillerPoint[client][competance_awp] || !g_iKillerPoint[client][competance_pompe] )) { //On ne peut pas selectionner une arme si on en déjà choisi une auparavant
+		AddMenuItem(menu, "usp", "M4 / Usp");
+	}
+	if( !g_iKillerPoint[client][competance_awp] && ( !g_iKillerPoint[client][competance_usp] || !g_iKillerPoint[client][competance_pompe] )) {
+		AddMenuItem(menu, "awp", "AWP / Tec9");
+	}
+	if( !g_iKillerPoint[client][competance_pompe] && ( !g_iKillerPoint[client][competance_awp] || !g_iKillerPoint[client][competance_usp] )) {
+		AddMenuItem(menu, "pompe", "Nova / Deagle");
 	}
 	if( !g_iKillerPoint[client][competance_invis] ) {
 		AddMenuItem(menu, "inv", "Invisibilité");
@@ -343,9 +351,8 @@ public int AddCompetanceToAssassin(Handle menu, MenuAction action, int client, i
 			g_iKillerPoint_stored[client][competance_tir] = RoundToCeil( rp_GetClientFloat(client, fl_WeaponTrain) );
 			rp_SetClientFloat(client, fl_WeaponTrain, 10.0);
 		}
-		else if( StrEqual(options, "usp", false) ) {
-			g_iKillerPoint[client][competance_usp] = 1;
-			
+		else if( StrEqual(options, "usp", false) || StrEqual(options, "awp", false) || StrEqual(options, "pompe", false) ) {
+
 			int wepIdx;
 			
 			for( int i = 0; i < 5; i++ ){
@@ -357,11 +364,30 @@ public int AddCompetanceToAssassin(Handle menu, MenuAction action, int client, i
 					RemoveEdict( wepIdx );
 				}
 			}
-			
-			int skin = GivePlayerItem(client, "weapon_usp_silencer");
-			rp_SetClientWeaponSkin(client, skin);
-			skin = GivePlayerItem(client, "weapon_m4a1_silencer");
-			rp_SetClientWeaponSkin(client, skin);
+			if( StrEqual(options, "usp", false) ){
+				g_iKillerPoint[client][competance_usp] = 1;
+				
+				int skin = GivePlayerItem(client, "weapon_usp_silencer");
+				rp_SetClientWeaponSkin(client, skin);
+				skin = GivePlayerItem(client, "weapon_m4a1_silencer");
+				rp_SetClientWeaponSkin(client, skin);
+			}
+			else if( StrEqual(options, "awp", false) ){
+				g_iKillerPoint[client][competance_awp] = 1;
+				
+				int skin = GivePlayerItem(client, "weapon_deagle");
+				rp_SetClientWeaponSkin(client, skin);
+				skin = GivePlayerItem(client, "weapon_awp");
+				rp_SetClientWeaponSkin(client, skin);
+			}
+			else if( StrEqual(options, "pompe", false) ){
+				g_iKillerPoint[client][competance_pompe] = 1;
+				
+				int skin = GivePlayerItem(client, "weapon_tec9");
+				rp_SetClientWeaponSkin(client, skin);
+				skin = GivePlayerItem(client, "weapon_nova");
+				rp_SetClientWeaponSkin(client, skin);
+			}
 		}
 		else if( StrEqual(options, "inv", false) ) {
 			g_iKillerPoint[client][competance_invis] = 1;
@@ -404,9 +430,8 @@ void RestoreAssassinNormal(int client) {
 		SetEntPropFloat(client, Prop_Send, "m_fadeMinDist", 0.0);
 		SetEntPropFloat(client, Prop_Send, "m_fadeMaxDist", -1.0);
 	}
-	if( g_iKillerPoint[client][competance_usp] ) {
+	if( g_iKillerPoint[client][competance_usp] || g_iKillerPoint[client][competance_awp] || g_iKillerPoint[client][competance_pompe] ) {
 		
-		g_iKillerPoint[client][competance_usp] = 0;
 		int wepIdx;
 		
 		for( int i = 0; i < 5; i++ ){
@@ -428,6 +453,8 @@ void RestoreAssassinNormal(int client) {
 	g_iKillerPoint[client][competance_cut] = 0;
 	g_iKillerPoint[client][competance_tir] = 0;
 	g_iKillerPoint[client][competance_usp] = 0;
+	g_iKillerPoint[client][competance_awp] = 0;
+	g_iKillerPoint[client][competance_pompe] = 0;
 	g_iKillerPoint[client][competance_invis] = 0;
 	g_iKillerPoint[client][competance_hp] = 0;
 	g_iKillerPoint[client][competance_vitesse] = 0;
