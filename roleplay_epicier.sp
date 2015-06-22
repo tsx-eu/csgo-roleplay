@@ -43,7 +43,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_ruban",		Cmd_ItemRuban,			"RP-ITEM",	FCVAR_UNREGISTERED);
 }
 public void OnMapStart() {
-	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt");
+	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemCigarette(int args) {

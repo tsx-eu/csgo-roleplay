@@ -47,8 +47,8 @@ public void OnPluginStart() {
 	}
 }
 public void OnMapStart() {
-	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt");
-	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt");
+	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt", true);
+	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);

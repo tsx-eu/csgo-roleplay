@@ -53,11 +53,11 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_morecash",	Cmd_ItemMoreCash,		"RP-ITEM",	FCVAR_UNREGISTERED);
 }
 public void OnMapStart() {
-	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt");
-	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt");
-	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt");
+	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
+	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt", true);
+	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt", true);
 	
-	PrecacheModel(MODEL_CASH);
+	PrecacheModel(MODEL_CASH, true);
 }
 // ------------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {

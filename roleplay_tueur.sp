@@ -692,9 +692,59 @@ public Action FreeKidnapping(Handle timer, any client) {
 	
 	rp_SetClientInt(client, i_KidnappedBy, 0);
 }
-
 // ----------------------------------------------------------------------------
+public Action Cmd_ItemCamera(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemCamera");
+	#endif
+	char arg1[12];
+	GetCmdArg(1, arg1, 11);
+	
+	int client = StringToInt(arg1);
+	int target = GetClientAimTarget(client, false);
+	
 
+	int item_id = GetCmdArgInt(args);
+	
+	if( !IsValidClient(target) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez vous raprocher pour lui coller une caméra.");
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
+	
+	
+	if( rp_GetClientInt(client, i_Camera) > 0 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible de mettre une caméra sur ce joueur pour le moment.");
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
+	
+	rp_SetClientInt(client, i_Camera, target);
+	
+	SetEntPropEnt(client, Prop_Send, "m_hViewEntity", target);
+	SetEntProp(client, Prop_Send, "m_bShouldDrawPlayerWhileUsingViewEntity", 1);
+	SetEntProp(client, Prop_Send, "m_iDefaultFOV", 130);
+	
+	if( rp_GetClientInt(client, i_ThirdPerson) == 1 ) {
+		ClientCommand(client, "firstperson");
+	}
+	return Plugin_Handled;
+}
+public Action Cmd_ItemCryptage(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemCryptage");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+	int level = rp_GetClientInt(client, i_Cryptage) + 1;
+	
+	if( level > 5 )
+		level = 5;
+		
+	rp_SetClientInt(client, i_Cryptage, level);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Les détectives vous couvre, vous avez %i de chance d'être caché", level*20);
+}
+// ----------------------------------------------------------------------------
 public Action Cmd_ItemEnqueteMenu(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemEnqueteMenu");
@@ -731,43 +781,22 @@ public Action Cmd_ItemEnqueteMenu(int args) {
 	SetMenuExitButton(menu, true);
 	DisplayMenu(menu, client, MENU_TIME_DURATION);
 }
-public Action Cmd_ItemCryptage(int args) {
+public int Cmd_ItemEnqueteMenu_2(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
 	#if defined DEBUG
-	PrintToServer("Cmd_ItemCryptage");
+	PrintToServer("Cmd_ItemEnqueteMenu_2");
 	#endif
-	
-	int client = GetCmdArgInt(1);
-	int level = rp_GetClientInt(client, i_Cryptage) + 1;
-	
-	if( level > 5 )
-		level = 5;
+	if (p_oAction == MenuAction_Select) {
 		
-	rp_SetClientInt(client, i_Cryptage, level);
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Les détectives vous couvre, vous avez %i de chance d'être caché", level*20);
-}
-public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
-	#if defined DEBUG
-	PrintToServer("MenuNothing");
-	#endif
-	
-	if( action == MenuAction_Select ) {
-		if( menu != INVALID_HANDLE )
-			CloseHandle(menu);
+		char szMenuItem[64];
+		if( GetMenuItem(p_hItemMenu, p_iParam2, szMenuItem, sizeof(szMenuItem)) ) {
+			
+			int target = StringToInt(szMenuItem);
+			ServerCommand("rp_item_enquete \"%i\" \"%i\"", client, target);
+		}		
 	}
-	else if( action == MenuAction_End ) {
-		if( menu != INVALID_HANDLE )
-			CloseHandle(menu);
+	else if (p_oAction == MenuAction_End) {
+		CloseHandle(p_hItemMenu);
 	}
-}
-void AddMenu_Blank(int client, Handle menu, const char[] myString , any ...) {
-	#if defined DEBUG
-	PrintToServer("AddMenu_Blank");
-	#endif
-	char[] str = new char[ strlen(myString)+255 ];
-	VFormat(str, (strlen(myString)+255), myString, 3);
-	
-	AddMenuItem(menu, "none", str, ITEMDRAW_DISABLED);
-	PrintToConsole(client, str);
 }
 public Action Cmd_ItemEnquete(int args) {
 	#if defined DEBUG
@@ -868,61 +897,28 @@ public Action Cmd_ItemEnquete(int args) {
 	SetMenuExitButton(menu, true);
 	DisplayMenu(menu, client, MENU_TIME_DURATION);
 }
-
-public Action Cmd_ItemCamera(int args) {
+public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
 	#if defined DEBUG
-	PrintToServer("Cmd_ItemCamera");
+	PrintToServer("MenuNothing");
 	#endif
-	char arg1[12];
-	GetCmdArg(1, arg1, 11);
 	
-	int client = StringToInt(arg1);
-	int target = GetClientAimTarget(client, false);
-	
-
-	int item_id = GetCmdArgInt(args);
-	
-	if( !IsValidClient(target) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez vous raprocher pour lui coller une caméra.");
-		ITEM_CANCEL(client, item_id);
-		return Plugin_Handled;
+	if( action == MenuAction_Select ) {
+		if( menu != INVALID_HANDLE )
+			CloseHandle(menu);
 	}
-	
-	
-	if( rp_GetClientInt(client, i_Camera) > 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible de mettre une caméra sur ce joueur pour le moment.");
-		ITEM_CANCEL(client, item_id);
-		return Plugin_Handled;
-	}
-	
-	rp_SetClientInt(client, i_Camera, target);
-	
-	SetEntPropEnt(client, Prop_Send, "m_hViewEntity", target);
-	SetEntProp(client, Prop_Send, "m_bShouldDrawPlayerWhileUsingViewEntity", 1);
-	SetEntProp(client, Prop_Send, "m_iDefaultFOV", 130);
-	
-	if( rp_GetClientInt(client, i_ThirdPerson) == 1 ) {
-		ClientCommand(client, "firstperson");
-	}
-	return Plugin_Handled;
-}
-
-public int Cmd_ItemEnqueteMenu_2(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemEnqueteMenu_2");
-	#endif
-	if (p_oAction == MenuAction_Select) {
-		
-		char szMenuItem[64];
-		if( GetMenuItem(p_hItemMenu, p_iParam2, szMenuItem, sizeof(szMenuItem)) ) {
-			
-			int target = StringToInt(szMenuItem);
-			ServerCommand("rp_item_enquete \"%i\" \"%i\"", client, target);
-		}		
-	}
-	else if (p_oAction == MenuAction_End) {
-		CloseHandle(p_hItemMenu);
+	else if( action == MenuAction_End ) {
+		if( menu != INVALID_HANDLE )
+			CloseHandle(menu);
 	}
 }
-
-
+// ----------------------------------------------------------------------------
+void AddMenu_Blank(int client, Handle menu, const char[] myString , any ...) {
+	#if defined DEBUG
+	PrintToServer("AddMenu_Blank");
+	#endif
+	char[] str = new char[ strlen(myString)+255 ];
+	VFormat(str, (strlen(myString)+255), myString, 3);
+	
+	AddMenuItem(menu, "none", str, ITEMDRAW_DISABLED);
+	PrintToConsole(client, str);
+}

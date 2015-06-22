@@ -41,9 +41,9 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_alcool",		Cmd_ItemAlcool,			"RP-ITEM",	FCVAR_UNREGISTERED);
 }
 public void OnMapStart() {
-	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt");
-	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt");
-	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt");
+	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
+	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt", true);
+	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt", true);
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemPreserv(int args) {

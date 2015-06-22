@@ -11,15 +11,18 @@
 #pragma semicolon 1
 
 #include <sourcemod>
+#include <sdkhooks>
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
+#include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
 
-#define __LAST_REV__ 		"v:0.2.0"
+#define __LAST_REV__ 		"v:0.2.1"
 
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
+#define MODEL_CASH 			"models/DeadlyDesire/props/atm01.mdl"
 #define MENU_TIME_DURATION	60
 
 public Plugin myinfo = {
@@ -39,9 +42,18 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_cheque",		Cmd_ItemCheque,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_packdebutant",Cmd_ItemPackDebutant, 	"RP-ITEM", 	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_permi",		Cmd_ItemPermi,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_distrib",		Cmd_ItemDistrib,		"RP-ITEM", 	FCVAR_UNREGISTERED);
+}
+public void OnMapStart() {
+	PrecacheModel(MODEL_CASH, true);
+}
+public void OnClientPostAdminCheck(int client) {
+	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
+}
+public void OnClientDisconnect(int client) {
+	rp_UnhookEvent(client, RP_OnPlayerBuild,fwdOnPlayerBuild);
 }
 // ----------------------------------------------------------------------------
-
 public Action Cmd_ItemPermi(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemPermi");
@@ -99,7 +111,7 @@ public Action Cmd_ItemBankSwap(int args) {
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous recevrez maintenant votre paye en banque.");
 	rp_ClientSave(client);
 }
-
+// ----------------------------------------------------------------------------
 public Action Cmd_ItemAssurance(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemAssurance");
@@ -133,9 +145,9 @@ public Action Cmd_ItemNoAction(int args) {
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ceci est un %s, vous en avez %d sur vous et %d en banque.", name, rp_GetClientItem(client, item_id), rp_GetClientItem(client, item_id, true));
 	return;
 }
-
+// ----------------------------------------------------------------------------
 int g_iChequeID = -1;
-
+// ----------------------------------------------------------------------------
 public Action Cmd_ItemCheque(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemCheque");
@@ -149,7 +161,6 @@ public Action Cmd_ItemCheque(int args) {
 	rp_ClientGiveItem(client, item_id);
 	CreateTimer(0.25, task_cheque, client);
 }
-
 public Action task_cheque(Handle timer, any client) {
 	#if defined DEBUG
 	PrintToServer("task_cheque");
@@ -200,7 +211,7 @@ public Action task_cheque(Handle timer, any client) {
 		DisplayMenu(menu, client, MENU_TIME_DURATION);
 	}
 }
-
+// ----------------------------------------------------------------------------
 public int MenuCheque(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
 	#if defined DEBUG
 	PrintToServer("MenuCheque");
@@ -302,6 +313,7 @@ public int MenuCheque2(Handle p_hItemMenu, MenuAction p_oAction, int client, int
 		CloseHandle(p_hItemMenu);
 	}
 }
+// ----------------------------------------------------------------------------
 public Action Cmd_ItemForward(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemForward");
@@ -335,4 +347,135 @@ public Action Cmd_ItemPackDebutant(int args) { //Permet d'avoir la CB, le compte
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre carte banquaire, votre compte banquaire et votre RIB sont maintenant actifs.");
 	
 	rp_ClientSave(client);
+}
+// ----------------------------------------------------------------------------
+public Action fwdOnPlayerBuild(int client, float& cooldown) {
+	if( rp_GetClientJobID(client) != 11 )
+		return Plugin_Continue;
+	
+	int ent = BuidlingATM(client);
+	rp_ScheduleEntityInput(ent, 300.0, "Kill");
+	
+	if( ent > 0 )
+		cooldown = 120.0;
+	else 
+		cooldown = 3.0;
+	
+	return Plugin_Stop;
+}
+public Action Cmd_ItemDistrib(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemDistrib");
+	#endif
+	int client = GetCmdArgInt(1);
+	int item_id = GetCmdArgInt(args);
+	
+	if( BuidlingATM(client) == 0 ) {
+		ITEM_CANCEL(client, item_id);
+	}
+	
+	return Plugin_Handled;
+}
+
+
+int BuidlingATM(int client) {
+	#if defined DEBUG
+	PrintToServer("BuildingATM");
+	#endif
+	
+	if( !rp_IsBuildingAllowed(client) )
+		return 0;	
+	
+	char classname[64], tmp[64];
+	
+	Format(classname, sizeof(classname), "rp_bank__%i", client);	
+	
+	float vecOrigin[3];
+	GetClientAbsOrigin(client, vecOrigin);
+	int count;
+	for(int i=1; i<=2048; i++) {
+		if( !IsValidEdict(i) )
+			continue;
+		if( !IsValidEntity(i) )
+			continue;
+		
+		GetEdictClassname(i, tmp, sizeof(tmp));
+		
+		if( StrEqual(classname, tmp) ) {
+			count++;
+			if( count >= 2 ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà deux banques de placées.");
+				return 0;
+			}
+		}
+	}
+	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Construction en cours...");
+
+	EmitSoundToAllAny("player/ammo_pack_use.wav", client);
+	
+	int ent = CreateEntityByName("prop_physics_override");
+	
+	DispatchKeyValue(ent, "classname", classname);
+	DispatchKeyValue(ent, "model", MODEL_CASH);
+	DispatchSpawn(ent);
+	ActivateEntity(ent);
+	
+	SetEntityModel(ent, MODEL_CASH);
+	
+	SetEntProp( ent, Prop_Data, "m_iHealth", 10000);
+	SetEntProp( ent, Prop_Data, "m_takedamage", 0);
+	
+	SetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity", client);
+	
+	float vecAngles[3]; GetClientEyeAngles(client, vecAngles); vecAngles[0] = vecAngles[2] = 0.0;
+	TeleportEntity(ent, vecOrigin, vecAngles, NULL_VECTOR);
+	
+	SetEntityRenderMode(ent, RENDER_NONE);
+	ServerCommand("sm_effect_fading \"%i\" \"3.0\" \"0\"", ent);
+	
+	SetEntityMoveType(client, MOVETYPE_NONE);
+	SetEntityMoveType(ent, MOVETYPE_NONE);
+	
+	CreateTimer(3.0, BuildingATM_post, ent);
+	rp_SetBuildingData(ent, BD_owner, client);
+	return 1;
+}
+
+public Action BuildingATM_post(Handle timer, any entity) {
+	#if defined DEBUG
+	PrintToServer("BuildingATM_post");
+	#endif
+	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
+	SetEntityMoveType(client, MOVETYPE_WALK);
+	
+	rp_Effect_BeamBox(client, entity, NULL_VECTOR, 255, 255, 0);
+	
+	SetEntProp(entity, Prop_Data, "m_takedamage", 2);
+	SDKHook(entity, SDKHook_OnTakeDamage, DamageATM);
+	HookSingleEntityOutput(entity, "OnBreak", BuildingATM_break);
+	return Plugin_Handled;
+}
+
+public void BuildingATM_break(const char[] output, int caller, int activator, float delay) {
+	#if defined DEBUG
+	PrintToServer("BuildingATM_break");
+	#endif
+	
+	int owner = GetEntPropEnt(caller, Prop_Send, "m_hOwnerEntity");
+	if( IsValidClient(owner) ) {
+		CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre banque a été détruite.");
+	}
+}
+public Action DamageATM(int victim, int &attacker, int &inflictor, float &damage, int &damagetype) {
+	#if defined DEBUG
+	PrintToServer("DamageATM");
+	#endif
+	
+	if( rp_IsInPVP(victim) ) {
+		damage *= 25.0;
+		return Plugin_Changed;
+	}
+	
+	return Plugin_Continue;
 }

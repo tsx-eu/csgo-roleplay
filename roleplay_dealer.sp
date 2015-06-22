@@ -41,9 +41,9 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_plant",		Cmd_ItemPlant,			"RP-ITEM",	FCVAR_UNREGISTERED);
 }
 public void OnMapStart() {
-	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt");
-	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt");
-	PrecacheModel(MODEL_PLANT);
+	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
+	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt", true);
+	PrecacheModel(MODEL_PLANT, true);
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
@@ -662,9 +662,13 @@ public int MenuBuildingDealer(Handle menu, MenuAction action, int client, int pa
 		
 		if( GetMenuItem(menu, param, szMenuItem, sizeof(szMenuItem)) ) {
 			
+			if( rp_GetClientInt(client, i_Money) + rp_GetClientInt(client, i_Bank) < mnt ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas assez d'argent.");
+				return;
+			}
+			
 			int ent = BuildingPlant(client, StringToInt(szMenuItem));
 			if( ent > 0 ) {
-				
 				int mnt = rp_GetItemInt(StringToInt(szMenuItem), item_type_prix) * 3;
 				rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - mnt);
 				rp_SetJobCapital(81, rp_GetJobCapital(81) + mnt);

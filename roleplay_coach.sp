@@ -40,8 +40,8 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_knifetype",	Cmd_ItemKnifeType,		"RP-ITEM",	FCVAR_UNREGISTERED);
 }
 public void OnMapStart() {
-	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt");
-	PrecacheModel(MODEL_KNIFE);
+	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
+	PrecacheModel(MODEL_KNIFE, true);
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemCut(int args) {

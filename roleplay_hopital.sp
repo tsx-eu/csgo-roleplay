@@ -57,7 +57,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_healbox",		Cmd_ItemHealBox,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 }
 public void OnMapStart() {
-	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt");
+	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 }
 // ----------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
@@ -463,6 +463,8 @@ public Action fwdOnPlayerBuild(int client, float& cooldown) {
 		return Plugin_Continue;
 	
 	int ent = BuildingHealBox(client);
+	ScheduleEntityInput(ent, 300.0, "Kill");
+	
 	if( ent > 0 ) {
 		cooldown = 30.0;
 	}
