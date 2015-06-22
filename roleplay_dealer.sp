@@ -661,6 +661,7 @@ public int MenuBuildingDealer(Handle menu, MenuAction action, int client, int pa
 		char szMenuItem[64];
 		
 		if( GetMenuItem(menu, param, szMenuItem, sizeof(szMenuItem)) ) {
+			int mnt = rp_GetItemInt(StringToInt(szMenuItem), item_type_prix) * 3;
 			
 			if( rp_GetClientInt(client, i_Money) + rp_GetClientInt(client, i_Bank) < mnt ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas assez d'argent.");
@@ -669,7 +670,7 @@ public int MenuBuildingDealer(Handle menu, MenuAction action, int client, int pa
 			
 			int ent = BuildingPlant(client, StringToInt(szMenuItem));
 			if( ent > 0 ) {
-				int mnt = rp_GetItemInt(StringToInt(szMenuItem), item_type_prix) * 3;
+				
 				rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - mnt);
 				rp_SetJobCapital(81, rp_GetJobCapital(81) + mnt);
 			}
