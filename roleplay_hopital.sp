@@ -463,7 +463,7 @@ public Action fwdOnPlayerBuild(int client, float& cooldown) {
 		return Plugin_Continue;
 	
 	int ent = BuildingHealBox(client);
-	ScheduleEntityInput(ent, 300.0, "Kill");
+	rp_ScheduleEntityInput(ent, 300.0, "Kill");
 	
 	if( ent > 0 ) {
 		cooldown = 30.0;
