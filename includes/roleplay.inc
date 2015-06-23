@@ -57,6 +57,9 @@ native float rp_GetClientFloat(int client, float_user_data prop);
 native void rp_SetClientInt(int client, int_user_data prop, int value);
 native void rp_SetClientBool(int client, bool_user_data prop, bool value);
 native void rp_SetClientFloat(int client, float_user_data prop, float value);
+native void rp_SetClientString(int client, sz_user_data prop, char[] value, int length);
+native void rp_GetClientString(int client, sz_user_data prop, char[] value, int length);
+
 // ----------------------------------------------------------------------------
 native int rp_GetClientJobID(int client); /* return le numéro du job auquel il appartient. 1, 11, 21, 31... */
 native int rp_GetClientGroupID(int client); /* return le numéro du groupe auquel il appartient. 1, 11, 21, 31... */
@@ -122,6 +125,9 @@ native void rp_SetClientKnifeType(int client, enum_ball_type typeID);
 native enum_ball_type rp_GetWeaponBallType(int wepID);
 native enum_ball_type rp_GetClientKnifeType(int client);
 native bool rp_GetWeaponStorage(int wepID);
+native void rp_SetWeaponStorage(int wepID, bool value);
+native int rp_GetWeaponGroupID(int wepID);
+
 // ----------------------------------------------------------------------------
 native void rp_GetWeaponSkinData(int skinID, skin_data typeID, char[] str, int length);
 public int rp_GetWeaponSkinInt(int skinID, int typeID) {
