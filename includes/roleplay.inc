@@ -20,6 +20,11 @@ enum rp_event {
 	RP_PreTakeDamage,													
 	RP_PostTakeDamageWeapon,
 	RP_PostTakeDamageKnife,
+	
+	RP_PreGiveDamage,													
+	RP_PostGiveDamageWeapon,
+	RP_PostGiveDamageKnife,
+	
 	RP_PrePlayerPhysic,
 	RP_PreHUDColorize,
 	RP_OnFrameSeconde,
@@ -36,6 +41,11 @@ typeset rp_event_enum {
 	function Action(int victim, int attacker, float& damage); 			/* RP_PreTakeDamage  == return Plugin_Handled = aucun dégat */
 	function Action(int victim, int attacker, float& damage, int wepID);/* RP_PostTakeDamageWeapon */
 	function Action(int victim, int attacker, float& damage); 			/* RP_PostTakeDamageKnife */
+	
+	function Action(int attacker, int victim, float& damage); 			/* RP_PreGiveDamage  == return Plugin_Handled = aucun dégat */
+	function Action(int attacker, int victim, float& damage, int wepID);/* RP_PostGiveDamageWeapon */
+	function Action(int attacker, int victim, float& damage); 			/* RP_PostGiveDamageKnife */
+	
 	function Action(int client, float& speed, float& gravity); 			/* RP_PrePlayerPhysic */
 	function Action(int client, int color[4]); 							/* RP_PreHUDColorize */
 	function Action(int client);										/* RP_OnFrameSeconde */
@@ -57,6 +67,9 @@ native float rp_GetClientFloat(int client, float_user_data prop);
 native void rp_SetClientInt(int client, int_user_data prop, int value);
 native void rp_SetClientBool(int client, bool_user_data prop, bool value);
 native void rp_SetClientFloat(int client, float_user_data prop, float value);
+native void rp_SetClientString(int client, sz_user_data prop, char[] value, int length);
+native void rp_GetClientString(int client, sz_user_data prop, char[] value, int length);
+
 // ----------------------------------------------------------------------------
 native int rp_GetClientJobID(int client); /* return le numéro du job auquel il appartient. 1, 11, 21, 31... */
 native int rp_GetClientGroupID(int client); /* return le numéro du groupe auquel il appartient. 1, 11, 21, 31... */
@@ -67,6 +80,7 @@ native bool rp_IsEntitiesNear(int ent1, int ent2, bool tresProche = false, float
 native bool rp_IsTutorialOver(int client);
 native bool rp_IsBuildingAllowed(int client, bool silent = false);
 native bool rp_IsClientLucky(int client);
+native bool rp_IsClientNew(int client);
 native bool rp_IncrementLuck(int client);
 native bool rp_IsTargetSeen(int client, int target);
 // ----------------------------------------------------------------------------
@@ -106,8 +120,8 @@ native void rp_ClientColorize(int client, int color[4]={-1,-1,-1,-1});
 native void rp_ClientSendToSpawn(int client, bool nearest = false);
 native void rp_ClientGiveKnife(int client);
 // ----------------------------------------------------------------------------
-native int rp_GetPlayerZoneAppart(int client);
-native int rp_GetPlayerZone(int client, float cache = 0.25);
+native int rp_GetPlayerZoneAppart(int client); /* Numéro de l'appartement: Uniquement si au moins 1 appart. Sinon 0 */
+native int rp_GetPlayerZone(int client, float cache = 0.25); 
 native int rp_GetZoneBit(int client, float cache = 300.0);
 // ----------------------------------------------------------------------------
 native int rp_GetRandomCapital(int jobID);
@@ -120,7 +134,17 @@ native void rp_SetWeaponBallType(int wepID, enum_ball_type typeID);
 native void rp_SetClientKnifeType(int client, enum_ball_type typeID);
 native enum_ball_type rp_GetWeaponBallType(int wepID);
 native enum_ball_type rp_GetClientKnifeType(int client);
+native bool rp_GetWeaponStorage(int wepID);
+native void rp_SetWeaponStorage(int wepID, bool value);
+native int rp_GetWeaponGroupID(int wepID);
+
 // ----------------------------------------------------------------------------
+native void rp_GetWeaponSkinData(int skinID, skin_data typeID, char[] str, int length);
+public int rp_GetWeaponSkinInt(int skinID, int typeID) {
+	char tmp[32];
+	rp_GetWeaponSkinData(skinID, view_as<skin_data>typeID, tmp, sizeof(tmp));
+	return StringToInt(tmp);
+}
 native void rp_GetZoneData(int zoneID, zone_type typeID, char[] str, int length);
 native void rp_GetJobData(int jobID, rp_job_type typeID, char[] str, int length);
 native void rp_GetItemData(int itemID, rp_item_type typeID, char[] str, int length);
@@ -520,4 +544,11 @@ enum car_data {
 	car_maxPassager,
 	
 	car_data_max,
+};
+
+enum skin_data {
+	skin_id,
+	skin_name,
+	
+	skin_max
 };
