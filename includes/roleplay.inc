@@ -473,6 +473,7 @@ enum rp_capture_zone {
 	cap_nuclear =  0,
 	cap_tower,
 	cap_villa,
+	cap_disableItem,
 	capture_max
 };
 enum enum_ball_type {
