@@ -231,7 +231,6 @@ enum bool_user_data {
 	b_isConnected2, // Success
 	b_Respawning,
 	b_Drugged,
-	b_Berserk,
 	b_License1,
 	b_License2,
 	b_LicenseSell,

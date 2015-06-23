@@ -29,7 +29,7 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-int g_cBeam;
+int g_cBeam, g_cGlow;
 
 enum chiruList {
 	ch_Force,
@@ -37,6 +37,7 @@ enum chiruList {
 	ch_Jump,
 	ch_Regen,
 	ch_Heal,
+	it_Berserk,
 	
 	ch_Max
 };
@@ -53,12 +54,13 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_respawn",		Cmd_ItemRespawn,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_sick",		Cmd_ItemSick,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_curedesintox",	Cmd_ItemCureDesintox,		"RP-ITEM",		FCVAR_UNREGISTERED);
-	RegServerCmd("rp_item_berserker", Cmd_ItemBerserker, "RP-ITEM", FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_berserker",	Cmd_ItemBerserker,		"RP-ITEM",		FCVAR_UNREGISTERED);
 	
 	RegServerCmd("rp_item_healbox",		Cmd_ItemHealBox,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
+	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt", true);
 }
 // ----------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
@@ -66,14 +68,12 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnAssurance,	fwdAssurance);
 	rp_HookEvent(client, RP_OnPlayerDead,	fwdDeath);
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
-	rp_HookEvent(client, RP_PreTakeDamage, 	fwdBerserk);
 }
 public void OnClientDisconnect(int client) {
 	rp_UnhookEvent(client, RP_PreTakeDamage, fwdChiruForce);
 	rp_UnhookEvent(client, RP_OnAssurance,	fwdAssurance);
 	rp_UnhookEvent(client, RP_OnPlayerDead,	fwdDeath);
 	rp_UnhookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
-	rp_UnhookEvent(client, RP_PreTakeDamage, fwdBerserk);
 	
 	if( g_bChirurgie[client][ch_Speed] )
 		rp_UnhookEvent(client, RP_PrePlayerPhysic,	fwdChiruSpeed);
@@ -182,6 +182,10 @@ public Action fwdChiruForce(int victim, int attacker, float &damage) {
 	#endif
 	if( g_bChirurgie[attacker][ch_Force] ) {
 		damage *= 1.75;
+		return Plugin_Changed;
+	}
+	if( g_bChirurgie[attacker][it_Berserk] ){
+		damage *= 2;
 		return Plugin_Changed;
 	}
 	return Plugin_Continue;
@@ -461,24 +465,16 @@ public Action Cmd_ItemBerserker(int args) {
 	
 	//Pendant 6.5 secondes le client reçoit et inflige plus de dommages
 	rp_HookEvent(client, RP_PreTakeDamage, fwdStartBerserk, 6.5);
-	rp_SetClientBool(client, b_Berserk, true);
+	g_bChirurgie[client][it_Berserk] = true;
 	
+	float vecTarget[3]; 
+	GetClientAbsOrigin(client, vecTarget);
+	TE_SetupBeamRingPoint(vecTarget, 10.0, 300.0, g_cBeam, g_cGlow, 0, 15, 6.5, 50.0, 0.0, {255, 0, 0, 100}, 10, 0);
+	TE_SendToAll();
+		
 	CreateTimer( 6.5, fwdStopBerserk, client);
 	
 	return Plugin_Handled;
-}
-public Action fwdBerserk(int victim, int attacker, float &damage) {
-	#if defined DEBUG
-	PrintToServer("fwdBerserk");
-	#endif
-	
-	//Degats infligés augmentés sous l'effet du la seringue du Berserker
-	if(rp_GetClientBool(attacker, b_Berserk)){
-		damage *= 1.5; //Peut-être pas assez ? a voir
-		return Plugin_Changed;
-	}
-	
-	return Plugin_Continue;
 }
 public Action fwdStartBerserk(int victim, int attacker, float &damage) {
 	#if defined DEBUG
@@ -497,8 +493,8 @@ public Action fwdStopBerserk(Handle time, any client) {
 	
 	if( !IsValidClient(client) )
 		return Plugin_Continue;
-
-	rp_SetClientBool(client, b_Berserk, false);
+		
+	g_bChirurgie[client][it_Berserk] = false;
 	
 	return Plugin_Continue;
 }
