@@ -52,7 +52,8 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_fullheal",	Cmd_ItemFullHeal,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_respawn",		Cmd_ItemRespawn,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_sick",		Cmd_ItemSick,			"RP-ITEM",	FCVAR_UNREGISTERED);
-	RegServerCmd("rp_item_curedesintox",	Cmd_ItemCureDesintox,	"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_curedesintox",	Cmd_ItemCureDesintox,		"RP-ITEM",		FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_berserker", Cmd_ItemBerserker, "RP-ITEM", FCVAR_UNREGISTERED);
 	
 	RegServerCmd("rp_item_healbox",		Cmd_ItemHealBox,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 }
@@ -65,12 +66,14 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnAssurance,	fwdAssurance);
 	rp_HookEvent(client, RP_OnPlayerDead,	fwdDeath);
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
+	rp_HookEvent(client, RP_PreTakeDamage, 	fwdBerserk);
 }
 public void OnClientDisconnect(int client) {
 	rp_UnhookEvent(client, RP_PreTakeDamage, fwdChiruForce);
 	rp_UnhookEvent(client, RP_OnAssurance,	fwdAssurance);
 	rp_UnhookEvent(client, RP_OnPlayerDead,	fwdDeath);
 	rp_UnhookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
+	rp_UnhookEvent(client, RP_PreTakeDamage, fwdBerserk);
 	
 	if( g_bChirurgie[client][ch_Speed] )
 		rp_UnhookEvent(client, RP_PrePlayerPhysic,	fwdChiruSpeed);
@@ -445,6 +448,57 @@ public Action ItemDrugStop(Handle time, any client) {
 		return Plugin_Continue;
 
 	rp_SetClientBool(client, b_Drugged, false);
+	
+	return Plugin_Continue;
+}
+// ----------------------------------------------------------------------------
+public Action Cmd_ItemBerserker(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemBerserker");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+	
+	//Pendant 6.5 secondes le client reçoit et inflige plus de dommages
+	rp_HookEvent(client, RP_PreTakeDamage, fwdStartBerserk, 6.5);
+	rp_SetClientBool(client, b_Berserk, true);
+	
+	CreateTimer( 6.5, fwdStopBerserk, client);
+	
+	return Plugin_Handled;
+}
+public Action fwdBerserk(int victim, int attacker, float &damage) {
+	#if defined DEBUG
+	PrintToServer("fwdBerserk");
+	#endif
+	
+	//Degats infligés augmentés sous l'effet du la seringue du Berserker
+	if(rp_GetClientBool(attacker, b_Berserk)){
+		damage *= 1.5; //Peut-être pas assez ? a voir
+		return Plugin_Changed;
+	}
+	
+	return Plugin_Continue;
+}
+public Action fwdStartBerserk(int victim, int attacker, float &damage) {
+	#if defined DEBUG
+	PrintToServer("fwdStartBerserk");
+	#endif
+	
+	//Degats reçus augmentés sous l'effet de la seringue du Berserker
+	damage *= 1.25; //Peut-être un peu trop ? a voir
+	
+	return Plugin_Changed;
+}
+public Action fwdStopBerserk(Handle time, any client) {
+	#if defined DEBUG
+	PrintToServer("ItemStopBerserk");
+	#endif
+	
+	if( !IsValidClient(client) )
+		return Plugin_Continue;
+
+	rp_SetClientBool(client, b_Berserk, false);
 	
 	return Plugin_Continue;
 }
