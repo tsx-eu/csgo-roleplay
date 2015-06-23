@@ -61,17 +61,17 @@ public void OnMapStart() {
 }
 // ----------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
-	rp_HookEvent(client, RP_PreTakeDamage,	fwdChiruForce);
 	rp_HookEvent(client, RP_OnAssurance,	fwdAssurance);
 	rp_HookEvent(client, RP_OnPlayerDead,	fwdDeath);
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
 }
 public void OnClientDisconnect(int client) {
-	rp_UnhookEvent(client, RP_PreTakeDamage, fwdChiruForce);
 	rp_UnhookEvent(client, RP_OnAssurance,	fwdAssurance);
 	rp_UnhookEvent(client, RP_OnPlayerDead,	fwdDeath);
 	rp_UnhookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
 	
+	if( g_bChirurgie[client][ch_Force] )
+		rp_UnhookEvent(client, RP_PreGiveDamage, fwdChiruForce); 
 	if( g_bChirurgie[client][ch_Speed] )
 		rp_UnhookEvent(client, RP_PrePlayerPhysic,	fwdChiruSpeed);
 	if( g_bChirurgie[client][ch_Jump] )
@@ -129,7 +129,9 @@ public Action Cmd_ItemChirurgie(int args) {
 	
 	rp_Effect_Particle(client, "blood_pool");
 	
-	if( StrEqual(arg1, "force") || StrEqual(arg1, "full") ) {	
+	if( StrEqual(arg1, "force") || StrEqual(arg1, "full") ) {
+		if( !g_bChirurgie[client][ch_Force] )
+			rp_HookEvent(client, RP_PreGiveDamage, fwdChiruForce); 
 		g_bChirurgie[client][ch_Force] = true;
 	}
 	if( StrEqual(arg1, "speed") || StrEqual(arg1, "full") ) {
@@ -173,15 +175,13 @@ public Action fwdFrozen(int client, float& speed, float& gravity) {
 	return Plugin_Stop;
 }
 // ----------------------------------------------------------------------------
-public Action fwdChiruForce(int victim, int attacker, float &damage) {
+public Action fwdChiruForce(int attacker, int victim, float &damage) {
 	#if defined DEBUG
 	PrintToServer("fwdChiruForce");
 	#endif
-	if( g_bChirurgie[attacker][ch_Force] ) {
-		damage *= 1.75;
-		return Plugin_Changed;
-	}
-	return Plugin_Continue;
+	
+	damage *= 1.75;
+	return Plugin_Changed;
 }
 public Action fwdChiruSpeed(int client, float& speed, float& gravity) {
 	#if defined DEBUG

@@ -20,6 +20,11 @@ enum rp_event {
 	RP_PreTakeDamage,													
 	RP_PostTakeDamageWeapon,
 	RP_PostTakeDamageKnife,
+	
+	RP_PreGiveDamage,													
+	RP_PostGiveDamageWeapon,
+	RP_PostGiveDamageKnife,
+	
 	RP_PrePlayerPhysic,
 	RP_PreHUDColorize,
 	RP_OnFrameSeconde,
@@ -36,6 +41,11 @@ typeset rp_event_enum {
 	function Action(int victim, int attacker, float& damage); 			/* RP_PreTakeDamage  == return Plugin_Handled = aucun dégat */
 	function Action(int victim, int attacker, float& damage, int wepID);/* RP_PostTakeDamageWeapon */
 	function Action(int victim, int attacker, float& damage); 			/* RP_PostTakeDamageKnife */
+	
+	function Action(int attacker, int victim, float& damage); 			/* RP_PreGiveDamage  == return Plugin_Handled = aucun dégat */
+	function Action(int attacker, int victim, float& damage, int wepID);/* RP_PostGiveDamageWeapon */
+	function Action(int attacker, int victim, float& damage); 			/* RP_PostGiveDamageKnife */
+	
 	function Action(int client, float& speed, float& gravity); 			/* RP_PrePlayerPhysic */
 	function Action(int client, int color[4]); 							/* RP_PreHUDColorize */
 	function Action(int client);										/* RP_OnFrameSeconde */
