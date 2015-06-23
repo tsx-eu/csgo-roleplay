@@ -167,7 +167,7 @@ public Action Cmd_ItemVehicle(int args) {
 	rp_SetVehicleInt(car, car_maxPassager, max);
 	rp_SetClientKeyVehicle(client, car, true);
 	
-	CreateTimer(3.5, Timer_VehicleRemoveCheck, car);
+	CreateTimer(3.5, Timer_VehicleRemoveCheck, EntIndexToEntRef(car));
 	
 	// Voiture donateur, on la thune wesh
 	char arg0[128];
@@ -527,6 +527,12 @@ public Action BatchLeave(Handle timer, any vehicle) {
 public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 	bool IsNear = false;
 	
+	ent = EntRefToEntIndex(ent);
+	
+	if( rp_GetVehicleInt(ent, car_health) <= 0 ) {
+		VehicleRemove(ent, true);
+		return Plugin_Handled;
+	}
 	
 	if( Vehicle_HasDriver(ent) )
 		IsNear = true;
@@ -564,11 +570,6 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 			}
 		}
 	}
-	
-	if( rp_GetVehicleInt(ent, car_health) <= 0 ) {
-		VehicleRemove(ent, true);
-		return Plugin_Handled;
-	}
 		
 	if( !IsNear ) {
 		int tick = rp_GetVehicleInt(ent, car_awayTick) + 1;
@@ -583,7 +584,7 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 		rp_SetVehicleInt(ent, car_awayTick, 0 );
 	}
 	
-	CreateTimer(1.1, Timer_VehicleRemoveCheck, ent);
+	CreateTimer(1.1, Timer_VehicleRemoveCheck, EntIndexToEntRef(ent));
 	return Plugin_Continue;
 }
 
