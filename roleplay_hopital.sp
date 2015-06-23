@@ -29,7 +29,8 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-int g_cBeam;
+int g_cBeam, g_cGlow;
+float ber_DmgGivenDecrease[65], ber_DmgTakenDecrease[65]; //Pour seringue Berserker
 
 enum chiruList {
 	ch_Force,
@@ -37,6 +38,7 @@ enum chiruList {
 	ch_Jump,
 	ch_Regen,
 	ch_Heal,
+	is_Berserk,
 	
 	ch_Max
 };
@@ -52,7 +54,8 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_fullheal",	Cmd_ItemFullHeal,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_respawn",		Cmd_ItemRespawn,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_sick",		Cmd_ItemSick,			"RP-ITEM",	FCVAR_UNREGISTERED);
-	RegServerCmd("rp_item_curedesintox",	Cmd_ItemCureDesintox,	"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_curedesintox",	Cmd_ItemCureDesintox,		"RP-ITEM",		FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_berserker", 	Cmd_ItemBerserker, 	"RP-ITEM", 	FCVAR_UNREGISTERED);
 	
 	RegServerCmd("rp_item_healbox",		Cmd_ItemHealBox,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 }
@@ -445,6 +448,67 @@ public Action ItemDrugStop(Handle time, any client) {
 		return Plugin_Continue;
 
 	rp_SetClientBool(client, b_Drugged, false);
+	
+	return Plugin_Continue;
+}
+// ----------------------------------------------------------------------------
+public Action Cmd_ItemBerserker(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemBerserker");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+	
+	//Le client recoit et inflige des degats augmentés; l'effet est decroissant
+	for (float i = 0.0; i <= 6.5; i+= 0.5) {
+		rp_HookEvent(client, RP_PreGiveDamage, fwdGiveBerserk, i);
+		rp_HookEvent(client, RP_PreTakeDamage, fwdTakeBerserk, i);
+	}	
+	g_bChirurgie[client][is_Berserk] = true;
+	
+	//Affiche un halo rouge autours du client
+	float vecTarget[3]; 
+	GetClientAbsOrigin(client, vecTarget);
+	TE_SetupBeamRingPoint(vecTarget, 10.0, 300.0, g_cBeam, g_cGlow, 0, 15, 6.5, 50.0, 0.0, {255, 0, 0, 100}, 10, 0);
+	TE_SendToAll();
+
+	CreateTimer( 6.5, stopBerserk, client);
+	
+	return Plugin_Handled;
+}
+public Action fwdGiveBerserk(int attacker, int victim, float &damage) {
+	#if defined DEBUG
+	PrintToServer("fwdGiveBerserk");
+	#endif
+	
+	//Degats infligés augmentés sous l'effet du la seringue du Berserker
+	damage *= (2 - ber_DmgGivenDecrease[attacker]); 
+	ber_DmgGivenDecrease[attacker] += 0.08;
+	
+	return Plugin_Changed;
+}
+public Action fwdTakeBerserk(int victim, int attacker, float &damage) {
+	#if defined DEBUG
+	PrintToServer("fwdTakeBerserk");
+	#endif
+	
+	//Degats reçus augmentés sous l'effet de la seringue du Berserker
+	damage *= (1.5 - ber_DmgTakenDecrease[victim]);
+	ber_DmgTakenDecrease[victim] += 0.1;
+	
+	return Plugin_Changed;
+}
+public Action stopBerserk(Handle time, any client) {
+	#if defined DEBUG
+	PrintToServer("stopBerserk");
+	#endif
+	
+	if( !IsValidClient(client) )
+		return Plugin_Continue;
+		
+	g_bChirurgie[client][is_Berserk] = false;
+	ber_DmgTakenDecrease[client] = 0.0;
+	ber_DmgGivenDecrease[client] = 0.0;
 	
 	return Plugin_Continue;
 }
