@@ -498,7 +498,7 @@ void SetContratFail(int client, bool time = false) { // time = retro-compatibili
 		if( time )
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N n'a pas remplis son contrat à temps.", client);
 		else if( jobClient != 41 ) // si le tueur a démissionné entre temps
-			CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous n'êtes plus mercenaire, vous ne pouvez plus remplir votre contrat.");
+			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N n'est plus mercenaire et ne peut plus remplir votre contrat.", client);
 		else
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N a été tué et n'a pas pu remplir son contrat.", client);
 		
