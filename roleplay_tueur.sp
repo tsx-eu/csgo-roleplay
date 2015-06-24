@@ -24,7 +24,6 @@
 //#define DEBUG
 #define MENU_TIME_DURATION 60
 
-// TODO: Si un tueur change de job pendant contrat
 // TODO: Annuler contrat quand capture activé
 // TODO: Trouver astuce pour bypass menu vente et définir les types de contrat ici.
 // TODO: Utiliser une CVAR pour la gestion des portes
@@ -153,6 +152,9 @@ public Action fwdFrame(int client) {
 	int target = rp_GetClientInt(client, i_ToKill);
 	if( target > 0 ) {
 		rp_Effect_BeamBox(client, target, NULL_VECTOR, 255, 0, 0);
+	}
+	if(rp_GetClientJobID(client) != 41) {
+		SetContratFail(client);
 	}
 }
 public Action fwdTueurKill(int client, int attacker, float& respawn) {
@@ -480,8 +482,12 @@ void SetContratFail(int client, bool time = false) { // time = retro-compatibili
 	PrintToServer("SetContratFail");
 	#endif
 	
+	int jobClient = rp_GetClientJobID(client);
+	
 	if( time )
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas remplis votre contrat à temps.");
+	else if( jobClient != 41 ) // si le tueur a démissionné entre temps
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes plus mercenaire, vous ne pouvez plus remplir votre contrat.");
 	else
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes mort et n'avez pas remplis votre contrat.");
 	
@@ -491,6 +497,8 @@ void SetContratFail(int client, bool time = false) { // time = retro-compatibili
 		
 		if( time )
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N n'a pas remplis son contrat à temps.", client);
+		else if( jobClient != 41 ) // si le tueur a démissionné entre temps
+			CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous n'êtes plus mercenaire, vous ne pouvez plus remplir votre contrat.");
 		else
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N a été tué et n'a pas pu remplir son contrat.", client);
 		
