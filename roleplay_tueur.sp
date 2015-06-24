@@ -28,7 +28,6 @@
 // TODO: Annuler contrat quand capture activé
 // TODO: Trouver astuce pour bypass menu vente et définir les types de contrat ici.
 // TODO: Utiliser une CVAR pour la gestion des portes
-// TODO: Afficher appartement dans enquête
 
 public Plugin myinfo = {
 	name = "Jobs: Mercenaire", author = "KoSSoLaX",
@@ -874,21 +873,9 @@ public Action Cmd_ItemEnquete(int args) {
 	
 	AddMenu_Blank(client, menu, "Argent: %i$ - Banque: %i$", rp_GetClientInt(target, i_Money), rp_GetClientInt(target, i_Bank));
 	
-	// TODO:
-	/* Format(tmp, sizeof(tmp), "Appartement possédé: ");
-	count = 0;
-	for(int a=0; a<MAX_KEYSELL; a++) {
-		if( g_iDoorOwner_v2[target][a] ) {
-			count++;
-			Format(tmp, sizeof(tmp), "%s %s", tmp, g_szSellingKeys[a][key_type_name]);
-		}
-	}
-	if( count == 0 ) {
-		Format(tmp, sizeof(tmp), "%s Aucun", tmp);
-	}
-	PrintToConsole(client, tmp);
-	AddMenu_Blank(menu, "%s.", tmp);*/
-	
+	int numAppart = rp_GetPlayerZoneAppart(target); //retourne 0 si la cible n'a pas d'appart
+	if(numAppart) AddMenu_Blank(client, menu, "Appartement possédé: %i", numAppart);
+	else AddMenu_Blank(client, menu, "Appartement possédé: Aucun");
 	
 	AddMenu_Blank(client, menu, "Taux d'alcoolémie: %.3f", rp_GetClientFloat(client, fl_Alcool));
 	
