@@ -309,13 +309,13 @@ void OpenSelectSkill(int client) {
 	if( !g_iKillerPoint[client][competance_tir] ) {
 		AddMenuItem(menu, "tir", "Precision Maximum");
 	}
-	if( !g_iKillerPoint[client][competance_usp] && ( !g_iKillerPoint[client][competance_awp] || !g_iKillerPoint[client][competance_pompe] )) { //On ne peut pas selectionner une arme si on en déjà choisi une auparavant
+	if( !g_iKillerPoint[client][competance_usp] && ( !g_iKillerPoint[client][competance_awp] && !g_iKillerPoint[client][competance_pompe] )) { //On ne peut pas selectionner une arme si on en déjà choisi une auparavant
 		AddMenuItem(menu, "usp", "M4 / Usp");
 	}
-	if( !g_iKillerPoint[client][competance_awp] && ( !g_iKillerPoint[client][competance_usp] || !g_iKillerPoint[client][competance_pompe] )) {
+	if( !g_iKillerPoint[client][competance_awp] && ( !g_iKillerPoint[client][competance_usp] && !g_iKillerPoint[client][competance_pompe] )) {
 		AddMenuItem(menu, "awp", "AWP / Tec9");
 	}
-	if( !g_iKillerPoint[client][competance_pompe] && ( !g_iKillerPoint[client][competance_awp] || !g_iKillerPoint[client][competance_usp] )) {
+	if( !g_iKillerPoint[client][competance_pompe] && ( !g_iKillerPoint[client][competance_awp] && !g_iKillerPoint[client][competance_usp] )) {
 		AddMenuItem(menu, "pompe", "Nova / Deagle");
 	}
 	if( !g_iKillerPoint[client][competance_invis] ) {
