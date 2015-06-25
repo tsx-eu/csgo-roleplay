@@ -460,7 +460,7 @@ public Action Cmd_ItemBerserker(int args) {
 	int client = GetCmdArgInt(1);
 	
 	//Le client recoit et inflige des degats augmentés; l'effet est decroissant
-	for (float i = 0.0; i <= 6.5; i+= 0.5) {
+	for (float i = 0.0; i <= 6.0; i+= 0.5) {
 		rp_HookEvent(client, RP_PreGiveDamage, fwdGiveBerserk, i);
 		rp_HookEvent(client, RP_PreTakeDamage, fwdTakeBerserk, i);
 	}	
