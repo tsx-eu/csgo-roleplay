@@ -313,7 +313,7 @@ void OpenSelectSkill(int client) {
 		AddMenuItem(menu, "usp", "M4 / Usp");
 	}
 	if( !g_iKillerPoint[client][competance_awp] && ( !g_iKillerPoint[client][competance_usp] && !g_iKillerPoint[client][competance_pompe] )) {
-		AddMenuItem(menu, "awp", "AWP / Tec9");
+		AddMenuItem(menu, "awp", "AWP / Cz75");
 	}
 	if( !g_iKillerPoint[client][competance_pompe] && ( !g_iKillerPoint[client][competance_awp] && !g_iKillerPoint[client][competance_usp] )) {
 		AddMenuItem(menu, "pompe", "Nova / Deagle");
@@ -381,7 +381,7 @@ public int AddCompetanceToAssassin(Handle menu, MenuAction action, int client, i
 			else if( StrEqual(options, "awp", false) ){
 				g_iKillerPoint[client][competance_awp] = 1;
 				
-				int skin = GivePlayerItem(client, "weapon_deagle");
+				int skin = GivePlayerItem(client, "weapon_cz75a");
 				rp_SetClientWeaponSkin(client, skin);
 				skin = GivePlayerItem(client, "weapon_awp");
 				rp_SetClientWeaponSkin(client, skin);
@@ -389,7 +389,7 @@ public int AddCompetanceToAssassin(Handle menu, MenuAction action, int client, i
 			else if( StrEqual(options, "pompe", false) ){
 				g_iKillerPoint[client][competance_pompe] = 1;
 				
-				int skin = GivePlayerItem(client, "weapon_tec9");
+				int skin = GivePlayerItem(client, "weapon_deagle");
 				rp_SetClientWeaponSkin(client, skin);
 				skin = GivePlayerItem(client, "weapon_nova");
 				rp_SetClientWeaponSkin(client, skin);
