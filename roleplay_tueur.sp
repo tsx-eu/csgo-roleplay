@@ -62,6 +62,10 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_enquete",		Cmd_ItemEnquete,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_camera",		Cmd_ItemCamera,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_cryptage",	Cmd_ItemCryptage,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	
+	for (int i = 1; i <= MaxClients; i++)
+		if( IsValidClient(i) )
+			OnClientPostAdminCheck(i);
 }
 // ----------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
@@ -917,7 +921,7 @@ void AddMenu_Blank(int client, Handle menu, const char[] myString , any ...) {
 	PrintToServer("AddMenu_Blank");
 	#endif
 	char[] str = new char[ strlen(myString)+255 ];
-	VFormat(str, (strlen(myString)+255), myString, 3);
+	VFormat(str, (strlen(myString)+255), myString, 4);
 	
 	AddMenuItem(menu, "none", str, ITEMDRAW_DISABLED);
 	PrintToConsole(client, str);

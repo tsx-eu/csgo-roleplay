@@ -43,6 +43,10 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_packdebutant",Cmd_ItemPackDebutant, 	"RP-ITEM", 	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_permi",		Cmd_ItemPermi,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_distrib",		Cmd_ItemDistrib,		"RP-ITEM", 	FCVAR_UNREGISTERED);
+	
+	for (int i = 1; i <= MaxClients; i++)
+		if( IsValidClient(i) )
+			OnClientPostAdminCheck(i);
 }
 public void OnMapStart() {
 	PrecacheModel(MODEL_CASH, true);
@@ -350,7 +354,7 @@ public Action Cmd_ItemPackDebutant(int args) { //Permet d'avoir la CB, le compte
 }
 // ----------------------------------------------------------------------------
 public Action fwdOnPlayerBuild(int client, float& cooldown) {
-	if( rp_GetClientJobID(client) != 11 )
+	if( rp_GetClientJobID(client) != 211 )
 		return Plugin_Continue;
 	
 	int ent = BuidlingATM(client);
