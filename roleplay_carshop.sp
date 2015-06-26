@@ -57,7 +57,7 @@ public void OnClientPostAdminCheck(int client) {
 }
 public void OnClientDisconnect(int client) {
 	rp_UnhookEvent(client, RP_OnPlayerUse, fwdUse);
-	for (int i = MaxClients; i <= 2048; i++) {
+	for (int i = MaxClients+1; i <= 2048; i++) {
 		if( !IsValidEdict(i) )
 			continue;
 		if( !IsValidEntity(i) )
