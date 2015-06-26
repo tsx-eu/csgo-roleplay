@@ -358,10 +358,11 @@ public Action fwdOnPlayerBuild(int client, float& cooldown) {
 		return Plugin_Continue;
 	
 	int ent = BuidlingATM(client);
-	rp_ScheduleEntityInput(ent, 300.0, "Kill");
 	
-	if( ent > 0 )
+	if( ent > 0 ) {
+		rp_ScheduleEntityInput(ent, 120.0, "Kill");
 		cooldown = 120.0;
+	}
 	else 
 		cooldown = 3.0;
 	
