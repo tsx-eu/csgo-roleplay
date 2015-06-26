@@ -460,7 +460,7 @@ void VehicleRemove(int vehicle, bool explode = false) {
 	#endif
 	CreateTimer(0.1, BatchLeave, vehicle);
 	
-	for(int i=1; i<=MaxClients+1; i++)
+	for(int i=1; i<=MaxClients; i++)
 		rp_SetClientKeyVehicle(i, vehicle, false);
 	
 	if( explode ) {
