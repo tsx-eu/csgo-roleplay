@@ -24,11 +24,9 @@
 //#define DEBUG
 #define MENU_TIME_DURATION 60
 
-// TODO: Si un tueur change de job pendant contrat
 // TODO: Annuler contrat quand capture activé
 // TODO: Trouver astuce pour bypass menu vente et définir les types de contrat ici.
 // TODO: Utiliser une CVAR pour la gestion des portes
-// TODO: Afficher appartement dans enquête
 
 public Plugin myinfo = {
 	name = "Jobs: Mercenaire", author = "KoSSoLaX",
@@ -158,6 +156,9 @@ public Action fwdFrame(int client) {
 	int target = rp_GetClientInt(client, i_ToKill);
 	if( target > 0 ) {
 		rp_Effect_BeamBox(client, target, NULL_VECTOR, 255, 0, 0);
+	}
+	if(rp_GetClientJobID(client) != 41) {
+		SetContratFail(client);
 	}
 }
 public Action fwdTueurKill(int client, int attacker, float& respawn) {
@@ -312,13 +313,13 @@ void OpenSelectSkill(int client) {
 	if( !g_iKillerPoint[client][competance_tir] ) {
 		AddMenuItem(menu, "tir", "Precision Maximum");
 	}
-	if( !g_iKillerPoint[client][competance_usp] && ( !g_iKillerPoint[client][competance_awp] || !g_iKillerPoint[client][competance_pompe] )) { //On ne peut pas selectionner une arme si on en déjà choisi une auparavant
+	if( !g_iKillerPoint[client][competance_usp] && ( !g_iKillerPoint[client][competance_awp] && !g_iKillerPoint[client][competance_pompe] )) { //On ne peut pas selectionner une arme si on en déjà choisi une auparavant
 		AddMenuItem(menu, "usp", "M4 / Usp");
 	}
-	if( !g_iKillerPoint[client][competance_awp] && ( !g_iKillerPoint[client][competance_usp] || !g_iKillerPoint[client][competance_pompe] )) {
-		AddMenuItem(menu, "awp", "AWP / Tec9");
+	if( !g_iKillerPoint[client][competance_awp] && ( !g_iKillerPoint[client][competance_usp] && !g_iKillerPoint[client][competance_pompe] )) {
+		AddMenuItem(menu, "awp", "AWP / Cz75");
 	}
-	if( !g_iKillerPoint[client][competance_pompe] && ( !g_iKillerPoint[client][competance_awp] || !g_iKillerPoint[client][competance_usp] )) {
+	if( !g_iKillerPoint[client][competance_pompe] && ( !g_iKillerPoint[client][competance_awp] && !g_iKillerPoint[client][competance_usp] )) {
 		AddMenuItem(menu, "pompe", "Nova / Deagle");
 	}
 	if( !g_iKillerPoint[client][competance_invis] ) {
@@ -384,7 +385,7 @@ public int AddCompetanceToAssassin(Handle menu, MenuAction action, int client, i
 			else if( StrEqual(options, "awp", false) ){
 				g_iKillerPoint[client][competance_awp] = 1;
 				
-				int skin = GivePlayerItem(client, "weapon_deagle");
+				int skin = GivePlayerItem(client, "weapon_cz75a");
 				rp_SetClientWeaponSkin(client, skin);
 				skin = GivePlayerItem(client, "weapon_awp");
 				rp_SetClientWeaponSkin(client, skin);
@@ -392,7 +393,7 @@ public int AddCompetanceToAssassin(Handle menu, MenuAction action, int client, i
 			else if( StrEqual(options, "pompe", false) ){
 				g_iKillerPoint[client][competance_pompe] = 1;
 				
-				int skin = GivePlayerItem(client, "weapon_tec9");
+				int skin = GivePlayerItem(client, "weapon_deagle");
 				rp_SetClientWeaponSkin(client, skin);
 				skin = GivePlayerItem(client, "weapon_nova");
 				rp_SetClientWeaponSkin(client, skin);
@@ -485,8 +486,12 @@ void SetContratFail(int client, bool time = false) { // time = retro-compatibili
 	PrintToServer("SetContratFail");
 	#endif
 	
+	int jobClient = rp_GetClientJobID(client);
+	
 	if( time )
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas remplis votre contrat à temps.");
+	else if( jobClient != 41 ) // si le tueur a démissionné entre temps
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes plus mercenaire, vous ne pouvez plus remplir votre contrat.");
 	else
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes mort et n'avez pas remplis votre contrat.");
 	
@@ -496,6 +501,8 @@ void SetContratFail(int client, bool time = false) { // time = retro-compatibili
 		
 		if( time )
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N n'a pas remplis son contrat à temps.", client);
+		else if( jobClient != 41 ) // si le tueur a démissionné entre temps
+			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N n'est plus mercenaire et ne peut plus remplir votre contrat.", client);
 		else
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N a été tué et n'a pas pu remplir son contrat.", client);
 		
@@ -878,21 +885,9 @@ public Action Cmd_ItemEnquete(int args) {
 	
 	AddMenu_Blank(client, menu, "Argent: %i$ - Banque: %i$", rp_GetClientInt(target, i_Money), rp_GetClientInt(target, i_Bank));
 	
-	// TODO:
-	/* Format(tmp, sizeof(tmp), "Appartement possédé: ");
-	count = 0;
-	for(int a=0; a<MAX_KEYSELL; a++) {
-		if( g_iDoorOwner_v2[target][a] ) {
-			count++;
-			Format(tmp, sizeof(tmp), "%s %s", tmp, g_szSellingKeys[a][key_type_name]);
-		}
-	}
-	if( count == 0 ) {
-		Format(tmp, sizeof(tmp), "%s Aucun", tmp);
-	}
-	PrintToConsole(client, tmp);
-	AddMenu_Blank(menu, "%s.", tmp);*/
-	
+	int numAppart = rp_GetPlayerZoneAppart(target); //retourne 0 si la cible n'a pas d'appart
+	if(numAppart) AddMenu_Blank(client, menu, "Appartement possédé: %i", numAppart);
+	else AddMenu_Blank(client, menu, "Appartement possédé: Aucun");
 	
 	AddMenu_Blank(client, menu, "Taux d'alcoolémie: %.3f", rp_GetClientFloat(client, fl_Alcool));
 	
