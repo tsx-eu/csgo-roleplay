@@ -22,8 +22,9 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
-#define DRUG_DURATION 90.0
-#define MODEL_PLANT	"models/props/cs_office/plant01_static.mdl"
+#define DRUG_DURATION 	90.0
+#define MODEL_PLANT		"models/props/cs_office/plant01_static.mdl"
+#define ITEM_PIEDBICHE	1
 
 public Plugin myinfo = {
 	name = "Jobs: DEALER", author = "KoSSoLaX",
@@ -582,7 +583,21 @@ public Action fwdOnPlayerUse(int client) {
 	#if defined DEBUG
 	PrintToServer("BuildingPlant_use");
 	#endif
-	char tmp[64], tmp2[64];
+	
+	static char tmp[64], tmp2[64];
+	
+	if( rp_GetClientJobID(client) == 81 && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == 81 ) {
+		int itemID = ITEM_PIEDBICHE;
+		int mnt = rp_GetClientItem(client, itemID);
+		int max = 1;
+		if( mnt <  max ) {
+			rp_ClientGiveItem(client, itemID, max - mnt);
+			rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez récupéré %i %s.", max - mnt, tmp);
+		}
+	}
+	
+	
 	Format(tmp2, sizeof(tmp2), "rp_plant_%i_", client);
 	
 	float vecOrigin[3];

@@ -83,6 +83,8 @@ native bool rp_IsClientLucky(int client);
 native bool rp_IsClientNew(int client);
 native bool rp_IncrementLuck(int client);
 native bool rp_IsTargetSeen(int client, int target);
+native bool rp_IsValidDoor(int doorID);
+native bool rp_IsNight();
 // ----------------------------------------------------------------------------
 native bool rp_IsValidVehicle(int entity);
 native void rp_SetClientKeyVehicle(int client, int vehicleID, bool status=false);
@@ -119,6 +121,8 @@ native void rp_ClientDamage(int client, int damage, int attacker, char[] weapon 
 native void rp_ClientColorize(int client, int color[4]={-1,-1,-1,-1});
 native void rp_ClientSendToSpawn(int client, bool nearest = false);
 native void rp_ClientGiveKnife(int client);
+native void rp_ClientReveal(int client);
+native void rp_ClientDrawWeaponMenu(int client, int ent, bool steal);
 // ----------------------------------------------------------------------------
 native int rp_GetPlayerZoneAppart(int client); /* Numéro de l'appartement: Uniquement si au moins 1 appart. Sinon 0 */
 native int rp_GetPlayerZone(int client, float cache = 0.25); 
@@ -127,6 +131,10 @@ native int rp_GetZoneBit(int client, float cache = 300.0);
 native int rp_GetRandomCapital(int jobID);
 native int rp_GetJobCapital(int jobID);
 native int rp_SetJobCapital(int jobID, int amount);
+// ----------------------------------------------------------------------------
+native int rp_GetDoorID(int ent); // return doorID
+native void rp_SetDoorLock(int doorID, bool status); 
+native void rp_ClientOpenDoor(int client, int doorID, bool status);
 // ----------------------------------------------------------------------------
 native void rp_SetClientWeaponSkin(int client, int wepID);
 native void rp_SetWeaponGroupID(int wepID, int groupID);
