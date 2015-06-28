@@ -275,7 +275,7 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 		
 		rp_Effect_SpawnMoney(vecOrigin, true);
 		rp_SetJobCapital(91, rp_GetJobCapital(91) + rnd);
-		rp_SetJobCapital(job, rp_GetJobCapital(91) - rnd);
+		rp_SetJobCapital(job, rp_GetJobCapital(job) - rnd);
 	}
 	
 	float time;
