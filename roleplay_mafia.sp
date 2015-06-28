@@ -49,6 +49,10 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_picklock2", 	Cmd_ItemPickLock,		"RP-ITEM",	FCVAR_UNREGISTERED);	
 	// Epicier
 	RegServerCmd("rp_item_doorDefine",	Cmd_ItemDoorDefine,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	
+	for (int i = 1; i <= MaxClients; i++)
+		if( IsValidClient(i) )
+			OnClientPostAdminCheck(i);
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
@@ -70,11 +74,9 @@ public Action fwdOnPlayerUse(int client) {
 	
 	if( rp_GetClientJobID(client) == 91 && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == 91 ) {
 		
-		
-		
 		int itemID = ITEM_KITCROCHTAGE;
 		int mnt = rp_GetClientItem(client, itemID);
-		int max = GetMaxKit(client);
+		int max = GetMaxKit(client, itemID);
 		if( mnt <  max ) {
 			rp_ClientGiveItem(client, itemID, max - mnt);
 			rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
@@ -83,7 +85,7 @@ public Action fwdOnPlayerUse(int client) {
 		
 		itemID = ITEM_KITEXPLOSIF;
 		mnt = rp_GetClientItem(client, itemID);
-		max = GetMaxKit(client, 2);
+		max = GetMaxKit(client, itemID);
 		if( mnt <  max ) {
 			rp_ClientGiveItem(client, itemID, max - mnt);
 			rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
@@ -92,7 +94,7 @@ public Action fwdOnPlayerUse(int client) {
 		
 		itemID = ITEM_PIEDBICHE;
 		mnt = rp_GetClientItem(client, itemID);
-		max = 1;
+		max = GetMaxKit(client, itemID);
 		if( mnt <  max ) {
 			rp_ClientGiveItem(client, itemID, max - mnt);
 			rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
@@ -175,11 +177,18 @@ public Action Cmd_ItemPiedBiche(int args) {
 	
 	char classname[128];
 	GetEdictClassname(target, classname, sizeof(classname));
-	if( StrContains(classname, "rp_bank__") == 0 && StrContains(classname, "rp_bank_") != 0 && StrContains(classname, "rp_weaponbox_") != 0  ) {
+	if( StrContains(classname, "rp_bank__") == 0 ) {
 		ITEM_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un distributeur de billet.");
 		return Plugin_Handled;
 	}
+	
+	if( StrContains(classname, "rp_weaponbox_") != 0 && StrContains(classname, "rp_bank_") != 0 ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un distributeur de billet.");
+		return Plugin_Handled;
+	}
+	
 	
 	if( rp_IsEntitiesNear(client, target, true) == false ) {
 		ITEM_CANCEL(client, item_id);
@@ -228,7 +237,7 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	
 	
 	float vecOrigin[3];
-	GetClientEyePosition(target, vecOrigin);
+	GetClientEyePosition(client, vecOrigin);
 	vecOrigin[2] += 25.0;
 	
 	rp_ClientColorize(client);
@@ -247,7 +256,7 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 		job = rp_GetClientInt(i, i_Job);
 		
 		if( GetClientTeam(i) == CS_TEAM_CT || (job >= 1 && job <= 7 ) ) {
-			if( Entity_GetDistance(target, i) < (MAX_AREA_DIST+100) ) {
+			if( Entity_GetDistance(client, i) < (MAX_AREA_DIST+100) ) {
 				rand += (4 + Math_GetRandomPow(0, 12));
 				count++;
 				if( count >= 5 )
@@ -256,7 +265,7 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 		}
 	}
 		
-	CPrintToChat(target, "{lightblue}[TSX-RP]{default} %d billets ont été sorti du distributeur.", rand);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} %d billets ont été sorti du distributeur.", rand);
 		
 	while(rand >= 1 ) {
 		rand--;
@@ -276,7 +285,7 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	else
 		time = (STEAL_TIME * 2.0);
 	
-	CreateTimer(time, AllowStealing, target);
+	CreateTimer(time, AllowStealing, client);
 	
 	return Plugin_Continue;
 }
@@ -318,8 +327,8 @@ public Action Cmd_ItemPickLock(int args) {
 	TE_SendToAll();
 	
 	// Anti-cheat:
-	if( rp_GetClientItem(client, item_id) >= GetMaxKit(client, 2)-1 ) {
-		rp_ClientGiveItem(client, item_id, -rp_GetClientItem(client, item_id) + GetMaxKit(client, 2) - 1);
+	if( rp_GetClientItem(client, item_id) >= GetMaxKit(client, item_id)-1 ) {
+		rp_ClientGiveItem(client, item_id, -rp_GetClientItem(client, item_id) + GetMaxKit(client, item_id) - 1);
 	}
 	
 	
@@ -344,15 +353,19 @@ public Action Cmd_ItemPickLock(int args) {
 			
 	}
 	
+	float time = 7.5;
 	
-	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 7.5);
-	ServerCommand("sm_effect_panel %d 7.5 \"Tentative de crochetage de la porte...\"", client);
+	if( fast )
+		time = 1.5;
+	
+	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, time);
+	ServerCommand("sm_effect_panel %d %f \"Tentative de crochetage de la porte...\"", client, time);
 	
 	rp_ClientColorize(client, { 255, 0, 0, 255} );
 	rp_ClientReveal(client);
 	
 	Handle dp;
-	CreateDataTimer(1.0, ItemPickLockOver_maffia, dp, TIMER_DATA_HNDL_CLOSE); 
+	CreateDataTimer(time-0.25, ItemPickLockOver_maffia, dp, TIMER_DATA_HNDL_CLOSE); 
 	WritePackCell(dp, client);
 	WritePackCell(dp, door);
 	WritePackCell(dp, fast);
@@ -417,7 +430,7 @@ public Action ItemPickLockOver_maffia(Handle timer, Handle dp) {
 		}
 	}
 	else {
-		if( Math_GetRandomInt(0, 200) > ratio ) {
+		if( Math_GetRandomInt(0, 150) > (ratio*2) ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez raté votre tentative de crochetage.");
 			return Plugin_Handled;
 		}
@@ -501,7 +514,7 @@ public Action AllowStealing(Handle timer, any client) {
 	rp_SetClientBool(client, b_MaySteal, true);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez à nouveau voler.");
 }
-int GetMaxKit(int client, int type=1) {
+int GetMaxKit(int client, int itemID) {
 	#if defined DEBUG
 	PrintToServer("GetMaxKit");
 	#endif
@@ -517,7 +530,9 @@ int GetMaxKit(int client, int type=1) {
 		default:	max = 0;
 	}
 	
-	if( type == 2 )
+	if( itemID == ITEM_PIEDBICHE )
+		max = 1;
+	if( itemID == ITEM_KITEXPLOSIF )
 		max = RoundToCeil(max / 2.0);
 	
 	return max;
