@@ -162,30 +162,7 @@ public int eventChooseSkin(Handle menu, MenuAction action, int client, int param
 			rp_SetClientInt(client, i_Skin, StringToInt(szMenuItem));
 			
 			int windex = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-			int index = GetEntProp(windex, Prop_Send, "m_iItemDefinitionIndex");
-			CSGO_GetItemDefinitionNameByIndex(index, classname, sizeof(classname));
-			
-			int ammo = Weapon_GetPrimaryClip(windex);
-			int ammo1;
-			Client_GetWeaponPlayerAmmoEx(client, windex, ammo1);
-			
-			enum_ball_type t = rp_GetWeaponBallType(windex);
-			int g = rp_GetWeaponGroupID(windex);
-			bool s = rp_GetWeaponStorage(windex);
-			
-			RemovePlayerItem(client, windex);
-			AcceptEntityInput(windex, "Kill");
-			
-			int entity = GivePlayerItem(client, classname);
-			EquipPlayerWeapon(client, entity);
-			rp_SetClientWeaponSkin(client, entity);
-			
-			Weapon_SetPrimaryClip(entity, ammo);
-			Client_SetWeaponPlayerAmmoEx(client, entity, ammo1);
-			
-			rp_SetWeaponGroupID(entity, g);
-			rp_SetWeaponBallType(entity, t);
-			rp_SetWeaponStorage(entity, s);
+			rp_ClientSwitchWeapon(client, entity);
 			
 			OpenItemSkin(client, RoundToFloor(param/6.0) * 6);
 		}
