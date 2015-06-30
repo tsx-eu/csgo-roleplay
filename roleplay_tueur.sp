@@ -602,8 +602,8 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 			
 			int from = rp_GetClientInt(client, i_ToPay);
 			
-			rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - 2500);
-			rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) + 2500);
+			rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) - 2500);
+			rp_SetClientInt(from, i_Bank, rp_GetClientInt(client, i_Bank) + 2500);
 			rp_SetClientInt(client, i_KidnappedBy, 0);
 			
 			CPrintToChat(from, "{lightblue}[TSX-RP] %N a payé la rançon de 2500$.", client);
