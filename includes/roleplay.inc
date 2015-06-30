@@ -182,7 +182,7 @@ native void rp_ClientRemoveProp(int client, int target, int item_id);
 native void rp_SetBuildingData(int ent, building_prop_data typeID, int data);
 native int rp_GetBuildingData(int ent, building_prop_data typeID);
 // ----------------------------------------------------------------------------
-public bool rp_IsRemoveAble(int target) {
+stock bool rp_IsRemoveAble(int target) {
 	#if defined DEBUG
 	PrintToServer("IsRemoveAble");
 	#endif
@@ -224,7 +224,34 @@ public bool rp_IsRemoveAble(int target) {
 	
 	return false;
 }
-
+stock void rp_ClientSwitchWeapon(int client, int wepid, int target=-1) {
+	if( target == -1 )
+		target = client;
+	
+	char wepname[64];
+	int g, ammo, ammo1, index;
+	enum_ball_type wep_type = rp_GetWeaponBallType(wepid);
+	bool s = rp_GetWeaponStorage(wepid);
+	
+	g = rp_GetWeaponGroupID(wepid);
+	ammo = Weapon_GetPrimaryClip(wepid);
+	Client_GetWeaponPlayerAmmoEx(client, wepid, ammo1);
+	index = GetEntProp(wepid, Prop_Send, "m_iItemDefinitionIndex");
+	CSGO_GetItemDefinitionNameByIndex(index, wepname, sizeof(wepname));
+	
+	RemovePlayerItem(client, wepid);
+	RemoveEdict( wepid );
+	
+	wepid = GivePlayerItem(target, wepname);
+	
+	rp_SetWeaponBallType(wepid, wep_type);
+	rp_SetWeaponGroupID(wepid, g);
+	Weapon_SetPrimaryClip(wepid, ammo);
+	Client_SetWeaponPlayerAmmoEx(target, wepid, ammo1);
+	rp_SetWeaponStorage(wepid, s);
+	
+	rp_SetClientWeaponSkin(target, wepid);
+}
 // ----------------------------------------------------------------------------
 
 #define ACCESS_DENIED(%1)	CPrintToChat(%1, "{lightblue}[TSX-RP]{default} Vous n'avez pas accès à cette commande.");	return Plugin_Handled
