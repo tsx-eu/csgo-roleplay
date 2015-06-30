@@ -205,11 +205,16 @@ public Action CmdItemMask(int args) {
 	int item_id = GetCmdArgInt(args);
 	
 	
-	if( rp_GetClientInt(client, i_Mask) != 0 || GetClientTeam(client) == CS_TEAM_CT ) {
+	if( rp_GetClientInt(client, i_Mask) != 0) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous portez déjà un masque.");
 		ITEM_CANCEL(client, item_id);
 		return Plugin_Handled;
 	}
-	
+	if(rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101){
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit aux forces de l'ordre.");
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
 	int rand = Math_GetRandomInt(1, 7);
 	char model[128];
 		
