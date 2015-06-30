@@ -155,14 +155,14 @@ public int eventChooseSkin(Handle menu, MenuAction action, int client, int param
 	#endif
 	
 	if( action == MenuAction_Select ) {
-		char szMenuItem[64], classname[64];
+		char szMenuItem[64];
 		
 		if( GetMenuItem(menu, param, szMenuItem, sizeof(szMenuItem)) ) {
 
 			rp_SetClientInt(client, i_Skin, StringToInt(szMenuItem));
 			
 			int windex = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-			rp_ClientSwitchWeapon(client, entity);
+			rp_ClientSwitchWeapon(client, windex);
 			
 			OpenItemSkin(client, RoundToFloor(param/6.0) * 6);
 		}
