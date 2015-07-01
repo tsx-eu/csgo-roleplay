@@ -12,7 +12,6 @@
 
 #include <sourcemod>
 #include <sdktools>
-#include <sdkhooks>
 #include <cstrike>
 #include <csgo_items>   // https://forums.alliedmods.net/showthread.php?t=243009
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
@@ -29,7 +28,6 @@
 #define STEAL_TIME			30.0
 #define ITEM_PIEDBICHE		1
 #define ITEM_KITCROCHTAGE	2
-#define ITEM_KITEXPLOSIF	3
 
 // TODO: Gérer le mandat de perquiz correctement.
 // TODO: Déplacer le /vol.
@@ -77,6 +75,8 @@ public Action fwdOnPlayerUse(int client) {
 			rp_ClientGiveItem(client, itemID, max - mnt);
 			rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez récupéré %i %s.", max - mnt, tmp);
+			
+			FakeClientCommand(client, "say /item");
 		}
 		
 		itemID = ITEM_PIEDBICHE;
@@ -86,6 +86,8 @@ public Action fwdOnPlayerUse(int client) {
 			rp_ClientGiveItem(client, itemID, max - mnt);
 			rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez récupéré %i %s.", max - mnt, tmp);
+			
+			FakeClientCommand(client, "say /item");
 		}
 		
 	}
@@ -127,7 +129,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 	
 	
 	
-	if( rp_GetClientInt(client, i_Job) <= 104 ) {
+	if( rp_GetClientInt(client, i_Job) >= 104 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes pas assez haut gradé.");
 		return Plugin_Handled;
 	}	
@@ -251,15 +253,37 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	
 	return Plugin_Continue;
 }
-int findPlayerWeapon(int target) {
+public void OnEntityCreated(int ent, const char[] classname) {
+	g_iWeaponStolen[ent] = GetTime() - 100;
+}
+int findPlayerWeapon(int client, int target) {
 	
-	if(
-		(rp_GetClientJobID(target)==41 && rp_GetClientInt(target, i_ToKill) > 0 ) ||
-		rp_IsClientNew(target) || !rp_IsTutorialOver(target) || rp_GetClientBool(target, b_Stealing) ||
-		(rp_GetClientFloat(target, fl_LastStolen)+(STEAL_TIME*2.0) > GetGameTime() ) ||
-		(rp_GetClientFloat(target, fl_Invincible) >= GetGameTime()) ||
-		rp_GetClientJobID(target) == 181
-		) {
+	if( rp_GetClientJobID(target)==41 && rp_GetClientInt(target, i_ToKill) > 0 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler un tueur sous contrat.");
+		return -1;
+	}
+	if( rp_IsClientNew(target) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler un nouveau joueur");
+		return -1;
+	}
+	if( !rp_IsTutorialOver(target) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur n'a pas terminé le tutorial.");
+		return -1;
+	}
+	if( rp_GetClientBool(target, b_Stealing) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Quelqu'un d'autre est déjà entrain de voler ce joueur.");
+		return -1;
+	}
+	if( rp_GetClientFloat(target, fl_LastStolen)+(STEAL_TIME) > GetGameTime() ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur s'est déjà fait volé récement.");
+		return -1;
+	}
+	if( rp_GetClientFloat(target, fl_Invincible) >= GetGameTime() ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur est invincible.");
+		return -1;
+	}
+	if( rp_GetClientJobID(target) == 181 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler un autre 18th");
 		return -1;
 	}
 	
@@ -271,10 +295,12 @@ int findPlayerWeapon(int target) {
 		wepid = GetPlayerWeaponSlot( target, i );
 		if( !IsValidEdict(wepid) )
 			continue;
+		if( g_iWeaponStolen[wepid]+120 > GetTime() )
+			continue;
 		
 		return wepid;
 	}
-	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur n'a pas d'arme.");
 	return -1;
 }
 // ----------------------------------------------------------------------------
@@ -309,12 +335,11 @@ public Action Cmd_ItemPickLock(int args) {
 	}
 	
 
-	int wepid = findPlayerWeapon(target);
+	int wepid = findPlayerWeapon(client, target);
 	
 		
 	if( wepid == -1 ) {
 		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N{default} ne semble pas avoir d'arme.", target);
 		return Plugin_Handled;
 	}
 			
@@ -341,7 +366,10 @@ public Action Cmd_ItemPickLock(int args) {
 	rp_ClientColorize(client, { 255, 0, 0, 255 } );
 	rp_ClientReveal(client);
 	
-	rp_ClientGiveItem(client, item_id, -rp_GetClientItem(client, item_id));
+	// Anti-cheat:
+	if( rp_GetClientItem(client, item_id) >= GetMaxKit(client, item_id)-1 ) {
+		rp_ClientGiveItem(client, item_id, -rp_GetClientItem(client, item_id) + GetMaxKit(client, item_id) - 1);
+	}
 		
 	float StealTime = 6.0;
 	switch( job ) {
@@ -354,6 +382,7 @@ public Action Cmd_ItemPickLock(int args) {
 		
 		default:	StealTime = 6.0;
 	}
+	
 	
 	Handle dp;
 	CreateDataTimer(StealTime, ItemPickLockOver_18th, dp, TIMER_DATA_HNDL_CLOSE);
@@ -400,17 +429,14 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 	
 	int price = CS_GetWeaponPrice2( CS_AliasToWeaponID(wepdata) );
 	
-	if( !IsValidEdict(wepid) || !IsValidEntity(wepid) || 
-		!IsValidClient(target) || !rp_IsEntitiesNear(client, target, false, -1.0) ||
-		Entity_GetOwner(wepid) != target
+	if( IsValidEdict(wepid) && IsValidEntity(wepid) &&
+		IsValidClient(target) && rp_IsEntitiesNear(client, target, false, -1.0) &&
+		Entity_GetOwner(wepid) == target
 	) {
 		
 		if( rp_GetClientFloat(target, fl_LastStolen)+(60.0) < GetGameTime() && g_iWeaponStolen[wepid]+(15*60) < GetTime() )
 		{
 				
-			
-			
-			
 			if( rp_GetClientBool(target, b_IsAFK) && (rp_GetClientJobID(target) == 1 || rp_GetClientJobID(target) == 101 ) ) {
 			
 				int button = GetClientButtons(client);
@@ -462,22 +488,13 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 	
 	LogToGame("[TSX-RP] [VOL-18TH] %L a vole %s de %L", client, wepname, target);
 	
-	rp_ClientSwitchWeapon(target, client, wepid);
+	rp_ClientSwitchWeapon(target, wepid, client);
 	g_iWeaponStolen[wepid] = GetTime();
 	//g_iSuccess_last_pas_vu_pas_pris[target] = GetTime();
 	
 	FakeClientCommand(target, "use weapon_knife");
 	
 	return Plugin_Handled;
-}
-public Action TaskResetDoor(Handle timer, any doorID) {
-	#if defined DEBUG
-	PrintToServer("TaskResetDoor");
-	#endif
-	
-	
-	rp_ClientOpenDoor(0, doorID, false);
-	rp_SetDoorLock(doorID, true); 
 }
 // ----------------------------------------------------------------------------
 public Action timerAlarm(Handle timer, any door) {
@@ -497,7 +514,10 @@ public Action AllowStealing(Handle timer, any client) {
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez à nouveau voler.");
 }
 int GetMaxKit(int client, int itemID) {
-	if( client || itemID ) { }
+	if( client ) { } // Hu?
+	
+	if( itemID == ITEM_KITCROCHTAGE )
+		return 3;
 	return 1;
 }
 int CS_GetWeaponPrice2(CSWeaponID id) {

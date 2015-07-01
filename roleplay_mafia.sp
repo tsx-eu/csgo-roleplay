@@ -81,6 +81,8 @@ public Action fwdOnPlayerUse(int client) {
 			rp_ClientGiveItem(client, itemID, max - mnt);
 			rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez récupéré %i %s.", max - mnt, tmp);
+			
+			FakeClientCommand(client, "say /item");
 		}
 		
 		itemID = ITEM_KITEXPLOSIF;
@@ -90,6 +92,8 @@ public Action fwdOnPlayerUse(int client) {
 			rp_ClientGiveItem(client, itemID, max - mnt);
 			rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez récupéré %i %s.", max - mnt, tmp);
+			
+			FakeClientCommand(client, "say /item");
 		}
 		
 		itemID = ITEM_PIEDBICHE;
@@ -99,6 +103,8 @@ public Action fwdOnPlayerUse(int client) {
 			rp_ClientGiveItem(client, itemID, max - mnt);
 			rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez récupéré %i %s.", max - mnt, tmp);
+			
+			FakeClientCommand(client, "say /item");
 		}
 		
 	}
@@ -149,6 +155,9 @@ public Action Cmd_ItemPiedBiche(int args) {
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
 	
+	if( rp_GetClientJobID(client) != 91 ) {
+		return Plugin_Continue;
+	}
 	
 	if( rp_GetClientVehiclePassager(client) > 0 || Client_GetVehicle(client) > 0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible d'utiliser cet item dans une voiture.");
@@ -160,11 +169,6 @@ public Action Cmd_ItemPiedBiche(int args) {
 		ITEM_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler pour le moment.");
 		return Plugin_Handled;
-	}
-	
-
-	if( rp_GetClientJobID(client) != 91 ) {
-		return Plugin_Continue;
 	}
 		
 	int target = GetClientTarget(client);

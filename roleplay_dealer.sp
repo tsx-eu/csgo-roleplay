@@ -594,6 +594,8 @@ public Action fwdOnPlayerUse(int client) {
 			rp_ClientGiveItem(client, itemID, max - mnt);
 			rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez récupéré %i %s.", max - mnt, tmp);
+			
+			FakeClientCommand(client, "say /item");
 		}
 	}
 	
