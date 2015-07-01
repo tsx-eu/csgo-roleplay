@@ -31,7 +31,7 @@
 #define ITEM_KITEXPLOSIF	3
 
 // TODO: Gérer le mandat de perquiz correctement.
-// TODO: Déplacer le /vol.
+// TODO: Repensé le /vol pour fusionner doublon.
 
 public Plugin myinfo = {
 	name = "Jobs: Mafia", author = "KoSSoLaX",
@@ -61,9 +61,180 @@ public void OnMapStart() {
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse,	fwdOnPlayerUse);
+	rp_HookEvent(client, RP_OnPlayerSteal,	fwdOnPlayerSteal);
+	
 }
 public void OnClientDisconnect(int client) {
 	rp_UnhookEvent(client, RP_OnPlayerUse,	fwdOnPlayerUse);
+	rp_UnhookEvent(client, RP_OnPlayerSteal,	fwdOnPlayerSteal);
+	
+}
+public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
+	if( rp_GetClientJobID(client) != 91 )
+		return Plugin_Continue;
+	
+	static int RandomItem[MAX_ITEMS];
+	static char tmp[128], szQuery[1024];
+	
+	int VOL_MAX, amount, money, job, prix;
+	
+	money = rp_GetClientInt(target, i_Money);
+	VOL_MAX = (money+rp_GetClientInt(target, i_Bank)) / 200;
+	
+	Math_Clamp(VOL_MAX, 50, 5000);
+	
+	if( rp_GetClientInt(client, i_Job) >= 95 )
+		Math_Clamp(VOL_MAX, 50, 1000);
+	
+	if( rp_IsClientNew(target) )
+		amount = Math_GetRandomPow(1, VOL_MAX);
+	else
+		amount = Math_GetRandomInt(1, VOL_MAX);
+	
+	if( money <= 0 && rp_GetClientInt(client, i_Job) <= 93 && !rp_IsClientNew(target) ) {
+		amount = 0;
+		
+		for(int i = 0; i < MAX_ITEMS; i++) {
+			
+			if( rp_GetClientItem(target, i) <= 0 )
+				continue;
+				
+			job = rp_GetItemInt(i, item_type_job_id);
+			if( job == 0|| job == 91 || job == 101 || job == 181 )
+				continue;
+			if( job == 51 && !(rp_GetClientItem(target, i) >= 1 && Math_GetRandomInt(0, 1) == 1) ) // TODO: Double vérif voiture
+				continue;
+			
+			RandomItem[amount++] = i;
+		}
+		
+		if( amount == 0  ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur n'a pas d'argent, ni d'item sur lui.");
+			cooldown = 1.0;
+			return Plugin_Stop;
+		}
+		
+		int i = RandomItem[ Math_GetRandomInt(0, (amount-1)) ];
+		prix = rp_GetItemInt(i, item_type_prix) / 2;
+		
+		rp_ClientGiveItem(target, i, -1);
+		rp_ClientGiveItem(client, i, 1);
+		
+		rp_SetClientInt(client, i_LastVolAmount, prix);
+		rp_SetClientInt(client, i_LastVolTarget, target);
+		rp_SetClientInt(target, i_LastVol, client);		
+		rp_SetClientFloat(target, fl_LastVente, GetGameTime() + 10.0);
+		
+		rp_GetItemData(i, item_type_name, tmp, sizeof(tmp));
+		
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez volé: %s.", tmp);
+		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Quelqu'un vous a volé: %s.", tmp);
+					
+		LogToGame("[TSX-RP] [VOL] %L a vole %L 1 %s", client, target, tmp);
+		
+		GetClientAuthId(client, AuthId_Engine, tmp, sizeof(tmp), false);
+		Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_sell` (`id`, `steamid`, `job_id`, `timestamp`, `item_type`, `item_id`, `item_name`, `amount`) VALUES (NULL, '%s', '%i', '%i', '4', '%i', '%s', '%i');",
+			tmp, rp_GetClientJobID(client), GetTime(), i, "Vol: Objet", amount);
+
+		SQL_TQuery( rp_GetDatabase(), SQL_QueryCallBack, szQuery);
+		
+		int alpha[4];
+		alpha[1] = 255;
+		alpha[3] = 50;
+		
+		if( rp_IsNight() ) {
+			cooldown *= 1.5;
+			alpha[3] = 25;
+		}
+		else {
+			cooldown *= 2.0;
+		}
+		
+		float vecTarget[3];
+		GetClientAbsOrigin(client, vecTarget);
+
+		TE_SetupBeamRingPoint(vecTarget, 10.0, 300.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, alpha, 10, 0);
+		TE_SendToAll();
+		
+		//g_iSuccess_last_pas_vu_pas_pris[target] = GetTime();
+
+		int cpt = rp_GetRandomCapital(91);
+		rp_SetJobCapital(91, rp_GetJobCapital(91) + prix);
+		rp_SetJobCapital(cpt, rp_GetJobCapital(cpt) - prix);
+		
+	}
+	else if( money > 0 ) {
+		if( amount > money )
+			amount = money;
+			
+		rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) + amount);
+		rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) + amount);
+		rp_SetClientInt(client, i_LastVolAmount, amount);
+		rp_SetClientInt(client, i_LastVolTarget, target);
+		rp_SetClientInt(target, i_LastVol, client);
+		
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez volé %d$.", amount);
+		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Quelqu'un vous a volé %d$.", amount);
+
+		//g_iSuccess_last_mafia[client][1] = GetTime();
+		//g_iSuccess_last_pas_vu_pas_pris[target] = GetTime();
+		LogToGame("[TSX-RP] [VOL] %L a vole %L %i$", client, target, amount);
+		
+		GetClientAuthId(client, AuthId_Engine, tmp, sizeof(tmp), false);
+		Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_sell` (`id`, `steamid`, `job_id`, `timestamp`, `item_type`, `item_id`, `item_name`, `amount`) VALUES (NULL, '%s', '%i', '%i', '4', '%i', '%s', '%i');",
+			tmp, rp_GetClientJobID(client), GetTime(), 0, "Vol: Argent", amount);
+		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
+		
+		
+		
+		float vecOrigin[3], vecTarget[3], log;
+		int alpha[4];
+		alpha[1] = 255;
+		alpha[3] = 50;
+		if( rp_IsNight() ) {
+			alpha[3] = 25;
+			cooldown *= 0.5;
+		}
+		
+	
+		if( amount < 50 )
+			cooldown *= 0.5;
+		if( amount < 5 )
+			cooldown *= 0.5;
+			
+		if( amount > 500 )
+			rp_SetClientFloat(client, fl_LastVente, GetGameTime() + 10.0);
+		if( amount > 2000 )
+			rp_SetClientFloat(client, fl_LastVente, GetGameTime() + 30.0);
+		
+		GetClientAbsOrigin(client, vecOrigin);
+		
+		for(int i=1; i<=MaxClients; i++) {
+			if( !IsValidClient(i) )
+				continue;
+			if( !IsPlayerAlive(i) )
+				continue;
+			
+			if( rp_GetClientJobID(i) == 1 || i == target || i == client || rp_GetClientJobID(i) == 91 ) {
+				GetClientAbsOrigin(i, vecTarget);
+				log = Logarithm( float(amount)+10 ) * 100.0;
+				
+				
+				TE_SetupBeamRingPoint(vecOrigin, 10.0, log, g_cBeam, g_cGlow, 0, 15, 0.5, log*0.25, 0.0, alpha, 10, 0);
+				TE_SendToClient(i);
+			}
+		}
+		
+		int cpt = rp_GetRandomCapital(91);
+		rp_SetJobCapital(91, rp_GetJobCapital(91) + (amount/4));
+		rp_SetJobCapital(cpt, rp_GetJobCapital(cpt) - (amount/4));
+	}
+	else {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'a pas d'argent sur lui.");
+		cooldown = 1.0;
+	}
+	
+	return Plugin_Stop;
 }
 
 public Action fwdOnPlayerUse(int client) {

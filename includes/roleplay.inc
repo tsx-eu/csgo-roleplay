@@ -34,6 +34,7 @@ enum rp_event {
 	RP_OnPlayerBuild,
 	RP_OnPlayerUse,
 	RP_OnPlayerCommand,
+	RP_OnPlayerSteal,
 	
 	RP_EventMax
 }
@@ -55,7 +56,7 @@ typeset rp_event_enum {
 	function Action(int client, float& cooldown);						/* RP_OnPlayerBuild */
 	function Action(int client);										/* RP_OnPlayerUse */
 	function Action(int client, char[] command);						/* RP_OnPlayerCommand */
-	
+	function Action(int client, int target, float& cooldown);			/* RP_OnPlayerSteal */
 };
 native bool rp_HookEvent(int client, rp_event eventID, rp_event_enum hook, float duration=-1.0);
 native bool rp_UnhookEvent(int client, rp_event eventID, rp_event_enum hook);
