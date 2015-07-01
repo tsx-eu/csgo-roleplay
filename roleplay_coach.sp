@@ -38,6 +38,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_cutnone",		Cmd_ItemCutRemove,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_esquive",		Cmd_ItemCut_Esquive,	"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_knifetype",	Cmd_ItemKnifeType,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_permi_tir",	Cmd_ItemPermiTir,		"RP-ITEM",	FCVAR_UNREGISTERED);
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
@@ -275,3 +276,17 @@ public Action fwdWeapon(int victim, int attacker, float &damage) {
 	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------
+public Action Cmd_ItemPermiTir(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemPermiTir");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+	
+	float train = rp_GetClientFloat(client, fl_WeaponTrain) + 4.0;
+	Math_Clamp(train, 0.0, 8.0);
+	rp_SetClientFloat(client, fl_WeaponTrain, train);
+	
+	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre entraînement est maintenant de %.2f%%", (train/8.0*100.0));
+}

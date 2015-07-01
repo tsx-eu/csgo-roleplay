@@ -32,17 +32,19 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-int g_cBeam, g_cExplode;
+int g_cBeam, g_cGlow, g_cExplode;
 Handle g_hDrugTimer[65];
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
 	RegServerCmd("rp_item_drug", 		Cmd_ItemDrugs,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_engrais",		Cmd_ItemEngrais,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_piedbiche", 	Cmd_ItemPiedBiche,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	
 	RegServerCmd("rp_item_plant",		Cmd_ItemPlant,			"RP-ITEM",	FCVAR_UNREGISTERED);
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
+	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt", true);
 	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt", true);
 	PrecacheModel(MODEL_PLANT, true);
 }
@@ -277,6 +279,11 @@ public Action fwdBeuh(int client, float& speed, float& gravity) {
 	gravity -= 0.4;
 	
 	return Plugin_Changed;
+}
+public Action fwdFrozen(int client, float& speed, float& gravity) {
+	speed = 0.0;
+	gravity = 0.0; 
+	return Plugin_Stop;
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemEngrais(int args) {
@@ -696,4 +703,111 @@ public int MenuBuildingDealer(Handle menu, MenuAction action, int client, int pa
 	else if( action == MenuAction_End ) {
 		CloseHandle(menu);
 	}
+}
+// ----------------------------------------------------------------------------
+public Action Cmd_ItemPiedBiche(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemPiedBiche");
+	#endif
+	int client = GetCmdArgInt(1);
+	int item_id = GetCmdArgInt(args);
+	
+	if( rp_GetClientJobID(client) != 81 ) {
+		return Plugin_Continue;
+	}
+
+	char tmp[64];
+	rp_GetZoneData(rp_GetPlayerZone(client), zone_type_name, tmp, sizeof(tmp));
+	
+	if( StrContains(tmp, "Place de l'ind") != 0 ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être sur la place de l'indépendance pour utiliser utiliser ce pied de biche.");
+		return Plugin_Handled;
+	}
+		
+	float vecTarget[3];
+	GetClientAbsOrigin(client, vecTarget);
+	TE_SetupBeamRingPoint(vecTarget, 10.0, 500.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, {255, 0, 0, 200}, 10, 0);
+	TE_SendToAll();
+		
+	rp_ClientGiveItem(client, item_id, -rp_GetClientItem(client, item_id));
+	
+	rp_ClientColorize(client, { 255, 0, 0, 255 } );
+	rp_ClientReveal(client);
+	rp_SetClientBool(client, b_MaySteal, false);
+	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 10.0);
+		
+	ServerCommand("sm_effect_panel %d 10.0 \"Déracinage d'un plant...\"", client);
+	
+	
+	
+	CreateTimer(10.0, ItemPiedBicheOver, client);
+	
+	return Plugin_Handled;
+}
+public Action ItemPiedBicheOver(Handle timer, any client) {
+	#if defined DEBUG
+	PrintToServer("ItemPiedBicheOver");
+	#endif
+	
+	float vecOrigin[3];
+	GetClientEyePosition(client, vecOrigin);
+	vecOrigin[2] += 25.0;
+	
+	
+	rp_ClientColorize(client);
+	
+	char tmp[64];
+	rp_GetZoneData(rp_GetPlayerZone(client), zone_type_name, tmp, sizeof(tmp));
+	
+	if( StrContains(tmp, "Place de l'ind") != 0 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être sur la place de l'indépendance pour utiliser utiliser ce pied de biche.");
+		return Plugin_Handled;
+	}
+		
+	int amount = 0;
+	int ItemRand[32];	
+	
+	
+	for(int i = 0; i < MAX_ITEMS; i++) {
+		if( rp_GetItemInt(i, item_type_job_id) != 81 )
+			continue;
+		ItemRand[amount++] = i;
+	}
+		
+	int item_id = ItemRand[ Math_GetRandomInt(0, amount-1) ];
+	amount = 1;
+	if( rp_GetItemInt(item_id, item_type_prix) < 200 )
+		amount = 10;
+	
+	rp_GetItemData(item_id, item_type_name, tmp, sizeof(tmp));
+
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez trouvé %d %s", amount, tmp);
+	rp_ClientGiveItem(client, item_id, amount);
+	
+	int job = rp_GetClientInt(client, i_Job);
+	float time;
+	
+	switch(job) {
+		case 81:	time = 165.0;
+		case 82:	time = 170.0;
+		case 83:	time = 175.0;
+		case 84:	time = 180.0;
+		case 85:	time = 185.0;
+		case 86:	time = 190.0;
+		case 87:	time = 195.0;
+		default:	time = 200.0;
+	}
+	
+	CreateTimer(time, AllowStealing, client);	
+	
+	return Plugin_Handled;
+}
+public Action AllowStealing(Handle timer, any client) {
+	#if defined DEBUG
+	PrintToServer("AllowStealing");
+	#endif
+	
+	rp_SetClientBool(client, b_MaySteal, true);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez à nouveau fouiller le jardin de la place de l'indépendance.");
 }
