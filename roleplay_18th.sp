@@ -52,6 +52,7 @@ public void OnPluginStart() {
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
+	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt", true);
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse,	fwdOnPlayerUse);

@@ -98,6 +98,12 @@ native void rp_SetVehicleInt(int vehicleID, car_data typeID, int value);
 native int rp_GetVehicleInt(int vehicleID, car_data typeID);
 native void rp_SetClientVehicle(int client, int vehicleID, bool force=false);
 // ----------------------------------------------------------------------------
+native void rp_SetAppartementInt(int appartID, type_appart_bonus typeID, int value);
+native int rp_GetAppartementInt(int appartID, type_appart_bonus typeID);
+native void rp_SetClientKeyAppartement(int client, int appartID, bool status=false);
+native bool rp_GetClientKeyAppartement(int client, int appartID);
+// ----------------------------------------------------------------------------
+native void rp_Effect_PropExplode(int entityID, bool tazer = false);
 native void rp_Effect_Smoke(int client, float duration = 30.0);
 native void rp_Effect_VisionTrouble(int client, float duration = 30.0);
 native void rp_Effect_ShakingVision(int client, float duration = 30.0);
@@ -183,7 +189,7 @@ native void rp_ClientRemoveProp(int client, int target, int item_id);
 native void rp_SetBuildingData(int ent, building_prop_data typeID, int data);
 native int rp_GetBuildingData(int ent, building_prop_data typeID);
 // ----------------------------------------------------------------------------
-stock bool rp_IsRemoveAble(int target) {
+public bool rp_IsRemoveAble(int target) {
 	#if defined DEBUG
 	PrintToServer("IsRemoveAble");
 	#endif
@@ -222,6 +228,51 @@ stock bool rp_IsRemoveAble(int target) {
 	if( StrContains(classname, "rp_grave") == 0 ) {
 		return true;
 	}
+	
+	return false;
+}
+public bool rp_IsMoveAble(int ent) {
+	static char classname[64];
+	
+	if( ent <= 0 )
+		return false;
+	if( !IsValidEdict(ent) ) 
+		return false;
+	if( !IsValidEntity(ent) )
+		return false;
+	
+	if( GetEntityMoveType(ent) == MOVETYPE_NOCLIP )
+		return false;
+	
+	if( IsValidClient(ent) )  {
+		if( IsPlayerAlive(ent) ) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	
+	GetEdictClassname(ent, classname, 63);
+	
+	
+	if( StrContains(classname, "door", false) != -1 )
+		return false;
+	if( StrContains(classname, "player", false) == 0 )
+		return true;
+	if( StrContains(classname, "prop_p", false) == 0 )
+		return true;
+	if( StrContains(classname, "func_phys", false) == 0 )
+		return true;
+	if( StrContains(classname, "weapon_", false) == 0 )
+		return true;
+	if( StrContains(classname, "item_", false) == 0 )
+		return true;
+	if( StrContains(classname, "chicken", false) == 0 )
+		return true;
+	if( StrContains(classname, "bonbon_entity_2", false) == 0 )
+		return true;
 	
 	return false;
 }
@@ -502,6 +553,7 @@ enum building_prop_data {
 	BD_count,
 	BD_max,
 	BD_owner,
+	BD_Trapped,
 	
 	building_prop_data_max
 };
@@ -582,10 +634,22 @@ enum car_data {
 	
 	car_data_max,
 };
-
 enum skin_data {
 	skin_id,
 	skin_name,
 	
 	skin_max
+};
+enum type_appart_bonus {
+	appart_bonus_energy,
+	appart_bonus_heal,
+	appart_bonus_armor,
+	appart_bonus_garage,
+	appart_bonus_vitality,
+	appart_bonus_coffre,
+	appart_bonus_paye,
+	
+	appart_proprio,
+	
+	appart_bonus_max	
 };
