@@ -72,11 +72,17 @@ public void OnClientDisconnect(int client) {
 public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	if( rp_GetClientJobID(client) != 91 )
 		return Plugin_Continue;
-	
 	static int RandomItem[MAX_ITEMS];
 	static char tmp[128], szQuery[1024];
 	
+	if( rp_GetClientJobID(target) == 91 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler cette personne.");
+		cooldown = 1.0;
+		return Plugin_Handled;
+	}
+	
 	int VOL_MAX, amount, money, job, prix;
+	
 	
 	money = rp_GetClientInt(target, i_Money);
 	VOL_MAX = (money+rp_GetClientInt(target, i_Bank)) / 200;

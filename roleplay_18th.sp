@@ -70,6 +70,12 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	
 	static char tmp[128], szQuery[1024];
 	
+	if( rp_GetClientJobID(target) == 181 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler cette personne.");
+		cooldown = 1.0;
+		return Plugin_Handled;
+	}
+	
 	int VOL_MAX, amount, money;
 	
 	money = rp_GetClientInt(target, i_Money);
