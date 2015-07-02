@@ -492,7 +492,7 @@ void VehicleRemove(int vehicle, bool explode = false) {
 	if( light > 0 && IsValidEdict(light) && IsValidEntity(light) ) {
 		rp_ScheduleEntityInput(light, 1.0, "Kill");
 		AcceptEntityInput(light, "LightOff");
-		rp_SetVehicleInt(vehicle, car_light_left_id, 0);
+		rp_SetVehicleInt(vehicle, car_light_right_id, 0);
 	}
 	
 	ServerCommand("sm_effect_fading %i 2.5 1", vehicle);
