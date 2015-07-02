@@ -89,7 +89,8 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 			amount = money;
 			
 		rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) + amount);
-		rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) + amount);
+		rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amount);
+		
 		rp_SetClientInt(client, i_LastVolAmount, amount);
 		rp_SetClientInt(client, i_LastVolTarget, target);
 		rp_SetClientInt(target, i_LastVol, client);
@@ -150,7 +151,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		rp_SetJobCapital(cpt, rp_GetJobCapital(cpt) - (amount/4));
 	}
 	else {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'a pas d'argent sur lui.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'a pas d'argent sur lui.", target);
 		cooldown = 1.0;
 	}
 	
@@ -350,7 +351,9 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	return Plugin_Continue;
 }
 public void OnEntityCreated(int ent, const char[] classname) {
-	g_iWeaponStolen[ent] = GetTime() - 100;
+	if( ent > 0 ) {
+		g_iWeaponStolen[ent] = GetTime() - 100;
+	}
 }
 int findPlayerWeapon(int client, int target) {
 	

@@ -168,7 +168,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 			amount = money;
 			
 		rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) + amount);
-		rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) + amount);
+		rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amount);
 		rp_SetClientInt(client, i_LastVolAmount, amount);
 		rp_SetClientInt(client, i_LastVolTarget, target);
 		rp_SetClientInt(target, i_LastVol, client);
@@ -230,7 +230,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		rp_SetJobCapital(cpt, rp_GetJobCapital(cpt) - (amount/4));
 	}
 	else {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'a pas d'argent sur lui.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'a pas d'argent sur lui.", target);
 		cooldown = 1.0;
 	}
 	

@@ -463,6 +463,8 @@ void VehicleRemove(int vehicle, bool explode = false) {
 	for(int i=1; i<=MaxClients; i++)
 		rp_SetClientKeyVehicle(i, vehicle, false);
 	
+	rp_SetVehicleInt(vehicle, car_owner, -1);
+	
 	if( explode ) {
 		IgniteEntity(vehicle, 1.75);
 		// Bim, boum badaboum.
