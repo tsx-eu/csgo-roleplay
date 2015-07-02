@@ -885,9 +885,21 @@ public Action Cmd_ItemEnquete(int args) {
 	
 	AddMenu_Blank(client, menu, "Argent: %i$ - Banque: %i$", rp_GetClientInt(target, i_Money), rp_GetClientInt(target, i_Bank));
 	
-	int numAppart = rp_GetPlayerZoneAppart(target); //retourne 0 si la cible n'a pas d'appart
-	if(numAppart) AddMenu_Blank(client, menu, "Appartement possédé: %i", numAppart);
-	else AddMenu_Blank(client, menu, "Appartement possédé: Aucun");
+	count = 0;
+	Format(tmp, sizeof(tmp), "Appartement possédé: ");
+	for (int i = 1; i <= 48; i++) {
+		if( rp_GetClientKeyAppartement(client, i) ) {
+			count++;
+			if( count > 1 )
+				Format(tmp, sizeof(tmp), "%s, ", tmp);
+			Format(tmp, sizeof(tmp), "%s%d", tmp, i);
+		}	
+	}
+	
+	if( count == 0 )
+		Format(tmp, sizeof(tmp), "%s Aucun", tmp);
+	
+	AddMenu_Blank(client, menu, tmp);
 	
 	AddMenu_Blank(client, menu, "Taux d'alcoolémie: %.3f", rp_GetClientFloat(client, fl_Alcool));
 	

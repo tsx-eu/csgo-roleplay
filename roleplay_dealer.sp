@@ -386,14 +386,10 @@ int BuildingPlant(int client, int type) {
 		}
 	}
 	
-	// TODO
-	/*
-	int appart = getZoneAppart(client);
-	if( appart > 0 && g_iDoorOwner_v2[client][appart] ) {
-		if( g_iAppartBonus[appart][appart_bonus_coffre] == 1 ) {
-			max += 1;
-		}
-	}*/
+	int appart = rp_GetPlayerZoneAppart(client);
+	if( appart > 0 && rp_GetAppartementInt(appart, appart_bonus_coffre) ) {
+		max += 1;
+	}
 	
 	if( count >= max ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez trop de plants actifs.");

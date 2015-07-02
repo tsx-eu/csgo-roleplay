@@ -411,15 +411,9 @@ int BuildingCashMachine(int client) {
 		max = 15;
 	
 	int appart = rp_GetPlayerZoneAppart(client);
-	if( appart ) {
+	if( appart > 0 && rp_GetAppartementInt(appart, appart_bonus_coffre) ) {
+		max += 3;
 	}
-	// TODO:
-	/*
-	if( appart > 0 && g_iDoorOwner_v2[client][appart] ) {
-		if( g_iAppartBonus[appart][appart_bonus_coffre] == 1 ) {
-			max += 3;
-		}
-	}*/
 	
 	if( count >= max ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez trop de machine active.");

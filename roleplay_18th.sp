@@ -254,14 +254,15 @@ public Action Cmd_ItemPiedBiche(int args) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez etre plus proche de la voiture pour la voler.");
 		return Plugin_Handled;
 	}
-		
-	/* TODO:
-	int appart = getZoneAppart(g_iVehicleData[target][car_owner]);
-	if( appart > 0 && g_iAppartBonus[appart][appart_bonus_garage] ) {
+	
+	
+	int appart = rp_GetPlayerZoneAppart( rp_GetVehicleInt(target, car_owner) );
+	if( appart > 0 && rp_GetAppartementInt(appart, appart_bonus_garage) ) {
 		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler cette voiture.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler cette voiture, le propriétaire est dans son appartement.");
 		return Plugin_Handled;
-	}*/
+	}
+	
 	if( rp_GetZoneBit(rp_GetPlayerZone(target)) & BITZONE_PARKING ) {
 		ITEM_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler cette voiture sur un parking.");

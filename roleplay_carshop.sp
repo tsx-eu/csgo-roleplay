@@ -562,13 +562,11 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 					break;
 				}
 				
-				// TODO:
-				/*
-				int can = getZoneAppart(client);
-				if( can >= 0 && g_iAppartBonus[can][appart_bonus_garage] ) {
+				int appart = rp_GetPlayerZoneAppart(client);
+				if( appart > 0 && rp_GetAppartementInt(appart, appart_bonus_garage) ) {
 					IsNear = true;
 					break;
-				}*/
+				}
 			}
 		}
 	}
