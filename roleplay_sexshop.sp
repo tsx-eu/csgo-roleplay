@@ -51,13 +51,20 @@ public Action Cmd_ItemPreserv(int args) {
 	PrintToServer("Cmd_ItemPreserv");
 	#endif
 	int client = GetCmdArgInt(1);
+	int item_id = GetCmdArgInt(args);
 	
-	int kevlar = rp_GetClientInt(client, i_Kevlar) + 5;
+	int kevlar = rp_GetClientInt(client, i_Kevlar);
+	if( kevlar >= 250 ) {
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
+	
+	kevlar += 5;
 	if( kevlar > 250 )
 		kevlar = 250;
 	
 	rp_SetClientInt(client, i_Kevlar, kevlar);
-	
+	return Plugin_Handled;
 }
 public Action fwdInvincible(int client, int attacker, float& damage) {
 	damage = 0.0;
