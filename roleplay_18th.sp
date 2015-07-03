@@ -12,8 +12,8 @@
 
 #include <sourcemod>
 #include <sdktools>
+#include <sdkhooks>
 #include <cstrike>
-#include <csgo_items>   // https://forums.alliedmods.net/showthread.php?t=243009
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
 #include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
@@ -29,9 +29,6 @@
 #define ITEM_PIEDBICHE		1
 #define ITEM_KITCROCHTAGE	2
 
-// TODO: Gérer le mandat de perquiz correctement.
-// TODO: Déplacer le /vol.
-
 public Plugin myinfo = {
 	name = "Jobs: 18th", author = "KoSSoLaX",
 	description = "RolePlay - Jobs: 18th",
@@ -39,6 +36,7 @@ public Plugin myinfo = {
 };
 
 int g_iWeaponStolen[2049];
+int g_iStolenAmountTime[65];
 
 int g_cBeam, g_cGlow;
 // ----------------------------------------------------------------------------
@@ -54,10 +52,10 @@ public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt", true);
 }
+// ----------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse,	fwdOnPlayerUse);
-	rp_HookEvent(client, RP_OnPlayerSteal,	fwdOnPlayerSteal);
-	
+	rp_HookEvent(client, RP_OnPlayerSteal,	fwdOnPlayerSteal);	
 }
 public void OnClientDisconnect(int client) {
 	rp_UnhookEvent(client, RP_OnPlayerUse,	fwdOnPlayerUse);
@@ -203,7 +201,7 @@ public Action fwdFrozen(int client, float& speed, float& gravity) {
 	return Plugin_Stop;
 }
 public Action fwdAccelerate(int client, float& speed, float& gravity) {
-	speed += 0.4;
+	speed += 0.5;
 	return Plugin_Changed;
 }
 // ----------------------------------------------------------------------------
@@ -233,7 +231,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 	
 	
 	
-	if( rp_GetClientInt(client, i_Job) >= 104 ) {
+	if( rp_GetClientInt(client, i_Job) >= 184 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes pas assez haut gradé.");
 		return Plugin_Handled;
 	}	
@@ -295,8 +293,6 @@ public Action Cmd_ItemPiedBiche(int args) {
 	return Plugin_Handled;
 
 }
-
-
 public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	#if defined DEBUG
 	PrintToServer("ItemPiedBicheOver");
@@ -351,7 +347,9 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 		}
 	}
 	
-	
+	rp_ClientColorize(client);
+	rp_ClientReveal(client);
+	rp_SetClientBool(client, b_MaySteal, true);
 	rp_SetClientKeyVehicle(client, target, true);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez maintenant les clés de cette voiture.");
 	
@@ -360,55 +358,8 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 }
 public void OnEntityCreated(int ent, const char[] classname) {
 	if( ent > 0 ) {
-		g_iWeaponStolen[ent] = GetTime() - 100;
+		g_iWeaponStolen[ent] = GetTime() - 110;
 	}
-}
-int findPlayerWeapon(int client, int target) {
-	
-	if( rp_GetClientJobID(target)==41 && rp_GetClientInt(target, i_ToKill) > 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler un tueur sous contrat.");
-		return -1;
-	}
-	if( rp_IsClientNew(target) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler un nouveau joueur");
-		return -1;
-	}
-	if( !rp_IsTutorialOver(target) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur n'a pas terminé le tutorial.");
-		return -1;
-	}
-	if( rp_GetClientBool(target, b_Stealing) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Quelqu'un d'autre est déjà entrain de voler ce joueur.");
-		return -1;
-	}
-	if( rp_GetClientFloat(target, fl_LastStolen)+(STEAL_TIME) > GetGameTime() ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur s'est déjà fait volé récement.");
-		return -1;
-	}
-	if( rp_GetClientFloat(target, fl_Invincible) >= GetGameTime() ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur est invincible.");
-		return -1;
-	}
-	if( rp_GetClientJobID(target) == 181 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler un autre 18th");
-		return -1;
-	}
-	
-	int wepid;
-	for( int i = 0; i < 5; i++ ) {
-		if( i == 2 )
-			continue;
-			
-		wepid = GetPlayerWeaponSlot( target, i );
-		if( !IsValidEdict(wepid) )
-			continue;
-		if( g_iWeaponStolen[wepid]+120 > GetTime() )
-			continue;
-		
-		return wepid;
-	}
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur n'a pas d'arme.");
-	return -1;
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemPickLock(int args) {
@@ -468,28 +419,39 @@ public Action Cmd_ItemPickLock(int args) {
 	TE_SetupBeamRingPoint(vecEnd, 30.0, 40.0, g_cBeam, 0, 0, 10, 1.0, 20.0, 1.0, alpha, 1, 0);
 	TE_SendToAll();
 	
-	rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, 5.0);
 	
 	rp_ClientColorize(client, { 255, 0, 0, 255 } );
 	rp_ClientReveal(client);
 	
-	// Anti-cheat:
+	// Anti-cheat: 
 	if( rp_GetClientItem(client, item_id) >= GetMaxKit(client, item_id)-1 ) {
 		rp_ClientGiveItem(client, item_id, -rp_GetClientItem(client, item_id) + GetMaxKit(client, item_id) - 1);
 	}
-		
-	float StealTime = 6.0;
+	
+	char wepname[64];
+	GetEdictClassname(wepid, wepname, sizeof(wepname));
+	ReplaceString(wepname, sizeof(wepname), "weapon_", "");	
+	int price = CS_GetWeaponPrice(client, CS_AliasToWeaponID(wepname) );
+	
+	float StealTime = (Logarithm(float(price), 2.0) * 0.5) - 2.0;
+	
 	switch( job ) {
-		case 181:	StealTime = 3.0;
-		case 182:	StealTime = 3.5;
-		case 183:	StealTime = 4.0; // Haut gradé
-		case 184:	StealTime = 4.5; // Pro
-		case 185:	StealTime = 5.0; // Narmol
-		case 186:	StealTime = 5.5; // Apprenti
+		case 181:	StealTime += 0.0;
+		case 182:	StealTime += 0.1;
+		case 183:	StealTime += 0.2; // Haut gradé
+		case 184:	StealTime += 0.3; // Pro
+		case 185:	StealTime += 0.4; // Narmol
+		case 186:	StealTime += 0.5; // Apprenti
 		
-		default:	StealTime = 6.0;
+		default:	StealTime += 0.5;
 	}
 	
+	if( !rp_IsTargetSeen(target, client) ) {
+		StealTime -= 0.5;
+	}	
+	
+	rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, StealTime);
+	rp_HookEvent(client, RP_PreTakeDamage, fwdDamage, StealTime);
 	
 	Handle dp;
 	CreateDataTimer(StealTime, ItemPickLockOver_18th, dp, TIMER_DATA_HNDL_CLOSE);
@@ -499,7 +461,7 @@ public Action Cmd_ItemPickLock(int args) {
 	
 	rp_SetClientBool(client, b_MaySteal, false);
 	rp_SetClientBool(target, b_Stealing, true);
-	
+	SDKHook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 	
 	return Plugin_Handled;
 }
@@ -517,24 +479,32 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 	int wepid = EntRefToEntIndex(ReadPackCell(dp));
 	
 	CreateTimer(STEAL_TIME/2.0, AllowStealing, client);
-	rp_SetClientBool(target, b_Stealing, false);
+	SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
+	
 	
 	rp_ClientColorize(client);
 	rp_ClientReveal(client);
 	
-	
-	
+	if( rp_GetClientBool(target, b_Stealing) == false ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le joueur s'est débatu, le vol a échoué.");
+		return Plugin_Handled;
+	}
+	rp_SetClientBool(target, b_Stealing, false);
+	g_iStolenAmountTime[target]++;
+	CreateTimer(300.0, RemoveStealAmount, target);
 	
 	if ( rp_GetClientFloat(target, fl_Invincible) >= GetGameTime() )
 		return Plugin_Handled;
-		
-	char wepname[64], wepdata[64];
-	if( IsValidEdict(wepid) && IsValidEntity(wepid) ) {
-		int index = GetEntProp(wepid, Prop_Send, "m_iItemDefinitionIndex");
-		CSGO_GetItemDefinitionNameByIndex(index, wepname, sizeof(wepname));
+	
+	if( !rp_IsTargetSeen(target, client) ) {
+		rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, 5.0);
+		rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, 1.0);
 	}
 	
-	int price = CS_GetWeaponPrice2( CS_AliasToWeaponID(wepdata) );
+	char wepname[64];
+	GetEdictClassname(wepid, wepname, sizeof(wepname));
+	ReplaceString(wepname, sizeof(wepname), "weapon_", "");	
+	int price = CS_GetWeaponPrice(client, CS_AliasToWeaponID(wepname) );
 	
 	if( IsValidEdict(wepid) && IsValidEntity(wepid) &&
 		IsValidClient(target) && rp_IsEntitiesNear(client, target, false, -1.0) &&
@@ -595,13 +565,78 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 	
 	LogToGame("[TSX-RP] [VOL-18TH] %L a vole %s de %L", client, wepname, target);
 	
-	rp_ClientSwitchWeapon(target, wepid, client);
+	RemovePlayerItem(target, wepid);
+	EquipPlayerWeapon(client, wepid);
+	
 	g_iWeaponStolen[wepid] = GetTime();
 	//g_iSuccess_last_pas_vu_pas_pris[target] = GetTime();
 	
 	FakeClientCommand(target, "use weapon_knife");
 	
 	return Plugin_Handled;
+}
+int findPlayerWeapon(int client, int target) {
+	
+	if( rp_GetClientJobID(target)==41 && rp_GetClientInt(target, i_ToKill) > 0 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler un tueur sous contrat.");
+		return -1;
+	}
+	if( rp_IsClientNew(target) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler un nouveau joueur");
+		return -1;
+	}
+	if( !rp_IsTutorialOver(target) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur n'a pas terminé le tutorial.");
+		return -1;
+	}
+	if( rp_GetClientBool(target, b_Stealing) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Quelqu'un d'autre est déjà entrain de voler ce joueur.");
+		return -1;
+	}
+	
+	if( (g_iStolenAmountTime[target] >= 3 && rp_GetClientFloat(target, fl_LastStolen)+(STEAL_TIME) > GetGameTime()) || (g_iStolenAmountTime[target] >= 5) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur s'est déjà fait volé récement.");
+		return -1;
+	}
+	if( rp_GetClientFloat(target, fl_Invincible) >= GetGameTime() ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur est invincible.");
+		return -1;
+	}
+	if( rp_GetClientJobID(target) == 181 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler un autre 18th");
+		return -1;
+	}
+	
+	int wepid;
+	for( int i = 0; i < 5; i++ ) {
+		if( i == 2 )
+			continue;
+			
+		wepid = GetPlayerWeaponSlot( target, i );
+		if( !IsValidEdict(wepid) )
+			continue;
+		//if( g_iWeaponStolen[wepid]+120 > GetTime() )
+		//	continue;
+		
+		return wepid;
+	}
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur n'a pas d'arme.");
+	return -1;
+}
+public Action OnWeaponDrop(int client, int weapon) {
+	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas lâcher vos armes pendant qu'un 18th vous vol, tirez dessus !");
+	return Plugin_Handled;
+}
+public Action fwdDamage(int client, int attacker, float& damage) {
+	if( damage >= 5.0 ) {
+		if( Math_GetRandomInt(0, 8) == 4 && rp_GetClientBool(attacker, b_Stealing) == true ) {
+			rp_SetClientBool(attacker, b_Stealing, false);
+			rp_ClientColorize(client);
+			rp_ClientReveal(client);
+		}
+	}
+	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------
 public Action timerAlarm(Handle timer, any door) {
@@ -620,20 +655,25 @@ public Action AllowStealing(Handle timer, any client) {
 	rp_SetClientBool(client, b_MaySteal, true);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez à nouveau voler.");
 }
-int GetMaxKit(int client, int itemID) {
-	if( client ) { } // Hu?
-	
-	if( itemID == ITEM_KITCROCHTAGE )
-		return 3;
-	return 1;
+public Action RemoveStealAmount(Handle time, any client) {
+	g_iStolenAmountTime[client]--;
 }
-int CS_GetWeaponPrice2(CSWeaponID id) {
+int GetMaxKit(int client, int itemID) {
 	
-	static const int priceList[CSWeaponID] = {
-		0, 500, 200, 1700, 300, 2000, 0, 1050, 3300, 300, 500, 500, 1200, 4200, 2000, 2250, 500, 4750,
-		1500, 5200, 1700, 3100, 1250, 5000, 200, 700, 3500, 2700, 0, 2350, 2200, 650, 1000, 1250, 2000,
-		1400, 1800, 5700, 1200, 500, 400, 200, 1700, 1250, 1200, 300, 5000, 5000, 3000, 2750, 0, 400,
-		50, 600, 400 };
-
-	return priceList[id];
+	if( itemID == ITEM_KITCROCHTAGE ) {
+		int job = rp_GetClientInt(client, i_Job);
+		switch( job ) {
+			case 181:	return 5;
+			case 182:	return 5;
+			case 183:	return 4; // Haut gradé
+			case 184:	return 3; // Pro
+			case 185:	return 2; // Narmol
+			case 186:	return 1; // Apprenti
+			
+			default:	return 2;
+		}
+		return 2;
+	}
+	
+	return 1;
 }

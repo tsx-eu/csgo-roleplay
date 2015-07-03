@@ -388,6 +388,11 @@ public Action Cmd_ItemPiedBiche(int args) {
 		
 	ServerCommand("sm_effect_panel %d 15.0 \"Crochetage du distributeur...\"", client);
 	
+	CreateTimer(2.5, timerAlarm, target); 
+	CreateTimer(7.5, timerAlarm, target); 
+	CreateTimer(12.5, timerAlarm, target); 
+	
+	
 	rp_ClientColorize(client, { 255, 0, 0, 255 } );
 	rp_ClientReveal(client);
 		
