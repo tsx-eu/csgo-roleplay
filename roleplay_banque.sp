@@ -446,7 +446,7 @@ int BuidlingATM(int client) {
 	
 	CreateTimer(3.0, BuildingATM_post, ent);
 	rp_SetBuildingData(ent, BD_owner, client);
-	return 1;
+	return ent;
 }
 
 public Action BuildingATM_post(Handle timer, any entity) {
