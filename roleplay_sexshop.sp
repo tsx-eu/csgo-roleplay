@@ -87,6 +87,7 @@ public Action Cmd_ItemPoupee(int args) {
 	
 	rp_HookEvent(client, RP_PreTakeDamage, fwdInvincible, 5.0);
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 5.0);
+	rp_SetClientFloat(client, fl_Invincible, GetGameTime() + 5.0);
 	
 	int heal = GetClientHealth(client) + 100;
 	int kevlar = rp_GetClientInt(client, i_Kevlar) + 25;
@@ -97,9 +98,7 @@ public Action Cmd_ItemPoupee(int args) {
 		heal = 500;
 		
 	SetEntityHealth(client, heal);
-	rp_SetClientInt(client, i_Kevlar, kevlar);
-	
-	
+	rp_SetClientInt(client, i_Kevlar, kevlar);	
 	
 	float vecTarget[3];
 	GetClientAbsOrigin(client, vecTarget);
