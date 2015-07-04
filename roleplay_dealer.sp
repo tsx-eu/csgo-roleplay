@@ -282,7 +282,6 @@ public Action fwdBeuh(int client, float& speed, float& gravity) {
 }
 public Action fwdFrozen(int client, float& speed, float& gravity) {
 	speed = 0.0;
-	gravity = 0.0; 
 	return Plugin_Stop;
 }
 // ----------------------------------------------------------------------------

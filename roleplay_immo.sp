@@ -228,7 +228,7 @@ public Action Cmd_ItemProp(int args) {
 	
 	float volume = (max[0]-min[0]) * (max[1]-min[1]) * (max[2]-min[2]);
 	int heal = RoundToCeil(volume/250.0)+10;
-	
+	position[2] += max[2];
 	Handle trace = TR_TraceHullEx(position, position, min, max, MASK_SOLID);
 	if( TR_DidHit(trace) ) {
 		delete trace;

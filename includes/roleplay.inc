@@ -70,7 +70,6 @@ native void rp_SetClientBool(int client, bool_user_data prop, bool value);
 native void rp_SetClientFloat(int client, float_user_data prop, float value);
 native void rp_SetClientString(int client, sz_user_data prop, char[] value, int length);
 native void rp_GetClientString(int client, sz_user_data prop, char[] value, int length);
-
 // ----------------------------------------------------------------------------
 native int rp_GetClientJobID(int client); /* return le numéro du job auquel il appartient. 1, 11, 21, 31... */
 native int rp_GetClientGroupID(int client); /* return le numéro du groupe auquel il appartient. 1, 11, 21, 31... */
@@ -127,6 +126,7 @@ native void rp_ClientPoison(int client, float time=10.0, int attacker=0);
 native void rp_ClientDamage(int client, int damage, int attacker, char[] weapon = "point_hurt", int damageType = DMG_GENERIC);
 native void rp_ClientColorize(int client, int color[4]={-1,-1,-1,-1});
 native void rp_ClientSendToSpawn(int client, bool nearest = false);
+native void rp_ClientResetSkin(int client);
 native void rp_ClientGiveKnife(int client);
 native void rp_ClientReveal(int client);
 native void rp_ClientDrawWeaponMenu(int client, int ent, bool steal);
@@ -160,6 +160,7 @@ public int rp_GetWeaponSkinInt(int skinID, int typeID) {
 	rp_GetWeaponSkinData(skinID, view_as<skin_data>typeID, tmp, sizeof(tmp));
 	return StringToInt(tmp);
 }
+native void rp_GetLocationData(int zoneID, location_type typeID, char[] str, int length);
 native void rp_GetZoneData(int zoneID, zone_type typeID, char[] str, int length);
 native void rp_GetJobData(int jobID, rp_job_type typeID, char[] str, int length);
 native void rp_GetItemData(int itemID, rp_item_type typeID, char[] str, int length);
@@ -176,6 +177,11 @@ public int rp_GetJobInt(int jobID, int typeID) {
 public int rp_GetZoneInt(int zoneID, int typeID) {
 	char tmp[32];
 	rp_GetZoneData(zoneID, view_as<zone_type>typeID, tmp, sizeof(tmp));
+	return StringToInt(tmp);
+}
+public int rp_GetLocationInt(int zoneID, int typeID) {
+	char tmp[32];
+	rp_GetLocationData(zoneID, view_as<location_type>typeID, tmp, sizeof(tmp));
 	return StringToInt(tmp);
 }
 // ----------------------------------------------------------------------------
@@ -618,6 +624,16 @@ enum zone_type {
 	zone_type_bit,
 	
 	zone_type_max
+};
+enum location_type {
+	location_type_base = 0,
+	location_type_message,
+	location_type_origin_x,
+	location_type_origin_y,
+	location_type_origin_z,
+	
+	location_type_map,
+	location_type_max
 };
 enum car_data {
 	car_light_left_id = 0,

@@ -533,11 +533,16 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 				rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) + amount);
 				rp_SetClientInt(target, i_Money, rp_GetClientInt(client, i_Money) - amount);
 			}
-				
+			else {
+				PrintToConsole(client, "COUCOU KIM --> 2");
+			}
 			int cpt = rp_GetRandomCapital(181);
 			rp_SetJobCapital(181, (rp_GetJobCapital(181) +  (price/2) ) );
 			rp_SetJobCapital(cpt, (rp_GetJobCapital(cpt) -  (price/2) ) );
 				
+		}
+		else {
+			PrintToConsole(client, "COUCOU KIM --> 1");
 		}
 	}
 	else {
