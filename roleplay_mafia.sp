@@ -30,7 +30,6 @@
 #define ITEM_KITCROCHTAGE	2
 #define ITEM_KITEXPLOSIF	3
 
-// TODO: Gérer le mandat de perquiz correctement.
 // TODO: Repensé le /vol pour fusionner doublon.
 
 public Plugin myinfo = {
@@ -44,7 +43,6 @@ int g_iDoorDefine_ALARM[2049], g_iDoorDefine_LOCKER[2049];
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
 	RegServerCmd("rp_item_piedbiche", 	Cmd_ItemPiedBiche,		"RP-ITEM",	FCVAR_UNREGISTERED);	
-	RegServerCmd("rp_item_mandat", 		Cmd_ItemPickLock,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_picklock", 	Cmd_ItemPickLock,		"RP-ITEM",	FCVAR_UNREGISTERED); 
 	RegServerCmd("rp_item_picklock2", 	Cmd_ItemPickLock,		"RP-ITEM",	FCVAR_UNREGISTERED);	
 	// Epicier

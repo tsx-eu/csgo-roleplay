@@ -82,7 +82,15 @@ char g_szTribunal_DATA[65][tribunal_max][64];
 public void OnPluginStart() {
 	RegConsoleCmd("sm_jugement", Cmd_Jugement);
 	
+	RegServerCmd("rp_item_mandat", 		Cmd_ItemPickLock,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_ratio",		Cmd_ItemRatio,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_SendToJail",		Cmd_SendToJail,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	for (int i = 1; i <= MaxClients; i++)
+		if( IsValidClient(i) )
+			OnClientPostAdminCheck(i);
+}
+public Action Cmd_SendToJail(int args) {
+	SendPlayerToJail(GetCmdArgInt(1));
 }
 public void OnMapStart() {
 	PrecacheModel(MODEL_PRISONNIER, true);
@@ -93,7 +101,8 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerSpawn, fwdSpawn);
 }
 public Action fwdSpawn(int client) {
-	SendPlayerToJail(client, 0);
+	if( rp_GetClientInt(client, i_JailTime) > 0 )
+		SendPlayerToJail(client, 0);
 	return Plugin_Continue;
 }
 public void OnClientDisconnect(int client) {
@@ -158,11 +167,10 @@ public Action Cmd_Cop(int client) {
 	if( (job == 107 || job == 108 || job == 109 ) && rp_GetZoneInt(zone, zone_type_type) != 101 ) { // GOS, Marshall, ONU dans Tribunal
 		ACCESS_DENIED(client);
 	}
-	if( !rp_GetClientBool(client, b_MaySteal) || !rp_GetClientBool(client, b_Stealing) ) { // Pendant un vol
+	if( !rp_GetClientBool(client, b_MaySteal) || rp_GetClientBool(client, b_Stealing) ) { // Pendant un vol
 		ACCESS_DENIED(client);
 	}
-		
-		
+	
 	float origin[3], vecAngles[3];
 	GetClientAbsOrigin(client, origin);
 	GetClientEyeAngles(client, vecAngles);
@@ -200,7 +208,7 @@ public Action Cmd_Vis(int client) {
 	if( rp_GetClientVehiclePassager(client) > 0 || Client_GetVehicle(client) > 0 || rp_GetClientInt(client, i_Sickness) ) { // En voiture, ou très malade
 		ACCESS_DENIED(client);
 	}
-	if( !rp_GetClientBool(client, b_MaySteal) || !rp_GetClientBool(client, b_Stealing) ) { // Pendant un vol
+	if( !rp_GetClientBool(client, b_MaySteal) || rp_GetClientBool(client, b_Stealing) ) { // Pendant un vol
 		ACCESS_DENIED(client);
 	}
 	
@@ -345,7 +353,7 @@ public Action Cmd_Tazer(int client) {
 			rp_GetZoneData(Tzone, zone_type_name, tmp, sizeof(tmp));
 			LogToGame("[TSX-RP] [TAZER] %L a supprimé un plant de %L dans %s", client, owner, tmp);
 			
-			reward = 250;
+			reward = 100;
 			if( rp_GetBuildingData(target, BD_started)+120 < GetTime() ) {
 				reward = 1000;
 			}
@@ -360,7 +368,6 @@ public Action Cmd_Tazer(int client) {
 			
 			rp_Effect_Tazer(client, target);
 			rp_Effect_PropExplode(target, true);
-			Entity_SetClassName(target, "toRemove");
 			AcceptEntityInput(target, "Kill");
 			
 			rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + reward);
@@ -391,7 +398,7 @@ public Action Cmd_InJail(int client) {
 		zone = rp_GetZoneBit(rp_GetPlayerZone(i));
 		if( zone & BITZONE_JAIL ||  zone & BITZONE_LACOURS ||  zone & BITZONE_HAUTESECU ) {
 			
-			Format(tmp, sizeof(tmp), "%N  - %d minutes", i, rp_GetClientInt(i, i_JailTime) );
+			Format(tmp, sizeof(tmp), "%N  - %.1f heures", i, rp_GetClientInt(i, i_JailTime)/60.0 );
 			AddMenuItem(menu, tmp, tmp,	ITEMDRAW_DISABLED);
 		}
 	}
@@ -425,10 +432,6 @@ public Action Cmd_Jail(int client) {
 	int Tbit = rp_GetZoneBit(Tzone);
 	
 	if( Entity_GetDistance(client, target) > MAX_AREA_DIST*3 ) {
-		ACCESS_DENIED(client);
-	}
-	
-	if( GetClientTeam(target) == CS_TEAM_T && !(job == 101 || job == 102 || job == 103 ) ) {
 		ACCESS_DENIED(client);
 	}
 	
@@ -488,6 +491,9 @@ public Action Cmd_Jail(int client) {
 		return Plugin_Handled;
 	}
 	
+	if( GetClientTeam(target) == CS_TEAM_CT && !(job == 101 || job == 102 || job == 103 ) ) {
+		ACCESS_DENIED(client);
+	}
 	
 	if( rp_GetClientInt(target, i_JailTime) <= 60 )
 		rp_SetClientInt(target, i_JailTime, 60);
@@ -619,13 +625,6 @@ public Action Cmd_Push(int client) {
 	cOrigin[2] -= 100.0;
 
 	float f_Velocity[3];
-	/*f_Velocity[0] = tOrigin[0] - cOrigin[0];
-	f_Velocity[1] = tOrigin[1] - cOrigin[1];
-	f_Velocity[2] = tOrigin[2] - cOrigin[2];
-	float f_Length = GetVectorLength(f_Velocity);
-	f_Velocity[0] = f_Velocity[0] / f_Length * 500.0;
-	f_Velocity[1] = f_Velocity[1] / f_Length * 500.0;
-	f_Velocity[2] = f_Velocity[2] / f_Length * 500.0;*/
 	SubtractVectors(tOrigin, cOrigin, f_Velocity);
 	NormalizeVector(f_Velocity, f_Velocity);
 	ScaleVector(f_Velocity, 500.0);
@@ -637,7 +636,7 @@ public Action Cmd_Push(int client) {
 public Action Cmd_Audience(int client) {
 	int job = rp_GetClientInt(client, i_Job);
 		
-	if( rp_GetClientJobID(client) != 1 && job != 101 && job != 102 && job != 103 && job != 104 && job != 105 && job != 106 ) {
+	if( job != 101 && job != 102 && job != 103 && job != 104 && job != 105 && job != 106 ) {
 		ACCESS_DENIED(client);
 	}
 	
@@ -879,7 +878,7 @@ public Action Cmd_Tribunal(int client) {
 
 	SetMenuTitle(menu, "  Tribunal \n--------------------");
 
-	if( job == 105 || job == 106 ) {
+	if( job == 101 || job == 102 || job == 103 || job == 104 ) {
 		AddMenuItem(menu, "forum",		"Juger les cas du forum");
 		AddMenuItem(menu, "connected",	"Juger un joueur présent");
 		AddMenuItem(menu, "disconnect",	"Juger un joueur récement déconnecté");
@@ -1410,8 +1409,8 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 		 
 		 
 		if( IsValidClient(client) && IsValidClient(target) ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N restera en prison %i heures pour \"%s\"", target, time_to_spend/60, g_szJailRaison[type][jail_raison]);
-			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N vous a mis %i heures de prison pour \"%s\"", client, time_to_spend, g_szJailRaison[type][jail_raison]); 
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N restera en prison %.1f heures pour \"%s\"", target, time_to_spend/60.0, g_szJailRaison[type][jail_raison]);
+			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N vous a mis %.1f heures de prison pour \"%s\"", client, time_to_spend/60.0, g_szJailRaison[type][jail_raison]); 
 		}
 		else {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le joueur s'est fait la male...");
@@ -1420,6 +1419,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 		LogToGame("[TSX-RP] [JAIL-1] %L (%d) a mis %L (%d) en prison: Raison %s.", client, rp_GetPlayerZone(client, 1.0), target, rp_GetPlayerZone(target, 1.0), g_szJailRaison[type][jail_raison]);
 		
 		if( time_to_spend <= 1 ) {
+			rp_ClientResetSkin(target);
 			rp_ClientSendToSpawn(target, true);
 		}
 	}
@@ -1879,3 +1879,84 @@ void displayTribunal(int client, const char szSteamID[64]) {
 	ShowMOTDPanel(client, szTitle, szURL, MOTDPANEL_TYPE_URL);
 }
 // ----------------------------------------------------------------------------
+
+public Action Cmd_ItemPickLock(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemPickLock");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+	int item_id = GetCmdArgInt(args);
+	
+	rp_ClientReveal(client);
+	
+	if( rp_GetClientJobID(client) != 1 &&  rp_GetClientJobID(client) != 101 ) {
+		return Plugin_Continue;
+	}
+	
+	int door = GetClientAimTarget(client, false);
+	
+	if( !rp_IsValidDoor(door) && IsValidEdict(door) && rp_IsValidDoor(Entity_GetParent(door)) )
+		door = Entity_GetParent(door);
+		
+
+		
+	if( !rp_IsValidDoor(door) || !rp_IsEntitiesNear(client, door, true) ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser une porte.");
+		return Plugin_Handled;
+	}
+	
+	float time = 0.5;
+	
+	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, time);
+	ServerCommand("sm_effect_panel %d %f \"Crochetage de la porte...\"", client, time);
+	
+	rp_ClientColorize(client, { 255, 0, 0, 255} );
+	rp_ClientReveal(client);
+	
+	Handle dp;
+	CreateDataTimer(time-0.25, ItemPickLockOver_mandat, dp, TIMER_DATA_HNDL_CLOSE); 
+	WritePackCell(dp, client);
+	WritePackCell(dp, door);
+	
+	return Plugin_Handled;
+}
+public Action ItemPickLockOver_mandat(Handle timer, Handle dp) {
+	
+	if( dp == INVALID_HANDLE ) {
+		return Plugin_Handled;
+	}
+	
+	ResetPack(dp);
+	int client 	 = ReadPackCell(dp);
+	int door = ReadPackCell(dp);
+	int doorID = rp_GetDoorID(door);
+	
+	rp_ClientColorize(client);
+	
+	if( !rp_IsEntitiesNear(client, door, true) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez raté votre tentative de crochetage, vous étiez trop loin de la porte...");
+		return Plugin_Handled;
+	}
+
+	rp_SetDoorLock(doorID, false); 
+	rp_ClientOpenDoor(client, doorID, true);
+
+	float vecOrigin[3], vecOrigin2[3];
+	Entity_GetAbsOrigin(door, vecOrigin);
+	
+	for (int i = 1; i <= MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		
+		Entity_GetAbsOrigin(i, vecOrigin2);
+		
+		if( GetVectorDistance(vecOrigin, vecOrigin2) > MAX_AREA_DIST.0 )
+			continue;
+		
+		CPrintToChat(i, "{lightblue}[TSX-RP]{default} La porte a été ouverte avec un mandat.");
+	}
+	
+	return Plugin_Continue;
+}
