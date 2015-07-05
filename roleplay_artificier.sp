@@ -73,8 +73,7 @@ public Action Cmd_ItemNade(int args) {
 	}
 	else if( StrEqual(arg1, "caltrop") ) {
 		for (int i = 0; i <= 10; i++) {
-			int ent = rp_CreateGrenade(client, "ctf_nade_caltrop", "models/grenades/caltrop/caltrop.mdl", throwCaltrop, caltropExplode, 10.0);
-			SDKHook(ent, SDKHook_Touch, touchCaltrop);
+			rp_CreateGrenade(client, "ctf_nade_caltrop", "models/grenades/caltrop/caltrop.mdl", throwCaltrop, caltropExplode, 0.1);
 		}
 	}
 	else if( StrEqual(arg1, "nail") ) {
@@ -91,17 +90,17 @@ public Action Cmd_ItemNade(int args) {
 	}
 	else if( StrEqual(arg1, "c4") ) {
 		int ent = rp_CreateGrenade(client, "ctf_nade_c4", "models/weapons/w_c4_planted.mdl", throwCaltrop, C4Explode, 30.0);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre C4 explosera dans 30 secondes. Entrez /C4 pour le faire exploser.");
 		g_bC4Expl[ent] = true;
 		
 	}
 }
 // ------------------------------------------------------------------------------
 public void throwMirvlet(int client, int ent) {
-	float vecOrigin[3], vecAngles[3], vecPush[3];
+	float vecOrigin[3], vecPush[3];
 	
-	GetClientEyePosition(client, vecOrigin);
-	GetClientEyeAngles(client,vecAngles);
-	vecOrigin[2] -= 25.0;
+	Entity_GetAbsOrigin(client, vecOrigin);
+	vecOrigin[2] += 25.0;
 
 	vecPush[0] = GetRandomFloat(-250.0, 250.0);
 	vecPush[1] = GetRandomFloat(-250.0, 250.0);
@@ -110,10 +109,9 @@ public void throwMirvlet(int client, int ent) {
 	TeleportEntity(ent, vecOrigin, NULL_VECTOR, vecPush);
 }
 public void throwCaltrop(int client, int ent) {
-	float vecOrigin[3], vecAngles[3], vecPush[3];
+	float vecOrigin[3],  vecPush[3];
 	
 	GetClientEyePosition(client, vecOrigin);
-	GetClientEyeAngles(client,vecAngles);
 	vecOrigin[2] -= 25.0;
 
 	vecPush[0] = GetRandomFloat(-120.0, 120.0);
@@ -300,20 +298,73 @@ void ConcPlayer(int victim, float center[3], int attacker, bool hh) {
 }
 // ------------------------------------------------------------------------------
 public void caltropExplode(int client, int ent) {
-	rp_ScheduleEntityInput(ent, 0.25, "KillHierarchy");
+	rp_ScheduleEntityInput(ent, 12.25, "KillHierarchy");
+	CreateTimer(0.01, caltropShot, EntIndexToEntRef(ent));
 }
 public Action fwdSlow(int client, float& speed, float& gravity) {
-	speed -= 0.8;
+	speed -= 0.0666;
 	return Plugin_Changed;
 }
-public void touchCaltrop(int ent, int client) {
-	rp_HookEvent(client, RP_PrePlayerPhysic, fwdSlow, 7.5);
-	SDKUnhook(ent, SDKHook_Touch, touchCaltrop);
+public Action caltropShot(Handle timer, any ent) {
+	ent = EntRefToEntIndex(ent);
+	if( !IsValidEdict(ent) || !IsValidEntity(ent) )
+		return Plugin_Handled;
+	
+	int attacker = GetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity");
+	float vecCenter[3], vecOrigin[3];
+	Entity_GetAbsOrigin(ent, vecCenter);
+	
+	for(int i=1; i<=MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		if( i == attacker )
+			continue;
+		
+		GetClientAbsOrigin(i, vecOrigin);
+		if( GetVectorDistance(vecOrigin, vecCenter) >= 20.0 )
+			continue;
+		
+		rp_HookEvent(i, RP_PrePlayerPhysic, fwdSlow, 2.5);
+		if( Math_GetRandomInt(0, 1) )
+			rp_ClientDamage(i, 1, attacker, "nade_caltrop");
+	}
+	
+	CreateTimer(0.01, caltropShot, EntIndexToEntRef(ent));
+	return Plugin_Handled;
 }
 // ------------------------------------------------------------------------------
-public void nailExplode(int client, int ent) {
-	rp_ScheduleEntityInput(ent, 5.25, "KillHierarchy");
-	CreateTimer(0.01, nailShot, EntIndexToEntRef(ent));
+public void nailExplode(int client, int ent) {	
+	float vecOrigin[3];
+	GetEntPropVector(ent, Prop_Send, "m_vecOrigin", vecOrigin);
+	vecOrigin[2] += 25.0;
+	TeleportEntity(ent, vecOrigin, NULL_VECTOR, NULL_VECTOR);
+	SetEntityMoveType(ent, MOVETYPE_NONE);
+	
+	CreateTimer(0.00001, nailShot, EntIndexToEntRef(ent));
+	CreateTimer(5.0, nailExplode_Task, EntIndexToEntRef(ent));
+	
+}
+public Action nailExplode_Task(Handle timer, any ent) {
+	ent = EntRefToEntIndex(ent);
+	if( !IsValidEdict(ent) || !IsValidEntity(ent) )
+		return Plugin_Handled;
+		
+	float vecOrigin[3];	
+	char sound[128];
+	int attacker = GetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity");
+	Entity_GetAbsOrigin(ent, vecOrigin);
+	
+	rp_Effect_Explode(vecOrigin, 500.0, 400.0, attacker, "nade_nail");
+	
+	TE_SetupExplosion(vecOrigin, g_cExplode, 1.0, 0, 0, 100, 100);
+	TE_SendToAll();
+	
+	Format(sound, sizeof(sound), "weapons/hegrenade/explode%i.wav", Math_GetRandomInt(3, 5));
+	EmitSoundToAllAny(sound, ent);
+	
+	rp_ScheduleEntityInput(ent, 0.01, "KillHierarchy");
+	
+	return Plugin_Handled;
 }
 public Action nailShot(Handle timer, any ent) {
 	static float lastAngle[2049];
@@ -326,7 +377,7 @@ public Action nailShot(Handle timer, any ent) {
 	
 	GetEntPropVector(ent, Prop_Send, "m_vecOrigin", vecOrigin);
 	
-	vecAngles[1] = lastAngle[ent] + 0.25;
+	vecAngles[1] = lastAngle[ent] + Math_GetRandomFloat(4.0, 6.0);
 	if ( vecAngles[1] >= 360.0 ) {
 		vecAngles[1] -= 360.0;
 	}
@@ -366,12 +417,12 @@ public Action nailShot(Handle timer, any ent) {
 		TE_SendToAll();
 		
 		if( IsValidClient(victim) ) {
-			rp_ClientDamage(victim, Math_GetRandomInt(15, 20), attacker);
+			rp_ClientDamage(victim, Math_GetRandomInt(30, 60), attacker);
 		}
 	}
 	
 	lastAngle[ent] = vecAngles[1];
-	CreateTimer(0.01, nailShot, EntIndexToEntRef(ent));
+	CreateTimer(0.00001, nailShot, EntIndexToEntRef(ent));
 	return Plugin_Handled;
 }
 void GetFrontLocationData( float _origin[3], float _angles[3], float position[3], float angles[3], float distance = 50.0 ) {
@@ -392,20 +443,20 @@ public void mirvExplode(int client, int ent) {
 	char sound[128];
 	Entity_GetAbsOrigin(ent, vecOrigin);
 	
-	rp_Effect_Explode(vecOrigin, 500.0, 400.0, ent, "nade_mirv");
+	rp_Effect_Explode(vecOrigin, 500.0, 400.0, client, "nade_mirv");
 	
 	TE_SetupExplosion(vecOrigin, g_cExplode, 1.0, 0, 0, 200, 200);
 	TE_SendToAll();
 	
-	Format(sound, 127, "weapons/hegrenade/explode%i.wav", Math_GetRandomInt(3, 5));
+	Format(sound, sizeof(sound), "weapons/hegrenade/explode%i.wav", Math_GetRandomInt(3, 5));
 	EmitSoundToAllAny(sound, ent);
 	
 	for(int i=0; i<Math_GetRandomInt(7, 8); i++) {
 		
-		rp_CreateGrenade(client, "ctf_nade_mirvlet", "models/grenades/mirvlet/mirvlet.mdl", throwMirvlet, mirvletExplode, 3.0);
+		rp_CreateGrenade(ent, "ctf_nade_mirvlet", "models/grenades/mirv/mirvlet.mdl", throwMirvlet, mirvletExplode, 3.0);
 	}
-	
-	rp_ScheduleEntityInput(ent, 0.25, "KillHierarchy");
+	SetEntityRenderMode(ent, RENDER_NONE);
+	rp_ScheduleEntityInput(ent, 3.25, "KillHierarchy");
 }
 public void mirvletExplode(int client, int ent) {
 	
@@ -413,12 +464,14 @@ public void mirvletExplode(int client, int ent) {
 	char sound[128];
 	Entity_GetAbsOrigin(ent, vecOrigin);
 	
-	rp_Effect_Explode(vecOrigin, 250.0, 200.0, ent, "nade_mirvlet");
+	int attacker = GetEntPropEnt(client, Prop_Send, "m_hOwnerEntity");
+	
+	rp_Effect_Explode(vecOrigin, 250.0, 200.0, attacker, "nade_mirvlet");
 	
 	TE_SetupExplosion(vecOrigin, g_cExplode, 1.0, 0, 0, 100, 100);
 	TE_SendToAll();
 	
-	Format(sound, 127, "weapons/hegrenade/explode%i.wav", Math_GetRandomInt(3, 5));
+	Format(sound, sizeof(sound), "weapons/hegrenade/explode%i.wav", Math_GetRandomInt(3, 5));
 	EmitSoundToAllAny(sound, ent);
 	
 	rp_ScheduleEntityInput(ent, 0.25, "KillHierarchy");
@@ -440,10 +493,10 @@ public void gasExplode(int client, int ent) {
 	AcceptEntityInput(ent1, "SetParent", ent);
 	
 	SetEntPropFloat(ent1, Prop_Send, "m_FadeStartTime", 8.0);
-	SetEntPropFloat(ent1, Prop_Send, "m_FadeEndTime", 22.0);
+	SetEntPropFloat(ent1, Prop_Send, "m_FadeEndTime", 16.0);
 	
 	CreateTimer(0.01, gasShot, EntIndexToEntRef(ent));
-	rp_ScheduleEntityInput(ent, 10.25, "KillHierarchy");
+	rp_ScheduleEntityInput(ent, 15.25, "KillHierarchy");
 }
 public Action gasShot(Handle timer, any ent) {
 	ent = EntRefToEntIndex(ent);
@@ -462,7 +515,7 @@ public Action gasShot(Handle timer, any ent) {
 		if( GetVectorDistance(vecOrigin, vecCenter) >= 200.0 )
 			continue;
 		
-		rp_ClientDamage(i, Math_GetRandomInt(1, 2), attacker, "ctf_nade_gas");
+		rp_ClientDamage(i, Math_GetRandomInt(2, 6), attacker, "ctf_nade_gas");
 		rp_SetClientFloat(i, fl_HallucinationTime, time);				
 	}
 	
@@ -482,6 +535,7 @@ public Action EMPExplode_Task(Handle timer, any ent) {
 	int kev, client = GetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity");	
 	float vecOrigin[3],  damage = 0.0, vecOrigin2[3];
 	char classname[64];
+	int attacker = GetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity");
 	Entity_GetAbsOrigin(ent, vecOrigin);
 	
 	for(int i=1; i<=2048; i++) {
@@ -542,7 +596,7 @@ public Action EMPExplode_Task(Handle timer, any ent) {
 	
 	vecOrigin[2] += 1.0;
 	
-	rp_Effect_Explode(vecOrigin, damage, 400.0, ent, "ctf_nade_emp");
+	rp_Effect_Explode(vecOrigin, damage, 400.0, attacker, "ctf_nade_emp");
 	
 	
 	TE_SetupExplosion(vecOrigin, g_cExplode, 1.0, 0, 0, 100, 400);
@@ -564,12 +618,12 @@ public void C4Explode(int client, int ent) {
 	char sound[128];
 	Entity_GetAbsOrigin(ent, vecOrigin);
 	
-	rp_Effect_Explode(vecOrigin, 400.0, 250.0, ent, "nade_c4");
+	rp_Effect_Explode(vecOrigin, 400.0, 250.0, client, "nade_c4");
 	
 	TE_SetupExplosion(vecOrigin, g_cExplode, 1.0, 0, 0, 200, 200);
 	TE_SendToAll();
 	
-	Format(sound, 127, "weapons/hegrenade/explode%i.wav", Math_GetRandomInt(3, 5));
+	Format(sound, sizeof(sound), "weapons/hegrenade/explode%i.wav", Math_GetRandomInt(3, 5));
 	EmitSoundToAllAny(sound, ent);
 	
 	rp_ScheduleEntityInput(ent, 0.25, "KillHierarchy");
@@ -594,8 +648,8 @@ public Action fwdCommand(int client, char[] command) {
 				continue;
 			
 			GetEdictClassname(i, classname, sizeof(classname));
-
-			if( StrEqual(classname, "rp_c4") ) {
+			
+			if( StrEqual(classname, "ctf_nade_c4") ) {
 
 				int owner = GetEntPropEnt(i, Prop_Send, "m_hOwnerEntity");
 				if( owner != client )
@@ -647,7 +701,7 @@ public Action Fire_Spriteworks02(Handle timer, any client) {
 	vec[2] += 400.0;
 	
 	char sound[128];
-	Format(sound, 127, "weapons/hegrenade/explode%i.wav", Math_GetRandomInt(3, 5));
+	Format(sound, sizeof(sound), "weapons/hegrenade/explode%i.wav", Math_GetRandomInt(3, 5));
 	EmitSoundToAllAny(sound, SOUND_FROM_WORLD, _, _, _, _, _, _, vec);
 	
 	float vecAngle[3]; 
