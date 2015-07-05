@@ -23,4 +23,4 @@ before_script:
     - cd addons/sourcemod/scripting/
     - chmod +x spcomp
 
-script: for i in ./../../../jobs/*.sp; do echo "Compiling... $i"; ./spcomp $i; RETVAL=$?; if [ $RETVAL -ne 0 ]; then exit 1; fi; done;
+script: for i in ./../../../jobs/*.sp; do echo "\n\n\nCompiling... $i"; ./spcomp $i; RETVAL=$?; if [ $RETVAL -ne 0 ]; then exit 1; fi; done;
