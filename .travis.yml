@@ -24,4 +24,4 @@ before_script:
     - cd addons/sourcemod/scripting/
     - chmod +x spcomp
 
-script: ./compile.sh ./../../../*.sp
+script: ./compile.sh ./../../../jobs/*.sp
