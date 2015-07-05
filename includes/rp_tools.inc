@@ -62,4 +62,29 @@ public void SQL_QueryCallBack(Handle owner, Handle handle, const char[] error, a
 		LogError("[SQL] [ERROR] %s - %f - %i", error, data, data);
 	}
 }
+public int rp_GetItemInt(int itemID, int typeID) {
+	char tmp[32];
+	rp_GetItemData(itemID, view_as<rp_item_type>typeID, tmp, sizeof(tmp));
+	return StringToInt(tmp);
+}
+public int rp_GetJobInt(int jobID, int typeID) {
+	char tmp[32];
+	rp_GetJobData(jobID, view_as<rp_job_type>typeID, tmp, sizeof(tmp));
+	return StringToInt(tmp);
+}
+public int rp_GetZoneInt(int zoneID, int typeID) {
+	char tmp[32];
+	rp_GetZoneData(zoneID, view_as<zone_type>typeID, tmp, sizeof(tmp));
+	return StringToInt(tmp);
+}
+public int rp_GetLocationInt(int zoneID, int typeID) {
+	char tmp[32];
+	rp_GetLocationData(zoneID, view_as<location_type>typeID, tmp, sizeof(tmp));
+	return StringToInt(tmp);
+}
+public int rp_GetWeaponSkinInt(int skinID, int typeID) {
+	char tmp[32];
+	rp_GetWeaponSkinData(skinID, view_as<skin_data>typeID, tmp, sizeof(tmp));
+	return StringToInt(tmp);
+}
 
