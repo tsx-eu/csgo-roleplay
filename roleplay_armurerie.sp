@@ -206,22 +206,21 @@ public Action Cmd_ItemRedraw(int args) {
 		}
 	}
 	
-	int id = WeaponsGetDeployedWeaponIndex(target);
-	int index = GetEntProp(id, Prop_Send, "m_iItemDefinitionIndex");
+	int index = GetEntProp(wep_id, Prop_Send, "m_iItemDefinitionIndex");
 	CSGO_GetItemDefinitionNameByIndex(index, classname, sizeof(classname));
 	
-	enum_ball_type wep_type = rp_GetWeaponBallType(id);
-	int g = rp_GetWeaponGroupID(id);
-	bool s = rp_GetWeaponStorage(id);
+	enum_ball_type wep_type = rp_GetWeaponBallType(wep_id);
+	int g = rp_GetWeaponGroupID(wep_id);
+	bool s = rp_GetWeaponStorage(wep_id);
 	
-	RemovePlayerItem(target, id );
-	RemoveEdict( id );
+	RemovePlayerItem(client, wep_id );
+	RemoveEdict( wep_id );
 	
-	id = GivePlayerItem(target, weapon);
-	rp_SetClientWeaponSkin(client, id);
-	rp_SetWeaponBallType(id, wep_type);
-	rp_SetWeaponGroupID(id, g);
-	rp_SetWeaponStorage(id, s);
+	wep_id = GivePlayerItem(client, classname);
+	rp_SetClientWeaponSkin(client, wep_id);
+	rp_SetWeaponBallType(wep_id, wep_type);
+	rp_SetWeaponGroupID(wep_id, g);
+	rp_SetWeaponStorage(wep_id, s);
 	
 	return Plugin_Handled;
 }
