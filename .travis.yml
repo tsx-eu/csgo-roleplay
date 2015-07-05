@@ -20,8 +20,7 @@ install:
     
 before_script:
     - cp includes/*.inc addons/sourcemod/scripting/include/
-#    - wget "https://forums.alliedmods.net/attachment.php?attachmentid=131610&d=1395237361" -O addons/sourcemod/scripting/include/emitsoundany.inc
     - cd addons/sourcemod/scripting/
     - chmod +x spcomp
 
-script: ./compile.sh ./../../../jobs/*.sp
+script: for i in ./../../../jobs/*.sp; do echo "Compiling... $i"; ./spcomp $i; RETVAL=$?; if [ $RETVAL -ne 0 ]; then exit 1; fi; done;
