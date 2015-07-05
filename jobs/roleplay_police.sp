@@ -440,8 +440,8 @@ public Action Cmd_Jail(int client) {
 	}
 	
 	if( (rp_GetZoneInt(Czone, zone_type_type) == 1 || rp_GetZoneInt(Czone, zone_type_type) == 101) && (job == 101 || job == 102 || job == 103 || job == 104 || job == 105 || job == 106) ) {
-		
-		if( rp_GetZoneInt(Tzone, zone_type_type) == 1 || rp_GetZoneInt(Tzone, zone_type_type) == 101) {
+
+		if( rp_GetZoneInt(Tzone, zone_type_type) != 1 && rp_GetZoneInt(Tzone, zone_type_type) != 101) {
 			ACCESS_DENIED(client);
 		}
 		int maxAmount = 0;
@@ -480,7 +480,7 @@ public Action Cmd_Jail(int client) {
 		
 		return Plugin_Handled;
 	}
-	
+
 	if( rp_IsValidVehicle(target) ) {
 		int client2 = GetEntPropEnt(target, Prop_Send, "m_hPlayer");
 		if( IsValidClient(client2) )
