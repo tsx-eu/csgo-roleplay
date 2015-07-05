@@ -284,9 +284,10 @@ public Action Cmd_ItemPermiTir(int args) {
 	int client = GetCmdArgInt(1);
 	
 	float train = rp_GetClientFloat(client, fl_WeaponTrain) + 4.0;
-	Math_Clamp(train, 0.0, 8.0);
+	train = Math_Clamp(train, 0.0, 8.0);
+	
 	rp_SetClientFloat(client, fl_WeaponTrain, train);
 	
 	
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre entraînement est maintenant de %.2f%%", (train/8.0*100.0));
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre entraînement est maintenant de %.2f%%", (train/5.0*100.0));
 }

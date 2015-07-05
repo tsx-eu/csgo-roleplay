@@ -11,6 +11,7 @@
 #pragma semicolon 1
 
 #include <sourcemod>
+#include <csgo_items>   // https://forums.alliedmods.net/showthread.php?t=243009
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
 
@@ -34,6 +35,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_giveitem",			Cmd_GiveItem,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_giveitem_pvp",		Cmd_GiveItemPvP,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_balltype",	Cmd_ItemBallType,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_redraw",		Cmd_ItemRedraw,			"RP-ITEM",	FCVAR_UNREGISTERED);
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
@@ -185,3 +187,41 @@ public Action fwdWeapon(int victim, int attacker, float &damage, int wepID) {
 	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------
+
+public Action Cmd_ItemRedraw(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemRedraw");
+	#endif
+	int client = GetCmdArgInt(1);
+	
+	int wep_id = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	int item_id = GetCmdArgInt(args);
+	char classname[64];
+	
+	if( IsValidEntity(wep_id) ) {
+		GetEdictClassname(wep_id, classname, sizeof(classname));
+		if( StrContains(classname, "weapon_bayonet") == 0 || StrContains(classname, "weapon_knife") == 0 ) {
+			ITEM_CANCEL(client, item_id);
+			return Plugin_Handled;
+		}
+	}
+	
+	int id = WeaponsGetDeployedWeaponIndex(target);
+	int index = GetEntProp(id, Prop_Send, "m_iItemDefinitionIndex");
+	CSGO_GetItemDefinitionNameByIndex(index, classname, sizeof(classname));
+	
+	enum_ball_type wep_type = rp_GetWeaponBallType(id);
+	int g = rp_GetWeaponGroupID(id);
+	bool s = rp_GetWeaponStorage(id);
+	
+	RemovePlayerItem(target, id );
+	RemoveEdict( id );
+	
+	id = GivePlayerItem(target, weapon);
+	rp_SetClientWeaponSkin(client, id);
+	rp_SetWeaponBallType(id, wep_type);
+	rp_SetWeaponGroupID(id, g);
+	rp_SetWeaponStorage(id, s);
+	
+	return Plugin_Handled;
+}

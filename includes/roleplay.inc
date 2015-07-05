@@ -106,7 +106,8 @@ native void rp_Effect_PropExplode(int entityID, bool tazer = false);
 native void rp_Effect_Smoke(int client, float duration = 30.0);
 native void rp_Effect_VisionTrouble(int client, float duration = 30.0);
 native void rp_Effect_ShakingVision(int client, float duration = 30.0);
-native void rp_Effect_Particle(int entity, char[] effect, float duration = 0.0001);
+native void rp_Effect_Particle(int entity, char[] effect);
+native void rp_Effect_ParticlePath(int entity, char[] effect, const float src[3], const float angle[3], const float dest[3]);
 native void rp_Effect_Tazer(int client, int target);
 native void rp_Effect_SpawnMoney(float origin[3], bool high = false);
 native void rp_Effect_BeamBox(int client, int target = -1, float origin[3] = NULL_VECTOR, int red = 0, int green = 255, int blue = 0);
@@ -152,6 +153,9 @@ native enum_ball_type rp_GetClientKnifeType(int client);
 native bool rp_GetWeaponStorage(int wepID);
 native void rp_SetWeaponStorage(int wepID, bool value);
 native int rp_GetWeaponGroupID(int wepID);
+
+typedef GrenadeFunction = function void (int client, int entity);
+native int rp_CreateGrenade(int client, const char[] name, const char[] model, GrenadeFunction fctThrow, GrenadeFunction fctExplode, float duration);
 
 // ----------------------------------------------------------------------------
 native void rp_GetWeaponSkinData(int skinID, skin_data typeID, char[] str, int length);
