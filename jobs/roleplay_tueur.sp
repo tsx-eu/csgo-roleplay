@@ -310,7 +310,7 @@ public Action TimerEndProtect(Handle timer, any client) {
 	
 }
 // ----------------------------------------------------------------------------
-public Action fwfCommand(int client, char[] command) {	
+public Action fwfCommand(int client, char[] command, char[] arg) {	
 	if( StrEqual(command, "tueur") ) { // C'est pour nous !
 		if( rp_GetClientJobID(client) == 41 ) {
 			OpenSelectSkill(client);
