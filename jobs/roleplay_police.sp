@@ -439,11 +439,8 @@ public Action Cmd_Jail(int client) {
 		ACCESS_DENIED(client);
 	}
 	
-	if( (rp_GetZoneInt(Czone, zone_type_type) == 1 || rp_GetZoneInt(Czone, zone_type_type) == 101) && (job == 101 || job == 102 || job == 103 || job == 104 || job == 105 || job == 106) ) {
+	if( rp_GetZoneInt(Czone, zone_type_type) == 101 && (job == 101 || job == 102 || job == 103 || job == 104 || job == 105 || job == 106) ) {
 
-		if( rp_GetZoneInt(Tzone, zone_type_type) != 1 && rp_GetZoneInt(Tzone, zone_type_type) != 101) {
-			ACCESS_DENIED(client);
-		}
 		int maxAmount = 0;
 		switch( job ) {
 			case 101: maxAmount = 1000;		// Président
@@ -1407,7 +1404,6 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 		rp_SetClientInt(target, i_JailTime, time_to_spend);
 		rp_SetClientInt(target, i_jailTime_Last, time_to_spend);
 		 
-		 
 		if( IsValidClient(client) && IsValidClient(target) ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N restera en prison %.1f heures pour \"%s\"", target, time_to_spend/60.0, g_szJailRaison[type][jail_raison]);
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N vous a mis %.1f heures de prison pour \"%s\"", client, time_to_spend/60.0, g_szJailRaison[type][jail_raison]); 
@@ -1421,6 +1417,9 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 		if( time_to_spend <= 1 ) {
 			rp_ClientResetSkin(target);
 			rp_ClientSendToSpawn(target, true);
+		}
+		else {
+			StripWeapons(target);
 		}
 	}
 	else if( action == MenuAction_End ) {
@@ -1449,7 +1448,7 @@ void WantPayForLeaving(int client, int police, int type, int amende) {
 	
 	DisplayMenu(menu, client, MENU_TIME_DURATION);
 }
-public int eventPayForLeaving(Handle menu, MenuAction action, int iTarget, int param2) {
+public int eventPayForLeaving(Handle menu, MenuAction action, int client, int param2) {
 	#if defined DEBUG
 	PrintToServer("eventPayForLeaving");
 	#endif
@@ -1464,15 +1463,14 @@ public int eventPayForLeaving(Handle menu, MenuAction action, int iTarget, int p
 		int target = StringToInt(data[0]);
 		int type = StringToInt(data[1]);
 		int amende = StringToInt(data[2]);
-		int client = rp_GetClientInt(target, i_JailledBy);
-		int jobID = rp_GetClientJobID(client);
+		int jobID = rp_GetClientJobID(target);
 		
-		if( target == 0 && type == 0 )
+		if( client == 0 && type == 0 )
 			return;
 		
 		int time_to_spend = 0;
-		rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amende);
-		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + (amende / 4));
+		rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - amende);
+		rp_SetClientInt(target, i_AddToPay, rp_GetClientInt(target, i_AddToPay) + (amende / 4));
 		rp_SetJobCapital(jobID, rp_GetJobCapital(jobID) + (amende/4 * 3));
 			
 		GetClientAuthId(client, AuthId_Engine, options, sizeof(options), false);
@@ -1496,9 +1494,13 @@ public int eventPayForLeaving(Handle menu, MenuAction action, int iTarget, int p
 			
 			
 		if( IsValidClient(target) ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Une amende de %i$ a été prélevée à %N.", amende, target);
-			CPrintToChat(target, "{lightblue}[TSX-RP]{default} Une caution de %i$ vous a été prelevée.", amende);
+			CPrintToChat(target, "{lightblue}[TSX-RP]{default} Une amende de %i$ a été prélevée à %N.", amende, client);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Une caution de %i$ vous a été prelevée.", amende);
 		}
+		
+		time_to_spend *= 60;
+		rp_SetClientInt(client, i_JailTime, time_to_spend);
+		rp_SetClientInt(client, i_jailTime_Last, time_to_spend);
 	}
 	else if( action == MenuAction_End ) {
 		CloseHandle(menu);
@@ -1959,4 +1961,19 @@ public Action ItemPickLockOver_mandat(Handle timer, Handle dp) {
 	}
 	
 	return Plugin_Continue;
+}
+// ----------------------------------------------------------------------------
+void StripWeapons(int client ) {
+	int wepIdx;
+	
+	for( int i = 0; i < 5; i++ ){
+		if( i == CS_SLOT_KNIFE ) continue; 
+		
+		while( ( wepIdx = GetPlayerWeaponSlot( client, i ) ) != -1 ) {
+			RemovePlayerItem( client, wepIdx );
+			RemoveEdict( wepIdx );
+		}
+	}
+	
+	FakeClientCommand(client, "use weapon_knife");
 }
