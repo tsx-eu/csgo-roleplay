@@ -88,7 +88,7 @@ public Action Cmd_ItemLoto(int args) {
 		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
 		
 		rp_IncrementSuccess(client, success_list_loterie, (amount*100));			
-		rp_Effect_Particle(client, "weapon_confetti_balloons");
+		rp_Effect_Particle(client, "weapon_confetti_balloons", 10.0);
 			
 		rp_ClientSave(client);
 	}
