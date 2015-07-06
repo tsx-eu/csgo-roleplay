@@ -24,8 +24,8 @@
 #define MAX_AREA_DIST		500.0
 
 public Plugin myinfo = {
-	name = "Jobs: Banquier", author = "KoSSoLaX",
-	description = "RolePlay - Jobs: Banquier",
+	name = "Jobs: Sexshop", author = "KoSSoLaX",
+	description = "RolePlay - Jobs: Sexshop",
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
@@ -147,6 +147,11 @@ public Action Cmd_ItemMenottes(int args){
 	if( rp_GetZoneBit( rp_GetPlayerZone(client) ) & BITZONE_PEACEFULL ) {
 		ITEM_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit où vous êtes.");
+		return;
+	}
+	if(rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101){
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit aux forces de l'ordre.");
+		ITEM_CANCEL(client, item_id);
 		return;
 	}
 	
