@@ -11,6 +11,7 @@
 #pragma semicolon 1
 
 #include <sourcemod>
+#include <sdkhooks>
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
 
@@ -167,6 +168,8 @@ public Action Cmd_ItemVehicle(int args) {
 	rp_SetVehicleInt(car, car_maxPassager, max);
 	rp_SetClientKeyVehicle(client, car, true);
 	
+	SDKHook(car, SDKHook_Touch, VehicleTouch);
+	
 	CreateTimer(3.5, Timer_VehicleRemoveCheck, EntIndexToEntRef(car));
 	
 	// Voiture donateur, on la thune wesh
@@ -179,6 +182,20 @@ public Action Cmd_ItemVehicle(int args) {
 	}
 	
 	return;
+}
+public void VehicleTouch(int car, int entity) {
+	if( rp_IsValidDoor(entity) ) {
+		int door = rp_GetDoorID(entity);
+		int client = Vehicle_GetDriver(car);
+		if( client > 0 && rp_GetClientKeyDoor(client, door) ) {
+			rp_SetDoorLock(door, false);
+			rp_ClientOpenDoor(client, door, true);
+			
+			rp_ScheduleEntityInput(entity, 3.0, "Close");
+			rp_ScheduleEntityInput(entity, 3.1, "Lock");
+			
+		}
+	}
 }
 public Action Cmd_ItemVehicleStuff(int args) {
 	#if defined DEBUG
