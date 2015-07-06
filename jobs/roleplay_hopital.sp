@@ -30,7 +30,6 @@ public Plugin myinfo = {
 };
 
 int g_cBeam, g_cGlow;
-float ber_DmgGivenDecrease[65], ber_DmgTakenDecrease[65]; //Pour seringue Berserker
 
 enum chiruList {
 	ch_Force,
@@ -38,7 +37,6 @@ enum chiruList {
 	ch_Jump,
 	ch_Regen,
 	ch_Heal,
-	is_Berserk,
 	
 	ch_Max
 };
@@ -55,7 +53,6 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_respawn",		Cmd_ItemRespawn,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_sick",		Cmd_ItemSick,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_curedesintox",	Cmd_ItemCureDesintox,		"RP-ITEM",		FCVAR_UNREGISTERED);
-	RegServerCmd("rp_item_berserker", 	Cmd_ItemBerserker, 	"RP-ITEM", 	FCVAR_UNREGISTERED);
 	
 	RegServerCmd("rp_item_healbox",		Cmd_ItemHealBox,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 }
@@ -412,19 +409,28 @@ public Action Cmd_ItemAdrenaline(int args) {
 	int heal = GetClientHealth(client); heal += 100;
 	SetEntityHealth(client, heal);
 	
-	for (float i = 0.0; i <= 30.0; i+= 0.5) {
+	for (float i = 0.0; i <= 10.0; i+= 0.2) {
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdAdrenalineSpeed, i);
 		rp_HookEvent(client, RP_PreHUDColorize, fwdAdrenalineColor, i);
-	}	
+		rp_HookEvent(client, RP_PostGiveDamageWeapon, fwdGiveBerserk, i);
+		rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdTakeBerserk, i);
+	}
+	
+	//Affiche un halo rouge autours du client
+	float vecTarget[3]; 
+	GetClientAbsOrigin(client, vecTarget);
+	TE_SetupBeamRingPoint(vecTarget, 10.0, 300.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, {255, 0, 0, 100}, 10, 0);
+	TE_SendToAll();
 	
 	rp_SetClientBool(client, b_Drugged, true);	
-	CreateTimer( 30.5, ItemDrugStop, client);
+	CreateTimer( 10.5, ItemDrugStop, client);
 }
 public Action fwdAdrenalineSpeed(int client, float& speed, float& gravity) {
 	#if defined DEBUG
 	PrintToServer("fwdAdrenalineSpeed");
 	#endif
-	speed += 0.05;
+	speed -= 0.05;
+	gravity += 0.05;
 	
 	return Plugin_Changed;
 }
@@ -433,10 +439,10 @@ public Action fwdAdrenalineColor(int client, int color[4]) {
 	PrintToServer("fwdAdrenalineColor");
 	#endif
 	
-	color[0] += 50;
+	color[0] += 40;
 	color[1] -= 10;
 	color[2] -= 10;
-	color[3] += 4;
+	color[3] += 3;
 	
 	return Plugin_Changed;
 }
@@ -444,74 +450,28 @@ public Action ItemDrugStop(Handle time, any client) {
 	#if defined DEBUG
 	PrintToServer("ItemDrugStop");
 	#endif
-	
-	if( !IsValidClient(client) )
-		return Plugin_Continue;
 
 	rp_SetClientBool(client, b_Drugged, false);
 	
 	return Plugin_Continue;
 }
-// ----------------------------------------------------------------------------
-public Action Cmd_ItemBerserker(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemBerserker");
-	#endif
-	
-	int client = GetCmdArgInt(1);
-	
-	//Le client recoit et inflige des degats augmentés; l'effet est decroissant
-	for (float i = 0.0; i <= 6.0; i+= 0.5) {
-		rp_HookEvent(client, RP_PreGiveDamage, fwdGiveBerserk, i);
-		rp_HookEvent(client, RP_PreTakeDamage, fwdTakeBerserk, i);
-	}	
-	g_bChirurgie[client][is_Berserk] = true;
-	
-	//Affiche un halo rouge autours du client
-	float vecTarget[3]; 
-	GetClientAbsOrigin(client, vecTarget);
-	TE_SetupBeamRingPoint(vecTarget, 10.0, 300.0, g_cBeam, g_cGlow, 0, 15, 6.5, 50.0, 0.0, {255, 0, 0, 100}, 10, 0);
-	TE_SendToAll();
-
-	CreateTimer( 6.5, stopBerserk, client);
-	
-	return Plugin_Handled;
-}
-public Action fwdGiveBerserk(int attacker, int victim, float &damage) {
+public Action fwdGiveBerserk(int attacker, int victim, float &damage, int wepID) {
 	#if defined DEBUG
 	PrintToServer("fwdGiveBerserk");
 	#endif
 	
-	//Degats infligés augmentés sous l'effet du la seringue du Berserker
-	damage *= (2 - ber_DmgGivenDecrease[attacker]); 
-	ber_DmgGivenDecrease[attacker] += 0.08;
+	damage *= 1.05;
 	
 	return Plugin_Changed;
 }
-public Action fwdTakeBerserk(int victim, int attacker, float &damage) {
+public Action fwdTakeBerserk(int victim, int attacker, float &damage, int wepID) {
 	#if defined DEBUG
 	PrintToServer("fwdTakeBerserk");
 	#endif
 	
-	//Degats reçus augmentés sous l'effet de la seringue du Berserker
-	damage *= (1.5 - ber_DmgTakenDecrease[victim]);
-	ber_DmgTakenDecrease[victim] += 0.1;
+	damage *= 0.95;
 	
 	return Plugin_Changed;
-}
-public Action stopBerserk(Handle time, any client) {
-	#if defined DEBUG
-	PrintToServer("stopBerserk");
-	#endif
-	
-	if( !IsValidClient(client) )
-		return Plugin_Continue;
-		
-	g_bChirurgie[client][is_Berserk] = false;
-	ber_DmgTakenDecrease[client] = 0.0;
-	ber_DmgGivenDecrease[client] = 0.0;
-	
-	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemHealBox(int args) {
