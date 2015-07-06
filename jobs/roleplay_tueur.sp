@@ -51,6 +51,7 @@ enum competance {
 
 int g_iKillerPoint[65][competance_max];
 int g_iKillerPoint_stored[65][competance_max];
+Handle g_vCapture = INVALID_HANDLE;
 
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
@@ -61,9 +62,30 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_camera",		Cmd_ItemCamera,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_cryptage",	Cmd_ItemCryptage,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	
+	
+	g_vCapture =  FindConVar("rp_capture");
+	HookConVarChange(g_vCapture, OnCvarChange);
+	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
+}
+public void OnCvarChange(Handle cvar, const char[] oldVal, const char[] newVal) {
+	#if defined DEBUG
+	PrintToServer("OnCvarChange");
+	#endif
+	
+	if( cvar == g_vCapture ) {
+		if( StrEqual(oldVal, "none") && StrEqual(newVal, "active") ) {
+			for (int i = 1; i <= MaxClients; i++) {
+				if( !IsValidClient(i) )
+					continue;
+				if( rp_GetClientInt(i, i_ToKill) > 0 ) {
+					SetContratFail(i, true);
+				}
+			}
+		}
+	}
 }
 // ----------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
@@ -129,7 +151,9 @@ public Action Cmd_ItemContrat(int args) {
 	rp_HookEvent(vendeur, RP_OnPlayerDead, fwdTueurDead);
 	rp_HookEvent(target, RP_OnPlayerDead, fwdTueurKill);
 	rp_HookEvent(vendeur, RP_OnFrameSeconde, fwdFrame);
-	rp_HookEvent(target, RP_PreTakeDamage, fwdDamage);
+	
+	rp_HookEvent(vendeur, RP_PreGiveDamage, fwdDamage);
+	
 	SDKHook(vendeur, SDKHook_WeaponDrop, OnWeaponDrop);
 	
 	
@@ -230,19 +254,21 @@ public Action OnWeaponDrop(int client, int weapon) {
 
 	return Plugin_Continue;
 }
-public Action fwdDamage(int victim, int attacker, float& damage) {
-
-	int target = rp_GetClientInt(attacker, i_ToKill);
+public Action fwdDamage(int client, int victim, float& damage) {
+	
+	int target = rp_GetClientInt(client, i_ToKill);
 	
 	if( target > 0 && target == victim ) {
-		if( !rp_IsTargetSeen(victim, target) )
+		if( !rp_IsTargetSeen(victim, client) )
+			damage *= 2.0;
+		if( rp_IsClientNew(victim) )
 			damage *= 2.0;
 			
 		damage *= 2.0;
 		return Plugin_Changed;
 	}
-	if( target > 0 && target != victim ) {
-		damage /= 2.0;
+	else if( target > 0 && target != victim ) {
+		damage /= 3.0;
 		return Plugin_Changed;
 	}
 		
@@ -472,8 +498,8 @@ void RestoreAssassinNormal(int client) {
 	SDKUnhook(client, SDKHook_WeaponDrop, OnWeaponDrop);
 	rp_UnhookEvent(client, RP_OnPlayerDead, fwdTueurDead);
 	rp_UnhookEvent(client, RP_OnFrameSeconde, fwdFrame);
+	rp_UnhookEvent(client, RP_PreGiveDamage, fwdDamage);
 	
-	rp_UnhookEvent( rp_GetClientInt(client, i_ToKill), RP_PreTakeDamage, fwdDamage);
 	rp_UnhookEvent( rp_GetClientInt(client, i_ToKill), RP_OnPlayerDead, fwdTueurKill);
 	
 	rp_SetClientInt(client, i_ToKill, 0);
