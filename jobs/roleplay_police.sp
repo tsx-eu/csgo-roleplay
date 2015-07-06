@@ -131,6 +131,9 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	else if( StrEqual(command, "tribunal") ) {
 		return Cmd_Tribunal(client);
 	}
+	else if( StrEqual(command, "mandat") ) {
+		return Cmd_Mandat(client);
+	}
 	else if( StrEqual(command, "push") ) {
 		return Cmd_Push(client);
 	}
