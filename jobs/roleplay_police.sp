@@ -164,7 +164,7 @@ public Action Cmd_Cop(int client) {
 	if( (job == 8 || job == 9) && rp_GetZoneInt(zone, zone_type_type) != 1 ) { // Gardien, policier dans le PDP
 		ACCESS_DENIED(client);
 	}
-	if( (job == 107 || job == 108 || job == 109 ) && rp_GetZoneInt(zone, zone_type_type) != 101 ) { // GOS, Marshall, ONU dans Tribunal
+	if( (job == 107 || job == 108 || job == 109 ) && rp_GetZoneInt(zone, zone_type_type) != 1 && rp_GetZoneInt(zone, zone_type_type) != 101 ) { // GOS, Marshall, ONU dans Tribunal
 		ACCESS_DENIED(client);
 	}
 	if( !rp_GetClientBool(client, b_MaySteal) || rp_GetClientBool(client, b_Stealing) ) { // Pendant un vol
