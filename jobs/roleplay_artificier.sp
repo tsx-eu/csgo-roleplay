@@ -630,7 +630,7 @@ public void C4Explode(int client, int ent) {
 	
 	g_bC4Expl[ent] = false;
 }
-public Action fwdCommand(int client, char[] command) {	
+public Action fwdCommand(int client, char[] command, char[] arg) {	
 	if( StrEqual(command, "c4") ) { // C'est pour nous !
 	
 		if( rp_GetClientFloat(client, fl_CoolDown) > GetGameTime() ) {

@@ -109,7 +109,7 @@ public void OnClientDisconnect(int client) {
 	rp_UnhookEvent(client, RP_OnPlayerCommand, fwdCommand);
 	rp_UnhookEvent(client, RP_OnPlayerSpawn, fwdSpawn);
 }
-public Action fwdCommand(int client, char[] command) {	
+public Action fwdCommand(int client, char[] command, char[] arg) {	
 	if( StrEqual(command, "cop") || StrEqual(command, "cops") ) {
 		return Cmd_Cop(client);
 	}
