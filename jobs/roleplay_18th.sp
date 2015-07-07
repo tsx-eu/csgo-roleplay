@@ -511,30 +511,29 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 		Entity_GetOwner(wepid) == target
 	) {
 		
-		if( rp_GetClientFloat(target, fl_LastStolen)+(60.0) < GetGameTime() && g_iWeaponStolen[wepid]+(15*60) < GetTime() )
-		{
-				
-			if( rp_GetClientBool(target, b_IsAFK) && (rp_GetClientJobID(target) == 1 || rp_GetClientJobID(target) == 101 ) ) {
+		if( rp_GetClientFloat(target, fl_LastStolen)+(60.0) < GetGameTime() && g_iWeaponStolen[wepid]+(15*60) < GetTime() ) {
 			
-				int button = GetClientButtons(client);
+			if( !rp_GetClientBool(target, b_IsAFK) && (rp_GetClientJobID(target) == 1 || rp_GetClientJobID(target) == 101) ) {
+			
+				int button = GetClientButtons(target);
 			
 				if( button & IN_FORWARD || button & IN_BACK || button & IN_LEFT || button & IN_RIGHT ||
 					button & IN_MOVELEFT || button & IN_MOVERIGHT || button & IN_ATTACK || button & IN_JUMP || button & IN_DUCK	) {
-					price *= 2.0;
+					price *= 2;
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vol en action, argent doublé");
 				}
 			
 				int amount = RoundFloat( (float(price)/100.0) * (25.0) );
 				
-				if( (rp_GetClientInt(client, i_Money)+rp_GetClientInt(client, i_Bank)) < amount ) {
-					amount = rp_GetClientInt(client, i_Money) + rp_GetClientInt(client, i_Bank);
+				if( (rp_GetClientInt(target, i_Money)+rp_GetClientInt(target, i_Bank)) < amount ) {
+					amount = rp_GetClientInt(target, i_Money) + rp_GetClientInt(target, i_Bank);
 				}
 				
 				rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) + amount);
-				rp_SetClientInt(target, i_Money, rp_GetClientInt(client, i_Money) - amount);
+				rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amount);
 			}
 			else {
-				PrintToConsole(client, "COUCOU KIM --> 2");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Soit le joueur était afk, soit %N n'est pas flic.", target);
 			}
 			int cpt = rp_GetRandomCapital(181);
 			rp_SetJobCapital(181, (rp_GetJobCapital(181) +  (price/2) ) );
@@ -542,7 +541,7 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 				
 		}
 		else {
-			PrintToConsole(client, "COUCOU KIM --> 1");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} L'arme %s de %N s'est déjà faites volée il y a quelques instant.", target, wepname);
 		}
 	}
 	else {
