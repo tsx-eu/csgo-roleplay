@@ -1519,7 +1519,7 @@ void WantPayForLeaving(int client, int police, int type, int amende) {
 	Format(tmp, 255, "%i_%i_%i", police, type, amende);
 	AddMenuItem(menu, tmp, "Oui, je souhaite payer ma caution");
 	
-	Format(tmp, 255, "0_0");
+	Format(tmp, 255, "0_0_0");
 	AddMenuItem(menu, tmp, "Non, je veux rester plus longtemps");
 	
 	
@@ -1544,7 +1544,7 @@ public int eventPayForLeaving(Handle menu, MenuAction action, int client, int pa
 		int amende = StringToInt(data[2]);
 		int jobID = rp_GetClientJobID(target);
 		
-		if( client == 0 && type == 0 )
+		if( target == 0 && type == 0 && amende == 0)
 			return;
 		
 		int time_to_spend = 0;
