@@ -584,11 +584,11 @@ public Action ItemPickLockOver_maffia(Handle timer, Handle dp) {
 	
 	switch( job ) {
 		case 91: ratio = 80;
-		case 92: ratio = 70;
-		case 93: ratio = 60; 	// Parrain
-		case 94: ratio = 50;	// Pro
-		case 95: ratio = 40;	// Mafieu
-		case 96: ratio = 30;	// Apprenti
+		case 92: ratio = 75;
+		case 93: ratio = 70; 	// Parrain
+		case 94: ratio = 65;	// Pro
+		case 95: ratio = 60;	// Mafieu
+		case 96: ratio = 55;	// Apprenti
 		
 		default: ratio = 0;
 		
