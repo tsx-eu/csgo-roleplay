@@ -355,7 +355,7 @@ public Action Cmd_Tazer(int client) {
 		rp_HookEvent(target, RP_PreHUDColorize, fwdTazerBlue, 9.0);
 		rp_HookEvent(target, RP_PrePlayerPhysic, fwdFrozen, 7.5);
 		
-		rp_SetClientFloat(target, fl_TazerTime, 9.0);
+		rp_SetClientFloat(target, fl_TazerTime, GetGameTime()+9.0);
 
 		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été tazé par %N", client);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez taze %N", target);
