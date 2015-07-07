@@ -157,8 +157,9 @@ public Action Cmd_ItemDrugs(int args) {
 	bool drugged = rp_GetClientBool(client, b_Drugged);
 	
 	if( drugged ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Attention, vous étiez déjà drogué.");
 		
-		if( !g_hDrugTimer[client] ) {
+		if( g_hDrugTimer[client] ) {
 			delete g_hDrugTimer[client];
 			
 			if( Math_GetRandomInt(1, 100) >= 80 ) {

@@ -243,9 +243,8 @@ public Action Cmd_ItemSick(int args) {
 	#endif
 	static bool bDiag[65];
 	
-	int client = GetCmdArgInt(1);
-	int type = GetCmdArgInt(2);
-	
+	int type = GetCmdArgInt(1);
+	int client = GetCmdArgInt(2);	
 	
 	if( type == view_as<int>sick_type_none ) {
 		bDiag[client] = true;
