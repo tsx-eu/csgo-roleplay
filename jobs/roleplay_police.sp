@@ -140,7 +140,7 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	else if( StrEqual(command, "conv") ) {
 		return Cmd_Conv(client);
 	}
-	else if( StrEqual(command, "amende") || StrEqual(command, "amende") ) {
+	else if( StrEqual(command, "amende") || StrEqual(command, "amande") ) {
 		return Cmd_Amende(client, arg);
 	}
 	else if( StrEqual(command, "audience") || StrEqual(command, "audiance") ) {
@@ -1544,7 +1544,7 @@ public int eventPayForLeaving(Handle menu, MenuAction action, int client, int pa
 		int amende = StringToInt(data[2]);
 		int jobID = rp_GetClientJobID(target);
 		
-		if( target == 0 && type == 0 && amande == 0)
+		if( target == 0 && type == 0 && amende == 0)
 			return;
 		
 		int time_to_spend = 0;
