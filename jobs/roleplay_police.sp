@@ -140,12 +140,91 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	else if( StrEqual(command, "conv") ) {
 		return Cmd_Conv(client);
 	}
+	else if( StrEqual(command, "amende") || StrEqual(command, "amande") ) {
+		return Cmd_Amende(client, arg);
+	}
 	else if( StrEqual(command, "audience") || StrEqual(command, "audiance") ) {
 		return Cmd_Audience(client);
 	}
 	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------
+public Action Cmd_Amende(int client, const char[] arg) {
+	int job = rp_GetClientInt(client, i_Job);
+		
+	if( job != 101 && job != 102 && job != 103 && job != 104 && job != 105 && job != 106 ) {
+		ACCESS_DENIED(client);
+	}
+	
+	if( !rp_GetClientBool(client, b_MaySteal) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible pour le moment.");
+		return Plugin_Handled;
+	}
+	int target = GetClientTarget(client);
+
+	if( !IsValidClient(target) )
+		return Plugin_Handled;
+
+	if( !IsPlayerAlive(target) )
+		return Plugin_Handled;
+	
+	if( rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) != 101 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être dans le tribunal pour utiliser cette commande.");
+		return Plugin_Handled;
+	}
+		
+	int amount = StringToInt(arg);
+
+	if( amount <= 0 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas donner une amende de moins de 0$.");
+		return Plugin_Handled;
+	}
+	if( amount > (rp_GetClientInt(target, i_Money)+rp_GetClientInt(target, i_Bank)) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur n'a pas assez d'argent.");
+		return Plugin_Handled;
+	}
+
+	int maxAmount = 0;
+	switch( job ) {
+		case 101: maxAmount = 100000000;	// Président
+		case 102: maxAmount = 250000;		// Vice Président
+		case 103: maxAmount = 100000;		// Haut juge 2
+		case 104: maxAmount = 100000;		// Haut juge 1
+		case 105: maxAmount = 25000;		// Juge 2
+		case 106: maxAmount = 10000;		// Juge 1
+
+	}
+	if( amount > maxAmount ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Amende trop élevée.");
+		return Plugin_Handled;
+	}
+
+	rp_SetJobCapital(101, ( rp_GetJobCapital(101) + (amount/4)*3 ) );
+
+	rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) + (amount / 4));
+	rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amount);
+
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez pris %i$ a %N.", amount, target);
+	CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N vous a pris %i$.", client, amount);
+
+	char SteamID[64], szTarget[64];
+		
+	GetClientAuthId(client, AuthId_Engine, SteamID, sizeof(SteamID), false);
+	GetClientAuthId(target, AuthId_Engine, szTarget, sizeof(szTarget), false);
+		
+	char szQuery[1024];
+	Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_sell` (`id`, `steamid`, `job_id`, `timestamp`, `item_type`, `item_id`, `item_name`, `amount`) VALUES (NULL, '%s', '%i', '%i', '4', '%i', '%s', '%i');",
+	SteamID, rp_GetClientJobID(client), GetTime(), 0, "Amande", amount/4);
+
+	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
+
+	
+	LogToGame("[TSX-RP] [AMENDE] %N (%s) a pris %i$ a %N (%s).", client, SteamID, amount, target, szTarget);
+	rp_SetClientBool(client, b_MaySteal, false);
+	
+	CreateTimer(30.0, AllowStealing, client);
+	return Plugin_Handled;
+}
 public Action Cmd_Cop(int client) {
 	int job = rp_GetClientInt(client, i_Job);
 		
