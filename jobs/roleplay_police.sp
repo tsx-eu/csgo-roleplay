@@ -1544,7 +1544,7 @@ public int eventPayForLeaving(Handle menu, MenuAction action, int client, int pa
 		int amende = StringToInt(data[2]);
 		int jobID = rp_GetClientJobID(target);
 		
-		if( client == 0 && type == 0 )
+		if( target == 0 && type == 0 && amande == 0)
 			return;
 		
 		int time_to_spend = 0;
