@@ -140,7 +140,7 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	else if( StrEqual(command, "conv") ) {
 		return Cmd_Conv(client);
 	}
-	else if( StrEqual(command, "amende") || StrEqual(command, "amande") ) {
+	else if( StrEqual(command, "amende") || StrEqual(command, "amende") ) {
 		return Cmd_Amende(client, arg);
 	}
 	else if( StrEqual(command, "audience") || StrEqual(command, "audiance") ) {
