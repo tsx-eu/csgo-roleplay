@@ -416,6 +416,7 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	
 	if( rp_IsEntitiesNear(client, target, true) == false ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un distributeur de billet.");
+		CreateTimer(0.5, AllowStealing, client);
 		return Plugin_Handled;
 	}
 	
@@ -430,6 +431,7 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	GetEdictClassname(target, classname, sizeof(classname));
 	if( StrContains(classname, "rp_weaponbox_") == 0 ) {
 		rp_ClientDrawWeaponMenu(client, target, true);
+		CreateTimer(STEAL_TIME*0.5, AllowStealing, client);
 		return Plugin_Handled;
 	}
 	int rand = 4 + Math_GetRandomPow(0, 4), count = 0, job, rnd;

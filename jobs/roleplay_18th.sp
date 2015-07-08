@@ -478,23 +478,24 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 	int target 	 = ReadPackCell(dp);
 	int wepid = EntRefToEntIndex(ReadPackCell(dp));
 	
-	CreateTimer(STEAL_TIME/2.0, AllowStealing, client);
-	SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
-	
+	CreateTimer(STEAL_TIME/2.0, AllowStealing, client);	
 	
 	rp_ClientColorize(client);
 	rp_ClientReveal(client);
 	
 	if( rp_GetClientBool(target, b_Stealing) == false ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le joueur s'est débatu, le vol a échoué.");
+		SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 		return Plugin_Handled;
 	}
 	rp_SetClientBool(target, b_Stealing, false);
 	g_iStolenAmountTime[target]++;
 	CreateTimer(300.0, RemoveStealAmount, target);
 	
-	if ( rp_GetClientFloat(target, fl_Invincible) >= GetGameTime() )
+	if ( rp_GetClientFloat(target, fl_Invincible) >= GetGameTime() ) {
+		SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 		return Plugin_Handled;
+	}
 	
 	if( !rp_IsTargetSeen(target, client) ) {
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, 5.0);
@@ -511,7 +512,7 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 		Entity_GetOwner(wepid) == target
 	) {
 		
-		if( rp_GetClientFloat(target, fl_LastStolen)+(60.0) < GetGameTime() && g_iWeaponStolen[wepid]+(15*60) < GetTime() ) {
+		if( rp_GetClientFloat(target, fl_LastStolen)+(60.0) < GetGameTime() && g_iWeaponStolen[wepid]+(120) < GetTime() ) {
 			
 			if( !rp_GetClientBool(target, b_IsAFK) && (rp_GetClientJobID(target) == 1 || rp_GetClientJobID(target) == 101) ) {
 			
@@ -541,11 +542,12 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 				
 		}
 		else {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} L'arme %s de %N s'est déjà faites volée il y a quelques instant.", target, wepname);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} L'arme %s de %N s'est déjà faites volée il y a quelques instant.", wepname, target);
 		}
 	}
 	else {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le joueur n'avait plus son arme sur lui.");
+		SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 		return Plugin_Handled;
 	}
 	
@@ -577,6 +579,7 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 	
 	FakeClientCommand(target, "use weapon_knife");
 	
+	SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 	return Plugin_Handled;
 }
 int findPlayerWeapon(int client, int target) {
@@ -619,8 +622,8 @@ int findPlayerWeapon(int client, int target) {
 		wepid = GetPlayerWeaponSlot( target, i );
 		if( !IsValidEdict(wepid) )
 			continue;
-		//if( g_iWeaponStolen[wepid]+120 > GetTime() )
-		//	continue;
+		if( g_iWeaponStolen[wepid]+120 > GetTime() )
+			continue;
 		
 		return wepid;
 	}
