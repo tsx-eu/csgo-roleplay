@@ -483,8 +483,8 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 	rp_ClientColorize(client);
 	rp_ClientReveal(client);
 	
-	if( rp_GetClientBool(target, b_Stealing) == false ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le joueur s'est débatu, le vol a échoué.");
+	if( rp_GetClientBool(target, b_Stealing) == false || !IsPlayerAlive(client) || !IsPlayerAlive(target) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N s'est débatu, le vol a échoué.", target);
 		SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 		return Plugin_Handled;
 	}
@@ -636,6 +636,7 @@ public Action OnWeaponDrop(int client, int weapon) {
 	return Plugin_Handled;
 }
 public Action fwdDamage(int client, int attacker, float& damage) {
+	
 	if( damage >= 5.0 ) {
 		if( Math_GetRandomInt(0, 8) == 4 && rp_GetClientBool(attacker, b_Stealing) == true ) {
 			rp_SetClientBool(attacker, b_Stealing, false);

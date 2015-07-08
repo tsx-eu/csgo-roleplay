@@ -341,7 +341,6 @@ enum float_user_data {
 	Float:fl_PaintBall,
 	Float:fl_Size,
 	Float:fl_Reflect,
-	Float:fl_SlowTime,
 	Float:fl_CoolDown,
 	Float:fl_Invincible,
 	Float:fl_LastVente,

@@ -411,8 +411,8 @@ public Action Cmd_ItemAdrenaline(int args) {
 	for (float i = 0.0; i <= 10.0; i+= 0.2) {
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdAdrenalineSpeed, i);
 		rp_HookEvent(client, RP_PreHUDColorize, fwdAdrenalineColor, i);
-		rp_HookEvent(client, RP_PostGiveDamageWeapon, fwdGiveBerserk, i);
-		rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdTakeBerserk, i);
+		rp_HookEvent(client, RP_PostGiveDamageWeapon, fwdBerserk, i);
+		rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdBerserk, i);
 	}
 	
 	//Affiche un halo rouge autours du client
@@ -454,21 +454,12 @@ public Action ItemDrugStop(Handle time, any client) {
 	
 	return Plugin_Continue;
 }
-public Action fwdGiveBerserk(int attacker, int victim, float &damage, int wepID) {
+public Action fwdBerserk(int attacker, int victim, float &damage, int wepID) {
 	#if defined DEBUG
 	PrintToServer("fwdGiveBerserk");
 	#endif
 	
 	damage *= 1.05;
-	
-	return Plugin_Changed;
-}
-public Action fwdTakeBerserk(int victim, int attacker, float &damage, int wepID) {
-	#if defined DEBUG
-	PrintToServer("fwdTakeBerserk");
-	#endif
-	
-	damage *= 0.95;
 	
 	return Plugin_Changed;
 }
