@@ -96,6 +96,7 @@ public Action Cmd_SendToJail(int args) {
 }
 public void OnMapStart() {
 	PrecacheModel(MODEL_PRISONNIER, true);
+	PrecacheModel(MODEL_BARRIERE, true);
 }
 // ----------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
