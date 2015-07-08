@@ -458,8 +458,12 @@ public Action Cmd_Tazer(int client) {
 			reward = 0;
 			
 			if( owner > 0 ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez retiré la barrière de %N", owner);
-				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos barrière a été retirée par un policier.");
+				if(client == owner)
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez retiré votre propre barrière");
+				else{
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez retiré la barrière de %N", owner);
+					CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos barrière a été retirée par un policier.");
+				}
 			}
 		}
 		if( reward >= 0 )  {
