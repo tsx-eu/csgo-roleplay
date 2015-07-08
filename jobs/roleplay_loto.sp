@@ -22,8 +22,8 @@
 //#define DEBUG
 
 public Plugin myinfo = {
-	name = "Jobs: Mc'Do", author = "KoSSoLaX",
-	description = "RolePlay - Jobs: Mc'Donalds",
+	name = "Jobs: Loto", author = "KoSSoLaX",
+	description = "RolePlay - Jobs: Loto",
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
