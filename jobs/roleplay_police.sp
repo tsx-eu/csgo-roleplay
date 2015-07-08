@@ -1865,6 +1865,13 @@ public Action fwdOnPlayerBuild(int client, float& cooldown) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas poser de barrière en PVP.");
 		return Plugin_Continue;
 	}
+
+	int Tzone = rp_GetPlayerZone(client);
+	if(Tzone==24 || Tzone==25){
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas poser de barrière dans les conduits.");
+		return Plugin_Continue;
+	}
+
 	int ent = BuildingBarriere(client);
 	
 	if(ent > 0){
