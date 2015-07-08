@@ -1865,7 +1865,7 @@ public Action fwdOnPlayerBuild(int client, float& cooldown) {
 	
 	if(ent > 0){
 		rp_ScheduleEntityInput(ent, 120.0, "Kill");
-		cooldown = 120.0;
+		cooldown = 7.0;
 	}
 	else 
 		cooldown = 3.0;
@@ -1885,16 +1885,24 @@ int BuildingBarriere(int client) {
 	
 	Format(classname, sizeof(classname), "rp_barriere_%i", client);	
 	
-	int count, max = 0;
+	int count, job = rp_GetClientInt(client, i_Job), max = 0;
 	
-	switch( rp_GetClientInt(client, i_Job) ) {
-		case 1: max = 7;	//Chef
+	switch( job ) {
+		case 1:	max = 7;	//Chef
 		case 2: max = 6;	//Co-chef
 		case 5: max = 5;	//GTI
 		case 6: max = 4;	//CIA
 		case 7: max = 3;	//FBI
 		case 8: max = 2;	//Policier
 		case 9: max = 1;	//Gardien
+		
+		case 101: max = 7;	// Président
+		case 102: max = 6;	// Vice président
+		case 103: max = 5;	// HJ2
+		case 104: max = 4;	// HJ1
+		
+		default:max = 0;
+		
 	}
 	
 	float vecOrigin[3];
