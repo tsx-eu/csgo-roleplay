@@ -32,6 +32,8 @@
 #define	MAX_LOCATIONS		150
 #define	MAX_ZONES			300
 #define MODEL_PRISONNIER	"models/player/rgmodels/rginmate/rginmate.mdl"
+#define MODEL_BARRIERE		"models/props_fortifications/police_barrier001_128_reference.mdl"
+
 
 public Plugin myinfo = {
 	name = "Jobs: Police", author = "KoSSoLaX",
@@ -99,6 +101,7 @@ public void OnMapStart() {
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 	rp_HookEvent(client, RP_OnPlayerSpawn, fwdSpawn);
+	rp_HookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
 }
 public Action fwdSpawn(int client) {
 	if( rp_GetClientInt(client, i_JailTime) > 0 )
@@ -108,6 +111,7 @@ public Action fwdSpawn(int client) {
 public void OnClientDisconnect(int client) {
 	rp_UnhookEvent(client, RP_OnPlayerCommand, fwdCommand);
 	rp_UnhookEvent(client, RP_OnPlayerSpawn, fwdSpawn);
+	rp_UnhookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
 }
 public Action fwdCommand(int client, char[] command, char[] arg) {	
 	if( StrEqual(command, "cop") || StrEqual(command, "cops") ) {
@@ -446,7 +450,17 @@ public Action Cmd_Tazer(int client) {
 				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Un de vos plant de drogue a été detruit par un policier.");
 			}
 		}
-		
+		else if( StrContains(tmp2, "rp_barriere_") == 0){
+			rp_GetZoneData(Tzone, zone_type_name, tmp, sizeof(tmp));
+			LogToGame("[TSX-RP] [TAZER] %L a retiré une barrière de %L dans %s", client, owner, tmp);
+			
+			reward = 0;
+			
+			if( owner > 0 ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez retiré la barrière de %N", owner);
+				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos barrière a été retirée par un policier.");
+			}
+		}
 		if( reward >= 0 )  {
 			
 			rp_Effect_Tazer(client, target);
@@ -1831,6 +1845,131 @@ int JobToZoneID(int job) {
 		}
 	}
 	return 0;
+}
+
+// ----------------------------------------------------------------------------
+public Action fwdOnPlayerBuild(int client, float& cooldown) {
+	#if defined DEBUG
+	PrintToServer("fwdOnPlayerBuild_Barriere");
+	#endif
+	
+	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 )
+		return Plugin_Continue;
+		
+	if( rp_IsInPVP(client) ){
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas poser de barrière en PVP.");
+		return Plugin_Continue;
+	}
+	int ent = BuildingBarriere(client);
+	
+	if(ent > 0){
+		rp_ScheduleEntityInput(ent, 120.0, "Kill");
+		cooldown = 120.0;
+	}
+	else 
+		cooldown = 3.0;
+	
+	return Plugin_Stop;
+}
+
+int BuildingBarriere(int client) {
+	#if defined DEBUG
+	PrintToServer("BuildingBarriere");
+	#endif
+	
+	if( !rp_IsBuildingAllowed(client) )
+		return 0;	
+	
+	char classname[64], tmp[64];
+	
+	Format(classname, sizeof(classname), "rp_barriere_%i", client);	
+	
+	int count, max = 0;
+	
+	switch( rp_GetClientInt(client, i_Job) ) {
+		case 1: max = 7;	//Chef
+		case 2: max = 6;	//Co-chef
+		case 5: max = 5;	//GTI
+		case 6: max = 4;	//CIA
+		case 7: max = 3;	//FBI
+		case 8: max = 2;	//Policier
+		case 9: max = 1;	//Gardien
+	}
+	
+	float vecOrigin[3];
+	GetClientAbsOrigin(client, vecOrigin);
+	for(int i=1; i<=2048; i++) {
+		if( !IsValidEdict(i) )
+			continue;
+		if( !IsValidEntity(i) )
+			continue;
+		
+		GetEdictClassname(i, tmp, sizeof(tmp));
+		
+		if( StrEqual(classname, tmp) ) {
+			count++;
+			if( count >= max ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez posé trop de barrières.");
+				return 0;
+			}
+		}
+	}
+	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous posez une barrière...");
+
+	EmitSoundToAllAny("player/ammo_pack_use.wav", client);
+	
+	int ent = CreateEntityByName("prop_physics_override");
+	
+	DispatchKeyValue(ent, "classname", classname);
+	DispatchKeyValue(ent, "model", MODEL_BARRIERE);
+	DispatchSpawn(ent);
+	ActivateEntity(ent);
+	
+	SetEntityModel(ent, MODEL_BARRIERE);
+	
+	SetEntProp( ent, Prop_Data, "m_iHealth", 500);
+	SetEntProp( ent, Prop_Data, "m_takedamage", 0);
+	
+	SetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity", client);
+	
+	float vecAngles[3]; GetClientEyeAngles(client, vecAngles); vecAngles[0] = vecAngles[2] = 0.0;
+	TeleportEntity(ent, vecOrigin, vecAngles, NULL_VECTOR);
+	
+	SetEntityRenderMode(ent, RENDER_NONE);
+	ServerCommand("sm_effect_fading \"%i\" \"2.0\" \"0\"", ent);
+	
+	SetEntityMoveType(client, MOVETYPE_NONE);
+	SetEntityMoveType(ent, MOVETYPE_NONE);
+	
+	CreateTimer(2.0, BuildingBarriere_post, ent);
+	rp_SetBuildingData(ent, BD_owner, client);
+	return ent;
+}
+
+public Action BuildingBarriere_post(Handle timer, any entity) {
+	#if defined DEBUG
+	PrintToServer("BuildingBarriere_post");
+	#endif
+	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
+	SetEntityMoveType(client, MOVETYPE_WALK);
+	
+	rp_Effect_BeamBox(client, entity, NULL_VECTOR, 255, 255, 0);
+	
+	SetEntProp(entity, Prop_Data, "m_takedamage", 2);
+	HookSingleEntityOutput(entity, "OnBreak", BuildingBarriere_break);
+	return Plugin_Handled;
+}
+
+public void BuildingBarriere_break(const char[] output, int caller, int activator, float delay) {
+	#if defined DEBUG
+	PrintToServer("BuildingBarriere_break");
+	#endif
+	
+	int owner = GetEntPropEnt(caller, Prop_Send, "m_hOwnerEntity");
+	if( IsValidClient(owner) ) {
+		CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre barrière a été détruite.");
+	}
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemRatio(int args) {
