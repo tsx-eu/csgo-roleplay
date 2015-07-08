@@ -358,7 +358,7 @@ public Action Cmd_Tazer(int client) {
 		rp_SetClientFloat(target, fl_TazerTime, GetGameTime()+9.0);
 
 		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été tazé par %N", client);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez taze %N", target);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez tazé %N", target);
 
 		rp_SetClientBool(client, b_MaySteal, false);
 		switch( job ) {
@@ -387,12 +387,16 @@ public Action Cmd_Tazer(int client) {
 		
 		if( owner != 0 && rp_IsMoveAble(target) && (Tzone == 0 || rp_GetZoneInt(Tzone, zone_type_type) <= 1	) ) {
 			// PROPS
-			
-			if( IsValidClient( owner ) )
-				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Un de vos props a été supprimé.");
-				
 			rp_GetZoneData(Tzone, zone_type_name, tmp, sizeof(tmp));
-			LogToGame("[TSX-RP] [TAZER] %L a supprimé un props de %L dans %s", client, target, tmp );
+			
+			if( IsValidClient( owner ) ){
+				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Un de vos props a été supprimé.");
+				LogToGame("[TSX-RP] [TAZER] %L a supprimé un props de %L dans %s", client, owner, tmp );
+			}
+			else{
+				LogToGame("[TSX-RP] [TAZER] %L a supprimé un props dans %s", client, tmp );
+			}
+				
 			
 			reward = 0;
 			if( rp_GetBuildingData(target, BD_started)+120 < GetTime() ) {
