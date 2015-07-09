@@ -64,7 +64,7 @@ char g_szJailRaison[][][128] = {
 	{ "Fuite, refus d'obtempérer",			"0", 	"6",	"200"},
 	{ "Vol",								"0", 	"3",	"50"},
 	{ "Insultes, Irrespect",				"1", 	"6",	"250"},
-	{ "Trafique illégal, tenative de vol",	"0", 	"6",	"100"},
+	{ "Trafique illégal, tentative de vol",	"0", 	"6",	"100"},
 	{ "Nuisance sonore",					"0", 	"6",	"100"},
 	{ "Tir dans la rue",					"0", 	"6",	"50"},
 	{ "Conduite dangeureuse",				"0", 	"6",	"150"},

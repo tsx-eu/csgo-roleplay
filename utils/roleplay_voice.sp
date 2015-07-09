@@ -26,6 +26,12 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
+public void OnPluginStart() {
+	for (int i = 1; i <= MaxClients; i++)
+		if( IsValidClient(i) )
+			OnClientPostAdminCheck(i);
+}
+
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerHear, fwdHear);
 }
@@ -42,7 +48,7 @@ public Action fwdHear(int client, int target, float& dist) {
 		return Plugin_Stop;
 	}
 	
-	if( Czone > 0 && Tzone > 0 && Ctype != Ttype ) {
+	if( Ctype != Ttype && (Czone==0||Tzone==0) ) {
 		return Plugin_Stop;
 	}
 	

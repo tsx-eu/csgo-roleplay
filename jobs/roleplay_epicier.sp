@@ -46,7 +46,6 @@ public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 }
 public void OnClientDisconnect(int client) {
-	
 	if( rp_GetClientBool(client, b_Crayon) ) 
 		rp_UnhookEvent(client, RP_PrePlayerTalk, fwdTalkCrayon);
 	
@@ -248,17 +247,22 @@ public Action Cmd_ItemCrayons(int args) {
 	#endif
 	
 	int client = GetCmdArgInt(1);
+	int item_id = GetCmdArgInt(args);
 	
 	bool crayon = rp_GetClientBool(client, b_Crayon);
 	
-	if( !crayon ) {
-		rp_IncrementSuccess(client, success_list_rainbow);
-		rp_HookEvent(client, RP_PrePlayerTalk, fwdTalkCrayon);
+	if( crayon ) {
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
 	}
 	
+	rp_IncrementSuccess(client, success_list_rainbow);
+	rp_HookEvent(client, RP_PrePlayerTalk, fwdTalkCrayon);	
 	rp_SetClientBool(client, b_Crayon, true);
+	return Plugin_Handled;
 }
 public Action fwdTalkCrayon(int client, char[] szSayText, int length) {
+	
 	char tmp[64];
 	int hours, minutes;
 	rp_GetTime(hours, minutes);
@@ -303,6 +307,8 @@ public Action fwdTalkCrayon(int client, char[] szSayText, int length) {
 	
 	ReplaceString(szSayText, length, "[TSX-RP]", "");	
 	ReplaceString(szSayText, length, "{white}", "{default}");
+	
+	return Plugin_Changed;
 }
 
 public Action Cmd_ItemMaps(int args) {
