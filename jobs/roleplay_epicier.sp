@@ -272,10 +272,10 @@ public Action fwdTalkCrayon(int client, char[] szSayText, int length) {
 	IntToString( hours, tmp, sizeof(tmp));
 	ReplaceString(szSayText, length, "{heure}", tmp);
 
-	if(tmp != '23')
+	if(hours != 23)
 		IntToString( hours+1, tmp, sizeof(tmp));
 	else
-		tmp='0';
+		tmp="0";
 
 	ReplaceString(szSayText, length, "{h+1}", tmp);
 
