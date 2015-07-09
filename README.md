@@ -18,4 +18,4 @@ TSX-RP de [ts-x.eu][1] est mis à disposition selon les termes de la [licence Cr
 ## Remerciements
 Nous remercions [toutes les personnes ayant collaboré](https://github.com/kossolax/TSX-RP/graphs/contributors) au développement de ce projet:
 - [medzila](https://github.com/kossolax/TSX-RP/commits?author=medzila)
-- [Hellhium](https://github.com/kossolax/TSX-RP/commits?author=Hellhium)
+- [Leethium (Hellhium)](https://github.com/kossolax/TSX-RP/commits?author=Hellhium)
