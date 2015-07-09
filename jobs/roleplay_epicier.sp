@@ -45,6 +45,12 @@ public void OnPluginStart() {
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 }
+public void OnClientDisconnect(int client) {
+	
+	if( rp_GetClientBool(client, b_Crayon) ) 
+		rp_UnhookEvent(client, RP_PrePlayerTalk, fwdTalkCrayon);
+	
+}
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemCigarette(int args) {
 	#if defined DEBUG
@@ -247,10 +253,58 @@ public Action Cmd_ItemCrayons(int args) {
 	
 	if( !crayon ) {
 		rp_IncrementSuccess(client, success_list_rainbow);
+		rp_HookEvent(client, RP_PrePlayerTalk, fwdTalkCrayon);
 	}
 	
 	rp_SetClientBool(client, b_Crayon, true);
 }
+public Action fwdTalkCrayon(int client, char[] szSayText, int length) {
+	char tmp[64];
+	int hours, minutes;
+	rp_GetTime(hours, minutes);
+	
+	IntToString( GetClientHealth(client), tmp, sizeof(tmp));
+	ReplaceString(szSayText, length, "{hp}", tmp);
+	
+	IntToString( rp_GetClientInt(client, i_Kevlar), tmp, sizeof(tmp));
+	ReplaceString(szSayText, length, "{ap}", tmp);
+	
+	IntToString( hours, tmp, sizeof(tmp));
+	ReplaceString(szSayText, length, "{heure}", tmp);
+	
+	IntToString( minutes, tmp, sizeof(tmp));
+	ReplaceString(szSayText, length, "{minute}", tmp);
+	
+	rp_GetDate(tmp, length);
+	ReplaceString(szSayText, length, "{date}", tmp);
+	GetClientName(client, tmp, sizeof(tmp));							ReplaceString(szSayText, length, "{me}", tmp);
+	
+	int target = GetClientTarget(client);
+	if( IsValidClient(target) ) {
+		GetClientName(target, tmp, sizeof(tmp));
+		ReplaceString(szSayText, length, "{target}", tmp);
+	}
+	else {
+		ReplaceString(szSayText, length, "{target}", "Personne");
+	}
+	
+	rp_GetZoneData(rp_GetPlayerZone( IsValidClient(target) ? target : client ), zone_type_name, tmp, sizeof(tmp));
+	ReplaceString(szSayText, length, "{door}", tmp);
+	
+	rp_GetJobData(rp_GetClientInt(client, i_Job), job_type_name, tmp, sizeof(tmp));
+	ReplaceString(szSayText, length, "{job}", tmp);
+	
+	rp_GetJobData(rp_GetClientInt(client, i_Group), job_type_name, tmp, sizeof(tmp));
+	ReplaceString(szSayText, length, "{gang}", tmp);
+	
+	rp_GetZoneData(rp_GetPlayerZone( client ), zone_type_name, tmp, sizeof(tmp));
+	ReplaceString(szSayText, length, "{zone}", tmp);
+	
+	
+	ReplaceString(szSayText, length, "[TSX-RP]", "");	
+	ReplaceString(szSayText, length, "{white}", "{default}");
+}
+
 public Action Cmd_ItemMaps(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemMaps");

@@ -409,7 +409,7 @@ public Action Cmd_ItemAdrenaline(int args) {
 	SetEntityHealth(client, heal);
 	
 	for (float i = 0.0; i <= 10.0; i+= 0.2) {
-		rp_HookEvent(client, RP_PrePlayerPhysic, fwdAdrenalineSpeed, i);
+		rp_HookEvent(client, RP_PostPlayerPhysic, fwdAdrenalineSpeed, i);
 		rp_HookEvent(client, RP_PreHUDColorize, fwdAdrenalineColor, i);
 		rp_HookEvent(client, RP_PostGiveDamageWeapon, fwdBerserk, i);
 		rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdBerserk, i);

@@ -556,7 +556,7 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 		time += 5.0 * 60.0;
 	
 	rp_SetClientFloat(target, fl_LastStolen, time);
-	rp_SetClientInt(client, i_LastVolAmount, price/2);
+	rp_SetClientInt(client, i_LastVolAmount, price/4);
 	rp_SetClientInt(client, i_LastVolTarget, target);
 	rp_SetClientInt(target, i_LastVol, client);
 	
