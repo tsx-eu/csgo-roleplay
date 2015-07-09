@@ -419,7 +419,7 @@ public Action Cmd_Tazer(int client) {
 			ReplaceString(tmp2, sizeof(tmp2), "weapon_", "");	
 			int prix = CS_GetWeaponPrice(client, CS_AliasToWeaponID(tmp2) );
 			
-			reward = prix / 10;
+			reward = RoundToCeil( prix / 10 );
 				
 			if( rp_GetWeaponBallType(target) != ball_type_none ) {
 				reward += 150;
