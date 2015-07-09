@@ -887,7 +887,10 @@ public Action Cmd_Conv(int client) {
 			continue;
 
 		Format(tmp, sizeof(tmp), "%i", i);
-		Format(tmp2, sizeof(tmp2), "%N", i);
+		if(rp_IsClientNew(i))
+			Format(tmp2, sizeof(tmp2), "[NEW] %N", i);
+		else
+			Format(tmp2, sizeof(tmp2), "%N", i);
 
 		AddMenuItem(menu, tmp, tmp2);
 	}
