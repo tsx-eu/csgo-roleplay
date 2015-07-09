@@ -416,13 +416,13 @@ public Action Cmd_Tazer(int client) {
 			rp_GetZoneData(Tzone, zone_type_name, tmp, sizeof(tmp));
 			LogToGame("[TSX-RP] [TAZER] %L a supprimé une arme %s dans %s", client, tmp2, tmp);
 			
-			if( StrContains(tmp2, "weapon_hegrenade") == 0 || StrContains(tmp2, "weapon_flashbang") == 0 ) //Si c'est une grenade ou Flash
-				reward = 25;
-			else 
-				reward = 100;
+			ReplaceString(tmp2, sizeof(tmp2), "weapon_", "");	
+			int prix = CS_GetWeaponPrice(client, CS_AliasToWeaponID(tmp2) );
+			
+			reward = prix / 10;
 				
 			if( rp_GetWeaponBallType(target) != ball_type_none ) {
-				reward = 250;
+				reward += 150;
 			}
 		}
 		else if ( StrContains(tmp2, "rp_cashmachine_") == 0 ) {
