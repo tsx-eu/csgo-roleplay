@@ -865,15 +865,15 @@ public Action Cmd_ItemEnquete(int args) {
 			
 			AddMenu_Blank(client, menu, "Il a tué: %s", tmp);
 			CPrintToChat(killedBy, "{lightblue}[TSX-RP]{default} Votre pot de vin envers un détective privé vient de vous sauver.");
-			LogToGame("[TSX-RP] [ENQUETE] Une enquête effectué sur %L n'a pas montrée qui il a tué pour cause de pot de vin.", client);
+			LogToGame("[TSX-RP] [ENQUETE] Une enquête effectué sur %L n'a pas montrée qui il a tué pour cause de pot de vin.", target);
 		}
 		else {	
 			AddMenu_Blank(client, menu, "Il a tué: %N", killedBy);
-			LogToGame("[TSX-RP] [ENQUETE] Une enquête effectué sur %L à montrée qu'il a tué %L.", client, killed);
+			LogToGame("[TSX-RP] [ENQUETE] Une enquête effectué sur %L à montrée qu'il a tué %L.", target, killedBy);
 		}
 	}
 	else{
-		LogToGame("[TSX-RP] [ENQUETE] Une enquête effectué sur %L à révélée qu'il n'a tué personne", client, killed);
+		LogToGame("[TSX-RP] [ENQUETE] Une enquête effectué sur %L à révélée qu'il n'a tué personne", target, killedBy);
 	}
 	
 	if( rp_GetClientInt(target, i_KillingSpread) > 0 )
@@ -888,15 +888,15 @@ public Action Cmd_ItemEnquete(int args) {
 			
 			AddMenu_Blank(client, menu, "%s, l'a tué", tmp);
 			CPrintToChat(killedBy, "{lightblue}[TSX-RP]{default} Votre pot de vin envers un détective privé vient de vous sauver.");
-			LogToGame("[TSX-RP] [ENQUETE] Une enquête effectué sur %L n'a pas montrée qui l'a tué pour cause de pot de vin.", client);
+			LogToGame("[TSX-RP] [ENQUETE] Une enquête effectué sur %L n'a pas montrée qui l'a tué pour cause de pot de vin.", target);
 		}
 		else {
 			AddMenu_Blank(client, menu, "%N, l'a tué", killed);
-			LogToGame("[TSX-RP] [ENQUETE] Une enquête effectué sur %L à montrée que %L l'a tué.", client, killed);
+			LogToGame("[TSX-RP] [ENQUETE] Une enquête effectué sur %L à montrée que %L l'a tué.", target, killed);
 		}
 	}
 	else{
-		LogToGame("[TSX-RP] [ENQUETE] Une enquête effectué sur %L a révélée qu'il n'a été tué par personne", client, killed);
+		LogToGame("[TSX-RP] [ENQUETE] Une enquête effectué sur %L a révélée qu'il n'a été tué par personne", target, killed);
 	}
 	
 	if( IsValidClient(rp_GetClientInt(target, i_LastVol)) ) 
