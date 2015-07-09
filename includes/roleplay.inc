@@ -26,6 +26,8 @@ enum rp_event {
 	RP_PostGiveDamageKnife,
 	
 	RP_PrePlayerPhysic,		/* Permet de modifier la physique d'un joueur. Utiliser return Plugin_Stop pour forcer les valeurs et ignorer toutes les autres. */
+	RP_PostPlayerPhysic,		/* Idem, mais accepté en PvP */
+	
 	RP_PreHUDColorize,		/* Modifie la couleur de l'écran */
 	RP_OnFrameSeconde,		/* Appelé chaque seconde */
 	RP_OnAssurance,			/* Modifie l'assurance, est appelé à chaques fois que le serveur la recalcul */
@@ -35,6 +37,10 @@ enum rp_event {
 	RP_OnPlayerUse,			/* Un joueur utilise la commande utiliser, soit la touche E. */
 	RP_OnPlayerCommand,		/* Un joueur execute une commande, /vol, /truc, /bidule. command ne contient ni de !, ni de /. */
 	RP_OnPlayerSteal,			/* Un joueur execute le /vol */
+	
+	RP_OnPlayerHear,		/* Peut-il entendre un autre joueur ? */
+	RP_PrePlayerTalk,		/* J'écris un message dans le chat  */
+	
 	
 	RP_EventMax
 }
@@ -50,6 +56,9 @@ typeset rp_event_enum {
 	
 	
 	function Action(int client, float& speed, float& gravity); 			/* RP_PrePlayerPhysic == return Plugin_Stop pour forcer les valeurs et ignorer les autres plugins/hook*/
+	function Action(int client, float& speed, float& gravity); 			/* RP_PostPlayerPhysic */
+	
+	
 	function Action(int client, int color[4]); 					/* RP_PreHUDColorize == idem */
 	function Action(int client);								/* RP_OnFrameSeconde */
 	function Action(int client, int& amount);						/* RP_OnAssurance */
@@ -59,6 +68,8 @@ typeset rp_event_enum {
 	function Action(int client);								/* RP_OnPlayerUse */
 	function Action(int client, char[] command, char[] arg);	/* RP_OnPlayerCommand */
 	function Action(int client, int target, float& cooldown);			/* RP_OnPlayerSteal */
+	function Action(int client, int target, float dist);			/* RP_OnPlayerHear Est-ce que client peut entendre target ? */
+	function Action(int client, char[] message, int length);	/* RP_PrePlayerTalk */
 };
 /*
  * @brief Hook sur un joueur. 
@@ -191,6 +202,10 @@ native Handle rp_GetDatabase();											/* Récupère un pointeur sur la DB */
 native Handle rp_CreateSellingMenu();										/* Récupère un pointeur sur le menu de vente... cf... Je sais plus quel job. */
 // ----------------------------------------------------------------------------
 native void rp_ClientRemoveProp(int client, int target, int item_id);					/* Supprime un prop. Rembourse item_id si le target ne peut pas être supprimé */
+// ----------------------------------------------------------------------------
+native void rp_GetDate(char[] str, int length);
+native void rp_GetTime(int& hour, int& minutes);
+
 // ----------------------------------------------------------------------------
 
 #define ACCESS_DENIED(%1)	CPrintToChat(%1, "{lightblue}[TSX-RP]{default} Vous n'avez pas accès à cette commande.");	return Plugin_Handled
@@ -552,5 +567,3 @@ enum type_appart_bonus {
 
 
 #include <rp_tools.inc>
-
-

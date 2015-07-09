@@ -203,4 +203,3 @@ stock void rp_ClientSwitchWeapon(int client, int wepid, int target=-1) {
 	
 	rp_SetClientWeaponSkin(target, wepid);
 }
-
