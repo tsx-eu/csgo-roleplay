@@ -299,7 +299,7 @@ public Action fwdTalkCrayon(int client, char[] szSayText, int length) {
 		ReplaceString(szSayText, length, "{target}", "Personne");
 	}
 	
-	rp_GetZoneData(rp_GetPlayerZone( IsValidClient(target) ? target : client ), zone_type_name, tmp, sizeof(tmp));
+	rp_GetZoneData(rp_GetPlayerZone( IsValidEntity(target) ? target : client ), zone_type_name, tmp, sizeof(tmp));
 	ReplaceString(szSayText, length, "{door}", tmp);
 	
 	rp_GetJobData(rp_GetClientInt(client, i_Job), job_type_name, tmp, sizeof(tmp));
