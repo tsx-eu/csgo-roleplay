@@ -336,6 +336,7 @@ enum int_user_data {
 	i_AddToPay,
 	i_TimeAFK,
 	i_TimeAFK_total,
+	i_MarriedTo,
 	
 	i_udata_max
 };
