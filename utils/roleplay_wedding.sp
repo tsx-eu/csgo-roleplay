@@ -38,6 +38,11 @@ public Plugin myinfo = {
 // TODO: Rajouter personnalité / sexe aux conjoints
 // TODO: Bonus s'ils sont proches differents si homme ou femme du coup ?
 
+public void OnPluginStart() {
+	for (int i = 1; i <= MaxClients; i++)
+		if( IsValidClient(i) )
+			OnClientPostAdminCheck(i);
+}
 
 // ----------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
@@ -112,7 +117,7 @@ public int eventMariage_1(Handle menu, MenuAction action, int client, int param2
 		char options[128];
 		GetMenuItem(menu, param2, options, sizeof(options));
 		int target = StringToInt(options); // On choppe la premiere personne a marier
-		
+
 		// Setup menu
 		Handle menu2 = CreateMenu(eventMariage_2);
 		Format(options, sizeof(options), "A qui voulez vous marier %N", target); // On choisi la seconde personne
@@ -131,8 +136,8 @@ public int eventMariage_1(Handle menu, MenuAction action, int client, int param2
 
 			Format(tmp, sizeof(tmp), "%i_%i", i, target); // On relie les deux personne a marier
 			Format(tmp2, sizeof(tmp2), "%N", i);
-
-			AddMenuItem(menu, tmp, tmp2);
+			
+			AddMenuItem(menu2, tmp, tmp2);
 		}
 		
 		SetMenuExitButton(menu2, true);
@@ -173,7 +178,7 @@ public int eventMariage_2(Handle menu, MenuAction action, int client, int param2
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes pas au tribunal, le mariage ne peut pas se dérouler.");
 			CloseHandle(menu);
 		}
-		if( !rp_GetClientInt(target_1, i_MarriedTo) || !rp_GetClientInt(target_2, i_MarriedTo) ){
+		if( rp_GetClientInt(target_1, i_MarriedTo) != 0 || rp_GetClientInt(target_2, i_MarriedTo) != 0 ){
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous essayez d'unir quelqu'un déjà marié, le mariage ne peut pas se dérouler.");
 			CloseHandle(menu);
 		}
