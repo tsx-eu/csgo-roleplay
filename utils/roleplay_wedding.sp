@@ -27,7 +27,7 @@
 #define MENU_TIME_DURATION 10
 
 public Plugin myinfo = {
-	name = "Utils: Wedding", author = "KoSSoLaX",
+	name = "Utils: Wedding", author = "Medzila",
 	description = "RolePlay - Utils: Wedding",
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
