@@ -151,8 +151,10 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	else if( StrEqual(command, "audience") || StrEqual(command, "audiance") ) {
 		return Cmd_Audience(client);
 	}
+	
 	return Plugin_Continue;
 }
+
 // ----------------------------------------------------------------------------
 public Action Cmd_Amende(int client, const char[] arg) {
 	int job = rp_GetClientInt(client, i_Job);
@@ -968,6 +970,7 @@ public int eventConvocation_2(Handle menu, MenuAction action, int client, int pa
 		CloseHandle(menu);
 	}
 }
+	
 // ----------------------------------------------------------------------------
 public Action Cmd_Tribunal(int client) {
 	int job = rp_GetClientInt(client, i_Job);
