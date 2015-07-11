@@ -12,6 +12,7 @@
 
 #include <sourcemod>
 #include <smlib>
+#include <colors_csgo>
 
 #define __LAST_REV__ 		"v:0.1.0"
 
