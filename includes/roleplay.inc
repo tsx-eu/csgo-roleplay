@@ -338,6 +338,10 @@ enum int_user_data {
 	i_TimeAFK_total,
 	i_MarriedTo,
 	
+	i_ItemCount,
+	i_ItemBankCount,
+	
+	
 	i_udata_max
 };
 enum float_user_data {

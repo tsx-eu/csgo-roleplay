@@ -428,8 +428,13 @@ public Action fwdAdrenalineSpeed(int client, float& speed, float& gravity) {
 	#if defined DEBUG
 	PrintToServer("fwdAdrenalineSpeed");
 	#endif
-	speed -= 0.05;
-	gravity += 0.05;
+	speed -= 0.03;
+	gravity += 0.03;
+	
+	if( speed <= 0.0 ) {
+		speed = 0.0;
+		return Plugin_Stop;
+	}
 	
 	return Plugin_Changed;
 }
