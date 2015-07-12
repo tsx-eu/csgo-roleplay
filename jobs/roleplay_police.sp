@@ -555,7 +555,7 @@ public Action Cmd_Jail(int client) {
 			case 102: maxAmount = 300;		// Vice Président
 			case 103: maxAmount = 100;		// Haut juge 2
 			case 104: maxAmount = 100;		// Haut juge 1
-			case 105: maxAmount = 35;		// Juge 2
+			case 105: maxAmount = 36;		// Juge 2
 			case 106: maxAmount = 24;		// Juge 1
 		}
 
@@ -575,6 +575,13 @@ public Action Cmd_Jail(int client) {
 
 			Format(tmp, 255, "%i_%i", target, i);
 			Format(tmp2, 255, "%i Heures", i);
+
+			AddMenuItem(menu, tmp, tmp2);
+		}
+
+		if(job == 104 || job == 103 || job == 101){
+			Format(tmp, 255, "%i_%i", target, maxamount);
+			Format(tmp2, 255, "%i Heures", maxamount);
 
 			AddMenuItem(menu, tmp, tmp2);
 		}
