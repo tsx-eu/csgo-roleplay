@@ -580,8 +580,8 @@ public Action Cmd_Jail(int client) {
 		}
 
 		if(job == 104 || job == 103 || job == 101){
-			Format(tmp, 255, "%i_%i", target, maxamount);
-			Format(tmp2, 255, "%i Heures", maxamount);
+			Format(tmp, 255, "%i_%i", target, maxAmount);
+			Format(tmp2, 255, "%i Heures", maxAmount);
 
 			AddMenuItem(menu, tmp, tmp2);
 		}
