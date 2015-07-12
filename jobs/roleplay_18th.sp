@@ -228,9 +228,6 @@ public Action Cmd_ItemPiedBiche(int args) {
 		ITEM_CANCEL(client, item_id);
 		return Plugin_Handled;
 	}
-	
-	
-	
 	if( rp_GetClientInt(client, i_Job) >= 184 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes pas assez haut gradé.");
 		return Plugin_Handled;
@@ -483,8 +480,9 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 	rp_ClientColorize(client);
 	rp_ClientReveal(client);
 	
-	if( rp_GetClientBool(target, b_Stealing) == false || !IsPlayerAlive(client) || !IsPlayerAlive(target) ) {
+	if( rp_GetClientBool(target, b_Stealing) == false || !IsPlayerAlive(client) || !IsPlayerAlive(target) || (rp_IsClientNew(target) && Math_GetRandomInt(0,3) != 0) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N s'est débatu, le vol a échoué.", target);
+		rp_SetClientBool(target, b_Stealing, false);
 		SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 		return Plugin_Handled;
 	}
@@ -493,6 +491,7 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 	CreateTimer(300.0, RemoveStealAmount, target);
 	
 	if ( rp_GetClientFloat(target, fl_Invincible) >= GetGameTime() ) {
+		rp_SetClientBool(target, b_Stealing, false);
 		SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 		return Plugin_Handled;
 	}
@@ -586,10 +585,6 @@ int findPlayerWeapon(int client, int target) {
 	
 	if( rp_GetClientJobID(target)==41 && rp_GetClientInt(target, i_ToKill) > 0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler un tueur sous contrat.");
-		return -1;
-	}
-	if( rp_IsClientNew(target) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler un nouveau joueur");
 		return -1;
 	}
 	if( !rp_IsTutorialOver(target) ) {

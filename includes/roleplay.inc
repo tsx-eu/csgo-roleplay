@@ -114,6 +114,7 @@ native bool rp_IsClientLucky(int client);										/* Le joueur à t-il de la ch
 native bool rp_IsClientNew(int client);										/* Moins de 20 heures de jeu */
 native bool rp_IncrementLuck(int client);										/* Augmente la chance d'un joueur... */
 native bool rp_IsTargetSeen(int client, int target);								/* Est-ce que client peut voir target ? TODO: A confirmer que ce n'est pas l'inverse */
+native bool rp_IsTargetHear(int client, int target);								/* Est-ce que client peut entendre target ? */
 native bool rp_IsValidDoor(int ent);										/* La porte est-elle valide ? */
 native bool rp_IsNight();												/* Entre 18h30 et 6h30 du matin */
 // ----------------------------------------------------------------------------
@@ -336,6 +337,11 @@ enum int_user_data {
 	i_AddToPay,
 	i_TimeAFK,
 	i_TimeAFK_total,
+	i_MarriedTo,
+	
+	i_ItemCount,
+	i_ItemBankCount,
+	
 	
 	i_udata_max
 };

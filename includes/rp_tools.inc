@@ -14,9 +14,39 @@
 #define _rp_tools_included_
 
 // ----------------------------------------------------------------------------
-// TODO: BUG min=1 sinon ça fait dla merde
 public int Math_GetRandomPow(int min, int max) {
-	return RoundToFloor( float( min + (max - min)  ) * ( Pow(GetRandomFloat(0.0, 1.0), (1.0/0.5) )  )) + 1;
+	return RoundToFloor(float(max - min) * Pow(GetURandomFloat(), 2.0)) + min;
+}
+// ----------------------------------------------------------------------------
+public void PrintToChatClientArea(int client, const char[] message, any ...) {
+	char buffer[250];
+	VFormat(buffer, sizeof(buffer), message, 3);
+	
+	for(int i=1; i<=MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		if( !IsPlayerAlive(i) )
+			continue;
+
+		if( rp_IsTargetHear(i, client) ) {
+			CPrintToChat(i, "{lightblue}[TSX-RP]{default} %s", buffer);
+		}
+	}
+}
+public void PrintToChatZone(int zoneID, const char[] message, any ...) {
+	char buffer[MAX_MESSAGE_LENGTH];
+	VFormat(buffer, sizeof(buffer), message, 3);
+	
+	for(int i=1; i<=MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		if( !IsPlayerAlive(i) )
+			continue;
+		
+		if( rp_GetPlayerZone(i) == zoneID ) {
+			CPrintToChat(i, "{lightblue}[TSX-RP]{default} %s", buffer);
+		}
+	}
 }
 // ----------------------------------------------------------------------------
 public float GetCmdArgFloat(int index) {
