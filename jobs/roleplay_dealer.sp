@@ -992,7 +992,8 @@ bool CanTP(float pos[3], int client)
 }
 
 public Action tpbeam(Handle timer,int client){
-	if(!IsPlayerAlive(client))
+	int clientzonebit = rp_GetZoneBit(rp_GetPlayerZone(client));
+	if(!IsValidClient(client) || !IsPlayerAlive(client) || ( clientzonebit & BITZONE_JAIL ||  clientzonebit & BITZONE_LACOURS ||  clientzonebit & BITZONE_HAUTESECU ) )
 		return Plugin_Handled;
 
 	float vecTarget[3];
