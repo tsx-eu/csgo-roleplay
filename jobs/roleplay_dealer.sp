@@ -964,7 +964,7 @@ bool CanTP(float pos[3], int client)
     GetClientMaxs(client, maxs);
     Handle tr;
     tr = TR_TraceHullEx(pos, pos, mins, maxs, MASK_SOLID);
-    ret = TR_DidHit(tr);
+    ret = !TR_DidHit(tr);
     CloseHandle(tr);
     return ret;
 }
