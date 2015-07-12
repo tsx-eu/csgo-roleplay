@@ -380,7 +380,7 @@ public Action Cmd_ItemPilule(int args){
 		for(int i=1; i<300;i++){
 			if(rp_GetZoneInt(i, zone_type_type) == rp_GetClientJobID(client)){
 				tptozone = i;
-				break;
+				continue;
 			}
 		}
 	}
@@ -395,6 +395,7 @@ public Action Cmd_ItemPilule(int args){
 	ServerCommand("sm_effect_panel %d 5.0 \"Téléportation en cours...\"", client);
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 5.0);
 	rp_ClientColorize(client, { 238, 148, 52, 255} );
+
 
 	rp_SetClientBool(client, b_MaySteal, false);
 	CreateTimer(35.0, AllowStealing, client);
