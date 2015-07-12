@@ -338,3 +338,161 @@ void UningiteEntity(int entity) {
 	if( IsValidEdict(ent) )
 		SetEntPropFloat(ent, Prop_Data, "m_flLifetime", 0.0); 
 }
+
+public Action Cmd_ItemPilule(int args){
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemPilule");
+	#endif
+
+	int type = GetCmdArgInt(1);	// 1 Pour Appart, 2 pour planque
+	int client = GetCmdArgInt(2);
+	int item_id = GetCmdArgInt(args);
+	int tptozone = -1;
+
+	if( !rp_GetClientBool(client, b_MaySteal) ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet item pour le moment.");
+		return Plugin_Handled;
+	}
+
+	if(type == 1){ // Appart
+		int appartcount = rp_GetClientInt(client, i_AppartCount);
+		if(appartcount == 0){
+			ITEM_CANCEL(client, item_id);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas vous téléporter à votre appartement si vous n'en avez pas.");
+			return Plugin_Handled;
+		}
+		else{
+			for (int i = 1; i <= 48; i++) {
+				if( rp_GetClientKeyAppartement(client, i) ) {
+					tptozone = appartToZoneID(i);
+				}
+			}
+		}
+	}
+	else if (type == 2){ // Planque
+		if(rp_GetClientJobID(client)==0){
+			ITEM_CANCEL(client, item_id);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas vous teleporter à votre planque puisque vous êtes sans-emploi.");
+			return Plugin_Handled;
+		}
+		for(int i=1; i<300;i++){
+			if(rp_GetZoneInt(i, zone_type_type) == rp_GetClientJobID(client)){
+				tptozone = i;
+				continue;
+			}
+		}
+	}
+
+	if(tptozone == -1){
+			ITEM_CANCEL(client, item_id);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Nous n'avons pas trouvé d'endroit où vous teleporter.");
+			return Plugin_Handled;
+	}
+
+	rp_ClientReveal(client);
+	ServerCommand("sm_effect_panel %d 5.0 \"Téléportation en cours...\"", client);
+	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 5.0);
+	rp_ClientColorize(client, { 238, 148, 52, 255} );
+
+
+	rp_SetClientBool(client, b_MaySteal, false);
+	CreateTimer(35.0, AllowStealing, client);
+
+	Handle dp;
+	CreateDataTimer(4.80, ItemPiluleOver, dp, TIMER_DATA_HNDL_CLOSE);
+	WritePackCell(dp, client);
+	WritePackCell(dp, item_id);
+	WritePackCell(dp, tptozone);
+	return Plugin_Handled;
+}
+
+public Action ItemPiluleOver(Handle timer, Handle dp) {
+	ResetPack(dp);
+	int client = ReadPackCell(dp);
+	int item_id = ReadPackCell(dp);
+	int tptozone = ReadPackCell(dp);
+	int clientzone = rp_GetPlayerZone(client);
+	int clientzonebit = rp_GetZoneBit(clientzone);
+
+	if(!IsValidClient(client) || !IsPlayerAlive(client) || ( clientzonebit & BITZONE_JAIL ||  clientzonebit & BITZONE_LACOURS ||  clientzonebit & BITZONE_HAUTESECU ) ){
+		if(IsValidClient(client))
+			rp_ClientColorize(client, { 255, 255, 255, 255} );
+		return Plugin_Handled;
+	}
+	float zonemin[3];
+	float zonemax[3];
+	float tppos[3];
+	char tmp[64];
+
+	rp_GetZoneData(tptozone, zone_type_min_x, tmp, 63);
+	zonemin[0] = StringToFloat(tmp);
+	rp_GetZoneData(tptozone, zone_type_min_y, tmp, 63);
+	zonemin[1] = StringToFloat(tmp);
+	rp_GetZoneData(tptozone, zone_type_min_z, tmp, 63);
+	zonemin[2] = StringToFloat(tmp)+5.0;
+
+	rp_GetZoneData(tptozone, zone_type_max_x, tmp, 63);
+	zonemax[0] = StringToFloat(tmp);
+	rp_GetZoneData(tptozone, zone_type_max_y, tmp, 63);
+	zonemax[1] = StringToFloat(tmp);
+	rp_GetZoneData(tptozone, zone_type_max_z, tmp, 63);
+	zonemax[2] = StringToFloat(tmp)-80.0;
+
+	for(int i=0; i<30; i++){
+		tppos[0]=Math_GetRandomFloat(zonemin[0],zonemax[0]);
+		tppos[1]=Math_GetRandomFloat(zonemin[1],zonemax[1]);
+		tppos[2]=Math_GetRandomFloat(zonemin[2],zonemax[2]);
+		if(CanTP(tppos, client)){
+			rp_ClientColorize(client, { 255, 255, 255, 255} );
+			TeleportEntity(client, tppos, NULL_VECTOR, NULL_VECTOR);
+			return Plugin_Handled;
+		}
+	}
+	ITEM_CANCEL(client, item_id);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Nous n'avons pas trouvé d'endroit où vous teleporter.");
+	return Plugin_Handled;
+}
+
+public Action AllowStealing(Handle timer, any client) {
+	#if defined DEBUG
+	PrintToServer("AllowStealing");
+	#endif
+
+	rp_SetClientBool(client, b_MaySteal, true);
+}
+
+public Action fwdFrozen(int client, float& speed, float& gravity) {
+	speed = 0.0;
+	gravity = 0.0;
+	return Plugin_Stop;
+}
+
+int appartToZoneID(int appartid){
+	char appart[32];
+	char tmp[32];
+	Format(appart, 31, "appart_%d",appartid);
+	for(int i=1;i<300;i++){
+		rp_GetZoneData(i, zone_type_type, tmp, sizeof(tmp));
+		if(StrEqual(tmp,appart,false)){
+			return i;
+		}
+	}
+	return -1;
+}
+
+
+bool CanTP(float pos[3], int client)
+{
+    float mins[3];
+    float maxs[3];
+    bool ret;
+
+    GetClientMins(client, mins);
+    GetClientMaxs(client, maxs);
+    Handle tr;
+    tr = TR_TraceHullEx(pos, pos, mins, maxs, MASK_SOLID);
+    ret = TR_DidHit(tr);
+    CloseHandle(tr);
+    return ret;
+}
