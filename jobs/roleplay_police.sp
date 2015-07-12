@@ -585,6 +585,9 @@ public Action Cmd_Jail(int client) {
 		
 		return Plugin_Handled;
 	}
+	else if( (job == 103 || job == 104 || job == 105 || job == 106) && rp_GetZoneInt(Czone, zone_type_type) != 101){
+		ACCESS_DENIED(client);
+	}
 
 	if( rp_IsValidVehicle(target) ) {
 		int client2 = GetEntPropEnt(target, Prop_Send, "m_hPlayer");
