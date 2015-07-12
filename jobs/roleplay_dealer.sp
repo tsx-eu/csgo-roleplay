@@ -22,7 +22,9 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
-#define TP_CD_DURATION 	35.0
+#define TP_CD_DURATION 		30.0
+#define TP_CHANNEL_DURATION 5.0
+
 #define DRUG_DURATION 	90.0
 #define MODEL_PLANT		"models/props/cs_office/plant01_static.mdl"
 #define ITEM_PIEDBICHE	1
@@ -887,18 +889,15 @@ public Action Cmd_ItemPilule(int args){
 	}
 
 	rp_ClientReveal(client);
-	ServerCommand("sm_effect_panel %d 5.0 \"Téléportation en cours...\"", client);
-	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 5.0);
-	CreateTimer(1.0, tpbeam, client); 
-	CreateTimer(2.5, tpbeam, client); 
-	CreateTimer(4.0, tpbeam, client); 
+	ServerCommand("sm_effect_panel %d %f \"Téléportation en cours...\"", client, TP_CHANNEL_DURATION);
+	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, TP_CHANNEL_DURATION);
+	CreateTimer( TP_CHANNEL_DURATION*0.1 , tpbeam, client);
+	CreateTimer( TP_CHANNEL_DURATION*0.4 , tpbeam, client);
+	CreateTimer( TP_CHANNEL_DURATION*0.8 , tpbeam, client);
 	rp_ClientColorize(client, { 238, 148, 52, 255} );
 
-	rp_SetClientBool(client, b_MaySteal, false);
-	CreateTimer( TP_CD_DURATION, AllowStealing2, client);
-
 	Handle dp;
-	CreateDataTimer(4.80, ItemPiluleOver, dp, TIMER_DATA_HNDL_CLOSE);
+	CreateDataTimer(TP_CHANNEL_DURATION, ItemPiluleOver, dp, TIMER_DATA_HNDL_CLOSE);
 	WritePackCell(dp, client);
 	WritePackCell(dp, item_id);
 	WritePackCell(dp, tptozone);
@@ -944,11 +943,15 @@ public Action ItemPiluleOver(Handle timer, Handle dp) {
 		if(CanTP(tppos, client)){
 			rp_ClientColorize(client, { 255, 255, 255, 255} );
 			TeleportEntity(client, tppos, NULL_VECTOR, NULL_VECTOR);
+			rp_SetClientBool(client, b_MaySteal, false);
+			CreateTimer( TP_CD_DURATION, AllowStealing2, client);
 			return Plugin_Handled;
 		}
 	}
 	ITEM_CANCEL(client, item_id);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Nous n'avons pas trouvé d'endroit où vous teleporter.");
+	rp_ClientColorize(client, { 255, 255, 255, 255} );
+	rp_SetClientBool(client, b_MaySteal, true);
 	return Plugin_Handled;
 }
 
