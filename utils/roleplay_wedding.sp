@@ -285,7 +285,10 @@ public Action Marier(int epoux, int epouse, int juge, int zoneJuge){
 	
 	rp_SetClientInt(epoux, i_MarriedTo, epouse);
 	rp_SetClientInt(epouse, i_MarriedTo, epoux);
-		
+	
+	ShareKeyAppart(epoux, epouse);
+	ShareKeyCar(epoux, epouse);
+	
 	rp_HookEvent(epoux, RP_OnFrameSeconde, fwdFrame);
 	rp_HookEvent(epouse, RP_OnFrameSeconde, fwdFrame);
 	
@@ -310,4 +313,37 @@ public Action fwdFrame(int client) {
 	
 	if( target > 0  && !areNear)
 		rp_Effect_BeamBox(client, target, NULL_VECTOR, 255, 92, 205); // Crée un laser / laser cube rose sur le/la marié(e)
+}
+
+public void ShareKeyAppart(int epoux, int epouse){
+	// Cherche les apparts dont les mariés sont proprio et les partagent
+	for (int i = 1; i <= 48; i++) {
+		int proprio = rp_GetAppartementInt(i, appart_proprio);
+		
+		if( proprio == epoux && !rp_GetClientKeyAppartement(epouse, i) ){
+			rp_SetClientInt(epouse, i_AppartCount, rp_GetClientInt(epouse, i_AppartCount) + 1);
+			rp_SetClientKeyAppartement(epouse, i, true);
+		}
+		if( proprio == epouse && !rp_GetClientKeyAppartement(epoux, i) ){
+			rp_SetClientInt(epoux, i_AppartCount, rp_GetClientInt(epoux, i_AppartCount) + 1);
+			rp_SetClientKeyAppartement(epoux, i, true);
+		}
+	}
+}
+
+public void ShareKeyCar(int epoux, int epouse){
+	// Cherche les vehicules dont les mariés sont proprio et les partagent
+	for (int i = MaxClients +1 ; i <= 2048; i++) {
+		if( !rp_IsValidVehicle(i) )
+			continue;
+			
+		int proprio = rp_GetVehicleInt(i, car_owner);
+		
+		if( proprio == epoux && !rp_GetClientKeyVehicle(epouse, i) ){
+			rp_SetClientKeyVehicle(epouse, i, true);
+		}
+		if( proprio == epouse && !rp_GetClientKeyVehicle(epoux, i)){
+			rp_SetClientKeyVehicle(epoux, i, true);
+		}
+	}
 }
