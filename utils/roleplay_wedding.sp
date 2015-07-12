@@ -93,7 +93,7 @@ public Action Cmd_Mariage(int client) {
 	}
 	
 	Handle menu = CreateMenu(eventMariage_1);
-	SetMenuTitle(menu, "Qui voulez vous marier ?:"); // Le juge choisi la première personne à marier 
+	SetMenuTitle(menu, "Qui voulez vous marier ?"); // Le juge choisi la première personne à marier 
 	char tmp[24], tmp2[64];
 
 
@@ -101,6 +101,10 @@ public Action Cmd_Mariage(int client) {
 		if( !IsValidClient(i) )
 			continue;
 		if( rp_GetPlayerZone(i) != zoneJuge )
+			continue;
+		if( rp_GetClientInt(i, i_MarriedTo) != 0 )
+			continue;
+		if( i == client )
 			continue;
 
 		Format(tmp, sizeof(tmp), "%i_%i", i, zoneJuge);
@@ -129,14 +133,16 @@ public int eventMariage_1(Handle menu, MenuAction action, int client, int param2
 		
 		// Setup menu
 		Handle menu2 = CreateMenu(eventMariage_2);
-		Format(options, sizeof(options), "A qui voulez vous marier %N", target); // On choisi la seconde personne
+		Format(options, sizeof(options), "A qui voulez vous marier %N ?", target); // On choisi la seconde personne
 		SetMenuTitle(menu2, options);
 		char tmp[24], tmp2[64];
 		
 		for(int i=1; i<=MaxClients; i++) {
 			if( !IsValidClient(i) )
 				continue;
-			if( i == target )
+			if( i == target || i == client )
+				continue;
+			if( rp_GetClientInt(i, i_MarriedTo) != 0 )
 				continue;
 			if( rp_GetPlayerZone(i) != zoneJuge )
 				continue;
@@ -173,7 +179,7 @@ public int eventMariage_2(Handle menu, MenuAction action, int client, int param2
 		int pos_2 = rp_GetPlayerZone(target_2);
 		int pos_3 = rp_GetPlayerZone(client);
 		
-		// Messages d'erreurs
+		// Messages d'erreurs double check
 		if( rp_GetZoneInt(pos_3, zone_type_type) != 101 ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes pas au tribunal, le mariage ne peut pas se dérouler.");
 			CloseHandle(menu);
@@ -233,7 +239,7 @@ public int eventMariage_3(Handle menu, MenuAction action, int client, int param2
 		
 		if( !reponse ) {
 		// Message à toute la salle
-			PrintToChatZone(zoneJuge, "{lightblue}[TSX-RP]{default} %N répond: NON, %N fond en pleurs... Stupéfaction dans la salle .", client);
+			PrintToChatZone(zoneJuge, "{lightblue}[TSX-RP]{default} %N répond: NON, %N fond en pleurs... Stupéfaction dans la salle .", client, fiance);
 			CloseHandle(menu);
 		}
 		else if( !flag ) { // Le premier a dit oui, on ouvre le même menu au second
@@ -285,7 +291,10 @@ public Action Marier(int epoux, int epouse, int juge, int zoneJuge){
 	
 	rp_SetClientInt(epoux, i_MarriedTo, epouse);
 	rp_SetClientInt(epouse, i_MarriedTo, epoux);
-		
+	
+	ShareKeyAppart(epoux, epouse);
+	ShareKeyCar(epoux, epouse);
+	
 	rp_HookEvent(epoux, RP_OnFrameSeconde, fwdFrame);
 	rp_HookEvent(epouse, RP_OnFrameSeconde, fwdFrame);
 	
@@ -296,18 +305,56 @@ public Action fwdFrame(int client) {
 	int target = rp_GetClientInt(client, i_MarriedTo);
 	
 	// Si les amoureux sont proches, regen et affiche un beamring rose autours d'eux
-	bool areNear = rp_IsEntitiesNear(client, target);
+	bool areNear = rp_IsEntitiesNear(client, target, true);
 	if( areNear ){
+		if(Math_GetRandomInt(0, 10) == 6){
+			ShareKeyAppart(client, target);
+			ShareKeyCar(client, target);
+		}
+		
 		float vecTarget[3];
 		GetClientAbsOrigin(client, vecTarget);
 		TE_SetupBeamRingPoint(vecTarget, 10.0, 100.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, {255, 92, 205, 100}, 10, 0);
 		TE_SendToAll();
 		
 		if( GetClientHealth(client) < Entity_GetMaxHealth(client) ) {
-			SetEntityHealth(client, GetClientHealth(client)+1);
+			SetEntityHealth(client, GetClientHealth(client)+5);
 		}
 	}
 	
 	if( target > 0  && !areNear)
 		rp_Effect_BeamBox(client, target, NULL_VECTOR, 255, 92, 205); // Crée un laser / laser cube rose sur le/la marié(e)
+}
+
+public void ShareKeyAppart(int epoux, int epouse){
+	// Cherche les apparts dont les mariés sont proprio et les partagent
+	for (int i = 1; i <= 48; i++) {
+		int proprio = rp_GetAppartementInt(i, appart_proprio);
+		
+		if( proprio == epoux && !rp_GetClientKeyAppartement(epouse, i) ){
+			rp_SetClientInt(epouse, i_AppartCount, rp_GetClientInt(epouse, i_AppartCount) + 1);
+			rp_SetClientKeyAppartement(epouse, i, true);
+		}
+		if( proprio == epouse && !rp_GetClientKeyAppartement(epoux, i) ){
+			rp_SetClientInt(epoux, i_AppartCount, rp_GetClientInt(epoux, i_AppartCount) + 1);
+			rp_SetClientKeyAppartement(epoux, i, true);
+		}
+	}
+}
+
+public void ShareKeyCar(int epoux, int epouse){
+	// Cherche les vehicules dont les mariés sont proprio et les partagent
+	for (int i = MaxClients +1 ; i <= 2048; i++) {
+		if( !rp_IsValidVehicle(i) )
+			continue;
+			
+		int proprio = rp_GetVehicleInt(i, car_owner);
+		
+		if( proprio == epoux && !rp_GetClientKeyVehicle(epouse, i) ){
+			rp_SetClientKeyVehicle(epouse, i, true);
+		}
+		if( proprio == epouse && !rp_GetClientKeyVehicle(epoux, i)){
+			rp_SetClientKeyVehicle(epoux, i, true);
+		}
+	}
 }
