@@ -846,11 +846,27 @@ public Action Cmd_ItemPilule(int args){
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas vous teleporter à votre planque puisque vous êtes sans-emploi.");
 			return Plugin_Handled;
 		}
-		for(int i=1; i<300;i++){
-			if(rp_GetZoneInt(i, zone_type_type) == rp_GetClientJobID(client)){
-				tptozone = i;
-				continue;
-			}
+		switch(rp_GetClientJobID(client)){
+			case 1:   tptozone = 14;
+			case 11:  tptozone = 200;
+			case 21:  tptozone = 119;
+			case 31:  tptozone = 137;
+			case 41:  tptozone = 1;
+			case 51:  tptozone = 114;
+			case 61:  tptozone = 253;
+			case 71:  tptozone = 160;
+			case 81:  tptozone = 167;
+			case 91:  tptozone = 13;
+			case 101: tptozone = 76;
+			case 111: tptozone = 100;
+			case 121: tptozone = 282;
+			case 131: tptozone = 61;
+			case 141: tptozone = 61;
+			case 171: tptozone = 65;
+			case 181: tptozone = 89;
+			case 191: tptozone = 72;
+			case 211: tptozone = 228;
+			case 221: tptozone = 228;
 		}
 	}
 
