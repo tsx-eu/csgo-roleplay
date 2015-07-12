@@ -924,7 +924,7 @@ public Action Cmd_ItemEnquete(int args) {
 	count = 0;
 	Format(tmp, sizeof(tmp), "Appartement possédé: ");
 	for (int i = 1; i <= 48; i++) {
-		if( rp_GetClientKeyAppartement(client, i) ) {
+		if( rp_GetClientKeyAppartement(target, i) ) {
 			count++;
 			if( count > 1 )
 				Format(tmp, sizeof(tmp), "%s, ", tmp);
