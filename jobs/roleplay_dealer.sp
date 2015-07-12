@@ -891,9 +891,9 @@ public Action Cmd_ItemPilule(int args){
 	rp_ClientReveal(client);
 	ServerCommand("sm_effect_panel %d %d \"Téléportation en cours...\"", client, TP_CHANNEL_DURATION);
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, TP_CHANNEL_DURATION);
-	CreateTimer( TP_CHANNEL_DURATION*0.1 , tpbeam, client); 
-	CreateTimer( TP_CHANNEL_DURATION*0.4 , tpbeam, client); 
-	CreateTimer( TP_CHANNEL_DURATION*0.8 , tpbeam, client); 
+	CreateTimer( TP_CHANNEL_DURATION*0.1 , tpbeam, client);
+	CreateTimer( TP_CHANNEL_DURATION*0.4 , tpbeam, client);
+	CreateTimer( TP_CHANNEL_DURATION*0.8 , tpbeam, client);
 	rp_ClientColorize(client, { 238, 148, 52, 255} );
 
 	Handle dp;
@@ -950,6 +950,8 @@ public Action ItemPiluleOver(Handle timer, Handle dp) {
 	}
 	ITEM_CANCEL(client, item_id);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Nous n'avons pas trouvé d'endroit où vous teleporter.");
+	rp_ClientColorize(client, { 255, 255, 255, 255} );
+	rp_SetClientBool(client, b_MaySteal, true);
 	return Plugin_Handled;
 }
 
