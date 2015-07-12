@@ -808,6 +808,15 @@ public Action AllowStealing(Handle timer, any client) {
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez à nouveau fouiller le jardin de la place de l'indépendance.");
 }
 
+public Action AllowStealing2(Handle timer, any client) {
+	#if defined DEBUG
+	PrintToServer("AllowStealing");
+	#endif
+
+	rp_SetClientBool(client, b_MaySteal, true);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez à nouveau vous téléporter.");
+}
+
 
 public Action Cmd_ItemPilule(int args){
 	#if defined DEBUG
@@ -883,7 +892,7 @@ public Action Cmd_ItemPilule(int args){
 
 
 	rp_SetClientBool(client, b_MaySteal, false);
-	CreateTimer(35.0, AllowStealing, client);
+	CreateTimer(35.0, AllowStealing2, client);
 
 	Handle dp;
 	CreateDataTimer(4.80, ItemPiluleOver, dp, TIMER_DATA_HNDL_CLOSE);
