@@ -992,6 +992,10 @@ bool CanTP(float pos[3], int client)
 }
 
 public Action tpbeam(Handle timer,int client){
+	int clientzonebit = rp_GetZoneBit(rp_GetPlayerZone(client));
+	if(!IsValidClient(client) || !IsPlayerAlive(client) || ( clientzonebit & BITZONE_JAIL ||  clientzonebit & BITZONE_LACOURS ||  clientzonebit & BITZONE_HAUTESECU ) )
+		return Plugin_Handled;
+
 	float vecTarget[3];
 	GetClientAbsOrigin(client, vecTarget);
 	TE_SetupBeamRingPoint(vecTarget, 10.0, 500.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, { 238, 148, 52, 200}, 10, 0);
