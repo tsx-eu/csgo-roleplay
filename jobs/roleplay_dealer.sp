@@ -889,7 +889,7 @@ public Action Cmd_ItemPilule(int args){
 	}
 
 	rp_ClientReveal(client);
-	ServerCommand("sm_effect_panel %d %d \"Téléportation en cours...\"", client, TP_CHANNEL_DURATION);
+	ServerCommand("sm_effect_panel %d %f \"Téléportation en cours...\"", client, TP_CHANNEL_DURATION);
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, TP_CHANNEL_DURATION);
 	CreateTimer( TP_CHANNEL_DURATION*0.1 , tpbeam, client);
 	CreateTimer( TP_CHANNEL_DURATION*0.4 , tpbeam, client);
