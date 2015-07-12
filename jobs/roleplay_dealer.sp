@@ -22,6 +22,7 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
+#define TP_CD_DURATION 	35.0
 #define DRUG_DURATION 	90.0
 #define MODEL_PLANT		"models/props/cs_office/plant01_static.mdl"
 #define ITEM_PIEDBICHE	1
@@ -808,6 +809,15 @@ public Action AllowStealing(Handle timer, any client) {
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez à nouveau fouiller le jardin de la place de l'indépendance.");
 }
 
+public Action AllowStealing2(Handle timer, any client) {
+	#if defined DEBUG
+	PrintToServer("AllowStealing");
+	#endif
+
+	rp_SetClientBool(client, b_MaySteal, true);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez à nouveau vous téléporter.");
+}
+
 
 public Action Cmd_ItemPilule(int args){
 	#if defined DEBUG
@@ -879,11 +889,13 @@ public Action Cmd_ItemPilule(int args){
 	rp_ClientReveal(client);
 	ServerCommand("sm_effect_panel %d 5.0 \"Téléportation en cours...\"", client);
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 5.0);
+	CreateTimer(1.0, tpbeam, client); 
+	CreateTimer(2.5, tpbeam, client); 
+	CreateTimer(4.0, tpbeam, client); 
 	rp_ClientColorize(client, { 238, 148, 52, 255} );
 
-
 	rp_SetClientBool(client, b_MaySteal, false);
-	CreateTimer(35.0, AllowStealing, client);
+	CreateTimer( TP_CD_DURATION, AllowStealing2, client);
 
 	Handle dp;
 	CreateDataTimer(4.80, ItemPiluleOver, dp, TIMER_DATA_HNDL_CLOSE);
@@ -963,8 +975,23 @@ bool CanTP(float pos[3], int client)
     GetClientMins(client, mins);
     GetClientMaxs(client, maxs);
     Handle tr;
-    tr = TR_TraceHullEx(pos, pos, mins, maxs, MASK_SOLID);
+    tr = TR_TraceHullEx(pos, pos, mins, maxs, MASK_PLAYERSOLID);
     ret = !TR_DidHit(tr);
     CloseHandle(tr);
-    return ret;
+    #if defined DEBUG
+		if( !ret ) {
+			TR_GetEndPosition(maxs, tr);
+			TE_SetupBeamRingPoint(maxs, 1.0, 1.5, g_cBeam, g_cBeam, 0, 30, 10.0, 1.0, 1.0, { 255, 255, 255, 255 }, 10, 0);
+			TE_SendToAll();
+		}
+	#endif
+	return ret;
+}
+
+public Action tpbeam(Handle timer,int client){
+	float vecTarget[3];
+	GetClientAbsOrigin(client, vecTarget);
+	TE_SetupBeamRingPoint(vecTarget, 10.0, 500.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, { 238, 148, 52, 200}, 10, 0);
+	TE_SendToAll();
+	return Plugin_Handled;
 }
