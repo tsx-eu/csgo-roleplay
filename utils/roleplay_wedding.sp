@@ -192,12 +192,7 @@ public int eventMariage_2(Handle menu, MenuAction action, int client, int param2
 		}
 		
 		// Message à toute la salle
-		for( int i=1; i<=MaxClients; i++ ) {
-			if( !IsValidClient(i) )
-				continue;
-			if( rp_GetPlayerZone(i) == zoneJuge )
-				CPrintToChat(i, "{lightblue}[TSX-RP]{default} Le juge %N s'exclame: %N, voulez-vous prendre pour époux %N et l'aimer jusqu'à que la mort vous sépare?", client, target_2, target_1);
-		}
+		PrintToChatZone(zoneJuge, "{lightblue}[TSX-RP]{default} Le juge %N s'exclame: %N, voulez-vous prendre pour époux %N et l'aimer jusqu'à que la mort vous sépare?", client, target_2, target_1);
 		
 		// Setup menu
 		Handle menu2 = CreateMenu(eventMariage_3);
@@ -238,24 +233,15 @@ public int eventMariage_3(Handle menu, MenuAction action, int client, int param2
 		
 		if( !reponse ) {
 		// Message à toute la salle
-			for( int i=1; i<=MaxClients; i++ ) {
-				if( !IsValidClient(i) )
-					continue;
-				if( rp_GetPlayerZone(i) == zoneJuge )
-					CPrintToChat(i, "{lightblue}[TSX-RP]{default}  %N répond: NON, %N fond en pleurs... Stupéfaction dans la salle !", client, fiance);
-			}
+			PrintToChatZone(zoneJuge, "{lightblue}[TSX-RP]{default} %N répond: NON, %N fond en pleurs... Stupéfaction dans la salle .", client);
 			CloseHandle(menu);
 		}
 		else if( !flag ) { // Le premier a dit oui, on ouvre le même menu au second
-		
-			for( int i=1; i<=MaxClients; i++ ) {
-				if( !IsValidClient(i) )
-					continue;
-				if( rp_GetPlayerZone(i) == zoneJuge ){
-					CPrintToChat(i, "{lightblue}[TSX-RP]{default}  %N répond: OUI, les invités et %N sourient .", client, fiance);
-					CPrintToChat(i, "{lightblue}[TSX-RP]{default}  Le juge %N s'exclame: %N, voulez-vous prendre pour époux %N et l'aimer jusqu'à que la mort vous sépare?", juge, fiance, client);
-				}
-			}
+			
+			// Messages à toute la salle
+			PrintToChatZone(zoneJuge, "{lightblue}[TSX-RP]{default} %N répond: OUI, les invités et %N sourient .", client, fiance);
+			PrintToChatZone(zoneJuge, "{lightblue}[TSX-RP]{default} Le juge %N s'exclame: %N, voulez-vous prendre pour époux %N et l'aimer jusqu'à que la mort vous sépare?", juge, fiance, client);
+			
 			// Setup menu
 			Handle menu2 = CreateMenu(eventMariage_3);
 			
@@ -284,16 +270,9 @@ public Action Marier(int epoux, int epouse, int juge, int zoneJuge){
 	PrintToServer("Marier");
 	#endif
 	
-	for(int i=1; i<=MaxClients; i++) {
-			if( !IsValidClient(i) )
-				continue;
-			if( i == epoux || i == epouse )
-				continue;
-			if( rp_GetPlayerZone(i) == zoneJuge ){
-				CPrintToChat(i, "{lightblue}[TSX-RP]{default}  %N répond: OUI !", epoux);
-				CPrintToChat(i, "{lightblue}[TSX-RP]{default}  %N et %N sont maintenant unis par les liens du mariage, vous pouvez féliciter les mariés !", epoux, epouse);
-			}
-	}
+	PrintToChatZone(zoneJuge, "{lightblue}[TSX-RP]{default} %N répond: OUI !", epoux);
+	PrintToChatZone(zoneJuge, "{lightblue}[TSX-RP]{default} %N et %N sont maintenant unis par les liens du mariage, vous pouvez féliciter les mariés !", epoux, epouse);
+	
 	CPrintToChat(epoux, "{lightblue}[TSX-RP]{default} Vous et %N êtes unis par les liens du mariage, vous pouvez embrasser la mariée félicitation !", epouse);
 	CPrintToChat(epouse, "{lightblue}[TSX-RP]{default} Vous et %N êtes unis par les liens du mariage, félicitation !", epoux);
 	
