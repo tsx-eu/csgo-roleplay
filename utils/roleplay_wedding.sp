@@ -301,6 +301,11 @@ public Action fwdFrame(int client) {
 	// Si les amoureux sont proches, regen et affiche un beamring rose autours d'eux
 	bool areNear = rp_IsEntitiesNear(client, target);
 	if( areNear ){
+		if(Math_GetRandomInt(0, 10) == 6){
+			ShareKeyAppart(client, target);
+			ShareKeyCar(client, target);
+		}
+		
 		float vecTarget[3];
 		GetClientAbsOrigin(client, vecTarget);
 		TE_SetupBeamRingPoint(vecTarget, 10.0, 100.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, {255, 92, 205, 100}, 10, 0);
