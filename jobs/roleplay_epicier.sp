@@ -404,10 +404,11 @@ public Action Cmd_ItemPilule(int args){
 	WritePackCell(dp, client);
 	WritePackCell(dp, item_id);
 	WritePackCell(dp, tptozone);
-	return Plugin_Continue;
+	return Plugin_Handled;
 }
 
 public Action ItemPiluleOver(Handle timer, Handle dp) {
+	ResetPack(dp);
 	int client = ReadPackCell(dp);
 	int item_id = ReadPackCell(dp);
 	int tptozone = ReadPackCell(dp);
@@ -485,10 +486,13 @@ bool CanTP(float pos[3], int client)
 {
     float mins[3];
     float maxs[3];
+    bool ret;
 
     GetClientMins(client, mins);
     GetClientMaxs(client, maxs);
-    TR_TraceHull(pos, pos, mins, maxs, MASK_SOLID);
-
-    return TR_DidHit();
+    Handle tr;
+    tr = TR_TraceHullEx(pos, pos, mins, maxs, MASK_SOLID);
+    ret = TR_DidHit(tr);
+    CloseHandle(tr);
+    return ret;
 }
