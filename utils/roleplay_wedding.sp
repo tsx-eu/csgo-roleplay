@@ -317,7 +317,7 @@ public Action fwdFrame(int client) {
 		TE_SetupBeamRingPoint(vecTarget, 10.0, 100.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, {255, 92, 205, 100}, 10, 0);
 		TE_SendToAll();
 		
-		if( GetClientHealth(client) < Entity_GetMaxHealth(client) ) {
+		if( GetClientHealth(client) < 500 ) {
 			SetEntityHealth(client, GetClientHealth(client)+5);
 		}
 	}
