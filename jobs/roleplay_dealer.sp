@@ -44,6 +44,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_piedbiche", 	Cmd_ItemPiedBiche,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_plant",		Cmd_ItemPlant,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_pilule",		Cmd_ItemPilule,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_moreplant", 	Cmd_ItemMorePlant, 		"RP-ITEM", 	FCVAR_UNREGISTERED);
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
@@ -323,6 +324,23 @@ public Action Cmd_ItemEngrais(int args) {
 	
 	return Plugin_Handled;
 }
+// ------------------------------------------------------------------------------
+public Action Cmd_ItemMorePlant(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemMorePlant");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+	int amount = rp_GetClientInt(client, i_Plant);
+	
+	if( amount >= 5 ) {
+		int item_id = GetCmdArgInt(args);
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas avoir de plant supplémentaire.");
+	}
+	else
+		rp_SetClientInt(client, i_Plant, amount + 1);
+}
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemPlant(int args) {
 	#if defined DEBUG
@@ -389,6 +407,11 @@ int BuildingPlant(int client, int type) {
 		}
 	}
 	
+	max += rp_GetClientInt(client, i_Plant);
+	
+	if(	max > 14 )
+		max = 14;
+		
 	int appart = rp_GetPlayerZoneAppart(client);
 	if( appart > 0 && rp_GetAppartementInt(appart, appart_bonus_coffre) ) {
 		max += 1;
