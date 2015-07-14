@@ -40,13 +40,11 @@ public Plugin myinfo = {
 	description = "RolePlay - Jobs: Police",
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
-// TODO: Opérateur de bit dans le /cop.
-// TODO: Message de débug oublié :(
+
 // TODO: Le joueur s'est fait la male --> Synchro avec rp_users2. Condamnation même si déco
 // TODO: Utiliser des TQuery pour le /perquiz.
 // TODO: Trouver une manière plus propre que d'utiliser int g_iCancel[65];
 // TODO: Améliorer le cache du JobToZoneID
-// TODO: Le /amende :(
 
 enum jail_raison_type {
 	jail_raison = 0,
@@ -92,6 +90,9 @@ public void OnPluginStart() {
 			OnClientPostAdminCheck(i);
 }
 public Action Cmd_SendToJail(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_SendToJail");
+	#endif
 	SendPlayerToJail(GetCmdArgInt(1));
 }
 public void OnMapStart() {
@@ -100,21 +101,33 @@ public void OnMapStart() {
 }
 // ----------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
+	#if defined DEBUG
+	PrintToServer("OnClientPostAdminCheck");
+	#endif
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 	rp_HookEvent(client, RP_OnPlayerSpawn, fwdSpawn);
 	rp_HookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
 }
 public Action fwdSpawn(int client) {
+	#if defined DEBUG
+	PrintToServer("fwdSpawn");
+	#endif
 	if( rp_GetClientInt(client, i_JailTime) > 0 )
 		SendPlayerToJail(client, 0);
 	return Plugin_Continue;
 }
 public void OnClientDisconnect(int client) {
+	#if defined DEBUG
+	PrintToServer("OnClientDisconnect");
+	#endif
 	rp_UnhookEvent(client, RP_OnPlayerCommand, fwdCommand);
 	rp_UnhookEvent(client, RP_OnPlayerSpawn, fwdSpawn);
 	rp_UnhookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
 }
-public Action fwdCommand(int client, char[] command, char[] arg) {	
+public Action fwdCommand(int client, char[] command, char[] arg) {
+	#if defined DEBUG
+	PrintToServer("fwdCommand");
+	#endif
 	if( StrEqual(command, "cop") || StrEqual(command, "cops") ) {
 		return Cmd_Cop(client);
 	}
@@ -154,9 +167,11 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	
 	return Plugin_Continue;
 }
-
 // ----------------------------------------------------------------------------
 public Action Cmd_Amende(int client, const char[] arg) {
+	#if defined DEBUG
+	PrintToServer("Cmd_Amende");
+	#endif
 	int job = rp_GetClientInt(client, i_Job);
 		
 	if( job != 101 && job != 102 && job != 103 && job != 104 && job != 105 && job != 106 ) {
@@ -233,6 +248,9 @@ public Action Cmd_Amende(int client, const char[] arg) {
 	return Plugin_Handled;
 }
 public Action Cmd_Cop(int client) {
+	#if defined DEBUG
+	PrintToServer("Cmd_Cop");
+	#endif
 	int job = rp_GetClientInt(client, i_Job);
 		
 	if( rp_GetClientJobID(client) != 1 && job != 101 && job != 102 && job != 107 && job != 108 && job != 109 ) {
@@ -241,7 +259,7 @@ public Action Cmd_Cop(int client) {
 	int zone = rp_GetPlayerZone(client);
 	int bit = rp_GetZoneBit(zone);
 		
-	if( bit & BITZONE_BLOCKJAIL || bit & BITZONE_JAIL || bit & BITZONE_HAUTESECU || bit & BITZONE_LACOURS || bit & BITZONE_PVP ) { // Flic ripoux
+	if( bit & (BITZONE_BLOCKJAIL|BITZONE_JAIL|BITZONE_HAUTESECU|BITZONE_LACOURS|BITZONE_PVP) ) { // Flic ripoux
 		ACCESS_DENIED(client);
 	}
 	if( rp_GetClientVehiclePassager(client) > 0 || Client_GetVehicle(client) > 0 || rp_GetClientInt(client, i_Sickness) ) { // En voiture, ou très malade
@@ -280,6 +298,9 @@ public Action Cmd_Cop(int client) {
 	return Plugin_Handled;
 }
 public Action Cmd_Vis(int client) {
+	#if defined DEBUG
+	PrintToServer("Cmd_Vis");
+	#endif
 	int job = rp_GetClientInt(client, i_Job);
 		
 	if( job != 1 && job != 2 && job != 5 && job != 6 ) { // Chef, co chef, gti, cia
@@ -328,6 +349,9 @@ public Action Cmd_Vis(int client) {
 	return Plugin_Handled;
 }
 public Action Cmd_Tazer(int client) {
+	#if defined DEBUG
+	PrintToServer("Cmd_Tazer");
+	#endif
 	char tmp[128], tmp2[128], szQuery[1024];
 	int job = rp_GetClientInt(client, i_Job);
 		
@@ -492,6 +516,9 @@ public Action Cmd_Tazer(int client) {
 	return Plugin_Handled;
 }
 public Action Cmd_InJail(int client) {
+	#if defined DEBUG
+	PrintToServer("Cmd_InJail");
+	#endif
 	char tmp[256];
 	
 	int zone;
@@ -517,7 +544,9 @@ public Action Cmd_InJail(int client) {
 	return Plugin_Handled;
 }
 public Action Cmd_Jail(int client) {
-	
+	#if defined DEBUG
+	PrintToServer("Cmd_Jail");
+	#endif
 	int job = rp_GetClientInt(client, i_Job);
 		
 	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
@@ -619,6 +648,9 @@ public Action Cmd_Jail(int client) {
 	return Plugin_Handled;
 }
 public Action Cmd_Perquiz(int client) {
+	#if defined DEBUG
+	PrintToServer("Cmd_Perquiz");
+	#endif
 	int job = rp_GetClientInt(client, i_Job);
 	
 	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
@@ -687,6 +719,9 @@ public Action Cmd_Perquiz(int client) {
 	return Plugin_Handled;
 }
 public Action Cmd_Mandat(int client) {
+	#if defined DEBUG
+	PrintToServer("Cmd_Mandat");
+	#endif
 	int job = rp_GetClientInt(client, i_Job);
 		
 	if( job != 101 && job != 102 && job != 103 && job != 104 && job != 105 && job != 106 ) {
@@ -708,7 +743,9 @@ public Action Cmd_Mandat(int client) {
 	return Plugin_Handled;
 }
 public Action Cmd_Push(int client) {
-	
+	#if defined DEBUG
+	PrintToServer("Cmd_Push");
+	#endif
 	int job = rp_GetClientInt(client, i_Job);
 		
 	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
@@ -749,6 +786,9 @@ public Action Cmd_Push(int client) {
 	return Plugin_Handled;
 }
 public Action Cmd_Audience(int client) {
+	#if defined DEBUG
+	PrintToServer("Cmd_Audience");
+	#endif
 	int job = rp_GetClientInt(client, i_Job);
 		
 	if( job != 101 && job != 102 && job != 103 && job != 104 && job != 105 && job != 106 ) {
@@ -766,7 +806,9 @@ public Action Cmd_Audience(int client) {
 	return Plugin_Handled;
 }
 public void ClientConVar(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue) {
-	
+	#if defined DEBUG
+	PrintToServer("ClientConVar");
+	#endif
 	if( StrEqual(cvarName, "cl_disablehtmlmotd", false) ) {
 		if( StrEqual(cvarValue, "0") == false ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Des problemes d'affichage? Entrer cl_disablehtmlmotd 0 dans votre console puis relancer CS:GO.");
@@ -775,7 +817,9 @@ public void ClientConVar(QueryCookie cookie, int client, ConVarQueryResult resul
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_Jugement(int client, int args) {
-	
+	#if defined DEBUG
+	PrintToServer("Cmd_Jugement");
+	#endif
 	char arg1[12];
 	GetCmdArg(1, arg1, sizeof(arg1));
 	
@@ -879,7 +923,9 @@ public Action Cmd_Jugement(int client, int args) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_Conv(int client) {
-	
+	#if defined DEBUG
+	PrintToServer("Cmd_Conv");
+	#endif
 	int job = rp_GetClientInt(client, i_Job);
 		
 	if( rp_GetClientJobID(client) != 101 ) {
@@ -913,7 +959,9 @@ public Action Cmd_Conv(int client) {
 	return Plugin_Handled;
 }
 public int eventConvocation(Handle menu, MenuAction action, int client, int param2) {
-	
+	#if defined DEBUG
+	PrintToServer("eventConvocation");
+	#endif
 	if( action == MenuAction_Select ) {
 		char options[128];
 		GetMenuItem(menu, param2, options, sizeof(options));
@@ -949,7 +997,9 @@ public int eventConvocation(Handle menu, MenuAction action, int client, int para
 	}
 }
 public int eventConvocation_2(Handle menu, MenuAction action, int client, int param2) {
-	
+	#if defined DEBUG
+	PrintToServer("eventConvocation_2");
+	#endif
 	if( action == MenuAction_Select ) {
 		char options[64], optionsBuff[2][64];
 		GetMenuItem(menu, param2, options, sizeof(options));
@@ -980,9 +1030,11 @@ public int eventConvocation_2(Handle menu, MenuAction action, int client, int pa
 		CloseHandle(menu);
 	}
 }
-	
 // ----------------------------------------------------------------------------
 public Action Cmd_Tribunal(int client) {
+	#if defined DEBUG
+	PrintToServer("Cmd_Tribunal");
+	#endif
 	int job = rp_GetClientInt(client, i_Job);
 		
 	if( job != 1 && job != 2 && job != 101 && job != 102 && job != 103 && job != 104 && job != 105 && job != 106 ) {
@@ -1225,7 +1277,9 @@ public int MenuTribunal_Apply(Handle p_hItemMenu, MenuAction p_oAction, int clie
 	}
 }
 public int MenuTribunal(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
-	
+	#if defined DEBUG
+	PrintToServer("MenuTribunal");
+	#endif
 	if (p_oAction == MenuAction_Select) {
 		
 		char szMenuItem[64];
@@ -1265,6 +1319,9 @@ public int MenuTribunal(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 }
 // ----------------------------------------------------------------------------
 void SendPlayerToJail(int target, int client = 0) {
+	#if defined DEBUG
+	PrintToServer("SendPlayerToJail");
+	#endif
 	static float fLocation[MAX_LOCATIONS][3];
 	char tmp[128];
 	
@@ -1338,8 +1395,13 @@ void SendPlayerToJail(int target, int client = 0) {
 }
 // ----------------------------------------------------------------------------
 void AskJailTime(int client, int target) {
+	#if defined DEBUG
+	PrintToServer("AskJailTime");
+	#endif
 	char tmp[256], tmp2[12];
 	
+	GetClientAuthId(target, AuthId_Engine, g_szTribunal_DATA[client][tribunal_steamid], sizeof(g_szTribunal_DATA[][]), false);
+
 	Handle menu = CreateMenu(eventSetJailTime);
 	Format(tmp, 255, "Combien de temps doit rester %N?", target);	
 	SetMenuTitle(menu, tmp);
@@ -1365,7 +1427,9 @@ void AskJailTime(int client, int target) {
 	DisplayMenu(menu, client, MENU_TIME_DURATION);	
 }
 public int eventAskJail2Time(Handle menu, MenuAction action, int client, int param2) {
-	
+	#if defined DEBUG
+	PrintToServer("eventAskJail2Time");
+	#endif
 	if( action == MenuAction_Select ) {
 		char options[64];
 		GetMenuItem(menu, param2, options, 63);
@@ -1401,6 +1465,9 @@ public int eventAskJail2Time(Handle menu, MenuAction action, int client, int par
 	}
 }
 public int eventSetJailTime(Handle menu, MenuAction action, int client, int param2) {
+	#if defined DEBUG
+	PrintToServer("eventSetJailTime");
+	#endif
 	char options[64], data[2][32], szQuery[1024];
 	
 	if( action == MenuAction_Select ) {
@@ -1531,7 +1598,12 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N vous a mis %.1f heures de prison pour \"%s\"", client, time_to_spend/60.0, g_szJailRaison[type][jail_raison]); 
 		}
 		else {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le joueur s'est fait la male...");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le joueur s'est déconnecté mais il fera %.1f heures de prison", time_to_spend / 60.0);
+			
+			Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_users2` (`id`, `steamid`, `jail` ) VALUES", szQuery);
+			Format(szQuery, sizeof(szQuery), "%s (NULL, '%s', '%i' );", szQuery, g_szTribunal_DATA[client][tribunal_steamid], time_to_spend );
+			
+			SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);			
 		}
 		
 		LogToGame("[TSX-RP] [JAIL-1] %L (%d) a mis %L (%d) en prison: Raison %s.", client, rp_GetPlayerZone(client, 1.0), target, rp_GetPlayerZone(target, 1.0), g_szJailRaison[type][jail_raison]);
@@ -1630,13 +1702,18 @@ public int eventPayForLeaving(Handle menu, MenuAction action, int client, int pa
 }
 // ----------------------------------------------------------------------------
 void amendeCalculation(int client, int& amende) {
+	#if defined DEBUG
+	PrintToServer("amendeCalculation");
+	#endif
 	int current = rp_GetClientInt(client, i_Money) + rp_GetClientInt(client, i_Bank);
 	
 	if( current > 10000 )
 		amende += (((current)-10000)/4000);	
 }
 int GetPerquizResp(int job_id) {
-	
+	#if defined DEBUG
+	PrintToServer("GetPerquizResp");
+	#endif
 	int zone;
 	
 	for(int i=1; i<=MaxClients; i++) {
@@ -1673,7 +1750,9 @@ int GetPerquizResp(int job_id) {
 }
 // ----------------------------------------------------------------------------
 public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
-	
+	#if defined DEBUG
+	PrintToServer("MenuPerquiz");
+	#endif
 	if( action == MenuAction_Select ) {
 		char options[64];
 		GetMenuItem(menu, param2, options, 63);
@@ -1703,7 +1782,9 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 	}
 }
 void start_perquiz(int client, int job) {
-	
+	#if defined DEBUG
+	PrintToServer("start_perquiz");
+	#endif
 	int REP = GetPerquizResp(job);
 	
 	Handle dp;
@@ -1727,6 +1808,9 @@ void start_perquiz(int client, int job) {
 	rp_SetJobCapital(1, rp_GetJobCapital(1) + 250);
 }
 void begin_perquiz(int client, int job) {
+	#if defined DEBUG
+	PrintToServer("begin_perquiz");
+	#endif
 	char tmp[255];
 	rp_GetZoneData(JobToZoneID(job), zone_type_name, tmp, sizeof(tmp));
 	
@@ -1742,6 +1826,9 @@ void begin_perquiz(int client, int job) {
 	
 }
 void end_perquiz(int client, int job) {
+	#if defined DEBUG
+	PrintToServer("end_perquiz");
+	#endif
 	char tmp[255];
 	rp_GetZoneData(JobToZoneID(job), zone_type_name, tmp, sizeof(tmp));
 	
@@ -1762,6 +1849,9 @@ void end_perquiz(int client, int job) {
 	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
 }
 void cancel_perquiz(int client, int job) {
+	#if defined DEBUG
+	PrintToServer("cancel_perquiz");
+	#endif
 	char tmp[255];
 	rp_GetZoneData(JobToZoneID(job), zone_type_name, tmp, sizeof(tmp));
 	
@@ -1775,7 +1865,9 @@ void cancel_perquiz(int client, int job) {
 	rp_SetJobCapital(1, rp_GetJobCapital(1) - 250);
 }
 public Action PerquizFrame(Handle timer, Handle dp) {
-	
+	#if defined DEBUG
+	PrintToServer("PerquizFrame");
+	#endif
 	ResetPack(dp);
 	int time = ReadPackCell(dp) - 10;
 	int client = ReadPackCell(dp);
@@ -1827,9 +1919,15 @@ public Action PerquizFrame(Handle timer, Handle dp) {
 }
 // ----------------------------------------------------------------------------
 public Action AllowStealing(Handle timer, any client) {
+	#if defined DEBUG
+	PrintToServer("AllowStealing");
+	#endif
 	rp_SetClientBool(client, b_MaySteal, true);
 }
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
+	#if defined DEBUG
+	PrintToServer("MenuNothing");
+	#endif
 	if( action == MenuAction_Select ) {
 		if( menu != INVALID_HANDLE )
 			CloseHandle(menu);
@@ -1840,10 +1938,16 @@ public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
 	}
 }
 public Action fwdFrozen(int client, float& speed, float& gravity) {
+	#if defined DEBUG
+	PrintToServer("fwdFrozen");
+	#endif
 	speed = 0.0;
 	return Plugin_Stop;
 }
 public Action fwdTazerBlue(int client, int color[4]) {
+	#if defined DEBUG
+	PrintToServer("fwdTazerBlue");
+	#endif
 	color[0] -= 50;
 	color[1] -= 50;
 	color[2] += 255;
@@ -1851,12 +1955,18 @@ public Action fwdTazerBlue(int client, int color[4]) {
 	return Plugin_Changed;
 }
 public bool TraceRayDontHitSelf(int entity, int mask, any data) {
+	#if defined DEBUG
+	PrintToServer("TraceRayDontHitSelf");
+	#endif
 	if(entity == data) {
 		return false;
 	}
 	return true;
 }
 int JobToZoneID(int job) {
+	#if defined DEBUG
+	PrintToServer("JobToZoneID");
+	#endif
 	static int last;
 	
 	if( rp_GetZoneInt(last, zone_type_type) == job ) {
@@ -1871,7 +1981,6 @@ int JobToZoneID(int job) {
 	}
 	return 0;
 }
-
 // ----------------------------------------------------------------------------
 public Action fwdOnPlayerBuild(int client, float& cooldown) {
 	#if defined DEBUG
@@ -1903,7 +2012,6 @@ public Action fwdOnPlayerBuild(int client, float& cooldown) {
 	
 	return Plugin_Stop;
 }
-
 int BuildingBarriere(int client) {
 	#if defined DEBUG
 	PrintToServer("BuildingBarriere");
@@ -1986,7 +2094,6 @@ int BuildingBarriere(int client) {
 	rp_SetBuildingData(ent, BD_owner, client);
 	return ent;
 }
-
 public Action BuildingBarriere_post(Handle timer, any entity) {
 	#if defined DEBUG
 	PrintToServer("BuildingBarriere_post");
@@ -2000,7 +2107,6 @@ public Action BuildingBarriere_post(Handle timer, any entity) {
 	HookSingleEntityOutput(entity, "OnBreak", BuildingBarriere_break);
 	return Plugin_Handled;
 }
-
 public void BuildingBarriere_break(const char[] output, int caller, int activator, float delay) {
 	#if defined DEBUG
 	PrintToServer("BuildingBarriere_break");
@@ -2143,7 +2249,6 @@ void displayTribunal(int client, const char szSteamID[64]) {
 	ShowMOTDPanel(client, szTitle, szURL, MOTDPANEL_TYPE_URL);
 }
 // ----------------------------------------------------------------------------
-
 public Action Cmd_ItemPickLock(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemPickLock");
@@ -2187,7 +2292,9 @@ public Action Cmd_ItemPickLock(int args) {
 	return Plugin_Handled;
 }
 public Action ItemPickLockOver_mandat(Handle timer, Handle dp) {
-	
+	#if defined DEBUG
+	PrintToServer("ItemPickLockOver_mandat");
+	#endif
 	if( dp == INVALID_HANDLE ) {
 		return Plugin_Handled;
 	}
@@ -2226,6 +2333,10 @@ public Action ItemPickLockOver_mandat(Handle timer, Handle dp) {
 }
 // ----------------------------------------------------------------------------
 void StripWeapons(int client ) {
+	#if defined DEBUG
+	PrintToServer("StripWeapons");
+	#endif
+	
 	int wepIdx;
 	
 	for( int i = 0; i < 5; i++ ){
