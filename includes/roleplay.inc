@@ -318,6 +318,7 @@ enum int_user_data {
 	i_Camera,
 	i_GPS,
 	i_Machine,
+	i_Plant,
 	i_Donateur,
 	i_ThirdPerson,
 	i_Protect_Him,
