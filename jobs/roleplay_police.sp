@@ -309,7 +309,7 @@ public Action Cmd_Vis(int client) {
 	int zone = rp_GetPlayerZone(client);
 	int bit = rp_GetZoneBit(zone);
 		
-	if( bit & BITZONE_BLOCKJAIL || bit & BITZONE_JAIL || bit & BITZONE_HAUTESECU || bit & BITZONE_LACOURS ) { // Flic ripoux
+	if( bit & (BITZONE_BLOCKJAIL|BITZONE_JAIL|BITZONE_HAUTESECU|BITZONE_LACOURS) ) { // Flic ripoux
 		ACCESS_DENIED(client);
 	}
 	if( rp_GetClientVehiclePassager(client) > 0 || Client_GetVehicle(client) > 0 || rp_GetClientInt(client, i_Sickness) ) { // En voiture, ou très malade
@@ -358,7 +358,9 @@ public Action Cmd_Tazer(int client) {
 	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
 		ACCESS_DENIED(client);
 	}
-	
+	if( rp_GetZoneBit(rp_GetPlayerZone(client)) & (BITZONE_BLOCKJAIL|BITZONE_EVENT) ) {
+		ACCESS_DENIED(client);
+	}
 	if( rp_GetClientVehiclePassager(client) > 0 || Client_GetVehicle(client) > 0 || rp_GetClientInt(client, i_Sickness) ) { // En voiture, ou très malade
 		ACCESS_DENIED(client);
 	}
@@ -531,7 +533,7 @@ public Action Cmd_InJail(int client) {
 			continue;
 			
 		zone = rp_GetZoneBit(rp_GetPlayerZone(i));
-		if( zone & BITZONE_JAIL ||  zone & BITZONE_LACOURS ||  zone & BITZONE_HAUTESECU ) {
+		if( zone & (BITZONE_JAIL|BITZONE_LACOURS|BITZONE_HAUTESECU) ) {
 			
 			Format(tmp, sizeof(tmp), "%N  - %.1f heures", i, rp_GetClientInt(i, i_JailTime)/60.0 );
 			AddMenuItem(menu, tmp, tmp,	ITEMDRAW_DISABLED);
@@ -572,7 +574,7 @@ public Action Cmd_Jail(int client) {
 		ACCESS_DENIED(client);
 	}
 	
-	if( Cbit & BITZONE_BLOCKJAIL ||  Tbit & BITZONE_BLOCKJAIL ) {
+	if( Cbit & BITZONE_BLOCKJAIL || Tbit & BITZONE_BLOCKJAIL ) {
 		ACCESS_DENIED(client);
 	}
 	
@@ -1721,7 +1723,7 @@ int GetPerquizResp(int job_id) {
 			continue;
 			
 		zone = rp_GetZoneBit(rp_GetPlayerZone(i));
-		if( zone & BITZONE_JAIL ||  zone & BITZONE_LACOURS ||  zone & BITZONE_HAUTESECU )
+		if( zone & (BITZONE_JAIL|BITZONE_LACOURS|BITZONE_HAUTESECU) )
 			continue;
 		
 		if( job_id == rp_GetClientInt(i, i_Job) )
@@ -1734,7 +1736,7 @@ int GetPerquizResp(int job_id) {
 		if( !IsValidClient(i) )
 			continue;
 		zone = rp_GetZoneBit(rp_GetPlayerZone(i));
-		if( zone & BITZONE_JAIL ||  zone & BITZONE_LACOURS ||  zone & BITZONE_HAUTESECU )
+		if( zone & (BITZONE_JAIL|BITZONE_LACOURS|BITZONE_HAUTESECU) )
 			continue;
 			
 		if( job_id == rp_GetJobInt( rp_GetClientInt(i, i_Job),  job_type_ownboss) ) {
