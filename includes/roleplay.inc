@@ -37,6 +37,7 @@ enum rp_event {
 	RP_OnPlayerUse,			/* Un joueur utilise la commande utiliser, soit la touche E. */
 	RP_OnPlayerCommand,		/* Un joueur execute une commande, /vol, /truc, /bidule. command ne contient ni de !, ni de /. */
 	RP_OnPlayerSteal,			/* Un joueur execute le /vol */
+	RP_OnPlayerZoneChange,		/* Un joueur change de zone */
 	
 	RP_OnPlayerHear,		/* Peut-il entendre un autre joueur ? */
 	RP_PrePlayerTalk,		/* J'écris un message dans le chat  */
@@ -68,6 +69,8 @@ typeset rp_event_enum {
 	function Action(int client);								/* RP_OnPlayerUse */
 	function Action(int client, char[] command, char[] arg);	/* RP_OnPlayerCommand */
 	function Action(int client, int target, float& cooldown);			/* RP_OnPlayerSteal */
+	function Action(int client, int newZoneID, int oldZoneID);		/* RP_OnPlayerZoneChange */
+	
 	function Action(int client, int target, float dist);			/* RP_OnPlayerHear Est-ce que client peut entendre target ? */
 	function Action(int client, char[] message, int length);	/* RP_PrePlayerTalk */
 };

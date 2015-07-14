@@ -124,12 +124,12 @@ public Action fwfBioYeux(int client, int color[4]) {
 	PrintToServer("fwfBioYeux");
 	#endif
 	
-	color[0] -= 10000;
-	color[1] -= 10000;
-	color[2] -= 10000;
-	color[3] -= 10000;
+	color[0] = 0;
+	color[1] = 0;
+	color[2] = 0;
+	color[3] = 0;
 	
-	return Plugin_Changed;
+	return Plugin_Stop;
 }
 public Action fwdFrozen(int client, float& speed, float& gravity) {
 	speed = 0.0;
