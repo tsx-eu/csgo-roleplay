@@ -24,7 +24,6 @@
 //#define DEBUG
 #define MENU_TIME_DURATION 60
 
-// TODO: Annuler contrat quand capture activé
 // TODO: Trouver astuce pour bypass menu vente et définir les types de contrat ici.
 // TODO: Utiliser une CVAR pour la gestion des portes
 

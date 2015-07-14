@@ -31,6 +31,7 @@ public Plugin myinfo = {
 
 int g_cBeam;
 int g_iKnifeThrowID = -1;
+int g_iRiotShield[65];
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
 	RegServerCmd("rp_item_cut",			Cmd_ItemCut,			"RP-ITEM",	FCVAR_UNREGISTERED);
@@ -39,6 +40,9 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_esquive",		Cmd_ItemCut_Esquive,	"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_knifetype",	Cmd_ItemKnifeType,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_permi_tir",	Cmd_ItemPermiTir,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	
+	RegServerCmd("rp_item_riotshield",	Cmd_ItemRiotShield,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
@@ -290,4 +294,85 @@ public Action Cmd_ItemPermiTir(int args) {
 	
 	
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre entraînement est maintenant de %.2f%%", (train/5.0*100.0));
+}
+// ----------------------------------------------------------------------------
+public Action Cmd_ItemRiotShield(int args) {
+	
+	int client = GetCmdArgInt(1);
+	int itemID = GetCmdArgInt(args);
+	
+	if( g_iRiotShield[client] > 0 ) {
+		AcceptEntityInput( g_iRiotShield[client], "Kill");
+		rp_UnhookEvent(client, RP_OnPlayerDead, fwdPlayerDead);
+		rp_UnhookEvent(client, RP_PostTakeDamageWeapon, fwdTakeDamage);
+		
+		g_iRiotShield[client] = 0;
+	}
+	
+	int ent = CreateEntityByName("prop_physics_override");
+	DispatchKeyValue(ent, "model", "models/weapons/melee/w_riotshield.mdl");
+	DispatchSpawn(ent);
+	Entity_SetOwner(ent, client);
+	
+	SetVariantString("!activator");
+	AcceptEntityInput(ent, "SetParent", client, client);
+	
+	SetVariantString("weapon_hand_L");
+	AcceptEntityInput(ent, "SetParentAttachment");
+	
+	TeleportEntity(ent, view_as<float> { 2.0, 4.0, 0.0 }, view_as<float> { 300.0, 90.0, 20.0}, NULL_VECTOR);
+	
+	rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdTakeDamage);
+	rp_HookEvent(client, RP_OnPlayerDead, fwdPlayerDead);
+	
+	g_iRiotShield[client] = ent;
+	SDKHook(ent, SDKHook_SetTransmit, Hook_SetTransmit);
+	
+}
+public Action fwdTakeDamage(int victim, int attacker, float& damage, int wepID) {
+	float start[3], end[3];
+	
+	
+	GetClientEyePosition(attacker, start);
+	GetClientEyeAngles(attacker, end);
+	
+	Handle tr = TR_TraceRayFilterEx(start, end, MASK_SHOT, RayType_Infinite, TEF_ExcludeEntity, attacker);
+	
+	if( TR_DidHit(tr) ) {
+		TR_GetEndPosition(end, tr);
+		
+		if( g_iRiotShield[victim] > 0 && TR_GetEntityIndex(tr) == g_iRiotShield[victim] ) {
+			damage = 0.0;
+			CloseHandle(tr);
+			
+			TE_SetupBeamPoints(start, end, g_cBeam, g_cBeam, 0, 10, 5.0, 1.0, 1.0, 1, 0.0, { 0, 255, 0, 255 }, 5);
+			TE_SendToAll();
+			
+			return Plugin_Stop;
+		}
+		
+		TE_SetupBeamPoints(start, end, g_cBeam, g_cBeam, 0, 10, 5.0, 1.0, 1.0, 1, 0.0, { 255, 0, 0, 255 }, 5);
+		TE_SendToAll();
+		
+	}
+	CloseHandle(tr);
+	
+	return Plugin_Continue;
+}
+public Action fwdPlayerDead(int victim, int attacker, float& respawn) {
+	
+	AcceptEntityInput( g_iRiotShield[victim], "Kill");
+	rp_UnhookEvent(victim, RP_OnPlayerDead, fwdPlayerDead);
+	g_iRiotShield[victim] = 0;
+}
+public Action Hook_SetTransmit(int entity, int client) {
+	if( Entity_GetOwner(entity) == client ) 
+		return Plugin_Handled;
+	return Plugin_Continue;
+}
+public bool TEF_ExcludeEntity(int entity, int contentsMask, any data) {
+	if( entity == data)
+		return false;
+	
+	return true;
 }
