@@ -219,14 +219,27 @@ public Action Cmd_ItemBanane(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemBanane");
 	#endif
-	char arg1[12];
-	GetCmdArg(1, arg1, 11);
 	
-	int client = StringToInt(arg1);
+	int client = GetCmdArgInt(1);
+	int itemID = GetCmdArgInt(args);
+	int count;
 	
-	char classname[64];
+	char classname[64], classname2[64];
 	Format(classname, sizeof(classname), "rp_banana_%i", client);
 	
+	for (int i = MaxClients; i <= 2048; i++) {
+		if( !IsValidEdict(i) )
+			continue;
+		GetEdictClassname(i, classname2, sizeof(classname2));
+		if( StrEqual(classname, classname2) ) {
+			count++;
+			if( count >= 10 ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez posé trop de banane.");
+				ITEM_CANCEL(client, itemID);
+				return Plugin_Handled;
+			}
+		}
+	}
 	float vecOrigin[3];
 	GetClientAbsOrigin(client, vecOrigin);
 	
