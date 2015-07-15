@@ -12,6 +12,7 @@
 
 #include <sourcemod>
 #include <sdkhooks>
+#include <cstrike>
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
 
@@ -43,10 +44,22 @@ public void OnPluginStart() {
 	
 	RegServerCmd("rp_item_riotshield",	Cmd_ItemRiotShield,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	
+	for (int i = 1; i <= MaxClients; i++) 
+		if( IsValidClient(i) )
+			OnClientPostAdminCheck(i); 
+	
 }
+	
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 	PrecacheModel(MODEL_KNIFE, true);
+}
+public void OnClientPostAdminCheck(int client) {
+	rp_HookEvent(client, RP_PostTakeDamageKnife, fwdWeapon);
+}
+public void OnClientDisconnect(int client) {
+	rp_UnhookEvent(client, RP_PostTakeDamageKnife, fwdWeapon);
+	removeShield(client);
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemCut(int args) {
@@ -226,12 +239,6 @@ public Action Cmd_ItemKnifeType(int args) {
 	
 	return Plugin_Handled;
 }
-public void OnClientPostAdminCheck(int client) {
-	rp_HookEvent(client, RP_PostTakeDamageKnife, fwdWeapon);
-}
-public void OnClientDisconnect(int client) {
-	rp_UnhookEvent(client, RP_PostTakeDamageKnife, fwdWeapon);
-}
 public Action fwdWeapon(int victim, int attacker, float &damage) {
 	bool changed = true;
 	
@@ -302,15 +309,20 @@ public Action Cmd_ItemRiotShield(int args) {
 	#endif
 	
 	int client = GetCmdArgInt(1);
-	int itemID = GetCmdArgInt(args);
+	int item_id = GetCmdArgInt(args);
 	
-	if( g_iRiotShield[client] > 0 ) {
-		AcceptEntityInput( g_iRiotShield[client], "Kill");
-		rp_UnhookEvent(client, RP_OnPlayerDead, fwdPlayerDead);
-		rp_UnhookEvent(client, RP_PostTakeDamageWeapon, fwdTakeDamage);
-		
-		g_iRiotShield[client] = 0;
+	if( (rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101) || GetClientTeam(client) != CS_TEAM_CT ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est réservés aux forces de l'ordre.");
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
 	}
+	if( g_iRiotShield[client] > 0 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà un bouclier anti-émeute.");
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
+	
+	removeShield(client);
 	
 	int ent = CreateEntityByName("prop_physics_override");
 	DispatchKeyValue(ent, "model", "models/weapons/melee/w_riotshield.mdl");
@@ -320,17 +332,46 @@ public Action Cmd_ItemRiotShield(int args) {
 	SetVariantString("!activator");
 	AcceptEntityInput(ent, "SetParent", client, client);
 	
+	FakeClientCommand(client, "use weapon_knife");
+	FakeClientCommand(client, "use weapon_bayonet");
+	
 	SetVariantString("weapon_hand_L");
 	AcceptEntityInput(ent, "SetParentAttachment");
-	
 	TeleportEntity(ent, view_as<float> { 2.0, 4.0, 0.0 }, view_as<float> { 300.0, 90.0, 20.0}, NULL_VECTOR);
 	
 	rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdTakeDamage);
 	rp_HookEvent(client, RP_OnPlayerDead, fwdPlayerDead);
+	rp_HookEvent(client, RP_OnFrameSeconde, fwdPlayerFrame);
 	
 	g_iRiotShield[client] = ent;
 	SDKHook(ent, SDKHook_SetTransmit, Hook_SetTransmit);
+	SDKHook(client, SDKHook_WeaponSwitch, Hook_WeaponSwitch);
 	
+	return Plugin_Handled;
+}
+public Action fwdPlayerFrame(int client) {
+	if( GetClientTeam(client) != CS_TEAM_CT )
+		removeShield(client);
+}
+public Action Hook_WeaponSwitch(int client, int weapon) {
+	char wepname[64];
+	if (g_iRiotShield[client] > 0) {
+		GetEdictClassname(weapon, wepname, sizeof(wepname));
+		
+		if( StrContains(wepname, "weapon_knife") == 0 || StrContains(wepname, "weapon_bayonet") == 0 ) {
+			SetVariantString("weapon_hand_L");
+			AcceptEntityInput(g_iRiotShield[client], "SetParentAttachment");
+			
+			TeleportEntity(g_iRiotShield[client], view_as<float> { 2.0, 4.0, 0.0 }, view_as<float> { 300.0, 90.0, 20.0}, NULL_VECTOR);
+		}
+		else {
+			
+			SetVariantString("primary");
+			AcceptEntityInput(g_iRiotShield[client], "SetParentAttachment");
+			
+			TeleportEntity(g_iRiotShield[client], view_as<float> { 10.0, 20.0, 0.0 }, view_as<float> { 150.0, 270.0, 120.0 }, NULL_VECTOR);
+		}
+	}
 }
 public Action fwdTakeDamage(int victim, int attacker, float& damage, int wepID, float pos[3]) {
 	#if defined DEBUG
@@ -339,7 +380,7 @@ public Action fwdTakeDamage(int victim, int attacker, float& damage, int wepID, 
 	float start[3];
 	GetClientEyePosition(attacker, start);
 	
-	Handle tr = TR_TraceRayFilterEx(start, pos, MASK_SHOT, RayType_EndPoint, TEF_ExcludeEntity, attacker);
+	Handle tr = TR_TraceRayFilterEx(start, pos, MASK_SHOT, RayType_EndPoint, TEF_ExcludeEntity, victim);
 	
 	if( TR_DidHit(tr) ) {
 		TR_GetEndPosition(pos, tr);
@@ -370,9 +411,7 @@ public Action fwdPlayerDead(int victim, int attacker, float& respawn) {
 	PrintToServer("fwdPlayerDead");
 	#endif
 	
-	AcceptEntityInput( g_iRiotShield[victim], "Kill");
-	rp_UnhookEvent(victim, RP_OnPlayerDead, fwdPlayerDead);
-	g_iRiotShield[victim] = 0;
+	removeShield(victim);
 }
 public Action Hook_SetTransmit(int entity, int client) {
 	if( Entity_GetOwner(entity) == client ) 
@@ -380,8 +419,26 @@ public Action Hook_SetTransmit(int entity, int client) {
 	return Plugin_Continue;
 }
 public bool TEF_ExcludeEntity(int entity, int contentsMask, any data) {
-	if( entity == data)
-		return false;
+	if( entity == data )
+		return true;
+	if( entity == g_iRiotShield[data] )
+		return true;
+		
+	return false;
+}
+void removeShield(int client) {
 	
-	return true;
+	if( g_iRiotShield[client] > 0 ) {
+		AcceptEntityInput( g_iRiotShield[client], "Kill");
+		rp_UnhookEvent(client, RP_OnPlayerDead, fwdPlayerDead);
+		rp_UnhookEvent(client, RP_PostTakeDamageWeapon, fwdTakeDamage);
+		rp_UnhookEvent(client, RP_OnFrameSeconde, fwdPlayerFrame);
+		
+		SDKUnhook(g_iRiotShield[client], SDKHook_SetTransmit, Hook_SetTransmit);
+		SDKUnhook(client, SDKHook_WeaponSwitch, Hook_WeaponSwitch);
+		
+		g_iRiotShield[client] = 0;
+		
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez perdu votre bouclier anti-émeute.");
+	}
 }

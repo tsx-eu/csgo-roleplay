@@ -771,6 +771,14 @@ public Action Cmd_ItemCryptage(int args) {
 	#endif
 	
 	int client = GetCmdArgInt(1);
+	int item_id = GetCmdArgInt(args);
+	
+	if(rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101){
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit aux forces de l'ordre.");
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
+	
 	int level = rp_GetClientInt(client, i_Cryptage) + 1;
 	
 	if( level > 5 )
@@ -778,6 +786,7 @@ public Action Cmd_ItemCryptage(int args) {
 		
 	rp_SetClientInt(client, i_Cryptage, level);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Les détectives vous couvre, vous avez %i de chance d'être caché", level*20);
+	return Plugin_Handled;
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemEnqueteMenu(int args) {
