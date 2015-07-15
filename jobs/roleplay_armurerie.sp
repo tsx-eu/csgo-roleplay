@@ -125,7 +125,7 @@ public void OnClientPostAdminCheck(int client) {
 public void OnClientDisconnect(int client) {
 	rp_UnhookEvent(client, RP_PostTakeDamageWeapon, fwdWeapon);
 }
-public Action fwdWeapon(int victim, int attacker, float &damage, int wepID) {
+public Action fwdWeapon(int victim, int attacker, float &damage, int wepID, float pos[3]) {
 	bool changed = true;
 	
 	switch( rp_GetWeaponBallType(wepID) ) {

@@ -297,6 +297,9 @@ public Action Cmd_ItemPermiTir(int args) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemRiotShield(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemRiotShield");
+	#endif
 	
 	int client = GetCmdArgInt(1);
 	int itemID = GetCmdArgInt(args);
@@ -330,10 +333,13 @@ public Action Cmd_ItemRiotShield(int args) {
 	
 }
 public Action fwdTakeDamage(int victim, int attacker, float& damage, int wepID, float pos[3]) {
+	#if defined DEBUG
+	PrintToServer("fwdTakeDamage");
+	#endif
 	float start[3];
 	GetClientEyePosition(attacker, start);
 	
-	Handle tr = TR_TraceRayFilterEx(start, pos, MASK_SHOT, RayType_Infinite, TEF_ExcludeEntity, attacker);
+	Handle tr = TR_TraceRayFilterEx(start, pos, MASK_SHOT, RayType_EndPoint, TEF_ExcludeEntity, attacker);
 	
 	if( TR_DidHit(tr) ) {
 		TR_GetEndPosition(pos, tr);
@@ -342,21 +348,27 @@ public Action fwdTakeDamage(int victim, int attacker, float& damage, int wepID, 
 			damage = 0.0;
 			CloseHandle(tr);
 			
+			#if defined DEBUG
 			TE_SetupBeamPoints(start, pos, g_cBeam, g_cBeam, 0, 10, 5.0, 1.0, 1.0, 1, 0.0, { 0, 255, 0, 255 }, 5);
 			TE_SendToAll();
+			#endif
 			
 			return Plugin_Stop;
 		}
 		
+		#if defined DEBUG
 		TE_SetupBeamPoints(start, pos, g_cBeam, g_cBeam, 0, 10, 5.0, 1.0, 1.0, 1, 0.0, { 255, 0, 0, 255 }, 5);
 		TE_SendToAll();
-		
+		#endif
 	}
 	CloseHandle(tr);
 	
 	return Plugin_Continue;
 }
 public Action fwdPlayerDead(int victim, int attacker, float& respawn) {
+	#if defined DEBUG
+	PrintToServer("fwdPlayerDead");
+	#endif
 	
 	AcceptEntityInput( g_iRiotShield[victim], "Kill");
 	rp_UnhookEvent(victim, RP_OnPlayerDead, fwdPlayerDead);

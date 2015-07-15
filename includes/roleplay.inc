@@ -52,7 +52,7 @@ typeset rp_event_enum {
 	function Action(int victim, int attacker, float& damage, int wepID, float pos[3]);	/* RP_PostTakeDamageWeapon */
 	function Action(int victim, int attacker, float& damage); 			/* RP_PostTakeDamageKnife */
 	function Action(int attacker, int victim, float& damage); 			/* RP_PreGiveDamage  == return Plugin_Handled = aucun dégat */
-	function Action(int attacker, int victim, float& damage, int wepID);	/* RP_PostGiveDamageWeapon */
+	function Action(int attacker, int victim, float& damage, int wepID, float pos[3]);	/* RP_PostGiveDamageWeapon */
 	function Action(int attacker, int victim, float& damage); 			/* RP_PostGiveDamageKnife */
 	
 	

@@ -459,7 +459,7 @@ public Action ItemDrugStop(Handle time, any client) {
 	
 	return Plugin_Continue;
 }
-public Action fwdBerserk(int attacker, int victim, float &damage, int wepID) {
+public Action fwdBerserk(int attacker, int victim, float &damage, int wepID, float pos[3]) {
 	#if defined DEBUG
 	PrintToServer("fwdGiveBerserk");
 	#endif
