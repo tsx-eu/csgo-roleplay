@@ -329,29 +329,26 @@ public Action Cmd_ItemRiotShield(int args) {
 	SDKHook(ent, SDKHook_SetTransmit, Hook_SetTransmit);
 	
 }
-public Action fwdTakeDamage(int victim, int attacker, float& damage, int wepID) {
-	float start[3], end[3];
-	
-	
+public Action fwdTakeDamage(int victim, int attacker, float& damage, int wepID, float pos[3]) {
+	float start[3];
 	GetClientEyePosition(attacker, start);
-	GetClientEyeAngles(attacker, end);
 	
-	Handle tr = TR_TraceRayFilterEx(start, end, MASK_SHOT, RayType_Infinite, TEF_ExcludeEntity, attacker);
+	Handle tr = TR_TraceRayFilterEx(start, pos, MASK_SHOT, RayType_Infinite, TEF_ExcludeEntity, attacker);
 	
 	if( TR_DidHit(tr) ) {
-		TR_GetEndPosition(end, tr);
+		TR_GetEndPosition(pos, tr);
 		
 		if( g_iRiotShield[victim] > 0 && TR_GetEntityIndex(tr) == g_iRiotShield[victim] ) {
 			damage = 0.0;
 			CloseHandle(tr);
 			
-			TE_SetupBeamPoints(start, end, g_cBeam, g_cBeam, 0, 10, 5.0, 1.0, 1.0, 1, 0.0, { 0, 255, 0, 255 }, 5);
+			TE_SetupBeamPoints(start, pos, g_cBeam, g_cBeam, 0, 10, 5.0, 1.0, 1.0, 1, 0.0, { 0, 255, 0, 255 }, 5);
 			TE_SendToAll();
 			
 			return Plugin_Stop;
 		}
 		
-		TE_SetupBeamPoints(start, end, g_cBeam, g_cBeam, 0, 10, 5.0, 1.0, 1.0, 1, 0.0, { 255, 0, 0, 255 }, 5);
+		TE_SetupBeamPoints(start, pos, g_cBeam, g_cBeam, 0, 10, 5.0, 1.0, 1.0, 1, 0.0, { 255, 0, 0, 255 }, 5);
 		TE_SendToAll();
 		
 	}

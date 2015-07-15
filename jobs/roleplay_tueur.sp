@@ -225,9 +225,8 @@ public Action fwdTueurKill(int client, int attacker, float& respawn) {
 				CreateTimer(0.33, SendToTueur, client);
 			}
 			else {
-				respawn = 25.0;
+				respawn *= 1.25;
 			}
-			
 		}
 		
 		RestoreAssassinNormal(attacker);
