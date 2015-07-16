@@ -276,9 +276,7 @@ public Action Marier(int epoux, int epouse, int juge, int zoneJuge){
 	int prix = 4000;
 
 	if( (rp_GetClientInt(epoux, i_Bank)+rp_GetClientInt(epoux, i_Money)) < prix/2 || (rp_GetClientInt(epouse, i_Bank)+rp_GetClientInt(epouse, i_Money)) < prix/2 ) {
-		CPrintToChat(epoux, "{lightblue}[TSX-RP]{default} Un des deux époux n'a pas l'argent nécessaire, le mariage ne peut pas se dérouler.");
-		CPrintToChat(epouse, "{lightblue}[TSX-RP]{default} Un des deux époux n'a pas l'argent nécessaire, le mariage ne peut pas se dérouler.");
-		CPrintToChat(juge, "{lightblue}[TSX-RP]{default} Un des deux époux n'a pas l'argent nécessaire, le mariage ne peut pas se dérouler.");
+		PrintToChatZone(zoneJuge, "{lightblue}[TSX-RP]{default} L'un des mariés est en fait un SDF refoulé et n'a pas assez d'argent pour s'aquitter des frais du mariage, Vous pouvez huer les pauvres !", epoux, epouse);
 		return Plugin_Handled;
 	}
 	
