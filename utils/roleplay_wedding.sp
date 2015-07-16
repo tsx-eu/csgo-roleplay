@@ -93,7 +93,7 @@ public Action Cmd_Mariage(int client) {
 	}
 	
 	Handle menu = CreateMenu(eventMariage_1);
-	SetMenuTitle(menu, "Qui voulez vous marier ?"); // Le juge choisi la première personne à marier 
+	SetMenuTitle(menu, "Qui voulez-vous marier ?"); // Le juge choisi la première personne à marier 
 	char tmp[24], tmp2[64];
 
 
@@ -133,7 +133,7 @@ public int eventMariage_1(Handle menu, MenuAction action, int client, int param2
 		
 		// Setup menu
 		Handle menu2 = CreateMenu(eventMariage_2);
-		Format(options, sizeof(options), "A qui voulez vous marier %N ?", target); // On choisi la seconde personne
+		Format(options, sizeof(options), "A qui voulez-vous vous marier %N ?", target); // On choisi la seconde personne
 		SetMenuTitle(menu2, options);
 		char tmp[24], tmp2[64];
 		
@@ -204,7 +204,7 @@ public int eventMariage_2(Handle menu, MenuAction action, int client, int param2
 		Handle menu2 = CreateMenu(eventMariage_3);
 		
 		// S'il n'y a pas d'erreurs, on envoie un menu de choix a la premiere personne
-		Format(options, sizeof(options), "Voulez-vous prendre %N pour epoux et l'aimer jusqu'a que la mort vous sépare(2000$)", target_1); 
+		Format(options, sizeof(options), "Voulez-vous prendre %N pour époux et l'aimer jusqu'à ce que la mort vous sépare ? (2000$)", target_1); 
 		SetMenuTitle(menu2, options);
 		
 		Format(options, sizeof(options), "%i_%i_1_0_%i", target_1, client, zoneJuge); // le dernier 0 signifie que c'est la premiere personne
@@ -251,7 +251,7 @@ public int eventMariage_3(Handle menu, MenuAction action, int client, int param2
 			// Setup menu
 			Handle menu2 = CreateMenu(eventMariage_3);
 			
-			Format(options, sizeof(options), "Voulez-vous prendre %N pour epouse et l'aimer jusqu'a que la mort vous separe(2000$)", client);
+			Format(options, sizeof(options), "Voulez-vous prendre %N pour épouse et l'aimer jusqu'à ce que la mort vous sépare(2000$)", client);
 			SetMenuTitle(menu2, options);
 			
 			Format(options, sizeof(options), "%i_%i_1_1_%i", client, juge, zoneJuge);
@@ -272,18 +272,25 @@ public int eventMariage_3(Handle menu, MenuAction action, int client, int param2
 	}
 }
 public Action Marier(int epoux, int epouse, int juge, int zoneJuge){
-	#if defined DEBUG
-	PrintToServer("Marier");
-	#endif
+	
+	int prix = 2000; // Fixer le prix du mariage
+	
+	prix = prix * 2;
+	if( rp_GetClientInt(epoux, i_Bank) < prix / 2
+		|| rp_GetClientInt(epouse, i_Bank) < prix / 2 ) {
+		CPrintToChat(epoux, "{lightblue}[TSX-RP]{default} Un des deux époux n'a pas l'argent nécessaire, le mariage ne peut pas se dérouler.");
+		CPrintToChat(epouse, "{lightblue}[TSX-RP]{default} Un des deux époux n'a pas l'argent nécessaire, le mariage ne peut pas se dérouler.");
+		CPrintToChat(juge, "{lightblue}[TSX-RP]{default} Un des deux époux n'a pas l'argent nécessaire, le mariage ne peut pas se dérouler.");
+		return Plugin_Handled;
+	}
 	
 	PrintToChatZone(zoneJuge, "{lightblue}[TSX-RP]{default} %N répond: OUI !", epoux);
 	PrintToChatZone(zoneJuge, "{lightblue}[TSX-RP]{default} %N et %N sont maintenant unis par les liens du mariage, vous pouvez féliciter les mariés !", epoux, epouse);
 	
-	CPrintToChat(epoux, "{lightblue}[TSX-RP]{default} Vous et %N êtes unis par les liens du mariage, vous pouvez embrasser la mariée félicitation !", epouse);
-	CPrintToChat(epouse, "{lightblue}[TSX-RP]{default} Vous et %N êtes unis par les liens du mariage, félicitation !", epoux);
+	CPrintToChat(epoux, "{lightblue}[TSX-RP]{default} Vous et %N êtes unis par les liens du mariage, vous pouvez embrasser la mariée félicitations !", epouse);
+	CPrintToChat(epouse, "{lightblue}[TSX-RP]{default} Vous et %N êtes unis par les liens du mariage, félicitations !", epoux);
 	
 	// On paye le gentil juge et on preleve aux heureux élus
-	int prix = 4000;
 	rp_SetClientInt(epoux, i_Bank, rp_GetClientInt(epoux, i_Bank) - (prix / 2));
 	rp_SetClientInt(epouse, i_Bank, rp_GetClientInt(epouse, i_Bank) - (prix / 2));
 	rp_SetClientInt(juge, i_Bank, rp_GetClientInt(juge, i_Bank) + (prix / 4));
