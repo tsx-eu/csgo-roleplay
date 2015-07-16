@@ -275,7 +275,7 @@ public Action Marier(int epoux, int epouse, int juge, int zoneJuge){
 	
 	int prix = 4000;
 
-	if( (rp_GetClientInt(epoux, i_Bank)+rp_GetClientInt(epoux, i_Money)) < prix/2 || (rp_GetClientInt(epouse, i_Bank)+rp_GetClientInt(epouse, i_Money)) < prix/2 ) {
+	if( (rp_GetClientInt(epoux, i_Bank)+rp_GetClientInt(epoux, i_Money)) < (prix/2) || (rp_GetClientInt(epouse, i_Bank)+rp_GetClientInt(epouse, i_Money)) < (prix/2) ) {
 		PrintToChatZone(zoneJuge, "{lightblue}[TSX-RP]{default} L'un des mariés est en fait un SDF refoulé et n'a pas assez d'argent pour s'aquitter des frais du mariage, Vous pouvez huer les pauvres !");
 		return Plugin_Handled;
 	}
@@ -289,7 +289,7 @@ public Action Marier(int epoux, int epouse, int juge, int zoneJuge){
 	// On paye le gentil juge et on preleve aux heureux élus
 	rp_SetClientInt(epoux, i_Money, rp_GetClientInt(epoux, i_Money) - (prix / 2));
 	rp_SetClientInt(epouse, i_Money, rp_GetClientInt(epouse, i_Money) - (prix / 2));
-	rp_SetClientInt(juge, i_Bank, rp_GetClientInt(juge, i_Bank) + (prix / 4));
+	rp_SetClientInt(juge, i_AddToPay, rp_GetClientInt(juge, i_AddToPay) + (prix / 4));
 	rp_SetJobCapital(101, ( rp_GetJobCapital(101) + (prix/4)*3 ) );
 	
 	rp_SetClientInt(epoux, i_MarriedTo, epouse);
