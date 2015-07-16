@@ -273,14 +273,10 @@ public int eventMariage_3(Handle menu, MenuAction action, int client, int param2
 }
 public Action Marier(int epoux, int epouse, int juge, int zoneJuge){
 	
-	int prix = 2000; // Fixer le prix du mariage
-	
-	prix = prix * 2;
-	if( rp_GetClientInt(epoux, i_Bank) < prix / 2
-		|| rp_GetClientInt(epouse, i_Bank) < prix / 2 ) {
-		CPrintToChat(epoux, "{lightblue}[TSX-RP]{default} Un des deux époux n'a pas l'argent nécessaire, le mariage ne peut pas se dérouler.");
-		CPrintToChat(epouse, "{lightblue}[TSX-RP]{default} Un des deux époux n'a pas l'argent nécessaire, le mariage ne peut pas se dérouler.");
-		CPrintToChat(juge, "{lightblue}[TSX-RP]{default} Un des deux époux n'a pas l'argent nécessaire, le mariage ne peut pas se dérouler.");
+	int prix = 4000;
+
+	if( (rp_GetClientInt(epoux, i_Bank)+rp_GetClientInt(epoux, i_Money)) < (prix/2) || (rp_GetClientInt(epouse, i_Bank)+rp_GetClientInt(epouse, i_Money)) < (prix/2) ) {
+		PrintToChatZone(zoneJuge, "{lightblue}[TSX-RP]{default} L'un des mariés est en fait un SDF refoulé et n'a pas assez d'argent pour s'aquitter des frais du mariage, Vous pouvez huer les pauvres !");
 		return Plugin_Handled;
 	}
 	
@@ -291,9 +287,9 @@ public Action Marier(int epoux, int epouse, int juge, int zoneJuge){
 	CPrintToChat(epouse, "{lightblue}[TSX-RP]{default} Vous et %N êtes unis par les liens du mariage, félicitations !", epoux);
 	
 	// On paye le gentil juge et on preleve aux heureux élus
-	rp_SetClientInt(epoux, i_Bank, rp_GetClientInt(epoux, i_Bank) - (prix / 2));
-	rp_SetClientInt(epouse, i_Bank, rp_GetClientInt(epouse, i_Bank) - (prix / 2));
-	rp_SetClientInt(juge, i_Bank, rp_GetClientInt(juge, i_Bank) + (prix / 4));
+	rp_SetClientInt(epoux, i_Money, rp_GetClientInt(epoux, i_Money) - (prix / 2));
+	rp_SetClientInt(epouse, i_Money, rp_GetClientInt(epouse, i_Money) - (prix / 2));
+	rp_SetClientInt(juge, i_AddToPay, rp_GetClientInt(juge, i_AddToPay) + (prix / 4));
 	rp_SetJobCapital(101, ( rp_GetJobCapital(101) + (prix/4)*3 ) );
 	
 	rp_SetClientInt(epoux, i_MarriedTo, epouse);
