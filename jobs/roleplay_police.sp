@@ -226,8 +226,8 @@ public Action Cmd_Amende(int client, const char[] arg) {
 	rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) + (amount / 4));
 	rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amount);
 
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez pris %i$ a %N.", amount, target);
-	CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N vous a pris %i$.", client, amount);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez pris %i$ a %N{default}.", amount, target);
+	CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N {default}vous a pris %i$.", client, amount);
 
 	char SteamID[64], szTarget[64];
 		
@@ -1014,17 +1014,17 @@ public int eventConvocation_2(Handle menu, MenuAction action, int client, int pa
 		
 		if( etat == -1 ) {
 			CPrintToChatAll("{lightblue} ================================== {default}");
-			CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N n'est plus recherché par le Tribunal.", target);
+			CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}n'est plus recherché par le Tribunal.", target);
 			CPrintToChatAll("{lightblue} ================================== {default}");
 		}
 		else if( etat == 0 ) {
 			CPrintToChatAll("{lightblue} ================================== {default}");
-			CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N est recherché par le Tribunal.", target);
+			CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est recherché par le Tribunal.", target);
 			CPrintToChatAll("{lightblue} ================================== {default}");
 		}
 		else {
 			CPrintToChatAll("{lightblue} ================================== {default}");
-			CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N est appelé dans le %s. [%i/3]", target, options, etat);
+			CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est appelé dans le %s. [%i/3]", target, options, etat);
 			CPrintToChatAll("{lightblue} ================================== {default}");
 		}
 	}
@@ -1383,8 +1383,8 @@ void SendPlayerToJail(int target, int client = 0) {
 			rp_SetClientInt(target, i_JailledBy, client);
 		
 		
-		CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N vous a mis en prison.", client);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez mis %N en prison.", target);
+		CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N {default}vous a mis en prison.", client);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez mis %N {default}en prison.", target);
 		
 		AskJailTime(client, target);
 		LogToGame("[TSX-RP] [JAIL-0] %L (%d) a mis %L (%d) en prison.", client, rp_GetPlayerZone(client, 1.0), target, rp_GetPlayerZone(target, 1.0));
@@ -1458,7 +1458,7 @@ public int eventAskJail2Time(Handle menu, MenuAction action, int client, int par
 			rp_SetClientInt(iTarget, i_JailTime,iTime*60);		
 			rp_SetClientInt(iTarget, i_JailledBy, client);
 			
-			CPrintToChatAll("{lightblue}[TSX-RP]{default} %N a été condamne à faire %i heures de prison par le juge %N.", iTarget, iTime, client);
+			CPrintToChatAll("{lightblue}[TSX-RP]{default} %N {default}a été condamne à faire %i heures de prison par le juge %N{default}.", iTarget, iTime, client);
 			LogToGame("[TSX-RP] [JUGE] %L a été condamne à faire %i heures de prison par le juge %L.", iTarget, iTime, client);
 		}
 	}
@@ -1489,8 +1489,8 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			rp_SetClientInt(target, i_jailTime_Last, 0);
 			rp_SetClientInt(target, i_JailledBy, 0);
 			
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez libéré %N.", target);
-			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N vous a liberé.", client);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez libéré %N{default}.", target);
+			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N {default}vous a liberé.", client);
 			
 			LogToGame("[TSX-RP] [JAIL] [LIBERATION] %L a liberé %L", client, target);
 			
@@ -1506,7 +1506,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				TeleportEntity(target, view_as<float>{632.0, -1258.0, -1980.0}, NULL_VECTOR, NULL_VECTOR);
 			
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été mis en prison, en attente de jugement par: %N", client);
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez mis: %N en prison du Tribunal.", target);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez mis: %N {default}en prison du Tribunal.", target);
 			
 			if( rp_GetClientInt(target, i_JailTime) <= 360 )
 				rp_SetClientInt(target, i_JailTime, 360);
@@ -1562,7 +1562,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			if( amende > 0 ) {
 				
 				if( IsValidClient(target) ) {
-					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Une amende de %i$ a été prélevée à %N.", amende, target);
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Une amende de %i$ a été prélevée à %N{default}.", amende, target);
 					CPrintToChat(target, "{lightblue}[TSX-RP]{default} Une caution de %i$ vous a été prelevée.", amende);
 				}
 			}
@@ -1596,8 +1596,8 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 		rp_SetClientInt(target, i_jailTime_Last, time_to_spend);
 		 
 		if( IsValidClient(client) && IsValidClient(target) ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N restera en prison %.1f heures pour \"%s\"", target, time_to_spend/60.0, g_szJailRaison[type][jail_raison]);
-			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N vous a mis %.1f heures de prison pour \"%s\"", client, time_to_spend/60.0, g_szJailRaison[type][jail_raison]); 
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N {default}restera en prison %.1f heures pour \"%s\"", target, time_to_spend/60.0, g_szJailRaison[type][jail_raison]);
+			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N {default}vous a mis %.1f heures de prison pour \"%s\"", client, time_to_spend/60.0, g_szJailRaison[type][jail_raison]); 
 		}
 		else {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le joueur s'est déconnecté mais il fera %.1f heures de prison", time_to_spend / 60.0);
@@ -1804,7 +1804,7 @@ void start_perquiz(int client, int job) {
 	LogToGame("[TSX-RP] [POLICE] Début d'une perquisition dans: %s.", tmp);
 	
 	if( REP > 0 )
-		CPrintToChatAll("{lightblue}[TSX-RP] [POLICE]{default} %N est prié de se présenter sur les lieux.", REP);
+		CPrintToChatAll("{lightblue}[TSX-RP] [POLICE]{default} %N {default}est prié de se présenter sur les lieux.", REP);
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	
 	rp_SetJobCapital(1, rp_GetJobCapital(1) + 250);
@@ -1902,12 +1902,12 @@ public Action PerquizFrame(Handle timer, Handle dp) {
 		
 	CPrintToChat(target, "{lightblue} ================================== {default}");
 	CPrintToChat(target, "{lightblue}[TSX-RP] [POLICE]{default} une perquisition commencera dans: %i secondes", time);
-	CPrintToChat(target, "{lightblue}[TSX-RP] [POLICE]{default} %N est prié de se présenter à %s.", target, tmp);
+	CPrintToChat(target, "{lightblue}[TSX-RP] [POLICE]{default} %N {default}est prié de se présenter à %s.", target, tmp);
 	CPrintToChat(target, "{lightblue} ================================== {default}");
 	
 	CPrintToChat(client, "{lightblue} ================================== {default}");
 	CPrintToChat(client, "{lightblue}[TSX-RP] [POLICE]{default} une perquisition commencera dans: %i secondes", time);
-	CPrintToChat(client, "{lightblue}[TSX-RP] [POLICE]{default} %N est prié de se présenter à %s", target, tmp);
+	CPrintToChat(client, "{lightblue}[TSX-RP] [POLICE]{default} %N {default}est prié de se présenter à %s", target, tmp);
 	CPrintToChat(client, "{lightblue} ================================== {default}");
 	
 	
