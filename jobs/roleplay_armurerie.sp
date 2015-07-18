@@ -116,6 +116,9 @@ public Action Cmd_ItemBallType(int args) {
 	else if( StrEqual(arg1, "explode") ) {
 		rp_SetWeaponBallType(wepid, ball_type_explode);
 	}
+	else if( StrEqual(arg1, "revitalisante") ) {
+		rp_SetWeaponBallType(wepid, ball_type_revitalisante);
+	}
 	
 	return Plugin_Handled;
 }
@@ -176,6 +179,27 @@ public Action fwdWeapon(int victim, int attacker, float &damage, int wepID, floa
 		}
 		case ball_type_explode: {
 			damage *= 0.8;
+		}
+		case ball_type_revitalisante: {
+			int current = GetClientHealth(victim);
+			if( current < 500 ) {
+				current += RoundToCeil(damage*0.1); // On rend environ 10% des degats infligés sous forme de vie
+
+				if( current > 500 )
+					current = 500;
+
+				SetEntityHealth(victim, current);
+				
+				float vecOrigin[3], vecOrigin2[3];
+				GetClientEyePosition(attacker, vecOrigin);
+				GetClientEyePosition(victim, vecOrigin2);
+				
+				vecOrigin[2] -= 20.0; vecOrigin2[2] -= 20.0;
+				
+				TE_SetupBeamPoints(vecOrigin, vecOrigin2, g_cBeam, 0, 0, 0, 0.1, 10.0, 10.0, 0, 10.0, {0, 0, 255, 250}, 10); // Laser vert entre les deux
+				TE_SendToAll();
+			}
+			damage = 0.0; // L'arme ne fait pas de dégats
 		}
 		default: {
 			changed = false;
