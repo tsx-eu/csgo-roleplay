@@ -382,6 +382,9 @@ public Action Cmd_Tazer(int client) {
 		if( GetClientTeam(target) == CS_TEAM_CT ) {
 			ACCESS_DENIED(client);
 		}
+		if( job == 103 || job == 104 || job == 105 || job == 106 ) {
+			ACCESS_DENIED(client);
+		}
 		
 		float time;
 		rp_Effect_Tazer(client, target);
@@ -755,6 +758,10 @@ public Action Cmd_Push(int client) {
 	}
 	
 	if( GetClientTeam(client) == CS_TEAM_T && (job == 8 || job == 9 || job == 103 || job == 104 || job == 105 || job == 106 || job == 107 || job == 108 || job == 109 ) ) {
+		ACCESS_DENIED(client);
+	}
+	
+	if( job == 103 || job == 104 || job == 105 || job == 106 ) {
 		ACCESS_DENIED(client);
 	}
 	
@@ -1989,7 +1996,11 @@ public Action fwdOnPlayerBuild(int client, float& cooldown) {
 	PrintToServer("fwdOnPlayerBuild_Barriere");
 	#endif
 	
-	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 )
+	int job = rp_GetClientJobID(client);
+	if( job != 1 && job != 101 )
+		return Plugin_Continue;
+		
+	if( job == 103 || job == 104 || job == 105 || job == 106 )
 		return Plugin_Continue;
 		
 	if( rp_IsInPVP(client) ){
@@ -2039,8 +2050,6 @@ int BuildingBarriere(int client) {
 		
 		case 101: max = 7;	// Président
 		case 102: max = 6;	// Vice président
-		case 103: max = 5;	// HJ2
-		case 104: max = 4;	// HJ1
 		
 		default:max = 0;
 		
