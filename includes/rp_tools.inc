@@ -85,7 +85,15 @@ public int GetClientTarget(int client) {
 	return ent;
 }
 public bool FilterToOne(int entity, int mask, any data) {
-	return (data != entity);
+	static char classname[64];
+	if( entity == data )
+		return false;
+	GetEdictClassname(entity, classname, sizeof(classname));
+	
+	if( StrEqual(classname, "notsolid") )
+		return false;
+		
+	return true;
 }
 public void SQL_QueryCallBack(Handle owner, Handle handle, const char[] error, any data) {
 	if( strlen(error) >= 1  ) {

@@ -209,7 +209,6 @@ native void rp_ClientRemoveProp(int client, int target, int item_id);					/* Sup
 // ----------------------------------------------------------------------------
 native void rp_GetDate(char[] str, int length);
 native void rp_GetTime(int& hour, int& minutes);
-
 // ----------------------------------------------------------------------------
 
 #define ACCESS_DENIED(%1)	CPrintToChat(%1, "{lightblue}[TSX-RP]{default} Vous n'avez pas accès à cette commande.");	return Plugin_Handled
@@ -573,6 +572,11 @@ enum type_appart_bonus {
 	appart_proprio,
 	
 	appart_bonus_max	
+};
+enum type_quest_type {
+	quest_story,
+	quest_daily,
+	quest_weekly
 };
 
 
