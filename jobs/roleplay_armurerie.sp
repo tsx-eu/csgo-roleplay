@@ -196,7 +196,7 @@ public Action fwdWeapon(int victim, int attacker, float &damage, int wepID, floa
 				
 				vecOrigin[2] -= 20.0; vecOrigin2[2] -= 20.0;
 				
-				TE_SetupBeamPoints(vecOrigin, vecOrigin2, g_cBeam, 0, 0, 0, 0.1, 10.0, 10.0, 0, 10.0, {0, 0, 255, 250}, 10); // Laser vert entre les deux
+				TE_SetupBeamPoints(vecOrigin, vecOrigin2, g_cBeam, 0, 0, 0, 0.1, 10.0, 10.0, 0, 10.0, {0, 255, 0, 250}, 10); // Laser vert entre les deux
 				TE_SendToAll();
 			}
 			damage = 0.0; // L'arme ne fait pas de dégats
