@@ -577,7 +577,7 @@ public Action EMPExplode_Task(Handle timer, any ent) {
 				AcceptEntityInput(i, "Kill");
 			}
 			else {
-				if( IsValidClient(i) ) {
+				if( IsValidClient(i) && !(rp_GetZoneBit(rp_GetPlayerZone(i)) & BITZONE_PEACEFULL) ) {
 					kev = rp_GetClientInt(i, i_Kevlar) / 2;
 					damage += float(kev);
 					
