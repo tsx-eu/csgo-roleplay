@@ -21,7 +21,7 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-//#define DEBUG
+#define DEBUG
 #define MODEL_KNIFE	"models/weapons/w_knife_flip.mdl"
 
 public Plugin myinfo = {
@@ -325,9 +325,11 @@ public Action Cmd_ItemRiotShield(int args) {
 	removeShield(client);
 	
 	int ent = CreateEntityByName("prop_physics_override");
+	DispatchKeyValue(ent, "classname", "notsolid");
 	DispatchKeyValue(ent, "model", "models/weapons/melee/w_riotshield.mdl");
 	DispatchSpawn(ent);
 	Entity_SetOwner(ent, client);
+	Entity_SetSolidFlags(ent, FSOLID_TRIGGER | FSOLID_USE_TRIGGER_BOUNDS);
 	
 	SetVariantString("!activator");
 	AcceptEntityInput(ent, "SetParent", client, client);
@@ -345,9 +347,14 @@ public Action Cmd_ItemRiotShield(int args) {
 	
 	g_iRiotShield[client] = ent;
 	SDKHook(ent, SDKHook_SetTransmit, Hook_SetTransmit);
+	SDKHook(ent, SDKHook_ShouldCollide, Hook_Collide);
 	SDKHook(client, SDKHook_WeaponSwitch, Hook_WeaponSwitch);
 	
 	return Plugin_Handled;
+}
+public bool Hook_Collide(int entity, int collisiongroup, int contentsMask, bool result) {
+	result = false;
+	return false;
 }
 public Action fwdPlayerFrame(int client) {
 	if( GetClientTeam(client) != CS_TEAM_CT )
@@ -380,7 +387,7 @@ public Action fwdTakeDamage(int victim, int attacker, float& damage, int wepID, 
 	float start[3];
 	GetClientEyePosition(attacker, start);
 	
-	Handle tr = TR_TraceRayFilterEx(start, pos, MASK_SHOT, RayType_EndPoint, TEF_ExcludeEntity, victim);
+	Handle tr = TR_TraceRayFilterEx(start, pos, MASK_ALL, RayType_EndPoint, TEF_ExcludeEntity, victim);
 	
 	if( TR_DidHit(tr) ) {
 		TR_GetEndPosition(pos, tr);
