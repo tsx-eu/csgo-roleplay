@@ -354,11 +354,12 @@ public Action Cmd_Tazer(int client) {
 	#endif
 	char tmp[128], tmp2[128], szQuery[1024];
 	int job = rp_GetClientInt(client, i_Job);
+	int Czone = rp_GetPlayerZone(client);
 		
 	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
 		ACCESS_DENIED(client);
 	}
-	if( rp_GetZoneBit(rp_GetPlayerZone(client)) & (BITZONE_BLOCKJAIL|BITZONE_EVENT) ) {
+	if( rp_GetZoneBit(Czone) & (BITZONE_BLOCKJAIL|BITZONE_EVENT) ) {
 		ACCESS_DENIED(client);
 	}
 	if( rp_GetClientVehiclePassager(client) > 0 || Client_GetVehicle(client) > 0 || rp_GetClientInt(client, i_Sickness) ) { // En voiture, ou très malade
