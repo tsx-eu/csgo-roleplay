@@ -54,6 +54,12 @@ public void OnClientPostAdminCheck(int client) {
 	#endif
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 }
+public void OnClientDisconnect(int client) {
+	#if defined DEBUG
+	PrintToServer("OnClientDisconnect");
+	#endif
+	rp_UnhookEvent(client, RP_OnPlayerCommand, fwdCommand);
+}
 // ----------------------------------------------------------------------------
 public Action fwdCommand(int client, char[] command, char[] arg) {
 	#if defined DEBUG
