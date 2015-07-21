@@ -630,7 +630,7 @@ public Action Cmd_Jail(int client) {
 		
 		return Plugin_Handled;
 	}
-	else if( (job == 103 || job == 104 || job == 105 || job == 106) && rp_GetZoneInt(Czone, zone_type_type) != 101){
+	else if( (job == 103 || job == 104 || job == 105 || job == 106) && (rp_GetZoneInt(Czone, zone_type_type) != 101 || rp_GetZoneInt(Czone, zone_type_type) != 1)) {
 		ACCESS_DENIED(client);
 	}
 
