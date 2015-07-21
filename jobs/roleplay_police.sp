@@ -382,6 +382,9 @@ public Action Cmd_Tazer(int client) {
 		if( GetClientTeam(target) == CS_TEAM_CT ) {
 			ACCESS_DENIED(client);
 		}
+		if( (job == 103 || job == 104 || job == 105 || job == 106) && (rp_GetZoneInt(Czone, zone_type_type) != 101) ) { // J et HJ en dehors du tribu
+			ACCESS_DENIED(client);
+		}
 		
 		float time;
 		rp_Effect_Tazer(client, target);
@@ -414,6 +417,9 @@ public Action Cmd_Tazer(int client) {
 	}
 	else {
 		// Props:
+		if( (job == 103 || job == 104 || job == 105 || job == 106) && !(rp_GetZoneBit(Czone) & BITZONE_PERQUIZ) ) {
+			ACCESS_DENIED(client);
+		}
 		int reward = -1;
 		int owner = rp_GetBuildingData(target, BD_owner);
 		GetEdictClassname(target, tmp2, sizeof(tmp2));
@@ -753,7 +759,9 @@ public Action Cmd_Push(int client) {
 	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
 		ACCESS_DENIED(client);
 	}
-	
+	if( (job == 103 || job == 104 || job == 105 || job == 106) ) {
+		ACCESS_DENIED(client);
+	}
 	if( GetClientTeam(client) == CS_TEAM_T && (job == 8 || job == 9 || job == 103 || job == 104 || job == 105 || job == 106 || job == 107 || job == 108 || job == 109 ) ) {
 		ACCESS_DENIED(client);
 	}
