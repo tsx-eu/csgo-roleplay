@@ -48,7 +48,29 @@ public void OnMapStart() {
 	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt", true);
 	PrecacheModel(MODEL_GRAVE, true);
 }
+public void OnClientPostAdminCheck(int client) {
+	#if defined DEBUG
+	PrintToServer("OnClientPostAdminCheck");
+	#endif
+	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
+}
+public void OnClientDisconnect(int client) {
+	#if defined DEBUG
+	PrintToServer("OnClientDisconnect");
+	#endif
+	rp_UnhookEvent(client, RP_OnPlayerCommand, fwdCommand);
+}
 // ----------------------------------------------------------------------------
+public Action fwdCommand(int client, char[] command, char[] arg) {
+	#if defined DEBUG
+	PrintToServer("fwdCommand");
+	#endif
+	if( StrEqual(command, "infocoloc") ) {
+		return Cmd_InfoColoc(client);
+	}
+	return Plugin_Continue;
+}
+
 public Action Cmd_ItemGiveAppart(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemGiveAppart");
@@ -469,4 +491,77 @@ void GetClientFrontLocationData( int client, float position[3], float angles[3],
 	angles[0] = 0.0;
 	angles[1] = _angles[1];
 	angles[2] = 0.0;
+}
+
+public Action Cmd_InfoColoc(int client){
+	#if defined DEBUG
+	PrintToServer("Cmd_InfoColoc");
+	#endif
+	if(rp_GetClientInt(client, i_AppartCount) == 0){
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas d'appartement.");
+		return Plugin_Handled;
+	}
+	char tmp[128];
+	char tmp2[64];
+	int proprio;
+	Handle menu = CreateMenu(MenuNothing);
+	SetMenuTitle(menu, "Information sur vos appartements");
+	for (int i = 1; i <= 48; i++) {
+		if( rp_GetClientKeyAppartement(client, i) ) {
+
+			if(i<10)
+				Format(tmp,127,"--- Garage %i ---",i);
+			else
+				Format(tmp,127,"--- Appartement %i ---",i);
+
+			AddMenuItem(menu, tmp, tmp,	ITEMDRAW_DISABLED);
+
+			tmp = "  Bonus :";
+			if(rp_GetAppartementInt(i, appart_bonus_energy) == 1)
+				StrCat(tmp, 127, " energie");
+			if(rp_GetAppartementInt(i, appart_bonus_heal) == 1)
+				StrCat(tmp, 127, ", regen");
+			if(rp_GetAppartementInt(i, appart_bonus_armor) == 1)
+				StrCat(tmp, 127, ", kevlar");
+			if(rp_GetAppartementInt(i, appart_bonus_garage) == 1)
+				StrCat(tmp, 127, ", garage");
+			if(rp_GetAppartementInt(i, appart_bonus_vitality) == 1)
+				StrCat(tmp, 127, ", vitalité");
+			if(rp_GetAppartementInt(i, appart_bonus_coffre) == 1)
+				StrCat(tmp, 127, ", coffre");
+			if(rp_GetAppartementInt(i, appart_bonus_paye) >= 50){
+				Format(tmp2, 63, ", Paye * %i%%", rp_GetAppartementInt(i, appart_bonus_paye));
+				StrCat(tmp, 127, tmp2);
+			}
+			AddMenuItem(menu, tmp, tmp,	ITEMDRAW_DISABLED);
+
+			proprio = rp_GetAppartementInt(i, appart_proprio);
+			Format(tmp,127,"  Proprio: %N", proprio);
+			AddMenuItem(menu, tmp, tmp,	ITEMDRAW_DISABLED);
+
+			for(int j=1; j<MAXPLAYERS+1; j++){
+				if(rp_GetClientKeyAppartement(j, i) && j != proprio){
+					Format(tmp,127,"  %N",j);
+					AddMenuItem(menu, tmp, tmp,	ITEMDRAW_DISABLED);
+				}
+			}
+		}
+	}
+	SetMenuExitButton(menu, true);
+	DisplayMenu(menu, client, 60);
+	return Plugin_Handled;
+}
+
+public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
+	#if defined DEBUG
+	PrintToServer("MenuNothing");
+	#endif
+	if( action == MenuAction_Select ) {
+		if( menu != INVALID_HANDLE )
+			CloseHandle(menu);
+	}
+	else if( action == MenuAction_End ) {
+		if( menu != INVALID_HANDLE )
+			CloseHandle(menu);
+	}
 }
