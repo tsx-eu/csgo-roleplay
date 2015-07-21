@@ -210,6 +210,16 @@ native void rp_ClientRemoveProp(int client, int target, int item_id);					/* Sup
 native void rp_GetDate(char[] str, int length);
 native void rp_GetTime(int& hour, int& minutes);
 // ----------------------------------------------------------------------------
+native Handle rp_CreatePanel(int client);
+native void rp_SendPanelToClient(Handle panel, int client, float duration);
+typedef QuestFctInit = function bool (int client);
+typedef QuestFct = function void (int objectiveID, int client);
+public void QUEST_NULL(int objectiveID, int client) {
+}
+native void rp_QuestStepComplete(int client, int objectiveID);
+native int rp_RegisterQuest(char uniqID[32], char name[64], quest_type_type type, QuestFctInit CanStart);
+native void rp_QuestAddStep(int questID, QuestFct start, QuestFct frame, QuestFct abort, QuestFct done);
+// ----------------------------------------------------------------------------
 
 #define ACCESS_DENIED(%1)	CPrintToChat(%1, "{lightblue}[TSX-RP]{default} Vous n'avez pas accès à cette commande.");	return Plugin_Handled
 #define ITEM_CANCEL(%1,%2)	rp_ClientGiveItem(%1,%2); rp_SetClientFloat(%1, fl_CoolDown, 0.05)
@@ -574,11 +584,10 @@ enum type_appart_bonus {
 	
 	appart_bonus_max	
 };
-enum type_quest_type {
+enum quest_type_type {
 	quest_story,
 	quest_daily,
 	quest_weekly
-};
-
+}
 
 #include <rp_tools.inc>
