@@ -630,7 +630,7 @@ public Action Cmd_Jail(int client) {
 		
 		return Plugin_Handled;
 	}
-	else if( (job == 103 || job == 104 || job == 105 || job == 106) && rp_GetZoneInt(Czone, zone_type_type) != 101){
+	else if( (job == 103 || job == 104 || job == 105 || job == 106) && (rp_GetZoneInt(Czone, zone_type_type) != 101 || rp_GetZoneInt(Czone, zone_type_type) != 1)) {
 		ACCESS_DENIED(client);
 	}
 
@@ -758,9 +758,6 @@ public Action Cmd_Push(int client) {
 	int job = rp_GetClientInt(client, i_Job);
 		
 	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
-		ACCESS_DENIED(client);
-	}
-	if( (job == 103 || job == 104 || job == 105 || job == 106) ) {
 		ACCESS_DENIED(client);
 	}
 	if( GetClientTeam(client) == CS_TEAM_T && (job == 8 || job == 9 || job == 103 || job == 104 || job == 105 || job == 106 || job == 107 || job == 108 || job == 109 ) ) {
