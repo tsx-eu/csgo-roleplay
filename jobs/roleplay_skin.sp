@@ -39,15 +39,6 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_mask",		CmdItemMask,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_giveskin",			Cmd_ItemGiveSkin,		"RP-ITEM",  FCVAR_UNREGISTERED);
 	RegServerCmd("rp_giveknife",		Cmd_GiveKnife,			"RP-ITEM",	FCVAR_UNREGISTERED);
-	RegServerCmd("rp_item_shoes", 		Cmd_ItemShoes, 			"RP-ITEM",	FCVAR_UNREGISTERED);
-}
-// ----------------------------------------------------------------------------
-public void OnClientDisconnect(int client) {
-	if( rp_GetClientBool(client, b_HasShoes) ) { 
-		rp_UnhookEvent(client, RP_OnFrameSeconde, fwdVitalite);
-		SDKUnhook(client, SDKHook_OnTakeDamage, fwdNoFallDamage);
-		rp_SetClientBool(client, b_HasShoes, false);
-	}
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_GiveKnife(int args) {
@@ -249,53 +240,6 @@ public Action Hook_SetTransmit(int entity, int client) {
 		return Plugin_Handled;
 	return Plugin_Continue;
 }
-// ----------------------------------------------------------------------------
-public Action Cmd_ItemShoes(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemShoes");
-	#endif
-	
-	int client = GetCmdArgInt(1);
-	int item_id = GetCmdArgInt(args);
 
 
-	if(	rp_GetClientBool(client, b_HasShoes) ){
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà des chaussures voyons!");
-		ITEM_CANCEL(client, item_id);
-		return Plugin_Handled;
-	}
-	
-	rp_SetClientBool(client, b_HasShoes, true);
-	
-	rp_HookEvent(client, RP_OnFrameSeconde, fwdVitalite);
-	SDKHook(client, SDKHook_OnTakeDamage, fwdNoFallDamage);
-	
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez maintenant la classe avec votre nouvelle paire de baskets!");
-	return Plugin_Handled;
-}
-public Action fwdVitalite(int client) {
-	#if defined DEBUG
-	PrintToServer("fwdVitalite");
-	#endif
-	if( GetEntityMoveType(client) == MOVETYPE_WALK ) { // Si le joueur marche
-		if( Math_GetRandomInt(0, 60) == 35 ) { // 1 fois sur 60 on rajoute 5 de vitalite
-			float vita = rp_GetClientFloat(client, fl_Vitality);
-			
-			rp_SetClientFloat(client, fl_Vitality, vita + 5.0);
-			
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ressentez votre vitalité s'augmenter grâce à vos baskets (%.1f -> %.1f).", vita, vita + 5.0);
-		}
-	}
-}
-public Action fwdNoFallDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype) {
-	#if defined DEBUG
-	PrintToServer("fwdNoFallDamage");
-	#endif
-	
-	if( damagetype & DMG_FALL ) {
-		damage = 0.0;
-		return Plugin_Changed;
-	}
-	
-	return Plugin_Continue;
-}
+

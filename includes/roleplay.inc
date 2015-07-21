@@ -281,7 +281,6 @@ enum bool_user_data {
 	b_AdminHeal,
 	b_HasMail,
 	b_HasGrave,
-	b_HasShoes,
 	b_SpawnToGrave,
 	b_Pissing,
 	b_ChiruRegen,
