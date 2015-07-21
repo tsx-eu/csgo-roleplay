@@ -266,7 +266,7 @@ public Action Cmd_ItemCrayons(int args) {
 	rp_SetClientBool(client, b_Crayon, true);
 	return Plugin_Handled;
 }
-public Action fwdTalkCrayon(int client, char[] szSayText, int length) {
+public Action fwdTalkCrayon(int client, char[] szSayText, int length, bool local) {
 	
 	char tmp[64];
 	int hours, minutes;

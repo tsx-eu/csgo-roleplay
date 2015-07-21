@@ -33,45 +33,78 @@ public Plugin myinfo = {
 };
 
 int g_iQuest;
-// TODO: Q8_Frame (say_team cc, /aide)
+
 // TODO: Déplacer les récompenses dans les fonctions appropriées
 // TODO: Menu parainage
-// TODO: Core: appeler la fonction abort en cas d'annulation ou de déconnexion
-// TODO: Core: Appeler la fonction done quand l'étape est terminée
-// TODO: Core: retiré le hookframe quand le joueur déco, ou termine la quête
 
+int g_iQ8, g_iQ12, g_iClientDoingQ[65];
 public void OnPluginStart() {
+	RegServerCmd("rp_quest_reload", Cmd_Reload);
+	
 	g_iQuest = rp_RegisterQuest(QUEST_UNIQID, QUEST_NAME, QUEST_TYPE, fwdCanStart);
 	if( g_iQuest == -1 )
 		SetFailState("Erreur lors de la création de la quête %s %s", QUEST_UNIQID, QUEST_NAME);
 	
-	rp_QuestAddStep(g_iQuest, Q_Start, Q1_Frame, QUEST_NULL, QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, Q_Start, Q2_Frame, QUEST_NULL, QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, Q_Start, Q3_Frame, QUEST_NULL, QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, Q_Start, Q4_Frame, QUEST_NULL, QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, Q_Start, Q5_Frame, QUEST_NULL, QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, Q_Start, Q6_Frame, QUEST_NULL, QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, Q_Start, Q7_Frame, QUEST_NULL, QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, Q_Start, Q8_Frame, QUEST_NULL, QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, Q_Start, Q9_Frame, QUEST_NULL, QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, Q_Start, Q10_Frame, QUEST_NULL, QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, Q_Start, Q11_Frame, QUEST_NULL, QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, Q_Start, Q12_Frame, QUEST_NULL, QUEST_NULL);
+	int i;
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q1_Frame,	QUEST_NULL,	QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q2_Frame,	QUEST_NULL,	QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q3_Frame,	QUEST_NULL,	QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q4_Frame,	QUEST_NULL,	QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q5_Frame,	QUEST_NULL,	QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q6_Frame,	QUEST_NULL,	QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q7_Frame,	QUEST_NULL,	QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, Q8_Start,	Q8_Frame,	Q8_Abort,	Q8_Abort);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q9_Frame,	QUEST_NULL,	QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, Q10_Start,	Q10_Frame,	Q10_Abort,	Q10_Abort);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q11_Frame,	QUEST_NULL,	QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q12_Frame,	QUEST_NULL,	QUEST_NULL);
 	
+	for (int j = 1; j <= MaxClients; j++)
+		if( IsValidClient(j) )
+			OnClientPostAdminCheck(j);
 }
+public Action Cmd_Reload(int args) {
+	char name[64];
+	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
+	ServerCommand("sm plugins reload %s", name);
+	return Plugin_Continue;
+}
+// ----------------------------------------------------------------------------
+public void OnClientPostAdminCheck(int client) {
+	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
+}
+public void OnClientDisconnect(int client) {
+	rp_UnhookEvent(client, RP_OnPlayerCommand, fwdCommand);
+}
+public Action fwdCommand(int client, char[] command, char[] arg) {	
+	if( StrEqual(command, "aide") || StrEqual(command, "aides") || StrEqual(command, "wiki") || StrEqual(command, "help")  ) { // C'est pour nous !
+		QueryClientConVar(client, "cl_disablehtmlmotd", view_as<ConVarQueryFinished>ClientConVar, client);
+		ShowMOTDPanel(client, "Role-Play: WiKi", "http://www.ts-x.eu/popup.php?url=/wiki/", MOTDPANEL_TYPE_URL);
+		
+		if( g_iClientDoingQ[client] > 0 ) {
+			rp_QuestStepComplete(client, g_iClientDoingQ[client]);
+		}
+	}
+}
+public void ClientConVar(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue) {
+	if( StrEqual(cvarName, "cl_disablehtmlmotd", false) ) {
+		if( StrEqual(cvarValue, "0") == false ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Des problemes d'affichage? Entrer cl_disablehtmlmotd 0 dans votre console puis relancer CS:GO.");
+		}
+	}	
+}
+// ----------------------------------------------------------------------------
 public bool fwdCanStart(int client) {
-	PrintToServer("%N veut savoir s'il a le droit de faire la quete %d", client, g_iQuest);
 	return true;
 }
-public void Q_Start(int objectiveID, int client) {
-	PrintToServer("%N started objective: %d", client, objectiveID);
-}
+// ----------------------------------------------------------------------------
 public void Q1_Frame(int objectiveID, int client) {
 	float origin[3], target[3] = {1372.0, 30.0, -2146.0};
 	GetClientAbsOrigin(client, origin);
 	
-	Handle panel = rp_CreatePanel(client);
-	if( panel ) {
+	if( rp_ClientCanDrawPanel(client) ) {
+		Handle panel = CreatePanel();
+		
 		SetPanelTitle(panel, "== Bienvenue sur le serveur RolePlay");
 		DrawPanelText(panel, " C'est votre première connexion,");
 		DrawPanelText(panel, "vous devez donc faire notre tutoriel ");
@@ -104,8 +137,10 @@ public void Q2_Frame(int objectiveID, int client) {
 	float origin[3], target[3] = {2034.0, 1391.0, -2014.0};
 	GetClientAbsOrigin(client, origin);
 	
-	Handle panel = rp_CreatePanel(client);
-	if( panel ) {
+	if( rp_ClientCanDrawPanel(client) ) {
+		
+		Handle panel = CreatePanel();
+		
 		SetPanelTitle(panel, "== Objectif 1: La ville");
 		DrawPanelText(panel, " Princeton est la ville dans laquelle");
 		DrawPanelText(panel, "vous êtes, c'est la map du serveur. La ");
@@ -118,6 +153,8 @@ public void Q2_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, "→ Rendez-vous devant le commissariat afin");
 		DrawPanelText(panel, "de continuer votre apprentissage.");
+		
+		rp_SendPanelToClient(panel, client, 1.1);
 	}
 	
 	if( GetVectorDistance(target, origin) < 64.0 ) {
@@ -131,8 +168,10 @@ public void Q3_Frame(int objectiveID, int client) {
 	float origin[3], target[3] = {2189.0, -12.0, -2134.0};
 	GetClientAbsOrigin(client, origin);
 	
-	Handle panel = rp_CreatePanel(client);
-	if( panel ) {
+	if( rp_ClientCanDrawPanel(client) ) {
+		
+		Handle panel = CreatePanel();
+		
 		SetPanelTitle(panel, "== Objectif 2: Le commissariat");
 		DrawPanelText(panel, " Selon le règlement de la police, vous");
 		DrawPanelText(panel, "pouvez être mis en prison dans ce");
@@ -175,8 +214,10 @@ public void Q4_Frame(int objectiveID, int client) {
 	float origin[3], target[3] = {2288.0, 136.0, -2134.0};
 	GetClientAbsOrigin(client, origin);
 	
-	Handle panel = rp_CreatePanel(client);
-	if( panel ) {
+	if( rp_ClientCanDrawPanel(client) ) {
+		
+		Handle panel = CreatePanel();
+		
 		SetPanelTitle(panel, "== Objectif 3: Mettre son argent en sécurité");
 		DrawPanelText(panel, " Dans un premier temps pour éviter de vous");
 		DrawPanelText(panel, "faire voler votre argent, déposez-le");
@@ -192,10 +233,12 @@ public void Q4_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "faciliterons la vie plus tard sur le serveur.");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, "→ Déposez tout votre argent en banque.");
+		
+		rp_SendPanelToClient(panel, client, 1.1);
 	}
 	
 	if( GetVectorDistance(target, origin) < 64.0 && rp_GetClientInt(client, i_Money) <= 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu en récompense 1 Deset Eagle.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu en récompense 1 Desert Eagle.");
 		rp_ClientGiveItem(client, 150);
 		rp_QuestStepComplete(client, objectiveID);
 	}
@@ -207,8 +250,10 @@ public void Q5_Frame(int objectiveID, int client) {
 	float origin[3], target[3] = {-1900.0, 604.0, -2134.0};
 	GetClientAbsOrigin(client, origin);
 	
-	Handle panel = rp_CreatePanel(client);
-	if( panel ) {
+	if( rp_ClientCanDrawPanel(client) ) {
+		
+		Handle panel = CreatePanel();
+		
 		SetPanelTitle(panel, "== Objectif 4: L'armurerie");
 		DrawPanelText(panel, " Le lazer suivant vous indique l'armurerie ou ");
 		DrawPanelText(panel, "vous pouvez vous procurer des armes.");
@@ -222,6 +267,8 @@ public void Q5_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " Notez que votre inventaire disparait en cas");
 		DrawPanelText(panel, "de déconnexion.");
+		
+		rp_SendPanelToClient(panel, client, 1.1);
 	}
 	
 	if( GetVectorDistance(target, origin) < 64.0 && rp_GetClientItem(client, 150) <= 0) {
@@ -235,8 +282,10 @@ public void Q6_Frame(int objectiveID, int client) {
 	float origin[3], target[3] = {-1192.0, -778.0, -2135.0};
 	GetClientAbsOrigin(client, origin);
 	
-	Handle panel = rp_CreatePanel(client);
-	if( panel ) {
+	if( rp_ClientCanDrawPanel(client) ) {
+		
+		Handle panel = CreatePanel();
+		
 		SetPanelTitle(panel, "== Objectif 5: Les appartements");
 		DrawPanelItem(panel, "", ITEMDRAW_SPACER);
 		DrawPanelText(panel, " Un appartement vous permet d'augmenter");
@@ -250,6 +299,8 @@ public void Q6_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, "→ Rendez-vous devant les appartements afin");
 		DrawPanelText(panel, "de continuer votre apprentissage.");
+		
+		rp_SendPanelToClient(panel, client, 1.1);
 	}
 	
 	if( GetVectorDistance(target, origin) < 64.0 ) {
@@ -269,8 +320,10 @@ public void Q7_Frame(int objectiveID, int client) {
 	float origin[3], target[3] = {-611.0, -1286.0, -2016.0};
 	GetClientAbsOrigin(client, origin);
 	
-	Handle panel = rp_CreatePanel(client);
-	if( panel ) {
+	if( rp_ClientCanDrawPanel(client) ) {
+		
+		Handle panel = CreatePanel();
+		
 		SetPanelTitle(panel, "== Objectif 6: Un trafic illégal");
 		DrawPanelItem(panel, "", ITEMDRAW_SPACER);
 		DrawPanelText(panel, " Une imprimante à faux-billet et un plant");
@@ -285,6 +338,8 @@ public void Q7_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "→ Déposez une machine, et un plant de");
 		DrawPanelText(panel, "drogue afin de continuer votre");
 		DrawPanelText(panel, "apprentissage.");
+		
+		rp_SendPanelToClient(panel, client, 1.1);
 	}
 	
 	if( GetVectorDistance(target, origin) < 64.0 && rp_GetClientItem(client, 81) <= 0 && rp_GetClientItem(client, 103) <= 0 ) {
@@ -295,9 +350,10 @@ public void Q7_Frame(int objectiveID, int client) {
 	}
 }
 public void Q8_Frame(int objectiveID, int client) {
-	
-	Handle panel = rp_CreatePanel(client);
-	if( panel ) {
+	if( rp_ClientCanDrawPanel(client) ) {
+		
+		Handle panel = CreatePanel();
+		
 		SetPanelTitle(panel, "== Objectif 7: Le chat général");
 		DrawPanelItem(panel, "", ITEMDRAW_SPACER);
 		DrawPanelText(panel, " Le chat est divisé en plusieurs");
@@ -314,15 +370,32 @@ public void Q8_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "→ Faites un coucou dans le chat local");
 		DrawPanelText(panel, "(chat équipe) afin de continuer votre");
 		DrawPanelText(panel, "apprentissage.");
+		
+		rp_SendPanelToClient(panel, client, 1.1);
 	}
-	
 }
+// ----------------------------------------------------------------------------
+public void Q8_Start(int objectiveID, int client) {
+	g_iQ8 = objectiveID;
+	rp_HookEvent(client, RP_PrePlayerTalk, OnPlayerTalk);
+}
+public void Q8_Abort(int objectiveID, int client) {
+	rp_UnhookEvent(client, RP_PrePlayerTalk, OnPlayerTalk);
+}
+public Action OnPlayerTalk(int client, char[] szSayText, int length, bool local) {
+	if( local ) {
+		rp_QuestStepComplete(client, g_iQ8);
+	}
+}
+// ----------------------------------------------------------------------------
 public void Q9_Frame(int objectiveID, int client) {
 	float origin[3], target[3] = {763.0,-4748.0, -2014.0};
 	GetClientAbsOrigin(client, origin);
 	
-	Handle panel = rp_CreatePanel(client);
-	if( panel ) {
+	if( rp_ClientCanDrawPanel(client) ) {
+		
+		Handle panel = CreatePanel();
+		
 		SetPanelTitle(panel, "== Objectif 8: Les commandes utiles");
 		DrawPanelItem(panel, "", ITEMDRAW_SPACER);
 		DrawPanelText(panel, " Il existe de nombreuses commandes sur le");
@@ -337,6 +410,8 @@ public void Q9_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "emploi.");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, "→ Rendez-vous maintenant sur la place Station");
+		
+		rp_SendPanelToClient(panel, client, 1.1);
 	}
 	
 	if( GetVectorDistance(target, origin) < 64.0 ) {
@@ -346,10 +421,13 @@ public void Q9_Frame(int objectiveID, int client) {
 		rp_Effect_BeamBox(client, 0, target);
 	}
 }
+// ----------------------------------------------------------------------------
 public void Q10_Frame(int objectiveID, int client) {
 	
-	Handle panel = rp_CreatePanel(client);
-	if( panel ) {
+	if( rp_ClientCanDrawPanel(client) ) {
+		
+		Handle panel = CreatePanel();
+		
 		SetPanelTitle(panel, "== Objectif 9: Le site, le forum, le WiKi");
 		DrawPanelItem(panel, "", ITEMDRAW_SPACER);
 		DrawPanelText(panel, " Le forum et notre site sont deux parties");
@@ -366,15 +444,25 @@ public void Q10_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "→ Allez faire un tour sur notre site ( dites /aide ");
 		DrawPanelText(panel, " afin d'obtenir davantage d'aide et de");
 		DrawPanelText(panel, "continuer votre apprentissage.");
+		
+		rp_SendPanelToClient(panel, client, 1.1);
 	}
-	
 }
+public void Q10_Start(int objectiveID, int client) {
+	g_iClientDoingQ[client] = objectiveID;
+}
+public void Q10_Abort(int objectiveID, int client) {
+	g_iClientDoingQ[client] = -1;
+}
+// ----------------------------------------------------------------------------
 public void Q11_Frame(int objectiveID, int client) {
 	float origin[3], target[3] = {2472.0, -1063.0, -2144.0};
 	GetClientAbsOrigin(client, origin);
 	
-	Handle panel = rp_CreatePanel(client);
-	if( panel ) {
+	if( rp_ClientCanDrawPanel(client) ) {
+		
+		Handle panel = CreatePanel();
+		
 		SetPanelTitle(panel, "== Objectif 10: Le mot de la fin");
 		DrawPanelItem(panel, "", ITEMDRAW_SPACER);
 		DrawPanelText(panel, " Derniers conseils avant de vous laisser");
@@ -390,6 +478,8 @@ public void Q11_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, "→ Rendez-vous devant l'hôpital afin de");
 		DrawPanelText(panel, "commencer votre aventure RolePlay.");
+		
+		rp_SendPanelToClient(panel, client, 1.1);
 	}
 	
 	if( GetVectorDistance(target, origin) < 64.0 ) {
@@ -400,7 +490,37 @@ public void Q11_Frame(int objectiveID, int client) {
 	}
 }
 public void Q12_Frame(int objectiveID, int client) {
-	PrintToChatAll("yay dernière étape");
+	
+	if( rp_ClientCanDrawPanel(client) ) {
+		g_iQ12 = objectiveID;
+		
+		Handle menu = CreateMenu(MenuSelectParrain);
+		SetMenuTitle(menu, "== Parrainage");
+					
+		AddMenuItem(menu, "", "Quelqu'un de présent vous a t-il invité",		ITEMDRAW_DISABLED);
+		AddMenuItem(menu, "", "a jouer sur notre serveur?  Si oui, qui?",		ITEMDRAW_DISABLED);
+		
+		AddMenuItem(menu, "youtube", "Youtube, en regardant une vidéo");
+		AddMenuItem(menu, "none", "Personne, j'ai connu autrement le serveur");
+				
+		char szSteamID[64], szName[128];
+		for( int i=1;i<=MaxClients; i++) {
+			if( !IsValidClient(i) )
+				continue;
+			if( i == client )
+				continue;
+			if( rp_IsClientNew(i) )
+				continue;
+						
+			GetClientAuthId(i, AuthId_Engine, szSteamID, sizeof(szSteamID), false);
+			Format(szName, sizeof(szName), "%N", i);
+						
+			AddMenuItem(menu, szSteamID, szName);
+		}
+					
+		SetMenuExitButton(menu, true);
+		DisplayMenu(menu, client, 60);
+	}
 }
 
 
@@ -419,7 +539,10 @@ public int MenuSelectParrain(Handle menu, MenuAction action, int client, int par
 		}
 		
 		rp_SetClientInt(client, i_Tutorial, 20);
-		rp_GetClientItem(client, 286);
+		rp_ClientGiveItem(client, 286);
+		rp_QuestStepComplete(client, g_iQ12);
+		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank)+ 7500);
+		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez terminé le tutorial, une voiture vous a été offerte. (Faites /item !)");
 	}
 	else if( action == MenuAction_End ) {
