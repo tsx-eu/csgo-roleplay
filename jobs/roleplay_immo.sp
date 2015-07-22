@@ -316,6 +316,7 @@ public Action Cmd_ItemPropTrap(int args) {
 		return Plugin_Handled;
 	}
 	
+	rp_SetClientInt(client, i_LastAgression, GetTime());
 	float vecTarget[3];
 	Entity_GetAbsOrigin(target, vecTarget);
 	TE_SetupBeamRingPoint(vecTarget, 1.0, 150.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, {50, 100, 255, 50}, 10, 0);

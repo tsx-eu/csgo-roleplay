@@ -344,6 +344,8 @@ enum int_user_data {
 	
 	i_ItemCount,
 	i_ItemBankCount,
+
+	i_LastAgression,
 	
 	
 	i_udata_max

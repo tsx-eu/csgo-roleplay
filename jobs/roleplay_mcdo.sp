@@ -240,6 +240,7 @@ public Action Cmd_ItemBanane(int args) {
 			}
 		}
 	}
+
 	float vecOrigin[3];
 	GetClientAbsOrigin(client, vecOrigin);
 	
@@ -274,6 +275,7 @@ public Action BuildingBanana_touch(int index, int client) {
 	if( !IsValidClient(client) )
 		return Plugin_Continue;
 	
+	rp_SetClientInt(client, i_LastAgression, GetTime());
 	char sound[128];
 	Format(sound, sizeof(sound), "hostage/hpain/hpain%i.wav", Math_GetRandomInt(1, 6));
 	EmitSoundToAll(sound, client);

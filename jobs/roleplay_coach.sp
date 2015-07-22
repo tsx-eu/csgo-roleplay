@@ -164,6 +164,7 @@ public Action Cmd_ItemCutThrow(int args) {
 	int client = GetCmdArgInt(1);
 	g_iKnifeThrowID = GetCmdArgInt(args);
 	
+	rp_SetClientInt(client, i_LastAgression, GetTime());
 	float fPos[3], fAng[3], fVel[3], fPVel[3];
 	GetClientEyePosition(client, fPos);
 	GetClientEyeAngles(client, fAng);

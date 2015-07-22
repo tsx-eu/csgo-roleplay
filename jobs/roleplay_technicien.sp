@@ -195,12 +195,14 @@ public Action Cmd_ItemNano(int args) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit où vous êtes.");
 		return Plugin_Handled;
 	}
+	rp_SetClientInt(client, i_LastAgression, GetTime());
 	
 	if( StrEqual(arg1, "cryo") ) {
 		
 		float vecStart[3];
 		GetClientEyePosition(client, vecStart);
 		vecStart[2] -= 20.0;
+
 		
 		TE_SetupBeamRingPoint(vecStart, 2.0, 250.0, g_cBeam, 0, 0, 0, 0.5, 10.0, 0.5, {0, 128, 255, 192}, 1, 0);
 		TE_SendToAll();
