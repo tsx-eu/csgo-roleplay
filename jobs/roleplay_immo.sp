@@ -333,6 +333,7 @@ public void PropsTouched(int touched, int toucher) {
 	#endif
 	if( IsValidClient(toucher) && toucher != rp_GetBuildingData(touched, BD_owner) ) {
 		rp_Effect_PropExplode(touched);
+		rp_SetClientInt(rp_GetBuildingData(touched, BD_owner), i_LastAgression, GetTime());
 	}
 }
 public Action PropsDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype) {
