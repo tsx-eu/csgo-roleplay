@@ -74,6 +74,7 @@ public Action Cmd_ItemCigarette(int args) {
 			return Plugin_Handled;
 		}
 		
+		rp_SetClientInt(client, i_LastAgression, GetTime());
 		float origin[3];
 		GetClientAbsOrigin(client, origin);
 		origin[2] -= 1.0;
