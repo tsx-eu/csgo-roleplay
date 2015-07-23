@@ -1383,6 +1383,7 @@ void SendPlayerToJail(int target, int client = 0) {
 	}
 	
 	Entity_SetModel(target, MODEL_PRISONNIER);
+	rp_ClientColorize(target); // Remet la couleur normale au prisonnier si jamais il est coloré
 	
 	if( IsValidClient(client) ) {
 		
