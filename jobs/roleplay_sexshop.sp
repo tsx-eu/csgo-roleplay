@@ -165,7 +165,7 @@ public Action Cmd_ItemMenottes(int args){
 		return;
 	}
 	
-	
+	rp_SetClientInt(client, i_LastAgression, GetTime());
 	rp_IncrementSuccess(client, success_list_menotte);
 	rp_Effect_Tazer(client, target);
 	rp_ClientColorize(target, { 255, 175, 200, 255 } );
@@ -302,6 +302,7 @@ public Action Cmd_ItemFouet(int args) {
 		return Plugin_Handled;
 	}
 	
+	rp_SetClientInt(client, i_LastAgression, GetTime());
 	rp_Effect_Tazer(client, target);
 	rp_ClientDamage(target, rp_GetClientInt(client, i_KnifeTrain), client);
 	

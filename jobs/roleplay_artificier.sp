@@ -67,6 +67,7 @@ public Action Cmd_ItemNade(int args) {
 	GetCmdArg(1, arg1, sizeof(arg1));
 	
 	int client = GetCmdArgInt(2);
+	rp_SetClientInt(client, i_LastAgression, GetTime());
 	
 	if( StrEqual(arg1, "conc") ) {
 		rp_CreateGrenade(client, "ctf_nade_conc", "models/grenades/conc/conc.mdl", throwClassic, concExplode, 3.0);
@@ -753,7 +754,9 @@ public Action Cmd_ItemBomb(int args) {
 		ITEM_CANCEL(client, item_id);
 		return Plugin_Handled;
 	}
-	
+
+	rp_SetClientInt(client, i_LastAgression, GetTime());
+
 	Handle dp;
 	CreateDataTimer(15.0, ItemBombOver, dp, TIMER_DATA_HNDL_CLOSE);
 	WritePackCell(dp, EntIndexToEntRef(target) );

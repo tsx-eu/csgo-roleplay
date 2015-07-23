@@ -107,6 +107,7 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 	rp_HookEvent(client, RP_OnPlayerSpawn, fwdSpawn);
 	rp_HookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
+	rp_HookEvent(client, RP_PreGiveDamage, fwdDmg);
 }
 public Action fwdSpawn(int client) {
 	#if defined DEBUG
@@ -123,6 +124,7 @@ public void OnClientDisconnect(int client) {
 	rp_UnhookEvent(client, RP_OnPlayerCommand, fwdCommand);
 	rp_UnhookEvent(client, RP_OnPlayerSpawn, fwdSpawn);
 	rp_UnhookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
+	rp_HookEvent(client, RP_PreGiveDamage, fwdDmg);
 }
 public Action fwdCommand(int client, char[] command, char[] arg) {
 	#if defined DEBUG
@@ -1520,7 +1522,22 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			LogToGame("[TSX-RP] [TRIBUNAL] %L a mis %L en prison du Tribunal.", client, target);
 			return;
 		}
-		
+		if( StrEqual(g_szJailRaison[type][jail_raison],"Agression physique") ){ // Agression physique
+			if(rp_GetClientInt(target, i_LastAgression)+30 < GetTime()){
+				rp_SetClientInt(target, i_JailTime, 0);
+				rp_SetClientInt(target, i_jailTime_Last, 0);
+				rp_SetClientInt(target, i_JailledBy, 0);
+				
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N{default} à été libéré car il n'a pas commis d'agression.", target);
+				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été libéré car vous n'avez pas commis d'agression.", client);
+				
+				LogToGame("[TSX-RP] [JAIL] %L à été libéré car il n'avait pas commis d'agression", target);
+				
+				rp_ClientResetSkin(target);
+				rp_ClientSendToSpawn(target, true);
+				return;
+			}
+		}
 		
 		int amende = StringToInt(g_szJailRaison[type][jail_amende]);
 		
@@ -2337,6 +2354,11 @@ public Action ItemPickLockOver_mandat(Handle timer, Handle dp) {
 		CPrintToChat(i, "{lightblue}[TSX-RP]{default} La porte a été ouverte avec un mandat.");
 	}
 	
+	return Plugin_Continue;
+}
+
+public Action fwdDmg(int attacker, int victim, float& damage){
+	rp_SetClientInt(attacker, i_LastAgression, GetTime());
 	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------

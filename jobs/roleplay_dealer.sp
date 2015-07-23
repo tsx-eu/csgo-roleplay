@@ -98,6 +98,7 @@ public Action Cmd_ItemDrugs(int args) {
 			return Plugin_Handled;
 		}
 		
+		rp_SetClientInt(client, i_LastAgression, GetTime());
 		//Initialisation des positions pour le laser (cf. laser des chiru)
 		float pos1[3], pos2[3];
 		GetClientEyePosition(client, pos1);

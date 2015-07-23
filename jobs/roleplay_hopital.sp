@@ -302,6 +302,7 @@ public Action Cmd_ItemPoison(int args) {
 		return Plugin_Handled;
 	}
 	
+	rp_SetClientInt(client, i_LastAgression, GetTime());
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez empoisonné %N.", target);
 	CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été empoisoné.");
 	rp_ClientPoison(target, 120.0, client);
