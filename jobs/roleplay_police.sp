@@ -2359,7 +2359,9 @@ public Action ItemPickLockOver_mandat(Handle timer, Handle dp) {
 }
 
 public Action fwdDmg(int attacker, int victim, float& damage){
-	rp_SetClientInt(attacker, i_LastAgression, GetTime());
+	if(!rp_GetClientBool(victim, b_Stealing))
+		rp_SetClientInt(attacker, i_LastAgression, GetTime());
+
 	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------
