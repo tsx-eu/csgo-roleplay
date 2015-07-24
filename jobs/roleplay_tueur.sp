@@ -785,7 +785,7 @@ public Action Cmd_ItemCryptage(int args) {
 		level = 5;
 		
 	rp_SetClientInt(client, i_Cryptage, level);
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Les détectives vous couvre, vous avez %i de chance d'être caché", level*20);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Les détectives vous couvre, vous avez %i/100 de chance d'être caché", level*20);
 	return Plugin_Handled;
 }
 // ----------------------------------------------------------------------------

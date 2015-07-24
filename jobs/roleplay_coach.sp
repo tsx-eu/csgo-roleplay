@@ -21,7 +21,7 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-#define DEBUG
+//#define DEBUG
 #define MODEL_KNIFE	"models/weapons/w_knife_flip.mdl"
 
 public Plugin myinfo = {
@@ -60,6 +60,9 @@ public void OnClientPostAdminCheck(int client) {
 }
 public void OnClientDisconnect(int client) {
 	rp_UnhookEvent(client, RP_PostTakeDamageKnife, fwdWeapon);
+	if(	rp_GetClientBool(client, b_HasShoes) ) {
+		rp_UnhookEvent(client, RP_OnFrameSeconde, fwdVitalite);
+	}
 	removeShield(client);
 }
 // ----------------------------------------------------------------------------
