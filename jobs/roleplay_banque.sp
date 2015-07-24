@@ -55,9 +55,62 @@ public void OnMapStart() {
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
+	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 }
 public void OnClientDisconnect(int client) {
 	rp_UnhookEvent(client, RP_OnPlayerBuild,fwdOnPlayerBuild);
+	rp_UnhookEvent(client, RP_OnPlayerCommand, fwdCommand);
+}
+public Action fwdCommand(int client, char[] command, char[] arg) {	
+	if( StrEqual(command, "search") || StrEqual(command, "lookup")) {
+		if( rp_GetClientJobID(client) != 1 &&  rp_GetClientJobID(client) != 41 && rp_GetClientJobID(client) != 211 ) { // Police, mercenaire, banquier
+			ACCESS_DENIED(client);
+		}
+		int target = GetClientTarget(client);
+		
+		if( !IsValidClient(target) )
+			return Plugin_Handled;
+
+		if( !IsPlayerAlive(target) )
+			return Plugin_Handled;
+
+		int wepIdx;
+		char classname[32], msg[128];
+		Format(msg, 127, "Ce joueur possède: ");
+
+		if( (wepIdx = GetPlayerWeaponSlot( target, 1 )) != -1 ){
+			GetEdictClassname(wepIdx, classname, 31);
+			ReplaceString(classname, 31, "weapon_", "", false);
+
+			Format(msg, 127, "%s %s", msg, classname);
+		}
+		if( (wepIdx = GetPlayerWeaponSlot( target, 0 )) != -1 ){
+			GetEdictClassname(wepIdx, classname, 31);
+			ReplaceString(classname, 31, "weapon_", "", false);
+
+			Format(msg, 127, "%s %s", msg, classname);
+		}
+			
+		
+		if( rp_GetClientBool(target, b_License1) || rp_GetClientBool(target, b_License2) || rp_GetClientBool(target, b_LicenseSell) ) {
+			Format(msg, 127, "%s permis", msg);
+
+			if( rp_GetClientBool(target, b_License1) ) {
+				Format(msg, 127, "%s léger", msg);
+			}
+			if( rp_GetClientBool(target, b_License2) ) {
+				Format(msg, 127, "%s lourd", msg);
+			}
+			if(  rp_GetClientBool(target, b_LicenseSell) ) {
+				Format(msg, 127, "%s vente", msg);
+			}
+		}
+
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %s.", msg);
+
+		return Plugin_Handled;
+	}
+	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemPermi(int args) {
