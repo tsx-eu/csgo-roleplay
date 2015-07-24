@@ -1386,6 +1386,16 @@ void SendPlayerToJail(int target, int client = 0) {
 	int rand = Math_GetRandomInt(0, (MaxJail-1));
 	TeleportEntity(target, fLocation[rand], NULL_VECTOR, NULL_VECTOR);
 	FakeClientCommandEx(target, "sm_stuck");
+	
+	
+	SDKHook(target, SDKHook_WeaponDrop, OnWeaponDrop);
+	CreateTimer(MENU_TIME_DURATION.0, AllowWeaponDrop, target);
+}
+public Action AllowWeaponDrop(Handle timer, any client) {
+	SDKUnhook(client, SDKHook_WeaponDrop, OnWeaponDrop);
+}
+public Action OnWeaponDrop(int client, int weapon) {
+	return Plugin_Handled;
 }
 // ----------------------------------------------------------------------------
 void AskJailTime(int client, int target) {
