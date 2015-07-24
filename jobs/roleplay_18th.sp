@@ -541,9 +541,7 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 				rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) + amount);
 				rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amount);
 			}
-			else {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Soit le joueur était afk, soit %N n'est pas flic.", target);
-			}
+			
 			int cpt = rp_GetRandomCapital(181);
 			rp_SetJobCapital(181, (rp_GetJobCapital(181) +  (price/2) ) );
 			rp_SetJobCapital(cpt, (rp_GetJobCapital(cpt) -  (price/2) ) );

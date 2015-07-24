@@ -283,12 +283,14 @@ public Action Cmd_Cop(int client) {
 	if( GetClientTeam(client) == CS_TEAM_CT ) {
 		CS_SwitchTeam(client, CS_TEAM_T);
 		SetEntityHealth(client, 100);
+		Entity_SetMaxHealth(client, 200);
 		rp_SetClientInt(client, i_Kevlar, 100);
 		FakeClientCommand(client, "say /shownotes");
 	}
 	else if( GetClientTeam(client) == CS_TEAM_T ) {
 		CS_SwitchTeam(client, CS_TEAM_CT);
 		SetEntityHealth(client, 500);
+		Entity_SetMaxHealth(client, 500);
 		rp_SetClientInt(client, i_Kevlar, 250);
 	}
 		
