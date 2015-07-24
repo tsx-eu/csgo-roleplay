@@ -479,15 +479,27 @@ public Action fwdVitalite(int client) {
 	#if defined DEBUG
 	PrintToServer("fwdVitalite");
 	#endif
-	if( GetEntityMoveType(client) == MOVETYPE_WALK ) { // Si le joueur marche
-		if( Math_GetRandomInt(0, 60) == 35 ) { // 1 fois sur 60 on rajoute 5 de vitalite
+	static float fLast[65][3];
+	static count[65];
+	
+	float fNow[3];
+	GetClientAbsOrigin(client, fNow);	
+	
+	
+	if( GetVectorDistance(fNow, fLast[client]) > 50.0 && !rp_GetClientBool(client, b_IsAFK) ) { // Si le joueur marche
+		count[client]++;
+		if( count[client] > 60 ) {
+			count[client] = 0;
+		
 			float vita = rp_GetClientFloat(client, fl_Vitality);
-			
 			rp_SetClientFloat(client, fl_Vitality, vita + 5.0);
 			
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ressentez votre vitalité s'augmenter grâce à vos baskets (%.1f -> %.1f).", vita, vita + 5.0);
 		}
 	}
+	
+	for (int i = 0; i < 3; i++)
+		fLast[client][i] = fNow[i];
 }
 public Action fwdNoFallDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype) {
 	#if defined DEBUG
