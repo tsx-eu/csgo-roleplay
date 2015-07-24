@@ -68,7 +68,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	
 	static char tmp[128], szQuery[1024];
 	
-	if( rp_GetClientJobID(target) == 91 ) {
+	if( rp_GetClientJobID(target) == 181 ) {
 		ACCESS_DENIED(client);
 	}
 	if( rp_GetZoneBit( rp_GetPlayerZone(target) ) & BITZONE_BLOCKSTEAL ) {
