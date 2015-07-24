@@ -14,6 +14,7 @@
 #include <sdkhooks>
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
+#include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
 
 #define __LAST_REV__ 		"v:0.2.0"
 
@@ -22,6 +23,7 @@
 
 //#define DEBUG
 #define MAX_AREA_DIST		500.0
+#define MODEL_BAGAGE 		"models/props_unique/airport/luggage1.mdl"
 
 public Plugin myinfo = {
 	name = "Jobs: Sexshop", author = "KoSSoLaX",
@@ -44,6 +46,13 @@ public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt", true);
 	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt", true);
+	PrecacheModel(MODEL_BAGAGE, true);
+}
+public void OnClientPostAdminCheck(int client) {
+	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
+}
+public void OnClientDisconnect(int client) {
+	rp_UnhookEvent(client, RP_OnPlayerBuild,fwdOnPlayerBuild);
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemPreserv(int args) {
@@ -329,4 +338,222 @@ public Action Cmd_ItemAlcool(int args) {
 	if( level > 6.0 ) {
 		SDKHooks_TakeDamage(client, client, client, (25 + GetClientHealth(client))/2.0);
 	}
+}
+// ----------------------------------------------------------------------------
+public Action Cmd_ItemKevlarBox(int args) {
+	int client = GetCmdArgInt(1);
+	
+	if( BuildingKevlarBox(client) == 0 ) {
+		int item_id = GetCmdArgInt(args);
+		
+		ITEM_CANCEL(client, item_id);
+	}
+}
+public Action fwdOnPlayerBuild(int client, float& cooldown) {
+	if( rp_GetClientJobID(client) != 191 )
+		return Plugin_Continue;
+	
+	int ent = BuildingKevlarBox(client);
+	
+	if( ent > 0 ) {
+		rp_ScheduleEntityInput(ent, 300.0, "Kill");
+		cooldown = 30.0;
+	}
+	else {
+		cooldown = 3.0;
+	}
+	return Plugin_Stop;
+}
+
+int BuildingKevlarBox(int client) {
+	#if defined DEBUG 
+	PrintToServer("BuildingKevlarBox");
+	#endif
+	
+	if( !rp_IsBuildingAllowed(client) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas construire ici.");
+		return 0;
+	}
+	
+	char classname[64], tmp[64];
+	Format(classname, sizeof(classname), "rp_kevlarbox_%i", client);
+	
+	float vecOrigin[3], vecOrigin2[3];
+	GetClientAbsOrigin(client, vecOrigin);
+	
+	for(int i=1; i<=2048; i++) {
+		if( !IsValidEdict(i) )
+			continue;
+		if( !IsValidEntity(i) )
+			continue;
+			
+		GetEdictClassname(i, tmp, 63);
+		
+		if( StrEqual(classname, tmp) ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà une valise remplie de préservatifs.");
+			return 0;
+		}
+		if( StrContains(tmp, "rp_kevlarbox_") == 0 ) {
+			Entity_GetAbsOrigin(i, vecOrigin2);
+			if( GetVectorDistance(vecOrigin, vecOrigin2) < 600 ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il existe une autre valise remplie de préservatifs à proximité.");
+				return 0;
+			}
+		}
+	}
+	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Construction en cours...");
+	
+	EmitSoundToAllAny("player/ammo_pack_use.wav", client, _, _, _, 0.66);
+	
+	int ent = CreateEntityByName("prop_physics");
+	
+	DispatchKeyValue(ent, "classname", classname);
+	DispatchKeyValue(ent, "model", MODEL_BAGAGE);
+	DispatchSpawn(ent);
+	ActivateEntity(ent);
+	
+	SetEntityModel(ent, MODEL_BAGAGE);
+	SetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity", client);
+	SetEntProp( ent, Prop_Data, "m_takedamage", 2);
+	SetEntProp( ent, Prop_Data, "m_iHealth", 2500);
+	
+	
+	TeleportEntity(ent, vecOrigin, NULL_VECTOR, NULL_VECTOR);
+	
+	SetEntityRenderMode(ent, RENDER_NONE);
+	ServerCommand("sm_effect_fading \"%i\" \"2.5\" \"0\"", ent);
+	
+	SetEntityMoveType(client, MOVETYPE_NONE);
+	SetEntityMoveType(ent, MOVETYPE_NONE);
+	
+	
+	rp_SetBuildingData(ent, BD_started, GetTime());
+	rp_SetBuildingData(ent, BD_owner, client );
+	
+	CreateTimer(3.0, BuildingKevlarBox_post, ent);
+	return ent;
+	
+}
+public Action BuildingKevlarBox_post(Handle timer, any entity) {
+	#if defined DEBUG
+	PrintToServer("BuildingKevlarBox_post");
+	#endif
+	if( !IsValidEdict(entity) && !IsValidEntity(entity) )
+		return Plugin_Handled;
+	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
+	
+	SetEntityMoveType(client, MOVETYPE_WALK);
+	
+	if( rp_IsInPVP(entity) ) {
+		rp_ClientColorize(entity);
+	}
+	
+	SetEntProp( entity, Prop_Data, "m_takedamage", 2);
+	SetEntProp( entity, Prop_Data, "m_iHealth", 2500);
+	HookSingleEntityOutput(entity, "OnBreak", BuildingKevlarBox_break);
+	
+	CreateTimer(1.0, Frame_KevlarBox, EntIndexToEntRef(entity));
+	
+	return Plugin_Handled;
+}
+public void BuildingKevlarBox_break(const char[] output, int caller, int activator, float delay) {
+	#if defined DEBUG
+	PrintToServer("BuildingKevlarBox_break");
+	#endif
+	
+	int client = GetEntPropEnt(caller, Prop_Send, "m_hOwnerEntity");
+	CPrintToChat(client,"{lightblue}[TSX-RP]{default} Votre Valise remplie de préservatifs a été détruite");
+	
+	float vecOrigin[3];
+	Entity_GetAbsOrigin(caller,vecOrigin);
+	TE_SetupSparks(vecOrigin, view_as<float>{0.0,0.0,1.0},120,40);
+	TE_SendToAll();
+	
+	rp_Effect_Explode(vecOrigin, 100.0, 400.0, client);
+}
+public Action Frame_KevlarBox(Handle timer, any ent) {
+	ent = EntRefToEntIndex(ent); if( ent == -1 ) { return Plugin_Handled; }
+	#if defined DEBUG
+	PrintToServer("Frame_KevlarBox");
+	#endif
+	
+	float vecOrigin[3], vecOrigin2[3];
+	Entity_GetAbsOrigin(ent, vecOrigin);
+	vecOrigin[2] += 12.0;
+	
+	bool inPvP = rp_IsInPVP(ent);
+	float maxDist = 240.0;
+	if( inPvP )
+		maxDist = 180.0;
+	
+	int boxHeal = GetEntProp(ent, Prop_Data, "m_iHealth"), kevlar, toKevlar;
+	float dist;
+	
+	int owner = GetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity");	
+	if( !IsValidClient(owner) ) {
+		rp_ScheduleEntityInput(ent, 60.0, "Kill");
+		return Plugin_Handled;
+	}
+	int gOWNER = rp_GetClientGroupID(owner);
+	
+	for(int client=1; client<=MaxClients; client++) {
+		
+		if( !IsValidClient(client) )
+			continue;
+		if( boxHeal < 100 )
+			break;
+		if( inPvP && rp_GetClientGroupID(client) != gOWNER )
+			continue;
+		
+		GetClientAbsOrigin(client, vecOrigin2);
+		vecOrigin2[2] += 24.0;
+		
+		dist = GetVectorDistance(vecOrigin, vecOrigin2);
+		if( dist > maxDist )
+			continue;
+		
+		kevlar = rp_GetClientInt(client, i_Kevlar);
+		if( kevlar >= 250 )
+			continue;
+		
+		Handle trace = TR_TraceRayFilterEx(vecOrigin, vecOrigin2, MASK_SHOT, RayType_EndPoint, FilterToOne, ent);
+		
+		if( TR_DidHit(trace) ) {
+			if( TR_GetEntityIndex(trace) != client ) {
+				CloseHandle(trace);
+				continue;
+			}
+		}
+		
+		CloseHandle(trace);
+		
+		if( inPvP || rp_IsInPVP(client) ) {
+			toKevlar = 3;
+			kevlar += 3;
+		}
+		else {
+			toKevlar = 6;
+			kevlar += 6;
+		}
+		
+		if( kevlar > 250 )
+			kevlar = 250;
+			
+		boxHeal -= toKevlar;
+		rp_SetClientInt(client, i_Kevlar, kevlar);
+	}
+	boxHeal += 5;
+	if( boxHeal > 2500 )
+		boxHeal = 2500;
+	if( !inPvP )
+		boxHeal += Math_GetRandomInt(5, 20);
+	
+	SetEntProp(ent, Prop_Data, "m_iHealth", boxHeal);
+	
+	TE_SetupBeamRingPoint(vecOrigin, 1.0, maxDist, g_cBeam, g_cBeam, 1, 20, 1.0, 20.0, 0.0, {0, 0, 255, 128}, 10, 0);
+	TE_SendToAll();
+	
+	CreateTimer(1.0, Frame_KevlarBox, EntIndexToEntRef(ent));
+	return Plugin_Handled;
 }
