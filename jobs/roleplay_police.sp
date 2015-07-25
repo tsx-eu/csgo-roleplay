@@ -954,10 +954,15 @@ public Action Cmd_Jugement(int client, int args) {
 				buffer_name,
 				SteamID,
 				buffer_reason,
-				SteamID,
 				amende
 			);
 
+			SQL_TQuery(DB, SQL_QueryCallBack, szQuery);
+
+			Format(szQuery, sizeof(szQuery), "INSERT INTO `ts-x`.`srv_bans` (`id`, `SteamID`, `StartTime`, `EndTime`, `Length`, `adminSteamID`, `BanReason`)");
+			Format(szQuery, sizeof(szQuery), "%s VALUES (NULL, '%s', UNIX_TIMESTAMP(), (UNIX_TIMESTAMP()+'%i'), '%i', '%s', '%s', 'tribunal'); ",
+			szQuery, g_szTribunal_DATA[client][tribunal_steamid], StringToInt(g_szTribunal_DATA[client][tribunal_duration])*60, StringToInt(g_szTribunal_DATA[client][tribunal_duration])*60, SteamID, buffer_reason);
+			
 			SQL_TQuery(DB, SQL_QueryCallBack, szQuery);
 
 			LogToGame("[TSX-RP] [TRIBUNAL_V2] le juge %s %s a condamné %s à faire %s heures de prison et à payer %i$ pour %s",
