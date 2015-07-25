@@ -947,7 +947,7 @@ public Action Cmd_Jugement(int client, int args) {
 
 
 			Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_users2` (`id`, `steamid`, `jail`, `pseudo`, `steamid2`, `raison`, `money`) VALUES", szQuery);
-			Format(szQuery, sizeof(szQuery), "%s (NULL, '%s', '%i', '%s', '%s', '%s', (SELECT `money`-%i FROM `rp_users` WHERE `steamid`='%s') );", 
+			Format(szQuery, sizeof(szQuery), "%s (NULL, '%s', '%i', '%s', '%s', '%s', '-%i');", 
 				szQuery,
 				g_szTribunal_DATA[client][tribunal_steamid],
 				StringToInt(g_szTribunal_DATA[client][tribunal_duration])*60,
