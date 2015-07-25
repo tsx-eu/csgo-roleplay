@@ -945,6 +945,7 @@ public Action Cmd_Jugement(int client, int args) {
 				amende = 0;
 			}
 
+
 			Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_users2` (`id`, `steamid`, `jail`, `pseudo`, `steamid2`, `raison`, `money`) VALUES", szQuery);
 			Format(szQuery, sizeof(szQuery), "%s (NULL, '%s', '%i', '%s', '%s', '%s', (SELECT `money`-%i FROM `rp_users` WHERE `steamid`='%s') );", 
 				szQuery,
@@ -977,33 +978,7 @@ public Action Cmd_Jugement(int client, int args) {
 				szReason
 			);
 		}
-		else {
-			LogToGame("[TSX-RP] [TRIBUNAL_V2] le juge %s %s a acquitté %s pour %s",
-				UserName,
-				SteamID,
-				g_szTribunal_DATA[client][tribunal_steamid],
-				szReason
-			);
-			
-			Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_users2` (`id`, `steamid`, `jail`, `pseudo`, `steamid2`, `raison`) VALUES", szQuery);
-			Format(szQuery, sizeof(szQuery), "%s (NULL, '%s', '%i', '%s', '%s', '%s');", 
-			szQuery, g_szTribunal_DATA[client][tribunal_steamid], StringToInt(g_szTribunal_DATA[client][tribunal_duration])*60, buffer_name, SteamID, buffer_reason);
-			
-			SQL_TQuery(DB, SQL_QueryCallBack, szQuery);
-			
-			Format(szQuery, sizeof(szQuery), "INSERT INTO `ts-x`.`srv_bans` (`id`, `SteamID`, `StartTime`, `EndTime`, `Length`, `adminSteamID`, `BanReason`)");
-			Format(szQuery, sizeof(szQuery), "%s VALUES (NULL, '%s', UNIX_TIMESTAMP(), (UNIX_TIMESTAMP()+'%i'), '%i', '%s', '%s', 'tribunal'); ",
-			szQuery, g_szTribunal_DATA[client][tribunal_steamid], StringToInt(g_szTribunal_DATA[client][tribunal_duration])*60, StringToInt(g_szTribunal_DATA[client][tribunal_duration])*60, SteamID, buffer_reason);
-			
-			SQL_TQuery(DB, SQL_QueryCallBack, szQuery);
-			
-			LogToGame("[TSX-RP] [TRIBUNAL_V2] le juge %s %s a condamné %s à faire %s heures de prison pour %s",
-				UserName, SteamID, g_szTribunal_DATA[client][tribunal_steamid], g_szTribunal_DATA[client][tribunal_duration], szReason);
-			
-			CPrintToChatAll("{lightblue}[TSX-RP]{default} Le juge %s %s a condamné %s à faire %s heures de prison pour %s",
-				UserName, SteamID, g_szTribunal_DATA[client][tribunal_steamid], g_szTribunal_DATA[client][tribunal_duration], szReason);
-		}
-		else {
+		else{
 			LogToGame("[TSX-RP] [TRIBUNAL_V2] le juge %s %s a acquitté %s pour %s",
 				UserName, SteamID, g_szTribunal_DATA[client][tribunal_steamid], szReason);
 
