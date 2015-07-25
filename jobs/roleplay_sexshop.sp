@@ -406,7 +406,7 @@ int BuildingKevlarBox(int client) {
 	
 	EmitSoundToAllAny("player/ammo_pack_use.wav", client, _, _, _, 0.66);
 	
-	int ent = CreateEntityByName("prop_physics");
+	int ent = CreateEntityByName("prop_dynamic_override");
 	
 	DispatchKeyValue(ent, "classname", classname);
 	DispatchKeyValue(ent, "model", MODEL_BAGAGE);

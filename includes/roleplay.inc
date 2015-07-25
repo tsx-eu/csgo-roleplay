@@ -71,7 +71,7 @@ typeset rp_event_enum {
 	function Action(int client, int target, float& cooldown);			/* RP_OnPlayerSteal */
 	function Action(int client, int newZoneID, int oldZoneID);		/* RP_OnPlayerZoneChange */
 	
-	function Action(int client, int target, float dist);			/* RP_OnPlayerHear Est-ce que client peut entendre target ? */
+	function Action(int client, int target, float& dist, bool local);		/* RP_OnPlayerHear Est-ce que client peut entendre target ? */
 	function Action(int client, char[] message, int length, bool local);	/* RP_PrePlayerTalk */
 };
 /*
@@ -289,6 +289,11 @@ enum bool_user_data {
 	b_ChiruKevlar,
 	b_ChiruYeux,
 	b_IsAFK,
+	b_IsMuteGlobal,
+	b_IsMuteLocal,
+	b_IsMuteVocal,
+	b_IsNoPyj,
+	
 	b_udata_max
 };
 enum int_user_data {
