@@ -833,10 +833,19 @@ public Action Cmd_Jugement(int client, int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_Jugement");
 	#endif
+	int amende = 0;
 	char arg1[12];
-	GetCmdArg(1, arg1, sizeof(arg1));
+
+	if(StringToInt(g_szTribunal_DATA[client][tribunal_duration]) > 0){
+		amende = GetCmdArgInt(1);
+		GetCmdArg(2, arg1, sizeof(arg1));
+	}
+	else{
+		GetCmdArg(1, arg1, sizeof(arg1));
+	}
 	
 	int job = rp_GetClientInt(client, i_Job);
+	char random[6];
 	
 	if( job != 101 && job != 102 && job != 103 && job != 104 ) {
 		ACCESS_DENIED(client);
@@ -846,22 +855,30 @@ public Action Cmd_Jugement(int client, int args) {
 	
 	if( StrEqual(g_szTribunal_DATA[client][tribunal_code], arg1, false) ) {
 		if( StrEqual(g_szTribunal_DATA[client][tribunal_option], "unknown") ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le code est incorecte, le jugement a été annulé.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Erreur: Pas de jugement en cours.");
 			return Plugin_Handled;
 		}
-		
+
 		char SteamID[64], UserName[64];
-		
+
 		GetClientAuthId(client, AuthId_Engine, SteamID, sizeof(SteamID), false);
 		GetClientName(client,UserName,63);
-		
+
 		char szReason[128], tmp[64];
-		for(int i=2; i<=args; i++) {
-			
-			GetCmdArg(i, tmp, sizeof(tmp));
-			Format(szReason, sizeof(szReason), "%s%s ", szReason, tmp);
+
+		if(StringToInt(g_szTribunal_DATA[client][tribunal_duration]) > 0){
+			for(int i=3; i<=args; i++) {
+				GetCmdArg(i, tmp, sizeof(tmp));
+				Format(szReason, sizeof(szReason), "%s%s ", szReason, tmp);
+			}
 		}
-		
+		else{
+			for(int i=2; i<=args; i++) {
+				GetCmdArg(i, tmp, sizeof(tmp));
+				Format(szReason, sizeof(szReason), "%s%s ", szReason, tmp);
+			}
+		}
+
 		char buffer_name[ sizeof(UserName)*2+1 ];
 		SQL_EscapeString(DB, UserName, buffer_name, sizeof(buffer_name));
 		
@@ -870,33 +887,105 @@ public Action Cmd_Jugement(int client, int args) {
 		
 		char szQuery[2048];
 		if( StringToInt(g_szTribunal_DATA[client][tribunal_duration]) > 0 ) {
-			
-			Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_users2` (`id`, `steamid`, `jail`, `pseudo`, `steamid2`, `raison`) VALUES", szQuery);
-			Format(szQuery, sizeof(szQuery), "%s (NULL, '%s', '%i', '%s', '%s', '%s');", 
-			szQuery, g_szTribunal_DATA[client][tribunal_steamid], StringToInt(g_szTribunal_DATA[client][tribunal_duration])*60, buffer_name, SteamID, buffer_reason);
-			
+
+			if(amende >= 1){
+				int maxAmount;
+				switch( job ) {
+					case 101: maxAmount = 1000000;		// Président
+					case 102: maxAmount = 300000;		// Vice Président
+					case 103: maxAmount = 100000;		// Haut juge 2
+					case 104: maxAmount = 100000;		// Haut juge 1
+				}
+
+				if(amende > maxAmount){
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} L'amende excède le montant maximal.");
+					String_GetRandom(random, sizeof(random), sizeof(random) - 1);
+
+					Format(g_szTribunal_DATA[client][tribunal_code], 63, random);
+					Format(g_szTribunal_DATA[client][tribunal_option], 63, "unknown");
+
+					return Plugin_Handled;
+				}
+				int playermoney=-1;
+
+				SQL_LockDatabase( DB );
+				Format(szQuery, sizeof(szQuery), "SELECT (`money`+`bank`) FROM  `rp_users` WHERE `steamid`='%s';", g_szTribunal_DATA[client][tribunal_steamid]);
+				Handle row = SQL_Query(DB, szQuery);
+				if( row != INVALID_HANDLE ) {
+					if( SQL_FetchRow(row) ) {
+						playermoney=SQL_FetchInt(row, 0);
+					}
+				}
+				SQL_UnlockDatabase( DB );
+
+				if(playermoney == -1){
+					PrintToServer("Erreur SQL: Impossible de relever l'argent du joueur (Amende jugement)");
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Erreur: Impossible de relever l'argent du joueur.", playermoney);
+					String_GetRandom(random, sizeof(random), sizeof(random) - 1);
+
+					Format(g_szTribunal_DATA[client][tribunal_code], 63, random);
+					Format(g_szTribunal_DATA[client][tribunal_option], 63, "unknown");
+
+					return Plugin_Handled;
+				}
+				else if(amende > playermoney){
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le joueur n'a que %i$, le jugement à été annulé.", playermoney);
+					String_GetRandom(random, sizeof(random), sizeof(random) - 1);
+
+					Format(g_szTribunal_DATA[client][tribunal_code], 63, random);
+					Format(g_szTribunal_DATA[client][tribunal_option], 63, "unknown");
+
+					return Plugin_Handled;
+				}
+
+				rp_SetJobCapital(101, rp_GetJobCapital(101) + (amende/4 * 3));
+				rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + (amende / 4));
+			}
+			else{
+				amende = 0;
+			}
+
+
+			Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_users2` (`id`, `steamid`, `jail`, `pseudo`, `steamid2`, `raison`, `money`) VALUES", szQuery);
+			Format(szQuery, sizeof(szQuery), "%s (NULL, '%s', '%i', '%s', '%s', '%s', '-%i');", 
+				szQuery,
+				g_szTribunal_DATA[client][tribunal_steamid],
+				StringToInt(g_szTribunal_DATA[client][tribunal_duration])*60,
+				buffer_name,
+				SteamID,
+				buffer_reason,
+				SteamID,
+				amende
+			);
+
 			SQL_TQuery(DB, SQL_QueryCallBack, szQuery);
-			
-			Format(szQuery, sizeof(szQuery), "INSERT INTO `ts-x`.`srv_bans` (`id`, `SteamID`, `StartTime`, `EndTime`, `Length`, `adminSteamID`, `BanReason`)");
-			Format(szQuery, sizeof(szQuery), "%s VALUES (NULL, '%s', UNIX_TIMESTAMP(), (UNIX_TIMESTAMP()+'%i'), '%i', '%s', '%s', 'tribunal'); ",
-			szQuery, g_szTribunal_DATA[client][tribunal_steamid], StringToInt(g_szTribunal_DATA[client][tribunal_duration])*60, StringToInt(g_szTribunal_DATA[client][tribunal_duration])*60, SteamID, buffer_reason);
-			
-			SQL_TQuery(DB, SQL_QueryCallBack, szQuery);
-			
-			LogToGame("[TSX-RP] [TRIBUNAL_V2] le juge %s %s a condamné %s à faire %s heures de prison pour %s",
-				UserName, SteamID, g_szTribunal_DATA[client][tribunal_steamid], g_szTribunal_DATA[client][tribunal_duration], szReason);
-			
-			CPrintToChatAll("{lightblue}[TSX-RP]{default} Le juge %s %s a condamné %s à faire %s heures de prison pour %s",
-				UserName, SteamID, g_szTribunal_DATA[client][tribunal_steamid], g_szTribunal_DATA[client][tribunal_duration], szReason);
+
+			LogToGame("[TSX-RP] [TRIBUNAL_V2] le juge %s %s a condamné %s à faire %s heures de prison et à payer %i$ pour %s",
+				UserName,
+				SteamID,
+				g_szTribunal_DATA[client][tribunal_steamid],
+				g_szTribunal_DATA[client][tribunal_duration],
+				amende,
+				szReason
+			);
+
+			CPrintToChatAll("{lightblue}[TSX-RP]{default} Le juge %s %s a condamné %s à faire %s heures de prison et à payer %i$ pour %s",
+				UserName,
+				SteamID,
+				g_szTribunal_DATA[client][tribunal_steamid],
+				g_szTribunal_DATA[client][tribunal_duration],
+				amende,
+				szReason
+			);
 		}
-		else {
+		else{
 			LogToGame("[TSX-RP] [TRIBUNAL_V2] le juge %s %s a acquitté %s pour %s",
 				UserName, SteamID, g_szTribunal_DATA[client][tribunal_steamid], szReason);
-			
+
 			CPrintToChatAll("{lightblue}[TSX-RP]{default} Le juge %s %s a acquitté %s pour %s",
 				UserName, SteamID, g_szTribunal_DATA[client][tribunal_steamid], szReason);
 		}
-		
+
 		if( StrEqual(g_szTribunal_DATA[client][tribunal_option], "forum") ) {
 			
 			Format(szQuery, sizeof(szQuery), "DELETE FROM `ts-x`.`site_report` WHERE `report_steamid`='%s';", g_szTribunal_DATA[client][tribunal_steamid]);
@@ -907,8 +996,10 @@ public Action Cmd_Jugement(int client, int args) {
 		}
 		
 	}
+	else{
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le code est incorrect, le jugement a été annulé.");
+	}
 	
-	char random[6];
 	String_GetRandom(random, sizeof(random), sizeof(random) - 1);
 	
 	Format(g_szTribunal_DATA[client][tribunal_code], 63, random);
@@ -1263,8 +1354,10 @@ public int MenuTribunal_Apply(Handle p_hItemMenu, MenuAction p_oAction, int clie
 		strcopy(g_szTribunal_DATA[client][tribunal_steamid], 63, options[1]);
 		strcopy(g_szTribunal_DATA[client][tribunal_duration], 63, options[2]);
 		strcopy(g_szTribunal_DATA[client][tribunal_code], 63, random);
-		
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Afin de confirmer votre jugement, tappez maintenant /jugement %s votre raison.", random);
+		if(StringToInt(g_szTribunal_DATA[client][tribunal_duration]) > 0)
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Afin de confirmer votre jugement, tappez maintenant /jugement amende %s raison", random);
+		else
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Afin de confirmer votre jugement, tappez maintenant /jugement %s raison", random);
 	}
 	else if( p_oAction == MenuAction_End ) {
 		
