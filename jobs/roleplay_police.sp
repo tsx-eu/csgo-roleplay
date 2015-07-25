@@ -954,7 +954,6 @@ public Action Cmd_Jugement(int client, int args) {
 				buffer_name,
 				SteamID,
 				buffer_reason,
-				SteamID,
 				amende
 			);
 
