@@ -2302,7 +2302,7 @@ public Action Cmd_ItemPickLock(int args) {
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, time);
 	ServerCommand("sm_effect_panel %d %f \"Crochetage de la porte...\"", client, time);
 	
-	rp_ClientColorize(client, { 255, 0, 0, 255} );
+	rp_ClientColorize(client, { 255, 0, 0, 190} );
 	rp_ClientReveal(client);
 	
 	Handle dp;

@@ -763,7 +763,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 		
 	rp_ClientGiveItem(client, item_id, -rp_GetClientItem(client, item_id));
 	
-	rp_ClientColorize(client, { 255, 0, 0, 255 } );
+	rp_ClientColorize(client, { 255, 0, 0, 190 } );
 	rp_ClientReveal(client);
 	rp_SetClientBool(client, b_MaySteal, false);
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 10.0);

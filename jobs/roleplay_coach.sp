@@ -228,19 +228,30 @@ public Action Cmd_ItemKnifeType(int args) {
 	GetCmdArg(1, arg1, sizeof(arg1));
 	
 	int client = GetCmdArgInt(2);
+	int item_id = GetCmdArgInt(args);
 	
+	enum_ball_type ball_type_type = ball_type_none;
+
 	if( StrEqual(arg1, "fire") ) {
-		rp_SetClientKnifeType(client, ball_type_fire);
+		ball_type_type = ball_type_fire;
 	}
 	else if( StrEqual(arg1, "caoutchouc") ) {
-		rp_SetClientKnifeType(client, ball_type_caoutchouc);
+		ball_type_type = ball_type_caoutchouc;
 	}
 	else if( StrEqual(arg1, "poison") ) {
-		rp_SetClientKnifeType(client, ball_type_poison);
+		ball_type_type = ball_type_poison;
 	}
 	else if( StrEqual(arg1, "vampire") ) {
-		rp_SetClientKnifeType(client, ball_type_vampire);
+		ball_type_type = ball_type_vampire;
 	}
+	
+	if( rp_GetClientKnifeType(client) == ball_type_type ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà un couteau de ce type.");
+		return Plugin_Handled;
+	}
+	
+	rp_SetClientKnifeType(client, ball_type_fire);
 	
 	return Plugin_Handled;
 }

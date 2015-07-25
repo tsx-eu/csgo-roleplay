@@ -194,7 +194,7 @@ public Action Cmd_ItemGiveBonus(int args) {
 		return Plugin_Handled;	
 	}
 	
-	if( rp_GetAppartementInt(appartID, view_as<type_appart_bonus>bonus) > mnt ) {
+	if( rp_GetAppartementInt(appartID, view_as<type_appart_bonus>bonus) >= mnt ) {
 		ITEM_CANCEL(client, itemID);
 		return Plugin_Handled;
 	}

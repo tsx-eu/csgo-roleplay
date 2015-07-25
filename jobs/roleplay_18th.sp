@@ -280,7 +280,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 	CreateTimer(5.0, timerAlarm, target);
 	CreateTimer(10.0, timerAlarm, target);
 	
-	rp_ClientColorize(client, { 255, 0, 0, 255 } );
+	rp_ClientColorize(client, { 255, 0, 0, 190 } );
 	rp_ClientReveal(client);
 		
 	Handle dp;
@@ -419,7 +419,7 @@ public Action Cmd_ItemPickLock(int args) {
 	TE_SendToAll();
 	
 	
-	rp_ClientColorize(client, { 255, 0, 0, 255 } );
+	rp_ClientColorize(client, { 255, 0, 0, 190 } );
 	rp_ClientReveal(client);
 	
 	// Anti-cheat: 

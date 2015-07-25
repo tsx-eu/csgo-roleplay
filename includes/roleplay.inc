@@ -350,6 +350,7 @@ enum int_user_data {
 	i_LastKillTime,
 	i_AddToPay,
 	i_TimeAFK,
+	i_TimeAFK_today,
 	i_TimeAFK_total,
 	i_MarriedTo,
 	
