@@ -41,7 +41,6 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-// TODO: Le joueur s'est fait la male --> Synchro avec rp_users2. Condamnation même si déco
 // TODO: Utiliser des TQuery pour le /perquiz.
 // TODO: Trouver une manière plus propre que d'utiliser int g_iCancel[65];
 // TODO: Améliorer le cache du JobToZoneID
@@ -284,12 +283,14 @@ public Action Cmd_Cop(int client) {
 	if( GetClientTeam(client) == CS_TEAM_CT ) {
 		CS_SwitchTeam(client, CS_TEAM_T);
 		SetEntityHealth(client, 100);
+		Entity_SetMaxHealth(client, 200);
 		rp_SetClientInt(client, i_Kevlar, 100);
 		FakeClientCommand(client, "say /shownotes");
 	}
 	else if( GetClientTeam(client) == CS_TEAM_T ) {
 		CS_SwitchTeam(client, CS_TEAM_CT);
 		SetEntityHealth(client, 500);
+		Entity_SetMaxHealth(client, 500);
 		rp_SetClientInt(client, i_Kevlar, 250);
 	}
 		
@@ -356,11 +357,12 @@ public Action Cmd_Tazer(int client) {
 	#endif
 	char tmp[128], tmp2[128], szQuery[1024];
 	int job = rp_GetClientInt(client, i_Job);
+	int Czone = rp_GetPlayerZone(client);
 		
 	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
 		ACCESS_DENIED(client);
 	}
-	if( rp_GetZoneBit(rp_GetPlayerZone(client)) & (BITZONE_BLOCKJAIL|BITZONE_EVENT) ) {
+	if( rp_GetZoneBit(Czone) & (BITZONE_BLOCKJAIL|BITZONE_EVENT) ) {
 		ACCESS_DENIED(client);
 	}
 	if( rp_GetClientVehiclePassager(client) > 0 || Client_GetVehicle(client) > 0 || rp_GetClientInt(client, i_Sickness) ) { // En voiture, ou très malade
@@ -384,6 +386,9 @@ public Action Cmd_Tazer(int client) {
 		if( GetClientTeam(target) == CS_TEAM_CT ) {
 			ACCESS_DENIED(client);
 		}
+		if( (job == 103 || job == 104 || job == 105 || job == 106) && (rp_GetZoneInt(Czone, zone_type_type) != 101) ) { // J et HJ en dehors du tribu
+			ACCESS_DENIED(client);
+		}
 		
 		float time;
 		rp_Effect_Tazer(client, target);
@@ -391,6 +396,8 @@ public Action Cmd_Tazer(int client) {
 		rp_HookEvent(target, RP_PrePlayerPhysic, fwdFrozen, 7.5);
 		
 		rp_SetClientFloat(target, fl_TazerTime, GetGameTime()+9.0);
+		rp_SetClientFloat(target, fl_FrozenTime, GetGameTime()+7.5);	
+		
 
 		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été tazé par %N", client);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez tazé %N", target);
@@ -416,6 +423,9 @@ public Action Cmd_Tazer(int client) {
 	}
 	else {
 		// Props:
+		if( (job == 103 || job == 104 || job == 105 || job == 106) && !(rp_GetZoneBit(Czone) & BITZONE_PERQUIZ) ) {
+			ACCESS_DENIED(client);
+		}
 		int reward = -1;
 		int owner = rp_GetBuildingData(target, BD_owner);
 		GetEdictClassname(target, tmp2, sizeof(tmp2));
@@ -625,7 +635,7 @@ public Action Cmd_Jail(int client) {
 		
 		return Plugin_Handled;
 	}
-	else if( (job == 103 || job == 104 || job == 105 || job == 106) && rp_GetZoneInt(Czone, zone_type_type) != 101){
+	else if( (job == 103 || job == 104 || job == 105 || job == 106) && (rp_GetZoneInt(Czone, zone_type_type) != 101 || rp_GetZoneInt(Czone, zone_type_type) != 1)) {
 		ACCESS_DENIED(client);
 	}
 
@@ -755,7 +765,6 @@ public Action Cmd_Push(int client) {
 	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
 		ACCESS_DENIED(client);
 	}
-	
 	if( GetClientTeam(client) == CS_TEAM_T && (job == 8 || job == 9 || job == 103 || job == 104 || job == 105 || job == 106 || job == 107 || job == 108 || job == 109 ) ) {
 		ACCESS_DENIED(client);
 	}
@@ -975,13 +984,31 @@ public Action Cmd_Jugement(int client, int args) {
 				g_szTribunal_DATA[client][tribunal_steamid],
 				szReason
 			);
+			
+			Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_users2` (`id`, `steamid`, `jail`, `pseudo`, `steamid2`, `raison`) VALUES", szQuery);
+			Format(szQuery, sizeof(szQuery), "%s (NULL, '%s', '%i', '%s', '%s', '%s');", 
+			szQuery, g_szTribunal_DATA[client][tribunal_steamid], StringToInt(g_szTribunal_DATA[client][tribunal_duration])*60, buffer_name, SteamID, buffer_reason);
+			
+			SQL_TQuery(DB, SQL_QueryCallBack, szQuery);
+			
+			Format(szQuery, sizeof(szQuery), "INSERT INTO `ts-x`.`srv_bans` (`id`, `SteamID`, `StartTime`, `EndTime`, `Length`, `adminSteamID`, `BanReason`)");
+			Format(szQuery, sizeof(szQuery), "%s VALUES (NULL, '%s', UNIX_TIMESTAMP(), (UNIX_TIMESTAMP()+'%i'), '%i', '%s', '%s', 'tribunal'); ",
+			szQuery, g_szTribunal_DATA[client][tribunal_steamid], StringToInt(g_szTribunal_DATA[client][tribunal_duration])*60, StringToInt(g_szTribunal_DATA[client][tribunal_duration])*60, SteamID, buffer_reason);
+			
+			SQL_TQuery(DB, SQL_QueryCallBack, szQuery);
+			
+			LogToGame("[TSX-RP] [TRIBUNAL_V2] le juge %s %s a condamné %s à faire %s heures de prison pour %s",
+				UserName, SteamID, g_szTribunal_DATA[client][tribunal_steamid], g_szTribunal_DATA[client][tribunal_duration], szReason);
+			
+			CPrintToChatAll("{lightblue}[TSX-RP]{default} Le juge %s %s a condamné %s à faire %s heures de prison pour %s",
+				UserName, SteamID, g_szTribunal_DATA[client][tribunal_steamid], g_szTribunal_DATA[client][tribunal_duration], szReason);
+		}
+		else {
+			LogToGame("[TSX-RP] [TRIBUNAL_V2] le juge %s %s a acquitté %s pour %s",
+				UserName, SteamID, g_szTribunal_DATA[client][tribunal_steamid], szReason);
 
 			CPrintToChatAll("{lightblue}[TSX-RP]{default} Le juge %s %s a acquitté %s pour %s",
-				UserName,
-				SteamID,
-				g_szTribunal_DATA[client][tribunal_steamid],
-				szReason
-			);
+				UserName, SteamID, g_szTribunal_DATA[client][tribunal_steamid], szReason);
 		}
 
 		if( StrEqual(g_szTribunal_DATA[client][tribunal_option], "forum") ) {
@@ -1459,6 +1486,7 @@ void SendPlayerToJail(int target, int client = 0) {
 	}
 	
 	Entity_SetModel(target, MODEL_PRISONNIER);
+	rp_ClientColorize(target); // Remet la couleur normale au prisonnier si jamais il est coloré
 	
 	if( IsValidClient(client) ) {
 		
@@ -1478,6 +1506,16 @@ void SendPlayerToJail(int target, int client = 0) {
 	int rand = Math_GetRandomInt(0, (MaxJail-1));
 	TeleportEntity(target, fLocation[rand], NULL_VECTOR, NULL_VECTOR);
 	FakeClientCommandEx(target, "sm_stuck");
+	
+	
+	SDKHook(target, SDKHook_WeaponDrop, OnWeaponDrop);
+	CreateTimer(MENU_TIME_DURATION.0, AllowWeaponDrop, target);
+}
+public Action AllowWeaponDrop(Handle timer, any client) {
+	SDKUnhook(client, SDKHook_WeaponDrop, OnWeaponDrop);
+}
+public Action OnWeaponDrop(int client, int weapon) {
+	return Plugin_Handled;
 }
 // ----------------------------------------------------------------------------
 void AskJailTime(int client, int target) {
@@ -2382,7 +2420,7 @@ public Action Cmd_ItemPickLock(int args) {
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, time);
 	ServerCommand("sm_effect_panel %d %f \"Crochetage de la porte...\"", client, time);
 	
-	rp_ClientColorize(client, { 255, 0, 0, 255} );
+	rp_ClientColorize(client, { 255, 0, 0, 190} );
 	rp_ClientReveal(client);
 	
 	Handle dp;
@@ -2433,8 +2471,8 @@ public Action ItemPickLockOver_mandat(Handle timer, Handle dp) {
 	return Plugin_Continue;
 }
 
-public Action fwdDmg(int attacker, int victim, float& damage){
-	if(!rp_GetClientBool(victim, b_Stealing))
+public Action fwdDmg(int attacker, int victim, float& damage) {
+	if( !rp_GetClientBool(attacker, b_Stealing) )
 		rp_SetClientInt(attacker, i_LastAgression, GetTime());
 
 	return Plugin_Continue;

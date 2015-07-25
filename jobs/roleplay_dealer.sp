@@ -45,6 +45,10 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_plant",		Cmd_ItemPlant,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_pilule",		Cmd_ItemPilule,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_moreplant", 	Cmd_ItemMorePlant, 		"RP-ITEM", 	FCVAR_UNREGISTERED);
+	
+	for (int j = 1; j <= MaxClients; j++)
+		if( IsValidClient(j) )
+			OnClientPostAdminCheck(j);
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
@@ -70,6 +74,7 @@ public Action Cmd_ItemDrugs(int args) {
 	GetCmdArg(1, arg0, sizeof(arg0));
 	int client = GetCmdArgInt(2);
 	int item_id = GetCmdArgInt(args);
+	float dur = DRUG_DURATION;
 	
 	if( StrEqual(arg0, "lsd2") || StrEqual(arg0, "pcp2") ){
 		int target = GetClientTarget(client);
@@ -94,6 +99,8 @@ public Action Cmd_ItemDrugs(int args) {
 			return Plugin_Handled;
 		}
 		
+		dur = 30.0;
+		
 		rp_SetClientInt(client, i_LastAgression, GetTime());
 		//Initialisation des positions pour le laser (cf. laser des chiru)
 		float pos1[3], pos2[3];
@@ -103,7 +110,7 @@ public Action Cmd_ItemDrugs(int args) {
 		
 		//Effets des drogues
 		if( StrEqual(arg0, "lsd2")) rp_Effect_VisionTrouble(target);  //Si c'est de la LSD
-		else rp_HookEvent(target, RP_PrePlayerPhysic, fwdPCP, DRUG_DURATION); //Si c'est du PCP
+		else rp_HookEvent(target, RP_PrePlayerPhysic, fwdPCP, dur); //Si c'est du PCP
 	
 		//Affichage du laser entre le client et la cible (cf. laser des chiru)
 		TE_SetupBeamPoints(pos1, pos2, g_cBeam, 0, 0, 0, 0.5, 10.0, 10.0, 1, 0.5, {255, 155, 0, 250}, 0);
@@ -115,29 +122,29 @@ public Action Cmd_ItemDrugs(int args) {
 		client = target;
 	}
 	else if( StrEqual(arg0, "crack2") ) {
-		rp_HookEvent(client, RP_PreTakeDamage, fwdCrack, DRUG_DURATION);
+		rp_HookEvent(client, RP_PreTakeDamage, fwdCrack, dur);
 		rp_Effect_ShakingVision(client);
 	}
 	else if( StrEqual(arg0, "cannabis2") ) {
-		rp_SetClientFloat(client, fl_invisibleTime, GetGameTime() + DRUG_DURATION);
+		rp_SetClientFloat(client, fl_invisibleTime, GetGameTime() + dur);
 	}
 	else if( StrEqual(arg0, "heroine") ) {
-		rp_HookEvent(client, RP_PrePlayerPhysic, fwdHeroine, DRUG_DURATION);
-		rp_HookEvent(client, RP_PreHUDColorize, fwdHeroine2, DRUG_DURATION);
+		rp_HookEvent(client, RP_PrePlayerPhysic, fwdHeroine, dur);
+		rp_HookEvent(client, RP_PreHUDColorize, fwdHeroine2, dur);
 	}
 	else if( StrEqual(arg0, "cocaine") ) {
-		rp_HookEvent(client, RP_PreHUDColorize, fwdCocaine, DRUG_DURATION);
+		rp_HookEvent(client, RP_PreHUDColorize, fwdCocaine, dur);
 
 		SetEntityHealth(client, 500);
 	}
 	else if( StrEqual(arg0, "champigions") ) {
-		rp_HookEvent(client, RP_PrePlayerPhysic, fwdChampi, DRUG_DURATION);
+		rp_HookEvent(client, RP_PrePlayerPhysic, fwdChampi, dur);
 		
-		rp_SetClientFloat(client, fl_HallucinationTime, GetGameTime() + DRUG_DURATION);
+		rp_SetClientFloat(client, fl_HallucinationTime, GetGameTime() + dur);
 	}
 	else if( StrEqual(arg0, "crystal") ) {
-		rp_HookEvent(client, RP_PrePlayerPhysic, fwdCrystal, DRUG_DURATION);
-		rp_HookEvent(client, RP_PreHUDColorize, fwdCrystal2, DRUG_DURATION);
+		rp_HookEvent(client, RP_PrePlayerPhysic, fwdCrystal, dur);
+		rp_HookEvent(client, RP_PreHUDColorize, fwdCrystal2, dur);
 	}
 	else if( StrEqual(arg0, "ecstasy") ) {
 		int kevlar = rp_GetClientInt(client, i_Kevlar);
@@ -145,18 +152,18 @@ public Action Cmd_ItemDrugs(int args) {
 			ITEM_CANCEL(client, item_id);
 			return Plugin_Handled;
 		}
-		rp_HookEvent(client, RP_PrePlayerPhysic, fwdEcstasy, DRUG_DURATION);
+		rp_HookEvent(client, RP_PrePlayerPhysic, fwdEcstasy, dur);
 		kevlar += 120; if (kevlar > 250)kevlar = 250;
 		
 		rp_SetClientInt(client, i_Kevlar, kevlar);
 		rp_SetClientBool(client, b_KeyReverse, true);
 	}
 	else if( StrEqual(arg0, "beuh") ) {
-		rp_HookEvent(client, RP_PrePlayerPhysic, fwdBeuh, DRUG_DURATION);
+		rp_HookEvent(client, RP_PrePlayerPhysic, fwdBeuh, dur);
 		
 		SetEntityHealth(client, GetClientHealth(client)+100);
 		
-		rp_Effect_Smoke(client, DRUG_DURATION);
+		rp_Effect_Smoke(client, dur);
 	}
 	
 	bool drugged = rp_GetClientBool(client, b_Drugged);
@@ -178,7 +185,7 @@ public Action Cmd_ItemDrugs(int args) {
 	}
 	
 	rp_SetClientBool(client, b_Drugged, true);
-	g_hDrugTimer[client] = CreateTimer( DRUG_DURATION, ItemDrugStop, client);
+	g_hDrugTimer[client] = CreateTimer( dur, ItemDrugStop, client);
 	
 	return Plugin_Handled;
 }
@@ -207,8 +214,9 @@ public Action fwdPCP(int client, float& speed, float& gravity) {
 	#if defined DEBUG
 	PrintToServer("fwdPCP");
 	#endif
-	speed -= 0.25;
 	
+	if( speed > 0.5 )
+		speed -= 0.25;
 	return Plugin_Changed;
 }
 public Action fwdHeroine(int client, float& speed, float& gravity) {
@@ -755,7 +763,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 		
 	rp_ClientGiveItem(client, item_id, -rp_GetClientItem(client, item_id));
 	
-	rp_ClientColorize(client, { 255, 0, 0, 255 } );
+	rp_ClientColorize(client, { 255, 0, 0, 190 } );
 	rp_ClientReveal(client);
 	rp_SetClientBool(client, b_MaySteal, false);
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 10.0);

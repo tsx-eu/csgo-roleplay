@@ -25,8 +25,6 @@
 //#define DEBUG
 #define MENU_TIME_DURATION 60
 
-// TODO: Parser le fichier scripts/items/items_game.txt pour automatiser la liste des skins (+mettre en cache bien évidement !) cf: csgo_items.
-
 public Plugin myinfo = {
 	name = "Jobs: V. Skin", author = "KoSSoLaX",
 	description = "RolePlay - Jobs: v. Skin",
@@ -39,6 +37,217 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_mask",		CmdItemMask,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_giveskin",			Cmd_ItemGiveSkin,		"RP-ITEM",  FCVAR_UNREGISTERED);
 	RegServerCmd("rp_giveknife",		Cmd_GiveKnife,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	
+	RegServerCmd("rp_skin_separatist",	Cmd_ItemSeparatist);
+	RegServerCmd("rp_skin_professional",Cmd_ItemProfessional);
+	RegServerCmd("rp_skin_pirate",		Cmd_ItemPirate);
+	RegServerCmd("rp_skin_phoenix",		Cmd_ItemPhoenix);
+	RegServerCmd("rp_skin_leet",		Cmd_ItemLeet);
+	RegServerCmd("rp_skin_balkan",		Cmd_ItemBalkan);
+	RegServerCmd("rp_skin_anarchist",	Cmd_ItemAnarchist);	
+}
+public Action Cmd_ItemAnarchist(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemLeet");
+	#endif
+	int client = GetCmdArgInt(1);
+	
+	CreateTimer(0.25, task_ItemAnarchist, client);
+}
+public Action task_ItemAnarchist(Handle timer, any client) {
+	#if defined DEBUG
+	PrintToServer("task_ItemAnarchist");
+	#endif
+	
+	Handle menu = CreateMenu(MenuSetSkin);
+	SetMenuTitle(menu, "Choisissez un skin:");
+	
+	AddMenuItem(menu, "models/player/tm_anarchist.mdl", 			"Anarchist");
+	AddMenuItem(menu, "models/player/tm_anarchist_varianta.mdl", 	"Anarchist - A");
+	AddMenuItem(menu, "models/player/tm_anarchist_variantb.mdl",	"Anarchist - B");
+	AddMenuItem(menu, "models/player/tm_anarchist_variantc.mdl", 	"Anarchist - C");
+	AddMenuItem(menu, "models/player/tm_anarchist_variantd.mdl", 	"Anarchist - D");
+	
+	SetMenuExitButton(menu, true);
+	DisplayMenu(menu, client, MENU_TIME_DURATION);
+	
+	return Plugin_Handled;
+}
+public Action Cmd_ItemBalkan(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemLeet");
+	#endif
+	int client = GetCmdArgInt(1);
+	
+	CreateTimer(0.25, task_ItemBalkan, client);
+}
+public Action task_ItemBalkan(Handle timer, any client) {
+	#if defined DEBUG
+	PrintToServer("task_ItemBalkan");
+	#endif
+	
+	Handle menu = CreateMenu(MenuSetSkin);
+	SetMenuTitle(menu, "Choisissez un skin:");
+	
+	AddMenuItem(menu, "models/player/tm_balkan_varianta.mdl", 	"Balkan");
+	AddMenuItem(menu, "models/player/tm_balkan_variantb.mdl", 	"Balkan - A");
+	AddMenuItem(menu, "models/player/tm_balkan_variantc.mdl",	"Balkan - B");
+	AddMenuItem(menu, "models/player/tm_balkan_variantd.mdl", 	"Balkan - C");
+	AddMenuItem(menu, "models/player/tm_balkan_variante.mdl", 	"Balkan - D");
+	
+	SetMenuExitButton(menu, true);
+	DisplayMenu(menu, client, MENU_TIME_DURATION);
+	
+	return Plugin_Handled;
+}
+public Action Cmd_ItemLeet(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemLeet");
+	#endif
+	int client = GetCmdArgInt(1);
+	
+	CreateTimer(0.25, task_ItemLeet, client);
+}
+public Action task_ItemLeet(Handle timer, any client) {
+	#if defined DEBUG
+	PrintToServer("task_ItemLeet");
+	#endif
+	
+	Handle menu = CreateMenu(MenuSetSkin);
+	SetMenuTitle(menu, "Choisissez un skin:");
+	
+	AddMenuItem(menu, "models/player/tm_leet_varianta.mdl", 	"Phoenix");
+	AddMenuItem(menu, "models/player/tm_leet_variantb.mdl", 	"Phoenix - A");
+	AddMenuItem(menu, "models/player/tm_leet_variantc.mdl",		"Phoenix - B");
+	AddMenuItem(menu, "models/player/tm_leet_variantd.mdl", 	"Phoenix - C");
+	AddMenuItem(menu, "models/player/tm_leet_variante.mdl", 	"Phoenix - D");
+	
+	SetMenuExitButton(menu, true);
+	DisplayMenu(menu, client, MENU_TIME_DURATION);
+	
+	return Plugin_Handled;
+}
+public Action Cmd_ItemPhoenix(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemPhoenix");
+	#endif
+	int client = GetCmdArgInt(1);
+	
+	CreateTimer(0.25, task_ItemPhoenix, client);
+}
+public Action task_ItemPhoenix(Handle timer, any client) {
+	#if defined DEBUG
+	PrintToServer("task_ItemPhoenix");
+	#endif
+	
+	Handle menu = CreateMenu(MenuSetSkin);
+	SetMenuTitle(menu, "Choisissez un skin:");
+	
+	AddMenuItem(menu, "models/player/tm_phoenix.mdl", 			"Phoenix");
+	AddMenuItem(menu, "models/player/tm_phoenix_varianta.mdl", 	"Phoenix - A");
+	AddMenuItem(menu, "models/player/tm_phoenix_variantb.mdl",	"Phoenix - B");
+	AddMenuItem(menu, "models/player/tm_phoenix_variantc.mdl", 	"Phoenix - C");
+	AddMenuItem(menu, "models/player/tm_phoenix_variantd.mdl", 	"Phoenix - D");
+	
+	SetMenuExitButton(menu, true);
+	DisplayMenu(menu, client, MENU_TIME_DURATION);
+	
+	return Plugin_Handled;
+}
+public Action Cmd_ItemPirate(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemPirate");
+	#endif
+	int client = GetCmdArgInt(1);
+	
+	CreateTimer(0.25, task_ItemPirate, client);
+}
+public Action task_ItemPirate(Handle timer, any client) {
+	#if defined DEBUG
+	PrintToServer("task_ItemPirate");
+	#endif
+	
+	Handle menu = CreateMenu(MenuSetSkin);
+	SetMenuTitle(menu, "Choisissez un skin:");
+	
+	AddMenuItem(menu, "models/player/tm_pirate.mdl", 			"Pirate");
+	AddMenuItem(menu, "models/player/tm_pirate_varianta.mdl", 	"Pirate - A");
+	AddMenuItem(menu, "models/player/tm_pirate_variantb.mdl",	"Pirate - B");
+	AddMenuItem(menu, "models/player/tm_pirate_variantc.mdl", 	"Pirate - C");
+	AddMenuItem(menu, "models/player/tm_pirate_variantd.mdl", 	"Pirate - D");
+	
+	SetMenuExitButton(menu, true);
+	DisplayMenu(menu, client, MENU_TIME_DURATION);
+	
+	return Plugin_Handled;
+}
+public Action Cmd_ItemProfessional(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemProfessional");
+	#endif
+	int client = GetCmdArgInt(1);
+	
+	CreateTimer(0.25, task_ItemProfessional, client);
+}
+public Action task_ItemProfessional(Handle timer, any client) {
+	#if defined DEBUG
+	PrintToServer("task_Cmd_ItemSeparatist");
+	#endif
+	
+	Handle menu = CreateMenu(MenuSetSkin);
+	SetMenuTitle(menu, "Choisissez un skin:");
+	
+	AddMenuItem(menu, "models/player/tm_professional.mdl", 			"Professional");
+	AddMenuItem(menu, "models/player/tm_professional_var1.mdl", 	"Professional - A");
+	AddMenuItem(menu, "models/player/tm_professional_var2.mdl",		"Professional - B");
+	AddMenuItem(menu, "models/player/tm_professional_var3.mdl", 	"Professional - C");
+	AddMenuItem(menu, "models/player/tm_professional_var4.mdl", 	"Professional - D");
+	
+	SetMenuExitButton(menu, true);
+	DisplayMenu(menu, client, MENU_TIME_DURATION);
+	
+	return Plugin_Handled;
+}
+public Action Cmd_ItemSeparatist(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemSeparatist");
+	#endif
+	int client = GetCmdArgInt(1);
+	
+	CreateTimer(0.25, task_ItemSeparatist, client);
+}
+public Action task_ItemSeparatist(Handle timer, any client) {
+	#if defined DEBUG
+	PrintToServer("task_Cmd_ItemSeparatist");
+	#endif
+	
+	Handle menu = CreateMenu(MenuSetSkin);
+	SetMenuTitle(menu, "Choisissez un skin:");
+	
+	AddMenuItem(menu, "models/player/tm_separatist.mdl", 			"Séparatist");
+	AddMenuItem(menu, "models/player/tm_separatist_varianta.mdl", 	"Séparatist - A");
+	AddMenuItem(menu, "models/player/tm_separatist_variantb.mdl",	"Séparatist - B");
+	AddMenuItem(menu, "models/player/tm_separatist_variantc.mdl", 	"Séparatist - C");
+	AddMenuItem(menu, "models/player/tm_separatist_variantd.mdl", 	"Séparatist - D");
+	
+	SetMenuExitButton(menu, true);
+	DisplayMenu(menu, client, MENU_TIME_DURATION);
+	
+	return Plugin_Handled;
+}
+public int MenuSetSkin(Handle menu, MenuAction action, int client, int param2) {
+	#if defined DEBUG
+	PrintToServer("MenuSetSkin");
+	#endif
+	if( action == MenuAction_Select ) {
+		char options[128];
+		GetMenuItem(menu, param2, options, sizeof(options));
+		ServerCommand("rp_giveskin %s %d", options, client);
+		rp_SetClientString(client, sz_Skin, options, strlen(options) + 1);
+	}
+	else if( action == MenuAction_End ) {
+		CloseHandle(menu);
+	}
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_GiveKnife(int args) {
@@ -240,6 +449,3 @@ public Action Hook_SetTransmit(int entity, int client) {
 		return Plugin_Handled;
 	return Plugin_Continue;
 }
-
-
-

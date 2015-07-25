@@ -72,7 +72,7 @@ typeset rp_event_enum {
 	function Action(int client, int newZoneID, int oldZoneID);		/* RP_OnPlayerZoneChange */
 	
 	function Action(int client, int target, float dist);			/* RP_OnPlayerHear Est-ce que client peut entendre target ? */
-	function Action(int client, char[] message, int length);	/* RP_PrePlayerTalk */
+	function Action(int client, char[] message, int length, bool local);	/* RP_PrePlayerTalk */
 };
 /*
  * @brief Hook sur un joueur. 
@@ -210,6 +210,16 @@ native void rp_ClientRemoveProp(int client, int target, int item_id);					/* Sup
 native void rp_GetDate(char[] str, int length);
 native void rp_GetTime(int& hour, int& minutes);
 // ----------------------------------------------------------------------------
+native bool rp_ClientCanDrawPanel(int client);
+native void rp_SendPanelToClient(Handle panel, int client, float duration);
+typedef QuestFctInit = function bool (int client);
+typedef QuestFct = function void (int objectiveID, int client);
+public void QUEST_NULL(int objectiveID, int client) {
+}
+native void rp_QuestStepComplete(int client, int objectiveID);
+native int rp_RegisterQuest(char uniqID[32], char name[64], quest_type_type type, QuestFctInit CanStart);
+native void rp_QuestAddStep(int questID, int stepID, QuestFct start, QuestFct frame, QuestFct abort, QuestFct done);
+// ----------------------------------------------------------------------------
 
 #define ACCESS_DENIED(%1)	CPrintToChat(%1, "{lightblue}[TSX-RP]{default} Vous n'avez pas accès à cette commande.");	return Plugin_Handled
 #define ITEM_CANCEL(%1,%2)	rp_ClientGiveItem(%1,%2); rp_SetClientFloat(%1, fl_CoolDown, 0.05)
@@ -271,6 +281,7 @@ enum bool_user_data {
 	b_AdminHeal,
 	b_HasMail,
 	b_HasGrave,
+	b_HasShoes,
 	b_SpawnToGrave,
 	b_Pissing,
 	b_ChiruRegen,
@@ -339,6 +350,7 @@ enum int_user_data {
 	i_LastKillTime,
 	i_AddToPay,
 	i_TimeAFK,
+	i_TimeAFK_today,
 	i_TimeAFK_total,
 	i_MarriedTo,
 	
@@ -485,6 +497,7 @@ enum enum_ball_type {
 	ball_type_paintball,
 	ball_type_reflexive,
 	ball_type_explode,
+	ball_type_revitalisante,
 	ball_type_max
 };
 enum rp_item_type {
@@ -575,11 +588,10 @@ enum type_appart_bonus {
 	
 	appart_bonus_max	
 };
-enum type_quest_type {
+enum quest_type_type {
 	quest_story,
 	quest_daily,
 	quest_weekly
-};
-
+}
 
 #include <rp_tools.inc>

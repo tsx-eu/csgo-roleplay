@@ -69,10 +69,12 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	static char tmp[128], szQuery[1024];
 	
 	if( rp_GetClientJobID(target) == 181 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler cette personne.");
-		cooldown = 1.0;
-		return Plugin_Handled;
+		ACCESS_DENIED(client);
 	}
+	if( rp_GetZoneBit( rp_GetPlayerZone(target) ) & BITZONE_BLOCKSTEAL ) {
+		ACCESS_DENIED(client);
+	}
+	
 	
 	int VOL_MAX, amount, money;
 	
@@ -278,7 +280,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 	CreateTimer(5.0, timerAlarm, target);
 	CreateTimer(10.0, timerAlarm, target);
 	
-	rp_ClientColorize(client, { 255, 0, 0, 255 } );
+	rp_ClientColorize(client, { 255, 0, 0, 190 } );
 	rp_ClientReveal(client);
 		
 	Handle dp;
@@ -417,7 +419,7 @@ public Action Cmd_ItemPickLock(int args) {
 	TE_SendToAll();
 	
 	
-	rp_ClientColorize(client, { 255, 0, 0, 255 } );
+	rp_ClientColorize(client, { 255, 0, 0, 190 } );
 	rp_ClientReveal(client);
 	
 	// Anti-cheat: 
@@ -480,21 +482,28 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 	rp_ClientColorize(client);
 	rp_ClientReveal(client);
 	
-	if( rp_GetClientBool(target, b_Stealing) == false || !IsPlayerAlive(client) || !IsPlayerAlive(target) || (rp_IsClientNew(target) && Math_GetRandomInt(0,3) != 0) ) {
+	if( rp_GetClientBool(target, b_Stealing) == false || !IsPlayerAlive(client) || !IsPlayerAlive(target) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N s'est débatu, le vol a échoué.", target);
 		rp_SetClientBool(target, b_Stealing, false);
 		SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 		return Plugin_Handled;
 	}
-	rp_SetClientBool(target, b_Stealing, false);
-	g_iStolenAmountTime[target]++;
-	CreateTimer(300.0, RemoveStealAmount, target);
+	if( (rp_IsClientNew(target) || (rp_GetClientJobID(target)==41 && rp_GetClientInt(target, i_ToKill) > 0)) && Math_GetRandomInt(0,3) != 0 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N est plus difficile à voler qu'un autre...", target);
+		rp_SetClientBool(target, b_Stealing, false);
+		SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
+		return Plugin_Handled;
+	}
 	
 	if ( rp_GetClientFloat(target, fl_Invincible) >= GetGameTime() ) {
 		rp_SetClientBool(target, b_Stealing, false);
 		SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 		return Plugin_Handled;
 	}
+	
+	rp_SetClientBool(target, b_Stealing, false);
+	g_iStolenAmountTime[target]++;
+	CreateTimer(300.0, RemoveStealAmount, target);
 	
 	if( !rp_IsTargetSeen(target, client) ) {
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, 5.0);
@@ -532,9 +541,7 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 				rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) + amount);
 				rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amount);
 			}
-			else {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Soit le joueur était afk, soit %N n'est pas flic.", target);
-			}
+			
 			int cpt = rp_GetRandomCapital(181);
 			rp_SetJobCapital(181, (rp_GetJobCapital(181) +  (price/2) ) );
 			rp_SetJobCapital(cpt, (rp_GetJobCapital(cpt) -  (price/2) ) );
@@ -583,10 +590,6 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 }
 int findPlayerWeapon(int client, int target) {
 	
-	if( rp_GetClientJobID(target)==41 && rp_GetClientInt(target, i_ToKill) > 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler un tueur sous contrat.");
-		return -1;
-	}
 	if( !rp_IsTutorialOver(target) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur n'a pas terminé le tutorial.");
 		return -1;
@@ -632,13 +635,12 @@ public Action OnWeaponDrop(int client, int weapon) {
 }
 public Action fwdDamage(int client, int attacker, float& damage) {
 	
-	if( damage >= 5.0 ) {
-		if( Math_GetRandomInt(0, 8) == 4 && rp_GetClientBool(attacker, b_Stealing) == true ) {
-			rp_SetClientBool(attacker, b_Stealing, false);
-			rp_ClientColorize(client);
-			rp_ClientReveal(client);
-		}
+	if( Math_GetRandomInt(0, 8) == 4 && rp_GetClientBool(attacker, b_Stealing) == true ) {
+		rp_SetClientBool(attacker, b_Stealing, false);
+		rp_ClientColorize(client);
+		rp_ClientReveal(client);
 	}
+	
 	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------

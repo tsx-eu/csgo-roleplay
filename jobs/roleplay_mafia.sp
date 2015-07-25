@@ -74,9 +74,10 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	static char tmp[128], szQuery[1024];
 	
 	if( rp_GetClientJobID(target) == 91 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler cette personne.");
-		cooldown = 1.0;
-		return Plugin_Handled;
+		ACCESS_DENIED(client);
+	}
+	if( rp_GetZoneBit( rp_GetPlayerZone(target) ) & BITZONE_BLOCKSTEAL ) {
+		ACCESS_DENIED(client);
 	}
 	
 	int VOL_MAX, amount, money, job, prix;
@@ -391,7 +392,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 	CreateTimer(12.5, timerAlarm, target); 
 	
 	
-	rp_ClientColorize(client, { 255, 0, 0, 255 } );
+	rp_ClientColorize(client, { 255, 0, 0, 190 } );
 	rp_ClientReveal(client);
 		
 	Handle dp;
@@ -547,7 +548,7 @@ public Action Cmd_ItemPickLock(int args) {
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, time);
 	ServerCommand("sm_effect_panel %d %f \"Tentative de crochetage de la porte...\"", client, time);
 	
-	rp_ClientColorize(client, { 255, 0, 0, 255} );
+	rp_ClientColorize(client, { 255, 0, 0, 190} );
 	rp_ClientReveal(client);
 	
 	Handle dp;

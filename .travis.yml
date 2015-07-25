@@ -25,3 +25,4 @@ before_script:
 
 script: 
     - for i in ./../../../*/*.sp; do echo -e "\n\n----------------------------------------------------------------------------\nCompiling... $i"; ./spcomp $i; RETVAL=$?; if [ $RETVAL -ne 0 ]; then exit 1; fi; done;
+    - for i in ./../../../quests/*/*.sp; do echo -e "\n\n----------------------------------------------------------------------------\nCompiling... $i"; ./spcomp $i; RETVAL=$?; if [ $RETVAL -ne 0 ]; then exit 1; fi; done;

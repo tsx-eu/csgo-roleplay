@@ -21,7 +21,7 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-#define DEBUG
+//#define DEBUG
 #define MODEL_KNIFE	"models/weapons/w_knife_flip.mdl"
 
 public Plugin myinfo = {
@@ -41,6 +41,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_esquive",		Cmd_ItemCut_Esquive,	"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_knifetype",	Cmd_ItemKnifeType,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_permi_tir",	Cmd_ItemPermiTir,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_shoes", 		Cmd_ItemShoes, 			"RP-ITEM", 	FCVAR_UNREGISTERED);
 	
 	RegServerCmd("rp_item_riotshield",	Cmd_ItemRiotShield,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	
@@ -59,6 +60,9 @@ public void OnClientPostAdminCheck(int client) {
 }
 public void OnClientDisconnect(int client) {
 	rp_UnhookEvent(client, RP_PostTakeDamageKnife, fwdWeapon);
+	if(	rp_GetClientBool(client, b_HasShoes) ) {
+		rp_UnhookEvent(client, RP_OnFrameSeconde, fwdVitalite);
+	}
 	removeShield(client);
 }
 // ----------------------------------------------------------------------------
@@ -224,19 +228,30 @@ public Action Cmd_ItemKnifeType(int args) {
 	GetCmdArg(1, arg1, sizeof(arg1));
 	
 	int client = GetCmdArgInt(2);
+	int item_id = GetCmdArgInt(args);
 	
+	enum_ball_type ball_type_type = ball_type_none;
+
 	if( StrEqual(arg1, "fire") ) {
-		rp_SetClientKnifeType(client, ball_type_fire);
+		ball_type_type = ball_type_fire;
 	}
 	else if( StrEqual(arg1, "caoutchouc") ) {
-		rp_SetClientKnifeType(client, ball_type_caoutchouc);
+		ball_type_type = ball_type_caoutchouc;
 	}
 	else if( StrEqual(arg1, "poison") ) {
-		rp_SetClientKnifeType(client, ball_type_poison);
+		ball_type_type = ball_type_poison;
 	}
 	else if( StrEqual(arg1, "vampire") ) {
-		rp_SetClientKnifeType(client, ball_type_vampire);
+		ball_type_type = ball_type_vampire;
 	}
+	
+	if( rp_GetClientKnifeType(client) == ball_type_type ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà un couteau de ce type.");
+		return Plugin_Handled;
+	}
+	
+	rp_SetClientKnifeType(client, ball_type_fire);
 	
 	return Plugin_Handled;
 }
@@ -449,4 +464,66 @@ void removeShield(int client) {
 		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez perdu votre bouclier anti-émeute.");
 	}
+}
+// ----------------------------------------------------------------------------
+public Action Cmd_ItemShoes(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemShoes");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+	int item_id = GetCmdArgInt(args);
+
+
+	if(	rp_GetClientBool(client, b_HasShoes) ){
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà des chaussures voyons!");
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
+	
+	rp_SetClientBool(client, b_HasShoes, true);
+	
+	rp_HookEvent(client, RP_OnFrameSeconde, fwdVitalite);
+	SDKHook(client, SDKHook_OnTakeDamage, fwdNoFallDamage);
+	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez maintenant la classe avec votre nouvelle paire de baskets!");
+	return Plugin_Handled;
+}
+public Action fwdVitalite(int client) {
+	#if defined DEBUG
+	PrintToServer("fwdVitalite");
+	#endif
+	static float fLast[65][3];
+	static count[65];
+	
+	float fNow[3];
+	GetClientAbsOrigin(client, fNow);	
+	
+	
+	if( GetVectorDistance(fNow, fLast[client]) > 50.0 && !rp_GetClientBool(client, b_IsAFK) ) { // Si le joueur marche
+		count[client]++;
+		if( count[client] > 60 ) {
+			count[client] = 0;
+		
+			float vita = rp_GetClientFloat(client, fl_Vitality);
+			rp_SetClientFloat(client, fl_Vitality, vita + 5.0);
+			
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ressentez votre vitalité s'augmenter grâce à vos baskets (%.1f -> %.1f).", vita, vita + 5.0);
+		}
+	}
+	
+	for (int i = 0; i < 3; i++)
+		fLast[client][i] = fNow[i];
+}
+public Action fwdNoFallDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype) {
+	#if defined DEBUG
+	PrintToServer("fwdNoFallDamage");
+	#endif
+	
+	if( damagetype & DMG_FALL ) {
+		damage = 0.0;
+		return Plugin_Changed;
+	}
+	
+	return Plugin_Continue;
 }
