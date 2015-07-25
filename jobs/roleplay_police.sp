@@ -958,8 +958,11 @@ public Action Cmd_Jugement(int client, int args) {
 			);
 
 			SQL_TQuery(DB, SQL_QueryCallBack, szQuery);
-
-			Format(szQuery, sizeof(szQuery), "INSERT INTO `ts-x`.`srv_bans` (`id`, `SteamID`, `StartTime`, `EndTime`, `Length`, `adminSteamID`, `BanReason`)");
+			
+			ReplaceString(g_szTribunal_DATA[client][tribunal_steamid], sizeof(g_szTribunal_DATA[][]), "STEAM_1", "STEAM_0");
+			ReplaceString(SteamID, sizeof(SteamID), "STEAM_1", "STEAM_0");
+			
+			Format(szQuery, sizeof(szQuery), "INSERT INTO `ts-x`.`srv_bans` (`id`, `SteamID`, `StartTime`, `EndTime`, `Length`, `adminSteamID`, `BanReason`, `game`)");
 			Format(szQuery, sizeof(szQuery), "%s VALUES (NULL, '%s', UNIX_TIMESTAMP(), (UNIX_TIMESTAMP()+'%i'), '%i', '%s', '%s', 'tribunal'); ",
 			szQuery, g_szTribunal_DATA[client][tribunal_steamid], StringToInt(g_szTribunal_DATA[client][tribunal_duration])*60, StringToInt(g_szTribunal_DATA[client][tribunal_duration])*60, SteamID, buffer_reason);
 			
