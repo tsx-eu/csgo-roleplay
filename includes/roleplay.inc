@@ -571,6 +571,7 @@ enum car_data {
 	car_health,
 	car_awayTick,
 	car_maxPassager,
+	car_battery,
 	
 	car_data_max,
 };
