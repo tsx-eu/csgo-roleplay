@@ -571,6 +571,8 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 	Entity_GetAbsOrigin(ent, vecOrigin);
 
 	ent = EntRefToEntIndex(ent);
+	if( ent < 0 || !IsValidEdict(ent) )
+		return Plugin_Handled;
 	
 	if( rp_GetVehicleInt(ent, car_health) <= 0 ) {
 		VehicleRemove(ent, true);

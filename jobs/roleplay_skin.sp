@@ -445,7 +445,7 @@ public Action CmdItemMask(int args) {
 	return Plugin_Handled;
 }
 public Action Hook_SetTransmit(int entity, int client) {
-	if( Entity_GetOwner(entity) == client ) 
+	if( Entity_GetOwner(entity) == client && rp_GetClientInt(client, i_ThirdPerson) == 0 ) 
 		return Plugin_Handled;
 	return Plugin_Continue;
 }

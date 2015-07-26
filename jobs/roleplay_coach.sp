@@ -251,7 +251,7 @@ public Action Cmd_ItemKnifeType(int args) {
 		return Plugin_Handled;
 	}
 	
-	rp_SetClientKnifeType(client, ball_type_fire);
+	rp_SetClientKnifeType(client, ball_type_type);
 	
 	return Plugin_Handled;
 }
@@ -437,7 +437,7 @@ public Action fwdPlayerDead(int victim, int attacker, float& respawn) {
 	removeShield(victim);
 }
 public Action Hook_SetTransmit(int entity, int client) {
-	if( Entity_GetOwner(entity) == client ) 
+	if( Entity_GetOwner(entity) == client && rp_GetClientInt(client, i_ThirdPerson) == 0 ) 
 		return Plugin_Handled;
 	return Plugin_Continue;
 }
@@ -452,14 +452,17 @@ public bool TEF_ExcludeEntity(int entity, int contentsMask, any data) {
 void removeShield(int client) {
 	
 	if( g_iRiotShield[client] > 0 ) {
-		AcceptEntityInput( g_iRiotShield[client], "Kill");
+		
+		
 		rp_UnhookEvent(client, RP_OnPlayerDead, fwdPlayerDead);
 		rp_UnhookEvent(client, RP_PostTakeDamageWeapon, fwdTakeDamage);
 		rp_UnhookEvent(client, RP_OnFrameSeconde, fwdPlayerFrame);
 		
 		SDKUnhook(g_iRiotShield[client], SDKHook_SetTransmit, Hook_SetTransmit);
 		SDKUnhook(client, SDKHook_WeaponSwitch, Hook_WeaponSwitch);
+		SDKUnhook(g_iRiotShield[client], SDKHook_ShouldCollide, Hook_Collide);
 		
+		AcceptEntityInput( g_iRiotShield[client], "Kill");
 		g_iRiotShield[client] = 0;
 		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez perdu votre bouclier anti-émeute.");

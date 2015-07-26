@@ -155,23 +155,21 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	
 	return Plugin_Continue;
 }
-public Action fwdHear(int client, int target, float& dist, bool local) {
+public Action fwdHear(int client, int target, float& dist) {
 	
 	int Czone = rp_GetPlayerZone(client), Ctype = rp_GetZoneInt(Czone, zone_type_type);
 	int Tzone = rp_GetPlayerZone(target), Ttype = rp_GetZoneInt(Tzone, zone_type_type), Tbit = rp_GetZoneBit(Tzone);
 	
-	if( !local ) {
-		if( IsValidClient(target) ) {
-			if( rp_GetClientBool(target, b_IsMuteVocal) )
-				return Plugin_Stop;
-		}
-		else if( rp_IsValidVehicle(target) ) {
-			if( rp_GetClientBool(Vehicle_GetDriver(target), b_IsMuteVocal) )
-				return Plugin_Stop;
-		}
+	if( IsValidClient(target) ) {
+		if( rp_GetClientBool(target, b_IsMuteVocal) )
+			return Plugin_Stop;
+	}
+	else if( rp_IsValidVehicle(target) ) {
+		if( rp_GetClientBool(Vehicle_GetDriver(target), b_IsMuteVocal) )
+			return Plugin_Stop;
 	}
 		
-	if( !local && (Tbit & BITZONE_JAIL || Tbit & BITZONE_HAUTESECU) ) { 
+	if( (Tbit & BITZONE_JAIL || Tbit & BITZONE_HAUTESECU) ) {
 		return Plugin_Stop;
 	}
 	
