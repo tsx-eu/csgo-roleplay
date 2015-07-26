@@ -995,11 +995,17 @@ public Action Cmd_Jugement(int client, int args) {
 		}
 
 		if( StrEqual(g_szTribunal_DATA[client][tribunal_option], "forum") ) {
-			
-			Format(szQuery, sizeof(szQuery), "DELETE FROM `ts-x`.`site_report` WHERE `report_steamid`='%s';", g_szTribunal_DATA[client][tribunal_steamid]);
+			char steamid0[64];
+			strcopy(steamid0,63,g_szTribunal_DATA[client][tribunal_steamid]);
+			ReplaceString(steamid0, sizeof(steamid0), "STEAM_1", "STEAM_0");
+			char steamid1[64];
+			strcopy(steamid1,63,g_szTribunal_DATA[client][tribunal_steamid]);
+			ReplaceString(steamid0, sizeof(steamid0), "STEAM_0", "STEAM_1");
+
+			Format(szQuery, sizeof(szQuery), "DELETE FROM `ts-x`.`site_report` WHERE `report_steamid`='%s' OR `report_steamid`='%s';", steamid0, steamid1);
 			SQL_TQuery(DB, SQL_QueryCallBack, szQuery);
 			
-			Format(szQuery, sizeof(szQuery), "DELETE FROM `ts-x`.`site_tribunal` WHERE `report_steamid`='%s';", g_szTribunal_DATA[client][tribunal_steamid]);
+			Format(szQuery, sizeof(szQuery), "DELETE FROM `ts-x`.`site_tribunal` WHERE `report_steamid`='%s' OR `report_steamid`='%s';", steamid0, steamid1);
 			SQL_TQuery(DB, SQL_QueryCallBack, szQuery);
 		}
 		
