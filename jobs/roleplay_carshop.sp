@@ -70,7 +70,9 @@ public void OnClientDisconnect(int client) {
 	}
 }
 public Action fwdUse(int client) {
-	
+	if( rp_GetPlayerZoneAppart(client) > 0 && rp_GetPlayerZoneAppart(client) <= 10 ) {
+		DisplayGarageMenu(client);
+	}
 	
 	int target = GetClientTarget(client);
 	int vehicle = GetEntPropEnt(client, Prop_Send, "m_hVehicle");
@@ -605,7 +607,6 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 	CreateTimer(1.1, Timer_VehicleRemoveCheck, EntIndexToEntRef(ent));
 	return Plugin_Continue;
 }
-
 // ----------------------------------------------------------------------------
 void AskToJoinCar(int client, int vehicle) {
 	#if defined DEBUG
@@ -694,7 +695,6 @@ public int AskToJoinCar_Menu(Handle p_hItemMenu, MenuAction p_oAction, int clien
 		CloseHandle(p_hItemMenu);
 	}
 }
-
 int CountPassagerInVehicle(int vehicle) {
 	int cpt = 0;
 	
@@ -705,4 +705,198 @@ int CountPassagerInVehicle(int vehicle) {
 			cpt++;
 	}
 	return cpt;
+}
+// ----------------------------------------------------------------------------
+void DisplayGarageMenu(int client) {
+	#if defined DEBUG
+	PrintToServer("DisplayGarageMenu");
+	#endif
+	
+	Handle menu = CreateMenu(eventGarageMenu);
+	SetMenuTitle(menu, "Menu du garage == BETA ");
+	
+	AddMenuItem(menu, "=", "==== Peinture:", ITEMDRAW_DISABLED);
+	AddMenuItem(menu, "white",	"Ajouter du blanc");
+	AddMenuItem(menu, "black",	"Ajouter du noir");
+	AddMenuItem(menu, "red", 	"Ajouter du rouge");
+	AddMenuItem(menu, "green", 	"Ajouter du vert");
+	AddMenuItem(menu, "bleue", 	"Ajouter du bleu");
+	AddMenuItem(menu, "=", "==== Garage:", ITEMDRAW_DISABLED);
+	AddMenuItem(menu, "to_bank", "Ranger la voiture");
+	AddMenuItem(menu, "from_bank", "Sortir la voiture");
+	AddMenuItem(menu, "repair", "Reparer la voiture");
+	
+	
+	SetMenuExitButton(menu, true);
+	DisplayMenu(menu, client, MENU_TIME_DURATION);
+}
+public int eventGarageMenu(Handle menu, MenuAction action, int client, int param) {
+	#if defined DEBUG
+	PrintToServer("eventGarageMenu");
+	#endif
+	
+	static int offset = -1, last[65];
+	
+	
+	if( action == MenuAction_Select ) {
+		char arg1[64];
+		
+		if( GetMenuItem(menu, param, arg1, sizeof(arg1)) ) {
+			
+			if( rp_GetPlayerZoneAppart(client) <= 0 || rp_GetPlayerZoneAppart(client) >= 10 ) {
+				return;
+			}
+			
+			int zone = rp_GetPlayerZone(client);
+			
+			if( StrEqual(arg1, "from_bank") ) {
+					
+				Handle menu2 = CreateMenu(eventGarageMenu2);
+				SetMenuTitle(menu2, "Selectionnez votre voiture:");
+				
+				char tmp[12], tmp2[64];
+				
+				for(int i = 0; i < MAX_ITEMS; i++) {
+					if( rp_GetClientItem(client, i, true) <= 0 )
+						continue;
+						
+					rp_GetItemData(i, item_type_extra_cmd, tmp2, sizeof(tmp2));
+					
+					if( StrContains(tmp2, "rp_item_vehicle") != 0 )
+						continue;
+					
+					Format(tmp, sizeof(tmp), "%d", i);
+					rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2));
+					AddMenuItem(menu2, tmp, tmp2);
+				}
+				SetMenuExitButton(menu2, true);
+				DisplayMenu(menu2, client, MENU_TIME_DURATION);
+				return;
+			}
+			
+			for (int target = MaxClients; target <= 2048; target++) {
+				if( !rp_IsValidVehicle(target) )
+					continue;
+				if( rp_GetPlayerZone(target) != zone )
+					continue;
+				
+				if( StrEqual(arg1, "red") ||  StrEqual(arg1, "green") ||  StrEqual(arg1, "bleue") ||  StrEqual(arg1, "white") ||  StrEqual(arg1, "black") ) {
+					int color[4];
+					if( offset == -1 ) {
+						offset = GetEntSendPropOffs(target, "m_clrRender", true);
+					}
+					for(int i=0; i<3; i++) {
+						color[i] = GetEntData(target, offset+i, 1);
+					}
+					color[3] = 255;
+					
+					if( color[0] >= 250 && color[1] >= 250 && color[2] >= 250 && last[client] != target ) {
+						rp_IncrementSuccess(client, success_list_carshop);
+					}
+					
+					last[client] = target;
+					
+					if( StrEqual(arg1, "red") ) {
+						color[0] += 32;
+						color[1] -= 32;
+						color[2] -= 32;
+					}
+					else if( StrEqual(arg1, "green") ) {
+						color[0] -= 32;
+						color[1] += 32;
+						color[2] -= 32;
+					}
+					else if( StrEqual(arg1, "bleue") ) {
+						color[0] -= 32;
+						color[1] -= 32;
+						color[2] += 32;
+					}
+					else if( StrEqual(arg1, "white") ) {
+						color[0] += 32;
+						color[1] += 32;
+						color[2] += 32;
+					}
+					else if( StrEqual(arg1, "black") ) {
+						color[0] -= 32;
+						color[1] -= 32;
+						color[2] -= 32;
+					}
+					
+					for(int i=0; i<3; i++) {
+						if( color[i] > 255 )
+							color[i] = 255;
+						if( color[i] < 0 )
+							color[i] = 0;
+					}
+					
+					ServerCommand("sm_effect_colorize %d %d %d %d 255", target, color[0], color[1], color[2]);
+				}
+				else if( StrEqual(arg1, "to_bank") ) {
+					
+					if( rp_GetVehicleInt(target, car_owner) != client )
+						continue;
+						
+					if( rp_GetVehicleInt(target, car_health) < 1000 ) {
+						CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre véhicule est endommagé.");
+						continue;
+					}
+					
+					if( Vehicle_GetDriver(target) > 0 ) {
+						CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il y a quelqu'un dans votre véhicule.");
+						continue;
+					}
+					
+					rp_SetVehicleInt(target, car_health, 0);
+					
+					int itemID = rp_GetVehicleInt(target, car_item_id);
+					rp_ClientGiveItem(client, itemID, 1, true);					
+				}
+				else if( StrEqual(arg1, "repair") ) {
+					
+					if( rp_GetClientItem(client, 310, true) <= 0 ) {
+						CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas de kit de carrosserie en banque.");
+						DisplayGarageMenu(client);
+						return;
+					}
+					
+					rp_ClientGiveItem(client, 310, -1, true);		
+					
+					int heal = rp_GetVehicleInt(target, car_health) + 1000;
+					if( heal >= 2500 ) {
+						heal = 2500;
+					}
+					
+					rp_SetVehicleInt(target, car_health, heal);
+				}
+			}
+			
+			DisplayGarageMenu(client);
+		}
+	}
+	else if( action == MenuAction_End ) {
+		CloseHandle(menu);
+	}
+}
+public int eventGarageMenu2(Handle menu, MenuAction action, int client, int param ) {
+	#if defined DEBUG
+	PrintToServer("eventGarageMenu2");
+	#endif
+	if( action == MenuAction_Select ) {
+		char szMenuItem[64];
+		
+		if( GetMenuItem(menu, param, szMenuItem, sizeof(szMenuItem)) ) {
+			
+			int itemID = StringToInt(szMenuItem);
+			rp_GetItemData(itemID, item_type_extra_cmd, szMenuItem, sizeof(szMenuItem));
+			
+			
+			if( rp_GetClientItem(client, itemID, true) > 0 ) {
+				rp_ClientGiveItem(client, itemID, -1, true);
+				ServerCommand("%s %d %d", szMenuItem, client, itemID);
+			}
+		}
+	}
+	else if( action == MenuAction_End ) {
+		CloseHandle(menu);
+	}
 }
