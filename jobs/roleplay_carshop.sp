@@ -33,6 +33,7 @@ public Plugin myinfo = {
 Handle g_hMAX_CAR;
 int g_cExplode, g_cBeam;
 int g_iBlockedTime[65][65];
+int g_Battery[65];
 
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
@@ -53,6 +54,7 @@ public void OnMapStart() {
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);
+	g_Battery[client]= -1;
 	for (int i = 1; i < 65; i++)
 		g_iBlockedTime[client][i] = 0;
 }
@@ -75,7 +77,17 @@ public Action fwdUse(int client) {
 	int target = GetClientTarget(client);
 	int vehicle = GetEntPropEnt(client, Prop_Send, "m_hVehicle");
 	int passager = rp_GetClientVehiclePassager(client);
-	
+	int garage = rp_GetPlayerZoneAppart(client);
+
+	if(garage != -1 && garage < 10){
+		if(rp_GetClientKeyAppartement(client, garage)){
+			if(g_Battery[client] >= 600){
+				g_Battery[client] = -1;
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous venez de vendre votre batterie, 1000$ ont été ajouté à votre paye.");
+				rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 1000);
+			}
+		}
+	}
 	//
 	if( vehicle > 0 ) {
 		int speed = GetEntProp(vehicle, Prop_Data, "m_nSpeed");
@@ -300,6 +312,15 @@ public Action Cmd_ItemVehicleStuff(int args) {
 			ITEM_CANCEL(client, item_id);
 			return Plugin_Handled;
 		}
+	}
+	else if( StrEqual(arg1, "battery") ){
+		if(g_Battery[client]!= -1){
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre voiture est déjà équipée d'une batterie secondaire.");
+			ITEM_CANCEL(client, item_id);
+			return Plugin_Handled;
+		}
+		g_Battery[client]=0;
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre voiture est maintenant équipée d'une batterie secondaire.");
 	}
 	
 	return Plugin_Handled;
@@ -544,8 +565,11 @@ public Action BatchLeave(Handle timer, any vehicle) {
 	}
 }
 public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
+	static float fPosLast[65][3];
 	bool IsNear = false;
-	
+	float vecOrigin[3];
+	Entity_GetAbsOrigin(ent, vecOrigin);
+
 	ent = EntRefToEntIndex(ent);
 	
 	if( rp_GetVehicleInt(ent, car_health) <= 0 ) {
@@ -553,13 +577,26 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 		return Plugin_Handled;
 	}
 	
-	if( Vehicle_HasDriver(ent) )
+	if( Vehicle_HasDriver(ent) ){
 		IsNear = true;
+		int driver = GetEntPropEnt(ent, Prop_Send, "m_hPlayer");
+		if(g_Battery[driver] != -1){
+			if(GetVectorDistance(fPosLast[driver], vecOrigin) > 50.0 && !rp_GetClientBool(driver, b_IsAFK) && g_Battery[driver]<600){
+				g_Battery[driver]++;
+				if(g_Battery[driver] == 600)
+					CPrintToChat(driver, "{lightblue}[TSX-RP]{default} Votre batterie est pleine vous pouvez maintenant aller au garage pour la revendre.");
+				else if(g_Battery[driver]%60 == 0)
+					CPrintToChat(driver, "{lightblue}[TSX-RP]{default} Votre batterie est chargée à %i%%.", g_Battery[driver]/6);
+
+				for (int i = 0; i < 3; i++)
+					fPosLast[driver][i] = vecOrigin[i];
+			}
+		}
+	}
 	else if( rp_GetZoneBit(rp_GetPlayerZone(ent)) & BITZONE_PARKING )
 		IsNear = true;
 	else {
-		float vecOrigin[3], vecTarget[3];
-		Entity_GetAbsOrigin(ent, vecOrigin);
+		float vecTarget[3];
 			
 		for(int client=1; client<=MAXPLAYERS; client++) {
 			if( !IsValidClient(client) )
