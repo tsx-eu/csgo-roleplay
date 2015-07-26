@@ -71,7 +71,7 @@ typeset rp_event_enum {
 	function Action(int client, int target, float& cooldown);			/* RP_OnPlayerSteal */
 	function Action(int client, int newZoneID, int oldZoneID);		/* RP_OnPlayerZoneChange */
 	
-	function Action(int client, int target, float& dist, bool local);		/* RP_OnPlayerHear Est-ce que client peut entendre target ? */
+	function Action(int client, int target, float& dist);		/* RP_OnPlayerHear Est-ce que client peut entendre target ? */
 	function Action(int client, char[] message, int length, bool local);	/* RP_PrePlayerTalk */
 };
 /*
