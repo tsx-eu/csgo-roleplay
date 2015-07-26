@@ -545,8 +545,9 @@ public Action BatchLeave(Handle timer, any vehicle) {
 }
 public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 	bool IsNear = false;
-	
 	ent = EntRefToEntIndex(ent);
+	if( ent < 0 || !IsValidEdict(ent) )
+		return Plugin_Handled;
 	
 	if( rp_GetVehicleInt(ent, car_health) <= 0 ) {
 		VehicleRemove(ent, true);

@@ -51,6 +51,7 @@ public void OnMapStart() {
 // ----------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
+	rp_SetClientInt(client, i_MarriedTo, -1);
 }
 public void OnClientDisconnect(int client) {
 	rp_UnhookEvent(client, RP_OnPlayerCommand, fwdCommand);
@@ -58,11 +59,11 @@ public void OnClientDisconnect(int client) {
 	// Un mariage est terminé si un des deux mariés déco
 	int mari = rp_GetClientInt(client, i_MarriedTo);
 	if( mari > 0 ) {
+		rp_SetClientInt(mari, i_MarriedTo, -1);
+		rp_SetClientInt(client, i_MarriedTo, -1);
+		CPrintToChat(mari, "{lightblue}[TSX-RP]{default} Votre conjoint a quitté la ville précipitamment, vous n'êtes plus mariés.");
 		rp_UnhookEvent(client, RP_OnFrameSeconde, fwdFrame);
 		rp_UnhookEvent(mari, RP_OnFrameSeconde, fwdFrame);
-		rp_SetClientInt(mari, i_MarriedTo, 0);
-		rp_SetClientInt(client, i_MarriedTo, 0);
-		CPrintToChat(mari, "{lightblue}[TSX-RP]{default} Votre conjoint a quitté la ville précipitamment, vous n'êtes plus mariés.");
 	}
 }
 
@@ -102,7 +103,7 @@ public Action Cmd_Mariage(int client) {
 			continue;
 		if( rp_GetPlayerZone(i) != zoneJuge )
 			continue;
-		if( rp_GetClientInt(i, i_MarriedTo) != 0 )
+		if( rp_GetClientInt(i, i_MarriedTo) != -1 )
 			continue;
 		if( i == client )
 			continue;
@@ -142,7 +143,7 @@ public int eventMariage_1(Handle menu, MenuAction action, int client, int param2
 				continue;
 			if( i == target || i == client )
 				continue;
-			if( rp_GetClientInt(i, i_MarriedTo) != 0 )
+			if( rp_GetClientInt(i, i_MarriedTo) != -1 )
 				continue;
 			if( rp_GetPlayerZone(i) != zoneJuge )
 				continue;
@@ -192,7 +193,7 @@ public int eventMariage_2(Handle menu, MenuAction action, int client, int param2
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'est pas dans la même salle de tribunal que vous, le mariage ne peut pas se dérouler", target_1);
 			CloseHandle(menu);
 		}
-		if( rp_GetClientInt(target_1, i_MarriedTo) != 0 || rp_GetClientInt(target_2, i_MarriedTo) != 0 ){
+		if( rp_GetClientInt(target_1, i_MarriedTo) != -1 || rp_GetClientInt(target_2, i_MarriedTo) != -1 ){
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous essayez d'unir quelqu'un déjà marié, le mariage ne peut pas se dérouler.");
 			CloseHandle(menu);
 		}
