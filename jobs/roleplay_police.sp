@@ -996,10 +996,10 @@ public Action Cmd_Jugement(int client, int args) {
 
 		if( StrEqual(g_szTribunal_DATA[client][tribunal_option], "forum") ) {
 			char steamid0[64];
-			steamid0 = g_szTribunal_DATA[client][tribunal_steamid];
+			StrCopy(steamid0,63,g_szTribunal_DATA[client][tribunal_steamid]);
 			ReplaceString(steamid0, sizeof(steamid0), "STEAM_1", "STEAM_0");
 			char steamid1[64];
-			steamid1 = g_szTribunal_DATA[client][tribunal_steamid];
+			StrCopy(steamid1,63,g_szTribunal_DATA[client][tribunal_steamid]);
 			ReplaceString(steamid0, sizeof(steamid0), "STEAM_0", "STEAM_1");
 
 			Format(szQuery, sizeof(szQuery), "DELETE FROM `ts-x`.`site_report` WHERE `report_steamid`='%s' OR `report_steamid`='%s';", steamid0, steamid1);
