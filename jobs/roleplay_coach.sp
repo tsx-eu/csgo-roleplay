@@ -251,7 +251,7 @@ public Action Cmd_ItemKnifeType(int args) {
 		return Plugin_Handled;
 	}
 	
-	rp_SetClientKnifeType(client, ball_type_fire);
+	rp_SetClientKnifeType(client, ball_type_type);
 	
 	return Plugin_Handled;
 }
