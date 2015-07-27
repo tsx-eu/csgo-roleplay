@@ -33,6 +33,8 @@ public Plugin myinfo = {
 Handle g_hMAX_CAR;
 int g_cExplode, g_cBeam;
 int g_iBlockedTime[65][65];
+float g_lastpos[2049][3];
+
 
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
@@ -77,7 +79,7 @@ public Action fwdUse(int client) {
 	int target = GetClientTarget(client);
 	int vehicle = GetEntPropEnt(client, Prop_Send, "m_hVehicle");
 	int passager = rp_GetClientVehiclePassager(client);
-	
+
 	//
 	if( vehicle > 0 ) {
 		int speed = GetEntProp(vehicle, Prop_Data, "m_nSpeed");
@@ -168,6 +170,7 @@ public Action Cmd_ItemVehicle(int args) {
 	rp_SetVehicleInt(car, car_owner, client);
 	rp_SetVehicleInt(car, car_item_id, item_id);
 	rp_SetVehicleInt(car, car_maxPassager, max);
+	rp_SetVehicleInt(car, car_battery, -1);
 	rp_SetClientKeyVehicle(client, car, true);
 	
 	SDKHook(car, SDKHook_Touch, VehicleTouch);
@@ -302,6 +305,15 @@ public Action Cmd_ItemVehicleStuff(int args) {
 			ITEM_CANCEL(client, item_id);
 			return Plugin_Handled;
 		}
+	}
+	else if( StrEqual(arg1, "battery") ){
+		if(rp_GetVehicleInt(target, car_battery)!= -1){
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre voiture est déjà équipée d'une batterie secondaire.");
+			ITEM_CANCEL(client, item_id);
+			return Plugin_Handled;
+		}
+		rp_SetVehicleInt(target, car_battery, 0);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre voiture est maintenant équipée d'une batterie secondaire.");
 	}
 	
 	return Plugin_Handled;
@@ -546,7 +558,11 @@ public Action BatchLeave(Handle timer, any vehicle) {
 	}
 }
 public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
+
 	bool IsNear = false;
+	float vecOrigin[3];
+	Entity_GetAbsOrigin(ent, vecOrigin);
+
 	ent = EntRefToEntIndex(ent);
 	if( ent < 0 || !IsValidEdict(ent) )
 		return Plugin_Handled;
@@ -556,13 +572,26 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 		return Plugin_Handled;
 	}
 	
-	if( Vehicle_HasDriver(ent) )
+	if( Vehicle_HasDriver(ent) ){
 		IsNear = true;
+		int driver = GetEntPropEnt(ent, Prop_Send, "m_hPlayer");
+		if(rp_GetVehicleInt(ent, car_battery) != -1){
+			if(GetVectorDistance(g_lastpos[ent], vecOrigin) > 50.0 && !rp_GetClientBool(driver, b_IsAFK) && rp_GetVehicleInt(ent, car_battery)<600){
+				rp_SetVehicleInt(ent, car_battery, rp_GetVehicleInt(ent, car_battery)+1);
+				if(rp_GetVehicleInt(ent, car_battery) == 600)
+					CPrintToChat(driver, "{lightblue}[TSX-RP]{default} Votre batterie est pleine vous pouvez maintenant aller au garage pour la revendre.");
+				else if(rp_GetVehicleInt(ent, car_battery)%60 == 0)
+					CPrintToChat(driver, "{lightblue}[TSX-RP]{default} Votre batterie est chargée à %i%%.", rp_GetVehicleInt(ent, car_battery)/6);
+
+				for (int i = 0; i < 3; i++)
+					g_lastpos[ent][i] = vecOrigin[i];
+			}
+		}
+	}
 	else if( rp_GetZoneBit(rp_GetPlayerZone(ent)) & BITZONE_PARKING )
 		IsNear = true;
 	else {
-		float vecOrigin[3], vecTarget[3];
-		Entity_GetAbsOrigin(ent, vecOrigin);
+		float vecTarget[3];
 			
 		for(int client=1; client<=MAXPLAYERS; client++) {
 			if( !IsValidClient(client) )
@@ -725,6 +754,7 @@ void DisplayGarageMenu(int client) {
 	AddMenuItem(menu, "to_bank", "Ranger la voiture");
 	AddMenuItem(menu, "from_bank", "Sortir la voiture");
 	AddMenuItem(menu, "repair", "Reparer la voiture");
+	AddMenuItem(menu, "battery", "Vendre la batterie");
 	
 	
 	SetMenuExitButton(menu, true);
@@ -867,6 +897,16 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 					}
 					
 					rp_SetVehicleInt(target, car_health, heal);
+				}
+				else if( StrEqual(arg1, "battery") ) {
+					if( rp_GetVehicleInt(target, car_owner) != client )
+						continue;
+
+					if(rp_GetVehicleInt(target, car_battery) >= 600){
+						rp_SetClientInt(car_owner, i_AddToPay, rp_GetClientInt(car_owner, i_AddToPay)+1000);
+						CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez vendu votre batterie, 1000$ vous seront crédité à la fin de la journée.");
+						rp_SetVehicleInt(target, car_battery, -1);
+					}
 				}
 			}
 			
