@@ -327,6 +327,9 @@ public Action Cmd_ItemRiotShield(int args) {
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
 	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Temporairement désactivé");
+	ITEM_CANCEL(client, item_id);
+	return Plugin_Handled;
 	if( (rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101) || GetClientTeam(client) != CS_TEAM_CT ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est réservés aux forces de l'ordre.");
 		ITEM_CANCEL(client, item_id);
