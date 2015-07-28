@@ -765,7 +765,7 @@ public Action Cmd_Push(int client) {
 	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
 		ACCESS_DENIED(client);
 	}
-
+	int Czone = rp_GetPlayerZone(client);
 	if( rp_GetZoneBit(Czone) & (BITZONE_BLOCKJAIL|BITZONE_EVENT) ) {
 		ACCESS_DENIED(client);
 	}
