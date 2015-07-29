@@ -35,9 +35,9 @@ public Plugin myinfo = {
 int g_iQuest;
 
 // TODO: Déplacer les récompenses dans les fonctions appropriées
-// TODO: Menu parainage
+// TODO: Trié les jobs par sous quota, ou quota "non respecté"
 
-int g_iQ8, g_iQ12, g_iClientDoingQ[65];
+int g_iQ8, g_iQ12, g_iQ13, g_iClientDoingQ[65];
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	
@@ -58,6 +58,8 @@ public void OnPluginStart() {
 	rp_QuestAddStep(g_iQuest, i++, Q10_Start,	Q10_Frame,	Q10_Abort,	Q10_Abort);
 	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q11_Frame,	QUEST_NULL,	QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q12_Frame,	QUEST_NULL,	QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q13_Frame,	QUEST_NULL,	QUEST_NULL);
+	
 	
 	for (int j = 1; j <= MaxClients; j++)
 		if( IsValidClient(j) )
@@ -511,8 +513,8 @@ public void Q12_Frame(int objectiveID, int client) {
 		AddMenuItem(menu, "", "Quelqu'un de présent vous a t-il invité",		ITEMDRAW_DISABLED);
 		AddMenuItem(menu, "", "a jouer sur notre serveur?  Si oui, qui?",		ITEMDRAW_DISABLED);
 		
-		AddMenuItem(menu, "youtube", "Youtube, en regardant une vidéo");
 		AddMenuItem(menu, "none", "Personne, j'ai connu autrement le serveur");
+		AddMenuItem(menu, "youtube", "Youtube, en regardant une vidéo");
 				
 		char szSteamID[64], szName[128];
 		for( int i=1;i<=MaxClients; i++) {
@@ -533,8 +535,6 @@ public void Q12_Frame(int objectiveID, int client) {
 		DisplayMenu(menu, client, 60);
 	}
 }
-
-
 public int MenuSelectParrain(Handle menu, MenuAction action, int client, int param2) {
 	if( action == MenuAction_Select ) {
 		char options[64];
@@ -549,10 +549,55 @@ public int MenuSelectParrain(Handle menu, MenuAction action, int client, int par
 			SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
 		}
 		
-		rp_SetClientInt(client, i_Tutorial, 20);
 		rp_ClientGiveItem(client, 286);
 		rp_QuestStepComplete(client, g_iQ12);
 		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank)+ 7500);
+		
+		
+	}
+	else if( action == MenuAction_End ) {
+		CloseHandle(menu);
+	}
+}
+
+public void Q13_Frame(int objectiveID, int client) {
+	static int job[] =  { 16, 25, 35, 46, 55, 65, 76, 85, 116, 125, 135, 175, 194/*, 216*/, 226 };
+	
+	if( rp_ClientCanDrawPanel(client) ) {
+		g_iQ13 = objectiveID;
+		
+		Handle menu = CreateMenu(MenuSelectJob);
+		SetMenuTitle(menu, "== Votre premier job vous est offert");
+		AddMenuItem(menu, "", "Sachez que plus tard, vous devrez trouver", ITEMDRAW_DISABLED);
+		AddMenuItem(menu, "", "vous-même, le chef d'un job.", ITEMDRAW_DISABLED);
+			
+		char tmp[128], tmp2[8];
+		SortIntegers(job, sizeof(job), Sort_Random);
+	
+		for( int i=1;i<sizeof(job); i++) {
+			rp_GetJobData(i, job_type_name, tmp, sizeof(tmp));
+			
+			Format(tmp2, sizeof(tmp2), "%d", i);	
+			AddMenuItem(menu, tmp2, tmp);
+		}
+					
+		SetMenuExitButton(menu, true);
+		DisplayMenu(menu, client, 60);
+	}
+}
+public int MenuSelectJob(Handle menu, MenuAction action, int client, int param2) {
+	if( action == MenuAction_Select ) {
+		char options[64];
+		GetMenuItem(menu, param2, options, sizeof(options));
+		
+		if( !StrEqual(options, "") ) {
+			rp_SetClientInt(client, i_Job, StringToInt(options));
+			FakeClientCommand(client, "say /shownotes");
+		}
+		
+		rp_SetClientInt(client, i_Tutorial, 20);
+		rp_ClientGiveItem(client, 286);
+		rp_QuestStepComplete(client, g_iQ13);
 		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez terminé le tutorial, une voiture vous a été offerte. (Faites /item !)");
 	}
@@ -560,7 +605,6 @@ public int MenuSelectParrain(Handle menu, MenuAction action, int client, int par
 		CloseHandle(menu);
 	}
 }
-
 public Action PostKillHandle(Handle timer, any data) {
 	if( data!= INVALID_HANDLE )
 		CloseHandle(data);
