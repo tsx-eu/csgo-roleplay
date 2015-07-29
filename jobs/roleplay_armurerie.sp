@@ -225,11 +225,12 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 
 			if(StrEqual(type, "pvp")){
 				Handle menupvp = CreateMenu(ModifyWeaponPVP);
-				char tmp[64];
-				char tmp2[64];
+				char tmp[64], tmp2[64];
 				SetMenuTitle(menupvp, "A quel groupe attribuer l'arme?");
 				for(int i=1; i<112; i+=10){
 					for(int j=1;j< MAXPLAYERS+1;j++){
+						if( !IsValidClient(j) )
+							continue;
 						if(rp_GetClientGroupID(j)==i){
 							rp_GetGroupData(i, group_type_name, tmp, 63);
 							Format(tmp2,63,"%i_%i",i,price);
@@ -250,24 +251,26 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 					return;
 				}
 
-				if(StrEqual(szMenuItem, "fire"))
+				if(StrEqual(type, "fire"))
 					rp_SetWeaponBallType(wep_id, ball_type_fire);
-				else if(StrEqual(szMenuItem, "caoutchouc"))
+				else if(StrEqual(type, "caoutchouc"))
 					rp_SetWeaponBallType(wep_id, ball_type_caoutchouc);
-				else if(StrEqual(szMenuItem, "poison"))
+				else if(StrEqual(type, "poison"))
 					rp_SetWeaponBallType(wep_id, ball_type_poison);
-				else if(StrEqual(szMenuItem, "vampire"))
+				else if(StrEqual(type, "vampire"))
 					rp_SetWeaponBallType(wep_id, ball_type_vampire);
-				else if(StrEqual(szMenuItem, "reflexive"))
+				else if(StrEqual(type, "reflexive"))
 					rp_SetWeaponBallType(wep_id, ball_type_reflexive);
-				else if(StrEqual(szMenuItem, "explode"))
+				else if(StrEqual(type, "explode"))
 					rp_SetWeaponBallType(wep_id, ball_type_explode);
-				else if(StrEqual(szMenuItem, "revitalisante"))
+				else if(StrEqual(type, "revitalisante"))
 					rp_SetWeaponBallType(wep_id, ball_type_revitalisante);
-				else if(StrEqual(szMenuItem, "paintball"))
+				else if(StrEqual(type, "paintball"))
 					rp_SetWeaponBallType(wep_id, ball_type_paintball);
-				else if(StrEqual(szMenuItem, "reload"))
+				else if(StrEqual(type, "reload"))
 					ServerCommand("rp_item_redraw %i 74", client);
+				
+				FakeClientCommand(client, "say /build");
 			}
 		}
 	}
