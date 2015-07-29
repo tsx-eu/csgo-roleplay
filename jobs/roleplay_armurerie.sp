@@ -124,10 +124,195 @@ public Action Cmd_ItemBallType(int args) {
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdWeapon);
+	rp_HookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
 }
 public void OnClientDisconnect(int client) {
 	rp_UnhookEvent(client, RP_PostTakeDamageWeapon, fwdWeapon);
+	rp_UnhookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
 }
+public Action fwdOnPlayerBuild(int client, float& cooldown){
+	if( rp_GetClientJobID(client) != 111 )
+		return Plugin_Continue;
+
+	int wep_id = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	char wep_name[32];
+	GetEdictClassname(wep_id, wep_name, 31);
+	if( StrContains(wep_name, "weapon_bayonet") == 0 || StrContains(wep_name, "weapon_knife") == 0 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez prendre une arme en main pour la modifier");
+		return Plugin_Handled;
+	}
+
+	Handle menu = CreateMenu(ModifyWeapon);
+	SetMenuTitle(menu, "Modifier l'arme");
+	AddMenuItem(menu, "reload_50", "Recharger l'arme (50$)");
+
+	if(rp_GetWeaponGroupID(wep_id) != 0)
+		AddMenuItem(menu, "pvp_500", "Transformer en arme PvP (500$)", ITEMDRAW_DISABLED);
+	else
+		AddMenuItem(menu, "pvp_500", "Transformer en arme PvP (500$)");
+
+	if(rp_GetWeaponBallType(wep_id) == ball_type_fire)
+		AddMenuItem(menu, "fire_500", "Ajouter des cartouches incendiaires (500$)", ITEMDRAW_DISABLED);
+	else
+		AddMenuItem(menu, "fire_500", "Ajouter des cartouches incendiaires (500$)");
+
+	if(rp_GetWeaponBallType(wep_id) == ball_type_caoutchouc)
+		AddMenuItem(menu, "caoutchouc_400", "Ajouter des cartouches en caoutchouc (400$)", ITEMDRAW_DISABLED);
+	else
+		AddMenuItem(menu, "caoutchouc_400", "Ajouter des cartouches en caoutchouc (400$)");
+
+	if(rp_GetWeaponBallType(wep_id) == ball_type_poison)
+		AddMenuItem(menu, "poison_400", "Ajouter des cartouches empoisonnées (400$)", ITEMDRAW_DISABLED);
+	else
+		AddMenuItem(menu, "poison_400", "Ajouter des cartouches empoisonnées (400$)");
+
+	if(rp_GetWeaponBallType(wep_id) == ball_type_vampire)
+		AddMenuItem(menu, "vampire_400", "Ajouter des cartouches vampiriques (400$)", ITEMDRAW_DISABLED);
+	else
+		AddMenuItem(menu, "vampire_400", "Ajouter des cartouches vampiriques (400$)");
+
+	if(rp_GetWeaponBallType(wep_id) == ball_type_reflexive)
+		AddMenuItem(menu, "reflexive_400", "Ajouter des cartouches rebondissantes (400$)", ITEMDRAW_DISABLED);
+	else
+		AddMenuItem(menu, "reflexive_400", "Ajouter des cartouches rebondissantes (400$)");
+
+	if(rp_GetWeaponBallType(wep_id) == ball_type_explode)
+		AddMenuItem(menu, "explode_500", "Ajouter des cartouches explosives (500$)", ITEMDRAW_DISABLED);
+	else
+		AddMenuItem(menu, "explode_500", "Ajouter des cartouches explosives (500$)");
+
+	if(rp_GetWeaponBallType(wep_id) == ball_type_revitalisante)
+		AddMenuItem(menu, "revitalisante_500", "Ajouter des cartouches revitalisantes (500$)", ITEMDRAW_DISABLED);
+	else
+		AddMenuItem(menu, "revitalisante_500", "Ajouter des cartouches revitalisantes (500$)");
+
+	if(rp_GetWeaponBallType(wep_id) == ball_type_paintball)
+		AddMenuItem(menu, "paintball_50", "Ajouter des cartouches de paintball (50$)", ITEMDRAW_DISABLED);
+	else
+		AddMenuItem(menu, "paintball_50", "Ajouter des cartouches de paintball (50$)");
+
+	DisplayMenu(menu, client, 60);
+	return Plugin_Handled;
+}
+
+public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
+	#if defined DEBUG
+	PrintToServer("ModifyWeapon Menu");
+	#endif
+
+	if (p_oAction == MenuAction_Select) {
+		char szMenuItem[32];
+		if (GetMenuItem(p_hItemMenu, p_iParam2, szMenuItem, sizeof(szMenuItem))){
+
+			char data[2][32];
+			ExplodeString(szMenuItem, "_", data, sizeof(data), sizeof(data[]));
+
+			char type[32];
+			strcopy(type, 31, data[0]);
+			int price = StringToInt(data[1]);
+			int wep_id = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+			char wep_name[32];
+			GetEdictClassname(wep_id, wep_name, 31);
+
+			if( StrContains(wep_name, "weapon_bayonet") == 0 || StrContains(wep_name, "weapon_knife") == 0 ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez prendre une arme en main pour la modifier");
+				return;
+			}
+
+			if(StrEqual(type, "pvp")){
+				Handle menupvp = CreateMenu(ModifyWeaponPVP);
+				char tmp[64];
+				char tmp2[64];
+				SetMenuTitle(menupvp, "A quel groupe attribuer l'arme?");
+				for(int i=1; i<112; i+=10){
+					for(int j=1;j< MAXPLAYERS+1;j++){
+						if(rp_GetClientGroupID(j)==i){
+							rp_GetGroupData(i, group_type_name, tmp, 63);
+							Format(tmp2,63,"%i_%i",i,price);
+							AddMenuItem(menupvp, tmp2, tmp);
+							break;
+						}
+					}
+				}
+				DisplayMenu(menupvp, client, 60);
+			}
+			else{
+				if((rp_GetClientInt(client, i_Bank)+rp_GetClientInt(client, i_Money)) >= price){
+					rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money)-price);
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} La modification à été appliqué à votre arme.");	
+				}
+				else{
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas assez d'argent.");
+					return;
+				}
+
+				if(StrEqual(szMenuItem, "fire"))
+					rp_SetWeaponBallType(wep_id, ball_type_fire);
+				else if(StrEqual(szMenuItem, "caoutchouc"))
+					rp_SetWeaponBallType(wep_id, ball_type_caoutchouc);
+				else if(StrEqual(szMenuItem, "poison"))
+					rp_SetWeaponBallType(wep_id, ball_type_poison);
+				else if(StrEqual(szMenuItem, "vampire"))
+					rp_SetWeaponBallType(wep_id, ball_type_vampire);
+				else if(StrEqual(szMenuItem, "reflexive"))
+					rp_SetWeaponBallType(wep_id, ball_type_reflexive);
+				else if(StrEqual(szMenuItem, "explode"))
+					rp_SetWeaponBallType(wep_id, ball_type_explode);
+				else if(StrEqual(szMenuItem, "revitalisante"))
+					rp_SetWeaponBallType(wep_id, ball_type_revitalisante);
+				else if(StrEqual(szMenuItem, "paintball"))
+					rp_SetWeaponBallType(wep_id, ball_type_paintball);
+				else if(StrEqual(szMenuItem, "reload"))
+					ServerCommand("rp_item_redraw %i 74", client);
+			}
+		}
+	}
+	else if (p_oAction == MenuAction_End) {
+		CloseHandle(p_hItemMenu);
+	}
+
+}
+
+public int ModifyWeaponPVP(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2){
+	#if defined DEBUG
+	PrintToServer("ModifyWeaponPVP");
+	#endif
+
+	if (p_oAction == MenuAction_Select) {
+		char szMenuItem[32];
+		if (GetMenuItem(p_hItemMenu, p_iParam2, szMenuItem, sizeof(szMenuItem))){
+
+			char data[2][32];
+			ExplodeString(szMenuItem, "_", data, sizeof(data), sizeof(data[]));
+
+			int groupid = StringToInt(data[0]);
+			int price = StringToInt(data[1]);
+			int wep_id = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+			char wep_name[32];
+			GetEdictClassname(wep_id, wep_name, 31);
+
+			if( StrContains(wep_name, "weapon_bayonet") == 0 || StrContains(wep_name, "weapon_knife") == 0 ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez prendre une arme en main pour la modifier");
+				return;
+			}
+
+			if((rp_GetClientInt(client, i_Bank)+rp_GetClientInt(client, i_Money)) >= price){
+				rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money)-price);
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} La modification à été appliqué à votre arme.");	
+			}
+			else{
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas assez d'argent.");
+				return;
+			}
+
+			rp_SetWeaponGroupID(wep_id, groupid);
+		}
+	}
+	else if (p_oAction == MenuAction_End) {
+		CloseHandle(p_hItemMenu);
+	}
+}
+
 public Action fwdWeapon(int victim, int attacker, float &damage, int wepID, float pos[3]) {
 	bool changed = true;
 	

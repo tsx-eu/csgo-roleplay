@@ -196,7 +196,7 @@ native void rp_GetWeaponSkinData(int skinID, skin_data typeID, char[] str, int l
 native void rp_GetLocationData(int zoneID, location_type typeID, char[] str, int length);		/* Récupère les données d'une position (spawn, jail)*/
 native void rp_GetZoneData(int zoneID, zone_type typeID, char[] str, int length);			/* Récupère les données d'une zone banque, police, hosto... */
 native void rp_GetJobData(int jobID, rp_job_type typeID, char[] str, int length);			/* Récupère les données d'un job */
-native void rp_GetGroupData(int jobID, rp_job_type typeID, char[] str, int length);			/* Récupère les données d'un group */
+native void rp_GetGroupData(int groupID, rp_group_type typeID, char[] str, int length);			/* Récupère les données d'un group */
 native void rp_GetItemData(int itemID, rp_item_type typeID, char[] str, int length);		/* Récupère les données d'un item */
 native int rp_GetBuildingData(int ent, building_prop_data typeID);					/* Récupère les données d'une constuction. Attention utilise un entier*/
 native void rp_SetBuildingData(int ent, building_prop_data typeID, int data);				/* Définir les données d'une constuction. Attention utilise un entier*/

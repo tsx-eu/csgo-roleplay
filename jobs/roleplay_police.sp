@@ -765,6 +765,11 @@ public Action Cmd_Push(int client) {
 	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
 		ACCESS_DENIED(client);
 	}
+	int Czone = rp_GetPlayerZone(client);
+	if( rp_GetZoneBit(Czone) & (BITZONE_BLOCKJAIL|BITZONE_EVENT) ) {
+		ACCESS_DENIED(client);
+	}
+
 	if( GetClientTeam(client) == CS_TEAM_T && (job == 8 || job == 9 || job == 103 || job == 104 || job == 105 || job == 106 || job == 107 || job == 108 || job == 109 ) ) {
 		ACCESS_DENIED(client);
 	}
