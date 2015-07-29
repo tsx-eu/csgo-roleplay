@@ -72,8 +72,12 @@ public void OnClientDisconnect(int client) {
 	}
 }
 public Action fwdUse(int client) {
-	if( rp_GetPlayerZoneAppart(client) > 0 && rp_GetPlayerZoneAppart(client) <= 10 ) {
-		DisplayGarageMenu(client);
+	int app = rp_GetPlayerZoneAppart(client);
+	
+	if( app > 0 && app <= 10 ) {
+		if( rp_GetClientKeyAppartement(client, app) ) {
+			DisplayGarageMenu(client);
+		}
 	}
 	
 	int target = GetClientTarget(client);

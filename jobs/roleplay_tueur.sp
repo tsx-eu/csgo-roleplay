@@ -645,7 +645,7 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 			rp_SetClientWeaponSkin(client, skin);
 			
 			// TODO: Utiliser une CVAR ? 
-			char door[128] = "314,315,316,317,325,326-327";
+			char door[128] = "249,250,251,252,260,261-262";
 			char doors[12][12];
 			int amount = ExplodeString(door, ",", doors, sizeof(doors), sizeof(doors[]) );
 			

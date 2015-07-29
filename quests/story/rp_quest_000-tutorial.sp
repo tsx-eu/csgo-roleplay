@@ -575,9 +575,9 @@ public void Q13_Frame(int objectiveID, int client) {
 		SortIntegers(job, sizeof(job), Sort_Random);
 	
 		for( int i=1;i<sizeof(job); i++) {
-			rp_GetJobData(i, job_type_name, tmp, sizeof(tmp));
+			rp_GetJobData(job[i], job_type_name, tmp, sizeof(tmp));
 			
-			Format(tmp2, sizeof(tmp2), "%d", i);	
+			Format(tmp2, sizeof(tmp2), "%d", job[i]);	
 			AddMenuItem(menu, tmp2, tmp);
 		}
 					

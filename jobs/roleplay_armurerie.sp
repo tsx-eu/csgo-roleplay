@@ -36,6 +36,10 @@ public void OnPluginStart() {
 	RegServerCmd("rp_giveitem_pvp",		Cmd_GiveItemPvP,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_balltype",	Cmd_ItemBallType,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_redraw",		Cmd_ItemRedraw,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	
+	for (int i = 1; i <= MaxClients; i++)
+		if( IsValidClient(i) )
+			OnClientPostAdminCheck(i);
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
@@ -147,44 +151,44 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 	AddMenuItem(menu, "reload_50", "Recharger l'arme (50$)");
 
 	if(rp_GetWeaponGroupID(wep_id) != 0)
-		AddMenuItem(menu, "pvp_500", "Transformer en arme PvP (500$)", ITEMDRAW_DISABLED);
+		AddMenuItem(menu, "pvp_250", "Transformer en arme PvP (250$)", ITEMDRAW_DISABLED);
 	else
-		AddMenuItem(menu, "pvp_500", "Transformer en arme PvP (500$)");
+		AddMenuItem(menu, "pvp_250", "Transformer en arme PvP (250$)");
 
 	if(rp_GetWeaponBallType(wep_id) == ball_type_fire)
-		AddMenuItem(menu, "fire_500", "Ajouter des cartouches incendiaires (500$)", ITEMDRAW_DISABLED);
+		AddMenuItem(menu, "fire_250", "Ajouter des cartouches incendiaires (250$)", ITEMDRAW_DISABLED);
 	else
-		AddMenuItem(menu, "fire_500", "Ajouter des cartouches incendiaires (500$)");
+		AddMenuItem(menu, "fire_250", "Ajouter des cartouches incendiaires (250$)");
 
 	if(rp_GetWeaponBallType(wep_id) == ball_type_caoutchouc)
-		AddMenuItem(menu, "caoutchouc_400", "Ajouter des cartouches en caoutchouc (400$)", ITEMDRAW_DISABLED);
+		AddMenuItem(menu, "caoutchouc_200", "Ajouter des cartouches en caoutchouc (200$)", ITEMDRAW_DISABLED);
 	else
-		AddMenuItem(menu, "caoutchouc_400", "Ajouter des cartouches en caoutchouc (400$)");
+		AddMenuItem(menu, "caoutchouc_200", "Ajouter des cartouches en caoutchouc (200$)");
 
 	if(rp_GetWeaponBallType(wep_id) == ball_type_poison)
-		AddMenuItem(menu, "poison_400", "Ajouter des cartouches empoisonnées (400$)", ITEMDRAW_DISABLED);
+		AddMenuItem(menu, "poison_200", "Ajouter des cartouches empoisonnées (200$)", ITEMDRAW_DISABLED);
 	else
-		AddMenuItem(menu, "poison_400", "Ajouter des cartouches empoisonnées (400$)");
+		AddMenuItem(menu, "poison_200", "Ajouter des cartouches empoisonnées (200$)");
 
 	if(rp_GetWeaponBallType(wep_id) == ball_type_vampire)
-		AddMenuItem(menu, "vampire_400", "Ajouter des cartouches vampiriques (400$)", ITEMDRAW_DISABLED);
+		AddMenuItem(menu, "vampire_200", "Ajouter des cartouches vampiriques (200$)", ITEMDRAW_DISABLED);
 	else
-		AddMenuItem(menu, "vampire_400", "Ajouter des cartouches vampiriques (400$)");
+		AddMenuItem(menu, "vampire_200", "Ajouter des cartouches vampiriques (200$)");
 
 	if(rp_GetWeaponBallType(wep_id) == ball_type_reflexive)
-		AddMenuItem(menu, "reflexive_400", "Ajouter des cartouches rebondissantes (400$)", ITEMDRAW_DISABLED);
+		AddMenuItem(menu, "reflexive_200", "Ajouter des cartouches rebondissantes (200$)", ITEMDRAW_DISABLED);
 	else
-		AddMenuItem(menu, "reflexive_400", "Ajouter des cartouches rebondissantes (400$)");
+		AddMenuItem(menu, "reflexive_200", "Ajouter des cartouches rebondissantes (200$)");
 
 	if(rp_GetWeaponBallType(wep_id) == ball_type_explode)
-		AddMenuItem(menu, "explode_500", "Ajouter des cartouches explosives (500$)", ITEMDRAW_DISABLED);
+		AddMenuItem(menu, "explode_300", "Ajouter des cartouches explosives (300$)", ITEMDRAW_DISABLED);
 	else
-		AddMenuItem(menu, "explode_500", "Ajouter des cartouches explosives (500$)");
+		AddMenuItem(menu, "explode_300", "Ajouter des cartouches explosives (300$)");
 
 	if(rp_GetWeaponBallType(wep_id) == ball_type_revitalisante)
-		AddMenuItem(menu, "revitalisante_500", "Ajouter des cartouches revitalisantes (500$)", ITEMDRAW_DISABLED);
+		AddMenuItem(menu, "revitalisante_200", "Ajouter des cartouches revitalisantes (200$)", ITEMDRAW_DISABLED);
 	else
-		AddMenuItem(menu, "revitalisante_500", "Ajouter des cartouches revitalisantes (500$)");
+		AddMenuItem(menu, "revitalisante_200", "Ajouter des cartouches revitalisantes (200$)");
 
 	if(rp_GetWeaponBallType(wep_id) == ball_type_paintball)
 		AddMenuItem(menu, "paintball_50", "Ajouter des cartouches de paintball (50$)", ITEMDRAW_DISABLED);
