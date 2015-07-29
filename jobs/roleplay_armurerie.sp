@@ -149,6 +149,7 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 	Handle menu = CreateMenu(ModifyWeapon);
 	SetMenuTitle(menu, "Modifier l'arme");
 	AddMenuItem(menu, "reload_50", "Recharger l'arme (50$)");
+	AddMenuItem(menu, "sanandreas_150", "Ajouter 1000 balles (150$)");
 
 	if(rp_GetWeaponGroupID(wep_id) != 0)
 		AddMenuItem(menu, "pvp_250", "Transformer en arme PvP (250$)", ITEMDRAW_DISABLED);
@@ -269,8 +270,14 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 					rp_SetWeaponBallType(wep_id, ball_type_paintball);
 				else if(StrEqual(type, "reload"))
 					ServerCommand("rp_item_redraw %i 74", client);
-				
+				else if(StrEqual(type, "sanandreas")){
+					int ammo = Weapon_GetPrimaryClip(wep_id);
+					ammo += 1000; if( ammo > 5000 ) ammo = 5000;
+					Weapon_SetPrimaryClip(wep_id, ammo);
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme à maintenant %i balles", ammo);
+				}
 				FakeClientCommand(client, "say /build");
+
 			}
 		}
 	}
