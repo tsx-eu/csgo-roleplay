@@ -149,6 +149,7 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 	Handle menu = CreateMenu(ModifyWeapon);
 	SetMenuTitle(menu, "Modifier l'arme");
 	AddMenuItem(menu, "reload_50", "Recharger l'arme (50$)");
+	AddMenuItem(menu, "sanandreas_150", "Ajouter 1000 balles (150$)");
 
 	if(rp_GetWeaponGroupID(wep_id) != 0)
 		AddMenuItem(menu, "pvp_250", "Transformer en arme PvP (250$)", ITEMDRAW_DISABLED);
@@ -250,24 +251,30 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 					return;
 				}
 
-				if(StrEqual(szMenuItem, "fire"))
+				if(StrEqual(type, "fire"))
 					rp_SetWeaponBallType(wep_id, ball_type_fire);
-				else if(StrEqual(szMenuItem, "caoutchouc"))
+				else if(StrEqual(type, "caoutchouc"))
 					rp_SetWeaponBallType(wep_id, ball_type_caoutchouc);
-				else if(StrEqual(szMenuItem, "poison"))
+				else if(StrEqual(type, "poison"))
 					rp_SetWeaponBallType(wep_id, ball_type_poison);
-				else if(StrEqual(szMenuItem, "vampire"))
+				else if(StrEqual(type, "vampire"))
 					rp_SetWeaponBallType(wep_id, ball_type_vampire);
-				else if(StrEqual(szMenuItem, "reflexive"))
+				else if(StrEqual(type, "reflexive"))
 					rp_SetWeaponBallType(wep_id, ball_type_reflexive);
-				else if(StrEqual(szMenuItem, "explode"))
+				else if(StrEqual(type, "explode"))
 					rp_SetWeaponBallType(wep_id, ball_type_explode);
-				else if(StrEqual(szMenuItem, "revitalisante"))
+				else if(StrEqual(type, "revitalisante"))
 					rp_SetWeaponBallType(wep_id, ball_type_revitalisante);
-				else if(StrEqual(szMenuItem, "paintball"))
+				else if(StrEqual(type, "paintball"))
 					rp_SetWeaponBallType(wep_id, ball_type_paintball);
-				else if(StrEqual(szMenuItem, "reload"))
+				else if(StrEqual(type, "reload"))
 					ServerCommand("rp_item_redraw %i 74", client);
+				else if(StrEqual(type, "sanandreas")){
+					int ammo = Weapon_GetPrimaryClip(wep_id);
+					ammo += 1000; if( ammo > 5000 ) ammo = 5000;
+					Weapon_SetPrimaryClip(wep_id, ammo);
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme à maintenant %i balles", ammo);
+				}
 			}
 		}
 	}
