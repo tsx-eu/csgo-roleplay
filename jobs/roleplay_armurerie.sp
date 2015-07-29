@@ -226,11 +226,12 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 
 			if(StrEqual(type, "pvp")){
 				Handle menupvp = CreateMenu(ModifyWeaponPVP);
-				char tmp[64];
-				char tmp2[64];
+				char tmp[64], tmp2[64];
 				SetMenuTitle(menupvp, "A quel groupe attribuer l'arme?");
 				for(int i=1; i<112; i+=10){
 					for(int j=1;j< MAXPLAYERS+1;j++){
+						if( !IsValidClient(j) )
+							continue;
 						if(rp_GetClientGroupID(j)==i){
 							rp_GetGroupData(i, group_type_name, tmp, 63);
 							Format(tmp2,63,"%i_%i",i,price);
@@ -275,6 +276,8 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 					Weapon_SetPrimaryClip(wep_id, ammo);
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme à maintenant %i balles", ammo);
 				}
+				FakeClientCommand(client, "say /build");
+
 			}
 		}
 	}
