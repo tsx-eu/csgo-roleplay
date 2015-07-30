@@ -580,12 +580,12 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 		IsNear = true;
 		int driver = GetEntPropEnt(ent, Prop_Send, "m_hPlayer");
 		if(rp_GetVehicleInt(ent, car_battery) != -1){
-			if(GetVectorDistance(g_lastpos[ent], vecOrigin) > 50.0 && !rp_GetClientBool(driver, b_IsAFK) && rp_GetVehicleInt(ent, car_battery)<600){
+			if(GetVectorDistance(g_lastpos[ent], vecOrigin) > 50.0 && !rp_GetClientBool(driver, b_IsAFK) && rp_GetVehicleInt(ent, car_battery)<420){
 				rp_SetVehicleInt(ent, car_battery, rp_GetVehicleInt(ent, car_battery)+1);
-				if(rp_GetVehicleInt(ent, car_battery) == 600)
+				if(rp_GetVehicleInt(ent, car_battery) == 420)
 					CPrintToChat(driver, "{lightblue}[TSX-RP]{default} Votre batterie est pleine vous pouvez maintenant aller au garage pour la revendre.");
-				else if(rp_GetVehicleInt(ent, car_battery)%60 == 0)
-					CPrintToChat(driver, "{lightblue}[TSX-RP]{default} Votre batterie est chargée à %i%%.", rp_GetVehicleInt(ent, car_battery)/6);
+				else if(rp_GetVehicleInt(ent, car_battery)%42 == 0)
+					CPrintToChat(driver, "{lightblue}[TSX-RP]{default} Votre batterie est chargée à %i%%.", rp_GetVehicleInt(ent, car_battery)/4.2);
 
 				for (int i = 0; i < 3; i++)
 					g_lastpos[ent][i] = vecOrigin[i];
@@ -906,7 +906,7 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 					if( rp_GetVehicleInt(target, car_owner) != client )
 						continue;
 
-					if(rp_GetVehicleInt(target, car_battery) >= 600){
+					if(rp_GetVehicleInt(target, car_battery) >= 420){
 						rp_SetClientInt(car_owner, i_AddToPay, rp_GetClientInt(car_owner, i_AddToPay)+1000);
 						CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez vendu votre batterie, 1000$ vous seront crédité à la fin de la journée.");
 						rp_SetVehicleInt(target, car_battery, -1);
