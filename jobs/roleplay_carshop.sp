@@ -801,6 +801,7 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 					
 					Format(tmp, sizeof(tmp), "%d", i);
 					rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2));
+					Format(tmp2, sizeof(tmp2), "%s (%i)",tmp2,rp_GetClientItem(client, i, true));
 					AddMenuItem(menu2, tmp, tmp2);
 				}
 				SetMenuExitButton(menu2, true);
