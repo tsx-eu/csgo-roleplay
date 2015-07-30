@@ -907,7 +907,7 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 						continue;
 
 					if(rp_GetVehicleInt(target, car_battery) >= 420){
-						rp_SetClientInt(car_owner, i_AddToPay, rp_GetClientInt(car_owner, i_AddToPay)+1000);
+						rp_SetClientInt(rp_GetVehicleInt(target, car_owner), i_AddToPay, rp_GetClientInt(rp_GetVehicleInt(target, car_owner), i_AddToPay)+1000);
 						CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez vendu votre batterie, 1000$ vous seront crédité à la fin de la journée.");
 						rp_SetVehicleInt(target, car_battery, -1);
 					}
