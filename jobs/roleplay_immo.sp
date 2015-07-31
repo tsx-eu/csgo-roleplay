@@ -36,6 +36,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_give_appart_door",		Cmd_ItemGiveAppart,				"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_appart_bonus",	Cmd_ItemGiveBonus,				"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_appart_keys",		Cmd_ItemGiveAppartDouble,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_appart_serrure",		Cmd_ItemAppartSerrure,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	
 	RegServerCmd("rp_item_prop",		Cmd_ItemProp,			"RP-ITEM",  FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_proptraps",	Cmd_ItemPropTrap,		"RP-ITEM",  FCVAR_UNREGISTERED);
@@ -100,6 +101,60 @@ public Action Cmd_ItemGiveAppart(int args) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes maintenant le propriétaire du garage n°%d", appart);
 		else
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes maintenant le propriétaire de l'appartement n°%d", appart);
+	}
+}
+public Action Cmd_ItemAppartSerrure(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemAppartSerrure");
+	#endif
+
+	int client = GetCmdArgInt(1);
+	int item_id = GetCmdArgInt(args);
+	int appartID = rp_GetPlayerZoneAppart(client);
+	if( appartID == -1 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être dans votre appartement.");
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
+	if( rp_GetAppartementInt(appartID, appart_proprio) != client ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes pas le propriétaire de cet appartement.");
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
+	Handle menu = CreateMenu(MenuSerrureVirer);
+	SetMenuTitle(menu, "Qui faut-il virer de l'appartement ?");
+	char tmp[32], tmp2[32];
+	for(int i=1; i<MAXPLAYERS+1; i++){
+		if(rp_GetClientKeyAppartement(i, appartID) && i!=client){
+			Format(tmp, 31, "%i_%i_%i", item_id, appartID, i);
+			Format(tmp2, 31, "%N", i);
+			AddMenuItem(menu,tmp,tmp2);
+		}
+	}
+	DisplayMenu(menu, client, 60);
+	return Plugin_Handled;
+}
+public int MenuSerrureVirer(Handle menu, MenuAction action, int client, int param2) {
+	if( action == MenuAction_Select ) {
+		char options[64], data[3][32];
+		GetMenuItem(menu, param2, options, 63);
+		ExplodeString(options, "_", data, sizeof(data), sizeof(data[]));
+		int item_id = StringToInt(data[0]);
+		int appartID = StringToInt(data[1]);
+		int target = StringToInt(data[2]);
+
+		if(rp_GetClientKeyAppartement(target, appartID)){
+			rp_SetClientInt(target, i_AppartCount, rp_GetClientInt(target, i_AppartCount) - 1);
+			rp_SetClientKeyAppartement(target, appartID, false);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Les clefs de l'appartement ont été retirées à %N.", target);
+		}
+		else{
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le joueur n'a pas les clefs de l'appartement.");
+			ITEM_CANCEL(client, item_id);
+		}
+	}
+	else if( action == MenuAction_End ) {
+		CloseHandle(menu);
 	}
 }
 public Action Cmd_ItemGiveAppartDouble(int args) {
