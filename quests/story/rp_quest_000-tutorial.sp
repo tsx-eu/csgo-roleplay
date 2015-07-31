@@ -452,7 +452,7 @@ public void Q10_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, " WiKi: http://www.ts-x.eu/wiki/");
 		DrawPanelText(panel, " TeamSpeak: ts.ts-x.eu");
 		DrawPanelText(panel, " ");
-		DrawPanelText(panel, "→ Allez faire un tour sur notre site ( dites /aide ");
+		DrawPanelText(panel, "→ Allez faire un tour sur notre wiki ( dites /aide ) ");
 		DrawPanelText(panel, " afin d'obtenir davantage d'aide et de");
 		DrawPanelText(panel, "continuer votre apprentissage.");
 		
