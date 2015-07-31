@@ -200,7 +200,7 @@ public int MenuRubanWho(Handle menu, MenuAction action, int client, int param2) 
 		AddMenuItem(menucolor, tmp, "Jaune");
 		Format(tmp,63,"%s_%i_%i_%i_%i_%i", data[0], target, 253, 108, 158, 200);
 		AddMenuItem(menucolor, tmp, "Rose");
-		DisplayMenu(menu, client, 60);
+		DisplayMenu(menu, client, 20);
 	}
 	else if( action == MenuAction_End ) {
 		CloseHandle(menu);
