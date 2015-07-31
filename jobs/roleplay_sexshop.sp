@@ -158,7 +158,7 @@ public Action Cmd_ItemMenottes(int args){
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit où vous êtes.");
 		return;
 	}
-	if(rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101){
+	if( (rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101) && !rp_IsInPVP(client)){
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit aux forces de l'ordre.");
 		ITEM_CANCEL(client, item_id);
 		return;
