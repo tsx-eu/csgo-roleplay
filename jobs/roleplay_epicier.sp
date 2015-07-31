@@ -141,38 +141,101 @@ public Action Cmd_ItemRuban(int args) {
 	PrintToServer("Cmd_ItemRuban");
 	#endif
 
-	int color[4];
-	color[0] = GetCmdArgInt(1);
-	color[1] = GetCmdArgInt(2);
-	color[2] = GetCmdArgInt(3);
-	color[3] = 200;
-	
-	int client = GetCmdArgInt(4);
-	int target = GetClientAimTarget(client, false);
+	int client = GetCmdArgInt(1);
 
 	int item_id = GetCmdArgInt(args);
-	
-	if( target == 0 || !IsValidEdict(target) || !IsValidEntity(target) ) {
-		ITEM_CANCEL(client, item_id);
-		return Plugin_Handled;
-	}
-	
-	char classname[64];
-	GetEdictClassname(target, classname, sizeof(classname));
-	
-	if( StrContains("chicken|player|weapon|prop_physics|", classname) == -1 ) {
-		ITEM_CANCEL(client, item_id);
-		return Plugin_Handled;
-	}
-	if( !rp_IsEntitiesNear(client, target) ) {
-		ITEM_CANCEL(client, item_id);
-		return Plugin_Handled;
-	}
-	
-	TE_SetupBeamFollow(target, g_cBeam, 0, 180.0, 4.0, 0.1, 5, color);
-	TE_SendToAll();
-	
+	rp_ClientGiveItem(client, item_id);
+	char tmp[32];
+	Handle menu = CreateMenu(MenuRubanWho);
+	SetMenuTitle(menu, "Sur qui mettre le ruban ?");
+	Format(tmp, 31, "%i_target", item_id);
+	AddMenuItem(menu, tmp, "Ce que je vise");
+	Format(tmp, 31, "%i_client", item_id);
+	AddMenuItem(menu, tmp, "Moi");
+	DisplayMenu(menu, client, 60);
 	return Plugin_Handled;
+}
+public int MenuRubanWho(Handle menu, MenuAction action, int client, int param2) {
+	if( action == MenuAction_Select ) {
+		int target;
+		char options[64], data[2][32];
+		GetMenuItem(menu, param2, options, 63);
+		ExplodeString(options, "_", data, sizeof(data), sizeof(data[]));
+		if(StrEqual(data[1],"client")){
+			target = client;
+		}
+		else{
+			target = GetClientAimTarget(client, false);
+			if( target == 0 || !IsValidEdict(target) || !IsValidEntity(target) ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre cible n'est pas valide");
+				return;
+			}
+			char classname[64];
+			GetEdictClassname(target, classname, sizeof(classname));
+
+			if( StrContains("chicken|player|weapon|prop_physics|", classname) == -1 ){
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre cible n'est pas valide");
+				return;
+			}
+
+			if( !rp_IsEntitiesNear(client, target) ){
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre cible est trop loin");
+				return;
+			}
+		}
+		char tmp[64];
+		Handle menucolor = CreateMenu(MenuRubanColor);
+		SetMenuTitle(menucolor, "De quelle couleur ?");
+		Format(tmp,63,"%s_%i_%i_%i_%i_%i", data[0], target, 255, 0  , 0  , 200);
+		AddMenuItem(menucolor, tmp, "Rouge");
+		Format(tmp,63,"%s_%i_%i_%i_%i_%i", data[0], target, 0  , 255, 0  , 200);
+		AddMenuItem(menucolor, tmp, "Vert");
+		Format(tmp,63,"%s_%i_%i_%i_%i_%i", data[0], target, 0  , 0  , 255, 200);
+		AddMenuItem(menucolor, tmp, "Bleu");
+		Format(tmp,63,"%s_%i_%i_%i_%i_%i", data[0], target, 255, 255, 255, 200);
+		AddMenuItem(menucolor, tmp, "Blanc");
+		Format(tmp,63,"%s_%i_%i_%i_%i_%i", data[0], target, 0  , 0  , 0  , 200);
+		AddMenuItem(menucolor, tmp, "Noir");
+		Format(tmp,63,"%s_%i_%i_%i_%i_%i", data[0], target, 122, 122, 0  , 200);
+		AddMenuItem(menucolor, tmp, "Jaune");
+		Format(tmp,63,"%s_%i_%i_%i_%i_%i", data[0], target, 253, 108, 158, 200);
+		AddMenuItem(menucolor, tmp, "Rose");
+		DisplayMenu(menu, client, 20);
+	}
+	else if( action == MenuAction_End ) {
+		CloseHandle(menu);
+	}
+}
+public int MenuRubanColor(Handle menu, MenuAction action, int client, int param2) {
+	if( action == MenuAction_Select ) {
+		char options[64], data[6][32];
+		int color[4];
+		GetMenuItem(menu, param2, options, 63);
+		ExplodeString(options, "_", data, sizeof(data), sizeof(data[]));
+		int item_id = StringToInt(data[0]);
+		int target = StringToInt(data[1]);
+		color[0] = StringToInt(data[2]);
+		color[1] = StringToInt(data[3]);
+		color[2] = StringToInt(data[4]);
+		color[3] = StringToInt(data[5]);
+		if( target == 0 || !IsValidEdict(target) || !IsValidEntity(target) ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre cible a disparue.");
+			return;
+		}
+		if(rp_GetClientItem(client, item_id)==0){
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez plus l'item ruban.");
+			return;
+		}
+		else{
+			rp_ClientGiveItem(client, item_id, -1);
+		}
+
+		TE_SetupBeamFollow(target, g_cBeam, 0, 180.0, 4.0, 0.1, 5, color);
+		TE_SendToAll();
+	}
+	else if( action == MenuAction_End ) {
+		CloseHandle(menu);
+	}
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemSanAndreas(int args) {
