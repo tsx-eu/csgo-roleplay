@@ -832,29 +832,19 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 					last[client] = target;
 					
 					if( StrEqual(arg1, "red") ) {
-						color[0] += 32;
-						color[1] -= 32;
-						color[2] -= 32;
+						color[0] += 32;	color[1] -= 32;	color[2] -= 32;
 					}
 					else if( StrEqual(arg1, "green") ) {
-						color[0] -= 32;
-						color[1] += 32;
-						color[2] -= 32;
+						color[0] -= 32;	color[1] += 32;	color[2] -= 32;
 					}
 					else if( StrEqual(arg1, "bleue") ) {
-						color[0] -= 32;
-						color[1] -= 32;
-						color[2] += 32;
+						color[0] -= 32;	color[1] -= 32;	color[2] += 32;
 					}
 					else if( StrEqual(arg1, "white") ) {
-						color[0] += 32;
-						color[1] += 32;
-						color[2] += 32;
+						color[0] += 32;	color[1] += 32;	color[2] += 32;
 					}
 					else if( StrEqual(arg1, "black") ) {
-						color[0] -= 32;
-						color[1] -= 32;
-						color[2] -= 32;
+						color[0] -= 32;	color[1] -= 32;	color[2] -= 32;
 					}
 					
 					for(int i=0; i<3; i++) {
@@ -908,7 +898,11 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 						continue;
 
 					if(rp_GetVehicleInt(target, car_battery) >= 420){
-						rp_SetClientInt(rp_GetVehicleInt(target, car_owner), i_AddToPay, rp_GetClientInt(rp_GetVehicleInt(target, car_owner), i_AddToPay)+1000);
+						rp_SetClientInt( client, i_AddToPay, rp_GetClientInt(client, i_AddToPay)+1000);
+						
+						int capital_id = rp_GetRandomCapital( client );
+						rp_SetJobCapital( capital_id, rp_GetJobCapital(capital_id)-1000 );
+						
 						CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez vendu votre batterie, 1000$ vous seront crédité à la fin de la journée.");
 						rp_SetVehicleInt(target, car_battery, -1);
 					}
