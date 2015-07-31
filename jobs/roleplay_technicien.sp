@@ -504,16 +504,12 @@ public Action Frame_CashMachine(Handle timer, any ent) {
 		return Plugin_Handled;
 	}
 	
-	
-	EmitSoundToAllAny("ambient/tones/equip3.wav", ent, _, _, _, 0.66);
-	
-	
 	if( !rp_GetClientBool(client, b_IsAFK) && rp_GetClientInt(client, i_TimeAFK) <= 60 && g_bProps_trapped[ent] == false ) {
+		EmitSoundToAllAny("ambient/tones/equip3.wav", ent, _, _, _, 0.66);
 		
 		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank)+1);
 		
 		int capital_id = rp_GetRandomCapital( rp_GetClientJobID(client) );
-
 		rp_SetJobCapital( capital_id, rp_GetJobCapital(capital_id)-1 );
 		
 		
