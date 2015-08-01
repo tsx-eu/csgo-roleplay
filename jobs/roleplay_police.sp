@@ -2170,8 +2170,14 @@ int BuildingBarriere(int client) {
 		
 		case 101: max = 7;	// Président
 		case 102: max = 6;	// Vice président
-		case 103: max = 5;	// HJ2
-		case 104: max = 4;	// HJ1
+		case 103: max = 6;	// HJ2
+		case 104: max = 5;	// HJ1
+		case 105: max = 4;	// J2
+		case 106: max = 3;	// J1
+		case 107: max = 5;	// GOS
+		case 108: max = 3;	// US
+		case 109: max = 1;	// gONU
+		
 		
 		default:max = 0;
 		
