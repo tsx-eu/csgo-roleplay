@@ -1004,16 +1004,18 @@ int appartToZoneID(int appartid){
 bool CanTP(float pos[3], int client) {
 	static float mins[3], maxs[3];
 	static bool init = false;
+	bool ret;
+	
 	if( !init ) {
 		GetClientMins(client, mins);
 		GetClientMaxs(client, maxs);
 		init = true;
 	}
 	
-    Handle tr;
-    tr = TR_TraceHullEx(pos, pos, mins, maxs, MASK_PLAYERSOLID);
-    ret = !TR_DidHit(tr);
-    CloseHandle(tr);
+	Handle tr;
+	tr = TR_TraceHullEx(pos, pos, mins, maxs, MASK_PLAYERSOLID);
+	ret = !TR_DidHit(tr);
+	CloseHandle(tr);
     #if defined DEBUG
 		if( !ret ) {
 			TR_GetEndPosition(maxs, tr);
