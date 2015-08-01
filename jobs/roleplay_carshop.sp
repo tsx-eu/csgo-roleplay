@@ -584,8 +584,9 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 				rp_SetVehicleInt(ent, car_battery, rp_GetVehicleInt(ent, car_battery)+1);
 				if(rp_GetVehicleInt(ent, car_battery) == 420)
 					CPrintToChat(driver, "{lightblue}[TSX-RP]{default} Votre batterie est pleine vous pouvez maintenant aller au garage pour la revendre.");
-				else if(rp_GetVehicleInt(ent, car_battery)%42 == 0)
-					CPrintToChat(driver, "{lightblue}[TSX-RP]{default} Votre batterie est chargée à %i%%.", rp_GetVehicleInt(ent, car_battery)/4.2);
+				else if(rp_GetVehicleInt(ent, car_battery)%42 == 0){
+					CPrintToChat(driver, "{lightblue}[TSX-RP]{default} Votre batterie est chargée à %i%%.", rp_GetVehicleInt(ent, car_battery)*100/420);
+				}
 
 				for (int i = 0; i < 3; i++)
 					g_lastpos[ent][i] = vecOrigin[i];
