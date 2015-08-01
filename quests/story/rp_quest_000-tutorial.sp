@@ -591,7 +591,11 @@ public int MenuSelectJob(Handle menu, MenuAction action, int client, int param2)
 		GetMenuItem(menu, param2, options, sizeof(options));
 		
 		if( !StrEqual(options, "") ) {
-			rp_SetClientInt(client, i_Job, StringToInt(options));
+			int job = StringToInt(options);
+			rp_SetClientInt(client, i_Job, job);
+			
+			rp_GetJobData(job, job_type_name, options, sizeof(options));
+			LogToGame("[TSX-RP] [TUTORIAL] %L a terminé son tutorial. Il a choisis %s comme job.", client, options);
 			FakeClientCommand(client, "say /shownotes");
 		}
 		
@@ -600,6 +604,8 @@ public int MenuSelectJob(Handle menu, MenuAction action, int client, int param2)
 		rp_QuestStepComplete(client, g_iQ13);
 		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez terminé le tutorial, une voiture vous a été offerte. (Faites /item !)");
+		
+		
 	}
 	else if( action == MenuAction_End ) {
 		CloseHandle(menu);
