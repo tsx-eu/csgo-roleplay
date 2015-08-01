@@ -24,7 +24,6 @@
 //#define DEBUG
 #define MAX_AREA_DIST		500.0
 #define MODEL_BAGAGE 		"models/props_unique/airport/luggage1.mdl"
-
 public Plugin myinfo = {
 	name = "Jobs: Sexshop", author = "KoSSoLaX",
 	description = "RolePlay - Jobs: Sexshop",
@@ -32,8 +31,10 @@ public Plugin myinfo = {
 };
 
 int g_cBeam, g_cGlow, g_cExplode;
+Handle g_vCapture = INVALID_HANDLE;
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
+	g_vCapture =  FindConVar("rp_capture");
 	RegServerCmd("rp_item_preserv",		Cmd_ItemPreserv,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_poupee",		Cmd_ItemPoupee,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_menottes",	Cmd_ItemMenottes,		"RP-ITEM",	FCVAR_UNREGISTERED);
@@ -158,7 +159,9 @@ public Action Cmd_ItemMenottes(int args){
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit où vous êtes.");
 		return;
 	}
-	if(rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101){
+	char capstatus[16];
+	GetConVarString(g_vCapture, capstatus, 15);
+	if( (rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101) && StrEqual(capstatus,"none")){
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit aux forces de l'ordre.");
 		ITEM_CANCEL(client, item_id);
 		return;
