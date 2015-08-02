@@ -316,7 +316,6 @@ public Action Cmd_ItemDoorDefine(int args) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le cadena a été placé avec succès.");
 	}
 	else if( StrEqual(Arg1, "alarm") ) {
-		// TODO: Payer plus chère, mais installer l'alarme partout ?
 		g_iDoorDefine_ALARM[doorID] = client;
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} L'alarme a été installée.");
 	}
@@ -415,7 +414,9 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	int client 	= ReadPackCell(dp);
 	int target	= ReadPackCell(dp);
 	
-	if( rp_IsEntitiesNear(client, target, true) == false ) {
+	rp_ClientColorize(client);
+	
+	if( rp_IsEntitiesNear(client, target, true) == false || !IsPlayerAlive(client) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un distributeur de billet.");
 		CreateTimer(0.5, AllowStealing, client);
 		return Plugin_Handled;
@@ -426,7 +427,6 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	GetClientEyePosition(client, vecOrigin);
 	vecOrigin[2] += 25.0;
 	
-	rp_ClientColorize(client);
 	
 	char classname[128];
 	GetEdictClassname(target, classname, sizeof(classname));

@@ -306,7 +306,9 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	
 	if( !rp_IsEntitiesNear(client, target) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez etre plus proche de la voiture pour la voler.");
-		CreateTimer(0.01, AllowStealing, client);
+		rp_ClientColorize(client);
+		rp_ClientReveal(client);
+		rp_SetClientBool(client, b_MaySteal, true);
 		return Plugin_Handled;
 	}
 	
