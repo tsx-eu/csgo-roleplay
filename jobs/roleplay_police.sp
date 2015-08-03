@@ -451,7 +451,7 @@ public Action Cmd_Tazer(int client) {
 				}
 			}
 		}
-		else if ( StrContains(tmp2, "weapon_") == 0 && GetEntPropEnt(target, Prop_Send, "m_hOwnerEntity") == -1 ) {
+		else if ( StrContains(tmp2, "weapon_") == 0 && GetEntPropEnt(target, Prop_Send, "m_hOwnerEntity") == -1  && GetEntProp(target, Prop_Data, "m_spawnflags") != 1 ) {
 			
 			rp_GetZoneData(Tzone, zone_type_name, tmp, sizeof(tmp));
 			LogToGame("[TSX-RP] [TAZER] %L a supprimé une arme %s dans %s", client, tmp2, tmp);
