@@ -53,9 +53,13 @@ public Action Cmd_GiveItem(int args) {
 	char Arg1[64];
 	GetCmdArg(1, Arg1, sizeof(Arg1));
 	
+	if( StrContains(Arg1, "weapon_usp") == 0 || StrContains(Arg1, "weapon_scout") == 0 )
+		return Plugin_Handled;
+	
 	int client = GetCmdArgInt(2);
 	int wpnID = GivePlayerItem(client, Arg1);
 	rp_SetClientWeaponSkin(client, wpnID);
+	return Plugin_Handled;
 }
 public Action Cmd_GiveItemPvP(int args) {
 	#if defined DEBUG
