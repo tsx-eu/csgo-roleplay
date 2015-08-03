@@ -182,8 +182,8 @@ public void Q3_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "commissariat pour différentes raisons.");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " Les principales raisons d’incarcération");
-		DrawPanelText(panel, "sont: Le meurtre ou la tentative");
-		DrawPanelText(panel, "de meurtre, le tir dans la rue, le vol,");
+		DrawPanelText(panel, "sont: Le meurtre ou l'aggression");
+		DrawPanelText(panel, "physique, le tir dans la rue, le vol,");
 		DrawPanelText(panel, "les nuisances sonores, le trafic illégal");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " Votre futur emploi définira votre");
