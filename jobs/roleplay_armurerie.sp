@@ -53,7 +53,7 @@ public Action Cmd_GiveItem(int args) {
 	char Arg1[64];
 	GetCmdArg(1, Arg1, sizeof(Arg1));
 	
-	if( StrEqual(Arg1, "weapon_usp") || StrEqual(Arg1, "weapon_scout") )
+	if( StrEqual(Arg1, "weapon_usp") || StrEqual(Arg1, "weapon_scout") || StrEqual(Arg1, "weapon_m3") )
 		return Plugin_Handled;
 	
 	int client = GetCmdArgInt(2);
