@@ -53,8 +53,11 @@ public Action Cmd_GiveItem(int args) {
 	char Arg1[64];
 	GetCmdArg(1, Arg1, sizeof(Arg1));
 	
-	if( StrEqual(Arg1, "weapon_usp") || StrEqual(Arg1, "weapon_scout") || StrEqual(Arg1, "weapon_m3") )
+	if( StrEqual(Arg1, "weapon_usp") || StrEqual(Arg1, "weapon_p228") || StrEqual(Arg1, "weapon_m3") || StrEqual(Arg1, "weapon_galil") || StrEqual(Arg1, "weapon_scout") )
 		return Plugin_Handled;
+	if( StrEqual(Arg1, "weapon_sg552") || StrEqual(Arg1, "weapon_sg550") || StrEqual(Arg1, "weapon_tmp") || StrEqual(Arg1, "weapon_mp5navy") )
+		return Plugin_Handled;
+	
 	
 	int client = GetCmdArgInt(2);
 	int wpnID = GivePlayerItem(client, Arg1);
