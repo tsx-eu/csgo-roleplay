@@ -40,7 +40,10 @@ char g_PropsAppart[][][128] = {
 	{ "Armoire",				"models/props_c17/FurnitureDresser001a.mdl"},
 	{ "Chaise",					"models/props_interiors/chair_office2.mdl"},
 	{ "Canapé",					"models/props_interiors/couch.mdl"},
-	{ "Table basse",			"models/props_interiors/coffee_table_rectangular.mdl"}
+	{ "Table basse",			"models/props_interiors/coffee_table_rectangular.mdl"},
+	{ "Pile de palettes",		"models/props/cs_assault/box_stack1.mdl"},
+	{ "Bar",					"models/props/cs_militia/bar01.mdl"},
+	{ "Mur de fortification",	"models/props_fortifications/concrete_block001_128_reference.mdl"}
 };
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
