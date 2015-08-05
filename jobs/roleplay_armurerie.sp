@@ -222,6 +222,7 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 			char type[32];
 			strcopy(type, 31, data[0]);
 			int price = StringToInt(data[1]);
+			int sellerjob;
 			int wep_id = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 			char wep_name[32];
 			GetEdictClassname(wep_id, wep_name, 31);
@@ -259,30 +260,50 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 					return;
 				}
 
-				if(StrEqual(type, "fire"))
+				if(StrEqual(type, "fire")){
 					rp_SetWeaponBallType(wep_id, ball_type_fire);
-				else if(StrEqual(type, "caoutchouc"))
+					sellerjob = 131;
+				}
+				else if(StrEqual(type, "caoutchouc")){
 					rp_SetWeaponBallType(wep_id, ball_type_caoutchouc);
-				else if(StrEqual(type, "poison"))
+					sellerjob = 31;
+				}
+				else if(StrEqual(type, "poison")){
 					rp_SetWeaponBallType(wep_id, ball_type_poison);
-				else if(StrEqual(type, "vampire"))
+					sellerjob = 31;
+				}
+				else if(StrEqual(type, "vampire")){
 					rp_SetWeaponBallType(wep_id, ball_type_vampire);
-				else if(StrEqual(type, "reflexive"))
+					sellerjob = 31;
+				}
+				else if(StrEqual(type, "reflexive")){
 					rp_SetWeaponBallType(wep_id, ball_type_reflexive);
-				else if(StrEqual(type, "explode"))
+					sellerjob = 31;
+				}
+				else if(StrEqual(type, "explode")){
 					rp_SetWeaponBallType(wep_id, ball_type_explode);
-				else if(StrEqual(type, "revitalisante"))
+					sellerjob = 131;
+				}
+				else if(StrEqual(type, "revitalisante")){
 					rp_SetWeaponBallType(wep_id, ball_type_revitalisante);
-				else if(StrEqual(type, "paintball"))
+					sellerjob = 31;
+				}
+				else if(StrEqual(type, "paintball")){
 					rp_SetWeaponBallType(wep_id, ball_type_paintball);
-				else if(StrEqual(type, "reload"))
+					sellerjob = 71;
+				}
+				else if(StrEqual(type, "reload")){
 					ServerCommand("rp_item_redraw %i 74", client);
+					sellerjob = 111;
+				}
 				else if(StrEqual(type, "sanandreas")){
 					int ammo = Weapon_GetPrimaryClip(wep_id);
 					ammo += 1000; if( ammo > 5000 ) ammo = 5000;
 					Weapon_SetPrimaryClip(wep_id, ammo);
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme à maintenant %i balles", ammo);
+					sellerjob = 31;
 				}
+				rp_SetJobCapital( sellerjob, rp_GetJobCapital(sellerjob)+price );
 				FakeClientCommand(client, "say /build");
 
 			}
@@ -319,6 +340,7 @@ public int ModifyWeaponPVP(Handle p_hItemMenu, MenuAction p_oAction, int client,
 
 			if((rp_GetClientInt(client, i_Bank)+rp_GetClientInt(client, i_Money)) >= price){
 				rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money)-price);
+				rp_SetJobCapital( 111, rp_GetJobCapital(111)+price );
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} La modification à été appliqué à votre arme.");	
 			}
 			else{
