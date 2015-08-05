@@ -43,6 +43,8 @@ char g_PropsAppart[][][128] = {
 	{ "Table basse",			"models/props_interiors/coffee_table_rectangular.mdl"},
 	{ "Pile de palettes",		"models/props/cs_assault/box_stack1.mdl"},
 	{ "Bar",					"models/props/cs_militia/bar01.mdl"}
+	{ "Lit",					"models\props\de_house\bed_rustic.mdl"}
+	{ "Etagère télévision",					"models/props_interiors/tv_cabinet.mdl"}
 };
 char g_PropsOutdoor[][][128] = {
 	{ "Cube",					"models/DeadlyDesire/props/blocks/v2/64x64.mdl "},
@@ -50,6 +52,7 @@ char g_PropsOutdoor[][][128] = {
 	{ "Mur de fortification",	"models/props_fortifications/concrete_block001_128_reference.mdl"},
 	{ "Distributeur de boisson","models/props/cs_office/vending_machine.mdl"},
 	{ "Bateau",					"models/props_urban/boat002.mdl"}
+	{ "Planche en bois",					"models/props/de_vertigo/construction_wood_2x4_01.mdl"}
 };
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
