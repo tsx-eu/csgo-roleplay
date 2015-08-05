@@ -31,6 +31,24 @@ public Plugin myinfo = {
 };
 
 int g_cBeam, g_cGlow;
+
+int g_PropsAppartItemId,g_PropsOutdoorItemId;
+char g_PropsAppart[][][128] = {
+	{ "Bureau",					"models/props_office/desk_01.mdl"},
+	{ "Télévision",				"models/props_interiors/tv.mdl"},
+	{ "Machine a laver",		"models/props_c17/furniturewashingmachine001a.mdl"},
+	{ "Armoire",				"models/props_c17/FurnitureDresser001a.mdl"},
+	{ "Chaise",					"models/props_interiors/chair_office2.mdl"},
+	{ "Canapé",					"models/props_interiors/couch.mdl"},
+	{ "Table basse",			"models/props_interiors/coffee_table_rectangular.mdl"},
+	{ "Pile de palettes",		"models/props/cs_assault/box_stack1.mdl"},
+	{ "Bar",					"models/props/cs_militia/bar01.mdl"},
+};
+char g_PropsOutdoor[][][128] = {
+	{ "Cube",					"models/DeadlyDesire/props/blocks/v2/64x64.mdl "},
+	{ "Palette",				"models/props_industrial/pallet_stack_96.mdl"},
+	{ "Mur de fortification",	"models/props_fortifications/concrete_block001_128_reference.mdl"}
+};
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
 	RegServerCmd("rp_give_appart_door",		Cmd_ItemGiveAppart,				"RP-ITEM",	FCVAR_UNREGISTERED);
@@ -38,7 +56,8 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_appart_keys",		Cmd_ItemGiveAppartDouble,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_appart_serrure",		Cmd_ItemAppartSerrure,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	
-	RegServerCmd("rp_item_prop",		Cmd_ItemProp,			"RP-ITEM",  FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_prop_appart",		Cmd_ItemPropAppart,			"RP-ITEM",  FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_prop_outdoor",	Cmd_ItemPropOutdoor,		"RP-ITEM",  FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_proptraps",	Cmd_ItemPropTrap,		"RP-ITEM",  FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_graves",		Cmd_ItemGrave,			"RP-ITEM", 	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_lampe", 		Cmd_ItemLampe,			"RP-ITEM",	FCVAR_UNREGISTERED);
@@ -262,80 +281,188 @@ public Action Cmd_ItemGiveBonus(int args) {
 	return Plugin_Handled;	
 }
 // ----------------------------------------------------------------------------
-public Action Cmd_ItemProp(int args) {
-	char model[128];
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemProp");
-	#endif
-	GetCmdArg(1, model, sizeof(model));
-	int client = GetCmdArgInt(2);
-	
-
+public Action Cmd_ItemPropAppart(int args){
+	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
+	g_PropsAppartItemId = item_id;
+	int zone = rp_GetPlayerZone(client);
+	int appart = rp_GetPlayerZoneAppart(client);
+	if(appart == -1){
+		if(rp_GetZoneInt(zone, zone_type_type) != rp_GetClientJobID(client)){
+			ITEM_CANCEL(client,item_id);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être dans votre planque ou dans votre appartment.");
+			return Plugin_Handled;
+		}
+	}
+	Handle menu = CreateMenu(MenuPropAppart);
+	for(int i=0; i<sizeof(g_PropsAppart); i++){
+		AddMenuItem(menu, g_PropsAppart[i][1], g_PropsAppart[i][0]);
+	}
+	DisplayMenu(menu, client, 60);
+	return Plugin_Handled;
+}
+public int MenuPropAppart(Handle menu, MenuAction action, int client, int param2) {
+	if( action == MenuAction_Select ) {
+		char model[128];
+		GetMenuItem(menu, param2, model, 127);
+		int item_id = g_PropsAppartItemId;
+		int zone = rp_GetPlayerZone(client);
+		int appart = rp_GetPlayerZoneAppart(client);
+		if(appart == -1){
+			if(rp_GetZoneInt(zone, zone_type_type) != rp_GetClientJobID(client)){
+				ITEM_CANCEL(client,item_id);
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être dans votre planque ou dans votre appartment.");
+				return;
+			}
+		}
+		int ent = CreateEntityByName("prop_physics_override"); 
+		if( !IsModelPrecached(model) ) {
+			PrecacheModel(model);
+		}
+		
+		DispatchKeyValue(ent, "physdamagescale", "0.0");
+		DispatchKeyValue(ent, "model", model);
+		DispatchSpawn(ent);
+		SetEntityModel(ent, model);
+		
+		float min[3], max[3], position[3], ang_eye[3], ang_ent[3], normal[3];
+		float distance = 50.0;
+		
+		GetEntPropVector( ent, Prop_Send, "m_vecMins", min );
+		GetEntPropVector( ent, Prop_Send, "m_vecMaxs", max );
+		
+		distance += SquareRoot( (max[0] - min[0]) * (max[0] - min[0]) + (max[1] - min[1]) * (max[1] - min[1]) ) * 0.5;
+		
+		GetClientFrontLocationData( client, position, ang_eye, distance );
+		normal[0] = 0.0;
+		normal[1] = 0.0;
+		normal[2] = 1.0;
+		
+		NegateVector( normal );
+		GetVectorAngles( normal, ang_ent );
+		
+		float volume = (max[0]-min[0]) * (max[1]-min[1]) * (max[2]-min[2]);
+		int heal = RoundToCeil(volume/500.0)+10;
+		position[2] += max[2];
+		Handle trace = TR_TraceHullEx(position, position, min, max, MASK_SOLID);
+		if( TR_DidHit(trace) ) {
+			delete trace;
+			
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a pas assez de place.");
+			AcceptEntityInput(ent, "Kill");
+			ITEM_CANCEL(client, item_id);
+			return;
+		}
+		delete trace;
+		
+		SetEntProp( ent, Prop_Data, "m_takedamage", 2);
+		SetEntProp( ent, Prop_Data, "m_iHealth", heal);
+		
+		SetEntityMoveType(ent, MOVETYPE_VPHYSICS); 
+		TeleportEntity(ent, position, ang_ent, NULL_VECTOR);
+		AcceptEntityInput(ent, "DisableMotion");
+		rp_ScheduleEntityInput(ent, 0.6, "EnableMotion");
+		
+		ServerCommand("sm_effect_fading %i 0.5", ent);
+		
+		rp_SetBuildingData(ent, BD_owner, client);
+		rp_Effect_BeamBox(client, ent, NULL_VECTOR, 0, 64, 255);
+		
+		HookSingleEntityOutput(ent, "OnBreak", PropBuilt_break);
+	}
+	else if( action == MenuAction_End ) {
+		CloseHandle(menu);
+	}
+}
+public Action Cmd_ItemPropOutdoor(int args){
+	int client = GetCmdArgInt(1);
+	int item_id = GetCmdArgInt(args);
+	g_PropsOutdoorItemId = item_id;
 	int zone = rp_GetPlayerZone(client);
 	int zoneBIT = rp_GetZoneBit(zone);
-	
+
 	if( rp_GetZoneInt(zone, zone_type_type) == 1 || zoneBIT & BITZONE_PEACEFULL || zoneBIT & BITZONE_BLOCKBUILD ) {
 		ITEM_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit où vous êtes.");
 		return Plugin_Handled;
 	}
-	
-	int ent = CreateEntityByName("prop_physics_override"); 
-	if( !IsModelPrecached(model) ) {
-		PrecacheModel(model);
+	Handle menu = CreateMenu(MenuPropOutdoor);
+	for(int i=0; i<sizeof(g_PropsOutdoor); i++){
+		AddMenuItem(menu, g_PropsOutdoor[i][1], g_PropsOutdoor[i][0]);
 	}
-	
-	DispatchKeyValue(ent, "physdamagescale", "0.0");
-	DispatchKeyValue(ent, "model", model);
-	DispatchSpawn(ent);
-	SetEntityModel(ent, model);
-	
-	float min[3], max[3], position[3], ang_eye[3], ang_ent[3], normal[3];
-	float distance = 50.0;
-	
-	GetEntPropVector( ent, Prop_Send, "m_vecMins", min );
-	GetEntPropVector( ent, Prop_Send, "m_vecMaxs", max );
-	
-	distance += SquareRoot( (max[0] - min[0]) * (max[0] - min[0]) + (max[1] - min[1]) * (max[1] - min[1]) ) * 0.5;
-	
-	GetClientFrontLocationData( client, position, ang_eye, distance );
-	normal[0] = 0.0;
-	normal[1] = 0.0;
-	normal[2] = 1.0;
-	
-	NegateVector( normal );
-	GetVectorAngles( normal, ang_ent );
-	
-	float volume = (max[0]-min[0]) * (max[1]-min[1]) * (max[2]-min[2]);
-	int heal = RoundToCeil(volume/250.0)+10;
-	position[2] += max[2];
-	Handle trace = TR_TraceHullEx(position, position, min, max, MASK_SOLID);
-	if( TR_DidHit(trace) ) {
+	DisplayMenu(menu, client, 60);
+	return Plugin_Handled;
+}
+public int MenuPropOutdoor(Handle menu, MenuAction action, int client, int param2) {
+	if( action == MenuAction_Select ) {
+		char model[128];
+		GetMenuItem(menu, param2, model, 127);
+		int item_id = g_PropsOutdoorItemId;
+		int zone = rp_GetPlayerZone(client);
+		int zoneBIT = rp_GetZoneBit(zone);
+
+		int ent = CreateEntityByName("prop_physics_override"); 
+		if( !IsModelPrecached(model) ) {
+			PrecacheModel(model);
+		}
+		if( rp_GetZoneInt(zone, zone_type_type) == 1 || zoneBIT & BITZONE_PEACEFULL || zoneBIT & BITZONE_BLOCKBUILD ) {
+			ITEM_CANCEL(client, item_id);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit où vous êtes.");
+			return;
+		}
+		DispatchKeyValue(ent, "physdamagescale", "0.0");
+		DispatchKeyValue(ent, "model", model);
+		DispatchSpawn(ent);
+		SetEntityModel(ent, model);
+		
+		float min[3], max[3], position[3], ang_eye[3], ang_ent[3], normal[3];
+		float distance = 50.0;
+		
+		GetEntPropVector( ent, Prop_Send, "m_vecMins", min );
+		GetEntPropVector( ent, Prop_Send, "m_vecMaxs", max );
+		
+		distance += SquareRoot( (max[0] - min[0]) * (max[0] - min[0]) + (max[1] - min[1]) * (max[1] - min[1]) ) * 0.5;
+		
+		GetClientFrontLocationData( client, position, ang_eye, distance );
+		normal[0] = 0.0;
+		normal[1] = 0.0;
+		normal[2] = 1.0;
+		
+		NegateVector( normal );
+		GetVectorAngles( normal, ang_ent );
+		
+		float volume = (max[0]-min[0]) * (max[1]-min[1]) * (max[2]-min[2]);
+		int heal = RoundToCeil(volume/250.0)+10;
+		position[2] += max[2];
+		Handle trace = TR_TraceHullEx(position, position, min, max, MASK_SOLID);
+		if( TR_DidHit(trace) ) {
+			delete trace;
+			
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a pas assez de place.");
+			AcceptEntityInput(ent, "Kill");
+			ITEM_CANCEL(client, item_id);
+			return;
+		}
 		delete trace;
 		
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a pas assez de place.");
-		AcceptEntityInput(ent, "Kill");
-		ITEM_CANCEL(client, item_id);
-		return Plugin_Handled;
+		SetEntProp( ent, Prop_Data, "m_takedamage", 2);
+		SetEntProp( ent, Prop_Data, "m_iHealth", heal);
+		
+		SetEntityMoveType(ent, MOVETYPE_VPHYSICS); 
+		TeleportEntity(ent, position, ang_ent, NULL_VECTOR);
+		AcceptEntityInput(ent, "DisableMotion");
+		rp_ScheduleEntityInput(ent, 0.6, "EnableMotion");
+		
+		ServerCommand("sm_effect_fading %i 0.5", ent);
+		
+		rp_SetBuildingData(ent, BD_owner, client);
+		rp_Effect_BeamBox(client, ent, NULL_VECTOR, 0, 64, 255);
+		
+		HookSingleEntityOutput(ent, "OnBreak", PropBuilt_break);
 	}
-	delete trace;
-	
-	SetEntProp( ent, Prop_Data, "m_takedamage", 2);
-	SetEntProp( ent, Prop_Data, "m_iHealth", heal);
-	
-	SetEntityMoveType(ent, MOVETYPE_VPHYSICS); 
-	TeleportEntity(ent, position, ang_ent, NULL_VECTOR);
-	AcceptEntityInput(ent, "DisableMotion");
-	rp_ScheduleEntityInput(ent, 0.6, "EnableMotion");
-	
-	ServerCommand("sm_effect_fading %i 0.5", ent);
-	
-	rp_SetBuildingData(ent, BD_owner, client);
-	rp_Effect_BeamBox(client, ent, NULL_VECTOR, 0, 64, 255);
-	
-	HookSingleEntityOutput(ent, "OnBreak", PropBuilt_break);
-	return Plugin_Handled;
+	else if( action == MenuAction_End ) {
+		CloseHandle(menu);
+	}
 }
 public void PropBuilt_break(const char[] output, int caller, int activator, float delay) {
 	#if defined DEBUG
