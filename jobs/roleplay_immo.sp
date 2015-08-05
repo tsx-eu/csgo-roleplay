@@ -47,7 +47,9 @@ char g_PropsAppart[][][128] = {
 char g_PropsOutdoor[][][128] = {
 	{ "Cube",					"models/DeadlyDesire/props/blocks/v2/64x64.mdl "},
 	{ "Palette",				"models/props_industrial/pallet_stack_96.mdl"},
-	{ "Mur de fortification",	"models/props_fortifications/concrete_block001_128_reference.mdl"}
+	{ "Mur de fortification",	"models/props_fortifications/concrete_block001_128_reference.mdl"},
+	{ "Distributeur de boisson","models/props/cs_office/vending_machine.mdl"},
+	{ "Bateau",					"models/props_urban/boat002.mdl"}
 };
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
@@ -284,17 +286,22 @@ public Action Cmd_ItemGiveBonus(int args) {
 public Action Cmd_ItemPropAppart(int args){
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
+	rp_ClientGiveItem(client,item_id);
 	g_PropsAppartItemId = item_id;
 	int zone = rp_GetPlayerZone(client);
 	int appart = rp_GetPlayerZoneAppart(client);
 	if(appart == -1){
 		if(rp_GetZoneInt(zone, zone_type_type) != rp_GetClientJobID(client)){
-			ITEM_CANCEL(client,item_id);
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être dans votre planque ou dans votre appartment.");
 			return Plugin_Handled;
 		}
 	}
+	CreateTimer(0.25, task_ItemPropAppart, client);
+	return Plugin_Handled;
+}
+public Action task_ItemPropAppart(Handle timer, any client) {
 	Handle menu = CreateMenu(MenuPropAppart);
+	SetMenuTitle(menu, "Quel props voulez vous spawn");
 	for(int i=0; i<sizeof(g_PropsAppart); i++){
 		AddMenuItem(menu, g_PropsAppart[i][1], g_PropsAppart[i][0]);
 	}
@@ -310,7 +317,6 @@ public int MenuPropAppart(Handle menu, MenuAction action, int client, int param2
 		int appart = rp_GetPlayerZoneAppart(client);
 		if(appart == -1){
 			if(rp_GetZoneInt(zone, zone_type_type) != rp_GetClientJobID(client)){
-				ITEM_CANCEL(client,item_id);
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être dans votre planque ou dans votre appartment.");
 				return;
 			}
@@ -350,7 +356,6 @@ public int MenuPropAppart(Handle menu, MenuAction action, int client, int param2
 			
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a pas assez de place.");
 			AcceptEntityInput(ent, "Kill");
-			ITEM_CANCEL(client, item_id);
 			return;
 		}
 		delete trace;
@@ -366,9 +371,11 @@ public int MenuPropAppart(Handle menu, MenuAction action, int client, int param2
 		ServerCommand("sm_effect_fading %i 0.5", ent);
 		
 		rp_SetBuildingData(ent, BD_owner, client);
+		rp_SetBuildingData(ent, BD_item_id, item_id);
 		rp_Effect_BeamBox(client, ent, NULL_VECTOR, 0, 64, 255);
 		
 		HookSingleEntityOutput(ent, "OnBreak", PropBuilt_break);
+		rp_ClientGiveItem(client,item_id,-1);
 	}
 	else if( action == MenuAction_End ) {
 		CloseHandle(menu);
@@ -377,16 +384,22 @@ public int MenuPropAppart(Handle menu, MenuAction action, int client, int param2
 public Action Cmd_ItemPropOutdoor(int args){
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
+	rp_ClientGiveItem(client,item_id);
 	g_PropsOutdoorItemId = item_id;
 	int zone = rp_GetPlayerZone(client);
 	int zoneBIT = rp_GetZoneBit(zone);
 
 	if( rp_GetZoneInt(zone, zone_type_type) == 1 || zoneBIT & BITZONE_PEACEFULL || zoneBIT & BITZONE_BLOCKBUILD ) {
-		ITEM_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit où vous êtes.");
 		return Plugin_Handled;
 	}
+	CreateTimer(0.25, task_ItemPropOutdoor, client);
+	return Plugin_Handled;
+}
+
+public Action task_ItemPropOutdoor(Handle timer, any client){
 	Handle menu = CreateMenu(MenuPropOutdoor);
+	SetMenuTitle(menu, "Quel props voulez vous spawn");
 	for(int i=0; i<sizeof(g_PropsOutdoor); i++){
 		AddMenuItem(menu, g_PropsOutdoor[i][1], g_PropsOutdoor[i][0]);
 	}
@@ -406,7 +419,6 @@ public int MenuPropOutdoor(Handle menu, MenuAction action, int client, int param
 			PrecacheModel(model);
 		}
 		if( rp_GetZoneInt(zone, zone_type_type) == 1 || zoneBIT & BITZONE_PEACEFULL || zoneBIT & BITZONE_BLOCKBUILD ) {
-			ITEM_CANCEL(client, item_id);
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit où vous êtes.");
 			return;
 		}
@@ -440,7 +452,6 @@ public int MenuPropOutdoor(Handle menu, MenuAction action, int client, int param
 			
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a pas assez de place.");
 			AcceptEntityInput(ent, "Kill");
-			ITEM_CANCEL(client, item_id);
 			return;
 		}
 		delete trace;
@@ -456,9 +467,11 @@ public int MenuPropOutdoor(Handle menu, MenuAction action, int client, int param
 		ServerCommand("sm_effect_fading %i 0.5", ent);
 		
 		rp_SetBuildingData(ent, BD_owner, client);
+		rp_SetBuildingData(ent, BD_item_id, item_id);
 		rp_Effect_BeamBox(client, ent, NULL_VECTOR, 0, 64, 255);
 		
 		HookSingleEntityOutput(ent, "OnBreak", PropBuilt_break);
+		rp_ClientGiveItem(client,item_id,-1);
 	}
 	else if( action == MenuAction_End ) {
 		CloseHandle(menu);
