@@ -206,8 +206,6 @@ native void rp_ScheduleEntityInput(int entity, float time, char[] input);				/* 
 native Handle rp_GetDatabase();											/* Récupère un pointeur sur la DB */
 native Handle rp_CreateSellingMenu();										/* Récupère un pointeur sur le menu de vente... cf... Je sais plus quel job. */
 // ----------------------------------------------------------------------------
-native void rp_ClientRemoveProp(int client, int target, int item_id);					/* Supprime un prop. Rembourse item_id si le target ne peut pas être supprimé */
-// ----------------------------------------------------------------------------
 native void rp_GetDate(char[] str, int length);
 native void rp_GetTime(int& hour, int& minutes);
 // ----------------------------------------------------------------------------

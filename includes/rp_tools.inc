@@ -241,3 +241,95 @@ stock void rp_ClientSwitchWeapon(int client, int wepid, int target=-1) {
 	
 	rp_SetClientWeaponSkin(target, wepid);
 }
+
+public Action rp_ClientRemoveProp(int client, int target, int item_id) {
+		
+	if( target > 0 && Entity_GetDistance(client, target) < 300.0 ) {
+		if( rp_IsRemoveAble(target) ) {
+				
+			char name[128];
+			GetEdictClassname(target, name, sizeof(name));
+			if( StrContains(name, "rp_cashmachine_") == 0 ) {
+					
+				int owner = GetEntPropEnt(target, Prop_Send, "m_hOwnerEntity");
+				if( IsValidClient(owner) ) {
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez detruit la machine de %N", owner);
+					CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos machines a faux billet a été detruite.");
+				}
+			}
+			else if( StrContains(name, "rp_plant_") == 0 ) {
+				int owner = GetEntPropEnt(target, Prop_Send, "m_hOwnerEntity");
+				if( IsValidClient(owner) && owner != client ) {
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez detruit un plant de drogue de %N", owner);
+					CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos plantations a été detruite.");
+				}
+				else if( owner == client ) {
+					char tmp2[64];
+					Format(tmp2, sizeof(tmp2), "rp_plant_%i_", client);
+						
+					ReplaceString(name, sizeof(name), tmp2, "");
+					ReplaceString(name, sizeof(name), "_", "");
+						
+					int sub = StringToInt(name);
+					rp_ClientGiveItem(client, sub, rp_GetBuildingData(target, BD_count));
+					
+					if( rp_GetBuildingData(target, BD_started)+180 < GetTime() ) {
+						rp_ClientGiveItem(client, sub, Math_GetRandomInt(1, 5) );
+					}
+				}
+			}
+			
+			rp_Effect_Tazer(client, target);
+				
+				
+			if( StrContains(name, "prop_physics") == 0 ) {
+				int owner = rp_GetBuildingData(target, BD_owner);
+				
+				if( IsValidClient(owner) ) {
+					
+					if( owner == client ) {
+						int i = rp_GetBuildingData(target, BD_item_id);
+						if( i > 0 ) {
+							rp_ClientGiveItem(client, i);
+						}
+						AcceptEntityInput(target, "Kill");
+					}
+					else {
+						// DealDamage(target, 1000, client);
+						SDKHooks_TakeDamage(target, client, client, 1000.0);
+					}
+				}
+				else {
+					AcceptEntityInput(target, "Kill");
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le props a été supprime.");
+				}
+			}
+			else {
+				AcceptEntityInput(target, "Kill");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le props a été supprime.");
+			}
+			
+			
+		}
+		else if( rp_IsValidVehicle(target) && rp_IsInPVP(client) ) {
+			
+			int heal = rp_GetVehicleInt(target, car_health) - 500;
+			int owner = rp_GetVehicleInt(target, car_owner);
+			rp_SetVehicleInt(target, car_health, heal);
+			
+			if( heal <= 0 && IsValidClient(owner) ) {
+				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre voiture a été détruite en PvP.");
+			}
+			rp_Effect_Tazer(client, target);
+		}
+		else {				
+			ITEM_CANCEL(client, item_id);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a rien à supprimer.");
+		}
+	}
+	else {
+		ITEM_CANCEL(client, item_id);
+	}
+	
+	return Plugin_Continue;
+}
