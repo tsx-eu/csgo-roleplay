@@ -31,6 +31,17 @@ public Plugin myinfo = {
 };
 
 int g_cBeam, g_cGlow;
+
+int g_PropsAppartItemId;
+char g_PropsAppart[][][128] = {
+	{ "Bureau",					"models/props_office/desk_01.mdl"},
+	{ "Télévision",				"models/props_interiors/tv.mdl"},
+	{ "Machine a laver",		"models/props_c17/furniturewashingmachine001a.mdl"},
+	{ "Armoire",				"models/props_c17/FurnitureDresser001a.mdl"},
+	{ "Chaise",					"models/props_interiors/chair_office2.mdl"},
+	{ "Canapé",					"models/props_interiors/couch.mdl"},
+	{ "Table basse",			"models/props_interiors/coffee_table_rectangular.mdl"}
+};
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
 	RegServerCmd("rp_give_appart_door",		Cmd_ItemGiveAppart,				"RP-ITEM",	FCVAR_UNREGISTERED);
@@ -38,6 +49,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_appart_keys",		Cmd_ItemGiveAppartDouble,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_appart_serrure",		Cmd_ItemAppartSerrure,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	
+	RegServerCmd("rp_item_prop_appart",		Cmd_ItemPropAppart,			"RP-ITEM",  FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_prop",		Cmd_ItemProp,			"RP-ITEM",  FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_proptraps",	Cmd_ItemPropTrap,		"RP-ITEM",  FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_graves",		Cmd_ItemGrave,			"RP-ITEM", 	FCVAR_UNREGISTERED);
@@ -262,6 +274,99 @@ public Action Cmd_ItemGiveBonus(int args) {
 	return Plugin_Handled;	
 }
 // ----------------------------------------------------------------------------
+public Action Cmd_ItemPropAppart(int args){
+	int client = GetCmdArgInt(1);
+	int item_id = GetCmdArgInt(args);
+	g_PropsAppartItemId = item_id;
+	int zone = rp_GetPlayerZone(client);
+	int appart = rp_GetPlayerZoneAppart(client);
+	if(appart == -1){
+		if(rp_GetZoneInt(zone, zone_type_type) != rp_GetClientJobID(client)){
+			ITEM_CANCEL(client,item_id);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être dans votre planque ou dans votre appartment.");
+			return Plugin_Handled;
+		}
+	}
+	Handle menu = CreateMenu(MenuPropAppart);
+	for(int i=0; i<sizeof(g_PropsAppart); i++){
+		AddMenuItem(menu, g_PropsAppart[i][1], g_PropsAppart[i][0]);
+	}
+	DisplayMenu(menu, client, 60);
+	return Plugin_Handled;
+}
+public int MenuPropAppart(Handle menu, MenuAction action, int client, int param2) {
+	if( action == MenuAction_Select ) {
+		char model[128];
+		GetMenuItem(menu, param2, model, 127);
+		int item_id = g_PropsAppartItemId;
+		int zone = rp_GetPlayerZone(client);
+		int appart = rp_GetPlayerZoneAppart(client);
+		if(appart == -1){
+			if(rp_GetZoneInt(zone, zone_type_type) != rp_GetClientJobID(client)){
+				ITEM_CANCEL(client,item_id);
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être dans votre planque ou dans votre appartment.");
+				return;
+			}
+		}
+		int ent = CreateEntityByName("prop_physics_override"); 
+		if( !IsModelPrecached(model) ) {
+			PrecacheModel(model);
+		}
+		
+		DispatchKeyValue(ent, "physdamagescale", "0.0");
+		DispatchKeyValue(ent, "model", model);
+		DispatchSpawn(ent);
+		SetEntityModel(ent, model);
+		
+		float min[3], max[3], position[3], ang_eye[3], ang_ent[3], normal[3];
+		float distance = 50.0;
+		
+		GetEntPropVector( ent, Prop_Send, "m_vecMins", min );
+		GetEntPropVector( ent, Prop_Send, "m_vecMaxs", max );
+		
+		distance += SquareRoot( (max[0] - min[0]) * (max[0] - min[0]) + (max[1] - min[1]) * (max[1] - min[1]) ) * 0.5;
+		
+		GetClientFrontLocationData( client, position, ang_eye, distance );
+		normal[0] = 0.0;
+		normal[1] = 0.0;
+		normal[2] = 1.0;
+		
+		NegateVector( normal );
+		GetVectorAngles( normal, ang_ent );
+		
+		float volume = (max[0]-min[0]) * (max[1]-min[1]) * (max[2]-min[2]);
+		int heal = RoundToCeil(volume/500.0)+10;
+		position[2] += max[2];
+		Handle trace = TR_TraceHullEx(position, position, min, max, MASK_SOLID);
+		if( TR_DidHit(trace) ) {
+			delete trace;
+			
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a pas assez de place.");
+			AcceptEntityInput(ent, "Kill");
+			ITEM_CANCEL(client, item_id);
+			return;
+		}
+		delete trace;
+		
+		SetEntProp( ent, Prop_Data, "m_takedamage", 2);
+		SetEntProp( ent, Prop_Data, "m_iHealth", heal);
+		
+		SetEntityMoveType(ent, MOVETYPE_VPHYSICS); 
+		TeleportEntity(ent, position, ang_ent, NULL_VECTOR);
+		AcceptEntityInput(ent, "DisableMotion");
+		rp_ScheduleEntityInput(ent, 0.6, "EnableMotion");
+		
+		ServerCommand("sm_effect_fading %i 0.5", ent);
+		
+		rp_SetBuildingData(ent, BD_owner, client);
+		rp_Effect_BeamBox(client, ent, NULL_VECTOR, 0, 64, 255);
+		
+		HookSingleEntityOutput(ent, "OnBreak", PropBuilt_break);
+	}
+	else if( action == MenuAction_End ) {
+		CloseHandle(menu);
+	}
+}
 public Action Cmd_ItemProp(int args) {
 	char model[128];
 	#if defined DEBUG
