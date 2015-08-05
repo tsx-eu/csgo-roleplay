@@ -42,7 +42,7 @@ char g_PropsAppart[][][128] = {
 	{ "Canapé",					"models/props_interiors/couch.mdl"},
 	{ "Table basse",			"models/props_interiors/coffee_table_rectangular.mdl"},
 	{ "Pile de palettes",		"models/props/cs_assault/box_stack1.mdl"},
-	{ "Bar",					"models/props/cs_militia/bar01.mdl"},
+	{ "Bar",					"models/props/cs_militia/bar01.mdl"}
 };
 char g_PropsOutdoor[][][128] = {
 	{ "Cube",					"models/DeadlyDesire/props/blocks/v2/64x64.mdl "},
