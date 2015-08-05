@@ -42,12 +42,14 @@ char g_PropsAppart[][][128] = {
 	{ "Canapé",					"models/props_interiors/couch.mdl"},
 	{ "Table basse",			"models/props_interiors/coffee_table_rectangular.mdl"},
 	{ "Pile de palettes",		"models/props/cs_assault/box_stack1.mdl"},
-	{ "Bar",					"models/props/cs_militia/bar01.mdl"},
+	{ "Bar",					"models/props/cs_militia/bar01.mdl"}
 };
 char g_PropsOutdoor[][][128] = {
 	{ "Cube",					"models/DeadlyDesire/props/blocks/v2/64x64.mdl "},
 	{ "Palette",				"models/props_industrial/pallet_stack_96.mdl"},
-	{ "Mur de fortification",	"models/props_fortifications/concrete_block001_128_reference.mdl"}
+	{ "Mur de fortification",	"models/props_fortifications/concrete_block001_128_reference.mdl"},
+	{ "Distributeur de boisson","models/props/cs_office/vending_machine.mdl"},
+	{ "Bateau",					"models/props_urban/boat002.mdl"}
 };
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
