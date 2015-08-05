@@ -43,7 +43,7 @@ char g_PropsAppart[][][128] = {
 	{ "Table basse",			"models/props_interiors/coffee_table_rectangular.mdl"},
 	{ "Pile de palettes",		"models/props/cs_assault/box_stack1.mdl"},
 	{ "Bar",					"models/props/cs_militia/bar01.mdl"},
-	{ "Lit",					"models\props\de_house\bed_rustic.mdl"},
+	{ "Lit",					"models/props/de_house/bed_rustic.mdl"},
 	{ "Etagère télévision",		"models/props_interiors/tv_cabinet.mdl"}
 };
 char g_PropsOutdoor[][][128] = {
