@@ -484,6 +484,7 @@ enum building_prop_data {
 	BD_max,
 	BD_owner,
 	BD_Trapped,
+	BD_item_id,
 	
 	building_prop_data_max
 };
