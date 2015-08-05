@@ -13,6 +13,7 @@
 #endif
 #define _rp_tools_included_
 
+#include <sdkhooks>
 // ----------------------------------------------------------------------------
 public int Math_GetRandomPow(int min, int max) {
 	return RoundToFloor(float(max - min) * Pow(GetURandomFloat(), 2.0)) + min;
