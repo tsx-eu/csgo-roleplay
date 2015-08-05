@@ -52,6 +52,12 @@ char g_PropsOutdoor[][][128] = {
 	{ "Mur de fortification",	"models/props_fortifications/concrete_block001_128_reference.mdl"},
 	{ "Distributeur de boisson","models/props/cs_office/vending_machine.mdl"},
 	{ "Bateau",					"models/props_urban/boat002.mdl"},
+	{ "Cabine de toilettes",	"models/props_urban/outhouse002.mdl"},
+	{ "Conduit en béton",		"models/props_pipes/concrete_pipe001b.mdl"},
+	{ "Petite Benne",			"models/props_junk/trashdumpster02a.mdl"},
+	{ "Table de picnic",		"models/props_interiors/table_picnic.mdl"},
+	{ "Etagère industrielle",   "models/props_industrial/warehouse_shelf001.mdl"},
+	{ "Barricade de carton",    "models/props/cs_assault/box_stack1.mdl"},
 	{ "Planche en bois",		"models/props/de_vertigo/construction_wood_2x4_01.mdl"}
 };
 // ----------------------------------------------------------------------------
