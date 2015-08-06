@@ -1630,7 +1630,8 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			LogToGame("[TSX-RP] [TRIBUNAL] %L a mis %L en prison du Tribunal.", client, target);
 			return;
 		}
-		if( StrEqual(g_szJailRaison[type][jail_raison],"Agression physique") ){ // Agression physique
+		if( StrEqual(g_szJailRaison[type][jail_raison],"Agression physique") 
+			&& !(rp_GetClientInt(client, i_Job) > 102 || rp_GetClientInt(client, i_Job) > 107) ) { // Agression physique
 			if(rp_GetClientInt(target, i_LastAgression)+30 < GetTime()){
 				rp_SetClientInt(target, i_JailTime, 0);
 				rp_SetClientInt(target, i_jailTime_Last, 0);
@@ -1745,9 +1746,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			rp_ClientResetSkin(target);
 			rp_ClientSendToSpawn(target, true);
 		}
-		else {
-			StripWeapons(target);
-		}
+		StripWeapons(target);
 	}
 	else if( action == MenuAction_End ) {
 		CloseHandle(menu);

@@ -304,7 +304,7 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	int client 	= ReadPackCell(dp);
 	int target	= ReadPackCell(dp);
 	
-	if( !rp_IsEntitiesNear(client, target) ) {
+	if( !rp_IsEntitiesNear(client, target) || !IsPlayerAlive(client) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez etre plus proche de la voiture pour la voler.");
 		rp_ClientColorize(client);
 		rp_ClientReveal(client);
