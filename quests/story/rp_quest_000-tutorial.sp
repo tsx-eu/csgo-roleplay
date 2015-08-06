@@ -37,7 +37,7 @@ int g_iQuest;
 // TODO: Déplacer les récompenses dans les fonctions appropriées
 // TODO: Trié les jobs par sous quota, ou quota "non respecté"
 
-int g_iQ8, g_iQ12, g_iQ13, g_iClientDoingQ[65];
+int g_iQ8, g_iQ12, g_iQ14, g_iClientDoingQ[65];
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	
@@ -59,6 +59,7 @@ public void OnPluginStart() {
 	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q11_Frame,	QUEST_NULL,	QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q12_Frame,	QUEST_NULL,	QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q13_Frame,	QUEST_NULL,	QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q14_Frame,	QUEST_NULL,	QUEST_NULL);
 	
 	
 	for (int j = 1; j <= MaxClients; j++)
@@ -182,14 +183,43 @@ public void Q3_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "commissariat pour différentes raisons.");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " Les principales raisons d’incarcération");
-		DrawPanelText(panel, "sont: Le meurtre ou l'aggression");
-		DrawPanelText(panel, "physique, le tir dans la rue, le vol,");
+		DrawPanelText(panel, "sont: Le meurtre ou la tentative");
+		DrawPanelText(panel, "de meurtre, le tir dans la rue, le vol,");
 		DrawPanelText(panel, "les nuisances sonores, le trafic illégal");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " Votre futur emploi définira votre");
 		DrawPanelText(panel, "camp. Par exemple, un mafieux vole de l'argent,");
 		DrawPanelText(panel, "un tueur à gage exécute des contrats, un");
 		DrawPanelText(panel, "policier tentera de les en empêcher.");
+		DrawPanelText(panel, " ");
+		DrawPanelText(panel, "→ Rendez-vous devant le tribunal.");
+		
+		rp_SendPanelToClient(panel, client, 1.1);
+		CreateTimer(1.1, PostKillHandle, panel);
+	}
+
+public void Q4_Frame(int objectiveID, int client) {
+	float origin[3], target[3] = {245.8 -1522.9 -2007.9};
+	GetClientAbsOrigin(client, origin);
+	
+	if( rp_ClientCanDrawPanel(client) ) {
+		
+		Handle panel = CreatePanel();
+		
+		SetPanelTitle(panel, "== Objectif 3: Le Tribunal");
+		DrawPanelText(panel, " Le tribunal sert pour les infraction");
+		DrawPanelText(panel, "qui n'ont pas été vue par la police.");
+		DrawPanelText(panel, "De ce faites vous pouvez venir y déposer plainte.");
+		DrawPanelText(panel, " ");
+		DrawPanelText(panel, " Les principales raisons sont :");
+		DrawPanelText(panel, "le meurtre, vol, et bien d'autre d'après le code pénal");
+		DrawPanelText(panel, "il vous suffit juste de connaître la");
+		DrawPanelText(panel, "personne qui vous a tué dans les 1h30 maximum IRL.");
+		DrawPanelText(panel, " ");
+		DrawPanelText(panel, " Votre futur emploi définira votre");
+		DrawPanelText(panel, "camp. Par exemple, un mafieux vole de l'argent,");
+		DrawPanelText(panel, "un tueur à gage exécute des contrats, un");
+		DrawPanelText(panel, "Un joueur pourra déposer plainte contre vous pour ceci");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, "→ Rendez-vous devant la banque.");
 		
@@ -215,7 +245,7 @@ public void Q3_Frame(int objectiveID, int client) {
 		rp_Effect_BeamBox(client, 0, target);
 	}
 }
-public void Q4_Frame(int objectiveID, int client) {
+public void Q5_Frame(int objectiveID, int client) {
 	float origin[3], target[3] = {2288.0, 136.0, -2134.0};
 	GetClientAbsOrigin(client, origin);
 	
@@ -252,7 +282,7 @@ public void Q4_Frame(int objectiveID, int client) {
 		rp_Effect_BeamBox(client, 0, target);
 	}
 }
-public void Q5_Frame(int objectiveID, int client) {
+public void Q6_Frame(int objectiveID, int client) {
 	float origin[3], target[3] = {-1900.0, 604.0, -2134.0};
 	GetClientAbsOrigin(client, origin);
 	
@@ -285,7 +315,7 @@ public void Q5_Frame(int objectiveID, int client) {
 		rp_Effect_BeamBox(client, 0, target);
 	}
 }
-public void Q6_Frame(int objectiveID, int client) {
+public void Q7_Frame(int objectiveID, int client) {
 	float origin[3], target[3] = {-1192.0, -778.0, -2135.0};
 	GetClientAbsOrigin(client, origin);
 	
@@ -324,7 +354,7 @@ public void Q6_Frame(int objectiveID, int client) {
 		rp_Effect_BeamBox(client, 0, target);
 	}
 }
-public void Q7_Frame(int objectiveID, int client) {
+public void Q8_Frame(int objectiveID, int client) {
 	float origin[3], target[3] = {-611.0, -1286.0, -2016.0};
 	GetClientAbsOrigin(client, origin);
 	
@@ -358,7 +388,7 @@ public void Q7_Frame(int objectiveID, int client) {
 		rp_Effect_BeamBox(client, 0, target);
 	}
 }
-public void Q8_Frame(int objectiveID, int client) {
+public void Q9_Frame(int objectiveID, int client) {
 	if( rp_ClientCanDrawPanel(client) ) {
 		
 		Handle panel = CreatePanel();
@@ -385,11 +415,11 @@ public void Q8_Frame(int objectiveID, int client) {
 	}
 }
 // ----------------------------------------------------------------------------
-public void Q8_Start(int objectiveID, int client) {
-	g_iQ8 = objectiveID;
+public void Q9_Start(int objectiveID, int client) {
+	g_iQ9 = objectiveID;
 	rp_HookEvent(client, RP_PrePlayerTalk, OnPlayerTalk);
 }
-public void Q8_Abort(int objectiveID, int client) {
+public void Q9_Abort(int objectiveID, int client) {
 	rp_UnhookEvent(client, RP_PrePlayerTalk, OnPlayerTalk);
 }
 public Action OnPlayerTalk(int client, char[] szSayText, int length, bool local) {
@@ -398,7 +428,7 @@ public Action OnPlayerTalk(int client, char[] szSayText, int length, bool local)
 	}
 }
 // ----------------------------------------------------------------------------
-public void Q9_Frame(int objectiveID, int client) {
+public void Q10_Frame(int objectiveID, int client) {
 	float origin[3], target[3] = {763.0,-4748.0, -2014.0};
 	GetClientAbsOrigin(client, origin);
 	
@@ -433,7 +463,7 @@ public void Q9_Frame(int objectiveID, int client) {
 	}
 }
 // ----------------------------------------------------------------------------
-public void Q10_Frame(int objectiveID, int client) {
+public void Q11_Frame(int objectiveID, int client) {
 	
 	if( rp_ClientCanDrawPanel(client) ) {
 		
@@ -460,14 +490,14 @@ public void Q10_Frame(int objectiveID, int client) {
 		CreateTimer(1.1, PostKillHandle, panel);
 	}
 }
-public void Q10_Start(int objectiveID, int client) {
+public void Q11_Start(int objectiveID, int client) {
 	g_iClientDoingQ[client] = objectiveID;
 }
-public void Q10_Abort(int objectiveID, int client) {
+public void Q11_Abort(int objectiveID, int client) {
 	g_iClientDoingQ[client] = -1;
 }
 // ----------------------------------------------------------------------------
-public void Q11_Frame(int objectiveID, int client) {
+public void Q12_Frame(int objectiveID, int client) {
 	float origin[3], target[3] = {2472.0, -1063.0, -2144.0};
 	GetClientAbsOrigin(client, origin);
 	
@@ -484,6 +514,9 @@ public void Q11_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "- Ne tuez pas tout les passants");
 		DrawPanelText(panel, "- Décrochez le rang no-pyj");
 		DrawPanelText(panel, "- Faites un tour sur notre TeamSpeak");
+		DrawPanelText(panel, "- N'oubliez pas de vous abonnez à la map présent sur workshop");
+		DrawPanelText(panel, "- Cela vous permettra de tenir à jour la map 'Princeton'");
+		DrawPanelText(panel, "- sans être sur le serveur.");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " Bon jeu!");
@@ -502,7 +535,7 @@ public void Q11_Frame(int objectiveID, int client) {
 		rp_Effect_BeamBox(client, 0, target);
 	}
 }
-public void Q12_Frame(int objectiveID, int client) {
+public void Q13_Frame(int objectiveID, int client) {
 	
 	if( rp_ClientCanDrawPanel(client) ) {
 		g_iQ12 = objectiveID;
@@ -560,7 +593,7 @@ public int MenuSelectParrain(Handle menu, MenuAction action, int client, int par
 	}
 }
 
-public void Q13_Frame(int objectiveID, int client) {
+public void Q14_Frame(int objectiveID, int client) {
 	static int job[] =  { 16, 25, 35, 46, 55, 65, 76, 85, 116, 125, 135, 175, 194/*, 216*/, 226 };
 	
 	if( rp_ClientCanDrawPanel(client) ) {
