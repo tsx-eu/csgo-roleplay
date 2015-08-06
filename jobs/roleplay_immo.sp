@@ -42,14 +42,23 @@ char g_PropsAppart[][][128] = {
 	{ "Canapé",					"models/props_interiors/couch.mdl"},
 	{ "Table basse",			"models/props_interiors/coffee_table_rectangular.mdl"},
 	{ "Pile de palettes",		"models/props/cs_assault/box_stack1.mdl"},
-	{ "Bar",					"models/props/cs_militia/bar01.mdl"}
+	{ "Bar",					"models/props/cs_militia/bar01.mdl"},
+	{ "Lit",					"models/props/de_house/bed_rustic.mdl"},
+	{ "Etagère télévision",		"models/props_interiors/tv_cabinet.mdl"}
 };
 char g_PropsOutdoor[][][128] = {
 	{ "Cube",					"models/DeadlyDesire/props/blocks/v2/64x64.mdl "},
 	{ "Palette",				"models/props_industrial/pallet_stack_96.mdl"},
 	{ "Mur de fortification",	"models/props_fortifications/concrete_block001_128_reference.mdl"},
 	{ "Distributeur de boisson","models/props/cs_office/vending_machine.mdl"},
-	{ "Bateau",					"models/props_urban/boat002.mdl"}
+	{ "Bateau",					"models/props_urban/boat002.mdl"},
+	{ "Cabine de toilettes",	"models/props_urban/outhouse002.mdl"},
+	{ "Conduit en béton",		"models/props_pipes/concrete_pipe001b.mdl"},
+	{ "Petite Benne",			"models/props_junk/trashdumpster02a.mdl"},
+	{ "Table de picnic",		"models/props_interiors/table_picnic.mdl"},
+	{ "Etagère industrielle",   "models/props_industrial/warehouse_shelf001.mdl"},
+	{ "Barricade de carton",    "models/props/cs_assault/box_stack1.mdl"},
+	{ "Planche en bois",		"models/props/de_vertigo/construction_wood_2x4_01.mdl"}
 };
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
