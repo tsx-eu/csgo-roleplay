@@ -236,7 +236,7 @@ public Action Cmd_ItemSucette2(int args) {
 		rp_SetClientFloat(client, fl_CoolDown, rp_GetClientFloat(client, fl_CoolDown) + 15.0);
 		duration += 0.66;
 	}
-	
+	rp_SetClientInt(client, i_LastAgression, GetTime());
 	EmitSoundToAll("UI/arm_bomb.wav", client);
 	
 	CreateTimer((duration / 4.0) * 1.0, Beep, client);
