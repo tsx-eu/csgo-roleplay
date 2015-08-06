@@ -210,7 +210,7 @@ native void rp_GetDate(char[] str, int length);
 native void rp_GetTime(int& hour, int& minutes);
 // ----------------------------------------------------------------------------
 native bool rp_ClientCanDrawPanel(int client);
-native void rp_SendPanelToClient(Handle panel, int client, float duration);
+native void rp_SendPanelToClient(Handle& panel, int client, float duration);
 typedef QuestFctInit = function bool (int client);
 typedef QuestFct = function void (int objectiveID, int client);
 public void QUEST_NULL(int objectiveID, int client) {
