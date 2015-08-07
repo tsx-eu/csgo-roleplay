@@ -66,13 +66,13 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "-----------------", ITEMDRAW_RAWLINE);
 	
-	menu.AddItem("", "Vous entendez comme des chuchotements endehors de cette église.", ITEMDRAW_RAWLINE);
-	menu.AddItem("", "Etant de nature curieuse vous décidez de vous en approchez", ITEMDRAW_RAWLINE);
-	menu.AddItem("", "pour écoute. Malheureusement, vous ne percevez que de petit bout de phrase...", ITEMDRAW_RAWLINE);
+	menu.AddItem("", "Vous entendez comme des chuchotements en dehors de cette église.", ITEMDRAW_RAWLINE);
+	menu.AddItem("", "Étant de nature curieuse vous décidez de vous en approchez", ITEMDRAW_RAWLINE);
+	menu.AddItem("", "pour écouter. Malheureusement, vous ne percevez que de petit bout de phrase...", ITEMDRAW_RAWLINE);
 	menu.AddItem("", "", ITEMDRAW_RAWLINE);
 	menu.AddItem("", "ςεττε vιℓℓε η'εsτ ραs sμя ρяοςμяεя vομs μηε αямε ρομя vομs δéfεηδяε.", ITEMDRAW_RAWLINE);
 	menu.AddItem("", "", ITEMDRAW_RAWLINE);
-	menu.AddItem("", "Par inadvetance, vous renversez la statue de Cupidon, juste derrière vous..", ITEMDRAW_RAWLINE);
+	menu.AddItem("", "Par inadvertance, vous renversez la statue de Cupidon, juste derrière vous..", ITEMDRAW_RAWLINE);
 	menu.AddItem("", "Vous entendez des bruits de pas s'éloigner.", ITEMDRAW_RAWLINE);
 	menu.AddItem("", "", ITEMDRAW_RAWLINE);
 	menu.AddItem("", "Vous décidez d'aller enquêter en direction du bruit.", ITEMDRAW_RAWLINE);	
@@ -99,13 +99,13 @@ public void Q2_Start(int objectiveID, int client) {
 	
 	menu.AddItem("", "-----------------", ITEMDRAW_RAWLINE);
 	
-	menu.AddItem("", "Vous avez suivit les bruits... Jusqu'à une tombe.", ITEMDRAW_RAWLINE);
-	menu.AddItem("", "On dirait qu'il y a quelqu'un d'entérrer vivant !!", ITEMDRAW_RAWLINE);
-	menu.AddItem("", "Il semblerai que cette ville cache bien des secrets.", ITEMDRAW_RAWLINE);
+	menu.AddItem("", "Vous avez suivi les bruits... Jusqu'à une tombe.", ITEMDRAW_RAWLINE);
+	menu.AddItem("", "On dirait qu'il y a quelqu'un d'enterrer vivant !!", ITEMDRAW_RAWLINE);
+	menu.AddItem("", "Il semblerait que cette ville cache bien des secrets.", ITEMDRAW_RAWLINE);
 	
 	menu.AddItem("", "Vous courrez jusqu'à l'armurerie... Vous décidez", ITEMDRAW_RAWLINE);
 	menu.AddItem("", "de vous procurer une arme afin de pouvoir mieux dormir la nuit", ITEMDRAW_RAWLINE);
-	menu.AddItem("", "et surtout de vous protéger si jamais on viendrais à vous attaquez.", ITEMDRAW_RAWLINE);
+	menu.AddItem("", "et surtout de vous protéger si jamais on viendrait à vous attaquer.", ITEMDRAW_RAWLINE);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 30);
