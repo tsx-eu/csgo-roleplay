@@ -437,18 +437,18 @@ public Action Cmd_ItemPickLock(int args) {
 	float StealTime = (Logarithm(float(price), 2.0) * 0.5) - 2.0;
 	
 	switch( job ) {
-		case 181:	StealTime += 0.0;
-		case 182:	StealTime += 0.1;
-		case 183:	StealTime += 0.2; // Haut gradé
-		case 184:	StealTime += 0.3; // Pro
-		case 185:	StealTime += 0.4; // Narmol
-		case 186:	StealTime += 0.5; // Apprenti
+		case 181:	StealTime += 0.1;
+		case 182:	StealTime += 0.2;
+		case 183:	StealTime += 0.3; // Haut gradé
+		case 184:	StealTime += 0.4; // Pro
+		case 185:	StealTime += 0.5; // Narmol
+		case 186:	StealTime += 0.6; // Apprenti
 		
-		default:	StealTime += 0.5;
+		default:	StealTime += 0.7;
 	}
 	
 	if( !rp_IsTargetSeen(target, client) ) {
-		StealTime -= 0.5;
+		StealTime -= 0.4;
 	}	
 	
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, StealTime);
@@ -637,7 +637,7 @@ public Action OnWeaponDrop(int client, int weapon) {
 }
 public Action fwdDamage(int client, int attacker, float& damage) {
 	
-	if( Math_GetRandomInt(0, 8) == 4 && rp_GetClientBool(attacker, b_Stealing) == true ) {
+	if( Math_GetRandomInt(0, 4) == 4 && rp_GetClientBool(attacker, b_Stealing) == true ) {
 		rp_SetClientBool(attacker, b_Stealing, false);
 		rp_ClientColorize(client);
 		rp_ClientReveal(client);

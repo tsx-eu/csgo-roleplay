@@ -12,6 +12,7 @@
 
 #include <sourcemod>
 #include <sdkhooks>
+#include <cstrike>
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
 #include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
@@ -755,7 +756,21 @@ public Action Cmd_ItemPiedBiche(int args) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être sur la place de l'indépendance pour utiliser utiliser ce pied de biche.");
 		return Plugin_Handled;
 	}
+	int count = 0;
+	for(int i=1; i<MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		if( rp_GetClientBool(i, b_IsAFK) )
+			continue;
+			
+		if( GetClientTeam(i) == CS_TEAM_CT || (rp_GetClientInt(i, i_Job) >= 1 && rp_GetClientInt(i, i_Job) <= 7 ) )
+			count++;
+	}
 		
+	if( count <= 0 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a pas de policier connecté.");
+		return Plugin_Handled;
+	}
 	float vecTarget[3];
 	GetClientAbsOrigin(client, vecTarget);
 	TE_SetupBeamRingPoint(vecTarget, 10.0, 500.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, {255, 0, 0, 200}, 10, 0);
