@@ -142,9 +142,22 @@ public Action Cmd_ItemRuban(int args) {
 	#endif
 
 	int client = GetCmdArgInt(1);
-
 	int item_id = GetCmdArgInt(args);
 	rp_ClientGiveItem(client, item_id);
+	
+	Handle dp;
+	CreateDataTimer(0.25, Cmd_ItemRuban_Task, dp);
+	WritePackCell(dp, client);
+	WritePackCell(dp, item_id);
+	
+	
+	return Plugin_Handled;
+}
+public Action Cmd_ItemRuban_Task(Handle timer, any dp) {
+	ResetPack(dp);
+	int client = ReadPackCell(dp);
+	int item_id = ReadPackCell(dp);
+	
 	char tmp[32];
 	Handle menu = CreateMenu(MenuRubanWho);
 	SetMenuTitle(menu, "Sur qui mettre le ruban ?");
@@ -153,6 +166,8 @@ public Action Cmd_ItemRuban(int args) {
 	Format(tmp, 31, "%i_client", item_id);
 	AddMenuItem(menu, tmp, "Moi");
 	DisplayMenu(menu, client, 60);
+	
+	CloseHandle(dp);
 	return Plugin_Handled;
 }
 public int MenuRubanWho(Handle menu, MenuAction action, int client, int param2) {
@@ -200,7 +215,7 @@ public int MenuRubanWho(Handle menu, MenuAction action, int client, int param2) 
 		AddMenuItem(menucolor, tmp, "Jaune");
 		Format(tmp,63,"%s_%i_%i_%i_%i_%i", data[0], target, 253, 108, 158, 200);
 		AddMenuItem(menucolor, tmp, "Rose");
-		DisplayMenu(menu, client, 20);
+		DisplayMenu(menucolor, client, 20);
 	}
 	else if( action == MenuAction_End ) {
 		CloseHandle(menu);
