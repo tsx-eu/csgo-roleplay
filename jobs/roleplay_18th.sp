@@ -248,7 +248,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 	
 	if( !rp_IsEntitiesNear(client, target) ) {
 		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez etre plus proche de la voiture pour la voler.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être plus proche de la voiture pour la voler.");
 		return Plugin_Handled;
 	}
 	
@@ -305,7 +305,7 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	int target	= ReadPackCell(dp);
 	
 	if( !rp_IsEntitiesNear(client, target) || !IsPlayerAlive(client) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez etre plus proche de la voiture pour la voler.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être plus proche de la voiture pour la voler.");
 		rp_ClientColorize(client);
 		rp_ClientReveal(client);
 		rp_SetClientBool(client, b_MaySteal, true);
@@ -334,7 +334,7 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	
 	if( !rp_GetClientKeyVehicle(client, target) ) {
 			
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %d billets ont été sorti de la boite a gants.", rand);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %d billets ont été sorti de la boîte à gants.", rand);
 			
 		while(rand >= 1 ) {
 			rand--;
@@ -389,7 +389,7 @@ public Action Cmd_ItemPickLock(int args) {
 		
 	if( !rp_IsEntitiesNear(client, target) ) {
 		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez etre plus proche du joueur pour le voler.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être plus proche du joueur pour le voler.");
 		return Plugin_Handled;
 	}
 	
@@ -485,7 +485,7 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 	rp_ClientReveal(client);
 	
 	if( rp_GetClientBool(target, b_Stealing) == false || !IsPlayerAlive(client) || !IsPlayerAlive(target) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N s'est débatu, le vol a échoué.", target);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N s'est débattu, le vol a échoué.", target);
 		rp_SetClientBool(target, b_Stealing, false);
 		SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 		return Plugin_Handled;
@@ -550,7 +550,7 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 				
 		}
 		else {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} L'arme %s de %N s'est déjà faites volée il y a quelques instant.", wepname, target);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} L'arme %s de %N s'est déjà faite volée il y a quelques instants.", wepname, target);
 		}
 	}
 	else {
@@ -602,7 +602,7 @@ int findPlayerWeapon(int client, int target) {
 	}
 	
 	if( (g_iStolenAmountTime[target] >= 3 && rp_GetClientFloat(target, fl_LastStolen)+(STEAL_TIME) > GetGameTime()) || (g_iStolenAmountTime[target] >= 5) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur s'est déjà fait volé récement.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur s'est déjà fait volé récemment.");
 		return -1;
 	}
 	if( rp_GetClientFloat(target, fl_Invincible) >= GetGameTime() ) {
