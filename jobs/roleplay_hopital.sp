@@ -110,7 +110,7 @@ public Action Cmd_ItemChirurgie(int args) {
 	int vendeur = GetCmdArgInt(3);
 	
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N{default} Vous fait une opération chirurgicale.", vendeur);
-	CPrintToChat(vendeur, "{lightblue}[TSX-RP]{default} Vous commencez a opérer %N.", client);
+	CPrintToChat(vendeur, "{lightblue}[TSX-RP]{default} Vous commencez à opérer %N.", client);
 	
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 5.0);
 	rp_HookEvent(vendeur, RP_PrePlayerPhysic, fwdFrozen, 5.0);
@@ -261,7 +261,7 @@ public Action Cmd_ItemSick(int args) {
 		
 		switch(rp_GetClientInt(client, i_Sick)) {
 			case sick_type_fievre:
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes atteint de Forte fièvre. Prenez des Cachets d'aspirine.");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes atteint de forte fièvre. Prenez des Cachets d'aspirine.");
 			case sick_type_grippe:
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes atteint de la Grippe. Prenez des Cachets d'amantadine.");
 			case sick_type_tourista:
@@ -270,7 +270,7 @@ public Action Cmd_ItemSick(int args) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes atteint d'hémorragie. Prenez une Poche de sang et priez.");
 			default: {
 				if( rp_GetClientInt(client, i_Sickness) )
-					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes empoisonné, prenez donc un anti-poison...");
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes empoisonné, prenez donc un antipoison...");
 				else
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Paix à votre âme. Je ne connais pas cette maladie.");
 			}
@@ -285,7 +285,7 @@ public Action Cmd_ItemSick(int args) {
 		g_iSuccess_last_faster_dead[client] = GetTime();
 	}
 	else {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ca n'a eut aucun effet.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ça n'a eu aucun effets.");
 	}
 }
 public Action Cmd_ItemPoison(int args) {
@@ -314,7 +314,7 @@ public Action Cmd_ItemPoison(int args) {
 	
 	rp_SetClientInt(client, i_LastAgression, GetTime());
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez empoisonné %N.", target);
-	CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été empoisoné.");
+	CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été empoisonné.");
 	rp_ClientPoison(target, 120.0, client);
 	
 	return Plugin_Handled;
@@ -327,7 +327,7 @@ public Action Cmd_ItemAntiPoison(int args) {
 	int client = GetCmdArgInt(1);
 	
 	if( rp_GetClientInt(client, i_Sickness) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes maintenant guérris.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes maintenant guéris.");
 		
 		// TODO:
 		//if( g_iSuccess_last_poison[client] > 0 && (g_iSuccess_last_poison[client]+(1)) >= GetTime() ) {
@@ -601,7 +601,7 @@ public void BuildingHealBox_break(const char[] output, int caller, int activator
 	#endif
 	
 	int client = GetEntPropEnt(caller, Prop_Send, "m_hOwnerEntity");
-	CPrintToChat(client,"{lightblue}[TSX-RP]{default} Votre Heal Box a été détruite");
+	CPrintToChat(client,"{lightblue}[TSX-RP]{default} Votre HealBox a été détruite");
 	
 	float vecOrigin[3];
 	Entity_GetAbsOrigin(caller,vecOrigin);
