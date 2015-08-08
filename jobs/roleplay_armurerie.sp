@@ -133,6 +133,9 @@ public Action Cmd_ItemBallType(int args) {
 	else if( StrEqual(arg1, "nosteal") ) {
 		rp_SetWeaponBallType(wepid, ball_type_nosteal);
 	}
+	else if( StrEqual(arg1, "notk") ) {
+		rp_SetWeaponBallType(wepid, ball_type_notk);
+	}
 	
 	return Plugin_Handled;
 }
@@ -207,9 +210,14 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 		AddMenuItem(menu, "paintball_50", "Ajouter des cartouches de paintball (50$)");
 
 	if(rp_GetWeaponBallType(wep_id) == ball_type_nosteal)
-		AddMenuItem(menu, "nosteal_50", "Ajouter des cartouches antivol (75$)", ITEMDRAW_DISABLED);
+		AddMenuItem(menu, "nosteal_75", "Ajouter des cartouches antivol (75$)", ITEMDRAW_DISABLED);
 	else
-		AddMenuItem(menu, "nosteal_50", "Ajouter des cartouches antivol (75$)");
+		AddMenuItem(menu, "nosteal_75", "Ajouter des cartouches antivol (75$)");
+
+	if(rp_GetWeaponBallType(wep_id) == ball_type_notk)
+		AddMenuItem(menu, "notk_50", "Ajouter des cartouches anti team-kill (50$)", ITEMDRAW_DISABLED);
+	else
+		AddMenuItem(menu, "notk_50", "Ajouter des cartouches anti team-kill (50$)");
 
 	DisplayMenu(menu, client, 60);
 	return Plugin_Handled;
@@ -302,6 +310,10 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 				}
 				else if(StrEqual(type, "nosteal")){
 					rp_SetWeaponBallType(wep_id, ball_type_nosteal);
+					sellerjob = 31;
+				}
+				else if(StrEqual(type, "notk")){
+					rp_SetWeaponBallType(wep_id, ball_type_notk);
 					sellerjob = 31;
 				}
 				else if(StrEqual(type, "reload")){
@@ -440,6 +452,14 @@ public Action fwdWeapon(int victim, int attacker, float &damage, int wepID, floa
 				TE_SendToAll();
 			}
 			damage = 0.0; // L'arme ne fait pas de dégats
+		}
+		case ball_type_notk: {
+			if(rp_GetClientGroupID(attacker) != rp_GetClientGroupID(victim)){
+				changed = false;
+			}
+			else{
+				damage *= 0.0;
+			}
 		}
 		default: {
 			changed = false;
