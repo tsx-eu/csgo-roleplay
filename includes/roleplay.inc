@@ -499,6 +499,7 @@ enum enum_ball_type {
 	ball_type_caoutchouc,
 	ball_type_poison,
 	ball_type_vampire,
+	ball_type_antikevlar,
 	ball_type_paintball,
 	ball_type_reflexive,
 	ball_type_explode,
