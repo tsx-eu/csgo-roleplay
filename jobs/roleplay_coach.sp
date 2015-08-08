@@ -273,12 +273,11 @@ public Action fwdWeapon(int victim, int attacker, float &damage) {
 		}
 		case ball_type_antikevlar: {
 			int kevlar = GetClientInt(victim, i_Kevlar);
-			kevlar = kevlar>0 ? kevlar : 0;
-			if (kevlar != 0)
-			{
+			if (kevlar != 0){
 				damage *= 0.50;
 				kevlar *= 0.7;
 				kevlar -= 20;
+				kevlar = kevlar>0 ? kevlar : 0;
 				rp_SetClientInt(victim, i_Kevlar, kevlar);
 			}
 		}
