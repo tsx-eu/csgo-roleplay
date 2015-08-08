@@ -244,7 +244,9 @@ public Action Cmd_ItemKnifeType(int args) {
 	else if( StrEqual(arg1, "vampire") ) {
 		ball_type_type = ball_type_vampire;
 	}
-	
+	else if (StrEqual(arg1, "anti-kevlar") ){
+		ball_type_type = ball_type_antikevlar;
+	}
 	if( rp_GetClientKnifeType(client) == ball_type_type ) {
 		ITEM_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà un couteau de ce type.");
@@ -268,6 +270,16 @@ public Action fwdWeapon(int victim, int attacker, float &damage) {
 
 			rp_SetClientFloat(victim, fl_FrozenTime, GetGameTime() + 1.5);
 			ServerCommand("sm_effect_flash %d 1.5 180", victim);
+		}
+		case ball_type_antikevlar: {
+			int kevlar = rp_GetClientInt(victim, i_Kevlar);
+			if (kevlar > 0){
+				damage *= 0.50;
+				kevlar *= 0.7;
+				kevlar -= 20;
+				kevlar = kevlar>0 ? kevlar : 0;
+				rp_SetClientInt(victim, i_Kevlar, kevlar);
+			}
 		}
 		case ball_type_poison: {
 			damage *= 0.40;
