@@ -273,7 +273,7 @@ public Action fwdWeapon(int victim, int attacker, float &damage) {
 		}
 		case ball_type_antikevlar: {
 			int kevlar = rp_GetClientInt(victim, i_Kevlar);
-			if (kevlar != 0){
+			if (kevlar > 0){
 				damage *= 0.50;
 				kevlar *= 0.7;
 				kevlar -= 20;
