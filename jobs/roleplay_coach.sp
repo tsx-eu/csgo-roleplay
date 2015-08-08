@@ -272,7 +272,7 @@ public Action fwdWeapon(int victim, int attacker, float &damage) {
 			ServerCommand("sm_effect_flash %d 1.5 180", victim);
 		}
 		case ball_type_antikevlar: {
-			int kevlar = GetClientInt(victim, i_Kevlar);
+			int kevlar = rp_GetClientInt(victim, i_Kevlar);
 			if (kevlar != 0){
 				damage *= 0.50;
 				kevlar *= 0.7;
