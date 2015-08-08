@@ -490,7 +490,7 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 		SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 		return Plugin_Handled;
 	}
-	if( (rp_IsClientNew(target) || (rp_GetClientJobID(target)==41 && rp_GetClientInt(target, i_ToKill) > 0)) && Math_GetRandomInt(0,3) != 0 ) {
+	if( (rp_IsClientNew(target) || (rp_GetClientJobID(target)==41 && rp_GetClientInt(target, i_ToKill) > 0) || (rp_GetWeaponBallType(wepid) == ball_type_nosteal)) && Math_GetRandomInt(0,3) != 0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N est plus difficile à voler qu'un autre...", target);
 		rp_SetClientBool(target, b_Stealing, false);
 		SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
