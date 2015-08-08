@@ -353,7 +353,8 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	rp_SetClientBool(client, b_MaySteal, true);
 	rp_SetClientKeyVehicle(client, target, true);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez maintenant les clés de cette voiture.");
-	
+	rp_SetClientInt(client, i_LastVolAmount, 200);
+	rp_SetClientInt(client, i_LastVolTarget, rp_GetVehicleInt(target, car_owner));
 	
 	return Plugin_Continue;
 }
