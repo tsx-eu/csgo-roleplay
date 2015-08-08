@@ -114,6 +114,12 @@ public Action fwdSpawn(int client) {
 	#endif
 	if( rp_GetClientInt(client, i_JailTime) > 0 )
 		SendPlayerToJail(client, 0);
+
+	if( GetClientTeam(client) == CS_TEAM_CT )
+		SetEntProp(client, Prop_Send, "m_bHasHelmet", 1);
+	else
+		SetEntProp(client, Prop_Send, "m_bHasHelmet", 0);
+
 	return Plugin_Continue;
 }
 public void OnClientDisconnect(int client) {
@@ -285,6 +291,7 @@ public Action Cmd_Cop(int client) {
 		SetEntityHealth(client, 100);
 		Entity_SetMaxHealth(client, 200);
 		rp_SetClientInt(client, i_Kevlar, 100);
+		SetEntProp(client, Prop_Send, "m_bHasHelmet", 0);
 		FakeClientCommand(client, "say /shownotes");
 	}
 	else if( GetClientTeam(client) == CS_TEAM_T ) {
@@ -292,6 +299,7 @@ public Action Cmd_Cop(int client) {
 		SetEntityHealth(client, 500);
 		Entity_SetMaxHealth(client, 500);
 		rp_SetClientInt(client, i_Kevlar, 250);
+		SetEntProp(client, Prop_Send, "m_bHasHelmet", 1);
 	}
 		
 	rp_ClientResetSkin(client);
