@@ -130,6 +130,9 @@ public Action Cmd_ItemBallType(int args) {
 	else if( StrEqual(arg1, "revitalisante") ) {
 		rp_SetWeaponBallType(wepid, ball_type_revitalisante);
 	}
+	else if( StrEqual(arg1, "nosteal") ) {
+		rp_SetWeaponBallType(wepid, ball_type_nosteal);
+	}
 	
 	return Plugin_Handled;
 }
@@ -202,6 +205,11 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 		AddMenuItem(menu, "paintball_50", "Ajouter des cartouches de paintball (50$)", ITEMDRAW_DISABLED);
 	else
 		AddMenuItem(menu, "paintball_50", "Ajouter des cartouches de paintball (50$)");
+
+	if(rp_GetWeaponBallType(wep_id) == ball_type_nosteal)
+		AddMenuItem(menu, "nosteal_50", "Ajouter des cartouches antivol (75$)", ITEMDRAW_DISABLED);
+	else
+		AddMenuItem(menu, "nosteal_50", "Ajouter des cartouches antivol (75$)");
 
 	DisplayMenu(menu, client, 60);
 	return Plugin_Handled;
@@ -291,6 +299,10 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 				else if(StrEqual(type, "paintball")){
 					rp_SetWeaponBallType(wep_id, ball_type_paintball);
 					sellerjob = 71;
+				}
+				else if(StrEqual(type, "nosteal")){
+					rp_SetWeaponBallType(wep_id, ball_type_nosteal);
+					sellerjob = 31;
 				}
 				else if(StrEqual(type, "reload")){
 					ServerCommand("rp_item_redraw %i 74", client);

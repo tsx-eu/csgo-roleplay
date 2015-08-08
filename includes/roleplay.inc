@@ -504,6 +504,7 @@ enum enum_ball_type {
 	ball_type_reflexive,
 	ball_type_explode,
 	ball_type_revitalisante,
+	ball_type_nosteal,
 	ball_type_max
 };
 enum rp_item_type {
