@@ -277,8 +277,8 @@ public Action fwdWeapon(int victim, int attacker, float &damage) {
 				damage *= 0.50;
 				kevlar *= 0.7;
 				kevlar -= 20;
-				kevlar = kevlar>0 ? kevlar : 0;
-				rp_SetClientInt(victim, i_Kevlar, kevlar);
+				
+				rp_SetClientInt(victim, i_Kevlar, kevlar = kevlar>0 ? kevlar : 0);
 			}
 		}
 		case ball_type_poison: {
