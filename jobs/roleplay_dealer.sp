@@ -830,6 +830,8 @@ public Action ItemPiedBicheOver(Handle timer, any client) {
 
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez trouvé %d %s", amount, tmp);
 	rp_ClientGiveItem(client, item_id, amount);
+	rp_SetClientInt(client, i_LastVolAmount, 200);
+	rp_SetClientInt(client, i_LastVolTarget, -1);
 	
 	int job = rp_GetClientInt(client, i_Job);
 	float time;

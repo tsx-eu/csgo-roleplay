@@ -453,7 +453,7 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	}
 		
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} %d billets ont été sorti du distributeur.", rand);
-		
+	int amount = 0;
 	while(rand >= 1 ) {
 		rand--;
 		
@@ -461,9 +461,12 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 		job = rp_GetRandomCapital(91);
 		
 		rp_Effect_SpawnMoney(vecOrigin, true);
-		rp_SetJobCapital(91, rp_GetJobCapital(91) + rnd);
+		amount += rnd;
 		rp_SetJobCapital(job, rp_GetJobCapital(job) - rnd);
 	}
+	rp_SetJobCapital(91, rp_GetJobCapital(91) + amount);
+	rp_SetClientInt(client, i_LastVolAmount, amount);
+	rp_SetClientInt(client, i_LastVolTarget, -1);
 	
 	float time;
 	
