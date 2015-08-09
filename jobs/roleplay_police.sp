@@ -2325,7 +2325,7 @@ public Action task_GPS(Handle timer, any client) {
 	char tmp[255], tmp2[255];
 	
 	for(int i = 1; i <= MaxClients; i++) {
-		if( !IsValidClient(i) )
+		if( !IsValidClient(i) || i == client )
 			continue;
 		
 		Format(tmp, sizeof(tmp), "%d", i);
