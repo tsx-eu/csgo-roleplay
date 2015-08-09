@@ -11,6 +11,7 @@
 #pragma semicolon 1
 
 #include <sourcemod>
+#include <sdkhooks>
 #include <smlib>
 #include <colors_csgo>
 #include <basecomm>
@@ -152,7 +153,57 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 
 		return Plugin_Handled;
 	}
+	else if( StrEqual(command, "job")){
+		Handle jobmenu = CreateMenu(MenuJobs);
+		SetMenuTitle(jobmenu, "Liste des jobs disponibles:");
+		char tmp[12], tmp2[64];
+
+		bool bJob[MAX_JOBS];
+
+		for(int i = 1; i <= MaxClients; i++) {
+
+			if( !IsValidClient(i) )
+				continue;
+			if( !IsClientConnected(i) )
+				continue;
+			if( rp_GetClientInt(i, i_Job) == 0 )
+				continue;
+			if( i == client )
+				continue;
+
+			int job = rp_GetClientJobID(i);
+			if(rp_GetClientJobID(client) != 0 && job == 181)
+				continue;
+
+			if( job == 1 || job == 101)
+				continue;
 	
+			bJob[job] = true;
+		}
+
+		int amount = 0;
+
+		for(int i=1; i<MAX_JOBS; i++) {
+			if( bJob[i] == false )
+				continue;
+
+			amount++;
+			Format(tmp, sizeof(tmp), "%d", i);
+			rp_GetJobData(i, job_type_name, tmp2, sizeof(tmp2));
+
+			AddMenuItem(jobmenu, tmp, tmp2);
+		}
+
+		if( amount == 0 ) {
+			CloseHandle(jobmenu);
+		}
+		else {
+			SetMenuExitButton(jobmenu, true);
+			DisplayMenu(jobmenu, client, 60);
+		}
+		return Plugin_Handled;
+	}
+
 	return Plugin_Continue;
 }
 public Action fwdHear(int client, int target, float& dist) {
@@ -184,4 +235,128 @@ public Action AllowStealing(Handle timer, any client) {
 	PrintToServer("AllowStealing");
 	#endif
 	rp_SetClientBool(client, b_MaySteal, true);
+}
+public int MenuJobs(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
+	if (p_oAction == MenuAction_Select) {
+		char szMenuItem[8];
+		if (GetMenuItem(p_hItemMenu, p_iParam2, szMenuItem, sizeof(szMenuItem))){
+			Handle menu = CreateMenu(MenuJobs2);
+			SetMenuTitle(menu, "Liste des employés connectés:");
+			int jobid = StringToInt(szMenuItem);
+			int amount = 0;
+			char tmp[128], tmp2[128];
+
+			if(jobid == 181){
+				for(int i=1; i<MAXPLAYERS+1;i++){
+					if(rp_GetClientInt(i, i_Job) != 181 && rp_GetClientInt(i, i_Job) != 182)
+						continue;
+
+					Format(tmp2, sizeof(tmp2), "%i", i);
+					rp_GetJobData(rp_GetClientInt(i, i_Job), job_type_name, tmp, sizeof(tmp));
+					Format(tmp, sizeof(tmp), "%N - %s", i, tmp);
+					AddMenuItem(menu, tmp2, tmp);
+					amount++;
+				}
+			}
+			else{
+				for(int i=1; i<MAXPLAYERS+1;i++){
+					if(rp_GetClientJobID(i) != jobid)
+						continue;
+
+					Format(tmp2, sizeof(tmp2), "%i", i);
+					rp_GetJobData(rp_GetClientInt(i, i_Job), job_type_name, tmp, sizeof(tmp));
+					Format(tmp, sizeof(tmp), "%N - %s", i, tmp);
+					AddMenuItem(menu, tmp2, tmp);
+					amount++;
+				}
+			}
+
+			if( amount == 0 ) {
+				CloseHandle(menu);
+			}
+			else {
+				SetMenuExitButton(menu, true);
+				DisplayMenu(menu, client, 60);
+			}
+		}
+	}
+	else if (p_oAction == MenuAction_End) {
+		CloseHandle(p_hItemMenu);
+	}
+}
+
+public int MenuJobs2(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
+	if (p_oAction == MenuAction_Select) {
+		char szMenuItem[8];
+		if (GetMenuItem(p_hItemMenu, p_iParam2, szMenuItem, sizeof(szMenuItem))){
+			Handle menu = CreateMenu(MenuJobs3);
+			SetMenuTitle(menu, "Que voulez vous lui demander:");
+			int target = StringToInt(szMenuItem);
+			int jobid = rp_GetClientJobID(target);
+			int amount = 0;
+			char tmp[128], tmp2[128];
+
+			if(rp_GetClientInt(target, i_Job)%10 == 1 || rp_GetClientInt(target, i_Job)%10 == 2){
+				Format(tmp2, sizeof(tmp2), "%i_-1", target);
+				AddMenuItem(menu, tmp2, "Demander à être recruté");
+				amount++;
+			}
+			if(jobid == 91){
+				Format(tmp2, sizeof(tmp2), "%i_-2", target);
+				AddMenuItem(menu, tmp2, "Demander pour un crochetage de porte");
+				amount++;
+			}
+			else{
+				for(int i=1;i<MAX_ITEMS+1;i++){
+					rp_GetItemData(i, item_type_job_id, tmp, sizeof(tmp));
+					if(StringToInt(tmp) != jobid)
+						continue;
+
+					rp_GetItemData(i, item_type_name, tmp, sizeof(tmp));
+					Format(tmp2, sizeof(tmp2), "%i_%i", target, i);
+					AddMenuItem(menu, tmp2, tmp);
+					amount++;
+				}
+			}
+
+			if( amount == 0 ) {
+				CloseHandle(menu);
+			}
+			else {
+				SetMenuExitButton(menu, true);
+				DisplayMenu(menu, client, 60);
+			}
+		}
+	}
+	else if (p_oAction == MenuAction_End) {
+		CloseHandle(p_hItemMenu);
+	}
+}
+
+public int MenuJobs3(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
+	if (p_oAction == MenuAction_Select) {
+		char szMenuItem[16];
+		if (GetMenuItem(p_hItemMenu, p_iParam2, szMenuItem, sizeof(szMenuItem))){
+			char data[2][32], tmp[128];
+			ExplodeString(szMenuItem, "_", data, sizeof(data), sizeof(data[]));
+			int target = StringToInt(data[0]);
+			int item_id = StringToInt(data[1]);
+			char zoneName[64];
+			rp_GetZoneData(rp_GetPlayerZone(client), zone_type_name, zoneName, sizeof(zoneName));
+			if(item_id == -1){
+				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N aimerait être recruté, il est actuellement: %s", client, zoneName);
+			}
+			else if(item_id == -2){
+				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin d'un crochetage de porte, il est actuellement: %s", client, zoneName);
+			}
+			else{
+				rp_GetItemData(item_id, item_type_name, tmp, sizeof(tmp));
+				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin de {lime}%s{default}, il est actuellement: %s", client, tmp, zoneName);
+			}
+			rp_Effect_BeamBox(target, client, NULL_VECTOR, 122, 122, 0);
+		}
+	}
+	else if (p_oAction == MenuAction_End) {
+		CloseHandle(p_hItemMenu);
+	}
 }
