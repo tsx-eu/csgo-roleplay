@@ -57,7 +57,7 @@ public Action Cmd_GiveItem(int args) {
 		return Plugin_Handled;
 	if( StrEqual(Arg1, "weapon_sg552") || StrEqual(Arg1, "weapon_sg550") || StrEqual(Arg1, "weapon_tmp") || StrEqual(Arg1, "weapon_mp5navy") )
 		return Plugin_Handled;
-	
+	// Toast
 	
 	int client = GetCmdArgInt(2);
 	int wpnID = GivePlayerItem(client, Arg1);
