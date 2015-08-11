@@ -260,7 +260,9 @@ public int MenuJobs(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_
 			}
 			else{
 				for(int i=1; i<MAXPLAYERS+1;i++){
-					if(!IsValidClient(client) || rp_GetClientJobID(i) != jobid)
+					if(!IsValidClient(i))
+						continue;
+					if(rp_GetClientJobID(i) != jobid)
 						continue;
 
 					Format(tmp2, sizeof(tmp2), "%i", i);
@@ -307,7 +309,7 @@ public int MenuJobs2(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 				amount++;
 			}
 			else{
-				for(int i=1;i<MAX_ITEMS+1;i++){
+				for(int i=1;i<MAX_ITEMS;i++){
 					rp_GetItemData(i, item_type_job_id, tmp, sizeof(tmp));
 					if(StringToInt(tmp) != jobid)
 						continue;
@@ -353,6 +355,7 @@ public int MenuJobs3(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 				rp_GetItemData(item_id, item_type_name, tmp, sizeof(tmp));
 				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin de {lime}%s{default}, il est actuellement: %s", client, tmp, zoneName);
 			}
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} La demande à été envoyée à la personne");
 			rp_Effect_BeamBox(target, client, NULL_VECTOR, 122, 122, 0);
 		}
 	}
