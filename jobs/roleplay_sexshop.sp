@@ -23,7 +23,7 @@
 
 //#define DEBUG
 #define MAX_AREA_DIST		500.0
-#define MODEL_BAGAGE 		"models/props_unique/airport/luggage1.mdl"
+
 public Plugin myinfo = {
 	name = "Jobs: Sexshop", author = "KoSSoLaX",
 	description = "RolePlay - Jobs: Sexshop",
@@ -47,7 +47,7 @@ public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt", true);
 	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt", true);
-	PrecacheModel(MODEL_BAGAGE, true);
+	PrecacheModel("models/props_unique/airport/luggage1.mdl", true);
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
@@ -412,11 +412,11 @@ int BuildingKevlarBox(int client) {
 	int ent = CreateEntityByName("prop_dynamic_override");
 	
 	DispatchKeyValue(ent, "classname", classname);
-	DispatchKeyValue(ent, "model", MODEL_BAGAGE);
+	DispatchKeyValue(ent, "model", "models/props_unique/airport/luggage1.mdl");
 	DispatchSpawn(ent);
 	ActivateEntity(ent);
 	
-	SetEntityModel(ent, MODEL_BAGAGE);
+	SetEntityModel(ent, "models/props_unique/airport/luggage1.mdl");
 	SetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity", client);
 	SetEntProp( ent, Prop_Data, "m_takedamage", 2);
 	SetEntProp( ent, Prop_Data, "m_iHealth", 2500);
@@ -490,7 +490,7 @@ public Action Frame_KevlarBox(Handle timer, any ent) {
 	if( inPvP )
 		maxDist = 180.0;
 	
-	int boxHeal = GetEntProp(ent, Prop_Data, "m_iHealth"), kevlar, toKevlar;
+	int boxKevlar = GetEntProp(ent, Prop_Data, "m_iHealth"), kevlar, toKevlar;
 	float dist;
 	
 	int owner = GetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity");	
@@ -504,7 +504,7 @@ public Action Frame_KevlarBox(Handle timer, any ent) {
 		
 		if( !IsValidClient(client) )
 			continue;
-		if( boxHeal < 100 )
+		if( boxKevlar < 100 )
 			break;
 		if( inPvP && rp_GetClientGroupID(client) != gOWNER )
 			continue;
@@ -543,16 +543,16 @@ public Action Frame_KevlarBox(Handle timer, any ent) {
 		if( kevlar > 250 )
 			kevlar = 250;
 			
-		boxHeal -= toKevlar;
+		boxKevlar -= toKevlar;
 		rp_SetClientInt(client, i_Kevlar, kevlar);
 	}
-	boxHeal += 5;
-	if( boxHeal > 2500 )
-		boxHeal = 2500;
+	boxKevlar += 5;
+	if( boxKevlar > 2500 )
+		boxKevlar = 2500;
 	if( !inPvP )
-		boxHeal += Math_GetRandomInt(5, 20);
+		boxKevlar += Math_GetRandomInt(5, 20);
 	
-	SetEntProp(ent, Prop_Data, "m_iHealth", boxHeal);
+	SetEntProp(ent, Prop_Data, "m_iHealth", boxKevlar);
 	
 	TE_SetupBeamRingPoint(vecOrigin, 1.0, maxDist, g_cBeam, g_cBeam, 1, 20, 1.0, 20.0, 0.0, {0, 0, 255, 128}, 10, 0);
 	TE_SendToAll();
