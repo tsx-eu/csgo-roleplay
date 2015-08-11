@@ -312,10 +312,18 @@ public Action Cmd_ItemDoorDefine(int args) {
 	}
 	
 	if( StrEqual(Arg1, "locker") ) {
+		if(g_iDoorDefine_LOCKER[doorID] == 0){
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Un cadenas est déja présent sur cette porte.");
+			ITEM_CANCEL(client, item_id);
+		}
 		g_iDoorDefine_LOCKER[doorID] = client;
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le cadena a été placé avec succès.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le cadenas a été placé avec succès.");
 	}
 	else if( StrEqual(Arg1, "alarm") ) {
+		if(g_iDoorDefine_ALARM[doorID] == 0){
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Une alarme est déja présente sur cette porte.");
+			ITEM_CANCEL(client, item_id);
+		}
 		g_iDoorDefine_ALARM[doorID] = client;
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} L'alarme a été installée.");
 	}
