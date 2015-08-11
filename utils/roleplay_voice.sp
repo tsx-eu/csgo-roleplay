@@ -262,7 +262,7 @@ public int MenuJobs(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_
 				for(int i=1; i<MAXPLAYERS+1;i++){
 					if(!IsValidClient(i))
 						continue;
-					if(rp_GetClientJobID(i) != jobid)
+					if(i == client || rp_GetClientJobID(i) != jobid)
 						continue;
 
 					Format(tmp2, sizeof(tmp2), "%i", i);
