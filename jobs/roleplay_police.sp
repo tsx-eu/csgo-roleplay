@@ -1127,6 +1127,9 @@ public int eventConvocation_2(Handle menu, MenuAction action, int client, int pa
 	PrintToServer("eventConvocation_2");
 	#endif
 	if( action == MenuAction_Select ) {
+		if( rp_GetZoneInt( rp_GetPlayerZone(client), zone_type_type) != 101 ) {
+			ACCESS_DENIED(client);
+		}
 		char options[64], optionsBuff[2][64];
 		GetMenuItem(menu, param2, options, sizeof(options));
 		
