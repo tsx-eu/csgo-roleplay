@@ -76,6 +76,15 @@ enum tribunal_type {
 	
 	tribunal_max
 }
+enum tribunal_search_data {
+	tribunal_search_status = 0,
+	tribunal_search_where,
+	tribunal_search_starttime,
+	
+	tribunal_search_max
+}
+
+int g_TribunalSearch[MAXPLAYERS+1][tribunal_search_max];
 char g_szTribunal_DATA[65][tribunal_max][64];
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
@@ -107,6 +116,7 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerSpawn, fwdSpawn);
 	rp_HookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
 	rp_HookEvent(client, RP_PreGiveDamage, fwdDmg);
+	g_TribunalSearch[client][tribunal_search_status] = -1;
 }
 public Action fwdSpawn(int client) {
 	#if defined DEBUG
@@ -1047,7 +1057,9 @@ public Action Cmd_Conv(int client) {
 	if( job == 109 || job == 108 || job == 107 ) {
 		ACCESS_DENIED(client);
 	}
-	
+	if( rp_GetZoneInt( rp_GetPlayerZone(client), zone_type_type) != 101 ) {
+		ACCESS_DENIED(client);
+	}
 	// Setup menu
 	Handle menu = CreateMenu(eventConvocation);
 	SetMenuTitle(menu, "Liste des joueurs:");
@@ -1079,31 +1091,36 @@ public int eventConvocation(Handle menu, MenuAction action, int client, int para
 		char options[128];
 		GetMenuItem(menu, param2, options, sizeof(options));
 		int target = StringToInt(options);
-		
+		if( rp_GetZoneInt( rp_GetPlayerZone(client), zone_type_type) != 101 ) {
+			return;
+		}
 		// Setup menu
 		Handle menu2 = CreateMenu(eventConvocation_2);
-		Format(options, sizeof(options), "Quel convocation donner a %N", target);
+		Format(options, sizeof(options), "Que faire pour %N", target);
 		SetMenuTitle(menu2, options);
-		
-		Format(options, sizeof(options), "%i_1", target);
-		AddMenuItem(menu2, options, "Premiere");
-		
-		Format(options, sizeof(options), "%i_2", target);
-		AddMenuItem(menu2, options, "Deuxieme");
-		
-		Format(options, sizeof(options), "%i_3", target);
-		AddMenuItem(menu2, options, "Troisieme");
-		
-		
-		Format(options, sizeof(options), "%i_0", target);
-		AddMenuItem(menu2, options, "Rechercher");
-		
-		Format(options, sizeof(options), "%i_-1", target);
-		AddMenuItem(menu2, options, "Stop recherche");
-		
+		if(g_TribunalSearch[target][tribunal_search_status] == -1){
+			Format(options, sizeof(options), "%i_1", target);
+			AddMenuItem(menu2, options, "Lancer la convocation");
+			
+			Format(options, sizeof(options), "%i_-1", target);
+			AddMenuItem(menu2, options, "Anuler la convocation", ITEMDRAW_DISABLED);
+
+			Format(options, sizeof(options), "%i_4", target);
+			AddMenuItem(menu2, options, "Forcer la recherche");
+		}
+		else{
+			Format(options, sizeof(options), "%i_1", target);
+			AddMenuItem(menu2, options, "Lancer la convocation", ITEMDRAW_DISABLED);
+			
+			Format(options, sizeof(options), "%i_-1", target);
+			AddMenuItem(menu2, options, "Anuler la convocation");
+
+			Format(options, sizeof(options), "%i_4", target);
+			AddMenuItem(menu2, options, "Forcer la recherche", ITEMDRAW_DISABLED);
+		}
 		
 		SetMenuExitButton(menu2, true);
-		DisplayMenu(menu2, client, MENU_TIME_DURATION*10);
+		DisplayMenu(menu2, client, 60);
 	}
 	else if( action == MenuAction_End ) {
 		CloseHandle(menu);
@@ -1114,6 +1131,9 @@ public int eventConvocation_2(Handle menu, MenuAction action, int client, int pa
 	PrintToServer("eventConvocation_2");
 	#endif
 	if( action == MenuAction_Select ) {
+		if( rp_GetZoneInt( rp_GetPlayerZone(client), zone_type_type) != 101 ) {
+			return;
+		}
 		char options[64], optionsBuff[2][64];
 		GetMenuItem(menu, param2, options, sizeof(options));
 		
@@ -1127,21 +1147,50 @@ public int eventConvocation_2(Handle menu, MenuAction action, int client, int pa
 			CPrintToChatAll("{lightblue} ================================== {default}");
 			CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}n'est plus recherché par le Tribunal.", target);
 			CPrintToChatAll("{lightblue} ================================== {default}");
+			g_TribunalSearch[target][tribunal_search_status] = -1;
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} La recherche sur le joueur %N à durée %.1f minutes.", target, (GetTime()-g_TribunalSearch[target][tribunal_search_starttime])/60.0);
+
 		}
-		else if( etat == 0 ) {
+		else if( etat == 1 ) {
+			g_TribunalSearch[target][tribunal_search_status] = 1;
+			g_TribunalSearch[target][tribunal_search_starttime] = GetTime();
+			g_TribunalSearch[target][tribunal_search_where] = FindCharInString(options,'1') != -1 ? 1 : 2;
+			CPrintToChatAll("{lightblue} ================================== {default}");
+			CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est appelé dans le Tribunal N°%i. [%i/3]", target, g_TribunalSearch[target][tribunal_search_where], etat);
+			CPrintToChatAll("{lightblue} ================================== {default}");
+			CreateTimer(30.0, Timer_ConvTribu, target, TIMER_REPEAT);
+		}
+		else if( etat == 4 ) {
+			g_TribunalSearch[target][tribunal_search_status] = 4;
+			g_TribunalSearch[target][tribunal_search_starttime] = GetTime();
+			g_TribunalSearch[target][tribunal_search_where] = FindCharInString(options,'1') != -1 ? 1 : 2;
 			CPrintToChatAll("{lightblue} ================================== {default}");
 			CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est recherché par le Tribunal.", target);
 			CPrintToChatAll("{lightblue} ================================== {default}");
-		}
-		else {
-			CPrintToChatAll("{lightblue} ================================== {default}");
-			CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est appelé dans le %s. [%i/3]", target, options, etat);
-			CPrintToChatAll("{lightblue} ================================== {default}");
+			CreateTimer(30.0, Timer_ConvTribu, target, TIMER_REPEAT);
 		}
 	}
 	else if( action == MenuAction_End ) {
 		CloseHandle(menu);
 	}
+}
+public Action Timer_ConvTribu(Handle timer, any target) {
+	if(!IsValidClient(target) || g_TribunalSearch[target][tribunal_search_status] == -1){
+		return Plugin_Stop;
+	}
+
+	g_TribunalSearch[target][tribunal_search_status]++;
+	if(g_TribunalSearch[target][tribunal_search_status] > 3){
+		CPrintToChatAll("{lightblue} ================================== {default}");
+		CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est recherché par le Tribunal.", target);
+		CPrintToChatAll("{lightblue} ================================== {default}");
+	}
+	else{
+		CPrintToChatAll("{lightblue} ================================== {default}");
+		CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est appelé dans le Tribunal N°%i. [%i/3]", target, g_TribunalSearch[target][tribunal_search_where], g_TribunalSearch[target][tribunal_search_status]);
+		CPrintToChatAll("{lightblue} ================================== {default}");
+	}
+	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_Tribunal(int client) {
