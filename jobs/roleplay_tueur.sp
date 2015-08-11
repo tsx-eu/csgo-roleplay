@@ -187,6 +187,7 @@ public Action fwdFrame(int client) {
 public Action fwdTueurKill(int client, int attacker, float& respawn) {
 	if( rp_GetClientInt(attacker, i_ToKill) == client ) {
 		CPrintToChat(attacker, "{lightblue}[TSX-RP]{default} Vous avez rempli votre contrat pour avoir tué %N.", client);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Un merceniare a rempli son contrat sur vous.");
 		rp_SetClientInt(attacker, i_AddToPay, rp_GetClientInt(attacker, i_AddToPay) + 100);
 		
 		int from = rp_GetClientInt(attacker, i_ContratFor);
