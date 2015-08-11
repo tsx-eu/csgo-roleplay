@@ -63,7 +63,7 @@ public void OnClientDisconnect(int client) {
 }
 public Action fwdCommand(int client, char[] command, char[] arg) {	
 	if( StrEqual(command, "search") || StrEqual(command, "lookup")) {
-		if( rp_GetClientJobID(client) != 1 &&  rp_GetClientJobID(client) != 41 && rp_GetClientJobID(client) != 211 ) { // Police, mercenaire, banquier
+		if( rp_GetClientJobID(client) != 1 &&  rp_GetClientJobID(client) != 41 && rp_GetClientJobID(client) != 211 && rp_GetClientJobID(client) != 101 ) { // Police, mercenaire, banquier, tribunal
 			ACCESS_DENIED(client);
 		}
 		int target = GetClientTarget(client);
