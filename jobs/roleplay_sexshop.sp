@@ -23,7 +23,7 @@
 
 //#define DEBUG
 #define MAX_AREA_DIST		500.0
-#define MODEL_BAGAGE 		"models/props_unique/airport/luggage1.mdl"
+#define MODEL_BAGAGE 		"models/props/cs_office/box_office_indoor_32.mdl"
 public Plugin myinfo = {
 	name = "Jobs: Sexshop", author = "KoSSoLaX",
 	description = "RolePlay - Jobs: Sexshop",
@@ -42,6 +42,10 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_sucetteduo",	Cmd_ItemSucette2,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_fouet",		Cmd_ItemFouet,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_alcool",		Cmd_ItemAlcool,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	
+	for (int i = 1; i <= MaxClients; i++) 
+		if( IsValidClient(i) )
+			OnClientPostAdminCheck(i);
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
@@ -421,7 +425,6 @@ int BuildingKevlarBox(int client) {
 	SetEntProp( ent, Prop_Data, "m_takedamage", 2);
 	SetEntProp( ent, Prop_Data, "m_iHealth", 2500);
 	
-	
 	TeleportEntity(ent, vecOrigin, NULL_VECTOR, NULL_VECTOR);
 	
 	SetEntityRenderMode(ent, RENDER_NONE);
@@ -430,11 +433,11 @@ int BuildingKevlarBox(int client) {
 	SetEntityMoveType(client, MOVETYPE_NONE);
 	SetEntityMoveType(ent, MOVETYPE_NONE);
 	
-	
 	rp_SetBuildingData(ent, BD_started, GetTime());
 	rp_SetBuildingData(ent, BD_owner, client );
 	
 	CreateTimer(3.0, BuildingKevlarBox_post, ent);
+
 	return ent;
 	
 }
@@ -442,8 +445,10 @@ public Action BuildingKevlarBox_post(Handle timer, any entity) {
 	#if defined DEBUG
 	PrintToServer("BuildingKevlarBox_post");
 	#endif
+	
 	if( !IsValidEdict(entity) && !IsValidEntity(entity) )
 		return Plugin_Handled;
+		
 	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
 	
 	SetEntityMoveType(client, MOVETYPE_WALK);
