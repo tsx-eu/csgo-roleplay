@@ -1161,7 +1161,7 @@ public int eventConvocation_2(Handle menu, MenuAction action, int client, int pa
 			CPrintToChatAll("{lightblue} ================================== {default}");
 			CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est recherché par le Tribunal.", target);
 			CPrintToChatAll("{lightblue} ================================== {default}");
-			CreateTimer(30.0, Timer_ConvTribu, target, TIMER_REPEAT);
+			CreateTimer(60.0, Timer_ConvTribu, target, TIMER_REPEAT);
 		}
 	}
 	else if( action == MenuAction_End ) {
@@ -1178,6 +1178,13 @@ public Action Timer_ConvTribu(Handle timer, any target) {
 		CPrintToChatAll("{lightblue} ================================== {default}");
 		CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est recherché par le Tribunal.", target);
 		CPrintToChatAll("{lightblue} ================================== {default}");
+	}
+	else if(g_TribunalSearch[target][tribunal_search_status] == 4){
+		CPrintToChatAll("{lightblue} ================================== {default}");
+		CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est appelé dans le Tribunal N°%i. [%i/3]", target, g_TribunalSearch[target][tribunal_search_where], g_TribunalSearch[target][tribunal_search_status]);
+		CPrintToChatAll("{lightblue} ================================== {default}");
+		CreateTimer(60.0, Timer_ConvTribu, target, TIMER_REPEAT);
+		return Plugin_Stop;
 	}
 	else{
 		CPrintToChatAll("{lightblue} ================================== {default}");
