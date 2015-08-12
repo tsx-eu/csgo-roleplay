@@ -231,6 +231,21 @@ public Action fwdHear(int client, int target, float& dist) {
 	
 	return Plugin_Continue;
 }
+public Action OnClientSayCommand(int client, const char[] command, const char[] sArgs){
+	if((strcmp(sArgs, "thetime", false) == 0) || (strcmp(sArgs, "timeleft", false) == 0) || (strcmp(sArgs, "/ff", false) == 0) || (strcmp(sArgs, "ff", false) == 0) || (strcmp(sArgs, "currentmap", false) == 0) || (strcmp(sArgs, "nextmap", false) == 0)){
+		if( rp_GetClientBool(client, b_IsMuteGlobal) ) {
+			PrintToChat(client, "\x04[\x02MUTE\x01]\x01: Vous avez été interdit d'utiliser le chat.");
+			return Plugin_Stop;
+		}
+		if( !rp_GetClientBool(client, b_MaySteal) ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez attendre encore quelques secondes.");
+			return Plugin_Stop;
+		}
+		rp_SetClientBool(client, b_MaySteal, false);
+		CreateTimer(10.0, AllowStealing, client);
+	}
+	return Plugin_Continue;
+}
 public Action AllowStealing(Handle timer, any client) {
 	#if defined DEBUG
 	PrintToServer("AllowStealing");
