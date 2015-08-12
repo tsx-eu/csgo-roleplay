@@ -59,6 +59,7 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 		if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
 			if( !rp_GetClientBool(client, b_MaySteal) ) {
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez attendre encore quelques secondes, avant d'utiliser à nouveau le chat annonce.");
+					return Plugin_Handled;
 			}
 			
 			rp_SetClientBool(client, b_MaySteal, false);
