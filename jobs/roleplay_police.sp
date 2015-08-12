@@ -1057,9 +1057,7 @@ public Action Cmd_Conv(int client) {
 	if( job == 109 || job == 108 || job == 107 ) {
 		ACCESS_DENIED(client);
 	}
-	if( rp_GetZoneInt( rp_GetPlayerZone(client), zone_type_type) != 101 ) {
-		ACCESS_DENIED(client);
-	}
+
 	// Setup menu
 	Handle menu = CreateMenu(eventConvocation);
 	SetMenuTitle(menu, "Liste des joueurs:");
@@ -1091,9 +1089,7 @@ public int eventConvocation(Handle menu, MenuAction action, int client, int para
 		char options[128];
 		GetMenuItem(menu, param2, options, sizeof(options));
 		int target = StringToInt(options);
-		if( rp_GetZoneInt( rp_GetPlayerZone(client), zone_type_type) != 101 ) {
-			return;
-		}
+
 		// Setup menu
 		Handle menu2 = CreateMenu(eventConvocation_2);
 		Format(options, sizeof(options), "Que faire pour %N", target);
@@ -1131,9 +1127,7 @@ public int eventConvocation_2(Handle menu, MenuAction action, int client, int pa
 	PrintToServer("eventConvocation_2");
 	#endif
 	if( action == MenuAction_Select ) {
-		if( rp_GetZoneInt( rp_GetPlayerZone(client), zone_type_type) != 101 ) {
-			return;
-		}
+
 		char options[64], optionsBuff[2][64];
 		GetMenuItem(menu, param2, options, sizeof(options));
 		
