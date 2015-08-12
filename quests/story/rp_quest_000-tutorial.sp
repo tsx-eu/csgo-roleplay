@@ -87,7 +87,10 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 		if( g_iClientDoingQ[client] > 0 ) {
 			rp_QuestStepComplete(client, g_iClientDoingQ[client]);
 		}
+		
+		return Plugin_Handled;
 	}
+	return Plugin_Continue;
 }
 public void ClientConVar(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue) {
 	if( StrEqual(cvarName, "cl_disablehtmlmotd", false) ) {
