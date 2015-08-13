@@ -407,6 +407,10 @@ public Action Cmd_Tazer(int client) {
 		if( (job == 103 || job == 104 || job == 105 || job == 106) && (rp_GetZoneInt(Czone, zone_type_type) != 101) ) { // J et HJ en dehors du tribu
 			ACCESS_DENIED(client);
 		}
+		if( rp_GetClientBool(target, b_Lube) && Math_GetRandomInt(1, 5) != 5) {
+			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N vous glisse entre les mains.", target);
+			return Plugin_Handled;
+		}
 		
 		float time;
 		rp_Effect_Tazer(client, target);
