@@ -274,6 +274,7 @@ enum bool_user_data {
 	b_Assurance,
 	b_Beacon,
 	b_Crayon,
+	b_Lube,
 	b_Map,
 	b_CAPSLOCK,
 	b_NoDonateurSkin,

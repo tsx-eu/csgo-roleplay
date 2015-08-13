@@ -42,6 +42,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_sucetteduo",	Cmd_ItemSucette2,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_fouet",		Cmd_ItemFouet,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_alcool",		Cmd_ItemAlcool,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_lube",		Cmd_ItemLube,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	
 	for (int i = 1; i <= MaxClients; i++) 
 		if( IsValidClient(i) )
@@ -177,6 +178,11 @@ public Action Cmd_ItemMenottes(int args){
 		return;
 	}
 	if( rp_GetZoneBit( rp_GetPlayerZone(target) ) & BITZONE_PEACEFULL ) {
+		ITEM_CANCEL(client, item_id);
+		return;
+	}
+	if( rp_GetClientBool(target, b_Lube) ) {
+		CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N vous glisse entre les mains.", target);
 		ITEM_CANCEL(client, item_id);
 		return;
 	}
@@ -564,4 +570,41 @@ public Action Frame_KevlarBox(Handle timer, any ent) {
 	
 	CreateTimer(1.0, Frame_KevlarBox, EntIndexToEntRef(ent));
 	return Plugin_Handled;
+}
+public Action Cmd_ItemLube(int args){
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemLube");
+	#endif
+
+	int client = GetCmdArgInt(1);
+	int item_id = GetCmdArgInt(1);
+
+	if(rp_GetClientBool(client, b_Lube)){
+		CPrintToChat(client,"{lightblue}[TSX-RP]{default} Vous semblez déjà bien lubrifié ;)");
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
+	rp_SetClientBool(client, b_Lube, true);
+	CreateTimer(30.0, ItemLube_After, client);
+	rp_HookEvent(client, RP_PreHUDColorize, fwdLube, 30.0);
+	return Plugin_Handled;
+}
+public Action ItemLube_After(Handle timer, any client){
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemLube");
+	#endif
+
+	rp_SetClientBool(client, b_Lube, false);
+}
+
+public Action fwdLube(int client, int color[4]){
+	#if defined DEBUG
+	PrintToServer("fwdLube");
+	#endif
+	
+	color[0] += 255;
+	color[1] += 191;
+	color[2] += 255;
+	color[3] += 50;
+	return Plugin_Changed;
 }
