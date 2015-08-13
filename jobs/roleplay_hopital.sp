@@ -63,6 +63,7 @@ public void OnPluginStart() {
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt", true);
+	PrecacheModel("models/pg_props/pg_hospital/pg_ekg.mdl", true);
 }
 // ----------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {

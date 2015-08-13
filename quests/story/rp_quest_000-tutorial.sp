@@ -87,7 +87,10 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 		if( g_iClientDoingQ[client] > 0 ) {
 			rp_QuestStepComplete(client, g_iClientDoingQ[client]);
 		}
+		
+		return Plugin_Handled;
 	}
+	return Plugin_Continue;
 }
 public void ClientConVar(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue) {
 	if( StrEqual(cvarName, "cl_disablehtmlmotd", false) ) {
@@ -126,6 +129,7 @@ public void Q1_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "au long de ce tutoriel.");
 		
 		rp_SendPanelToClient(panel, client, 1.1);
+		CreateTimer(1.1, PostKillHandle, panel);
 	}
 
 	
@@ -158,6 +162,7 @@ public void Q2_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "de continuer votre apprentissage.");
 		
 		rp_SendPanelToClient(panel, client, 1.1);
+		CreateTimer(1.1, PostKillHandle, panel);
 	}
 	
 	if( GetVectorDistance(target, origin) < 64.0 ) {
@@ -193,6 +198,7 @@ public void Q3_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "→ Rendez-vous devant la banque.");
 		
 		rp_SendPanelToClient(panel, client, 1.1);
+		CreateTimer(1.1, PostKillHandle, panel);
 	}
 	
 	if( GetVectorDistance(target, origin) < 64.0 ) {
@@ -229,6 +235,7 @@ public void Q4_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "→ Déposez tout votre argent en banque.");
 		
 		rp_SendPanelToClient(panel, client, 1.1);
+		CreateTimer(1.1, PostKillHandle, panel);
 	}
 	
 	if( GetVectorDistance(target, origin) < 64.0 && rp_GetClientInt(client, i_Money) <= 0 ) {
@@ -262,6 +269,7 @@ public void Q5_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "→ Rendez-vous devant le tribunal.");
 		
 		rp_SendPanelToClient(panel, client, 1.1);
+		CreateTimer(1.1, PostKillHandle, panel);
 	}
 
 
@@ -297,6 +305,7 @@ public void Q6_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "de déconnexion.");
 		
 		rp_SendPanelToClient(panel, client, 1.1);
+		CreateTimer(1.1, PostKillHandle, panel);
 	}
 	
 	if( rp_GetClientItem(client, 150) <= 0) {
@@ -329,6 +338,7 @@ public void Q7_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "de continuer votre apprentissage.");
 		
 		rp_SendPanelToClient(panel, client, 1.1);
+		CreateTimer(1.1, PostKillHandle, panel);
 	}
 	
 	if( GetVectorDistance(target, origin) < 64.0 ) {
@@ -368,6 +378,7 @@ public void Q8_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "apprentissage.");
 		
 		rp_SendPanelToClient(panel, client, 1.1);
+		CreateTimer(1.1, PostKillHandle, panel);
 	}
 	
 	if( rp_GetClientItem(client, 81) <= 0 && rp_GetClientItem(client, 103) <= 0 ) {
@@ -400,6 +411,7 @@ public void Q9_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "apprentissage.");
 		
 		rp_SendPanelToClient(panel, client, 1.1);
+		CreateTimer(1.1, PostKillHandle, panel);
 	}
 }
 // ----------------------------------------------------------------------------
@@ -440,6 +452,7 @@ public void Q10_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "→ Rendez-vous maintenant sur la place Station");
 		
 		rp_SendPanelToClient(panel, client, 1.1);
+		CreateTimer(1.1, PostKillHandle, panel);
 	}
 	
 	if( GetVectorDistance(target, origin) < 64.0 ) {
@@ -474,6 +487,7 @@ public void Q11_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "continuer votre apprentissage.");
 		
 		rp_SendPanelToClient(panel, client, 1.1);
+		CreateTimer(1.1, PostKillHandle, panel);
 	}
 }
 public void Q11_Start(int objectiveID, int client) {
@@ -511,6 +525,7 @@ public void Q12_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "commencer votre aventure RolePlay.");
 		
 		rp_SendPanelToClient(panel, client, 1.1);
+		CreateTimer(1.1, PostKillHandle, panel);
 	}
 	
 	if( GetVectorDistance(target, origin) < 64.0 ) {
@@ -628,4 +643,8 @@ public int MenuSelectJob(Handle menu, MenuAction action, int client, int param2)
 	else if( action == MenuAction_End ) {
 		CloseHandle(menu);
 	}
+}
+public Action PostKillHandle(Handle timer, any data) {
+	if( data != INVALID_HANDLE )
+		CloseHandle(data);
 }
