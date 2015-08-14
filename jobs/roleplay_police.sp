@@ -1993,7 +1993,7 @@ void start_perquiz(int client, int job) {
 	
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	CPrintToChatAll("{lightblue}[TSX-RP] [POLICE]{default} Début d'une perquisition dans: %s.", tmp);
-	LogToGame("[TSX-RP] [POLICE] Début d'une perquisition dans: %s.", tmp);
+	LogToGame("[TSX-RP] [POLICE] %N débute une perquisition dans: %s.",client, tmp);
 	
 	if( REP > 0 )
 		CPrintToChatAll("{lightblue}[TSX-RP] [POLICE]{default} %N {default}est prié de se présenter sur les lieux.", REP);
@@ -2010,7 +2010,7 @@ void begin_perquiz(int client, int job) {
 	
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	CPrintToChatAll("{lightblue}[TSX-RP] [POLICE]{default} Début d'une perquisition dans: %s.", tmp);
-	LogToGame("[TSX-RP] [POLICE] Début d'une perquisition dans: %s.", tmp);
+	LogToGame("[TSX-RP] [POLICE] La perquisition dans %s commence.", tmp);
 	
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	
@@ -2028,7 +2028,7 @@ void end_perquiz(int client, int job) {
 	
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	CPrintToChatAll("{lightblue}[TSX-RP] [POLICE]{default} Fin d'une perquisition dans: %s.", tmp);
-	LogToGame("[TSX-RP] [POLICE] Fin d'une perquisition dans: %s.", tmp);
+	LogToGame("[TSX-RP] [POLICE] %N a mis fin à une perquisition dans: %s.",client, tmp);
 	
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	
@@ -2051,7 +2051,7 @@ void cancel_perquiz(int client, int job) {
 	
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	CPrintToChatAll("{lightblue}[TSX-RP] [POLICE]{default} Annulation d'une perquisition dans: %s.", tmp);
-	LogToGame("[TSX-RP] [POLICE] Annulation d'une perquisition dans: %s.", tmp);
+	LogToGame("[TSX-RP] [POLICE] %N a annulé une perquisition dans: %s.",client, tmp);
 	
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	
