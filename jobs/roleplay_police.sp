@@ -1694,7 +1694,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 		}
 		if( StrEqual(g_szJailRaison[type][jail_raison],"Agression physique") 
 			&& !(rp_GetClientInt(client, i_Job) > 102 || rp_GetClientInt(client, i_Job) > 107) ) { // Agression physique
-			if(rp_GetClientInt(target, i_LastAgression)+30 < GetTime()){
+			if(rp_GetClientInt(target, i_LastAgression)+60 < GetTime()){
 				rp_SetClientInt(target, i_JailTime, 0);
 				rp_SetClientInt(target, i_jailTime_Last, 0);
 				rp_SetClientInt(target, i_JailledBy, 0);
