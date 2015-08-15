@@ -560,7 +560,7 @@ public Action EMPExplode_Task(Handle timer, any ent) {
 			if( GetVectorDistance(vecOrigin, vecOrigin2) > 400.0 )
 				continue;
 			
-			damage += 50.0;
+			damage += 52.5;
 			
 			TE_SetupExplosion(vecOrigin2, g_cExplode, 1.0, 0, 0, 25, 25);
 			TE_SendToAll();
@@ -587,6 +587,7 @@ public Action EMPExplode_Task(Handle timer, any ent) {
 						kev = 0;
 					
 					rp_SetClientInt(i, i_Kevlar, kev);
+					FakeClientCommand(i, "use weapon_knife; use weapon_knifegg"); 
 				}
 				else {
 					rp_ClientDamage(i, 50, client, "ctf_nade_emp");
