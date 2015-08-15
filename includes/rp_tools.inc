@@ -157,6 +157,9 @@ public bool rp_IsRemoveAble(int target) {
 	if( StrContains(classname, "rp_cashmachine_") == 0 ) {
 		return true;
 	}
+	if( StrContains(classname, "rp_bigcashmachine_") == 0 ) {
+		return true;
+	}
 	if( StrContains(classname, "rp_plant_") == 0 ) {
 		return true;
 	}
