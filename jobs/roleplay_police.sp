@@ -502,6 +502,21 @@ public Action Cmd_Tazer(int client) {
 				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos machines a faux billet a été detruite par un policier.");
 			}
 		}
+		else if ( StrContains(tmp2, "rp_bigcashmachine_") == 0 ) {
+			
+			rp_GetZoneData(Tzone, zone_type_name, tmp, sizeof(tmp));
+			LogToGame("[TSX-RP] [TAZER] %L a supprimé une grosse machine de %L dans %s", client, owner, tmp);
+			
+			reward = 25;
+			if( rp_GetBuildingData(target, BD_started)+120 < GetTime() ) {
+				reward = 1500;
+			}
+			
+			if( owner > 0 ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez detruit la grosse machine de %N", owner);
+				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre grosse machine a faux billet a été detruite par un policier.");
+			}
+		}
 		else if ( StrContains(tmp2, "rp_plant_") == 0 ) {
 			
 			rp_GetZoneData(Tzone, zone_type_name, tmp, sizeof(tmp));
