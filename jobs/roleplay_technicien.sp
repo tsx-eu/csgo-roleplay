@@ -53,6 +53,10 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_cash2",		Cmd_ItemCash,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_cashbig",		Cmd_ItemCashBig,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_morecash",	Cmd_ItemMoreCash,		"RP-ITEM",	FCVAR_UNREGISTERED);
+
+	for (int i = 1; i <= MaxClients; i++)
+		if( IsValidClient(i) )
+			OnClientPostAdminCheck(i);
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
@@ -348,11 +352,11 @@ public Action Cmd_ItemCash(int args) {
 	
 	return Plugin_Handled;
 }
-public Action fwdOnPlayerBuild(int client, float& cooldown) {
+public Action fwdOnPlayerBuild(int client, float& cooldown){
 	if( rp_GetClientJobID(client) != 221 )
 		return Plugin_Continue;
 	
-	int ent = BuildingCashMachine(client);
+	int ent = rp_GetClientInt(client, i_Job) == 221 ? BuildingBigCashMachine(client) : BuildingCashMachine(client);
 	if( ent > 0 ) {
 		cooldown = 30.0;
 	}
@@ -706,7 +710,7 @@ int BuildingBigCashMachine(int client) {
 	
 	int ent = CreateEntityByName("prop_physics");
 	
-	DispatchKeyValue(ent, "classname", classname);
+	DispatchKeyValue(ent, "classname", bigclassname);
 	DispatchKeyValue(ent, "model", MODEL_CASHBIG);
 	DispatchSpawn(ent);
 	ActivateEntity(ent);
@@ -722,16 +726,16 @@ int BuildingBigCashMachine(int client) {
 	TeleportEntity(ent, vecOrigin, NULL_VECTOR, NULL_VECTOR);
 	
 	SetEntityRenderMode(ent, RENDER_NONE);
-	ServerCommand("sm_effect_fading \"%i\" \"10.0\" \"0\"", ent);
+	ServerCommand("sm_effect_fading \"%i\" \"5.0\" \"0\"", ent);
 	
-	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 10.0);
+	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 5.0);
 	SetEntityMoveType(ent, MOVETYPE_NONE);
 	
 	
 	rp_SetBuildingData(ent, BD_started, GetTime());
 	rp_SetBuildingData(ent, BD_owner, client );
 	
-	CreateTimer(10.0, BuildingBigCashMachine_post, ent);
+	CreateTimer(5.0, BuildingBigCashMachine_post, ent);
 
 	return ent;
 }
@@ -743,7 +747,7 @@ public Action BuildingBigCashMachine_post(Handle timer, any entity) {
 	if( !IsValidEdict(entity) && !IsValidEntity(entity) )
 		return Plugin_Handled;
 
-	CreateTimer(20.0, Frame_BigCashMachine, EntIndexToEntRef(entity));
+	CreateTimer(2.0, Frame_BigCashMachine, EntIndexToEntRef(entity));
 	
 	SetEntProp( entity, Prop_Data, "m_takedamage", 2);
 	SetEntProp( entity, Prop_Data, "m_iHealth", 1000);
@@ -786,17 +790,17 @@ public Action Frame_BigCashMachine(Handle timer, any ent) {
 	}
 	
 	if( !rp_GetClientBool(client, b_IsAFK) && rp_GetClientInt(client, i_TimeAFK) <= 60 && g_bProps_trapped[ent] == false ) {
-		EmitSoundToAllAny("ambient/tones/equip3.wav", ent, _, _, _, 1.0, SNDPITCH_LOW);
+		EmitSoundToAllAny("ambient/tones/equip3.wav", ent, _, _, _, 1.0);
 		
-		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank)+15);
+		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank)+2);
 		
 		int capital_id = rp_GetRandomCapital( rp_GetClientJobID(client) );
-		rp_SetJobCapital( capital_id, rp_GetJobCapital(capital_id)-15 );
+		rp_SetJobCapital( capital_id, rp_GetJobCapital(capital_id)-2 );
 		
 		
 		if( rp_GetClientJobID(client) == 221 && Math_GetRandomInt(1, 100) > 80 ) {
-			rp_SetJobCapital( capital_id, rp_GetJobCapital(capital_id)-15 );
-			rp_SetJobCapital( 221, rp_GetJobCapital(221)+15 );
+			rp_SetJobCapital( capital_id, rp_GetJobCapital(capital_id)-2 );
+			rp_SetJobCapital( 221, rp_GetJobCapital(221)+2 );
 		}
 		
 		if( rp_GetBuildingData(ent, BD_started)+(48*60) < GetTime() ) {
@@ -818,7 +822,7 @@ public Action Frame_BigCashMachine(Handle timer, any ent) {
 		time = Math_GetRandomFloat(13.0, 18.0);
 	}
 	
-	CreateTimer(time, Frame_BigCashMachine, EntIndexToEntRef(ent));
+	CreateTimer(time/7.5, Frame_BigCashMachine, EntIndexToEntRef(ent));
 	return Plugin_Handled;
 }
 
@@ -841,7 +845,7 @@ void BigCashMachine_Destroy(int entity) {
 	
 	int owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
 	if( IsValidClient(owner) ) {
-		CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos machines a faux billet a été détruite.");
+		CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre grosse machine a faux billet a été détruite.");
 		
 		if( rp_GetBuildingData(entity, BD_started)+120 < GetTime() ) {
 			rp_SetClientInt(owner, i_Bank, rp_GetClientInt(owner, i_Bank)-300);
