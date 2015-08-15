@@ -549,7 +549,7 @@ public Action EMPExplode_Task(Handle timer, any ent) {
 		GetEdictClassname(i, classname, sizeof(classname));
 		
 		if( StrContains(classname, "player") == 0 || StrContains(classname, "weapon_") == 0 ||
-			StrContains(classname, "rp_cashmachine_") == 0 || StrContains(classname, "rp_mine_") == 0 ) {
+			StrContains(classname, "rp_cashmachine_") == 0 || StrContains(classname, "rp_bigcashmachine_") == 0 || StrContains(classname, "rp_mine_") == 0 ) {
 			
 			if( StrContains(classname, "weapon_knife") == 0 )
 				continue;
@@ -747,7 +747,7 @@ public Action Cmd_ItemBomb(int args) {
 	
 	char classname[64];
 	GetEdictClassname(target, classname, sizeof(classname));
-	if( StrContains("prop_door_rotating|func_door|chicken|player|rp_cashmachine|rp_plant|weapon|prop_physics|", classname) == -1 ) {
+	if( StrContains("prop_door_rotating|func_door|chicken|player|rp_cashmachine|rp_bigcashmachine|rp_plant|weapon|prop_physics|", classname) == -1 ) {
 		ITEM_CANCEL(client, item_id);
 		return Plugin_Handled;
 	}

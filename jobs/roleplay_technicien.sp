@@ -22,7 +22,8 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
-#define MODEL_CASH	"models/props_mall/cash_register.mdl"
+#define MODEL_CASH		"models/props_mall/cash_register.mdl"
+#define MODEL_CASHBIG	"models/props_interiors/copymachine01.mdl"
 
 public Plugin myinfo = {
 	name = "Jobs: Technicien", author = "KoSSoLaX",
@@ -50,6 +51,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_nano",		Cmd_ItemNano,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_cash",		Cmd_ItemCash,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_cash2",		Cmd_ItemCash,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_cashbig",		Cmd_ItemCashBig,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_morecash",	Cmd_ItemMoreCash,		"RP-ITEM",	FCVAR_UNREGISTERED);
 }
 public void OnMapStart() {
@@ -606,6 +608,243 @@ public Action PropsDamage(int victim, int &attacker, int &inflictor, float &dama
 		GetEdictClassname(wep_id, sWeapon, sizeof(sWeapon));
 		if( StrContains(sWeapon, "weapon_knife") == 0 || StrContains(sWeapon, "weapon_bayonet") == 0 ) {
 			ExplodeProp(victim);
+		}
+	}
+}
+// ------------------------------------------------------------------------------
+public Action Cmd_ItemCashBig(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemCashBig");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+	
+	if( rp_GetClientJobID(client) == 1 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit aux forces de l'ordre.");
+		return Plugin_Handled;
+	}
+	
+	int target = BuildingBigCashMachine(client);
+	
+	if( target == 0 ) {
+		char arg_last[12];
+		GetCmdArg(args, arg_last, 11);
+		int item_id = StringToInt(arg_last);
+		
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
+	rp_SetClientInt(client, i_Machine, 14);
+	return Plugin_Handled;
+}
+
+int BuildingBigCashMachine(int client) {
+	#if defined DEBUG
+	PrintToServer("BuildingBigCashMachine");
+	#endif
+	if( !rp_IsBuildingAllowed(client) )
+		return 0;
+	
+	char classname[64];
+	char bigclassname[64];
+	Format(bigclassname, sizeof(bigclassname), "rp_bigcashmachine_%i", client);
+	Format(classname, sizeof(classname), "rp_cashmachine_%i", client);
+	
+	float vecOrigin[3];
+	GetClientAbsOrigin(client, vecOrigin);
+	vecOrigin[2] += 12.0;
+	
+	int count, max = 15;
+	
+	switch( rp_GetClientInt(client, i_Job) ) {
+		case 221: max = 15; 
+		case 222: max = 14;
+		case 223: max = 13;
+		case 224: max = 12;
+		case 225: max = 11;
+		case 226: max = 10;		
+	}
+	
+	char tmp[64];
+	
+	for(int i=1; i<=2048; i++) {
+		if( !IsValidEdict(i) )
+			continue;
+		if( !IsValidEntity(i) )
+			continue;
+		
+		GetEdictClassname(i, tmp, 63);
+		if( StrEqual(bigclassname, tmp) ){
+			count += 15;
+		}
+		if( StrEqual(classname, tmp) ) {
+			count++;
+			
+			float vecOrigin2[3];
+			Entity_GetAbsOrigin(i, vecOrigin2);
+			
+			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 50 ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas construire aussi proche d'une autre machine à vous.");
+				return 0;
+			}
+		}
+	}
+	
+	int appart = rp_GetPlayerZoneAppart(client);
+	if( appart > 0 && rp_GetAppartementInt(appart, appart_bonus_coffre) ) {
+		max += 3;
+	}
+	
+	if( count >= max ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez trop de machine active.");
+		return 0;
+	}
+	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Construction en cours...");
+	
+	EmitSoundToAllAny("player/ammo_pack_use.wav", client, _, _, _, 0.66);
+	
+	int ent = CreateEntityByName("prop_physics");
+	
+	DispatchKeyValue(ent, "classname", classname);
+	DispatchKeyValue(ent, "model", MODEL_CASHBIG);
+	DispatchSpawn(ent);
+	ActivateEntity(ent);
+	
+	SetEntityModel(ent, MODEL_CASHBIG);
+	SetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity", client);
+	SetEntProp( ent, Prop_Data, "m_takedamage", 2);
+	SetEntProp( ent, Prop_Data, "m_iHealth", 1000);
+	
+	
+	
+	vecOrigin[2] -= 16.0;
+	TeleportEntity(ent, vecOrigin, NULL_VECTOR, NULL_VECTOR);
+	
+	SetEntityRenderMode(ent, RENDER_NONE);
+	ServerCommand("sm_effect_fading \"%i\" \"10.0\" \"0\"", ent);
+	
+	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 10.0);
+	SetEntityMoveType(ent, MOVETYPE_NONE);
+	
+	
+	rp_SetBuildingData(ent, BD_started, GetTime());
+	rp_SetBuildingData(ent, BD_owner, client );
+	
+	CreateTimer(10.0, BuildingBigCashMachine_post, ent);
+
+	return ent;
+}
+
+public Action BuildingBigCashMachine_post(Handle timer, any entity) {
+	#if defined DEBUG
+	PrintToServer("BuildingBigCashMachine_post");
+	#endif
+	if( !IsValidEdict(entity) && !IsValidEntity(entity) )
+		return Plugin_Handled;
+
+	CreateTimer(20.0, Frame_BigCashMachine, EntIndexToEntRef(entity));
+	
+	SetEntProp( entity, Prop_Data, "m_takedamage", 2);
+	SetEntProp( entity, Prop_Data, "m_iHealth", 1000);
+	
+	HookSingleEntityOutput(entity, "OnBreak", BuildingBigCashMachine_break);
+	
+	return Plugin_Handled;
+}
+
+public void BuildingBigCashMachine_break(const char[] output, int caller, int activator, float delay) {
+	#if defined DEBUG
+	PrintToServer("BuildingCashMachine_break");
+	#endif
+	BigCashMachine_Destroy(caller);
+	
+	if( IsValidClient(activator) ) {
+		rp_IncrementSuccess(activator, success_list_no_tech);
+		
+		if( rp_IsInPVP(caller) ) {
+			int owner = GetEntPropEnt(caller, Prop_Send, "m_hOwnerEntity");
+			if( IsValidClient(owner) ) {
+				if( rp_GetClientGroupID(activator) > 0 && rp_GetClientGroupID(owner) > 0 && rp_GetClientGroupID(activator) != rp_GetClientGroupID(owner) ) {
+					BigCashMachine_Destroy(caller);
+				}
+			}
+		}
+	}
+}
+
+public Action Frame_BigCashMachine(Handle timer, any ent) {
+	ent = EntRefToEntIndex(ent); if( ent == -1 ) { return Plugin_Handled; }
+	#if defined DEBUG
+	PrintToServer("Frame_BigCashMachine");
+	#endif
+	
+	int client = GetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity");
+	if( !IsValidClient(client) ) {
+		rp_ScheduleEntityInput(ent, 60.0, "Kill");
+		return Plugin_Handled;
+	}
+	
+	if( !rp_GetClientBool(client, b_IsAFK) && rp_GetClientInt(client, i_TimeAFK) <= 60 && g_bProps_trapped[ent] == false ) {
+		EmitSoundToAllAny("ambient/tones/equip3.wav", ent, _, _, _, 1.0, SNDPITCH_LOW);
+		
+		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank)+15);
+		
+		int capital_id = rp_GetRandomCapital( rp_GetClientJobID(client) );
+		rp_SetJobCapital( capital_id, rp_GetJobCapital(capital_id)-15 );
+		
+		
+		if( rp_GetClientJobID(client) == 221 && Math_GetRandomInt(1, 100) > 80 ) {
+			rp_SetJobCapital( capital_id, rp_GetJobCapital(capital_id)-15 );
+			rp_SetJobCapital( 221, rp_GetJobCapital(221)+15 );
+		}
+		
+		if( rp_GetBuildingData(ent, BD_started)+(48*60) < GetTime() ) {
+			rp_IncrementSuccess(client, success_list_technicien, 48);
+		}
+		
+		//char szQuery[1024];
+		//Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_sell` (`id`, `steamid`, `job_id`, `timestamp`, `item_type`, `item_id`, `item_name`, `amount`) VALUES (NULL, '%s', '%i', '%i', '2', '%i', '%s', '%i');",
+		//"MACHINE", capital_id, GetTime(), 1, "MACHINE", 15);
+		//SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery, DBPrio_Low);
+	}
+
+	float time = Math_GetRandomFloat(18.0, 22.0);
+	
+	if( rp_GetClientPvPBonus(client, cap_tower) && rp_GetClientPvPBonus(client, cap_nuclear) ) {
+		time = Math_GetRandomFloat(9.0, 13.0);
+	}
+	else if( rp_GetClientPvPBonus(client, cap_tower) ) {
+		time = Math_GetRandomFloat(13.0, 18.0);
+	}
+	
+	CreateTimer(time, Frame_BigCashMachine, EntIndexToEntRef(ent));
+	return Plugin_Handled;
+}
+
+void BigCashMachine_Destroy(int entity) {
+	#if defined DEBUG
+	PrintToServer("BigCashMachine_Destroy");
+	#endif
+	float vecOrigin[3];
+	Entity_GetAbsOrigin(entity, vecOrigin);
+	
+	
+	if( rp_GetBuildingData(entity, BD_started)+120 < GetTime() ) {
+		int rand = 10 + Math_GetRandomInt(1, 6);
+		for(int i=0; i<rand; i++)
+			rp_Effect_SpawnMoney(vecOrigin, true);
+	}
+	
+	TE_SetupExplosion(vecOrigin, g_cExplode, 0.5, 2, 1, 100, 50);
+	TE_SendToAll();
+	
+	int owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
+	if( IsValidClient(owner) ) {
+		CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos machines a faux billet a été détruite.");
+		
+		if( rp_GetBuildingData(entity, BD_started)+120 < GetTime() ) {
+			rp_SetClientInt(owner, i_Bank, rp_GetClientInt(owner, i_Bank)-300);
 		}
 	}
 }

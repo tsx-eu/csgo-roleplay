@@ -258,6 +258,14 @@ public Action rp_ClientRemoveProp(int client, int target, int item_id) {
 					CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos machines a faux billet a été detruite.");
 				}
 			}
+			if( StrContains(name, "rp_bigcashmachine_") == 0 ) {
+					
+				int owner = GetEntPropEnt(target, Prop_Send, "m_hOwnerEntity");
+				if( IsValidClient(owner) ) {
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez detruit la grosse machine de %N", owner);
+					CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre grosse machine a faux billet a été detruite.");
+				}
+			}
 			else if( StrContains(name, "rp_plant_") == 0 ) {
 				int owner = GetEntPropEnt(target, Prop_Send, "m_hOwnerEntity");
 				if( IsValidClient(owner) && owner != client ) {
