@@ -622,9 +622,9 @@ public Action ItemPickLockOver_maffia(Handle timer, Handle dp) {
 		}
 		
 		if( rp_IsInPVP(client) || alarm ) {
-			rp_SetJobCapital(91, rp_GetJobCapital(91) + 100);
+			rp_SetJobCapital(91, rp_GetJobCapital(91) + 250);
 			int cap = rp_GetRandomCapital(91);
-			rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 100);
+			rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 250);
 		}
 	}
 	else {
@@ -646,9 +646,9 @@ public Action ItemPickLockOver_maffia(Handle timer, Handle dp) {
 		if( Math_GetRandomInt(1, 5) == 5 ) { // boum
 			g_iDoorDefine_LOCKER[doorID] = 0;
 			
-			rp_SetJobCapital(91, rp_GetJobCapital(91) + 100);
+			rp_SetJobCapital(91, rp_GetJobCapital(91) + 250);
 			int cap = rp_GetRandomCapital(91);
-			rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 100);
+			rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 250);
 		}
 		
 		EmitSoundToAllAny("UI/arm_bomb.wav", door);
@@ -677,9 +677,9 @@ public Action ItemPickLockOver_maffia(Handle timer, Handle dp) {
 	int zone = rp_GetZoneInt(rp_GetPlayerZone(door), zone_type_type);
 	if( zone == 1 || zone == -1 || Math_GetRandomInt(1, 4) == 4 || last_door[client] != doorID ) {
 		
-		rp_SetJobCapital(91, rp_GetJobCapital(91) + 100);
+		rp_SetJobCapital(91, rp_GetJobCapital(91) + 250);
 		int cap = rp_GetRandomCapital(91);
-		rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 100);
+		rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 250);
 		
 		last_door[client] = doorID;
 	}
@@ -719,19 +719,19 @@ int GetMaxKit(int client, int itemID) {
 	int max, job = rp_GetClientInt(client, i_Job);
 	
 	switch( job ) {
-		case 91:	max = 5;
-		case 92:	max = 4;
-		case 93:	max = 3; // parrain
-		case 94:	max = 3; // pro
-		case 95:	max = 3; // mafieux
-		case 96:	max = 3; // apprenti
+		case 91:	max = 7;
+		case 92:	max = 6;
+		case 93:	max = 5; // parrain
+		case 94:	max = 5; // pro
+		case 95:	max = 5; // mafieux
+		case 96:	max = 5; // apprenti
 		default:	max = 0;
 	}
 	
 	if( itemID == ITEM_PIEDBICHE )
 		max = 1;
 	if( itemID == ITEM_KITEXPLOSIF )
-		max = RoundToCeil(max / 2.0);
+		max = RoundToCeil(max / 3.0);
 	
 	return max;
 }
