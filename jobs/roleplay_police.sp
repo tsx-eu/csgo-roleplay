@@ -1191,7 +1191,16 @@ public Action Timer_ConvTribu(Handle timer, any target) {
 	if(!IsValidClient(target) || g_TribunalSearch[target][tribunal_search_status] == -1){
 		return Plugin_Stop;
 	}
-
+	float vecOrigin[3];
+	Entity_GetAbsOrigin(target, vecOrigin);
+	if( GetVectorDistance(vecOrigin, view_as<float>{496.0, -1787.0, -1997.0}) < 64.0 || GetVectorDistance(vecOrigin, view_as<float>{-782.0, -476.0, -2000.0}) < 64.0 ){
+		CPrintToChatAll("{lightblue} ================================== {default}");
+		CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}n'est plus recherché par le Tribunal.", target);
+		CPrintToChatAll("{lightblue} ================================== {default}");
+		g_TribunalSearch[target][tribunal_search_status] = -1;
+		PrintToChatZone(rp_GetPlayerZone(target), "{lightblue}[TSX-RP]{default} La recherche sur le joueur %N à durée %.1f minutes.", target, (GetTime()-g_TribunalSearch[target][tribunal_search_starttime])/60.0);
+		return Plugin_Stop;
+	}
 	g_TribunalSearch[target][tribunal_search_status]++;
 	if(g_TribunalSearch[target][tribunal_search_status] > 3){
 		CPrintToChatAll("{lightblue} ================================== {default}");

@@ -372,10 +372,36 @@ public int MenuJobs3(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin de {lime}%s{default}, il est actuellement: %s", client, tmp, zoneName);
 			}
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} La demande à été envoyée à la personne");
+			ClientCommand(target, "play buttons/blip1.wav");
 			rp_Effect_BeamBox(target, client, NULL_VECTOR, 122, 122, 0);
+			Handle dp;
+			CreateDataTimer(1.0, ClientTargetTracer, dp, TIMER_REPEAT);
+			WritePackCell(dp, client);
+			WritePackCell(dp, target);
+			WritePackCell(dp, GetTime());
 		}
 	}
 	else if (p_oAction == MenuAction_End) {
 		CloseHandle(p_hItemMenu);
 	}
+}
+
+public Action ClientTargetTracer(Handle timer, Handle dp) {
+	ResetPack(dp);
+	int client = ReadPackCell(dp);
+	int target = ReadPackCell(dp);
+	int starttime = ReadPackCell(dp);
+	if(!IsValidClient(client) || !IsValidClient(target)){
+		CloseHandle(dp);
+		return Plugin_Stop;
+	}
+	
+	rp_Effect_BeamBox(target, client, NULL_VECTOR, 122, 122, 0);
+
+	if(starttime + 5 < GetTime()){
+		CloseHandle(dp);
+		return Plugin_Stop;
+	}
+	
+	return Plugin_Continue;
 }
