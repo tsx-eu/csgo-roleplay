@@ -404,7 +404,7 @@ int BuildingCashMachine(int client) {
 		max += 3;
 	}
 	
-	if( count >= max ) {
+	if( count > (max-1) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez trop de machine active.");
 		return 0;
 	}
@@ -652,7 +652,7 @@ int BuildingBigCashMachine(int client) {
 		max += 3;
 	}
 	
-	if( count >= max ) {
+	if( count > (max-15) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez trop de machine active.");
 		return 0;
 	}
