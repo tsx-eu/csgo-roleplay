@@ -390,28 +390,9 @@ int BuildingCashMachine(int client) {
 		case 226: max = 10;		
 	}
 	
-	char tmp[64];
-	
-	for(int i=1; i<=2048; i++) {
-		if( !IsValidEdict(i) )
-			continue;
-		if( !IsValidEntity(i) )
-			continue;
-		
-		GetEdictClassname(i, tmp, 63);
-		
-		if( StrEqual(classname, tmp) ) {
-			count++;
-			
-			float vecOrigin2[3];
-			Entity_GetAbsOrigin(i, vecOrigin2);
-			
-			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 24 ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas construire aussi proche d'une autre machine à vous.");
-				return 0;
-			}
-		}
-	}
+	count = CountMachine(client);
+	if( count == -1 )
+		return 0;
 	
 	max += rp_GetClientInt(client, i_Machine);
 	
@@ -534,14 +515,7 @@ public Action Frame_CashMachine(Handle timer, any ent) {
 		//SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery, DBPrio_Low);
 	}
 	
-	float time = Math_GetRandomFloat(18.0, 22.0);
-	
-	if( rp_GetClientPvPBonus(client, cap_tower) && rp_GetClientPvPBonus(client, cap_nuclear) ) {
-		time = Math_GetRandomFloat(9.0, 13.0);
-	}
-	else if( rp_GetClientPvPBonus(client, cap_tower) ) {
-		time = Math_GetRandomFloat(13.0, 18.0);
-	}
+	float time = GetMachineTime(client);
 	
 	CreateTimer(time, Frame_CashMachine, EntIndexToEntRef(ent));
 	return Plugin_Handled;
@@ -563,15 +537,18 @@ void CashMachine_Destroy(int entity) {
 	
 	int owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
 	if( IsValidClient(owner) ) {
-		CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos machines a faux billet a été détruite.");
+		char name[64];
+		GetEdictClassname(entity, name, sizeof(name));
+		if( StrContains(name, "big") >= 0 )
+			CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre photocopieuse à faux billet a été détruite.");
+		else
+			CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos machines à faux billet a été détruite.");
 		
 		if( rp_GetBuildingData(entity, BD_started)+120 < GetTime() ) {
 			rp_SetClientInt(owner, i_Bank, rp_GetClientInt(owner, i_Bank)-25);
 		}
 	}
 }
-
-
 void ExplodeProp(int ent) {
 	#if defined DEBUG
 	PrintToServer("ExplodeProp");
@@ -641,7 +618,6 @@ public Action Cmd_ItemCashBig(int args) {
 	rp_SetClientInt(client, i_Machine, 14);
 	return Plugin_Handled;
 }
-
 int BuildingBigCashMachine(int client) {
 	#if defined DEBUG
 	PrintToServer("BuildingBigCashMachine");
@@ -649,10 +625,8 @@ int BuildingBigCashMachine(int client) {
 	if( !rp_IsBuildingAllowed(client) )
 		return 0;
 	
-	char classname[64];
 	char bigclassname[64];
 	Format(bigclassname, sizeof(bigclassname), "rp_bigcashmachine_%i", client);
-	Format(classname, sizeof(classname), "rp_cashmachine_%i", client);
 	
 	float vecOrigin[3];
 	GetClientAbsOrigin(client, vecOrigin);
@@ -669,30 +643,9 @@ int BuildingBigCashMachine(int client) {
 		case 226: max = 10;		
 	}
 	
-	char tmp[64];
-	
-	for(int i=1; i<=2048; i++) {
-		if( !IsValidEdict(i) )
-			continue;
-		if( !IsValidEntity(i) )
-			continue;
-		
-		GetEdictClassname(i, tmp, 63);
-		if( StrEqual(bigclassname, tmp) ){
-			count += 15;
-		}
-		if( StrEqual(classname, tmp) ) {
-			count++;
-			
-			float vecOrigin2[3];
-			Entity_GetAbsOrigin(i, vecOrigin2);
-			
-			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 50 ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas construire aussi proche d'une autre machine à vous.");
-				return 0;
-			}
-		}
-	}
+	count = CountMachine(client);
+	if( count == -1 )
+		return 0;
 	
 	int appart = rp_GetPlayerZoneAppart(client);
 	if( appart > 0 && rp_GetAppartementInt(appart, appart_bonus_coffre) ) {
@@ -718,9 +671,7 @@ int BuildingBigCashMachine(int client) {
 	SetEntityModel(ent, MODEL_CASHBIG);
 	SetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity", client);
 	SetEntProp( ent, Prop_Data, "m_takedamage", 2);
-	SetEntProp( ent, Prop_Data, "m_iHealth", 1000);
-	
-	
+	SetEntProp( ent, Prop_Data, "m_iHealth", 1000);	
 	
 	vecOrigin[2] -= 16.0;
 	TeleportEntity(ent, vecOrigin, NULL_VECTOR, NULL_VECTOR);
@@ -739,7 +690,6 @@ int BuildingBigCashMachine(int client) {
 
 	return ent;
 }
-
 public Action BuildingBigCashMachine_post(Handle timer, any entity) {
 	#if defined DEBUG
 	PrintToServer("BuildingBigCashMachine_post");
@@ -752,31 +702,10 @@ public Action BuildingBigCashMachine_post(Handle timer, any entity) {
 	SetEntProp( entity, Prop_Data, "m_takedamage", 2);
 	SetEntProp( entity, Prop_Data, "m_iHealth", 1000);
 	
-	HookSingleEntityOutput(entity, "OnBreak", BuildingBigCashMachine_break);
+	HookSingleEntityOutput(entity, "OnBreak", BuildingCashMachine_break);
 	
 	return Plugin_Handled;
 }
-
-public void BuildingBigCashMachine_break(const char[] output, int caller, int activator, float delay) {
-	#if defined DEBUG
-	PrintToServer("BuildingCashMachine_break");
-	#endif
-	BigCashMachine_Destroy(caller);
-	
-	if( IsValidClient(activator) ) {
-		rp_IncrementSuccess(activator, success_list_no_tech);
-		
-		if( rp_IsInPVP(caller) ) {
-			int owner = GetEntPropEnt(caller, Prop_Send, "m_hOwnerEntity");
-			if( IsValidClient(owner) ) {
-				if( rp_GetClientGroupID(activator) > 0 && rp_GetClientGroupID(owner) > 0 && rp_GetClientGroupID(activator) != rp_GetClientGroupID(owner) ) {
-					BigCashMachine_Destroy(caller);
-				}
-			}
-		}
-	}
-}
-
 public Action Frame_BigCashMachine(Handle timer, any ent) {
 	ent = EntRefToEntIndex(ent); if( ent == -1 ) { return Plugin_Handled; }
 	#if defined DEBUG
@@ -813,42 +742,48 @@ public Action Frame_BigCashMachine(Handle timer, any ent) {
 		//SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery, DBPrio_Low);
 	}
 
-	float time = Math_GetRandomFloat(18.0, 22.0);
-	
-	if( rp_GetClientPvPBonus(client, cap_tower) && rp_GetClientPvPBonus(client, cap_nuclear) ) {
-		time = Math_GetRandomFloat(9.0, 13.0);
-	}
-	else if( rp_GetClientPvPBonus(client, cap_tower) ) {
-		time = Math_GetRandomFloat(13.0, 18.0);
-	}
+	float time = GetMachineTime(client);
 	
 	CreateTimer(time/7.5, Frame_BigCashMachine, EntIndexToEntRef(ent));
 	return Plugin_Handled;
 }
-
-void BigCashMachine_Destroy(int entity) {
-	#if defined DEBUG
-	PrintToServer("BigCashMachine_Destroy");
-	#endif
-	float vecOrigin[3];
-	Entity_GetAbsOrigin(entity, vecOrigin);
+float GetMachineTime(int client) {
+	if( rp_GetClientPvPBonus(client, cap_tower) && rp_GetClientPvPBonus(client, cap_nuclear) )
+		return Math_GetRandomFloat(9.0, 13.0);
+	else if( rp_GetClientPvPBonus(client, cap_tower) )
+		return Math_GetRandomFloat(13.0, 18.0);
+	else
+		return Math_GetRandomFloat(18.0, 22.0);
+}
+int CountMachine(int client) {
+	int count = 0;
+	char classname[64], bigclassname[64], tmp[64];
+	float vecOrigin[3], vecOrigin2[3];
+	GetClientAbsOrigin(client, vecOrigin);
+	Format(bigclassname, sizeof(bigclassname), "rp_bigcashmachine_%i", client);
+	Format(classname, sizeof(classname), "rp_cashmachine_%i", client);
 	
-	
-	if( rp_GetBuildingData(entity, BD_started)+120 < GetTime() ) {
-		int rand = 10 + Math_GetRandomInt(1, 6);
-		for(int i=0; i<rand; i++)
-			rp_Effect_SpawnMoney(vecOrigin, true);
-	}
-	
-	TE_SetupExplosion(vecOrigin, g_cExplode, 0.5, 2, 1, 100, 50);
-	TE_SendToAll();
-	
-	int owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
-	if( IsValidClient(owner) ) {
-		CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre grosse machine a faux billet a été détruite.");
+	for(int i=1; i<=2048; i++) {
+		if( !IsValidEdict(i) )
+			continue;
+		if( !IsValidEntity(i) )
+			continue;
 		
-		if( rp_GetBuildingData(entity, BD_started)+120 < GetTime() ) {
-			rp_SetClientInt(owner, i_Bank, rp_GetClientInt(owner, i_Bank)-300);
+		GetEdictClassname(i, tmp, 63);
+		if( StrEqual(bigclassname, tmp) ){
+			count += 15;
+		}
+		if( StrEqual(classname, tmp) ) {
+			count++;
+			
+			
+			Entity_GetAbsOrigin(i, vecOrigin2);
+			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 50 ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas construire aussi proche d'une autre machine à vous.");
+				return -1;
+			}
 		}
 	}
+	
+	return count;
 }
