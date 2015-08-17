@@ -89,10 +89,11 @@ public void OnCvarChange(Handle cvar, const char[] oldVal, const char[] newVal) 
 // ----------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerCommand, fwfCommand);
+	rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdWeapon);
 }
 public void OnClientDisconnect(int client) {
 	rp_UnhookEvent(client, RP_OnPlayerCommand, fwfCommand);
-	
+	rp_UnhookEvent(client, RP_PostTakeDamageWeapon, fwdWeapon);
 	
 	if( rp_GetClientInt(client, i_ToKill) > 0 && rp_GetClientJobID(client) == 41 ) {
 		SetContratFail(client);
@@ -976,4 +977,58 @@ void AddMenu_Blank(int client, Handle menu, const char[] myString , any ...) {
 	
 	AddMenuItem(menu, "none", str, ITEMDRAW_DISABLED);
 	PrintToConsole(client, str);
+}
+
+public Action fwdWeapon(int victim, int attacker, float &damage, int wepID, float pos[3]) {
+	bool changed = true;
+	char sWeapon[32];
+	GetEdictClassname(wepID, sWeapon, sizeof(sWeapon));
+	
+	if( StrContains(sWeapon, "taser") != -1 ) {
+		
+		int him = rp_GetClientInt(attacker, i_Protect_Him);
+		int from = rp_GetClientInt(attacker, i_Protect_From);
+		
+			
+		if( IsValidClient(him) || IsValidClient(from) ) {
+			SetEntProp(attacker, Prop_Data, "m_iAmmo", 100, _, 19);
+			
+			if( victim != him && victim != from ) {
+				
+				rp_SetClientFloat(victim, fl_FrozenTime, GetGameTime() + 1.5);
+				rp_SetClientFloat(victim, fl_TazerTime, GetGameTime() + 7.5);
+				
+				ServerCommand("sm_effect_flash %d 1.5 180", victim);
+						
+				if( rp_GetClientInt(attacker,i_Protect_Last) == victim ) {
+					int heal = GetClientHealth(him);
+					heal += 25;
+					if( heal > 500 )
+						heal = 500;
+					SetEntityHealth(him, heal);
+					
+					heal = GetClientHealth(attacker);
+					heal += 25;
+					if( heal > 500 )
+						heal = 500;
+					SetEntityHealth(attacker, heal);
+				}
+			}
+		}
+		else {
+			if(GetEntityFlags(victim) & FL_ONGROUND) {
+				int flags = GetEntityFlags(victim);
+				SetEntityFlags(victim, (flags&~FL_ONGROUND) );
+				SetEntPropEnt(victim, Prop_Send, "m_hGroundEntity", -1);
+			}
+			TeleportEntity(victim, NULL_VECTOR, NULL_VECTOR, view_as<float>({0.0, 0.0, 0.0}));
+			SlapPlayer(victim, 0, true);
+		}
+		damage *= 0.0;
+		return Plugin_Handled;
+	}
+	
+	if( changed )
+		return Plugin_Changed;
+	return Plugin_Continue;
 }
