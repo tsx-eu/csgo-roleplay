@@ -44,6 +44,7 @@ public Plugin myinfo = {
 // TODO: Utiliser des TQuery pour le /perquiz.
 // TODO: Trouver une manière plus propre que d'utiliser int g_iCancel[65];
 // TODO: Améliorer le cache du JobToZoneID
+// TODO: Les avocat dans la DB.
 
 enum jail_raison_type {
 	jail_raison = 0,
@@ -198,10 +199,38 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	else if( StrEqual(command, "audience") || StrEqual(command, "audiance") ) {
 		return Cmd_Audience(client);
 	}
+	else if( StrEqual(command, "avocat") || StrEqual(command, "avocat") ) {
+		return Cmd_Avocat(client, arg);
+	}
 	
 	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------
+public Action Cmd_Avocat(int client, const char[] arg) {
+	Handle menu = CreateMenu(MenuNothing);
+	SetMenuTitle(menu, "Liste des avocats officiels:");
+	
+	
+	AddMenuItem(menu, "STEAM_1:1:43056076", "Barbar     - 150$");
+	AddMenuItem(menu, "STEAM_1:1:61391530", "Crash      - 150$");
+	AddMenuItem(menu, "STEAM_1:0:57937429", "DaltonFive - 150$");
+	AddMenuItem(menu, "STEAM_1:1:49937727", "CandySpow  - 150$");
+	AddMenuItem(menu, "STEAM_1:0:27282750", "Joseph     - 150$");
+	AddMenuItem(menu, "STEAM_1:1:93713536", "Kiceroh    - 150$");
+	AddMenuItem(menu, "STEAM_1:1:27293331", "Leethium   - 150$");
+	AddMenuItem(menu, "STEAM_1:0:29435422", "Noob       - 150$");
+	AddMenuItem(menu, "STEAM_1:0:2459672",  "Orange     - 150$");
+	
+	AddMenuItem(menu, "STEAM_1:0:34370282", "Cybug      - 200$");
+	AddMenuItem(menu, "STEAM_1:1:32834448", "Gobelin    - 200$");
+	AddMenuItem(menu, "STEAM_1:0:35737135", "Redskyn    - 200$");
+	AddMenuItem(menu, "STEAM_1:1:87405234", "Rothi      - 200$");
+	AddMenuItem(menu, "STEAM_1:1:27282750", "Touchepass - 200$");
+	
+	SetMenuExitButton(menu, true);
+	DisplayMenu(menu, client, MENU_TIME_DURATION);
+	return Plugin_Handled;
+}
 public Action Cmd_Amende(int client, const char[] arg) {
 	#if defined DEBUG
 	PrintToServer("Cmd_Amende");
