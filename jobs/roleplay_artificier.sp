@@ -588,6 +588,7 @@ public Action EMPExplode_Task(Handle timer, any ent) {
 					
 					rp_SetClientInt(i, i_Kevlar, kev);
 					FakeClientCommand(i, "use weapon_knife; use weapon_knifegg"); 
+					rp_SetClientFloat(i, fl_TazerTime, GetGameTime() + 0.5);
 				}
 				else {
 					rp_ClientDamage(i, 50, client, "ctf_nade_emp");
