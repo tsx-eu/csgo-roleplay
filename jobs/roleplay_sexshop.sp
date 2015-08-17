@@ -419,7 +419,7 @@ int BuildingKevlarBox(int client) {
 	
 	EmitSoundToAllAny("player/ammo_pack_use.wav", client, _, _, _, 0.66);
 	
-	int ent = CreateEntityByName("prop_dynamic_override");
+	int ent = CreateEntityByName("prop_physics");
 	
 	DispatchKeyValue(ent, "classname", classname);
 	DispatchKeyValue(ent, "model", MODEL_BAGAGE);
@@ -429,7 +429,7 @@ int BuildingKevlarBox(int client) {
 	SetEntityModel(ent, MODEL_BAGAGE);
 	SetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity", client);
 	SetEntProp( ent, Prop_Data, "m_takedamage", 2);
-	SetEntProp( ent, Prop_Data, "m_iHealth", 2500);
+	SetEntProp( ent, Prop_Data, "m_iHealth", 1000);
 	
 	TeleportEntity(ent, vecOrigin, NULL_VECTOR, NULL_VECTOR);
 	
@@ -464,7 +464,7 @@ public Action BuildingKevlarBox_post(Handle timer, any entity) {
 	}
 	
 	SetEntProp( entity, Prop_Data, "m_takedamage", 2);
-	SetEntProp( entity, Prop_Data, "m_iHealth", 2500);
+	SetEntProp( entity, Prop_Data, "m_iHealth", 1000);
 	HookSingleEntityOutput(entity, "OnBreak", BuildingKevlarBox_break);
 	
 	CreateTimer(1.0, Frame_KevlarBox, EntIndexToEntRef(entity));
@@ -558,8 +558,8 @@ public Action Frame_KevlarBox(Handle timer, any ent) {
 		rp_SetClientInt(client, i_Kevlar, kevlar);
 	}
 	boxHeal += 5;
-	if( boxHeal > 2500 )
-		boxHeal = 2500;
+	if( boxHeal > 1500 )
+		boxHeal = 1500;
 	if( !inPvP )
 		boxHeal += Math_GetRandomInt(5, 20);
 	
