@@ -126,6 +126,10 @@ public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 		int oldType = rp_GetZoneInt(oldZone, zone_type_type);
 		int newType = rp_GetZoneInt(newZone, zone_type_type);
 		
+		int oldBIT = rp_GetZoneBit(oldZone);
+		int newBIT = rp_GetZoneBit(newZone);
+		
+		
 		if( newType == 101 && oldType != 101 ) {
 			CS_SwitchTeam(client, CS_TEAM_CT);
 			rp_ClientResetSkin(client);
@@ -133,6 +137,12 @@ public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 		else if( newType != 101 && oldType == 101 ) {
 			CS_SwitchTeam(client, CS_TEAM_T);
 			rp_ClientResetSkin(client);
+		}
+		
+		if( GetClientTeam(client) == CS_TEAM_CT ) {
+			if( (newBIT & BITZONE_PVP) && !(oldBIT & BITZONE_PVP) ) {
+				EmitSoundToClientAny(client, "UI/arm_bomb.wav", client);
+			}
 		}
 	}
 }
