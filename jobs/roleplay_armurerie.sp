@@ -30,6 +30,7 @@ public Plugin myinfo = {
 
 float vecNull[3];
 int g_cBeam;
+int g_iClientColor[65][4];
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
 	RegServerCmd("rp_giveitem",			Cmd_GiveItem,			"RP-ITEM",	FCVAR_UNREGISTERED);
@@ -425,6 +426,13 @@ public Action fwdWeapon(int victim, int attacker, float &damage, int wepID, floa
 		}
 		case ball_type_paintball: {
 			damage *= 1.0;
+			
+			g_iClientColor[victim][0] = Math_GetRandomInt(50, 255);
+			g_iClientColor[victim][1] = Math_GetRandomInt(50, 255);
+			g_iClientColor[victim][2] = Math_GetRandomInt(50, 255);
+			g_iClientColor[victim][3] = Math_GetRandomInt(100, 240);
+
+			rp_HookEvent(victim, RP_PreHUDColorize, fwdColorize, 5.0);
 		}
 		case ball_type_reflexive: {
 			damage = 0.9;
@@ -471,7 +479,11 @@ public Action fwdWeapon(int victim, int attacker, float &damage, int wepID, floa
 	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------
-
+public Action fwdColorize(int client, int color[4]) {
+	for (int i = 0; i < 4; i++)
+		color[i] += g_iClientColor[client][i];
+	return Plugin_Changed;
+}
 public Action Cmd_ItemRedraw(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemRedraw");
