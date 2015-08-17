@@ -116,7 +116,24 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerSpawn, fwdSpawn);
 	rp_HookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
 	rp_HookEvent(client, RP_PreGiveDamage, fwdDmg);
+	rp_HookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);
 	g_TribunalSearch[client][tribunal_search_status] = -1;
+}
+public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
+	int job = rp_GetClientInt(client, i_Job);
+	if( job == 103 || job == 104 || job == 105 || job == 106 ) {
+		int oldType = rp_GetZoneInt(oldZone, zone_type_type);
+		int newType = rp_GetZoneInt(newZone, zone_type_type);
+		
+		if( newType == 101 && oldType != 101 ) {
+			CS_SwitchTeam(client, CS_TEAM_CT);
+			rp_ClientResetSkin(client);
+		}
+		else if( newType != 101 && oldType == 101 ) {
+			CS_SwitchTeam(client, CS_TEAM_T);
+			rp_ClientResetSkin(client);
+		}
+	}
 }
 public Action fwdSpawn(int client) {
 	#if defined DEBUG
@@ -1717,7 +1734,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			return;
 		}
 		if( StrEqual(g_szJailRaison[type][jail_raison],"Agression physique") 
-			&& !(rp_GetClientInt(client, i_Job) > 102 || rp_GetClientInt(client, i_Job) > 107) ) { // Agression physique
+			&& !(rp_GetClientInt(client, i_Job) >= 101 || rp_GetClientInt(client, i_Job) >= 106) ) { // Agression physique
 			if(rp_GetClientInt(target, i_LastAgression)+60 < GetTime()){
 				rp_SetClientInt(target, i_JailTime, 0);
 				rp_SetClientInt(target, i_jailTime_Last, 0);
