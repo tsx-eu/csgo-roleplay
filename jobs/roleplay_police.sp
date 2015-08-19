@@ -479,6 +479,7 @@ public Action Cmd_Tazer(int client) {
 
 		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été tazé par %N", client);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez tazé %N", target);
+		LogToGame("[TSX-RP] [TAZER] %L a tazé %N dans %d.", client, target, rp_GetPlayerZone(target) );
 
 		rp_SetClientBool(client, b_MaySteal, false);
 		switch( job ) {
@@ -893,6 +894,9 @@ public Action Cmd_Push(int client) {
 	ScaleVector(f_Velocity, 500.0);
 
 	TeleportEntity(target, NULL_VECTOR, NULL_VECTOR, f_Velocity);
+	
+	
+	LogToGame("[TSX-RP] [TAZER] %L a tazé %N dans %d.", client, target, rp_GetPlayerZone(target) );
 	
 	return Plugin_Handled;
 }

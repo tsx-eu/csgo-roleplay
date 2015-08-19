@@ -103,7 +103,7 @@ public Action Cmd_Mariage(int client) {
 			continue;
 		if( rp_GetPlayerZone(i) != zoneJuge )
 			continue;
-		if( rp_GetClientInt(i, i_MarriedTo) != -1 )
+		if( rp_GetClientInt(i, i_MarriedTo) > 0 )
 			continue;
 		if( i == client )
 			continue;
