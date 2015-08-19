@@ -44,7 +44,18 @@ public void OnPluginStart() {
 	RegServerCmd("rp_skin_phoenix",		Cmd_ItemPhoenix);
 	RegServerCmd("rp_skin_leet",		Cmd_ItemLeet);
 	RegServerCmd("rp_skin_balkan",		Cmd_ItemBalkan);
-	RegServerCmd("rp_skin_anarchist",	Cmd_ItemAnarchist);	
+	RegServerCmd("rp_skin_anarchist",	Cmd_ItemAnarchist);
+
+	for (int i = 1; i <= MaxClients; i++) 
+		if( IsValidClient(i) )
+			OnClientPostAdminCheck(i);
+}
+public void OnClientPostAdminCheck(int client) {
+	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);
+}
+public void OnClientDisconnect(int client) {
+	rp_UnhookEvent(client, RP_OnPlayerUse, fwdUse);
+	rp_UnhookEvent(client, RP_OnFrameSeconde, fwdPlayerFrame);
 }
 public Action Cmd_ItemAnarchist(int args) {
 	#if defined DEBUG
@@ -448,4 +459,112 @@ public Action Hook_SetTransmit(int entity, int client) {
 	if( Entity_GetOwner(entity) == client && rp_GetClientInt(client, i_ThirdPerson) == 0 ) 
 		return Plugin_Handled;
 	return Plugin_Continue;
+}
+// ----------------------------------------------------------------------------
+public Action fwdUse(int client) {
+	int zoneid = rp_GetPlayerZone(client);
+	if(zoneid != 283)
+		return Plugin_Continue;
+
+	Handle menu = CreateMenu(MenuTrySkin);
+	SetMenuTitle(menu, "Selection du skin à essayer:");
+
+	AddMenuItem(menu, "models/player/custom/zoey/zoey.mdl", 			"Zoey");
+	AddMenuItem(menu, "models/player/custom/francis/francis.mdl", 		"Francis");
+	AddMenuItem(menu, "models/player/custom/ellis/ellis.mdl", 			"Ellis");
+	AddMenuItem(menu, "models/player/resident/sherry6/sherry6.mdl", 	"Sherry");
+	AddMenuItem(menu, "models/player/resident/leon6/leon6.mdl", 		"Leon");
+	AddMenuItem(menu, "models/player/resident/helena6/helena6.mdl", 	"Helena");
+	AddMenuItem(menu, "models/player/resident/ada_wong6/ada_wong6.mdl", "Ada Wong");
+	AddMenuItem(menu, "models/player/kuristaja/duke/duke.mdl", 			"Duke Nukem");
+	AddMenuItem(menu, "models/player/dr.valencia/dr.valencia.mdl", 		"Dr. Valencia");
+	AddMenuItem(menu, "models/player/domino/domino.mdl", 				"Domino");
+	AddMenuItem(menu, "models/player/custom/nick/nick.mdl", 			"Nick");
+	AddMenuItem(menu, "models/player/tm_anarchist.mdl", 				"Anarchist");
+	AddMenuItem(menu, "models/player/tm_anarchist_varianta.mdl", 		"Anarchist - A");
+	AddMenuItem(menu, "models/player/tm_anarchist_variantb.mdl",		"Anarchist - B");
+	AddMenuItem(menu, "models/player/tm_anarchist_variantc.mdl", 		"Anarchist - C");
+	AddMenuItem(menu, "models/player/tm_anarchist_variantd.mdl", 		"Anarchist - D");
+	AddMenuItem(menu, "models/player/tm_balkan_varianta.mdl", 			"Balkan");
+	AddMenuItem(menu, "models/player/tm_balkan_variantb.mdl", 			"Balkan - A");
+	AddMenuItem(menu, "models/player/tm_balkan_variantc.mdl",			"Balkan - B");
+	AddMenuItem(menu, "models/player/tm_balkan_variantd.mdl", 			"Balkan - C");
+	AddMenuItem(menu, "models/player/tm_balkan_variante.mdl", 			"Balkan - D");
+	AddMenuItem(menu, "models/player/tm_leet_varianta.mdl", 			"Phoenix");
+	AddMenuItem(menu, "models/player/tm_leet_variantb.mdl", 			"Phoenix - A");
+	AddMenuItem(menu, "models/player/tm_leet_variantc.mdl",				"Phoenix - B");
+	AddMenuItem(menu, "models/player/tm_leet_variantd.mdl", 			"Phoenix - C");
+	AddMenuItem(menu, "models/player/tm_leet_variante.mdl", 			"Phoenix - D");
+	AddMenuItem(menu, "models/player/tm_phoenix.mdl", 					"Phoenix");
+	AddMenuItem(menu, "models/player/tm_phoenix_varianta.mdl", 			"Phoenix - A");
+	AddMenuItem(menu, "models/player/tm_phoenix_variantb.mdl",			"Phoenix - B");
+	AddMenuItem(menu, "models/player/tm_phoenix_variantc.mdl", 			"Phoenix - C");
+	AddMenuItem(menu, "models/player/tm_phoenix_variantd.mdl", 			"Phoenix - D");
+	AddMenuItem(menu, "models/player/tm_pirate.mdl", 					"Pirate");
+	AddMenuItem(menu, "models/player/tm_pirate_varianta.mdl", 			"Pirate - A");
+	AddMenuItem(menu, "models/player/tm_pirate_variantb.mdl",			"Pirate - B");
+	AddMenuItem(menu, "models/player/tm_pirate_variantc.mdl", 			"Pirate - C");
+	AddMenuItem(menu, "models/player/tm_pirate_variantd.mdl", 			"Pirate - D");
+	AddMenuItem(menu, "models/player/tm_professional.mdl", 				"Professional");
+	AddMenuItem(menu, "models/player/tm_professional_var1.mdl", 		"Professional - A");
+	AddMenuItem(menu, "models/player/tm_professional_var2.mdl",			"Professional - B");
+	AddMenuItem(menu, "models/player/tm_professional_var3.mdl", 		"Professional - C");
+	AddMenuItem(menu, "models/player/tm_professional_var4.mdl", 		"Professional - D");
+	AddMenuItem(menu, "models/player/tm_separatist.mdl", 				"Séparatist");
+	AddMenuItem(menu, "models/player/tm_separatist_varianta.mdl", 		"Séparatist - A");
+	AddMenuItem(menu, "models/player/tm_separatist_variantb.mdl",		"Séparatist - B");
+	AddMenuItem(menu, "models/player/tm_separatist_variantc.mdl", 		"Séparatist - C");
+	AddMenuItem(menu, "models/player/tm_separatist_variantd.mdl", 		"Séparatist - D");
+
+	SetMenuExitButton(menu, true);
+	DisplayMenu(menu, client, 60);
+	return Plugin_Handled;
+}
+
+public int MenuTrySkin(Handle menu, MenuAction action, int client, int param2) {
+	#if defined DEBUG
+	PrintToServer("MenuTrySkin");
+	#endif
+	
+	if( action == MenuAction_Select ) {
+		char szMenuItem[128];
+		if( GetMenuItem(menu, param2, szMenuItem, sizeof(szMenuItem)) ) {
+			if(rp_GetPlayerZone(client) != 283){
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes sorti des cabines d'essayage.");
+				return;
+			}
+			ServerCommand("sm_effect_setmodel \"%i\" \"%s\"", client, szMenuItem);
+			rp_UnhookEvent(client, RP_OnFrameSeconde, fwdPlayerFrame);
+			rp_HookEvent(client, RP_OnFrameSeconde, fwdPlayerFrame);
+		}
+	}
+	else if( action == MenuAction_End ) {
+		CloseHandle(menu);
+	}
+}
+
+public Action fwdPlayerFrame(int client) {
+	if(!IsPlayerAlive(client)){
+		rp_UnhookEvent(client, RP_OnFrameSeconde, fwdPlayerFrame);
+	}
+	else if(rp_GetPlayerZone(client) != 283){
+		char clientskin[128];
+		rp_GetClientString(client, sz_Skin, clientskin, sizeof(clientskin));
+		if(StrEqual(clientskin, "")){
+			int rand = Math_GetRandomInt(1, 7);
+			switch(rand) {
+				case 1: Entity_SetModel(client, "models/player/tm_separatist.mdl");
+				case 2: Entity_SetModel(client, "models/player/tm_professional.mdl");
+				case 3: Entity_SetModel(client, "models/player/tm_pirate.mdl");
+				case 4: Entity_SetModel(client, "models/player/tm_phoenix.mdl");
+				case 5: Entity_SetModel(client, "models/player/tm_leet_varianta.mdl");
+				case 6: Entity_SetModel(client, "models/player/tm_balkan_varianta.mdl");
+				case 7: Entity_SetModel(client, "models/player/tm_anarchist.mdl");
+			}
+		}
+		else{
+			Entity_SetModel(client, clientskin);
+		}
+		rp_UnhookEvent(client, RP_OnFrameSeconde, fwdPlayerFrame);
+	}
 }
