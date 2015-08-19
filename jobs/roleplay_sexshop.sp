@@ -43,6 +43,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_fouet",		Cmd_ItemFouet,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_alcool",		Cmd_ItemAlcool,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_lube",		Cmd_ItemLube,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_kevlarbox",	Cmd_ItemKevlarBox,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 	
 	for (int i = 1; i <= MaxClients; i++) 
 		if( IsValidClient(i) )
