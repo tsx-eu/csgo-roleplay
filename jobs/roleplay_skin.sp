@@ -533,6 +533,16 @@ public int MenuTrySkin(Handle menu, MenuAction action, int client, int param2) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes sorti des cabines d'essayage.");
 				return;
 			}
+			if( GetClientTeam(client) == CS_TEAM_CT ){
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas essayer cela en CT.");
+				return;
+			}
+			char clientModel[128];
+			GetClientModel(client, clientModel, sizeof(clientModel));
+			if( StrEqual(clientModel, "models/player/rgmodels/rginmate/rginmate.mdl") ){
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas essayer cela en tant qu'évadé.");
+				return;
+			}
 			ServerCommand("sm_effect_setmodel \"%i\" \"%s\"", client, szMenuItem);
 			rp_UnhookEvent(client, RP_OnFrameSeconde, fwdPlayerFrame);
 			rp_HookEvent(client, RP_OnFrameSeconde, fwdPlayerFrame);
