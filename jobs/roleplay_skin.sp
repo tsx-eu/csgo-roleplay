@@ -55,7 +55,7 @@ public void OnClientPostAdminCheck(int client) {
 }
 public void OnClientDisconnect(int client) {
 	rp_UnhookEvent(client, RP_OnPlayerUse, fwdUse);
-	rp_UnhookEvent(client, RP_OnFrameSeconde, fwdPlayerFrame);
+	rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);
 }
 public Action Cmd_ItemAnarchist(int args) {
 	#if defined DEBUG
@@ -544,8 +544,8 @@ public int MenuTrySkin(Handle menu, MenuAction action, int client, int param2) {
 				return;
 			}
 			ServerCommand("sm_effect_setmodel \"%i\" \"%s\"", client, szMenuItem);
-			rp_UnhookEvent(client, RP_OnFrameSeconde, fwdPlayerFrame);
-			rp_HookEvent(client, RP_OnFrameSeconde, fwdPlayerFrame);
+			rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);
+			rp_HookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);
 		}
 	}
 	else if( action == MenuAction_End ) {
@@ -553,28 +553,23 @@ public int MenuTrySkin(Handle menu, MenuAction action, int client, int param2) {
 	}
 }
 
-public Action fwdPlayerFrame(int client) {
-	if(!IsPlayerAlive(client)){
-		rp_UnhookEvent(client, RP_OnFrameSeconde, fwdPlayerFrame);
-	}
-	else if(rp_GetPlayerZone(client) != 283){
-		char clientskin[128];
-		rp_GetClientString(client, sz_Skin, clientskin, sizeof(clientskin));
-		if(StrEqual(clientskin, "")){
-			int rand = Math_GetRandomInt(1, 7);
-			switch(rand) {
-				case 1: Entity_SetModel(client, "models/player/tm_separatist.mdl");
-				case 2: Entity_SetModel(client, "models/player/tm_professional.mdl");
-				case 3: Entity_SetModel(client, "models/player/tm_pirate.mdl");
-				case 4: Entity_SetModel(client, "models/player/tm_phoenix.mdl");
-				case 5: Entity_SetModel(client, "models/player/tm_leet_varianta.mdl");
-				case 6: Entity_SetModel(client, "models/player/tm_balkan_varianta.mdl");
-				case 7: Entity_SetModel(client, "models/player/tm_anarchist.mdl");
-			}
+public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
+	char clientskin[128];
+	rp_GetClientString(client, sz_Skin, clientskin, sizeof(clientskin));
+	if(StrEqual(clientskin, "") && GetClientTeam(client) == CS_TEAM_T ){
+		int rand = Math_GetRandomInt(1, 7);
+		switch(rand) {
+			case 1: Entity_SetModel(client, "models/player/tm_separatist.mdl");
+			case 2: Entity_SetModel(client, "models/player/tm_professional.mdl");
+			case 3: Entity_SetModel(client, "models/player/tm_pirate.mdl");
+			case 4: Entity_SetModel(client, "models/player/tm_phoenix.mdl");
+			case 5: Entity_SetModel(client, "models/player/tm_leet_varianta.mdl");
+			case 6: Entity_SetModel(client, "models/player/tm_balkan_varianta.mdl");
+			case 7: Entity_SetModel(client, "models/player/tm_anarchist.mdl");
 		}
-		else{
-			Entity_SetModel(client, clientskin);
-		}
-		rp_UnhookEvent(client, RP_OnFrameSeconde, fwdPlayerFrame);
 	}
+	else if(GetClientTeam(client) == CS_TEAM_T){
+		Entity_SetModel(client, clientskin);
+	}
+	rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);
 }
