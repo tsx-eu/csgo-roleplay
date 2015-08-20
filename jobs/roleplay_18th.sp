@@ -81,11 +81,6 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	money = rp_GetClientInt(target, i_Money);
 	VOL_MAX = (money+rp_GetClientInt(target, i_Bank)) / 200;
 	
-	Math_Clamp(VOL_MAX, 50, 5000);
-	
-	if( rp_GetClientInt(client, i_Job) >= 185 )
-		Math_Clamp(VOL_MAX, 50, 1000);
-	
 	if( rp_IsClientNew(target) )
 		amount = Math_GetRandomPow(1, VOL_MAX);
 	else
