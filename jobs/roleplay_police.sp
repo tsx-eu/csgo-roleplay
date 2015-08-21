@@ -2591,7 +2591,7 @@ public Action ItemPickLockOver_mandat(Handle timer, Handle dp) {
 	rp_ClientColorize(client);
 	
 	if( !rp_IsEntitiesNear(client, door, true) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez raté votre tentative de crochetage, vous étiez trop loin de la porte...");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} ~ [ECHEC] ~ Rapprochez-vous de la porte pour utiliser votre mandat");
 		return Plugin_Handled;
 	}
 
