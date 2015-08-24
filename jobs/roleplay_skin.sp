@@ -559,23 +559,7 @@ public int MenuTrySkin(Handle menu, MenuAction action, int client, int param2) {
 }
 
 public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
-	char clientskin[128];
-	rp_GetClientString(client, sz_Skin, clientskin, sizeof(clientskin));
 	
-	if( strlen(clientskin) <= 1 && GetClientTeam(client) == CS_TEAM_T ){
-		int rand = Math_GetRandomInt(1, 7);
-		switch(rand) {
-			case 1: Entity_SetModel(client, "models/player/tm_separatist.mdl");
-			case 2: Entity_SetModel(client, "models/player/tm_professional.mdl");
-			case 3: Entity_SetModel(client, "models/player/tm_pirate.mdl");
-			case 4: Entity_SetModel(client, "models/player/tm_phoenix.mdl");
-			case 5: Entity_SetModel(client, "models/player/tm_leet_varianta.mdl");
-			case 6: Entity_SetModel(client, "models/player/tm_balkan_varianta.mdl");
-			case 7: Entity_SetModel(client, "models/player/tm_anarchist.mdl");
-		}
-	}
-	else if(GetClientTeam(client) == CS_TEAM_T){
-		Entity_SetModel(client, clientskin);
-	}
+	rp_ClientResetSkin(client);
 	rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);
 }
