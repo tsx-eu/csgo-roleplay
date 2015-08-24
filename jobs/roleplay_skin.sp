@@ -543,6 +543,11 @@ public int MenuTrySkin(Handle menu, MenuAction action, int client, int param2) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas essayer cela en tant qu'évadé.");
 				return;
 			}
+			if( !IsModelPrecached(szMenuItem) ) {
+				if( PrecacheModel(szMenuItem) == 0 ) {
+					return;
+				}
+			}
 			ServerCommand("sm_effect_setmodel \"%i\" \"%s\"", client, szMenuItem);
 			rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);
 			rp_HookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);
@@ -556,7 +561,8 @@ public int MenuTrySkin(Handle menu, MenuAction action, int client, int param2) {
 public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 	char clientskin[128];
 	rp_GetClientString(client, sz_Skin, clientskin, sizeof(clientskin));
-	if(StrEqual(clientskin, "") && GetClientTeam(client) == CS_TEAM_T ){
+	
+	if( strlen(clientskin) <= 1 && GetClientTeam(client) == CS_TEAM_T ){
 		int rand = Math_GetRandomInt(1, 7);
 		switch(rand) {
 			case 1: Entity_SetModel(client, "models/player/tm_separatist.mdl");
