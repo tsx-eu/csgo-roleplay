@@ -50,6 +50,24 @@ public void OnPluginStart() {
 	for (int j = 1; j <= MaxClients; j++)
 		if( IsValidClient(j) )
 			OnClientPostAdminCheck(j);
+	
+	char classname[64];
+	for (int i = MaxClients; i <= 2048; i++) {
+		if( !IsValidEdict(i) )
+			continue;
+		if( !IsValidEntity(i) )
+			continue;
+		
+		GetEdictClassname(i, classname, sizeof(classname));
+		if( StrContains(classname, "rp_plant_") == 0 ) {
+			
+			rp_SetBuildingData(i, BD_started, GetTime());
+			rp_SetBuildingData(i, BD_owner, GetEntPropEnt(i, Prop_Send, "m_hOwnerEntity") );
+			rp_SetBuildingData(i, BD_max, 3);
+			
+			CreateTimer(Math_GetRandomFloat(0.25, 5.0), BuildingPlant_post, i);
+		}
+	}
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
@@ -752,11 +770,12 @@ public Action Cmd_ItemPiedBiche(int args) {
 	if( rp_GetClientJobID(client) != 81 ) {
 		return Plugin_Continue;
 	}
+	
 
 	char tmp[64];
 	rp_GetZoneData(rp_GetPlayerZone(client), zone_type_name, tmp, sizeof(tmp));
 	
-	if( StrContains(tmp, "Place de l'ind") != 0 ) {
+	if( StrContains(tmp, "Place de l'ind") != 0 || !rp_IsBuildingAllowed(client, true) ) {
 		ITEM_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être sur la place de l'indépendance pour utiliser utiliser ce pied de biche.");
 		return Plugin_Handled;
