@@ -50,9 +50,6 @@ public void OnPluginStart() {
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 }
-public void OnClientDisconnect(int client) {
-	rp_UnhookEvent(client, RP_OnPlayerCommand, fwdCommand);
-}
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt", true);

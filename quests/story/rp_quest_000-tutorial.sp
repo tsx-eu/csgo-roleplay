@@ -76,9 +76,6 @@ public Action Cmd_Reload(int args) {
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 }
-public void OnClientDisconnect(int client) {
-	rp_UnhookEvent(client, RP_OnPlayerCommand, fwdCommand);
-}
 public Action fwdCommand(int client, char[] command, char[] arg) {	
 	if( StrEqual(command, "aide") || StrEqual(command, "aides") || StrEqual(command, "wiki") || StrEqual(command, "help")  ) { // C'est pour nous !
 		QueryClientConVar(client, "cl_disablehtmlmotd", view_as<ConVarQueryFinished>ClientConVar, client);

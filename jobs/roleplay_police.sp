@@ -160,15 +160,6 @@ public Action fwdSpawn(int client) {
 
 	return Plugin_Continue;
 }
-public void OnClientDisconnect(int client) {
-	#if defined DEBUG
-	PrintToServer("OnClientDisconnect");
-	#endif
-	rp_UnhookEvent(client, RP_OnPlayerCommand, fwdCommand);
-	rp_UnhookEvent(client, RP_OnPlayerSpawn, fwdSpawn);
-	rp_UnhookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
-	rp_HookEvent(client, RP_PreGiveDamage, fwdDmg);
-}
 public Action fwdCommand(int client, char[] command, char[] arg) {
 	#if defined DEBUG
 	PrintToServer("fwdCommand");

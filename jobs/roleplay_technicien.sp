@@ -93,15 +93,7 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnAssurance,	fwdAssurance);
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
 }
-public void OnClientDisconnect(int client) {
-	rp_UnhookEvent(client, RP_OnAssurance,	fwdAssurance);
-	rp_UnhookEvent(client, RP_OnPlayerBuild,fwdOnPlayerBuild);
-	
-	if( g_bBionique[client][ch_Kevlar] )
-		rp_UnhookEvent(client, RP_OnFrameSeconde,	fwdRegenKevlar);
-	if( g_bBionique[client][ch_Yeux] )
-		rp_UnhookEvent(client, RP_PreHUDColorize,	fwfBioYeux);
-		
+public void OnClientDisconnect(int client) {		
 	for (int i = 0; i < view_as<int>ch_Max; i++) {
 		g_bBionique[client][i] = false;
 	}

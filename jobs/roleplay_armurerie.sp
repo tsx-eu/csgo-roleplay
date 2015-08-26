@@ -144,10 +144,6 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdWeapon);
 	rp_HookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
 }
-public void OnClientDisconnect(int client) {
-	rp_UnhookEvent(client, RP_PostTakeDamageWeapon, fwdWeapon);
-	rp_UnhookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
-}
 public Action fwdOnPlayerBuild(int client, float& cooldown){
 	if( rp_GetClientJobID(client) != 111 )
 		return Plugin_Continue;

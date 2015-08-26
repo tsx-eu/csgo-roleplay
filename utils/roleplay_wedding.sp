@@ -47,23 +47,19 @@ public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt", true);
 }
-
 // ----------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 	rp_SetClientInt(client, i_MarriedTo, -1);
 }
 public void OnClientDisconnect(int client) {
-	rp_UnhookEvent(client, RP_OnPlayerCommand, fwdCommand);
-	
 	// Un mariage est terminé si un des deux mariés déco
 	int mari = rp_GetClientInt(client, i_MarriedTo);
 	if( mari > 0 ) {
+		CPrintToChat(mari, "{lightblue}[TSX-RP]{default} Votre conjoint a quitté la ville précipitamment, vous n'êtes plus mariés.");
+		rp_UnhookEvent(mari, RP_OnFrameSeconde, fwdFrame);
 		rp_SetClientInt(mari, i_MarriedTo, -1);
 		rp_SetClientInt(client, i_MarriedTo, -1);
-		CPrintToChat(mari, "{lightblue}[TSX-RP]{default} Votre conjoint a quitté la ville précipitamment, vous n'êtes plus mariés.");
-		rp_UnhookEvent(client, RP_OnFrameSeconde, fwdFrame);
-		rp_UnhookEvent(mari, RP_OnFrameSeconde, fwdFrame);
 	}
 }
 

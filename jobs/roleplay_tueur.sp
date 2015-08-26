@@ -92,9 +92,6 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdWeapon);
 }
 public void OnClientDisconnect(int client) {
-	rp_UnhookEvent(client, RP_OnPlayerCommand, fwfCommand);
-	rp_UnhookEvent(client, RP_PostTakeDamageWeapon, fwdWeapon);
-	
 	if( rp_GetClientInt(client, i_ToKill) > 0 && rp_GetClientJobID(client) == 41 ) {
 		SetContratFail(client);
 	}

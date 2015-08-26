@@ -53,10 +53,6 @@ public void OnPluginStart() {
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);
 }
-public void OnClientDisconnect(int client) {
-	rp_UnhookEvent(client, RP_OnPlayerUse, fwdUse);
-	rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);
-}
 public Action Cmd_ItemAnarchist(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemLeet");

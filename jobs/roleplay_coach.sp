@@ -59,10 +59,6 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_PostTakeDamageKnife, fwdWeapon);
 }
 public void OnClientDisconnect(int client) {
-	rp_UnhookEvent(client, RP_PostTakeDamageKnife, fwdWeapon);
-	if(	rp_GetClientBool(client, b_HasShoes) ) {
-		rp_UnhookEvent(client, RP_OnFrameSeconde, fwdVitalite);
-	}
 	removeShield(client);
 }
 // ----------------------------------------------------------------------------

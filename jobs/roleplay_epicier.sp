@@ -50,11 +50,7 @@ public void OnPluginStart() {
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 }
-public void OnClientDisconnect(int client) {
-	if( rp_GetClientBool(client, b_Crayon) ) 
-		rp_UnhookEvent(client, RP_PrePlayerTalk, fwdTalkCrayon);
-	
-}
+
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemCigarette(int args) {
 	#if defined DEBUG

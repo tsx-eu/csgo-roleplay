@@ -58,9 +58,6 @@ public void OnMapStart() {
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
 }
-public void OnClientDisconnect(int client) {
-	rp_UnhookEvent(client, RP_OnPlayerBuild,fwdOnPlayerBuild);
-}
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemPreserv(int args) {
 	#if defined DEBUG

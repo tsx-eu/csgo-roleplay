@@ -72,21 +72,6 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
 }
 public void OnClientDisconnect(int client) {
-	rp_UnhookEvent(client, RP_OnAssurance,	fwdAssurance);
-	rp_UnhookEvent(client, RP_OnPlayerDead,	fwdDeath);
-	rp_UnhookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
-	
-	if( g_bChirurgie[client][ch_Force] )
-		rp_UnhookEvent(client, RP_PreGiveDamage, fwdChiruForce); 
-	if( g_bChirurgie[client][ch_Speed] )
-		rp_UnhookEvent(client, RP_PrePlayerPhysic,	fwdChiruSpeed);
-	if( g_bChirurgie[client][ch_Jump] )
-		rp_UnhookEvent(client, RP_PrePlayerPhysic,	fwdChiruJump);
-	if( g_bChirurgie[client][ch_Regen] )
-		rp_UnhookEvent(client, RP_OnFrameSeconde,	fwdChiruHealing);
-	if( g_bChirurgie[client][ch_Heal])
-		rp_UnhookEvent(client, RP_OnPlayerSpawn,	fwdSpawn);
-	
 	for (int i = 0; i < view_as<int>ch_Max; i++) {
 		g_bChirurgie[client][i] = false;
 	}

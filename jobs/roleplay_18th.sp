@@ -57,11 +57,6 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse,	fwdOnPlayerUse);
 	rp_HookEvent(client, RP_OnPlayerSteal,	fwdOnPlayerSteal);	
 }
-public void OnClientDisconnect(int client) {
-	rp_UnhookEvent(client, RP_OnPlayerUse,	fwdOnPlayerUse);
-	rp_UnhookEvent(client, RP_OnPlayerSteal,	fwdOnPlayerSteal);
-	
-}
 public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	if( rp_GetClientJobID(client) != 181 )
 		return Plugin_Continue;

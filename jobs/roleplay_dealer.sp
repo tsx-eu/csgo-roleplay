@@ -79,10 +79,6 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
 	rp_HookEvent(client, RP_OnPlayerUse,	fwdOnPlayerUse);
 }
-public void OnClientDisconnect(int client) {
-	rp_UnhookEvent(client, RP_OnPlayerBuild,fwdOnPlayerBuild);
-	rp_UnhookEvent(client, RP_OnPlayerUse,	fwdOnPlayerUse);
-}
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemDrugs(int args) {
 	#if defined DEBUG

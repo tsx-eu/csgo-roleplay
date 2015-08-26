@@ -59,7 +59,6 @@ public void OnClientPostAdminCheck(int client) {
 		g_iBlockedTime[client][i] = 0;
 }
 public void OnClientDisconnect(int client) {
-	rp_UnhookEvent(client, RP_OnPlayerUse, fwdUse);
 	for (int i = MaxClients+1; i <= 2048; i++) {
 		if( !IsValidEdict(i) )
 			continue;

@@ -57,10 +57,6 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 }
-public void OnClientDisconnect(int client) {
-	rp_UnhookEvent(client, RP_OnPlayerBuild,fwdOnPlayerBuild);
-	rp_UnhookEvent(client, RP_OnPlayerCommand, fwdCommand);
-}
 public Action fwdCommand(int client, char[] command, char[] arg) {	
 	if( StrEqual(command, "search") || StrEqual(command, "lookup")) {
 		if( rp_GetClientJobID(client) != 1 &&  rp_GetClientJobID(client) != 41 && rp_GetClientJobID(client) != 211 && rp_GetClientJobID(client) != 101 ) { // Police, mercenaire, banquier, tribunal
