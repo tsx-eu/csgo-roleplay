@@ -342,16 +342,34 @@ public Action Cmd_ItemAlcool(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemAlcool");
 	#endif
-	
-	int client = GetCmdArgInt(2);
-	float level = rp_GetClientFloat(client, fl_Alcool) + GetCmdArgFloat(1);
-	
-	rp_SetClientFloat(client, fl_Alcool, level);
-	rp_IncrementSuccess(client, success_list_alcool_abuse);
-	
-	if( level > 6.0 ) {
-		SDKHooks_TakeDamage(client, client, client, (25 + GetClientHealth(client))/2.0);
+	char arg[16];
+	int client, target, item_id;
+	client = GetCmdArgInt(3);
+	item_id = GetCmdArgInt(args);
+	GetCmdArg(1, arg, sizeof(arg));
+
+	if(StrEqual(arg,"me")){
+		target = client;
 	}
+	else if (StrEqual(arg,"aim")){
+		target = GetClientTarget(client);
+		if(target == -1 || !rp_IsEntitiesNear(client, target, true)){
+			ITEM_CANCEL(client,item_id);
+			return Plugin_Handled;
+		}
+		float vecTarget[3];
+		GetClientAbsOrigin(client, vecTarget);
+		TE_SetupBeamRingPoint(vecTarget, 10.0, 500.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, { 255, 0, 191, 200}, 10, 0);
+		rp_SetClientInt(client, i_LastAgression, GetTime());
+	}
+
+	float level = rp_GetClientFloat(target, fl_Alcool) + GetCmdArgFloat(2);
+	rp_SetClientFloat(target, fl_Alcool, level);
+	rp_IncrementSuccess(target, success_list_alcool_abuse);	
+	if( level > 6.0 ) {
+		SDKHooks_TakeDamage(target, target, target, (25 + GetClientHealth(target))/2.0);
+	}
+	return Plugin_Handled;
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemKevlarBox(int args) {
