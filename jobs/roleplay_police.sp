@@ -348,7 +348,7 @@ public Action Cmd_Cop(int client) {
 		Entity_SetMaxHealth(client, 200);
 		rp_SetClientInt(client, i_Kevlar, 100);
 		SetEntProp(client, Prop_Send, "m_bHasHelmet", 0);
-		FakeClientCommand(client, "say /shownotes");
+		FakeClientCommand(client, "say /shownote");
 	}
 	else if( GetClientTeam(client) == CS_TEAM_T ) {
 		CS_SwitchTeam(client, CS_TEAM_CT);
@@ -1670,10 +1670,16 @@ void AskJailTime(int client, int target) {
 		AddMenuItem(menu, tmp, "Jail Tribunal N°2");
 	}
 	
-	for(int i=0; i<sizeof(g_szJailRaison); i++) {
-		
-		Format(tmp2, sizeof(tmp2), "%d_%d", target, i);
-		AddMenuItem(menu, tmp2, g_szJailRaison[i][jail_raison]);
+	if(rp_GetClientInt(target, i_JailTime) <= 6*60){
+		for(int i=0; i<sizeof(g_szJailRaison); i++) {
+
+			Format(tmp2, sizeof(tmp2), "%d_%d", target, i);
+			AddMenuItem(menu, tmp2, g_szJailRaison[i][jail_raison]);
+		}
+	}
+	else{
+		Format(tmp2, sizeof(tmp2), "%d_%d", target, sizeof(g_szJailRaison)-1);
+		AddMenuItem(menu, tmp2, g_szJailRaison[sizeof(g_szJailRaison)-1][jail_raison]);
 	}
 	
 	SetMenuExitButton(menu, true);
