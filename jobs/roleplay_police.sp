@@ -213,7 +213,6 @@ public Action Cmd_Avocat(int client, const char[] arg) {
 	
 	
 	AddMenuItem(menu, "STEAM_1:1:42937983", "NokS       - 150$");
-	AddMenuItem(menu, "STEAM_0:0:41059246", "SunnN      - 150$");
 	AddMenuItem(menu, "STEAM_0:1:115329137", "Arseniy   - 150$");
 	AddMenuItem(menu, "STEAM_0:0:44606367", "Maverick   - 150$");
 	AddMenuItem(menu, "STEAM_1:1:989000", "Jean Cochon  - 150$");
