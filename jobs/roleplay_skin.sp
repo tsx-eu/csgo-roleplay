@@ -546,16 +546,25 @@ public int MenuTrySkin(Handle menu, MenuAction action, int client, int param2) {
 			}
 			ServerCommand("sm_effect_setmodel \"%i\" \"%s\"", client, szMenuItem);
 			rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);
-			rp_HookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);
+			CreateTimer(3.0, CheckTrySkin, client);
 		}
 	}
 	else if( action == MenuAction_End ) {
 		CloseHandle(menu);
 	}
 }
+public Action CheckTrySkin(Handle timer, any client) {
+	#if defined DEBUG
+	PrintToServer("CheckTrySkin");
+	#endif
+	if(rp_GetPlayerZone(client) != 283)
+		rp_ClientResetSkin(client);
+	else
+		rp_HookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);
+
+}
 
 public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
-	
 	rp_ClientResetSkin(client);
 	rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);
 }
