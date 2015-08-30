@@ -212,11 +212,11 @@ public Action Cmd_Avocat(int client, const char[] arg) {
 	SetMenuTitle(menu, "Liste des avocats officiels:");
 	
 	
-	AddMenuItem(menu, "STEAM_1:1:43056076", "Barbar     - 150$");
-	AddMenuItem(menu, "STEAM_1:1:61391530", "Crash      - 150$");
-	AddMenuItem(menu, "STEAM_1:0:57937429", "DaltonFive - 150$");
-	AddMenuItem(menu, "STEAM_1:1:49937727", "CandySpow  - 150$");
-	AddMenuItem(menu, "STEAM_1:0:27282750", "Joseph     - 150$");
+	AddMenuItem(menu, "STEAM_1:1:42937983", "NokS       - 150$");
+	AddMenuItem(menu, "STEAM_0:0:41059246", "SunnN      - 150$");
+	AddMenuItem(menu, "STEAM_0:1:115329137", "Arseniy   - 150$");
+	AddMenuItem(menu, "STEAM_0:0:44606367", "Maverick   - 150$");
+	AddMenuItem(menu, "STEAM_1:1:989000", "Jean Cochon  - 150$");
 	AddMenuItem(menu, "STEAM_1:1:93713536", "Kiceroh    - 150$");
 	AddMenuItem(menu, "STEAM_1:1:27293331", "Leethium   - 150$");
 	AddMenuItem(menu, "STEAM_1:0:29435422", "Noob       - 150$");
