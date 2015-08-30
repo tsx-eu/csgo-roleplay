@@ -786,15 +786,19 @@ int CountMachine(int client) {
 			continue;
 		
 		GetEdictClassname(i, tmp, 63);
+		Entity_GetAbsOrigin(i, vecOrigin2);
 		if( StrEqual(bigclassname, tmp) ){
 			count += 15;
+
+			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 50 ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas construire aussi proche d'une autre machine à vous.");
+				return -1;
+			}
 		}
 		if( StrEqual(classname, tmp) ) {
 			count++;
-			
-			
-			Entity_GetAbsOrigin(i, vecOrigin2);
-			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 50 ) {
+
+			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 24 ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas construire aussi proche d'une autre machine à vous.");
 				return -1;
 			}
