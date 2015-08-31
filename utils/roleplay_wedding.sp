@@ -139,7 +139,7 @@ public int eventMariage_1(Handle menu, MenuAction action, int client, int param2
 				continue;
 			if( i == target || i == client )
 				continue;
-			if( rp_GetClientInt(i, i_MarriedTo) != -1 )
+			if( rp_GetClientInt(i, i_MarriedTo) > 0 )
 				continue;
 			if( rp_GetPlayerZone(i) != zoneJuge )
 				continue;
