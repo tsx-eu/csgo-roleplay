@@ -335,9 +335,6 @@ public Action Cmd_ItemRiotShield(int args) {
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
 	
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Temporairement désactivé");
-	ITEM_CANCEL(client, item_id);
-	return Plugin_Handled;
 	if( (rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101) || GetClientTeam(client) != CS_TEAM_CT ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est réservés aux forces de l'ordre.");
 		ITEM_CANCEL(client, item_id);
@@ -356,7 +353,10 @@ public Action Cmd_ItemRiotShield(int args) {
 	DispatchKeyValue(ent, "model", "models/weapons/melee/w_riotshield.mdl");
 	DispatchSpawn(ent);
 	Entity_SetOwner(ent, client);
-	Entity_SetSolidFlags(ent, FSOLID_TRIGGER | FSOLID_USE_TRIGGER_BOUNDS);
+	
+	SetEntityMoveType(ent, MOVETYPE_NONE);
+	SetEntProp(ent, Prop_Data, "m_CollisionGroup", 2);  
+	
 	
 	SetVariantString("!activator");
 	AcceptEntityInput(ent, "SetParent", client, client);
@@ -374,14 +374,9 @@ public Action Cmd_ItemRiotShield(int args) {
 	
 	g_iRiotShield[client] = ent;
 	SDKHook(ent, SDKHook_SetTransmit, Hook_SetTransmit);
-	SDKHook(ent, SDKHook_ShouldCollide, Hook_Collide);
 	SDKHook(client, SDKHook_WeaponSwitch, Hook_WeaponSwitch);
 	
 	return Plugin_Handled;
-}
-public bool Hook_Collide(int entity, int collisiongroup, int contentsMask, bool result) {
-	result = false;
-	return false;
 }
 public Action fwdPlayerFrame(int client) {
 	if( GetClientTeam(client) != CS_TEAM_CT )
@@ -471,7 +466,6 @@ void removeShield(int client) {
 		
 		SDKUnhook(g_iRiotShield[client], SDKHook_SetTransmit, Hook_SetTransmit);
 		SDKUnhook(client, SDKHook_WeaponSwitch, Hook_WeaponSwitch);
-		SDKUnhook(g_iRiotShield[client], SDKHook_ShouldCollide, Hook_Collide);
 		
 		AcceptEntityInput( g_iRiotShield[client], "Kill");
 		g_iRiotShield[client] = 0;
