@@ -512,7 +512,7 @@ public void Q12_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "- Décrochez le rang no-pyj");
 		DrawPanelText(panel, "- Faites un tour sur notre TeamSpeak");
 		DrawPanelText(panel, "- Pensez à vous abonnez à la map sur workshop afin de");
-		DrawPanelText(panel, "- tenir à jour la map 'Princeton' automatiquement");
+		DrawPanelText(panel, "- maintenir à jour la map 'Princeton' automatiquement");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " Bon jeu!");
 		DrawPanelText(panel, " ");
