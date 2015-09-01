@@ -515,7 +515,6 @@ public void Q12_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "- Cela vous permettra de tenir à jour la map 'Princeton'");
 		DrawPanelText(panel, "- sans être sur le serveur.");
 		DrawPanelText(panel, " ");
-		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " Bon jeu!");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, "→ Rendez-vous devant l'hôpital afin de");
@@ -541,7 +540,7 @@ public void Q13_Frame(int objectiveID, int client) {
 		SetMenuTitle(menu, "== Parrainage");
 					
 		AddMenuItem(menu, "", "Quelqu'un de présent vous a t-il invité",		ITEMDRAW_DISABLED);
-		AddMenuItem(menu, "", "a jouer sur notre serveur?  Si oui, qui?",		ITEMDRAW_DISABLED);
+		AddMenuItem(menu, "", "à jouer sur notre serveur?  Si oui, qui?",		ITEMDRAW_DISABLED);
 		
 		AddMenuItem(menu, "none", "Personne, j'ai connu autrement le serveur");
 		AddMenuItem(menu, "youtube", "Youtube, en regardant une vidéo");
