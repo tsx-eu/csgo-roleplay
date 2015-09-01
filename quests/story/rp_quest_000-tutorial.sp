@@ -511,14 +511,8 @@ public void Q12_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "- Ne tuez pas tout les passants");
 		DrawPanelText(panel, "- Décrochez le rang no-pyj");
 		DrawPanelText(panel, "- Faites un tour sur notre TeamSpeak");
-<<<<<<< HEAD
 		DrawPanelText(panel, "- Pensez à vous abonnez à la map sur workshop afin de");
-		DrawPanelText(panel, "- maintenir à jour la map 'Princeton' automatiquement");
-=======
-		DrawPanelText(panel, "- N'oubliez pas de vous abonnez à la map présent sur workshop");
-		DrawPanelText(panel, "- Cela vous permettra de tenir à jour la map 'Princeton'");
-		DrawPanelText(panel, "- sans être sur le serveur.");
->>>>>>> 77816889b63d9c6ac4780e92d6b1a1d337f9bde4
+		DrawPanelText(panel, "maintenir à jour la map 'Princeton' automatiquement");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " Bon jeu!");
 		DrawPanelText(panel, " ");
