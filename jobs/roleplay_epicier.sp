@@ -28,7 +28,7 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-Handle g_hCigarette[65];
+Handle g_hCigarette[65], g_hEVENT;
 int g_cBeam;
 
 // ----------------------------------------------------------------------------
@@ -42,15 +42,162 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_map",			Cmd_ItemMaps,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_ruban",		Cmd_ItemRuban,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	
+	g_hEVENT =  FindConVar("rp_event");
+	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
-			if( rp_GetClientBool(i, b_Crayon) )
-				rp_HookEvent(i, RP_PrePlayerTalk, fwdTalkCrayon);
+			OnClientPostAdminCheck(i);
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 }
+public void OnClientPostAdminCheck(int client) {
+	#if defined DEBUG
+	PrintToServer("OnClientPostAdminCheck");
+	#endif
+	
+	if( rp_GetClientBool(client, b_Crayon) )
+		rp_HookEvent(client, RP_PrePlayerTalk, fwdTalkCrayon);
+	
+	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);
+}
+public Action fwdUse(int client) {
+	char tmp[32];
+	rp_GetZoneData(rp_GetPlayerZone(client), zone_type_type, tmp, sizeof(tmp));
+	
+	if( StrEqual(tmp, "metro") ) {
+		DisplayMetroMenu(client);
+	}
+}
 
+void DisplayMetroMenu(int client) {
+	#if defined DEBUG
+	PrintToServer("DisplayMetroMenu");
+	#endif
+	
+	if( !rp_IsTutorialOver(client) )
+		return;
+	
+	Handle menu = CreateMenu(eventMetroMenu);
+	SetMenuTitle(menu, "== Station de métro: ==");
+	
+	if( GetConVarInt(g_hEVENT) == 1 )
+		AddMenuItem(menu, "metro_event", "Métro: Station événementiel");
+	
+	AddMenuItem(menu, "metro_paix", 	"Métro: Station de la paix");
+	AddMenuItem(menu, "metro_zoning", 	"Métro: Station Place Station");
+	AddMenuItem(menu, "metro_inno", 	"Métro: Station de l'innovation");
+	AddMenuItem(menu, "metro_pigalle", 	"Métro: Station pigalle");
+	
+	AddMenuItem(menu, "metro_nucleair", "Métro: Station PVP - Nucléaire");
+	AddMenuItem(menu, "metro_tour", 	"Métro: Station PVP - Toit tour");
+	
+	SetMenuPagination(menu, MENU_NO_PAGINATION);
+	SetMenuExitBackButton(menu, false);
+	SetMenuExitButton(menu, true);
+	DisplayMenu(menu, client, 30);
+}
+
+public int eventMetroMenu(Handle menu, MenuAction action, int client, int param2) {
+	#if defined DEBUG
+	PrintToServer("eventMetroMenu");
+	#endif
+	if( action == MenuAction_Select ) {
+		char options[64], tmp[64];
+		GetMenuItem(menu, param2, options, sizeof(options));
+		rp_GetZoneData(rp_GetPlayerZone(client), zone_type_type, tmp, sizeof(tmp));
+		
+		if( !StrEqual(tmp, "metro", false) ) {
+			return;
+		}
+		if( StrEqual(options, "metro_event") && GetConVarInt(g_hEVENT) == 0 ) {
+			return;
+		}
+		
+		int Max, i, hours, min, iLocation[150];
+		
+		for( i=0; i<150; i++ ) {
+			rp_GetLocationData(i, location_type_base, tmp, sizeof(tmp));
+			
+			if( StrEqual(tmp, options, false) ) {
+				iLocation[Max++] = i;
+			}
+		}
+		i = iLocation[Math_GetRandomInt(0, (Max-1))];
+		float pos[3];
+		
+		pos[0] = float(rp_GetLocationInt(i, location_type_origin_x));
+		pos[1] = float(rp_GetLocationInt(i, location_type_origin_y));
+		pos[2] = float(rp_GetLocationInt(i, location_type_origin_z))+8.0;
+		
+		rp_GetTime(hours, min);
+		min = 5 - (min % 5);
+		
+		rp_GetZoneData(rp_GetZoneFromPoint(pos), zone_type_name, tmp, sizeof(tmp));
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Restez assis à l'intérieur du métro, le prochain départ pour %s est dans %d seconde(s).", tmp, min );
+		rp_SetClientInt(client, i_TeleportTo, i);
+		CreateTimer(float(min) + Math_GetRandomFloat(0.1, 0.9), metroTeleport, client);
+	}
+	else if( action == MenuAction_End ) {
+		CloseHandle(menu);
+	}
+}
+public Action metroTeleport(Handle timer, any client) {
+	
+	char tmp[32];
+	rp_GetZoneData(rp_GetPlayerZone(client), zone_type_type, tmp, sizeof(tmp));
+	int tp = rp_GetClientInt(client, i_TeleportTo);
+	
+	if( tp == 0 )
+		return Plugin_Handled;
+	if( !StrEqual(tmp, "metro", false) )
+		return Plugin_Handled;
+	
+	bool paid = false;
+	
+	rp_GetLocationData(tp, location_type_base, tmp, sizeof(tmp));
+	
+	if( StrEqual(tmp, "metro_event") ) {
+		if( rp_GetClientBool(client, b_IsMuteEvent) ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} En raison de votre mauvais comportement, il vous est temporairement interdit de participer à un event.");
+			return Plugin_Handled;
+		}
+		paid = true;
+	}
+	if( !paid && rp_GetClientJobID(client) == 31 )
+		paid = true;
+	if( !paid && rp_GetClientItem(client, 42) >= 0 ) {
+		paid = true;
+		rp_ClientGiveItem(client, 42, -1);
+	}
+	if( !paid && rp_GetClientItem(client, 42, true) >= 0) { 
+		paid = true;
+		rp_ClientGiveItem(client, 42, -1, true);
+	}
+	if( !paid && (rp_GetClientInt(client, i_Money)+rp_GetClientInt(client, i_Bank)) >= 100 ) {
+		rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - 100);
+		rp_SetJobCapital(31, rp_GetJobCapital(31) + 100);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le métro vous a couté 100$. Pensez à acheter des tickets à un épicier pour obtenir une réduction.");
+	}
+	
+	if( paid  ) {
+		
+		float pos[3], vel[3];
+		pos[0] = float(rp_GetLocationInt(tp, location_type_origin_x));
+		pos[1] = float(rp_GetLocationInt(tp, location_type_origin_y));
+		pos[2] = float(rp_GetLocationInt(tp, location_type_origin_z))+8.0;
+		
+		vel[0] = Math_GetRandomFloat(-300.0, 300.0);
+		vel[1] = Math_GetRandomFloat(-300.0, 300.0);
+		vel[2] = 100.0;
+						
+		TeleportEntity(client, pos, NULL_VECTOR, vel);
+		FakeClientCommandEx(client, "sm_stuck");
+						
+		rp_SetClientInt(client, i_TeleportTo, 0);
+	}
+	return Plugin_Continue;
+}
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemCigarette(int args) {
 	#if defined DEBUG

@@ -170,6 +170,7 @@ native void rp_ClientDrawWeaponMenu(int client, int ent, bool steal);					/* Aff
 native int rp_GetPlayerZoneAppart(int client); 									/* Numéro de l'appartement: Uniquement si on se trouve dedans... */
 native int rp_GetPlayerZone(int client, float cache = 0.25); 						/* Numéro de la zone actuelle. */
 native int rp_GetZoneBit(int client, float cache = 300.0);							/* Récupére une option sur une zone. val & BITZONE_BLOCKSTEAL --> On ne peut pas voler dans cette zone */
+native int rp_GetZoneFromPoint(float pos[3]);
 // ----------------------------------------------------------------------------
 native int rp_GetRandomCapital(int jobID);									/* Prend un job au hasard. Plus il ya d'argent dans ce capital, plus ses chances d'être choisis est élevé */
 native int rp_GetJobCapital(int jobID);										/* Valeur d'un capital */
@@ -292,6 +293,7 @@ enum bool_user_data {
 	b_IsMuteGlobal,
 	b_IsMuteLocal,
 	b_IsMuteVocal,
+	b_IsMuteEvent,
 	b_IsNoPyj,
 	
 	b_udata_max
