@@ -779,17 +779,17 @@ int CountMachine(int client) {
 	Format(bigclassname, sizeof(bigclassname), "rp_bigcashmachine_%i", client);
 	Format(classname, sizeof(classname), "rp_cashmachine_%i", client);
 	
-	for(int i=1; i<=2048; i++) {
+	for(int i=MaxClients; i<=2048; i++) {
 		if( !IsValidEdict(i) )
 			continue;
 		if( !IsValidEntity(i) )
 			continue;
 		
 		GetEdictClassname(i, tmp, 63);
-		Entity_GetAbsOrigin(i, vecOrigin2);
+		
 		if( StrEqual(bigclassname, tmp) ){
 			count += 15;
-
+			Entity_GetAbsOrigin(i, vecOrigin2);
 			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 50 ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas construire aussi proche d'une autre machine à vous.");
 				return -1;
@@ -797,7 +797,7 @@ int CountMachine(int client) {
 		}
 		if( StrEqual(classname, tmp) ) {
 			count++;
-
+			Entity_GetAbsOrigin(i, vecOrigin2);
 			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 24 ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas construire aussi proche d'une autre machine à vous.");
 				return -1;
