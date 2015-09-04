@@ -136,7 +136,7 @@ public int eventMetroMenu(Handle menu, MenuAction action, int client, int param2
 		rp_GetZoneData(rp_GetZoneFromPoint(pos), zone_type_name, tmp, sizeof(tmp));
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Restez assis à l'intérieur du métro, le prochain départ pour %s est dans %d seconde(s).", tmp, min );
 		rp_SetClientInt(client, i_TeleportTo, i);
-		CreateTimer(float(min) + Math_GetRandomFloat(0.1, 0.9), metroTeleport, client);
+		CreateTimer(float(min) + Math_GetRandomFloat(0.01, 0.8), metroTeleport, client);
 	}
 	else if( action == MenuAction_End ) {
 		CloseHandle(menu);
@@ -147,6 +147,7 @@ public Action metroTeleport(Handle timer, any client) {
 	char tmp[32];
 	rp_GetZoneData(rp_GetPlayerZone(client), zone_type_type, tmp, sizeof(tmp));
 	int tp = rp_GetClientInt(client, i_TeleportTo);
+	rp_SetClientInt(client, i_TeleportTo, 0);
 	
 	if( tp == 0 )
 		return Plugin_Handled;
@@ -158,19 +159,20 @@ public Action metroTeleport(Handle timer, any client) {
 	rp_GetLocationData(tp, location_type_base, tmp, sizeof(tmp));
 	
 	if( StrEqual(tmp, "metro_event") ) {
-		if( rp_GetClientBool(client, b_IsMuteEvent) ) {
+		if( rp_GetClientBool(client, b_IsMuteEvent) == true ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} En raison de votre mauvais comportement, il vous est temporairement interdit de participer à un event.");
 			return Plugin_Handled;
 		}
 		paid = true;
 	}
-	if( !paid && rp_GetClientJobID(client) == 31 )
+	if( !paid && rp_GetClientJobID(client) == 31 ) {
 		paid = true;
-	if( !paid && rp_GetClientItem(client, 42) >= 0 ) {
+	}
+	if( !paid && rp_GetClientItem(client, 42) > 0 ) {
 		paid = true;
 		rp_ClientGiveItem(client, 42, -1);
 	}
-	if( !paid && rp_GetClientItem(client, 42, true) >= 0) { 
+	if( !paid && rp_GetClientItem(client, 42, true) > 0) { 		
 		paid = true;
 		rp_ClientGiveItem(client, 42, -1, true);
 	}
@@ -178,10 +180,10 @@ public Action metroTeleport(Handle timer, any client) {
 		rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - 100);
 		rp_SetJobCapital(31, rp_GetJobCapital(31) + 100);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le métro vous a couté 100$. Pensez à acheter des tickets à un épicier pour obtenir une réduction.");
+		paid = true;
 	}
 	
 	if( paid  ) {
-		
 		float pos[3], vel[3];
 		pos[0] = float(rp_GetLocationInt(tp, location_type_origin_x));
 		pos[1] = float(rp_GetLocationInt(tp, location_type_origin_y));
@@ -193,9 +195,9 @@ public Action metroTeleport(Handle timer, any client) {
 						
 		TeleportEntity(client, pos, NULL_VECTOR, vel);
 		FakeClientCommandEx(client, "sm_stuck");
-						
-		rp_SetClientInt(client, i_TeleportTo, 0);
 	}
+	
+	
 	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------
