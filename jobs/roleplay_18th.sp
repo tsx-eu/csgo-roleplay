@@ -398,21 +398,10 @@ public Action Cmd_ItemPickLock(int args) {
 	GetClientEyePosition(client, vecStart);		
 	GetClientEyePosition(target, vecEnd);
 	
-	int alpha[4], job;
-	alpha[0] = 255;
-	alpha[3] = 128;
+	int job;
 	job = rp_GetClientInt(client, i_Job);
 	
-	if( rp_IsNight() )
-		alpha[3] = 50;
 	
-	TE_SetupBeamRingPoint(vecStart, 0.0, 10.0, g_cBeam, 0, 0, 10, 1.0, 20.0, 1.0, alpha, 1, 0);
-	TE_SendToAll();
-	TE_SetupBeamRingPoint(vecEnd, 30.0, 40.0, g_cBeam, 0, 0, 10, 1.0, 20.0, 1.0, alpha, 1, 0);
-	TE_SendToAll();
-	
-	
-	rp_ClientColorize(client, { 255, 0, 0, 190 } );
 	rp_ClientReveal(client);
 	
 	// Anti-cheat: 
@@ -440,7 +429,9 @@ public Action Cmd_ItemPickLock(int args) {
 	
 	if( !rp_IsTargetSeen(target, client) ) {
 		StealTime -= 0.4;
-	}	
+	}
+	
+	ServerCommand("sm_effect_particles #%d Aura1 %d", GetClientUserId(client), RoundToCeil(StealTime));
 	
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, StealTime);
 	rp_HookEvent(client, RP_PreTakeDamage, fwdDamage, StealTime);
