@@ -906,7 +906,7 @@ public Action Cmd_ItemPilule(int args){
 		return Plugin_Handled;
 	}
 
-	if(type == 1){ // Appart
+	if(type == 1) { // Appart
 		int appartcount = rp_GetClientInt(client, i_AppartCount);
 		if(appartcount == 0){
 			ITEM_CANCEL(client, item_id);
@@ -957,13 +957,19 @@ public Action Cmd_ItemPilule(int args){
 			return Plugin_Handled;
 	}
 
+	if(type == 1) {
+		ServerCommand("sm_effect_particles %d Aura7 %d", client, RoundFloat(TP_CHANNEL_DURATION));
+		rp_ClientColorize(client, { 238, 148, 52, 255} );
+	}
+	else if( type == 2 ) {
+		ServerCommand("sm_effect_particles %d Aura8 %d", client, RoundFloat(TP_CHANNEL_DURATION));
+		rp_ClientColorize(client, { 52, 148, 238, 255} );
+	}
+	
 	rp_ClientReveal(client);
 	ServerCommand("sm_effect_panel %d %f \"Téléportation en cours...\"", client, TP_CHANNEL_DURATION);
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, TP_CHANNEL_DURATION);
-	CreateTimer( TP_CHANNEL_DURATION*0.1 , tpbeam, client);
-	CreateTimer( TP_CHANNEL_DURATION*0.4 , tpbeam, client);
-	CreateTimer( TP_CHANNEL_DURATION*0.8 , tpbeam, client);
-	rp_ClientColorize(client, { 238, 148, 52, 255} );
+	
 
 	Handle dp;
 	CreateDataTimer(TP_CHANNEL_DURATION, ItemPiluleOver, dp, TIMER_DATA_HNDL_CLOSE);
