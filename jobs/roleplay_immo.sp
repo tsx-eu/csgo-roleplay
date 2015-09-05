@@ -135,6 +135,22 @@ public Action Cmd_ItemAppartSerrure(int args) {
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
 	int appartID = rp_GetPlayerZoneAppart(client);
+	Handle dp;
+	CreateDataTimer(0.25 , Task_ItemAppartSerrure, dp, TIMER_DATA_HNDL_CLOSE);
+	WritePackCell(dp, client);
+	WritePackCell(dp, item_id);
+	WritePackCell(dp, appartID);
+	return Plugin_Handled;
+}
+public Action Task_ItemAppartSerrure(Handle timer, Handle dp) {
+	#if defined DEBUG
+	PrintToServer("Task_ItemAppartSerrure");
+	#endif
+	ResetPack(dp);
+	int client = ReadPackCell(dp);
+	int item_id = ReadPackCell(dp);
+	int appartID = ReadPackCell(dp);
+
 	if( appartID == -1 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être dans votre appartement.");
 		ITEM_CANCEL(client, item_id);
