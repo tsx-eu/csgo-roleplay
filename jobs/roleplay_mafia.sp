@@ -62,6 +62,15 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerSteal,	fwdOnPlayerSteal);
 	
 }
+public void OnClientDisconnect(int client) {
+	for(int i=0; i<2049; i++){
+		if(g_iDoorDefine_ALARM[i] == client)
+			g_iDoorDefine_ALARM[i] = 0;
+
+		if(g_iDoorDefine_LOCKER[i] == client)
+			g_iDoorDefine_LOCKER[i] = 0;
+	}
+}
 public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	if( rp_GetClientJobID(client) != 91 )
 		return Plugin_Continue;
