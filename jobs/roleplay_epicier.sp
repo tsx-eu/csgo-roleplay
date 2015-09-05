@@ -205,8 +205,6 @@ public int MenuRubanWho(Handle menu, MenuAction action, int client, int param2) 
 		AddMenuItem(menucolor, tmp, "Bleu");
 		Format(tmp,63,"%s_%i_%i_%i_%i_%i", data[0], target, 255, 255, 255, 200);
 		AddMenuItem(menucolor, tmp, "Blanc");
-		Format(tmp,63,"%s_%i_%i_%i_%i_%i", data[0], target, 0  , 0  , 0  , 200);
-		AddMenuItem(menucolor, tmp, "Noir");
 		Format(tmp,63,"%s_%i_%i_%i_%i_%i", data[0], target, 122, 122, 0  , 200);
 		AddMenuItem(menucolor, tmp, "Jaune");
 		Format(tmp,63,"%s_%i_%i_%i_%i_%i", data[0], target, 253, 108, 158, 200);
@@ -273,7 +271,10 @@ public Action Cmd_ItemSanAndreas(int args) {
 		
 	int ammo = Weapon_GetPrimaryClip(wepid);
 	ammo += 1000; if( ammo > 5000 ) ammo = 5000;
-	Weapon_SetPrimaryClip(wepid, ammo);
+	Client_SetWeaponAmmo(client, classname, 0, 0, ammo, 0);
+	// int primammo, secammo;
+	// Client_GetWeaponPlayerAmmo(client, classname, primammo, secammo);
+	// PrintToChatAll("Prim : %i     Sec : %i", primammo, secammo);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme à maintenant %i balles", ammo);
 	return Plugin_Handled;
 }
