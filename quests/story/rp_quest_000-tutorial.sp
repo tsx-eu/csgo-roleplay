@@ -78,7 +78,7 @@ public void OnClientPostAdminCheck(int client) {
 }
 public Action fwdCommand(int client, char[] command, char[] arg) {	
 	if( StrEqual(command, "aide") || StrEqual(command, "aides") || StrEqual(command, "wiki") || StrEqual(command, "help")  ) { // C'est pour nous !
-		QueryClientConVar(client, "cl_disablehtmlmotd", view_as<ConVarQueryFinished>ClientConVar, client);
+		QueryClientConVar(client, "cl_disablehtmlmotd", view_as<ConVarQueryFinished>(ClientConVar), client);
 		ShowMOTDPanel(client, "Role-Play: WiKi", "http://www.ts-x.eu/popup.php?url=/wiki/", MOTDPANEL_TYPE_URL);
 		
 		if( g_iClientDoingQ[client] > 0 ) {
