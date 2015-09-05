@@ -354,8 +354,6 @@ public int MenuRubanWho(Handle menu, MenuAction action, int client, int param2) 
 		AddMenuItem(menucolor, tmp, "Bleu");
 		Format(tmp,63,"%s_%i_%i_%i_%i_%i", data[0], target, 255, 255, 255, 200);
 		AddMenuItem(menucolor, tmp, "Blanc");
-		Format(tmp,63,"%s_%i_%i_%i_%i_%i", data[0], target, 0  , 0  , 0  , 200);
-		AddMenuItem(menucolor, tmp, "Noir");
 		Format(tmp,63,"%s_%i_%i_%i_%i_%i", data[0], target, 122, 122, 0  , 200);
 		AddMenuItem(menucolor, tmp, "Jaune");
 		Format(tmp,63,"%s_%i_%i_%i_%i_%i", data[0], target, 253, 108, 158, 200);

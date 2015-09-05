@@ -62,6 +62,15 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerSteal,	fwdOnPlayerSteal);
 	
 }
+public void OnClientDisconnect(int client) {
+	for(int i=0; i<2049; i++){
+		if(g_iDoorDefine_ALARM[i] == client)
+			g_iDoorDefine_ALARM[i] = 0;
+
+		if(g_iDoorDefine_LOCKER[i] == client)
+			g_iDoorDefine_LOCKER[i] = 0;
+	}
+}
 public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	if( rp_GetClientJobID(client) != 91 )
 		return Plugin_Continue;
@@ -276,17 +285,19 @@ public Action Cmd_ItemDoorDefine(int args) {
 	}
 	
 	if( StrEqual(Arg1, "locker") ) {
-		if(g_iDoorDefine_LOCKER[doorID] == 0){
+		if(g_iDoorDefine_LOCKER[doorID] != 0){
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Un cadenas est déja présent sur cette porte.");
 			ITEM_CANCEL(client, item_id);
+			return Plugin_Handled;
 		}
 		g_iDoorDefine_LOCKER[doorID] = client;
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le cadenas a été placé avec succès.");
 	}
 	else if( StrEqual(Arg1, "alarm") ) {
-		if(g_iDoorDefine_ALARM[doorID] == 0){
+		if(g_iDoorDefine_ALARM[doorID] != 0){
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Une alarme est déja présente sur cette porte.");
 			ITEM_CANCEL(client, item_id);
+			return Plugin_Handled;
 		}
 		g_iDoorDefine_ALARM[doorID] = client;
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} L'alarme a été installée.");
