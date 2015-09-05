@@ -271,10 +271,7 @@ public Action Cmd_ItemSanAndreas(int args) {
 		
 	int ammo = Weapon_GetPrimaryClip(wepid);
 	ammo += 1000; if( ammo > 5000 ) ammo = 5000;
-	Client_SetWeaponAmmo(client, classname, 0, 0, ammo, 0);
-	// int primammo, secammo;
-	// Client_GetWeaponPlayerAmmo(client, classname, primammo, secammo);
-	// PrintToChatAll("Prim : %i     Sec : %i", primammo, secammo);
+	Weapon_SetPrimaryClip(wepid, ammo);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme à maintenant %i balles", ammo);
 	return Plugin_Handled;
 }
