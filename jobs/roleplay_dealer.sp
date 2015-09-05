@@ -132,9 +132,7 @@ public Action Cmd_ItemDrugs(int args) {
 		if( StrEqual(arg0, "lsd2")) rp_Effect_VisionTrouble(target);  //Si c'est de la LSD
 		else rp_HookEvent(target, RP_PrePlayerPhysic, fwdPCP, dur); //Si c'est du PCP
 	
-		//Affichage du laser entre le client et la cible (cf. laser des chiru)
-		TE_SetupBeamPoints(pos1, pos2, g_cBeam, 0, 0, 0, 0.5, 10.0, 10.0, 1, 0.5, {255, 155, 0, 250}, 0);
-		TE_SendToAll(0.1);
+		ServerCommand("sm_effect_particles %d Trail9 10", client);
 		
 		//Envoie de messages d'information
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez drogué %N.", target);
