@@ -299,6 +299,7 @@ public Action Cmd_ItemPoison(int args) {
 	}
 	
 	rp_SetClientInt(client, i_LastAgression, GetTime());
+	ServerCommand("sm_effect_particles %d Trail7 11 weapon_bone", client);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez empoisonné %N.", target);
 	CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été empoisonné.");
 	rp_ClientPoison(target, 120.0, client);
@@ -407,16 +408,11 @@ public Action Cmd_ItemAdrenaline(int args) {
 	
 	for (float i = 0.0; i <= 10.0; i+= 0.2) {
 		rp_HookEvent(client, RP_PostPlayerPhysic, fwdAdrenalineSpeed, i);
-		rp_HookEvent(client, RP_PreHUDColorize, fwdAdrenalineColor, i);
 		rp_HookEvent(client, RP_PostGiveDamageWeapon, fwdBerserk, i);
 		rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdBerserk, i);
 	}
 	
-	//Affiche un halo rouge autours du client
-	float vecTarget[3]; 
-	GetClientAbsOrigin(client, vecTarget);
-	TE_SetupBeamRingPoint(vecTarget, 10.0, 300.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, {255, 0, 0, 100}, 10, 0);
-	TE_SendToAll();
+	ServerCommand("sm_effect_particles %d Trail11 11 weapon_bone", client);
 	
 	rp_SetClientBool(client, b_Drugged, true);	
 	CreateTimer( 10.5, ItemDrugStop, client);

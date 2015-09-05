@@ -199,6 +199,9 @@ public Action Cmd_ItemPropulseur(int args) {
 	velocity[2] = (FloatAbs(velocity[2]) * 2.0) + Math_GetRandomFloat(50.0, 75.0);
 	
 	TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, velocity);
+	
+	ServerCommand("sm_effect_particles %d Trail12 1 lfoot", client);
+	ServerCommand("sm_effect_particles %d Trail12 1 rfoot", client);
 }
 // ------------------------------------------------------------------------------
 public Action Cmd_ItemNano(int args) {
