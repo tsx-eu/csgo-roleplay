@@ -311,7 +311,7 @@ public int MenuJobs2(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 				AddMenuItem(menu, tmp2, "Acheter / Vendre une arme");
 				amount++;
 			}
-			if(jobid == 101){
+			if(jobid == 101 && !(job == 103 || job == 104 || job == 105 || job == 106)){
 				Format(tmp2, sizeof(tmp2), "%i_-4", target);
 				AddMenuItem(menu, tmp2, "Demander pour une audience");
 				amount++;
