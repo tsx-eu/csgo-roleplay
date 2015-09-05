@@ -94,7 +94,7 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
 }
 public void OnClientDisconnect(int client) {		
-	for (int i = 0; i < view_as<int>ch_Max; i++) {
+	for (int i = 0; i < view_as<int>(ch_Max); i++) {
 		g_bBionique[client][i] = false;
 	}
 }
