@@ -115,7 +115,7 @@ public Action Cmd_ItemGiveAppart(int args) {
 	if( !rp_GetClientKeyAppartement(client, appart) ) { // TODO: Check si y a pas déjà un proprio... 
 		
 		for (int i = 0; i < view_as<int>(appart_bonus_max); i++)
-			rp_SetAppartementInt(appart, view_as<type_appart_bonus>i, 0);
+			rp_SetAppartementInt(appart, view_as<type_appart_bonus>(i), 0);
 		
 		rp_SetClientInt(client, i_AppartCount, rp_GetClientInt(client, i_AppartCount) + 1);
 		rp_SetClientKeyAppartement(client, appart, true);
@@ -277,11 +277,11 @@ public Action Cmd_ItemGiveBonus(int args) {
 		return Plugin_Handled;	
 	}
 	
-	if( rp_GetAppartementInt(appartID, view_as<type_appart_bonus>bonus) >= mnt ) {
+	if( rp_GetAppartementInt(appartID, view_as<type_appart_bonus>(bonus)) >= mnt ) {
 		ITEM_CANCEL(client, itemID);
 		return Plugin_Handled;
 	}
-	rp_SetAppartementInt(appartID, view_as<type_appart_bonus>bonus, mnt);
+	rp_SetAppartementInt(appartID, view_as<type_appart_bonus>(bonus), mnt);
 	
 	return Plugin_Handled;	
 }
