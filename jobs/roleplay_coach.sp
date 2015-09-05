@@ -180,7 +180,7 @@ public Action Cmd_ItemCutThrow(int args) {
 	SetEntityModel(entity, MODEL_KNIFE);
 	SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", client);
 	SetEntPropFloat(entity, Prop_Send, "m_flElasticity", 0.2);
-	SetEntPropVector(entity, Prop_Data, "m_vecAngVelocity", view_as<float>{4500.0, 0.0, 0.0});
+	SetEntPropVector(entity, Prop_Data, "m_vecAngVelocity", view_as<float>({4500.0, 0.0, 0.0}));
 	
 	TeleportEntity(entity, fPos, fAng, fVel);
 	
@@ -366,7 +366,7 @@ public Action Cmd_ItemRiotShield(int args) {
 	
 	SetVariantString("weapon_hand_L");
 	AcceptEntityInput(ent, "SetParentAttachment");
-	TeleportEntity(ent, view_as<float> { 2.0, 4.0, 0.0 }, view_as<float> { 300.0, 90.0, 20.0}, NULL_VECTOR);
+	TeleportEntity(ent, view_as<float>({ 2.0, 4.0, 0.0 }), view_as<float>({ 300.0, 90.0, 20.0}), NULL_VECTOR);
 	
 	rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdTakeDamage);
 	rp_HookEvent(client, RP_OnPlayerDead, fwdPlayerDead);
@@ -391,14 +391,14 @@ public Action Hook_WeaponSwitch(int client, int weapon) {
 			SetVariantString("weapon_hand_L");
 			AcceptEntityInput(g_iRiotShield[client], "SetParentAttachment");
 			
-			TeleportEntity(g_iRiotShield[client], view_as<float> { 2.0, 4.0, 0.0 }, view_as<float> { 300.0, 90.0, 20.0}, NULL_VECTOR);
+			TeleportEntity(g_iRiotShield[client], view_as<float>({ 2.0, 4.0, 0.0 }), view_as<float>({ 300.0, 90.0, 20.0}), NULL_VECTOR);
 		}
 		else {
 			
 			SetVariantString("primary");
 			AcceptEntityInput(g_iRiotShield[client], "SetParentAttachment");
 			
-			TeleportEntity(g_iRiotShield[client], view_as<float> { 10.0, 20.0, 0.0 }, view_as<float> { 150.0, 270.0, 120.0 }, NULL_VECTOR);
+			TeleportEntity(g_iRiotShield[client], view_as<float>({ 10.0, 20.0, 0.0 }), view_as<float>({ 150.0, 270.0, 120.0 }), NULL_VECTOR);
 		}
 	}
 }
