@@ -271,6 +271,8 @@ public int MenuJobs(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_
 					Format(tmp, sizeof(tmp), "[AFK] %N - %s", i, tmp);
 				else if(rp_GetClientInt(i, i_JailTime) > 0)
 					Format(tmp, sizeof(tmp), "[JAIL] %N - %s", i, tmp);
+				else if(rp_GetZoneBit(rp_GetPlayerZone(i)) & BITZONE_EVENT)
+					Format(tmp, sizeof(tmp), "[EVENT] %N - %s", i, tmp);
 				else
 					Format(tmp, sizeof(tmp), "%N - %s", i, tmp);
 
