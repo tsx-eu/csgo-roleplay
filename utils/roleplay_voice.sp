@@ -266,7 +266,15 @@ public int MenuJobs(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_
 
 				Format(tmp2, sizeof(tmp2), "%i", i);
 				rp_GetJobData(rp_GetClientInt(i, i_Job), job_type_name, tmp, sizeof(tmp));
-				Format(tmp, sizeof(tmp), "%N - %s", i, tmp);
+
+				if(rp_GetClientBool(i, b_IsAFK))
+					Format(tmp, sizeof(tmp), "[AFK] %N - %s", i, tmp);
+				else if(rp_GetClientInt(i, i_JailTime) > 0)
+					Format(tmp, sizeof(tmp), "[JAIL] %N - %s", i, tmp);
+				else
+					Format(tmp, sizeof(tmp), "%N - %s", i, tmp);
+
+					
 				AddMenuItem(menu, tmp2, tmp);
 				amount++;
 			}
@@ -293,6 +301,7 @@ public int MenuJobs2(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 			SetMenuTitle(menu, "Que voulez vous lui demander:");
 			int target = StringToInt(szMenuItem);
 			int jobid = rp_GetClientJobID(target);
+			int job = rp_GetClientInt(client, i_Job);
 			int amount = 0;
 			char tmp[128], tmp2[128];
 
