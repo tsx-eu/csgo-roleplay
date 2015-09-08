@@ -141,8 +141,8 @@ native void rp_Effect_PropExplode(int entityID, bool tazer = false);					/* Expl
 native void rp_Effect_Smoke(int client, float duration = 30.0);						/* Petit effect de fumée de cigarette */
 native void rp_Effect_VisionTrouble(int client, float duration = 30.0);					/* Trouble la vision d'un joueur */
 native void rp_Effect_ShakingVision(int client, float duration = 30.0);					/* Fait trembler la vue d'un joueur */
-native void rp_Effect_Particle(int entity, char[] effect, float duration=0.0001);		/* Affiche une particule */
-native void rp_Effect_ParticlePath(int entity, char[] effect, const float src[3], const float angle[3], const float dest[3]); /* Affiche une particule à un endroit précis */
+native int rp_Effect_Particle(int entity, char[] effect, float duration=0.0001);		/* Affiche une particule */
+native int rp_Effect_ParticlePath(int entity, char[] effect, const float src[3], const float angle[3], const float dest[3]); /* Affiche une particule à un endroit précis */
 native void rp_Effect_Tazer(int client, int target);								/* Affiche un trait du tazer entre un joueur et une cible */
 native void rp_Effect_SpawnMoney(float origin[3], bool high = false);						/* Spawn des billets 20-50$. High = true -> 200-500$. Penser à retirer la thune d'un capital */
 native void rp_Effect_BeamBox(int client, int target = -1, float origin[3] = NULL_VECTOR, int red = 0, int green = 255, int blue = 0); /* Affiche un lazer tracant entre un joueur et une cible */
@@ -170,6 +170,7 @@ native void rp_ClientDrawWeaponMenu(int client, int ent, bool steal);					/* Aff
 native int rp_GetPlayerZoneAppart(int client); 									/* Numéro de l'appartement: Uniquement si on se trouve dedans... */
 native int rp_GetPlayerZone(int client, float cache = 0.25); 						/* Numéro de la zone actuelle. */
 native int rp_GetZoneBit(int client, float cache = 300.0);							/* Récupére une option sur une zone. val & BITZONE_BLOCKSTEAL --> On ne peut pas voler dans cette zone */
+native int rp_GetZoneFromPoint(float pos[3]);
 // ----------------------------------------------------------------------------
 native int rp_GetRandomCapital(int jobID);									/* Prend un job au hasard. Plus il ya d'argent dans ce capital, plus ses chances d'être choisis est élevé */
 native int rp_GetJobCapital(int jobID);										/* Valeur d'un capital */
@@ -292,6 +293,7 @@ enum bool_user_data {
 	b_IsMuteGlobal,
 	b_IsMuteLocal,
 	b_IsMuteVocal,
+	b_IsMuteEvent,
 	b_IsNoPyj,
 	
 	b_udata_max

@@ -497,7 +497,7 @@ public void BuildingKevlarBox_break(const char[] output, int caller, int activat
 	
 	float vecOrigin[3];
 	Entity_GetAbsOrigin(caller,vecOrigin);
-	TE_SetupSparks(vecOrigin, view_as<float>{0.0,0.0,1.0},120,40);
+	TE_SetupSparks(vecOrigin, view_as<float>({0.0,0.0,1.0}),120,40);
 	TE_SendToAll();
 	
 	rp_Effect_Explode(vecOrigin, 100.0, 400.0, client);

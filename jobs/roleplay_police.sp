@@ -215,7 +215,7 @@ public Action Cmd_Avocat(int client, const char[] arg) {
 	AddMenuItem(menu, "STEAM_1:1:42937983", "NokS       - 150$");
 	AddMenuItem(menu, "STEAM_0:1:115329137", "Arseniy   - 150$");
 	AddMenuItem(menu, "STEAM_0:0:44606367", "Maverick   - 150$");
-	AddMenuItem(menu, "STEAM_1:1:989000", "Jean Cochon  - 150$");
+	AddMenuItem(menu, "STEAM_1:1:989000", "kirL	    - 150$");
 	AddMenuItem(menu, "STEAM_1:1:93713536", "Kiceroh    - 150$");
 	AddMenuItem(menu, "STEAM_1:1:27293331", "Leethium   - 150$");
 	AddMenuItem(menu, "STEAM_1:0:29435422", "Noob       - 150$");
@@ -905,7 +905,7 @@ public Action Cmd_Audience(int client) {
 	client, tmp2);
 		
 		
-	QueryClientConVar(client, "cl_disablehtmlmotd", view_as<ConVarQueryFinished>ClientConVar, client);
+	QueryClientConVar(client, "cl_disablehtmlmotd", view_as<ConVarQueryFinished>(ClientConVar), client);
 	ShowMOTDPanel(client, "Role-Play: Audience", tmp, MOTDPANEL_TYPE_URL);
 	return Plugin_Handled;
 }
@@ -1242,7 +1242,7 @@ public Action Timer_ConvTribu(Handle timer, any target) {
 	}
 	float vecOrigin[3];
 	Entity_GetAbsOrigin(target, vecOrigin);
-	if( GetVectorDistance(vecOrigin, view_as<float>{496.0, -1787.0, -1997.0}) < 64.0 || GetVectorDistance(vecOrigin, view_as<float>{-782.0, -476.0, -2000.0}) < 64.0 ){
+	if( GetVectorDistance(vecOrigin, view_as<float>({496.0, -1787.0, -1997.0})) < 64.0 || GetVectorDistance(vecOrigin, view_as<float>({-782.0, -476.0, -2000.0})) < 64.0 ){
 		CPrintToChatAll("{lightblue} ================================== {default}");
 		CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}n'est plus recherché par le Tribunal.", target);
 		CPrintToChatAll("{lightblue} ================================== {default}");
@@ -1758,9 +1758,9 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 		if( type == -2 || type == -3 ) {
 			
 			if( type == -3 )
-				TeleportEntity(target, view_as<float>{-276.0, -276.0, -1980.0}, NULL_VECTOR, NULL_VECTOR);
+				TeleportEntity(target, view_as<float>({-276.0, -276.0, -1980.0}), NULL_VECTOR, NULL_VECTOR);
 			else
-				TeleportEntity(target, view_as<float>{632.0, -1258.0, -1980.0}, NULL_VECTOR, NULL_VECTOR);
+				TeleportEntity(target, view_as<float>({632.0, -1258.0, -1980.0}), NULL_VECTOR, NULL_VECTOR);
 			
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été mis en prison, en attente de jugement par: %N", client);
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez mis: %N {default}en prison du Tribunal.", target);

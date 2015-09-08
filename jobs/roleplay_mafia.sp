@@ -157,8 +157,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		float vecTarget[3];
 		GetClientAbsOrigin(client, vecTarget);
 
-		TE_SetupBeamRingPoint(vecTarget, 10.0, 300.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, alpha, 10, 0);
-		TE_SendToAll();
+		ServerCommand("sm_effect_particles %d Aura2 3", client);
 		
 		//g_iSuccess_last_pas_vu_pas_pris[target] = GetTime();
 
@@ -189,18 +188,9 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 			tmp, rp_GetClientJobID(client), GetTime(), 0, "Vol: Argent", amount);
 		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
 		
-		
-		
-		float vecOrigin[3], vecTarget[3], log;
-		int alpha[4];
-		alpha[1] = 255;
-		alpha[3] = 50;
-		if( rp_IsNight() ) {
-			alpha[3] = 25;
+		if( rp_IsNight() )
 			cooldown *= 0.5;
-		}
 		
-	
 		if( amount < 50 )
 			cooldown *= 0.5;
 		if( amount < 5 )
@@ -211,23 +201,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		if( amount > 2000 )
 			rp_SetClientFloat(client, fl_LastVente, GetGameTime() + 30.0);
 		
-		GetClientAbsOrigin(client, vecOrigin);
-		
-		for(int i=1; i<=MaxClients; i++) {
-			if( !IsValidClient(i) )
-				continue;
-			if( !IsPlayerAlive(i) )
-				continue;
-			
-			if( rp_GetClientJobID(i) == 1 || i == target || i == client || rp_GetClientJobID(i) == 91 ) {
-				GetClientAbsOrigin(i, vecTarget);
-				log = Logarithm( float(amount)+10 ) * 100.0;
-				
-				
-				TE_SetupBeamRingPoint(vecOrigin, 10.0, log, g_cBeam, g_cGlow, 0, 15, 0.5, log*0.25, 0.0, alpha, 10, 0);
-				TE_SendToClient(i);
-			}
-		}
+		ServerCommand("sm_effect_particles %d Aura2 2", client);
 		
 		int cpt = rp_GetRandomCapital(91);
 		rp_SetJobCapital(91, rp_GetJobCapital(91) + (amount/4));
@@ -395,9 +369,11 @@ public Action Cmd_ItemPiedBiche(int args) {
 		
 	ServerCommand("sm_effect_panel %d 15.0 \"Crochetage du distributeur...\"", client);
 	
-	CreateTimer(2.5, timerAlarm, target); 
-	CreateTimer(7.5, timerAlarm, target); 
-	CreateTimer(12.5, timerAlarm, target); 
+	if( StrContains(classname, "rp_bank_") == 0 ) {
+		CreateTimer(2.5, timerAlarm, target); 
+		CreateTimer(7.5, timerAlarm, target); 
+		CreateTimer(12.5, timerAlarm, target); 
+	}
 	
 	
 	rp_ClientColorize(client, { 255, 0, 0, 190 } );

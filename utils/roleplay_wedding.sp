@@ -139,7 +139,7 @@ public int eventMariage_1(Handle menu, MenuAction action, int client, int param2
 				continue;
 			if( i == target || i == client )
 				continue;
-			if( rp_GetClientInt(i, i_MarriedTo) != -1 )
+			if( rp_GetClientInt(i, i_MarriedTo) > 0 )
 				continue;
 			if( rp_GetPlayerZone(i) != zoneJuge )
 				continue;
@@ -195,7 +195,7 @@ public int eventMariage_2(Handle menu, MenuAction action, int client, int param2
 		}
 		
 		// Message à toute la salle
-		PrintToChatZone(zoneJuge, "{lightblue}[TSX-RP]{default} Le juge %N s'exclame: %N, voulez-vous prendre pour époux %N et l'aimer jusqu'à que la mort vous sépare?", client, target_2, target_1);
+		PrintToChatZone(zoneJuge, "{lightblue}[TSX-RP]{default} Le juge %N s'exclame: %N, voulez-vous prendre pour époux %N et l'aimer jusqu'à ce que la mort vous sépare?", client, target_2, target_1);
 		
 		// Setup menu
 		Handle menu2 = CreateMenu(eventMariage_3);

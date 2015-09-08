@@ -132,9 +132,7 @@ public Action Cmd_ItemDrugs(int args) {
 		if( StrEqual(arg0, "lsd2")) rp_Effect_VisionTrouble(target);  //Si c'est de la LSD
 		else rp_HookEvent(target, RP_PrePlayerPhysic, fwdPCP, dur); //Si c'est du PCP
 	
-		//Affichage du laser entre le client et la cible (cf. laser des chiru)
-		TE_SetupBeamPoints(pos1, pos2, g_cBeam, 0, 0, 0, 0.5, 10.0, 10.0, 1, 0.5, {255, 155, 0, 250}, 0);
-		TE_SendToAll(0.1);
+		ServerCommand("sm_effect_particles %d Trail9 10", client);
 		
 		//Envoie de messages d'information
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez drogué %N.", target);
@@ -199,7 +197,7 @@ public Action Cmd_ItemDrugs(int args) {
 				
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes en état d'overdose.");			
 				
-				rp_SetClientInt(client, i_Sick, Math_GetRandomInt((view_as<int>sick_type_none)+1, (view_as<int>sick_type_max)-1));
+				rp_SetClientInt(client, i_Sick, Math_GetRandomInt((view_as<int>(sick_type_none))+1, (view_as<int>(sick_type_max))-1));
 			}
 		}
 	}
@@ -906,7 +904,7 @@ public Action Cmd_ItemPilule(int args){
 		return Plugin_Handled;
 	}
 
-	if(type == 1){ // Appart
+	if(type == 1) { // Appart
 		int appartcount = rp_GetClientInt(client, i_AppartCount);
 		if(appartcount == 0){
 			ITEM_CANCEL(client, item_id);
@@ -957,13 +955,19 @@ public Action Cmd_ItemPilule(int args){
 			return Plugin_Handled;
 	}
 
+	if(type == 1) {
+		ServerCommand("sm_effect_particles %d Aura7 %d", client, RoundFloat(TP_CHANNEL_DURATION));
+		rp_ClientColorize(client, { 238, 148, 52, 255} );
+	}
+	else if( type == 2 ) {
+		ServerCommand("sm_effect_particles %d Aura8 %d", client, RoundFloat(TP_CHANNEL_DURATION));
+		rp_ClientColorize(client, { 52, 148, 238, 255} );
+	}
+	
 	rp_ClientReveal(client);
 	ServerCommand("sm_effect_panel %d %f \"Téléportation en cours...\"", client, TP_CHANNEL_DURATION);
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, TP_CHANNEL_DURATION);
-	CreateTimer( TP_CHANNEL_DURATION*0.1 , tpbeam, client);
-	CreateTimer( TP_CHANNEL_DURATION*0.4 , tpbeam, client);
-	CreateTimer( TP_CHANNEL_DURATION*0.8 , tpbeam, client);
-	rp_ClientColorize(client, { 238, 148, 52, 255} );
+	
 
 	Handle dp;
 	CreateDataTimer(TP_CHANNEL_DURATION, ItemPiluleOver, dp, TIMER_DATA_HNDL_CLOSE);

@@ -72,7 +72,7 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
 }
 public void OnClientDisconnect(int client) {
-	for (int i = 0; i < view_as<int>ch_Max; i++) {
+	for (int i = 0; i < view_as<int>(ch_Max); i++) {
 		g_bChirurgie[client][i] = false;
 	}
 }
@@ -242,7 +242,7 @@ public Action Cmd_ItemSick(int args) {
 	int type = GetCmdArgInt(1);
 	int client = GetCmdArgInt(2);	
 	
-	if( type == view_as<int>sick_type_none ) {
+	if( type == view_as<int>(sick_type_none) ) {
 		bDiag[client] = true;
 		
 		switch(rp_GetClientInt(client, i_Sick)) {
@@ -265,7 +265,7 @@ public Action Cmd_ItemSick(int args) {
 		g_iSuccess_last_faster_dead[client] = GetTime();
 	}
 	else if( bDiag[client] && rp_GetClientInt(client, i_Sick) == type ) {
-		rp_SetClientInt(client, i_Sick, view_as<int>sick_type_none);
+		rp_SetClientInt(client, i_Sick, view_as<int>(sick_type_none));
 		bDiag[client] = false;
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous vous sentez mieux.");
 		g_iSuccess_last_faster_dead[client] = GetTime();
@@ -299,6 +299,7 @@ public Action Cmd_ItemPoison(int args) {
 	}
 	
 	rp_SetClientInt(client, i_LastAgression, GetTime());
+	ServerCommand("sm_effect_particles %d Trail7 11 weapon_bone", client);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez empoisonné %N.", target);
 	CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été empoisonné.");
 	rp_ClientPoison(target, 120.0, client);
@@ -407,16 +408,11 @@ public Action Cmd_ItemAdrenaline(int args) {
 	
 	for (float i = 0.0; i <= 10.0; i+= 0.2) {
 		rp_HookEvent(client, RP_PostPlayerPhysic, fwdAdrenalineSpeed, i);
-		rp_HookEvent(client, RP_PreHUDColorize, fwdAdrenalineColor, i);
 		rp_HookEvent(client, RP_PostGiveDamageWeapon, fwdBerserk, i);
 		rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdBerserk, i);
 	}
 	
-	//Affiche un halo rouge autours du client
-	float vecTarget[3]; 
-	GetClientAbsOrigin(client, vecTarget);
-	TE_SetupBeamRingPoint(vecTarget, 10.0, 300.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, {255, 0, 0, 100}, 10, 0);
-	TE_SendToAll();
+	ServerCommand("sm_effect_particles %d Trail11 11 weapon_bone", client);
 	
 	rp_SetClientBool(client, b_Drugged, true);	
 	CreateTimer( 10.5, ItemDrugStop, client);
@@ -591,7 +587,7 @@ public void BuildingHealBox_break(const char[] output, int caller, int activator
 	
 	float vecOrigin[3];
 	Entity_GetAbsOrigin(caller,vecOrigin);
-	TE_SetupSparks(vecOrigin, view_as<float>{0.0,0.0,1.0},120,40);
+	TE_SetupSparks(vecOrigin, view_as<float>({0.0,0.0,1.0}),120,40);
 	TE_SendToAll();
 	
 	rp_Effect_Explode(vecOrigin, 100.0, 400.0, client);

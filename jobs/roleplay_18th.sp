@@ -105,14 +105,8 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
 		
 		
-		float vecOrigin[3], vecTarget[3], log;
-		int alpha[4];
-		alpha[1] = 255;
-		alpha[3] = 50;
-		if( rp_IsNight() ) {
-			alpha[3] = 25;
+		if( rp_IsNight() )
 			cooldown *= 0.5;
-		}
 		
 	
 		if( amount < 50 )
@@ -125,23 +119,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		if( amount > 2000 )
 			rp_SetClientFloat(client, fl_LastVente, GetGameTime() + 30.0);
 		
-		GetClientAbsOrigin(client, vecOrigin);
-		
-		for(int i=1; i<=MaxClients; i++) {
-			if( !IsValidClient(i) )
-				continue;
-			if( !IsPlayerAlive(i) )
-				continue;
-			
-			if( rp_GetClientJobID(i) == 1 || i == target || i == client || rp_GetClientJobID(i) == 91 ) {
-				GetClientAbsOrigin(i, vecTarget);
-				log = Logarithm( float(amount)+10 ) * 100.0;
-				
-				
-				TE_SetupBeamRingPoint(vecOrigin, 10.0, log, g_cBeam, g_cGlow, 0, 15, 0.5, log*0.25, 0.0, alpha, 10, 0);
-				TE_SendToClient(i);
-			}
-		}
+		ServerCommand("sm_effect_particles %d Aura2 2", client);
 		
 		int cpt = rp_GetRandomCapital(181);
 		rp_SetJobCapital(181, rp_GetJobCapital(181) + (amount/4));
@@ -398,21 +376,10 @@ public Action Cmd_ItemPickLock(int args) {
 	GetClientEyePosition(client, vecStart);		
 	GetClientEyePosition(target, vecEnd);
 	
-	int alpha[4], job;
-	alpha[0] = 255;
-	alpha[3] = 128;
+	int job;
 	job = rp_GetClientInt(client, i_Job);
 	
-	if( rp_IsNight() )
-		alpha[3] = 50;
 	
-	TE_SetupBeamRingPoint(vecStart, 0.0, 10.0, g_cBeam, 0, 0, 10, 1.0, 20.0, 1.0, alpha, 1, 0);
-	TE_SendToAll();
-	TE_SetupBeamRingPoint(vecEnd, 30.0, 40.0, g_cBeam, 0, 0, 10, 1.0, 20.0, 1.0, alpha, 1, 0);
-	TE_SendToAll();
-	
-	
-	rp_ClientColorize(client, { 255, 0, 0, 190 } );
 	rp_ClientReveal(client);
 	
 	// Anti-cheat: 
@@ -440,7 +407,9 @@ public Action Cmd_ItemPickLock(int args) {
 	
 	if( !rp_IsTargetSeen(target, client) ) {
 		StealTime -= 0.4;
-	}	
+	}
+	
+	ServerCommand("sm_effect_particles %d Aura1 %d", client, RoundToCeil(StealTime));
 	
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, StealTime);
 	rp_HookEvent(client, RP_PreTakeDamage, fwdDamage, StealTime);

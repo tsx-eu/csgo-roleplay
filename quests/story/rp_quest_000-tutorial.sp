@@ -78,7 +78,7 @@ public void OnClientPostAdminCheck(int client) {
 }
 public Action fwdCommand(int client, char[] command, char[] arg) {	
 	if( StrEqual(command, "aide") || StrEqual(command, "aides") || StrEqual(command, "wiki") || StrEqual(command, "help")  ) { // C'est pour nous !
-		QueryClientConVar(client, "cl_disablehtmlmotd", view_as<ConVarQueryFinished>ClientConVar, client);
+		QueryClientConVar(client, "cl_disablehtmlmotd", view_as<ConVarQueryFinished>(ClientConVar), client);
 		ShowMOTDPanel(client, "Role-Play: WiKi", "http://www.ts-x.eu/popup.php?url=/wiki/", MOTDPANEL_TYPE_URL);
 		
 		if( g_iClientDoingQ[client] > 0 ) {
@@ -511,10 +511,8 @@ public void Q12_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "- Ne tuez pas tout les passants");
 		DrawPanelText(panel, "- Décrochez le rang no-pyj");
 		DrawPanelText(panel, "- Faites un tour sur notre TeamSpeak");
-		DrawPanelText(panel, "- N'oubliez pas de vous abonnez à la map présent sur workshop");
-		DrawPanelText(panel, "- Cela vous permettra de tenir à jour la map 'Princeton'");
-		DrawPanelText(panel, "- sans être sur le serveur.");
-		DrawPanelText(panel, " ");
+		DrawPanelText(panel, "- Pensez à vous abonnez à la map sur workshop afin de");
+		DrawPanelText(panel, "maintenir à jour la map 'Princeton' automatiquement");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " Bon jeu!");
 		DrawPanelText(panel, " ");
@@ -541,7 +539,7 @@ public void Q13_Frame(int objectiveID, int client) {
 		SetMenuTitle(menu, "== Parrainage");
 					
 		AddMenuItem(menu, "", "Quelqu'un de présent vous a t-il invité",		ITEMDRAW_DISABLED);
-		AddMenuItem(menu, "", "a jouer sur notre serveur?  Si oui, qui?",		ITEMDRAW_DISABLED);
+		AddMenuItem(menu, "", "à jouer sur notre serveur?  Si oui, qui?",		ITEMDRAW_DISABLED);
 		
 		AddMenuItem(menu, "none", "Personne, j'ai connu autrement le serveur");
 		AddMenuItem(menu, "youtube", "Youtube, en regardant une vidéo");

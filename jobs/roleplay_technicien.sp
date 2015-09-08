@@ -94,7 +94,7 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
 }
 public void OnClientDisconnect(int client) {		
-	for (int i = 0; i < view_as<int>ch_Max; i++) {
+	for (int i = 0; i < view_as<int>(ch_Max); i++) {
 		g_bBionique[client][i] = false;
 	}
 }
@@ -199,6 +199,9 @@ public Action Cmd_ItemPropulseur(int args) {
 	velocity[2] = (FloatAbs(velocity[2]) * 2.0) + Math_GetRandomFloat(50.0, 75.0);
 	
 	TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, velocity);
+	
+	ServerCommand("sm_effect_particles %d Trail12 1 lfoot", client);
+	ServerCommand("sm_effect_particles %d Trail12 1 rfoot", client);
 }
 // ------------------------------------------------------------------------------
 public Action Cmd_ItemNano(int args) {
@@ -779,17 +782,17 @@ int CountMachine(int client) {
 	Format(bigclassname, sizeof(bigclassname), "rp_bigcashmachine_%i", client);
 	Format(classname, sizeof(classname), "rp_cashmachine_%i", client);
 	
-	for(int i=1; i<=2048; i++) {
+	for(int i=MaxClients; i<=2048; i++) {
 		if( !IsValidEdict(i) )
 			continue;
 		if( !IsValidEntity(i) )
 			continue;
 		
 		GetEdictClassname(i, tmp, 63);
-		Entity_GetAbsOrigin(i, vecOrigin2);
+		
 		if( StrEqual(bigclassname, tmp) ){
 			count += 15;
-
+			Entity_GetAbsOrigin(i, vecOrigin2);
 			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 50 ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas construire aussi proche d'une autre machine à vous.");
 				return -1;
@@ -797,7 +800,7 @@ int CountMachine(int client) {
 		}
 		if( StrEqual(classname, tmp) ) {
 			count++;
-
+			Entity_GetAbsOrigin(i, vecOrigin2);
 			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 24 ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas construire aussi proche d'une autre machine à vous.");
 				return -1;
