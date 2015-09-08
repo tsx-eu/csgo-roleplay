@@ -202,8 +202,8 @@ public Action AllowStealing(Handle timer, any client) {
 public Action Cmd_job(int client, int args){
 	Handle jobmenu = CreateMenu(MenuJobs);
 	SetMenuTitle(jobmenu, "Liste des jobs disponibles:");
+	AddMenuItem(jobmenu, "-1", "Tout afficher");
 	char tmp[12], tmp2[64];
-
 	bool bJob[MAX_JOBS];
 
 	for(int i = 1; i <= MaxClients; i++) {
@@ -261,7 +261,7 @@ public int MenuJobs(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_
 			for(int i=1; i<MAXPLAYERS+1;i++){
 				if(!IsValidClient(i))
 					continue;
-				if(i == client || rp_GetClientJobID(i) != jobid)
+				if(jobid != -1 && (i == client || rp_GetClientJobID(i) != jobid))
 					continue;
 
 				Format(tmp2, sizeof(tmp2), "%i", i);
