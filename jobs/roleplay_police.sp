@@ -547,6 +547,7 @@ public Action Cmd_Tazer(int client) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez detruit la machine de %N", owner);
 				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos machines a faux billet a été detruite par un policier.");
 			}
+			SDKHooks_TakeDamage(target, client, client, 1000.0);
 		}
 		else if ( StrContains(tmp2, "rp_bigcashmachine_") == 0 ) {
 			

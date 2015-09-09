@@ -241,7 +241,7 @@ public Action Cmd_ItemCigarette(int args) {
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdCigSpeed, 30.0);
 	}
 	
-	rp_Effect_Smoke(client, 30.0);
+	ServerCommand("sm_effect_particles %d shacks_exhaust 30 forward", client);
 	
 	if( g_hCigarette[client] )
 		delete g_hCigarette[client];
@@ -419,11 +419,37 @@ public Action Cmd_ItemSanAndreas(int args) {
 	}
 		
 	int ammo = Weapon_GetPrimaryClip(wepid);
-	ammo += 1000; if( ammo > 5000 ) ammo = 5000;
+	if( ammo >= 5000 ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous aviez déjà 5000 balles.");
+		return Plugin_Handled;
+	}
+	ammo += 1000;
+	if( ammo > 5000 )
+		ammo = 5000;
 	Weapon_SetPrimaryClip(wepid, ammo);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme à maintenant %i balles", ammo);
+	
+	SDKHook(wepid, SDKHook_Reload, OnWeaponReload);
 	return Plugin_Handled;
 }
+public Action OnWeaponReload(int wepid) {
+	static float cache[65];
+	
+	int ammo = Weapon_GetPrimaryClip(wepid);
+	if( ammo >= 150 ) {
+		int client = Weapon_GetOwner(wepid);
+		
+		if( cache[client] < GetGameTime() ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme à un San Andreas, il vous reste %d balles dans votre chargeur.", ammo);
+			cache[client] = GetGameTime() + 1.0;
+		}
+		
+		return Plugin_Handled;
+	}
+	return Plugin_Continue;
+}
+
 public Action Cmd_ItemNeedForSpeed(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemNeedForSpeed");
