@@ -32,9 +32,65 @@ public void OnPluginStart() {
 	// Loto
 	RegServerCmd("rp_item_loto",		Cmd_ItemLoto,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_loto_bonus",	Cmd_ItemLotoBonus,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_pvpbonus", 	Cmd_ItemStuffPvP, 		"RP-ITEM",	FCVAR_UNREGISTERED);
+	
+	for (int i = 1; i <= MaxClients; i++)
+		if( IsValidClient(i) )
+			OnClientPostAdminCheck(i);
 }
 // ------------------------------------------------------------------------------
-
+public void OnClientPostAdminCheck(int client) {
+	rp_HookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
+}
+public Action fwdOnPlayerBuild(int client, float& cooldown){
+	if( rp_GetClientJobID(client) != 171 )
+		return Plugin_Continue;
+	
+	rp_Effect_Particle(client, "weapon_confetti_balloons", 10.0);
+	cooldown = 10.0;
+	
+	return Plugin_Handled;
+}
+public Action Cmd_ItemStuffPvP(int args) {
+	int client = GetCmdArgInt(1);
+	
+	int amount = 0;
+	int ItemRand[32];
+	
+	for (int i = 1; i <= 4; i++) {
+		ItemRand[amount++] = 239;	// P90-PVP
+		ItemRand[amount++] = 64;	// M4A1-S
+		ItemRand[amount++] = 236;	// AK47
+	}
+	
+	ItemRand[amount++] = 27;	// Drapeau
+	ItemRand[amount++] = 67;	// Drapeau
+	ItemRand[amount++] = 118;	// Drapeau
+	ItemRand[amount++] = 126;	// Drapeau	
+	
+	ItemRand[amount++] = 238;	// AWP
+	ItemRand[amount++] = 22;	// San-Andreas
+	ItemRand[amount++] = 46;	// Incendiaire
+	ItemRand[amount++] = 66;	// Sucette Duo
+	ItemRand[amount++] = 242;	// Hummer
+	ItemRand[amount++] = 94;	// EMP
+	ItemRand[amount++] = 35;	// Cocaine
+	ItemRand[amount++] = 184;	// Prop d'extérieur
+	ItemRand[amount++] = 6;		// Seringue du Berserker
+	ItemRand[amount++] = 114;	// Big Mac
+	
+	
+	
+	int item_id = ItemRand[ Math_GetRandomInt(0, amount-1) ];
+	rp_ClientGiveItem(client, item_id);
+	if( item_id == 35 )
+		rp_ClientGiveItem(client, item_id, 4);
+	
+	char tmp[64];
+	rp_GetItemData(item_id, item_type_name, tmp, sizeof(tmp));
+	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu comme cadeau: %s", tmp);
+}
 public Action Cmd_ItemLotoBonus(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemLotoBonus");
