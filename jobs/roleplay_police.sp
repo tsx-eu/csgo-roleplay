@@ -1861,6 +1861,14 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				if( kill <= 0.0 )
 					time_to_spend = 2;
 				rp_SetClientInt(target, i_FreekillSick, 0);	
+				
+				for(int i=1; i<MAXPLAYERS+1; i++){
+					if(!IsValidClient(i))
+						continue;
+					if(rp_GetClientInt(i, i_LastKilled_Reverse) != target)
+						continue;
+					CPrintToChat(i, "{lightblue}[TSX-RP]{default} Votre assasin à été mis en prison.");
+				}
 			}
 			
 			
