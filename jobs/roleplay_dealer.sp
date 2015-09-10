@@ -1013,7 +1013,7 @@ public Action ItemPiluleOver(Handle timer, Handle dp) {
 		tppos[0]=Math_GetRandomFloat(zonemin[0],zonemax[0]);
 		tppos[1]=Math_GetRandomFloat(zonemin[1],zonemax[1]);
 		tppos[2]=Math_GetRandomFloat(zonemin[2],zonemax[2]);
-		if(CanTP(tppos, client)){
+		if(CanTP(tppos, client) && rp_GetZoneFromPoint(tppos) == tptozone){
 			rp_ClientColorize(client, { 255, 255, 255, 255} );
 			TeleportEntity(client, tppos, NULL_VECTOR, NULL_VECTOR);
 			rp_SetClientBool(client, b_MaySteal, false);
