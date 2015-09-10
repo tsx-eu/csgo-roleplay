@@ -1029,16 +1029,21 @@ public Action ItemPiluleOver(Handle timer, Handle dp) {
 }
 
 int appartToZoneID(int appartid){
-	char appart[32];
-	char tmp[32];
+	static int res[128];
+	if( res != 0 )
+		return res;
+	
+	char appart[32], tmp[32];
 	Format(appart, 31, "appart_%d",appartid);
 	for(int i=1;i<300;i++){
 		rp_GetZoneData(i, zone_type_type, tmp, sizeof(tmp));
 		if(StrEqual(tmp,appart,false)){
-			return i;
+			res = i;
+			return res;
 		}
 	}
-	return -1;
+	res = -1;
+	return res;
 }
 
 
