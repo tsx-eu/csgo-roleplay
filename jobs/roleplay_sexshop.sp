@@ -34,7 +34,6 @@ int g_cBeam, g_cGlow, g_cExplode;
 Handle g_vCapture = INVALID_HANDLE;
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
-	g_vCapture =  FindConVar("rp_capture");
 	RegServerCmd("rp_item_preserv",		Cmd_ItemPreserv,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_poupee",		Cmd_ItemPoupee,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_menottes",	Cmd_ItemMenottes,		"RP-ITEM",	FCVAR_UNREGISTERED);
@@ -48,6 +47,9 @@ public void OnPluginStart() {
 	for (int i = 1; i <= MaxClients; i++) 
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
+}
+public void OnConfigsExecuted() {
+	g_vCapture =  FindConVar("rp_capture");
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);

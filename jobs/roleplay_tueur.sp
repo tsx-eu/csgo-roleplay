@@ -61,13 +61,13 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_camera",		Cmd_ItemCamera,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_cryptage",	Cmd_ItemCryptage,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	
-	
-	g_vCapture =  FindConVar("rp_capture");
-	HookConVarChange(g_vCapture, OnCvarChange);
-	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
+}
+public void OnConfigsExecuted() {
+	g_vCapture =  FindConVar("rp_capture");
+	HookConVarChange(g_vCapture, OnCvarChange);
 }
 public void OnCvarChange(Handle cvar, const char[] oldVal, const char[] newVal) {
 	#if defined DEBUG
