@@ -2632,7 +2632,7 @@ public Action ItemPickLockOver_mandat(Handle timer, Handle dp) {
 }
 
 public Action fwdDmg(int attacker, int victim, float& damage) {
-	if( !rp_GetClientBool(attacker, b_Stealing) )
+	if( !rp_GetClientBool(attacker, b_Stealing) && !rp_IsInPVP(attacker))
 		rp_SetClientInt(attacker, i_LastAgression, GetTime());
 
 	return Plugin_Continue;
