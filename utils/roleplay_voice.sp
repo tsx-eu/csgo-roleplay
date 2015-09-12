@@ -265,7 +265,8 @@ public int MenuJobs(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_
 					continue;
 
 				Format(tmp2, sizeof(tmp2), "%i", i);
-				rp_GetJobData(rp_GetClientInt(i, i_Job), job_type_name, tmp, sizeof(tmp));
+				int ijob = rp_GetClientJobID(i)== 1 && GetClientTeam(i) == 2 ? 0 : rp_GetClientInt(i, i_Job);
+				rp_GetJobData(ijob, job_type_name, tmp, sizeof(tmp));
 
 				if(rp_GetClientBool(i, b_IsAFK))
 					Format(tmp, sizeof(tmp), "[AFK] %N - %s", i, tmp);
@@ -303,7 +304,6 @@ public int MenuJobs2(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 			SetMenuTitle(menu, "Que voulez vous lui demander:");
 			int target = StringToInt(szMenuItem);
 			int jobid = rp_GetClientJobID(target);
-			int job = rp_GetClientInt(client, i_Job);
 			int amount = 0;
 			char tmp[128], tmp2[128];
 
