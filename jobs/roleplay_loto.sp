@@ -32,7 +32,7 @@ public void OnPluginStart() {
 	// Loto
 	RegServerCmd("rp_item_loto",		Cmd_ItemLoto,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_loto_bonus",	Cmd_ItemLotoBonus,		"RP-ITEM",	FCVAR_UNREGISTERED);
-	RegServerCmd("rp_item_pvpbonus", 	Cmd_ItemStuffPvP, 		"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_stuffpvp", 	Cmd_ItemStuffPvP, 		"RP-ITEM",	FCVAR_UNREGISTERED);
 	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
