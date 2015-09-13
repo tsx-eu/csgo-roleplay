@@ -355,6 +355,8 @@ public Action Cmd_ItemCash(int args) {
 		return Plugin_Handled;
 	}
 	
+	g_bProps_trapped[target] = false;
+	
 	char arg[32];
 	GetCmdArg(0, arg, sizeof(arg));
 	if( StrEqual(arg, "rp_item_cash2") ) {
@@ -635,6 +637,7 @@ public Action Cmd_ItemCashBig(int args) {
 		return Plugin_Handled;
 	}
 	rp_SetClientInt(client, i_Machine, 14);
+	g_bProps_trapped[target] = false;
 	return Plugin_Handled;
 }
 int BuildingBigCashMachine(int client) {
