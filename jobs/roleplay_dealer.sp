@@ -1010,16 +1010,19 @@ public Action ItemPiluleOver(Handle timer, Handle dp) {
 	zonemax[2] = StringToFloat(tmp)-80.0;
 
 	for(int i=0; i<30; i++){
-		tppos[0]=Math_GetRandomFloat(zonemin[0],zonemax[0]);
-		tppos[1]=Math_GetRandomFloat(zonemin[1],zonemax[1]);
-		tppos[2]=Math_GetRandomFloat(zonemin[2],zonemax[2]);
-		if(CanTP(tppos, client) && rp_GetZoneFromPoint(tppos) == tptozone){
-			rp_ClientColorize(client, { 255, 255, 255, 255} );
-			TeleportEntity(client, tppos, NULL_VECTOR, NULL_VECTOR);
-			rp_SetClientBool(client, b_MaySteal, false);
-			CreateTimer( TP_CD_DURATION, AllowStealing2, client);
-			return Plugin_Handled;
-		}
+		for(int j=0; j<3; j++)
+			tppos[j] = Math_GetRandomFloat(zonemin[j],zonemax[j]);
+		
+		if( rp_GetZoneFromPoint(tppos) != tptozone ) 
+			continue;
+		if( !CanTP(tppos, client) )
+			continue;
+		
+		rp_ClientColorize(client, { 255, 255, 255, 255} );
+		TeleportEntity(client, tppos, NULL_VECTOR, NULL_VECTOR);
+		rp_SetClientBool(client, b_MaySteal, false);
+		CreateTimer( TP_CD_DURATION, AllowStealing2, client);
+		return Plugin_Handled;
 	}
 	ITEM_CANCEL(client, item_id);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Nous n'avons pas trouvé d'endroit où vous teleporter.");
