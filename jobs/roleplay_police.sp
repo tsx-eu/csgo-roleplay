@@ -1717,7 +1717,7 @@ public int eventAskJail2Time(Handle menu, MenuAction action, int client, int par
 		else {
 			
 			SendPlayerToJail(iTarget);
-			rp_SetClientInt(iTarget, i_JailTime,iTime*60);		
+			rp_SetClientInt(iTarget, i_JailTime, (iTime*60) + 20);		
 			rp_SetClientInt(iTarget, i_JailledBy, client);
 			
 			CPrintToChatAll("{lightblue}[TSX-RP]{default} %N {default}a été condamne à faire %i heures de prison par le juge %N{default}.", iTarget, iTime, client);
