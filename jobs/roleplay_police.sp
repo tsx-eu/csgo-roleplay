@@ -143,7 +143,12 @@ public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 			if( (newBIT & BITZONE_PVP) && !(oldBIT & BITZONE_PVP) ) {
 				EmitSoundToClientAny(client, "UI/arm_bomb.wav", client);
 			}
+			
+			if( newBIT & BITZONE_EVENT ) {
+				SetEntProp(client, Prop_Send, "m_bHasHelmet", 0);
+			}
 		}
+		
 	}
 }
 public Action fwdSpawn(int client) {
