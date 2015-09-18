@@ -143,7 +143,12 @@ public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 			if( (newBIT & BITZONE_PVP) && !(oldBIT & BITZONE_PVP) ) {
 				EmitSoundToClientAny(client, "UI/arm_bomb.wav", client);
 			}
+			
+			if( newBIT & BITZONE_EVENT ) {
+				SetEntProp(client, Prop_Send, "m_bHasHelmet", 0);
+			}
 		}
+		
 	}
 }
 public Action fwdSpawn(int client) {
@@ -1717,7 +1722,7 @@ public int eventAskJail2Time(Handle menu, MenuAction action, int client, int par
 		else {
 			
 			SendPlayerToJail(iTarget);
-			rp_SetClientInt(iTarget, i_JailTime,iTime*60);		
+			rp_SetClientInt(iTarget, i_JailTime, (iTime*60) + 20);		
 			rp_SetClientInt(iTarget, i_JailledBy, client);
 			
 			CPrintToChatAll("{lightblue}[TSX-RP]{default} %N {default}a été condamne à faire %i heures de prison par le juge %N{default}.", iTarget, iTime, client);
