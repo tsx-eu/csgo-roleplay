@@ -472,7 +472,7 @@ public Action fwdUse(int client) {
 	AddMenuItem(menu, "models/player/resident/leon6/leon6.mdl", 		"Leon");
 	AddMenuItem(menu, "models/player/resident/helena6/helena6.mdl", 	"Helena");
 	AddMenuItem(menu, "models/player/resident/ada_wong6/ada_wong6.mdl", "Ada Wong");
-	AddMenuItem(menu, "models/player/kuristaja/duke/duke.mdl", 			"Duke Nukem");
+	AddMenuItem(menu, "models/player/custom_player/legacy/duke/duke.mdl", "Duke Nukem");
 	AddMenuItem(menu, "models/player/dr.valencia/dr.valencia.mdl", 		"Dr. Valencia");
 	AddMenuItem(menu, "models/player/domino/domino.mdl", 				"Domino");
 	AddMenuItem(menu, "models/player/custom/nick/nick.mdl", 			"Nick");
