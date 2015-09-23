@@ -583,6 +583,9 @@ public Action Cmd_Tazer(int client) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez detruit le plant de drogue de %N", owner);
 				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Un de vos plant de drogue a été detruit par un policier.");
 			}
+			
+			if(owner == client)
+				reward = 0;
 		}
 		else if( StrContains(tmp2, "rp_barriere_") == 0){
 			rp_GetZoneData(Tzone, zone_type_name, tmp, sizeof(tmp));
