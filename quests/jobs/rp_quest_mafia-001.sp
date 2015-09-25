@@ -86,9 +86,8 @@ public bool fwdCanStart(int client) {
 	
 	return false;
 }
-int g_objectiveID;
 public void Q1_Start(int objectiveID, int client) {
-	g_objectiveID = objectiveID;
+
 	Menu menu = new Menu(MenuNothing);
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
@@ -120,7 +119,7 @@ public void Q1_Frame(int objectiveID, int client) {
 	g_iDuration[client]--;
 	
 	if( g_iDuration[client] <= 0 ) {
-		rp_QuestStepComplete(client, g_objectiveID);
+		rp_QuestStepComplete(client, objectiveID);
 	}
 	else {
 		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s", QUEST_NAME, g_iDuration[client], QUEST_RESUME);
