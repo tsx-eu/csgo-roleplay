@@ -454,7 +454,7 @@ public Action Cmd_Tazer(int client) {
 		if( GetClientTeam(target) == CS_TEAM_CT ) {
 			ACCESS_DENIED(client);
 		}
-		if( (job == 103 || job == 104 || job == 105 || job == 106) && (rp_GetZoneInt(Czone, zone_type_type) != 101) ) { // J et HJ en dehors du tribu
+		if( (job == 103 || job == 104 || job == 105 || job == 106) && (rp_GetZoneInt(Tzone, zone_type_type) != 101) ) { // J et HJ en dehors du tribu
 			ACCESS_DENIED(client);
 		}
 		if( rp_GetClientBool(target, b_Lube) && Math_GetRandomInt(1, 5) != 5) {
