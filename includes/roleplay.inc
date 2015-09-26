@@ -203,6 +203,7 @@ native int rp_GetBuildingData(int ent, building_prop_data typeID);					/* Récup
 native void rp_SetBuildingData(int ent, building_prop_data typeID, int data);				/* Définir les données d'une constuction. Attention utilise un entier*/
 // ----------------------------------------------------------------------------
 native void rp_ScheduleEntityInput(int entity, float time, char[] input);				/* Programme un input dans le futur. cf: https://developer.valvesoftware.com/wiki/Inputs_and_Outputs */
+native int rp_GetEntityCount();
 // ----------------------------------------------------------------------------
 native Handle rp_GetDatabase();											/* Récupère un pointeur sur la DB */
 native Handle rp_CreateSellingMenu();										/* Récupère un pointeur sur le menu de vente... cf... Je sais plus quel job. */
@@ -217,6 +218,7 @@ typedef QuestFct = function void (int objectiveID, int client);
 public void QUEST_NULL(int objectiveID, int client) {
 }
 native void rp_QuestStepComplete(int client, int objectiveID);
+native void rp_QuestStepFail(int client, int objectiveID);
 native int rp_RegisterQuest(char uniqID[32], char name[64], quest_type_type type, QuestFctInit CanStart);
 native void rp_QuestAddStep(int questID, int stepID, QuestFct start, QuestFct frame, QuestFct abort, QuestFct done);
 // ----------------------------------------------------------------------------

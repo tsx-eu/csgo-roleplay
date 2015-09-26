@@ -29,7 +29,7 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-int g_cBeam, g_cGlow;
+int g_cBeam;
 
 enum chiruList {
 	ch_Force,
@@ -62,7 +62,6 @@ public void OnPluginStart() {
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
-	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt", true);
 	PrecacheModel("models/pg_props/pg_hospital/pg_ekg.mdl", true);
 }
 // ----------------------------------------------------------------------------
