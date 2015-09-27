@@ -170,7 +170,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		if( amount > money )
 			amount = money;
 			
-		rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) + amount);
+		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + amount);
 		rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amount);
 		rp_SetClientInt(client, i_LastVolAmount, amount);
 		rp_SetClientInt(client, i_LastVolTarget, target);
