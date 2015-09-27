@@ -221,6 +221,7 @@ native void rp_QuestStepComplete(int client, int objectiveID);
 native void rp_QuestStepFail(int client, int objectiveID);
 native int rp_RegisterQuest(char uniqID[32], char name[64], quest_type_type type, QuestFctInit CanStart);
 native void rp_QuestAddStep(int questID, int stepID, QuestFct start, QuestFct frame, QuestFct abort, QuestFct done);
+native int rp_QuestCreateInstance(int client, char model[PLATFORM_MAX_PATH], float vecPos[3]);
 // ----------------------------------------------------------------------------
 
 #define ACCESS_DENIED(%1)	CPrintToChat(%1, "{lightblue}[TSX-RP]{default} Vous n'avez pas accès à cette commande.");	return Plugin_Handled
