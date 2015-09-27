@@ -69,10 +69,12 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Mon frère, Nous avons besoin de toi.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Des documents très important se trouve", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Des documents très important se trouvent", ITEMDRAW_DISABLED);
 	menu.AddItem("", "dans la villa PvP. Vol-les.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	
+	menu.AddItem("", "Pendant toute la durée de ta mission, ", ITEMDRAW_DISABLED);
+	menu.AddItem("", "nous t'enverrons du matériel nécessaire à ta réussite.", ITEMDRAW_DISABLED);
+	menu.AddItem("", " Tu as 12 heures.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 60);
@@ -114,12 +116,12 @@ public void Q2_Start(int objectiveID, int client) {
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Vous l'avez !", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Raportez les nous au plus vite", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Raporte les nous au plus vite", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 30);
 	
-	g_iDuration[client] = 3 * 60;
+	g_iDuration[client] = 6 * 60;
 }
 public void Q2_Frame(int objectiveID, int client) {
 	static float dst[3] =  { -241.0, 3027.2, -2119.9 };
