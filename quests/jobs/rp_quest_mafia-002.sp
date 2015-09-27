@@ -137,7 +137,7 @@ public void Q1_Frame(int objectiveID, int client) {
 		
 		int cap = rp_GetRandomCapital(91);
 		rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 1000);
-		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(target, i_AddToPay) + 1000);
+		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 1000);
 	}
 	else if( g_iDuration[client] <= 0 ) {
 		rp_QuestStepFail(client, objectiveID);
