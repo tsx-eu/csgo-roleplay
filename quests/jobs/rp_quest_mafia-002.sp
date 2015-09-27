@@ -51,7 +51,8 @@ public void OnPluginStart() {
 	rp_QuestAddStep(g_iQuest, i++,	Q2_Start,	Q1_Frame,	Q1_Abort,	Q1_Abort);
 	rp_QuestAddStep(g_iQuest, i++,	Q2_Start,	Q1_Frame,	Q1_Abort,	Q1_Abort);
 	rp_QuestAddStep(g_iQuest, i++,	Q2_Start,	Q1_Frame,	Q1_Abort,	Q1_Abort);
-	rp_QuestAddStep(g_iQuest, i++,	Q2_Start,	Q1_Frame,	Q1_Abort,	Q1_Abort);
+	rp_QuestAddStep(g_iQuest, i++,	Q2_Start,	Q1_Frame,	Q1_Abort,	Q5_Done);
+	
 	
 }
 public Action Cmd_Reload(int args) {
@@ -88,23 +89,40 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.ExitButton = false;
 	menu.Display(client, 60);
 	
-	Q2_Start(objectiveID, client);
-}
-public void Q2_Start(int objectiveID, int client) {
 	g_iDuration[client] = 6 * 60;
 	g_iGoing[client] = getRandomLocation();
+	char item[64]; rp_GetItemData(2, item_type_name, item, sizeof(item)); rp_ClientGiveItem(client, 2, 5);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu: 5x%s", item);
+}
+public void Q2_Start(int objectiveID, int client) {	
+	Menu menu = new Menu(MenuNothing);
+	
+	menu.SetTitle("Quète: %s", QUEST_NAME);
+	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Vous avez trouvé des traces de son passage ici.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Mais il n'est pas ici. Infiltrez-vous dans.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Le batiment suivant.", ITEMDRAW_DISABLED);
+	
+	menu.ExitButton = false;
+	menu.Display(client, 30);
+	
+	g_iDuration[client] = 6 * 60;
+	g_iGoing[client] = getRandomLocation();
+	
+	char item[64]; rp_GetItemData(2, item_type_name, item, sizeof(item)); rp_ClientGiveItem(client, 2, 5);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu: 5x%s", item);
 }
 public void Q1_Frame(int objectiveID, int client) {
 	
-	char buffer[128];
+	char buffer[256];
 	float min[3], max[3], dst[3];
 	rp_GetZoneData(g_iGoing[client], zone_type_name, buffer, sizeof(buffer));
 	min[0] = float(rp_GetZoneInt(g_iGoing[client], zone_type_min_x));
 	min[1] = float(rp_GetZoneInt(g_iGoing[client], zone_type_min_y));
 	min[2] = float(rp_GetZoneInt(g_iGoing[client], zone_type_min_z));
-	max[0] = float(rp_GetZoneInt(g_iGoing[client], zone_type_min_x));
-	max[1] = float(rp_GetZoneInt(g_iGoing[client], zone_type_min_y));
-	max[2] = float(rp_GetZoneInt(g_iGoing[client], zone_type_min_z));
+	max[0] = float(rp_GetZoneInt(g_iGoing[client], zone_type_max_x));
+	max[1] = float(rp_GetZoneInt(g_iGoing[client], zone_type_max_y));
+	max[2] = float(rp_GetZoneInt(g_iGoing[client], zone_type_max_z));
 	
 	for (int i = 0; i < 3; i++) 
 		dst[i] = (min[i] + max[i]) / 2.0;
@@ -114,27 +132,44 @@ public void Q1_Frame(int objectiveID, int client) {
 	
 	g_iDuration[client]--;
 	
-	if( GetVectorDistance(dst, min) < 60.0 || GetVectorDistance(dst, max) < 60.0 ) {
+	if( rp_GetPlayerZone(client) == rp_GetZoneFromPoint(dst) ) {
 		rp_QuestStepComplete(client, objectiveID);
+		
+		int cap = rp_GetRandomCapital(91);
+		rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 1000);
+		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(target, i_AddToPay) + 1000);
 	}
 	else if( g_iDuration[client] <= 0 ) {
-		// TODO: ECHEC MISSION :(
+		rp_QuestStepFail(client, objectiveID);
 	}
 	else {
 		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s %s", QUEST_NAME, g_iDuration[client], QUEST_RESUME, buffer);
 		rp_Effect_BeamBox(client, -1, dst, 255, 255, 255);
 	}
-	
-	if( rp_GetZoneInt( rp_GetPlayerZone(client), zone_type_type ) == 1 ) {
-		if( rp_GetClientItem(client, 3) == 0 ) {
-			char item[64];
-			rp_GetItemData(3, item_type_name, item, sizeof(item));
-			rp_ClientGiveItem(client, 2);
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu: %s", item);
-		}
-	}
 }
 public void Q1_Abort(int objectiveID, int client) {
+	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
+}
+public void Q5_Done(int objectiveID, int client) {
+	Q1_Abort(objectiveID, client);
+	
+	Menu menu = new Menu(MenuNothing);
+	
+	menu.SetTitle("Quète: %s", QUEST_NAME);
+	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
+	menu.AddItem("", "La trace s'arrête ici...", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Vous n'avez pas trouver d'information supplémentaire.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "La mafia vous remercie pour votre enquête", ITEMDRAW_DISABLED);
+	menu.AddItem("", "et vous offre: [PvP] M4A1-S.", ITEMDRAW_DISABLED);
+	
+	menu.ExitButton = false;
+	menu.Display(client, 30);
+	
+	rp_ClientGiveItem(client, 64); // [PvP] M4A1-S.
+	
+	char item[64]; rp_GetItemData(64, item_type_name, item, sizeof(item)); rp_ClientGiveItem(client, 64);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu: %s", item);
+	
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
 }
 int getRandomLocation() {
