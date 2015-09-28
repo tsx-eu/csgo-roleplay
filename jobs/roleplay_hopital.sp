@@ -53,6 +53,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_respawn",		Cmd_ItemRespawn,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_sick",		Cmd_ItemSick,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_curedesintox",	Cmd_ItemCureDesintox,		"RP-ITEM",		FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_protimmu",	Cmd_ItemProtImmu,		"RP-ITEM",		FCVAR_UNREGISTERED);
 	
 	RegServerCmd("rp_item_healbox",		Cmd_ItemHealBox,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 	
@@ -342,6 +343,23 @@ public Action Cmd_ItemFullHeal(int args) {
 	
 	g_iSuccess_last_faster_dead[client] = GetTime();
 	
+}
+public Action Cmd_ItemProtImmu(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemProtImmu");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+	
+	if(rp_GetClientBool(client, b_HasProtImmu)){
+		ITEM_CANCEL(client, GetCmdArgInt(args));
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous bénéfifiez déjà d'une protection immunitaire.");
+	}
+	else{
+		rp_SetClientBool(client, b_HasProtImmu, true);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous bénéfifiez maintenant d'une protection immunitaire.");
+	}
+	return Plugin_Handled;
 }
 public Action Cmd_ItemRespawn(int args) {
 	#if defined DEBUG
