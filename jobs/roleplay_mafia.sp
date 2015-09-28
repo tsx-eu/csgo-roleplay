@@ -94,6 +94,10 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		amount = Math_GetRandomPow(1, VOL_MAX);
 	else
 		amount = Math_GetRandomInt(1, VOL_MAX);
+		
+	if( amount == 0 ) {
+		LogToGame("ERROR: %N %d %d", client, amount, VOL_MAX);
+	}
 	
 	if( money <= 0 && rp_GetClientInt(client, i_Job) <= 93 && !rp_IsClientNew(target) ) {
 		amount = 0;
@@ -166,7 +170,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		rp_SetJobCapital(cpt, rp_GetJobCapital(cpt) - prix);
 		
 	}
-	else if( money > 0 ) {
+	else if( money >= 1 ) {
 		if( amount > money )
 			amount = money;
 			
