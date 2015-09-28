@@ -97,7 +97,7 @@ public void Q1_Frame(int objectiveID, int client) {
 		rp_Effect_BeamBox(client, g_iGoing[client], NULL_VECTOR, 255, 0, 0);
 		float ang[3];
 		Entity_GetAbsAngles(g_iGoing[client], ang);
-		ang[2] += 1.0;
+		ang[1] += 1.0;
 		Entity_SetAbsAngles(g_iGoing[client], ang);
 		
 		if( rp_GetPlayerZone(client) == 244 || rp_GetPlayerZone(client) == 245 ) {
