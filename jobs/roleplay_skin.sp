@@ -465,52 +465,62 @@ public Action fwdUse(int client) {
 	Handle menu = CreateMenu(MenuTrySkin);
 	SetMenuTitle(menu, "Selection du skin à essayer:");
 
-	AddMenuItem(menu, "models/player/custom/zoey/zoey.mdl", 			"Zoey");
-	AddMenuItem(menu, "models/player/custom/francis/francis.mdl", 		"Francis");
-	AddMenuItem(menu, "models/player/custom/ellis/ellis.mdl", 			"Ellis");
-	AddMenuItem(menu, "models/player/resident/sherry6/sherry6.mdl", 	"Sherry");
-	AddMenuItem(menu, "models/player/resident/leon6/leon6.mdl", 		"Leon");
-	AddMenuItem(menu, "models/player/resident/helena6/helena6.mdl", 	"Helena");
-	AddMenuItem(menu, "models/player/resident/ada_wong6/ada_wong6.mdl", "Ada Wong");
-	AddMenuItem(menu, "models/player/custom_player/legacy/duke/duke.mdl", "Duke Nukem");
-	AddMenuItem(menu, "models/player/dr.valencia/dr.valencia.mdl", 		"Dr. Valencia");
-	AddMenuItem(menu, "models/player/domino/domino.mdl", 				"Domino");
-	AddMenuItem(menu, "models/player/custom/nick/nick.mdl", 			"Nick");
-	AddMenuItem(menu, "models/player/tm_anarchist.mdl", 				"Anarchist");
-	AddMenuItem(menu, "models/player/tm_anarchist_varianta.mdl", 		"Anarchist - A");
-	AddMenuItem(menu, "models/player/tm_anarchist_variantb.mdl",		"Anarchist - B");
-	AddMenuItem(menu, "models/player/tm_anarchist_variantc.mdl", 		"Anarchist - C");
-	AddMenuItem(menu, "models/player/tm_anarchist_variantd.mdl", 		"Anarchist - D");
-	AddMenuItem(menu, "models/player/tm_balkan_varianta.mdl", 			"Balkan");
-	AddMenuItem(menu, "models/player/tm_balkan_variantb.mdl", 			"Balkan - A");
-	AddMenuItem(menu, "models/player/tm_balkan_variantc.mdl",			"Balkan - B");
-	AddMenuItem(menu, "models/player/tm_balkan_variantd.mdl", 			"Balkan - C");
-	AddMenuItem(menu, "models/player/tm_balkan_variante.mdl", 			"Balkan - D");
-	AddMenuItem(menu, "models/player/tm_leet_varianta.mdl", 			"Phoenix");
-	AddMenuItem(menu, "models/player/tm_leet_variantb.mdl", 			"Phoenix - A");
-	AddMenuItem(menu, "models/player/tm_leet_variantc.mdl",				"Phoenix - B");
-	AddMenuItem(menu, "models/player/tm_leet_variantd.mdl", 			"Phoenix - C");
-	AddMenuItem(menu, "models/player/tm_leet_variante.mdl", 			"Phoenix - D");
-	AddMenuItem(menu, "models/player/tm_phoenix.mdl", 					"Phoenix");
-	AddMenuItem(menu, "models/player/tm_phoenix_varianta.mdl", 			"Phoenix - A");
-	AddMenuItem(menu, "models/player/tm_phoenix_variantb.mdl",			"Phoenix - B");
-	AddMenuItem(menu, "models/player/tm_phoenix_variantc.mdl", 			"Phoenix - C");
-	AddMenuItem(menu, "models/player/tm_phoenix_variantd.mdl", 			"Phoenix - D");
-	AddMenuItem(menu, "models/player/tm_pirate.mdl", 					"Pirate");
-	AddMenuItem(menu, "models/player/tm_pirate_varianta.mdl", 			"Pirate - A");
-	AddMenuItem(menu, "models/player/tm_pirate_variantb.mdl",			"Pirate - B");
-	AddMenuItem(menu, "models/player/tm_pirate_variantc.mdl", 			"Pirate - C");
-	AddMenuItem(menu, "models/player/tm_pirate_variantd.mdl", 			"Pirate - D");
-	AddMenuItem(menu, "models/player/tm_professional.mdl", 				"Professional");
-	AddMenuItem(menu, "models/player/tm_professional_var1.mdl", 		"Professional - A");
-	AddMenuItem(menu, "models/player/tm_professional_var2.mdl",			"Professional - B");
-	AddMenuItem(menu, "models/player/tm_professional_var3.mdl", 		"Professional - C");
-	AddMenuItem(menu, "models/player/tm_professional_var4.mdl", 		"Professional - D");
-	AddMenuItem(menu, "models/player/tm_separatist.mdl", 				"Séparatist");
-	AddMenuItem(menu, "models/player/tm_separatist_varianta.mdl", 		"Séparatist - A");
-	AddMenuItem(menu, "models/player/tm_separatist_variantb.mdl",		"Séparatist - B");
-	AddMenuItem(menu, "models/player/tm_separatist_variantc.mdl", 		"Séparatist - C");
-	AddMenuItem(menu, "models/player/tm_separatist_variantd.mdl", 		"Séparatist - D");
+	AddMenuItem(menu, "models/player/custom/hitman/hitman.mdl", 	"Hitman");
+	AddMenuItem(menu, "models/player/custom/max/max.mdl", 			"Max");
+	AddMenuItem(menu, "models/player/custom/johnny/johnny.mdl", 	"Johnny");
+	AddMenuItem(menu, "models/player/kuristaja/duke/duke.mdl", 		"Duke Nukem");
+	
+	AddMenuItem(menu, "models/player/custom/zoey/zoey.mdl", 		"Zoey");
+	AddMenuItem(menu, "models/player/custom/francis/francis.mdl", 	"Francis");
+	AddMenuItem(menu, "models/player/custom/ellis/ellis.mdl", 		"Ellis");
+	AddMenuItem(menu, "models/player/custom/nick/nick.mdl", 		"Nick");
+	
+	AddMenuItem(menu, "models/player/resident/sherry6/sherry6.mdl", "Sherry");
+	AddMenuItem(menu, "models/player/resident/leon6/leon6.mdl", 	"Leon");
+	AddMenuItem(menu, "models/player/dr.valencia/dr.valencia.mdl", 	"Dr. Valencia");
+	AddMenuItem(menu, "models/player/domino/domino.mdl", 			"Domino");
+	
+	AddMenuItem(menu, "models/player/tm_anarchist.mdl", 			"Anarchist");
+	AddMenuItem(menu, "models/player/tm_anarchist_varianta.mdl", 	"Anarchist - A");
+	AddMenuItem(menu, "models/player/tm_anarchist_variantb.mdl",	"Anarchist - B");
+	AddMenuItem(menu, "models/player/tm_anarchist_variantc.mdl", 	"Anarchist - C");
+	AddMenuItem(menu, "models/player/tm_anarchist_variantd.mdl", 	"Anarchist - D");
+	
+	AddMenuItem(menu, "models/player/tm_balkan_varianta.mdl", 		"Balkan");
+	AddMenuItem(menu, "models/player/tm_balkan_variantb.mdl", 		"Balkan - A");
+	AddMenuItem(menu, "models/player/tm_balkan_variantc.mdl",		"Balkan - B");
+	AddMenuItem(menu, "models/player/tm_balkan_variantd.mdl", 		"Balkan - C");
+	AddMenuItem(menu, "models/player/tm_balkan_variante.mdl", 		"Balkan - D");
+	
+	AddMenuItem(menu, "models/player/tm_leet_varianta.mdl", 		"Phoenix");
+	AddMenuItem(menu, "models/player/tm_leet_variantb.mdl", 		"Phoenix - A");
+	AddMenuItem(menu, "models/player/tm_leet_variantc.mdl",			"Phoenix - B");
+	AddMenuItem(menu, "models/player/tm_leet_variantd.mdl", 		"Phoenix - C");
+	AddMenuItem(menu, "models/player/tm_leet_variante.mdl", 		"Phoenix - D");
+	
+	AddMenuItem(menu, "models/player/tm_phoenix.mdl", 				"Phoenix");
+	AddMenuItem(menu, "models/player/tm_phoenix_varianta.mdl", 		"Phoenix - A");
+	AddMenuItem(menu, "models/player/tm_phoenix_variantb.mdl",		"Phoenix - B");
+	AddMenuItem(menu, "models/player/tm_phoenix_variantc.mdl", 		"Phoenix - C");
+	AddMenuItem(menu, "models/player/tm_phoenix_variantd.mdl", 		"Phoenix - D");
+	
+	AddMenuItem(menu, "models/player/tm_pirate.mdl", 				"Pirate");
+	AddMenuItem(menu, "models/player/tm_pirate_varianta.mdl", 		"Pirate - A");
+	AddMenuItem(menu, "models/player/tm_pirate_variantb.mdl",		"Pirate - B");
+	AddMenuItem(menu, "models/player/tm_pirate_variantc.mdl", 		"Pirate - C");
+	AddMenuItem(menu, "models/player/tm_pirate_variantd.mdl", 		"Pirate - D");
+	
+	AddMenuItem(menu, "models/player/tm_professional.mdl", 			"Professional");
+	AddMenuItem(menu, "models/player/tm_professional_var1.mdl", 	"Professional - A");
+	AddMenuItem(menu, "models/player/tm_professional_var2.mdl",		"Professional - B");
+	AddMenuItem(menu, "models/player/tm_professional_var3.mdl", 	"Professional - C");
+	AddMenuItem(menu, "models/player/tm_professional_var4.mdl", 	"Professional - D");
+	
+	AddMenuItem(menu, "models/player/tm_separatist.mdl", 			"Séparatist");
+	AddMenuItem(menu, "models/player/tm_separatist_varianta.mdl", 	"Séparatist - A");
+	AddMenuItem(menu, "models/player/tm_separatist_variantb.mdl",	"Séparatist - B");
+	AddMenuItem(menu, "models/player/tm_separatist_variantc.mdl", 	"Séparatist - C");
+	AddMenuItem(menu, "models/player/tm_separatist_variantd.mdl", 	"Séparatist - D");
 
 	SetMenuExitButton(menu, true);
 	DisplayMenu(menu, client, 60);
