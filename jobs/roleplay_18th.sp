@@ -85,7 +85,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		if( amount > money )
 			amount = money;
 			
-		rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) + amount);
+		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + amount);
 		rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amount);
 		
 		rp_SetClientInt(client, i_LastVolAmount, amount);
@@ -390,7 +390,7 @@ public Action Cmd_ItemPickLock(int args) {
 	char wepname[64];
 	GetEdictClassname(wepid, wepname, sizeof(wepname));
 	ReplaceString(wepname, sizeof(wepname), "weapon_", "");	
-	int price = CS_GetWeaponPrice(client, CS_AliasToWeaponID(wepname) );
+	int price = CS_GetWeaponPrice(client, CS_AliasToWeaponID(wepname)); 
 	
 	float StealTime = (Logarithm(float(price), 2.0) * 0.5) - 2.0;
 	
@@ -475,7 +475,7 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 	char wepname[64];
 	GetEdictClassname(wepid, wepname, sizeof(wepname));
 	ReplaceString(wepname, sizeof(wepname), "weapon_", "");	
-	int price = CS_GetWeaponPrice(client, CS_AliasToWeaponID(wepname) );
+	int price = CS_GetWeaponPrice(client, CS_AliasToWeaponID(wepname)); 
 	
 	if( IsValidEdict(wepid) && IsValidEntity(wepid) &&
 		IsValidClient(target) && rp_IsEntitiesNear(client, target, false, -1.0) &&
@@ -500,7 +500,8 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 					amount = rp_GetClientInt(target, i_Money) + rp_GetClientInt(target, i_Bank);
 				}
 				
-				rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) + amount);
+				
+				rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + amount);
 				rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amount);
 			}
 			

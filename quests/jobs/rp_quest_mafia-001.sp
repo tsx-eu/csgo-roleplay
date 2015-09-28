@@ -27,6 +27,7 @@
 #define	QUEST_NAME		"Délivrance"
 #define	QUEST_TYPE		quest_daily
 #define	QUEST_JOBID		91
+#define	QUEST_RESUME	"Libérez les prisonniers"
 
 public Plugin myinfo = {
 	name = "Quête: Délivrance", author = "KoSSoLaX",
@@ -34,7 +35,7 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-int g_iQuest;
+int g_iQuest, g_iDuration[MAXPLAYERS + 1];
 Handle g_hDoing;
 
 public void OnPluginStart() {
@@ -45,7 +46,7 @@ public void OnPluginStart() {
 		SetFailState("Erreur lors de la création de la quête %s %s", QUEST_UNIQID, QUEST_NAME);
 	
 	int i;
-	rp_QuestAddStep(g_iQuest, i++,	Q1_Start,	Q1_Frame,	Q1_Abort,	QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++,	Q1_Start,	Q1_Frame,	Q1_Abort,	Q1_Abort);
 	
 	g_hDoing = CreateArray(MAXPLAYERS);
 }
@@ -70,7 +71,7 @@ public bool fwdCanStart(int client) {
 		}
 	}
 	
-	if( count > 2 ) {
+	if( count >= 2 ) {
 		for (int i = 1; i <= MaxClients; i++) {
 			if( !IsValidClient(i) )
 				continue;
@@ -86,22 +87,25 @@ public bool fwdCanStart(int client) {
 	return false;
 }
 public void Q1_Start(int objectiveID, int client) {
+
 	Menu menu = new Menu(MenuNothing);
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	
 	menu.AddItem("", "Mon frère, l'un de nos hommes a été arrêté.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Nous avons besoin de toi.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	
 	menu.AddItem("", "Afin de faire sortir notre homme et qu'il passe", ITEMDRAW_DISABLED);
-	menu.AddItem("", "innaperçu, fait sortir un maximum de détenu.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Nous t'offrirons 1000$ par personnes libérée", ITEMDRAW_DISABLED);
+	menu.AddItem("", "inaperçu, fait sortir un maximum de détenu.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Nous t'offrons 1000$ par personne libérée", ITEMDRAW_DISABLED);
 	menu.AddItem("", "grace à toi. Pendant toute la durée de ta mission, ", ITEMDRAW_DISABLED);
-	menu.AddItem("", "nous t'environs du matériel nécéessaire à tes opérations.", ITEMDRAW_DISABLED);
-	
+	menu.AddItem("", "nous t'environs du matériel nécessaire à tes opérations.", ITEMDRAW_DISABLED);
+	menu.AddItem("", " Tu as 12 heures.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
-	menu.Display(client, 30);
+	menu.Display(client, 60);
+	
+	g_iDuration[client] = 12 * 60;
 	
 	PushArrayCell(g_hDoing, client);
 	for (int i = 1; i <= MaxClients; i++) {
@@ -111,9 +115,23 @@ public void Q1_Start(int objectiveID, int client) {
 	}
 }
 public void Q1_Frame(int objectiveID, int client) {
+	
+	g_iDuration[client]--;
+	
+	if( g_iDuration[client] <= 0 ) {
+		rp_QuestStepComplete(client, objectiveID);
+	}
+	else {
+		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s", QUEST_NAME, g_iDuration[client], QUEST_RESUME);
+	}
+	
 	if( rp_GetZoneInt( rp_GetPlayerZone(client), zone_type_type ) == 1 ) {
-		if( rp_GetClientItem(client, 3) == 0 )
+		if( rp_GetClientItem(client, 3) == 0 ) {
+			char item[64];
+			rp_GetItemData(3, item_type_name, item, sizeof(item));
 			rp_ClientGiveItem(client, 3);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu: %s", item);
+		}
 	}
 }
 public void Q1_Abort(int objectiveID, int client) {
@@ -124,25 +142,43 @@ public void Q1_Abort(int objectiveID, int client) {
 			continue;
 		rp_UnhookEvent(i, RP_OnPlayerZoneChange, fwdOnZoneChange);
 	}
+	
+	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
 }
 public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 	static zoneID[3] =  { 20, 257, 291 };
+	static lastFree[65];
+	
+	if( lastFree[client] > GetTime() )
+		return Plugin_Continue;
 	
 	
 	int length = GetArraySize(g_hDoing);
 	for (int i = 0; i < length; i++) {
-		int z = rp_GetPlayerZone(GetArrayCell(g_hDoing, i));
+		int target = GetArrayCell(g_hDoing, i);
+		int z = rp_GetPlayerZone(target);
 		
 		for (int j = 0; j < sizeof(zoneID); j++) {
 			if( z == zoneID[j] ) {
 				for (int k = 0; k < sizeof(zoneID); k++) {
 					if( rp_GetZoneBit(oldZone) & BITZONE_JAIL &&  zoneID[k] == newZone ) {
-						// TODO Libérer + give 1000$ + check s'il triche pas
+						
+						int cap = rp_GetRandomCapital(91);
+						rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 1000);
+						rp_SetClientInt(target, i_AddToPay, rp_GetClientInt(target, i_AddToPay) + 1000);
+						
+						rp_ClientSendToSpawn(client, false);
+						
+						CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N vous a libéré", target);
+						CPrintToChat(target, "{lightblue}[TSX-RP]{default} vous avez libéré %N et reçu une récompense de 1000$.", client);
+						
+						lastFree[client] = GetTime() + g_iDuration[client] + 1;
 					}
 				}
 			}
 		}
 	}
+	return Plugin_Continue;
 }
 
 // ----------------------------------------------------------------------------

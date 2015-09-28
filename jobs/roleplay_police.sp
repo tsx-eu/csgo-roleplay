@@ -530,7 +530,7 @@ public Action Cmd_Tazer(int client) {
 			LogToGame("[TSX-RP] [TAZER] %L a supprimé une arme %s dans %s", client, tmp2, tmp);
 			
 			ReplaceString(tmp2, sizeof(tmp2), "weapon_", "");	
-			int prix = CS_GetWeaponPrice(client, CS_AliasToWeaponID(tmp2) );
+			int prix = 0; CS_GetWeaponPrice(client, CS_AliasToWeaponID(tmp2));
 			
 			reward = prix / 10;
 				
