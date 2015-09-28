@@ -298,6 +298,7 @@ enum bool_user_data {
 	b_IsMuteVocal,
 	b_IsMuteEvent,
 	b_IsNoPyj,
+	b_HasProtImmu,
 	
 	b_udata_max
 };

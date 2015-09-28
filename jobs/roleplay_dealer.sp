@@ -192,7 +192,7 @@ public Action Cmd_ItemDrugs(int args) {
 		if( g_hDrugTimer[client] ) {
 			delete g_hDrugTimer[client];
 			
-			if( Math_GetRandomInt(1, 100) >= 80 ) {
+			if( Math_GetRandomInt(1, 100) >= 80 && !rp_GetClientBool(client, b_HasProtImmu)) {
 				rp_IncrementSuccess(client, success_list_dealer);
 				
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes en état d'overdose.");			
