@@ -96,7 +96,7 @@ public void Q1_Frame(int objectiveID, int client) {
 		float ang[3];
 		Entity_GetAbsAngles(g_iGoing[client], ang);
 		ang[2] += 1.0;
-		Entity_SetAbsAngles(g_iDuration[client], ang);
+		Entity_SetAbsAngles(g_iGoing[client], ang);
 		
 		if( rp_GetPlayerZone(client) == 244 || rp_GetPlayerZone(client) == 245 ) {
 			if( rp_GetClientItem(client, 3) == 0 ) {
