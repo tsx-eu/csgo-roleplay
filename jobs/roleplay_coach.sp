@@ -165,6 +165,7 @@ public Action Cmd_ItemCutThrow(int args) {
 	g_iKnifeThrowID = GetCmdArgInt(args);
 	
 	rp_SetClientInt(client, i_LastAgression, GetTime());
+	
 	float fPos[3], fAng[3], fVel[3], fPVel[3];
 	GetClientEyePosition(client, fPos);
 	GetClientEyeAngles(client, fAng);
@@ -180,7 +181,6 @@ public Action Cmd_ItemCutThrow(int args) {
 	SetEntityModel(entity, MODEL_KNIFE);
 	SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", client);
 	SetEntPropFloat(entity, Prop_Send, "m_flElasticity", 0.2);
-	SetEntPropVector(entity, Prop_Data, "m_vecAngVelocity", view_as<float>({4500.0, 0.0, 0.0}));
 	
 	TeleportEntity(entity, fPos, fAng, fVel);
 	
@@ -195,20 +195,29 @@ public void Cmd_ItemCutThrow_TOUCH(int rocket, int entity) {
 	PrintToServer("Cmd_ItemCutThrow_TOUCH");
 	#endif
 	
+	char classname[64];
 	int attacker = GetEntPropEnt(rocket, Prop_Send, "m_hOwnerEntity");
+	bool touched = false;
 	
-	if( IsValidEdict(entity) && IsValidEntity(entity) ) {
+	if( entity > 0 && IsValidEdict(entity) && IsValidEntity(entity) ) {
 		
-		char classname[64];
 		GetEdictClassname(entity, classname, sizeof(classname));
 		
-		if( StrContains(classname, "trigger_", false) == 0) // WHAT?
+		if( StrContains(classname, "trigger_") == 0 )
 			return;
 		
-		rp_ClientDamage(entity, rp_GetClientInt(attacker, i_KnifeTrain), attacker, "weapon_knife_throw");
+		if( IsValidClient(entity) ) {
+			float dmg = float(rp_GetClientInt(attacker, i_KnifeTrain));
+			wpnCutDamage(entity, attacker, dmg);
+			rp_ClientDamage(entity, RoundFloat(dmg), attacker, "weapon_knife_throw");
+			touched = true;
+		}
 	}
-	else {
+	
+	if( !touched) {
+		rp_GetItemData(g_iKnifeThrowID, item_type_name, classname, sizeof(classname));
 		rp_ClientGiveItem(attacker, g_iKnifeThrowID);
+		CPrintToChat(attacker, "{lightblue}[TSX-RP]{default} Vous avez récupéré votre couteau.");
 	}
 	
 	SDKUnhook(rocket, SDKHook_Touch, Cmd_ItemCutThrow_TOUCH);	// Prevent TWICE touch.
@@ -254,8 +263,14 @@ public Action Cmd_ItemKnifeType(int args) {
 	return Plugin_Handled;
 }
 public Action fwdWeapon(int victim, int attacker, float &damage) {
-	bool changed = true;
+	bool changed = wpnCutDamage(victim, attacker, damage);
 	
+	if( changed )
+		return Plugin_Changed;
+	return Plugin_Continue;
+}
+bool wpnCutDamage(int victim, int attacker, float damage) {
+	bool changed;
 	switch( rp_GetClientKnifeType(attacker) ) {
 		case ball_type_fire: {
 			rp_ClientIgnite(victim, 10.0, attacker);
@@ -304,11 +319,8 @@ public Action fwdWeapon(int victim, int attacker, float &damage) {
 		default: {
 			changed = false;
 		}
-	}	
-	
-	if( changed )
-		return Plugin_Changed;
-	return Plugin_Continue;
+	}
+	return changed;
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemPermiTir(int args) {
