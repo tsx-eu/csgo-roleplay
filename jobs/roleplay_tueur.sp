@@ -25,7 +25,6 @@
 #define MENU_TIME_DURATION 60
 
 // TODO: Trouver astuce pour bypass menu vente et définir les types de contrat ici.
-// TODO: Utiliser une CVAR pour la gestion des portes
 
 public Plugin myinfo = {
 	name = "Jobs: Mercenaire", author = "KoSSoLaX",
@@ -51,6 +50,8 @@ enum competance {
 int g_iKillerPoint[65][competance_max];
 int g_iKillerPoint_stored[65][competance_max];
 Handle g_vCapture = INVALID_HANDLE;
+Handle g_vConfigTueur = INVALID_HANDLE;
+Handle g_hTimer[65];
 
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
@@ -60,6 +61,8 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_enquete",		Cmd_ItemEnquete,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_camera",		Cmd_ItemCamera,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_cryptage",	Cmd_ItemCryptage,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	
+	g_vConfigTueur = CreateConVar("rp_config_kidnapping", "247,248,249,250,258,259-260");
 	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
@@ -100,9 +103,15 @@ public void OnClientDisconnect(int client) {
 		if( !IsValidClient(i) )
 			continue;
 			
-		if( rp_GetClientInt(i, i_ToKill) == client ) {
-			CPrintToChat(i, "{lightblue}[TSX-RP]{default} Votre cible s'est déconnectée.");
-			SetContratFail(i);
+		if( rp_GetClientInt(i, i_ToKill) == client  ) {
+			if( rp_GetClientInt(client, i_KidnappedBy) == i ) {
+				CPrintToChat(i, "{lightblue}[TSX-RP]{default} Votre cible s'est déconnectée.");
+				RestoreAssassinNormal(i);
+			}
+			else {
+				CPrintToChat(i, "{lightblue}[TSX-RP]{default} Votre cible s'est déconnectée.");
+				SetContratFail(i, true);
+			}
 		}
 	}
 }
@@ -183,12 +192,13 @@ public Action fwdFrame(int client) {
 	}
 }
 public Action fwdTueurKill(int client, int attacker, float& respawn) {
-	if( rp_GetClientInt(attacker, i_ToKill) == client ) {
+	if( rp_GetClientInt(attacker, i_ToKill) == client && rp_GetClientInt(client, i_KidnappedBy) != attacker ) {
 		CPrintToChat(attacker, "{lightblue}[TSX-RP]{default} Vous avez rempli votre contrat pour avoir tué %N.", client);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Un mercenaire a rempli son contrat sur vous.");
 		rp_SetClientInt(attacker, i_AddToPay, rp_GetClientInt(attacker, i_AddToPay) + 100);
 		
 		int from = rp_GetClientInt(attacker, i_ContratFor);
+		bool kidnapping = false;
 		
 		if( IsValidClient(from) ) {
 			CPrintToChat(from, "{lightblue}[TSX-RP]{default} %N a rempli son contrat en tuant %N.", attacker, client);
@@ -222,13 +232,15 @@ public Action fwdTueurKill(int client, int attacker, float& respawn) {
 							
 				respawn = 0.05;
 				CreateTimer(0.33, SendToTueur, client);
+				kidnapping = true;
 			}
 			else {
 				respawn *= 1.25;
 			}
 		}
 		
-		RestoreAssassinNormal(attacker);
+		if( !kidnapping )
+			RestoreAssassinNormal(attacker);
 		
 		return Plugin_Handled; // On retire des logs
 	}
@@ -596,7 +608,7 @@ public Action SendToTueur(Handle timer, any client) {
 		}
 	}
 	
-	CPrintToChat(client, "{lightblue}[TSX-RP] Vos ravisseurs vont vous libérer dans 6h. Mais vous pouvez tenter autre chose...");
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vos ravisseurs vont vous libérer dans 6h. Mais vous pouvez tenter autre chose...");
 	// Setup menu
 	Handle menu = CreateMenu(eventKidnapping);
 	SetMenuTitle(menu, "Vous avez été enlevé! Que faire ?");
@@ -606,9 +618,73 @@ public Action SendToTueur(Handle timer, any client) {
 	AddMenuItem(menu, "cops", "Appeler la police");
 	AddMenuItem(menu, "crier", "Crier");
 	
-	CreateTimer(6*60.0, FreeKidnapping, client);
+	g_hTimer[client] = CreateTimer(6*60.0, FreeKidnapping, client);
+	rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
+	rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
+	
 	SetMenuExitButton(menu, false);
 	DisplayMenu(menu, client, 180);
+}
+void clearKidnapping(int client) {
+	rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
+	rp_UnhookEvent(client, RP_OnPlayerDead, fwdDead);
+	rp_SetClientInt(client, i_KidnappedBy, 0);
+	KillTimer(g_hTimer[client]);
+	g_hTimer[client] = null;
+}
+public Action fwdZoneChange(int client, int newZone, int oldZone) {
+	int newType = rp_GetZoneInt(newZone, zone_type_type);
+	int oldType = rp_GetZoneInt(oldZone, zone_type_type);
+	
+	if( oldType == 41 && newType != 41 ) {
+		float vecDest[3] =  { -4150.0, -2572.0, -2007.9 };
+		float vecOrigin[3];
+		GetClientAbsOrigin(client, vecOrigin);
+		
+		if( GetVectorDistance(vecDest, vecOrigin) < 128.0 ) {
+			int target = rp_GetClientInt(client, i_KidnappedBy);
+			clearKidnapping(client);
+			
+			rp_SetClientInt( target, i_ContratFor, rp_GetClientInt(client, i_ToPay) );
+			SetContratFail( target , true);
+			
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez pris la fuite, vous êtes libres !");
+			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N s'est échappé.", client);
+		}
+		else {
+			TeleportEntity(client,  view_as<float>({-5879.0, -2815.0, -1950.0}), NULL_VECTOR, NULL_VECTOR);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Une tentative de triche a été détectée.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Etes vous sorti correctement, sans triche, sans téléportation?");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Si c'est le cas, conactez KoSSoLaX.");			
+		}
+	}
+}
+public Action fwdDead(int client, int attacker, float& respawn) {
+	int target = rp_GetClientInt(client, i_KidnappedBy);
+	clearKidnapping(client);
+	
+	rp_SetClientInt(target, i_ContratFor, rp_GetClientInt(client, i_ToPay) );
+	SetContratFail( target , true);
+	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vos ravisseurs vous ont tué.");
+	CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N s'est échappé.", client);
+	
+	
+	return Plugin_Continue;
+}
+public Action FreeKidnapping(Handle timer, any client) {
+	if( g_hTimer[client] == null )
+		return Plugin_Handled;
+	
+	int target = rp_GetClientInt(client, i_KidnappedBy);
+	clearKidnapping(client);
+	RestoreAssassinNormal(target);
+	TeleportEntity(client,  view_as<float>({2911.0, 868.0, -1853.0}), NULL_VECTOR, NULL_VECTOR);
+	rp_ClientSendToSpawn(client, true); // C'est proche du comico. 
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vos ravisseurs vous ont finalement libéré.");
+	CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez libéré %N.", target);
+	
+	return Plugin_Continue;
 }
 public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
 	#if defined DEBUG
@@ -621,22 +697,29 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 		
 		if( StrEqual( options, "pay", false) ) {
 			
-			CPrintToChat(client, "{lightblue}[TSX-RP] Vous avez payé la rançon de 2500$.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez payé la rançon de 2500$.");
 			
 			int from = rp_GetClientInt(client, i_ToPay);
+			int target = rp_GetClientInt(client, i_KidnappedBy);
 			
 			rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) - 2500);
-			rp_SetClientInt(from, i_Bank, rp_GetClientInt(client, i_Bank) + 2500);
+			rp_SetClientInt(from, i_Bank, rp_GetClientInt(from, i_Bank) + 2500);
 			rp_SetClientInt(client, i_KidnappedBy, 0);
 			
-			CPrintToChat(from, "{lightblue}[TSX-RP] %N a payé la rançon de 2500$.", client);
+			
+			CPrintToChat(from, "{lightblue}[TSX-RP]{default} %N a payé la rançon de 2500$.", client);
+			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N a payé la rançon de 2500$.", client);
+			
 			rp_IncrementSuccess(from, success_list_kidnapping);
 			
 			TeleportEntity(client,  view_as<float>({2911.0, 868.0, -1853.0}), NULL_VECTOR, NULL_VECTOR);
 			rp_ClientSendToSpawn(client, true);
+			
+			clearKidnapping(client);
+			RestoreAssassinNormal(target);
 		}
 		else if( StrEqual( options, "free", false) ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP] Les portes s'ouvriront toute les 20 secondes, vous n'avez qu'une seule chance de vous en sortir.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Les portes s'ouvriront toute les 20 secondes, vous n'avez qu'une seule chance de vous en sortir.");
 			float delay = 20.0;
 			float time = 0.0;
 			
@@ -644,8 +727,8 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 			rp_SetClientWeaponSkin(client, skin);
 			
 			// TODO: Utiliser une CVAR ? 
-			char door[128] = "247,248,249,250,258,259-260";
-			char doors[12][12];
+			char door[128], doors[12][12];
+			GetConVarString(g_vConfigTueur, door, sizeof(door));
 			int amount = ExplodeString(door, ",", doors, sizeof(doors), sizeof(doors[]) );
 			
 			for (int i = 0; i <= amount; i++) {
@@ -706,25 +789,6 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 	else if (p_oAction == MenuAction_End ) {
 		CloseHandle(p_hItemMenu);
 	}
-}
-public Action FreeKidnapping(Handle timer, any client) {
-	
-	
-	int target = rp_GetClientInt(client, i_KidnappedBy);
-	
-	if( rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == 41  ) {
-		TeleportEntity(client,  view_as<float>({2911.0, 868.0, -1853.0}), NULL_VECTOR, NULL_VECTOR);
-		rp_ClientSendToSpawn(client, true); // C'est proche du comico. 
-		
-		CPrintToChat(client, "{lightblue}[TSX-RP] Vos ravisseurs vous ont finalement libéré.");
-	}
-	else if( IsValidClient( target ) ) {
-		rp_SetClientInt(target, i_ContratFor, rp_GetClientInt(client, i_ToPay));
-		SetContratFail( target , true);
-		
-	}
-	
-	rp_SetClientInt(client, i_KidnappedBy, 0);
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemCamera(int args) {
