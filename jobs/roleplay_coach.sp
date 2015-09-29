@@ -269,8 +269,8 @@ public Action fwdWeapon(int victim, int attacker, float &damage) {
 		return Plugin_Changed;
 	return Plugin_Continue;
 }
-bool wpnCutDamage(int victim, int attacker, float damage) {
-	bool changed;
+bool wpnCutDamage(int victim, int attacker, float &damage) {
+	bool changed = true;
 	switch( rp_GetClientKnifeType(attacker) ) {
 		case ball_type_fire: {
 			rp_ClientIgnite(victim, 10.0, attacker);
