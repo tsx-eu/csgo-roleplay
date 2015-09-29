@@ -81,7 +81,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	else
 		amount = Math_GetRandomInt(1, VOL_MAX);
 	
-	if( money >= 1 ) {
+	if( VOL_MAX > 0 && money >= 1 ) {
 		if( amount > money )
 			amount = money;
 			
