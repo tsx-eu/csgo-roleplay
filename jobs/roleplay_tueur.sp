@@ -621,6 +621,7 @@ public Action SendToTueur(Handle timer, any client) {
 	g_hTimer[client] = CreateTimer(6*60.0, FreeKidnapping, client);
 	rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
 	rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
+	rp_HookEvent(client, RP_OnFrameSeconde, fwdFrameKidnap);
 	
 	SetMenuExitButton(menu, false);
 	DisplayMenu(menu, client, 180);
@@ -628,6 +629,8 @@ public Action SendToTueur(Handle timer, any client) {
 void clearKidnapping(int client) {
 	rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
 	rp_UnhookEvent(client, RP_OnPlayerDead, fwdDead);
+	rp_UnhookEvent(client, RP_OnFrameSeconde, fwdFrame);
+	
 	rp_SetClientInt(client, i_KidnappedBy, 0);
 	KillTimer(g_hTimer[client]);
 	g_hTimer[client] = null;
@@ -773,22 +776,31 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 		}
 		else if( StrEqual( options, "crier", false) ) {
 			FakeClientCommand(client, "say \"Au secour, j'ai été enlevé !!!\"");
-			// Setup menu
-			Handle menu = CreateMenu(eventKidnapping);
-			SetMenuTitle(menu, "Vous avez été enlevé! Que faire ?");
 			
-			AddMenuItem(menu, "pay", "Payer la rançon de 2500$");
-			AddMenuItem(menu, "free", "Tenter l'évasion");
-			AddMenuItem(menu, "cops", "Appeler la police");			
-			
-			SetMenuExitButton(menu, false);
-			DisplayMenu(menu, client, 180);
+			OpenKidnappingMenu(client);
 		}
 		
 	}
 	else if (p_oAction == MenuAction_End ) {
 		CloseHandle(p_hItemMenu);
 	}
+}
+void OpenKidnappingMenu(int client) {
+	
+	if( rp_ClientCanDrawPanel(client) ) {
+		Handle menu = CreateMenu(eventKidnapping);
+		SetMenuTitle(menu, "Vous avez été enlevé! Que faire ?");
+			
+		AddMenuItem(menu, "pay", "Payer la rançon de 2500$");
+		AddMenuItem(menu, "free", "Tenter l'évasion");
+		AddMenuItem(menu, "cops", "Appeler la police");			
+		
+		SetMenuExitButton(menu, false);
+		DisplayMenu(menu, client, 180);
+	}
+}
+public Action fwdFrameKidnap(int client) {
+	OpenKidnappingMenu(client);
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemCamera(int args) {
