@@ -22,6 +22,8 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
+Handle g_vAllTalk;
+bool g_bAllTalk = false;
 
 public Plugin myinfo = {
 	name = "Utils: VoiceProximity", author = "KoSSoLaX",
@@ -34,8 +36,18 @@ public void OnPluginStart() {
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
 	RegConsoleCmd("sm_job", Cmd_job, "Ouvre la liste des jobs");
+	g_vAllTalk = CreateConVar("rp_alltalk", "0", "alltalk en zone event", 0, true, 0.0, true, 1.0);
+	HookConVarChange(g_vAllTalk, OnCvarChange);
 }
-
+public void OnCvarChange(Handle cvar, const char[] oldVal, const char[] newVal) {
+	
+	if( cvar == g_vAllTalk ) {
+		if( StrEqual(newVal, "1") )
+			g_bAllTalk = true;
+		else 
+			g_bAllTalk = false;
+	}
+}
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerHear, fwdHear);
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
@@ -166,7 +178,11 @@ public Action fwdHear(int client, int target, float& dist) {
 		if( rp_GetClientBool(Vehicle_GetDriver(target), b_IsMuteVocal) )
 			return Plugin_Stop;
 	}
-		
+	
+	if( g_bAllTalk && Tbit & BITZONE_EVENT && Czone == Tzone ) {
+		dist = 1.0;
+		return Plugin_Continue;
+	}
 	if( (Tbit & BITZONE_JAIL || Tbit & BITZONE_HAUTESECU) ) {
 		return Plugin_Stop;
 	}
