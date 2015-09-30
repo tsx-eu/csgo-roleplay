@@ -678,7 +678,7 @@ public Action timerAlarm(Handle timer, any door) {
 	PrintToServer("timerAlarm");
 	#endif
 	
-	EmitSoundToAllAny("UI/arm_bomb.wav", door);
+	EmitSoundToAllAny("UI/arm_bomb.wav", door, _, _, _, 0.5);
 	return Plugin_Handled;
 }
 public Action AllowStealing(Handle timer, any client) {
