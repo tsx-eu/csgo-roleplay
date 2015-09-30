@@ -217,18 +217,14 @@ public Action Cmd_Avocat(int client, const char[] arg) {
 	SetMenuTitle(menu, "Liste des avocats officiels:");
 	
 	
-	AddMenuItem(menu, "STEAM_1:1:42937983", "NokS       - 150$");
-	AddMenuItem(menu, "STEAM_0:1:115329137", "Arseniy   - 150$");
-	AddMenuItem(menu, "STEAM_0:0:44606367", "Maverick   - 150$");
-	AddMenuItem(menu, "STEAM_1:1:989000", "kirL	    - 150$");
+	AddMenuItem(menu, "STEAM_1:0:44606367", "Maverick   - 150$");
 	AddMenuItem(menu, "STEAM_1:1:93713536", "Kiceroh    - 150$");
-	AddMenuItem(menu, "STEAM_1:1:27293331", "Leethium   - 150$");
-	AddMenuItem(menu, "STEAM_1:0:29435422", "Noob       - 150$");
-	
+	AddMenuItem(menu, "STEAM_1:1:12956123", "Mendes     - 150$");
+	AddMenuItem(menu, "STEAM_1:1:95016136", "Bot Diablo - 150$");
+	AddMenuItem(menu, "STEAM_1:1:56912514", "Yuskailand - 150$");
 	AddMenuItem(menu, "STEAM_1:0:34370282", "Cybug      - 200$");
 	AddMenuItem(menu, "STEAM_1:1:32834448", "Gobelin    - 200$");
-	AddMenuItem(menu, "STEAM_1:0:35737135", "Redskyn    - 200$");
-	AddMenuItem(menu, "STEAM_1:1:87405234", "Rothi      - 200$");
+	
 	AddMenuItem(menu, "STEAM_1:1:27282750", "Touchepass - 200$");
 	
 	SetMenuExitButton(menu, true);
