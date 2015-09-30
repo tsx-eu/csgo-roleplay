@@ -105,6 +105,9 @@ native void rp_SetClientBool(int client, bool_user_data prop, bool value);
 native void rp_SetClientFloat(int client, float_user_data prop, float value);
 native void rp_SetClientString(int client, sz_user_data prop, char[] value, int length);
 // ----------------------------------------------------------------------------
+native void rp_SetClientStat(int client, int_stat_data prop, int value);
+native int rp_GetClientStat(int client, int_stat_data prop);
+// ----------------------------------------------------------------------------
 native int rp_GetClientJobID(int client);										/* return le numéro du job auquel il appartient. 1==police, 11==hosto, 21==mcdo, etc --> http://www.ts-x.eu/index.php?page=roleplay&game=csgo&sub=job&id=1 */
 native int rp_GetClientGroupID(int client);									/* return le numéro du groupe auquel il appartient. 1==SPQR, 11==SMURF, etc --> https://www.ts-x.eu/index.php?page=roleplay&game=csgo&sub=group&id=1 */
 native int rp_GetClientPvPBonus(int client, rp_capture_zone typeID);					/* Est-ce qu'un joueur à le droit à un bonus de type PVP ? typeID==> cap_nuclear, cap_tower, cap_villa */
@@ -623,5 +626,49 @@ enum quest_type_type {
 	quest_daily,
 	quest_weekly
 }
+enum int_stat_data {
+	i_Money_OnConnection,
 
+	i_MoneyEarned_Pay, // Salaire + vita + appart
+	i_MoneyEarned_Phone, // Telephone + valeur des items ramassés
+	i_MoneyEarned_Mission, // Missions + valeur des items ramassés
+	i_MoneyEarned_Sales, // Ventes ou Vols
+	i_MoneyEarned_Pickup,
+	i_MoneyEarned_CashMachine,
+
+	i_MoneySpent_Fines,
+	i_MoneySpent_Shop,
+	i_MoneySpent_Give,
+	i_MoneySpent_Stolen,
+
+	i_Sales,
+
+	i_Vitality_OnConnection,
+
+	i_LotoSpent,
+	i_LotoWon,
+
+	i_DrugPickedUp,
+	
+	i_Kills,
+	i_Deaths,
+
+	i_ItemUsed,
+	i_ItemUsedPrice,
+
+	i_PVP_OnConnection,
+
+	i_TotalBuild,
+
+	i_RunDistance,
+
+	i_JobSucess, // Mafia 18th Tueur 
+	i_JobFails,
+
+
+	i_LastDeathTimestamp,
+	i_LastKillTimestamp,
+
+	i_uStat_max
+};
 #include <rp_tools.inc>
