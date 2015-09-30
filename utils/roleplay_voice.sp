@@ -74,7 +74,11 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 			rp_SetClientBool(client, b_MaySteal, false);
 			CreateTimer(10.0, AllowStealing, client);
 		}
-
+		
+		if( !rp_GetClientBool(client, b_Crayon)) {
+			CRemoveTags(arg, strlen(arg)+1);
+		}
+		
 		CPrintToChatAll("{lightblue}%N{default} ({olive}ANNONCE{default}): %s", client, arg);
 		LogToGame("[TSX-RP] [ANNONCES] %L: %s", client, arg);
 
