@@ -49,6 +49,7 @@ enum competance {
 
 int g_iKillerPoint[65][competance_max];
 int g_iKillerPoint_stored[65][competance_max];
+int g_bShouldOpen[65];
 Handle g_vCapture = INVALID_HANDLE;
 Handle g_vConfigTueur = INVALID_HANDLE;
 Handle g_hTimer[65];
@@ -99,6 +100,8 @@ public void OnClientDisconnect(int client) {
 		SetContratFail(client);
 	}
 	
+	g_bShouldOpen[client] = false;
+	
 	for(int i=1; i<=MaxClients; i++) {
 		if( !IsValidClient(i) )
 			continue;
@@ -114,6 +117,8 @@ public void OnClientDisconnect(int client) {
 			}
 		}
 	}
+	
+	clearKidnapping(client);
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemContrat(int args) {
@@ -609,22 +614,14 @@ public Action SendToTueur(Handle timer, any client) {
 	}
 	
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vos ravisseurs vont vous libérer dans 6h. Mais vous pouvez tenter autre chose...");
-	// Setup menu
-	Handle menu = CreateMenu(eventKidnapping);
-	SetMenuTitle(menu, "Vous avez été enlevé! Que faire ?");
-	
-	AddMenuItem(menu, "pay", "Payer la rançon de 2500$");
-	AddMenuItem(menu, "free", "Tenter l'évasion");
-	AddMenuItem(menu, "cops", "Appeler la police");
-	AddMenuItem(menu, "crier", "Crier");
 	
 	g_hTimer[client] = CreateTimer(6*60.0, FreeKidnapping, client);
 	rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
 	rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
 	rp_HookEvent(client, RP_OnFrameSeconde, fwdFrameKidnap);
+	g_bShouldOpen[client] = true;
 	
-	SetMenuExitButton(menu, false);
-	DisplayMenu(menu, client, 180);
+	OpenKidnappingMenu(client);
 }
 void clearKidnapping(int client) {
 	rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
@@ -634,6 +631,7 @@ void clearKidnapping(int client) {
 	rp_SetClientInt(client, i_KidnappedBy, 0);
 	KillTimer(g_hTimer[client]);
 	g_hTimer[client] = null;
+	g_bShouldOpen[client] = false;
 }
 public Action fwdZoneChange(int client, int newZone, int oldZone) {
 	int newType = rp_GetZoneInt(newZone, zone_type_type);
@@ -756,6 +754,8 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 				
 				time += delay;
 			}
+			
+			g_bShouldOpen[client] = false;
 		}
 		else if( StrEqual( options, "cops", false) ) {
 			
@@ -786,14 +786,15 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 	}
 }
 void OpenKidnappingMenu(int client) {
-	
-	if( rp_ClientCanDrawPanel(client) ) {
+		
+	if( g_bShouldOpen[client] && rp_GetZoneInt( rp_GetPlayerZone(client), zone_type_type) == 41 && rp_ClientCanDrawPanel(client) ) {
 		Handle menu = CreateMenu(eventKidnapping);
 		SetMenuTitle(menu, "Vous avez été enlevé! Que faire ?");
 			
 		AddMenuItem(menu, "pay", "Payer la rançon de 2500$");
 		AddMenuItem(menu, "free", "Tenter l'évasion");
-		AddMenuItem(menu, "cops", "Appeler la police");			
+		AddMenuItem(menu, "cops", "Appeler la police");		
+		AddMenuItem(menu, "crier", "Crier");		
 		
 		SetMenuExitButton(menu, false);
 		DisplayMenu(menu, client, 180);
