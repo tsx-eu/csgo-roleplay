@@ -49,7 +49,7 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 	rp_Effect_Particle(client, "weapon_confetti_balloons", 10.0);
 	cooldown = 10.0;
 	
-	return Plugin_Handled;
+	return Plugin_Stop;
 }
 public Action Cmd_ItemStuffPvP(int args) {
 	int client = GetCmdArgInt(1);
