@@ -206,7 +206,7 @@ public void Cmd_ItemCutThrow_TOUCH(int rocket, int entity) {
 		if( StrContains(classname, "trigger_") == 0 )
 			return;
 		
-		if( IsValidClient(entity) ) {
+		if( IsValidClient(entity) && !rp_IsTutorialOver(entity) ) {
 			float dmg = float(rp_GetClientInt(attacker, i_KnifeTrain));
 			wpnCutDamage(entity, attacker, dmg);
 			rp_ClientDamage(entity, RoundFloat(dmg), attacker, "weapon_knife_throw");
