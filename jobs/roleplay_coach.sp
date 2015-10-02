@@ -48,7 +48,7 @@ public void OnPluginStart() {
 	for (int i = 1; i <= MaxClients; i++) 
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i); 
-	
+
 }
 	
 public void OnMapStart() {
@@ -57,6 +57,7 @@ public void OnMapStart() {
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_PostTakeDamageKnife, fwdWeapon);
+	rp_HookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
 }
 public void OnClientDisconnect(int client) {
 	removeShield(client);
@@ -546,4 +547,121 @@ public Action fwdNoFallDamage(int victim, int &attacker, int &inflictor, float &
 	}
 	
 	return Plugin_Continue;
+}
+// ----------------------------------------------------------------------------
+public Action fwdOnPlayerBuild(int client, float& cooldown){
+	if( rp_GetClientJobID(client) != 71 )
+		return Plugin_Continue;
+
+	int wep_id = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	char wep_name[32];
+	GetEdictClassname(wep_id, wep_name, 31);
+	if( StrContains(wep_name, "weapon_bayonet") != 0 && StrContains(wep_name, "weapon_knife") != 0 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez prendre votre couteau en main pour le modifier");
+		return Plugin_Handled;
+	}
+
+	Handle menu = CreateMenu(ModifyWeapon);
+	SetMenuTitle(menu, "Modifier le couteau");
+
+	if(rp_GetClientKnifeType(client) == ball_type_fire)
+		AddMenuItem(menu, "fire", "Changer pour un couteau incendiaire (50$)", ITEMDRAW_DISABLED);
+	else
+		AddMenuItem(menu, "fire", "Changer pour un couteau incendiaire (50$)");
+
+	if(rp_GetClientKnifeType(client) == ball_type_caoutchouc)
+		AddMenuItem(menu, "caoutchouc", "Changer pour un couteau en caoutchouc (50$)", ITEMDRAW_DISABLED);
+	else
+		AddMenuItem(menu, "caoutchouc", "Changer pour un couteau en caoutchouc (50$)");
+
+	if(rp_GetClientKnifeType(client) == ball_type_poison)
+		AddMenuItem(menu, "poison", "Changer pour un couteau empoisonné (50$)", ITEMDRAW_DISABLED);
+	else
+		AddMenuItem(menu, "poison", "Changer pour un couteau empoisonné (50$)");
+
+	if(rp_GetClientKnifeType(client) == ball_type_vampire)
+		AddMenuItem(menu, "vampire", "Changer pour un couteau vampirique (50$)", ITEMDRAW_DISABLED);
+	else
+		AddMenuItem(menu, "vampire", "Changer pour un couteau vampirique (50$)");
+
+	if(rp_GetClientKnifeType(client) == ball_type_antikevlar)
+		AddMenuItem(menu, "kevlar", "Changer pour un couteau anti kevlar (50$)", ITEMDRAW_DISABLED);
+	else
+		AddMenuItem(menu, "kevlar", "Changer pour un couteau anti kevlar (50$)");
+
+	if(rp_GetClientInt(client, i_KnifeTrain) == 100)
+		AddMenuItem(menu, "full", "Me mettre à 100 niveaux d'entrainement (0$)", ITEMDRAW_DISABLED);
+	else{
+		char tmp[64];
+		Format(tmp, sizeof(tmp), "Me mettre à 100 niveaux d'entrainement (%i$)", (100 - rp_GetClientInt(client, i_KnifeTrain))*10 );
+		AddMenuItem(menu, "full", tmp);
+	}
+
+	DisplayMenu(menu, client, 60);
+	return Plugin_Handled;
+}
+
+public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
+	#if defined DEBUG
+	PrintToServer("ModifyWeapon Menu");
+	#endif
+
+	if (p_oAction == MenuAction_Select) {
+		char szMenuItem[32];
+		if (GetMenuItem(p_hItemMenu, p_iParam2, szMenuItem, sizeof(szMenuItem))){
+
+			int wep_id = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+			char wep_name[32];
+			int price = 50;
+			GetEdictClassname(wep_id, wep_name, 31);
+
+			if( StrContains(wep_name, "weapon_bayonet") != 0 && StrContains(wep_name, "weapon_knife") != 0 ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez prendre une arme en main pour la modifier");
+				return;
+			}
+
+			if(StrEqual(szMenuItem, "full")){
+				price = (100 - rp_GetClientInt(client, i_KnifeTrain))*10;
+				if((rp_GetClientInt(client, i_Bank)+rp_GetClientInt(client, i_Money)) >= price){
+					rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money)-price);
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre entrainement au couteau est maintenant maximal.");
+					rp_SetClientInt(client, i_KnifeTrain, 100);
+				}
+				else{
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas assez d'argent.");
+					return;
+				}
+			}
+			else if((rp_GetClientInt(client, i_Bank)+rp_GetClientInt(client, i_Money)) >= price){
+				rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money)-price);
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} La modification à été appliquée à votre couteau.");
+				if(StrEqual(szMenuItem, "fire")){
+					rp_SetClientKnifeType(client, ball_type_fire);
+				}
+				else if(StrEqual(szMenuItem, "caoutchouc")){
+					rp_SetClientKnifeType(client, ball_type_caoutchouc);
+				}
+				else if(StrEqual(szMenuItem, "poison")){
+					rp_SetClientKnifeType(client, ball_type_poison);
+				}
+				else if(StrEqual(szMenuItem, "vampire")){
+					rp_SetClientKnifeType(client, ball_type_vampire);
+				}
+				else if(StrEqual(szMenuItem, "kevlar")){
+					rp_SetClientKnifeType(client, ball_type_antikevlar);
+				}
+			}
+			else{
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas assez d'argent.");
+				return;
+			}
+
+			rp_SetJobCapital( 71, rp_GetJobCapital(71)+price );
+			FakeClientCommand(client, "say /build");
+		}
+	}
+	else if (p_oAction == MenuAction_End) {
+		CloseHandle(p_hItemMenu);
+	}
+
 }
