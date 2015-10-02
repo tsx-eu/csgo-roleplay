@@ -165,9 +165,7 @@ public void Q5_Done(int objectiveID, int client) {
 	menu.ExitButton = false;
 	menu.Display(client, 30);
 	
-	rp_ClientGiveItem(client, 64); // [PvP] M4A1-S.
-	
-	char item[64]; rp_GetItemData(64, item_type_name, item, sizeof(item)); rp_ClientGiveItem(client, 64);
+	char item[64]; rp_GetItemData(64, item_type_name, item, sizeof(item)); rp_ClientGiveItem(client, 64); // [PvP] M4A1-S.
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu: %s", item);
 	
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
