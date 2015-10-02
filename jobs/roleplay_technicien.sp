@@ -380,12 +380,12 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 	int ent = job == 221 ? BuildingBigCashMachine(client) : BuildingCashMachine(client);
 	if( ent > 0 ) {
 		switch(job){
-			case 221: cooldown = 60;
-			case 222: cooldown = 10;
-			case 223: cooldown = 15;
-			case 224: cooldown = 20;
-			case 225: cooldown = 25;
-			default: cooldown = 30;
+			case 221: cooldown = 60.0;
+			case 222: cooldown = 10.0;
+			case 223: cooldown = 15.0;
+			case 224: cooldown = 20.0;
+			case 225: cooldown = 25.0;
+			default: cooldown = 30.0;
 		}
 	}
 	else {
