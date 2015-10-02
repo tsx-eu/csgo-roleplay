@@ -680,6 +680,10 @@ public Action Cmd_Jail(int client) {
 	
 	if( rp_GetZoneInt(Czone, zone_type_type) == 101 && (job == 101 || job == 102 || job == 103 || job == 104 || job == 105 || job == 106) ) {
 
+		if(job == 106 && GetClientTeam(target) == CS_TEAM_CT ){
+			ACCESS_DENIED(client);
+		}
+
 		int maxAmount = 0;
 		switch( job ) {
 			case 101: maxAmount = 1000;		// Président
