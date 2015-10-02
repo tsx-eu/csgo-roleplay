@@ -376,10 +376,17 @@ public Action Cmd_ItemCash(int args) {
 public Action fwdOnPlayerBuild(int client, float& cooldown){
 	if( rp_GetClientJobID(client) != 221 )
 		return Plugin_Continue;
-	
-	int ent = rp_GetClientInt(client, i_Job) == 221 ? BuildingBigCashMachine(client) : BuildingCashMachine(client);
+	int job = rp_GetClientInt(client, i_Job);
+	int ent = job == 221 ? BuildingBigCashMachine(client) : BuildingCashMachine(client);
 	if( ent > 0 ) {
-		cooldown = 30.0;
+		switch(job){
+			case 221: cooldown = 60;
+			case 222: cooldown = 10;
+			case 223: cooldown = 15;
+			case 224: cooldown = 20;
+			case 225: cooldown = 25;
+			default: cooldown = 30;
+		}
 	}
 	else {
 		cooldown = 3.0;
