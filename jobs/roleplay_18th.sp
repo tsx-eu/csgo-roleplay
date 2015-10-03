@@ -39,8 +39,14 @@ int g_iWeaponStolen[2049];
 int g_iStolenAmountTime[65];
 
 int g_cBeam, g_cGlow;
+
+forward void RP_On18thStealWeapon(int client, int victim, int weaponID);
+Handle g_RP_On18thStealWeapon;
+
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
+	g_RP_On18thStealWeapon = CreateGlobalForward("RP_On18thStealWeapon", ET_Event, Param_Cell, Param_Cell, Param_Cell);
+	
 	RegServerCmd("rp_item_piedbiche", 	Cmd_ItemPiedBiche,		"RP-ITEM",	FCVAR_UNREGISTERED);	
 	RegServerCmd("rp_item_picklock", 	Cmd_ItemPickLock,		"RP-ITEM",	FCVAR_UNREGISTERED); 
 	
@@ -508,6 +514,12 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 			int cpt = rp_GetRandomCapital(181);
 			rp_SetJobCapital(181, (rp_GetJobCapital(181) +  (price/2) ) );
 			rp_SetJobCapital(cpt, (rp_GetJobCapital(cpt) -  (price/2) ) );
+			
+			Call_StartForward(g_RP_On18thStealWeapon);
+			Call_PushCell(client);
+			Call_PushCell(target);
+			Call_PushCell(wepid);
+			Call_Finish();
 				
 		}
 		else {

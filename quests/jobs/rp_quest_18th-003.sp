@@ -47,6 +47,11 @@ float g_flLocation[5][3] = {
 	{1862.8, -2407.6, -940.2}
 };
 
+// ---- TEST
+public void RP_On18thStealWeapon(int client, int victim, int weaponID) {
+	PrintToChatAll("%N vient de voler %d à %N", client, weaponID, victim);
+}
+// ---- TEST
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	
