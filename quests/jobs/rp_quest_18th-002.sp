@@ -30,6 +30,7 @@
 #define	QUEST_RESUME1	"Voler une voiture de police"
 #define	QUEST_RESUME2	"Raporter la voiture au garage"
 #define	QUEST_RESUME3	"Déposer l'argent à la banque"
+#define QUEST_ITEM		236
 
 public Plugin myinfo = {
 	name = "Quête: Trafficant de voiture", author = "KoSSoLaX",
@@ -86,10 +87,9 @@ public void Q1_Start(int objectiveID, int client) {
 public void Q1_Frame(int objectiveID, int client) {
 	
 	g_iDuration[client]--;
-	int wep = Client_GetActiveWeapon(client);
 	int nearest = nearestVehicle(client);
 	
-	if( wep > 0 && rp_GetWeaponStorage(wep) == true ) {
+	if( Client_GetVehicle(client) == nearest ) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else if( g_iDuration[client] <= 0 ) {
@@ -189,7 +189,7 @@ public void Q3_End(int objectiveID, int client) {
 	menu.ExitButton = false;
 	menu.Display(client, 30);
 	
-	char item[64]; rp_GetItemData(64, item_type_name, item, sizeof(item)); rp_ClientGiveItem(client, 236); // [PvP] AK-47
+	char item[64]; rp_GetItemData(QUEST_ITEM, item_type_name, item, sizeof(item)); rp_ClientGiveItem(client, QUEST_ITEM); // [PvP] AK-47
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu: %s", item);
 }
 public void Q1_Abort(int objectiveID, int client) {

@@ -23,17 +23,17 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
-#define QUEST_UNIQID	"18th-002"
-#define	QUEST_NAME		"Vol de voiture"
+#define QUEST_UNIQID	"18th-003"
+#define	QUEST_NAME		"Collecte des déchets"
 #define	QUEST_TYPE		quest_daily
 #define	QUEST_JOBID		181
 #define	QUEST_RESUME1	"Récupérer le colis"
 #define	QUEST_RESUME2	"Apporter les colis à votre planque"
-
+#define QUEST_ITEM		236
 
 public Plugin myinfo = {
-	name = "Quête: Trafficant de voiture", author = "KoSSoLaX",
-	description = "RolePlay - Quête 18th: Trafficant de voiture",
+	name = "Quête: Collecte des déchets", author = "KoSSoLaX",
+	description = "RolePlay - Quête 18th: Collecte des déchets",
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
@@ -47,11 +47,6 @@ float g_flLocation[5][3] = {
 	{1862.8, -2407.6, -940.2}
 };
 
-// ---- TEST
-public void RP_On18thStealWeapon(int client, int victim, int weaponID) {
-	PrintToChatAll("%N vient de voler %d à %N", client, weaponID, victim);
-}
-// ---- TEST
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	
@@ -119,8 +114,8 @@ public void Q1_Frame(int objectiveID, int client) {
 		rp_QuestStepComplete(client, objectiveID);
 		
 		int cap = rp_GetRandomCapital(181);
-		rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 1000);
-		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 1000);
+		rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 500);
+		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 500);
 	}
 	else if( g_iDuration[client] <= 0 ) {
 		rp_QuestStepFail(client, objectiveID);
@@ -199,10 +194,6 @@ public void Q3_End(int objectiveID, int client) {
 	
 	Q1_Abort(objectiveID, client);
 	
-	int cap = rp_GetRandomCapital(91);
-	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 5000);
-	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 5000);
-	
 	Menu menu = new Menu(MenuNothing);
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
@@ -213,7 +204,7 @@ public void Q3_End(int objectiveID, int client) {
 	menu.ExitButton = false;
 	menu.Display(client, 30);
 	
-	char item[64]; rp_GetItemData(64, item_type_name, item, sizeof(item)); rp_ClientGiveItem(client, 236); // [PvP] AK-47
+	char item[64]; rp_GetItemData(QUEST_ITEM, item_type_name, item, sizeof(item)); rp_ClientGiveItem(client, QUEST_ITEM); // [PvP] AK-47
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu: %s", item);
 }
 // ----------------------------------------------------------------------------
