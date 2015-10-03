@@ -175,7 +175,7 @@ public void Q3_End(int objectiveID, int client) {
 	
 	Q1_Abort(objectiveID, client);
 	
-	int cap = rp_GetRandomCapital(91);
+	int cap = rp_GetRandomCapital(181);
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 5000);
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 5000);
 	
@@ -184,7 +184,7 @@ public void Q3_End(int objectiveID, int client) {
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Les 18th te remercie pour ta rapidité d'action", ITEMDRAW_DISABLED);
-	menu.AddItem("", "et t'offre: [PvP] M4A1-S.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "et t'offre: [PvP] AK-47.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 30);
