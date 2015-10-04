@@ -124,14 +124,14 @@ public Action Cmd_ItemVehicle(int args) {
 	int max = 2;
 	
 	if( rp_GetZoneBit( rp_GetPlayerZone(client) ) & BITZONE_PEACEFULL ) {
-		ITEM_CANCEL(client, item_id);
+		CAR_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit où vous êtes.");
 		return;
 	}
 	
 	if( StrContains(arg1, "crownvic_cvpi") >  0 ) {
 		if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
-			ITEM_CANCEL(client, item_id);
+			CAR_CANCEL(client, item_id);
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est réservé aux forces de l'ordre.");
 			return;
 		}
@@ -150,7 +150,7 @@ public Action Cmd_ItemVehicle(int args) {
 	}
 	
 	if( count >= GetConVarInt(g_hMAX_CAR) ) {
-		ITEM_CANCEL(client, item_id);
+		CAR_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il y a trop de voiture sur le serveur pour l'instant.");
 		return;			
 	}
@@ -166,7 +166,7 @@ public Action Cmd_ItemVehicle(int args) {
 	
 	int car = rp_CreateVehicle(vecOrigin, vecAngles, arg1, skinid, client);
 	if( !car ) {
-		ITEM_CANCEL(client, item_id);
+		CAR_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a pas assez de place ici.");
 	}
 	
@@ -203,6 +203,15 @@ public void VehicleTouch(int car, int entity) {
 			rp_ScheduleEntityInput(entity, 3.1, "Lock");
 			
 		}
+	}
+}
+public void CAR_CANCEL(int client,int item_id){
+	if(item_id == -1){
+		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank)+500);
+		rp_SetJobCapital( 51, rp_GetJobCapital(51)-500 );
+	}
+	else{
+		ITEM_CANCEL(client, item_id);
 	}
 }
 public Action Cmd_ItemVehicleStuff(int args) {
