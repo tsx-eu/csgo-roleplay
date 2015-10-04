@@ -118,6 +118,7 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
 	rp_HookEvent(client, RP_PreGiveDamage, fwdDmg);
 	rp_HookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);
+	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);
 	g_TribunalSearch[client][tribunal_search_status] = -1;
 }
 public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
@@ -2646,6 +2647,42 @@ public Action fwdDmg(int attacker, int victim, float& damage) {
 		rp_SetClientInt(attacker, i_LastAgression, GetTime());
 
 	return Plugin_Continue;
+}
+public Action fwdUse(int client){
+	int zone = rp_GetPlayerZone(client);
+	int job = rp_GetClientJobID(client);
+	if(zone != 14)
+		return Plugin_Continue;
+	if(job != 1 && job != 101)
+		return Plugin_Continue;
+
+	Handle menu = CreateMenu(menuPoliceCar);
+	SetMenuTitle(menu, "Voitures de police");
+	AddMenuItem(menu, "buycar", "Acheter une voiture (500$)");
+	DisplayMenu(menu, client, 60);
+	return Plugin_Handled;
+}
+public int menuPoliceCar(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
+	#if defined DEBUG
+	PrintToServer("menuPoliceCar");
+	#endif
+
+	if (p_oAction == MenuAction_Select) {
+		char szMenuItem[32];
+		
+		if (GetMenuItem(p_hItemMenu, p_iParam2, szMenuItem, sizeof(szMenuItem))) {
+			if(StrEqual(szMenuItem, "buycar")){
+				if(rp_GetClientInt(client, i_Bank) + rp_GetClientInt(client, i_Money) >= 500){
+					rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - 500);
+					rp_SetJobCapital( 51, rp_GetJobCapital(51)+500 );
+					ServerCommand("rp_item_vehicle models/sentry/07crownvic_cvpi.mdl 0 %i -1", client);
+				}
+			}
+		}
+	}
+	else if (p_oAction == MenuAction_End) {
+		CloseHandle(p_hItemMenu);
+	}
 }
 // ----------------------------------------------------------------------------
 void StripWeapons(int client ) {
