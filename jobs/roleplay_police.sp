@@ -2673,9 +2673,7 @@ public int menuPoliceCar(Handle p_hItemMenu, MenuAction p_oAction, int client, i
 				if(rp_GetClientInt(client, i_Bank) + rp_GetClientInt(client, i_Money) >= 500){
 					rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - 500);
 					rp_SetJobCapital( 51, rp_GetJobCapital(51)+500 );
-					char cmd[256];
-					Format(cmd, sizeof(cmd), "rp_item_vehicle models/sentry/07crownvic_cvpi.mdl 0 %i -1", client);
-					ServerCommand(cmd);
+					ServerCommand("rp_item_vehicle models/sentry/07crownvic_cvpi.mdl 0 %i -1", client);
 				}
 			}
 		}
