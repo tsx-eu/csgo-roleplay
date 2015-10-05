@@ -137,7 +137,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		LogToGame("[TSX-RP] [VOL] %L a vole %L 1 %s", client, target, tmp);
 		
 		GetClientAuthId(client, AuthId_Engine, tmp, sizeof(tmp), false);
-		Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_sell` (`id`, `steamid`, `job_id`, `timestamp`, `item_type`, `item_id`, `item_name`, `amount`) VALUES (NULL, '%s', '%i', '%i', '4', '%i', '%s', '%i');",
+		Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_sell` (`id`, `steamid`, `job_id`, `timestamp`, `item_type`, `item_id`, `item_name`, `amount`) VALUES (NULL, '%s', '%i', '%i', '2', '%i', '%s', '%i');",
 			tmp, rp_GetClientJobID(client), GetTime(), i, "Vol: Objet", amount);
 
 		SQL_TQuery( rp_GetDatabase(), SQL_QueryCallBack, szQuery);
