@@ -89,6 +89,10 @@ public void Q1_Frame(int objectiveID, int client) {
 	int wep = Client_GetActiveWeapon(client);
 	int nearest = nearestWeapon(client);
 	
+	int owner = Weapon_GetOwner(nearest);
+	if( owner > 0 )
+		nearest = owner;
+	
 	if( wep > 0 && rp_GetWeaponStorage(wep) == true ) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
@@ -127,8 +131,10 @@ public void Q2_Frame(int objectiveID, int client) {
 	float vec[3];
 	GetClientAbsOrigin(client, vec);
 	
+	int wep = Client_GetActiveWeapon(client);
 	g_iDuration[client]--;
-	if( rp_GetPlayerZone(client) == zoneDest ) {
+	
+	if( wep > 0 && rp_GetWeaponStorage(wep) == true && rp_GetPlayerZone(client) == zoneDest ) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else if( g_iDuration[client] <= 0 ) {

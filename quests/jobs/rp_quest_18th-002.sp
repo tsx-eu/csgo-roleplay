@@ -128,7 +128,10 @@ public void Q2_Frame(int objectiveID, int client) {
 	GetClientAbsOrigin(client, vec);
 	
 	g_iDuration[client]--;
-	if( rp_GetPlayerZone(client) == zoneDest ) {
+	
+	int nearest = nearestVehicle(client);
+	
+	if( Client_GetVehicle(client) == nearest && rp_GetPlayerZone(client) == zoneDest ) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else if( g_iDuration[client] <= 0 ) {
@@ -224,7 +227,7 @@ int countVehicle() {
 int nearestVehicle(int client) {
 	float vecOrigin[3], vecDestination[3], vecMaxDIST = 999999999.9, tmp;
 	char classname[64];
-	int val = -1, owner;
+	int val = -1;
 	Entity_GetAbsOrigin(client, vecOrigin);
 	
 	for (int i = MaxClients; i <= 2048; i++) {

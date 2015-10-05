@@ -204,17 +204,22 @@ public Action Cmd_ItemPiedBiche(int args) {
 		ITEM_CANCEL(client, item_id);
 		return Plugin_Handled;
 	}
-	if( rp_GetClientInt(client, i_Job) >= 184 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes pas assez haut gradé.");
-		return Plugin_Handled;
-	}	
-		
+	
 	int target = GetClientTarget(client);
 	if( !rp_IsValidVehicle(target) ) {
 		ITEM_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser une voiture.");
 		return Plugin_Handled;
 	}
+	char classname[64];
+	GetEdictClassname(target, classname, sizeof(classname));
+	if( StrContains(classname, "07crownvic_cvpi") == -1 ) {
+		if( rp_GetClientInt(client, i_Job) >= 184 ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes pas assez haut gradé.");
+			return Plugin_Handled;
+		}
+	}
+	
 	if( rp_GetZoneBit( rp_GetPlayerZone(client) ) & BITZONE_BLOCKSTEAL || rp_GetZoneBit( rp_GetPlayerZone(target) ) & BITZONE_BLOCKSTEAL ) {
 		ITEM_CANCEL(client, item_id);
 		ACCESS_DENIED(client);
