@@ -179,10 +179,14 @@ int getRandomLocation() {
 		
 		tmp = StringToInt(buffer);
 		
+		if( tmp == 91 || tmp == 101 || tmp == 181 )
+			continue;
+		if( tmp == 181 )
+			continue;
 		if( tmp == 101 )
 			continue;
 		
-		if( ( tmp>0 && tmp != 91 && tmp != 181 ) || StrContains(buffer, "appart_") == 0 ) {
+		if( tmp>0 || StrContains(buffer, "appart_") == 0 ) {
 			stack[cpt++] = i;
 		}
 	}
