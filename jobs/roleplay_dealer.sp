@@ -650,7 +650,7 @@ public Action fwdOnPlayerUse(int client) {
 			rp_ClientGiveItem(client, itemID, max - mnt);
 			rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez récupéré %i %s.", max - mnt, tmp);
-			rp_SetClientStat(target, i_DrugPickedUp, rp_GetClientStat(target, i_DrugPickedUp) + (max - mnt));
+			rp_SetClientStat(client, i_DrugPickedUp, rp_GetClientStat(client, i_DrugPickedUp) + (max - mnt));
 			FakeClientCommand(client, "say /item");
 		}
 	}
