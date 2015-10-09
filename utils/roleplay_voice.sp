@@ -440,10 +440,3 @@ public Action ClientTargetTracer(Handle timer, Handle dp) {
 	
 	return Plugin_Continue;
 }
-
-public Action AllowStealing(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("AllowStealing");
-	#endif
-	rp_SetClientBool(client, b_MaySteal, true);
-}
