@@ -635,13 +635,12 @@ enum int_stat_data {
 	i_MoneyEarned_Sales, // Ventes ou Vols
 	i_MoneyEarned_Pickup,
 	i_MoneyEarned_CashMachine,
+	i_MoneyEarned_Give,
 
 	i_MoneySpent_Fines,
 	i_MoneySpent_Shop,
 	i_MoneySpent_Give,
 	i_MoneySpent_Stolen,
-
-	i_Sales,
 
 	i_Vitality_OnConnection,
 

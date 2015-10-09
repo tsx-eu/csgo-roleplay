@@ -267,6 +267,7 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 				if((rp_GetClientInt(client, i_Bank)+rp_GetClientInt(client, i_Money)) >= price){
 					rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money)-price);
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} La modification à été appliqué à votre arme.");	
+					rp_SetClientStat(client, i_TotalBuild, rp_GetClientStat(client, i_TotalBuild)+1);
 				}
 				else{
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas assez d'argent.");

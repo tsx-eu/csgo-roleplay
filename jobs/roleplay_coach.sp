@@ -595,8 +595,15 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 		char tmp[64];
 		Format(tmp, sizeof(tmp), "Me mettre à 100 niveaux d'entrainement (%i$)", (100 - rp_GetClientInt(client, i_KnifeTrain))*10 );
 		AddMenuItem(menu, "full", tmp);
-	}
+	}	
 
+	if(rp_GetClientInt(client, i_Esquive) == 100)
+		AddMenuItem(menu, "esquive", "Me mettre à 100 niveaux d'esquive (0$)", ITEMDRAW_DISABLED);
+	else{
+		char tmp[64];
+		Format(tmp, sizeof(tmp), "Me mettre à 100 niveaux d'esquive (%i$)", (100 - rp_GetClientInt(client, i_Esquive))*10 );
+		AddMenuItem(menu, "esquive", tmp);
+	}
 	DisplayMenu(menu, client, 60);
 	return Plugin_Handled;
 }
@@ -631,6 +638,18 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas assez d'argent.");
 					return;
 				}
+			}			
+			else if(StrEqual(szMenuItem, "esquive")){
+				price = (100 - rp_GetClientInt(client, i_Esquive))*10;
+				if((rp_GetClientInt(client, i_Bank)+rp_GetClientInt(client, i_Money)) >= price){
+					rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money)-price);
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre esquive est maintenant maximale.");
+					rp_SetClientInt(client, i_Esquive, 100);
+				}
+				else{
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas assez d'argent.");
+					return;
+				}
 			}
 			else if((rp_GetClientInt(client, i_Bank)+rp_GetClientInt(client, i_Money)) >= price){
 				rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money)-price);
@@ -655,7 +674,7 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas assez d'argent.");
 				return;
 			}
-
+			rp_SetClientStat(client, i_TotalBuild, rp_GetClientStat(client, i_TotalBuild)+1);
 			rp_SetJobCapital( 71, rp_GetJobCapital(71)+price );
 			FakeClientCommand(client, "say /build");
 		}

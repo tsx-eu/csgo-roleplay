@@ -379,6 +379,7 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 	int job = rp_GetClientInt(client, i_Job);
 	int ent = job == 221 ? BuildingBigCashMachine(client) : BuildingCashMachine(client);
 	if( ent > 0 ) {
+		rp_SetClientStat(client, i_TotalBuild, rp_GetClientStat(client, i_TotalBuild)+1);
 		switch(job){
 			case 221: cooldown = 60.0;
 			case 222: cooldown = 10.0;

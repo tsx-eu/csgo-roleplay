@@ -170,6 +170,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		if( amount > money )
 			amount = money;
 			
+		rp_SetClientStat(target, i_MoneySpent_Stolen, rp_GetClientStat(target, i_MoneySpent_Stolen) + amount);
 		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + amount);
 		rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amount);
 		rp_SetClientInt(client, i_LastVolAmount, amount);
@@ -358,6 +359,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 		return Plugin_Handled;
 	}
 		
+	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) + 1);
 	float vecTarget[3];
 	GetClientAbsOrigin(client, vecTarget);
 	TE_SetupBeamRingPoint(vecTarget, 10.0, 500.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, {255, 0, 0, 200}, 10, 0);
@@ -436,7 +438,8 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 			}
 		}
 	}
-		
+	rp_SetClientStat(client, i_JobSucess, rp_GetClientStat(client, i_JobSucess) + 1);
+	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} %d billets ont été sorti du distributeur.", rand);
 	int amount = 0;
 	while(rand >= 1 ) {
@@ -533,6 +536,7 @@ public Action Cmd_ItemPickLock(int args) {
 	if( fast )
 		time = 1.5;
 	
+	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) + 1);
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, time);
 	ServerCommand("sm_effect_panel %d %f \"Tentative de crochetage de la porte...\"", client, time);
 	
@@ -645,7 +649,9 @@ public Action ItemPickLockOver_maffia(Handle timer, Handle dp) {
 		TE_SendToAll();
 		CreateTimer(30.0, TaskResetDoor, doorID);
 	}
-	
+
+	rp_SetClientStat(client, i_JobSucess, rp_GetClientStat(client, i_JobSucess) + 1);
+	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} La porte a été ouverte.");
 	
 	// TODO:

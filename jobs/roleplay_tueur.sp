@@ -164,6 +164,9 @@ public Action Cmd_ItemContrat(int args) {
 	rp_HookEvent(vendeur, RP_OnFrameSeconde, fwdFrame);
 	
 	rp_HookEvent(vendeur, RP_PreGiveDamage, fwdDamage);
+
+	rp_SetClientStat(vendeur, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
+
 	
 	SDKHook(vendeur, SDKHook_WeaponDrop, OnWeaponDrop);
 	
@@ -198,6 +201,8 @@ public Action fwdFrame(int client) {
 }
 public Action fwdTueurKill(int client, int attacker, float& respawn) {
 	if( rp_GetClientInt(attacker, i_ToKill) == client && rp_GetClientInt(client, i_KidnappedBy) != attacker ) {
+		rp_SetClientStat(attacker, i_JobSucess, rp_GetClientStat(client, i_JobSucess) + 1);
+		rp_SetClientStat(attacker, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
 		CPrintToChat(attacker, "{lightblue}[TSX-RP]{default} Vous avez rempli votre contrat pour avoir tué %N.", client);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Un mercenaire a rempli son contrat sur vous.");
 		rp_SetClientInt(attacker, i_AddToPay, rp_GetClientInt(attacker, i_AddToPay) + 100);

@@ -650,7 +650,7 @@ public Action fwdOnPlayerUse(int client) {
 			rp_ClientGiveItem(client, itemID, max - mnt);
 			rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez récupéré %i %s.", max - mnt, tmp);
-			
+			rp_SetClientStat(client, i_DrugPickedUp, rp_GetClientStat(client, i_DrugPickedUp) + (max - mnt));
 			FakeClientCommand(client, "say /item");
 		}
 	}
@@ -802,7 +802,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 10.0);
 		
 	ServerCommand("sm_effect_panel %d 10.0 \"Déracinage d'un plant...\"", client);
-	
+	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) + 1);
 	
 	
 	CreateTimer(10.0, ItemPiedBicheOver, client);
@@ -844,6 +844,8 @@ public Action ItemPiedBicheOver(Handle timer, any client) {
 	if( rp_GetItemInt(item_id, item_type_prix) < 200 )
 		amount = 10;
 	
+	rp_SetClientStat(client, i_JobSucess, rp_GetClientStat(client, i_JobSucess) + 1);
+	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
 	rp_GetItemData(item_id, item_type_name, tmp, sizeof(tmp));
 
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez trouvé %d %s", amount, tmp);

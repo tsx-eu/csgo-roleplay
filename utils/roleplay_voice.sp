@@ -378,6 +378,12 @@ public int MenuJobs3(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 	if (p_oAction == MenuAction_Select) {
 		char szMenuItem[16];
 		if (GetMenuItem(p_hItemMenu, p_iParam2, szMenuItem, sizeof(szMenuItem))){
+			if(!rp_GetClientBool(client, b_MaySteal)){
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez attendre encore quelques instants avant d'envoyer une demande");
+				return;
+			}
+			rp_SetClientBool(client, b_MaySteal, false);
+			CreateTimer(10.0, AllowStealing, client);
 			char data[2][32], tmp[128];
 			ExplodeString(szMenuItem, "_", data, sizeof(data), sizeof(data[]));
 			int target = StringToInt(data[0]);

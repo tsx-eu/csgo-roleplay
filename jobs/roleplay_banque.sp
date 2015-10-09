@@ -411,6 +411,7 @@ public Action fwdOnPlayerBuild(int client, float& cooldown) {
 	int ent = BuidlingATM(client);
 	
 	if( ent > 0 ) {
+		rp_SetClientStat(client, i_TotalBuild, rp_GetClientStat(client, i_TotalBuild)+1);
 		rp_ScheduleEntityInput(ent, 120.0, "Kill");
 		cooldown = 120.0;
 	}
