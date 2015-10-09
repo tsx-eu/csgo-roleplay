@@ -287,6 +287,8 @@ public Action Cmd_Amende(int client, const char[] arg) {
 
 	rp_SetJobCapital(101, ( rp_GetJobCapital(101) + (amount/4)*3 ) );
 
+	rp_SetClientStat(client, i_MoneyEarned_Sales, rp_GetClientStat(client, i_MoneyEarned_Sales) + (amount / 4));
+	rp_SetClientStat(client, i_MoneySpent_Fines, rp_GetClientStat(client, i_MoneySpent_Fines) + amount);
 	rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) + (amount / 4));
 	rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amount);
 
@@ -1822,6 +1824,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 		if( rp_GetClientInt(target, i_Money) >= amende || (
 			(rp_GetClientInt(target, i_Money)+rp_GetClientInt(target, i_Bank)) >= amende*250 && amende <= 2500) ) {
 			
+			rp_SetClientStat(target, i_MoneySpent_Fines, rp_GetClientStat(target, i_MoneySpent_Fines) + amende);
 			rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amende);
 			rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + (amende / 4));
 			rp_SetJobCapital(jobID, rp_GetJobCapital(jobID) + (amende/4 * 3));
@@ -1965,6 +1968,7 @@ public int eventPayForLeaving(Handle menu, MenuAction action, int client, int pa
 			return;
 		
 		int time_to_spend = 0;
+		rp_SetClientStat(client, i_MoneySpent_Fines, rp_GetClientStat(client, i_MoneySpent_Fines) + amende);
 		rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - amende);
 		rp_SetClientInt(target, i_AddToPay, rp_GetClientInt(target, i_AddToPay) + (amende / 4));
 		rp_SetJobCapital(jobID, rp_GetJobCapital(jobID) + (amende/4 * 3));
@@ -2306,6 +2310,7 @@ public Action fwdOnPlayerBuild(int client, float& cooldown) {
 	int ent = BuildingBarriere(client);
 	
 	if(ent > 0){
+		rp_SetClientStat(client, i_TotalBuild, rp_GetClientStat(client, i_TotalBuild)+1);
 		rp_ScheduleEntityInput(ent, 120.0, "Kill");
 		cooldown = 7.0;
 	}

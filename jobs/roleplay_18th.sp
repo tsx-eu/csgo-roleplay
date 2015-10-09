@@ -85,6 +85,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		if( amount > money )
 			amount = money;
 			
+		rp_SetClientStat(target, i_MoneySpent_Stolen, rp_GetClientStat(target, i_MoneySpent_Stolen) + amount);
 		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + amount);
 		rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amount);
 		
@@ -233,6 +234,8 @@ public Action Cmd_ItemPiedBiche(int args) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler cette voiture sur un parking.");
 		return Plugin_Handled;
 	}
+
+	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) + 1);
 		
 	float vecTarget[3];
 	GetClientAbsOrigin(client, vecTarget);
@@ -316,6 +319,8 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 		}
 	}
 	
+	rp_SetClientStat(client, i_JobSucess, rp_GetClientStat(client, i_JobSucess) + 1);
+	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
 	rp_ClientColorize(client);
 	rp_ClientReveal(client);
 	rp_SetClientBool(client, b_MaySteal, true);
@@ -409,6 +414,7 @@ public Action Cmd_ItemPickLock(int args) {
 		StealTime -= 0.4;
 	}
 	
+	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) + 1);
 	ServerCommand("sm_effect_particles %d Aura1 %d", client, RoundToCeil(StealTime));
 	
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, StealTime);
@@ -463,6 +469,7 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 		return Plugin_Handled;
 	}
 	
+
 	rp_SetClientBool(target, b_Stealing, false);
 	g_iStolenAmountTime[target]++;
 	CreateTimer(300.0, RemoveStealAmount, target);
@@ -537,7 +544,8 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 	
 	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
 	
-	
+	rp_SetClientStat(client, i_JobSucess, rp_GetClientStat(client, i_JobSucess) + 1);
+	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
 	LogToGame("[TSX-RP] [VOL-18TH] %L a vole %s de %L", client, wepname, target);
 	
 	RemovePlayerItem(target, wepid);

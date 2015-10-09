@@ -46,6 +46,7 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 	if( rp_GetClientJobID(client) != 171 )
 		return Plugin_Continue;
 	
+	rp_SetClientStat(client, i_TotalBuild, rp_GetClientStat(client, i_TotalBuild)+1);
 	rp_Effect_Particle(client, "weapon_confetti_balloons", 10.0);
 	cooldown = 10.0;
 	
@@ -125,6 +126,7 @@ public Action Cmd_ItemLoto(int args) {
 	}
 	int luck = 100;
 	
+	rp_SetClientStat(client, i_LotoSpent, rp_GetClientStat(client, i_LotoSpent) + amount);
 	if( rp_GetClientJobID(client) == 171 ) // Pas de cheat inter job.
 		luck += 40;
 	if( !rp_IsClientLucky(client) )
@@ -132,6 +134,7 @@ public Action Cmd_ItemLoto(int args) {
 	
 	if( Math_GetRandomInt(1, luck) == 42 ) {
 			
+		rp_SetClientStat(client, i_LotoWon, rp_GetClientStat(client, i_LotoWon) + (amount*100));
 		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) + (amount * 100));
 		rp_SetJobCapital(171, rp_GetJobCapital(171) - (amount*100));
 			
