@@ -604,16 +604,8 @@ public Action Cmd_ItemLube(int args){
 		return Plugin_Handled;
 	}
 	rp_SetClientBool(client, b_Lube, true);
-	CreateTimer(30.0, ItemLube_After, client);
 	rp_HookEvent(client, RP_PreHUDColorize, fwdLube, 30.0);
 	return Plugin_Handled;
-}
-public Action ItemLube_After(Handle timer, any client){
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemLube");
-	#endif
-
-	rp_SetClientBool(client, b_Lube, false);
 }
 
 public Action fwdLube(int client, int color[4]){
