@@ -302,6 +302,7 @@ enum bool_user_data {
 	b_IsMuteEvent,
 	b_IsNoPyj,
 	b_HasProtImmu,
+	b_HasQuest,
 	
 	b_udata_max
 };
