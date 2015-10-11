@@ -212,9 +212,10 @@ public Action Cmd_ItemPiedBiche(int args) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser une voiture.");
 		return Plugin_Handled;
 	}
-	char classname[64];
-	GetEdictClassname(target, classname, sizeof(classname));
-	if( StrContains(classname, "07crownvic_cvpi") == -1 ) {
+	char model[64];
+	Entity_GetModel(target, model, sizeof(model));
+	
+	if( StrContains(model, "07crownvic_cvpi") == -1 ) {
 		if( rp_GetClientInt(client, i_Job) >= 184 ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes pas assez haut gradé.");
 			return Plugin_Handled;
