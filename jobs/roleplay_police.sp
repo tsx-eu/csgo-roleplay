@@ -2661,10 +2661,13 @@ public Action fwdUse(int client){
 	if(job != 1 && job != 101)
 		return Plugin_Continue;
 
-	Handle menu = CreateMenu(menuPoliceCar);
-	SetMenuTitle(menu, "Voitures de police");
-	AddMenuItem(menu, "buycar", "Acheter une voiture (500$)");
-	DisplayMenu(menu, client, 60);
+	if( rp_ClientCanDrawPanel(client) ) {
+		Handle menu = CreateMenu(menuPoliceCar);
+		SetMenuTitle(menu, "Voitures de police");
+		AddMenuItem(menu, "buycar", "Acheter une voiture (500$)");
+		DisplayMenu(menu, client, 5);
+	}
+	
 	return Plugin_Handled;
 }
 public int menuPoliceCar(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
@@ -2674,6 +2677,8 @@ public int menuPoliceCar(Handle p_hItemMenu, MenuAction p_oAction, int client, i
 
 	if (p_oAction == MenuAction_Select) {
 		char szMenuItem[32];
+		if(rp_GetPlayerZone(client) != 14)
+			return;
 		
 		if (GetMenuItem(p_hItemMenu, p_iParam2, szMenuItem, sizeof(szMenuItem))) {
 			if(StrEqual(szMenuItem, "buycar")){
