@@ -109,7 +109,7 @@ public void OnPluginStart() {
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
 	
-	g_hForward_RP_OnClientTazedItem = CreateGlobalForward("RP_OnClientTazedItem", ET_Event, Param_Cell);
+	g_hForward_RP_OnClientTazedItem = CreateGlobalForward("RP_OnClientTazedItem", ET_Event, Param_Cell, Param_Cell);
 }
 public Action Cmd_SendToJail(int args) {
 	#if defined DEBUG
@@ -560,7 +560,8 @@ public Action Cmd_Tazer(int client) {
 			reward = 25;
 			if( rp_GetBuildingData(target, BD_started)+120 < GetTime() ) {
 				reward = 100;
-				doRP_OnClientTazedItem(client, reward);
+				if( owner != client )
+					doRP_OnClientTazedItem(client, reward);
 			}
 			
 			if( owner > 0 ) {
@@ -577,7 +578,8 @@ public Action Cmd_Tazer(int client) {
 			reward = 25;
 			if( rp_GetBuildingData(target, BD_started)+120 < GetTime() ) {
 				reward = 1500;
-				doRP_OnClientTazedItem(client, reward);
+				if( owner != client )
+					doRP_OnClientTazedItem(client, reward);
 			}
 			
 			if( owner > 0 ) {
@@ -593,7 +595,8 @@ public Action Cmd_Tazer(int client) {
 			reward = 100;
 			if( rp_GetBuildingData(target, BD_started)+120 < GetTime() ) {
 				reward = 1000;
-				doRP_OnClientTazedItem(client, reward);
+				if( owner != client )
+					doRP_OnClientTazedItem(client, reward);
 			}
 			
 			if( owner > 0 ) {

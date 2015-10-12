@@ -46,7 +46,9 @@ public void OnPluginStart() {
 		SetFailState("Erreur lors de la création de la quête %s %s", QUEST_UNIQID, QUEST_NAME);
 	
 	int i;
-	rp_QuestAddStep(g_iQuest, i++,	Q1_Start,	Q1_Frame,	Q1_Abort,	Q1_Abort);	
+	rp_QuestAddStep(g_iQuest, i++,	Q1_Start,	Q1_Frame,	Q1_Abort,	Q1_Abort);
+	
+	g_hDoing = CreateArray(MAXPLAYERS);
 }
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -58,8 +60,8 @@ public Action Cmd_Reload(int args) {
 public bool fwdCanStart(int client) {
 	if( rp_GetClientJobID(client) != QUEST_JOBID )
 		return false;
-	// TODO: Limiter uniquement si y a un total de minimum 5 machine+plant
-	return true;
+
+	return (countBlackMarket(client)>5);
 }
 public void Q1_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
@@ -80,11 +82,14 @@ public void Q1_Start(int objectiveID, int client) {
 public void Q1_Frame(int objectiveID, int client) {
 	g_iDuration[client]--;
 	
-	// TODO: Afficher un tazer sur le plant/machine la plus proche
 	if( g_iDuration[client] <= 0 ) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else {
+		int v = nearestBlackMarket(client);
+		if( v > 0 )
+			rp_Effect_BeamBox(client, v, NULL_VECTOR, 255, 255, 255);
+		
 		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s", QUEST_NAME, g_iDuration[client], QUEST_RESUME1);
 	}
 }
@@ -93,6 +98,7 @@ public void Q1_Abort(int objectiveID, int client) {
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
 }
 public void RP_OnClientTazedItem(int attacker, int reward) {
+	
 	int length = GetArraySize(g_hDoing);
 	for (int i = 0; i < length; i++) {
 		if( GetArrayCell(g_hDoing, i) == attacker ) {
@@ -112,4 +118,47 @@ public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
 		if( menu != INVALID_HANDLE )
 			CloseHandle(menu);
 	}
+}
+
+
+int countBlackMarket(int client) {
+	char classname[64];
+	int amount = 0;
+	
+	for (int i = MaxClients; i <= 2048; i++) {
+		if( !IsValidEdict(i) || !IsValidEntity(i) )
+			continue;
+		
+		GetEdictClassname(i, classname, sizeof(classname));
+		if( StrContains(classname, "rp_cashmachine_") == 0 || StrContains(classname, "rp_bigcashmachine_") == 0 ||  StrContains(classname, "rp_plant_") == 0 ) {
+			if( rp_GetBuildingData(i, BD_started)+120 < GetTime() && rp_GetBuildingData(i, BD_owner) != client )
+				amount++;
+		}
+	}
+	return amount;
+}
+int nearestBlackMarket(int client) {
+	float vecOrigin[3], vecDestination[3], vecMaxDIST = 999999999.9, tmp;
+	char classname[64];
+	int val = -1;
+	Entity_GetAbsOrigin(client, vecOrigin);
+	
+	for (int i = MaxClients; i <= 2048; i++) {
+		if( !IsValidEdict(i) || !IsValidEntity(i) )
+			continue;
+		
+		GetEdictClassname(i, classname, sizeof(classname));
+		if( StrContains(classname, "rp_cashmachine_") == 0 || StrContains(classname, "rp_bigcashmachine_") == 0 ||  StrContains(classname, "rp_plant_") == 0 ) {
+			if( rp_GetBuildingData(i, BD_started)+120 < GetTime() && rp_GetBuildingData(i, BD_owner) != client ) {
+			
+				Entity_GetAbsOrigin(i, vecDestination);
+				tmp = GetVectorDistance(vecOrigin, vecDestination);
+				if( tmp < vecMaxDIST ) {
+					vecMaxDIST = tmp;
+					val = i;
+				}
+			}
+		}
+	}
+	return val;
 }

@@ -100,6 +100,10 @@ public void Q1_Frame(int objectiveID, int client) {
 		rp_QuestStepFail(client, objectiveID);
 	}
 	else {
+		
+		if( nearest > 0 )
+			rp_Effect_BeamBox(client, nearest, NULL_VECTOR, 255, 255, 255);
+			
 		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s", QUEST_NAME, g_iDuration[client], QUEST_RESUME1);
 	}
 }
