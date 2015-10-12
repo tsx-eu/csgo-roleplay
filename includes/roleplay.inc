@@ -574,6 +574,7 @@ enum zone_type {
 	
 	zone_type_type,	
 	zone_type_bit,
+	zone_type_private,	
 	
 	zone_type_max
 };
