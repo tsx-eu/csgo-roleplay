@@ -87,6 +87,17 @@ enum tribunal_search_data {
 
 int g_TribunalSearch[MAXPLAYERS+1][tribunal_search_max];
 char g_szTribunal_DATA[65][tribunal_max][64];
+
+//forward RP_OnClientTazedItem(int attacker, int reward);
+Handle g_hForward_RP_OnClientTazedItem;
+
+void doRP_OnClientTazedItem(int client, int reward) {
+	Call_StartForward(g_hForward_RP_OnClientTazedItem);
+	Call_PushCell(client);
+	Call_PushCell(reward);
+	Call_Finish();
+}
+
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
 	RegConsoleCmd("sm_jugement", Cmd_Jugement);
@@ -97,6 +108,8 @@ public void OnPluginStart() {
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
+	
+	g_hForward_RP_OnClientTazedItem = CreateGlobalForward("RP_OnClientTazedItem", ET_Event, Param_Cell);
 }
 public Action Cmd_SendToJail(int args) {
 	#if defined DEBUG
@@ -547,6 +560,7 @@ public Action Cmd_Tazer(int client) {
 			reward = 25;
 			if( rp_GetBuildingData(target, BD_started)+120 < GetTime() ) {
 				reward = 100;
+				doRP_OnClientTazedItem(client, reward);
 			}
 			
 			if( owner > 0 ) {
@@ -563,6 +577,7 @@ public Action Cmd_Tazer(int client) {
 			reward = 25;
 			if( rp_GetBuildingData(target, BD_started)+120 < GetTime() ) {
 				reward = 1500;
+				doRP_OnClientTazedItem(client, reward);
 			}
 			
 			if( owner > 0 ) {
@@ -578,6 +593,7 @@ public Action Cmd_Tazer(int client) {
 			reward = 100;
 			if( rp_GetBuildingData(target, BD_started)+120 < GetTime() ) {
 				reward = 1000;
+				doRP_OnClientTazedItem(client, reward);
 			}
 			
 			if( owner > 0 ) {

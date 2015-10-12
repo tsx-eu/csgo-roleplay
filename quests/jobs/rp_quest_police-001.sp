@@ -31,7 +31,7 @@
 #define	QUEST_RESUME2	"Arrêtez-le"
 
 
-// TODO: Détecter les zones public & privée.
+// TODO: Gérer le cas ou le mec à 5tdm puis 4 :c
 
 public Plugin myinfo = {
 	name = "Quête: Suivez le lapin blanc", author = "KoSSoLaX",
@@ -93,7 +93,7 @@ public void Q1_Frame(int objectiveID, int client) {
 	int nearest = findNearestSerialKiller(client);
 	
 	
-	if( rp_IsTargetSeen(client, nearest) && rp_GetClientInt(nearest, i_LastKillTime)+3 > GetTime() ) { 
+	if( rp_IsTargetSeen(client, nearest) && rp_GetZoneInt(rp_GetPlayerZone(nearest), zone_type_private) == 0 && rp_GetClientInt(nearest, i_LastKillTime)+3 > GetTime() ) { 
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else if( g_iDuration[client] <= 0 ) {
