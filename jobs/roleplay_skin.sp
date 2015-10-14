@@ -23,6 +23,7 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
+#define	ZONE_CABINE 284
 #define MENU_TIME_DURATION 60
 
 public Plugin myinfo = {
@@ -459,7 +460,7 @@ public Action Hook_SetTransmit(int entity, int client) {
 // ----------------------------------------------------------------------------
 public Action fwdUse(int client) {
 	int zoneid = rp_GetPlayerZone(client);
-	if(zoneid != 283)
+	if(zoneid != ZONE_CABINE)
 		return Plugin_Continue;
 
 	Handle menu = CreateMenu(MenuTrySkin);
@@ -535,7 +536,7 @@ public int MenuTrySkin(Handle menu, MenuAction action, int client, int param2) {
 	if( action == MenuAction_Select ) {
 		char szMenuItem[128];
 		if( GetMenuItem(menu, param2, szMenuItem, sizeof(szMenuItem)) ) {
-			if(rp_GetPlayerZone(client) != 283){
+			if(rp_GetPlayerZone(client) != ZONE_CABINE){
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes sorti des cabines d'essayage.");
 				return;
 			}
@@ -567,7 +568,7 @@ public Action CheckTrySkin(Handle timer, any client) {
 	#if defined DEBUG
 	PrintToServer("CheckTrySkin");
 	#endif
-	if(rp_GetPlayerZone(client) != 283)
+	if(rp_GetPlayerZone(client) != ZONE_CABINE)
 		rp_ClientResetSkin(client);
 	else
 		rp_HookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);
