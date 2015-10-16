@@ -249,7 +249,7 @@ public Action saveStats(Handle timer){
 		UpdateStats(i);
 		sSCount++;
 		for(int j = view_as<int>(i_S_MoneyEarned_Pay); j < view_as<int>(i_uStat_max); j++){
-			Format(sSQuery, sizeof(sSQuery), "%s (\"%s\", \"%i\", \"%i\"), ", sSQuery, sSUID, j, rp_GetClientStat(i, view_as<int_stat_data>(j)));
+			Format(sSQuery, sizeof(sSQuery), "%s (\"%s\", \"%i\", \"%i\"),", sSQuery, sSUID, j, rp_GetClientStat(i, view_as<int_stat_data>(j)));
 		}
 	}
 	if(sSCount < 1)
