@@ -106,7 +106,8 @@ public void DisplayStats(int client){
 	char tmp[128];
 	Handle menu = CreateMenu(MenuNothing);
 	SetMenuTitle(menu, "Vos stats:");
-	Format(tmp, sizeof(tmp), "Evolution de l'argent sur la session: %i", rp_GetClientStat(client, i_Money_OnConnection)-rp_GetClientInt(client, i_Money));
+	AddMenuItem(menu, "", "---------------- SESSION ---------------");
+	Format(tmp, sizeof(tmp), "Evolution de l'argent: %i", rp_GetClientStat(client, i_Money_OnConnection)-rp_GetClientInt(client, i_Money));
 	AddMenuItem(menu, "", tmp);
 	Format(tmp, sizeof(tmp), "Argent gagné par la paye: %i", rp_GetClientStat(client, i_MoneyEarned_Pay));
 	AddMenuItem(menu, "", tmp);
@@ -151,6 +152,47 @@ public void DisplayStats(int client){
 	Format(tmp, sizeof(tmp), "Actions de job ratées: %i", rp_GetClientStat(client, i_JobFails));
 	AddMenuItem(menu, "", tmp);
 	
+	AddMenuItem(menu, "", "----------- TOTAL -------------");
+
+	AddMenuItem(menu, "", tmp);
+	Format(tmp, sizeof(tmp), "Argent gagné par la paye: %i", rp_GetClientStat(client, i_S_MoneyEarned_Pay));
+	AddMenuItem(menu, "", tmp);
+	Format(tmp, sizeof(tmp), "Argent gagné par les missions telephone: %i", rp_GetClientStat(client, i_S_MoneyEarned_Phone));
+	AddMenuItem(menu, "", tmp);
+	Format(tmp, sizeof(tmp), "Argent gagné via metier: %i", rp_GetClientStat(client, i_S_MoneyEarned_Sales));
+	AddMenuItem(menu, "", tmp);
+	Format(tmp, sizeof(tmp), "Argent ramassé: %i", rp_GetClientStat(client, i_S_MoneyEarned_Pickup));
+	AddMenuItem(menu, "", tmp);
+	Format(tmp, sizeof(tmp), "Argent gagné par les machines: %i", rp_GetClientStat(client, i_S_MoneyEarned_CashMachine));
+	AddMenuItem(menu, "", tmp);
+	Format(tmp, sizeof(tmp), "Argent recu: %i", rp_GetClientStat(client, i_S_MoneyEarned_Give));
+	AddMenuItem(menu, "", tmp);
+
+	AddMenuItem(menu, "", "------------------------------------------");
+
+	Format(tmp, sizeof(tmp), "Argent perdu en amendes: %i", rp_GetClientStat(client, i_S_MoneySpent_Fines));
+	AddMenuItem(menu, "", tmp);
+	Format(tmp, sizeof(tmp), "Argent perdu en achetant: %i", rp_GetClientStat(client, i_S_MoneySpent_Shop));
+	AddMenuItem(menu, "", tmp);
+	Format(tmp, sizeof(tmp), "Argent donné: %i", rp_GetClientStat(client, i_S_MoneySpent_Give));
+	AddMenuItem(menu, "", tmp);
+	Format(tmp, sizeof(tmp), "Argent perdu par Vol: %i", rp_GetClientStat(client, i_S_MoneySpent_Stolen));
+	AddMenuItem(menu, "", tmp);
+
+	AddMenuItem(menu, "", "------------------------------------------");
+
+	Format(tmp, sizeof(tmp), "Argent perdu au loto: %i", rp_GetClientStat(client, i_S_LotoSpent));
+	AddMenuItem(menu, "", tmp);
+	Format(tmp, sizeof(tmp), "Argent gagné au loto: %i", rp_GetClientStat(client, i_S_LotoWon));
+	AddMenuItem(menu, "", tmp);
+	Format(tmp, sizeof(tmp), "Nombre de build: %i", rp_GetClientStat(client, i_S_TotalBuild));
+	AddMenuItem(menu, "", tmp);
+	Format(tmp, sizeof(tmp), "Distance courue: %im", rp_GetClientStat(client, i_S_RunDistance));
+	AddMenuItem(menu, "", tmp);
+	Format(tmp, sizeof(tmp), "Actions de job réussies: %i", rp_GetClientStat(client, i_S_JobSucess));
+	AddMenuItem(menu, "", tmp);
+	Format(tmp, sizeof(tmp), "Actions de job ratées: %i", rp_GetClientStat(client, i_S_JobFails));
+	AddMenuItem(menu, "", tmp);
 	DisplayMenu(menu, client, 60);
 }
 
@@ -180,6 +222,9 @@ public void UpdateStats(int client){
 }
 
 public Action saveStats(Handle timer){
+	#if defined DEBUG
+	PrintToServer("saveStats");
+	#endif
 	static char sSQuery[16384];
 	static char sSUID[32];
 	static int sSCount;
