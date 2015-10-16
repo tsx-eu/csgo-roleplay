@@ -108,6 +108,8 @@ public void SQL_StatLoadCB(Handle owner, Handle row, const char[] error, any cli
 }
 
 public void DisplayStats(int client){
+	if(!g_dataloaded[client])
+		return;
 	UpdateStats(client);
 	char tmp[128];
 	Handle menu = CreateMenu(MenuNothing);
