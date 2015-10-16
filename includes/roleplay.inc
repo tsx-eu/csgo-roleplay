@@ -41,7 +41,7 @@ enum rp_event {
 	
 	RP_OnPlayerHear,		/* Peut-il entendre un autre joueur ? */
 	RP_PrePlayerTalk,		/* J'écris un message dans le chat  */
-	
+	RP_OnPlayerDataLoaded,		/* Quand le joueur a chargé */
 	
 	RP_EventMax
 }
@@ -73,6 +73,7 @@ typeset rp_event_enum {
 	
 	function Action(int client, int target, float& dist);		/* RP_OnPlayerHear Est-ce que client peut entendre target ? */
 	function Action(int client, char[] message, int length, bool local);	/* RP_PrePlayerTalk */
+	function Action(int client);								/* RP_OnPlayerDataLoaded */
 };
 /*
  * @brief Hook sur un joueur. 
