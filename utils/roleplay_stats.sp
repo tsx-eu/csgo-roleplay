@@ -22,6 +22,7 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
+bool g_dataloaded[MAXPLAYERS];
 int g_iStat_LastSave[i_uStat_max];
 int_stat_data g_Sassoc[] = { // Fait le lien entre une stat et sa valeur sauvegardée
 	i_nostat, // Pas une stat à save
@@ -69,26 +70,11 @@ public void OnPluginStart() {
 }
 
 public void OnClientPostAdminCheck(int client) {
+	g_dataloaded[client] = false;
+	rp_HookEvent(client, RP_OnPlayerDataLoaded, fwdDataLoaded);
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 	for(int i=0;i<view_as<int>(i_uStat_max);i++)
 		rp_SetClientStat(client, view_as<int_stat_data>(i), 0);
-
-	rp_SetClientStat(client, i_Money_OnConnection, ( rp_GetClientInt(client, i_Money) + rp_GetClientInt(client, i_Bank) ));
-	rp_SetClientStat(client, i_PVP_OnConnection, ( rp_GetClientInt(client, i_Money) + rp_GetClientInt(client, i_Bank) ));
-	rp_SetClientStat(client, i_Vitality_OnConnection, view_as<int>(rp_GetClientFloat(client, fl_Vitality)) );
-	UpdateStats(client);
-	char steamID[32], query[128];
-	GetClientAuthId(client, AuthId_Engine, steamID, sizeof(steamID), false);
-	Format(query, sizeof(query), "SELECT `stat_id`, `data` FROM `rp_statdata` WHERE `steamid`=\"%s\"", steamID);
-	Handle db = rp_GetDatabase();
-	SQL_LockDatabase( db );
-	Handle row = SQL_Query(db, query);
-	if( row != INVALID_HANDLE ) {
-		while( SQL_FetchRow(row) ) {
-			rp_SetClientStat(client, view_as<int_stat_data>(SQL_FetchInt(row, 0)), SQL_FetchInt(row, 1));
-		}
-	}
-	SQL_UnlockDatabase( db );
 }
 
 public Action fwdCommand(int client, char[] command, char[] arg) {
@@ -102,7 +88,27 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	return Plugin_Continue;
 }
 
+public Action fwdDataLoaded(int client){
+	rp_SetClientStat(client, i_Money_OnConnection, ( rp_GetClientInt(client, i_Money) + rp_GetClientInt(client, i_Bank) ));
+	rp_SetClientStat(client, i_PVP_OnConnection, rp_GetClientInt(client, i_PVP));
+	rp_SetClientStat(client, i_Vitality_OnConnection, RoundToNearest(rp_GetClientFloat(client, fl_Vitality)) );
+	char steamID[32], query[128];
+	GetClientAuthId(client, AuthId_Engine, steamID, sizeof(steamID), false);
+	Format(query, sizeof(query), "SELECT `stat_id`, `data` FROM `rp_statdata` WHERE `steamid`=\"%s\"", steamID);
+	SQL_TQuery(rp_GetDatabase(), SQL_StatLoadCB, query, client, DBPrio_High);
+}
+
+public void SQL_StatLoadCB(Handle owner, Handle row, const char[] error, any client) {
+	if(row != INVALID_HANDLE){
+	    while( SQL_FetchRow(row) ) {
+	        rp_SetClientStat(client, view_as<int_stat_data>(SQL_FetchInt(row, 0)), SQL_FetchInt(row, 1));
+	    }
+	}
+	g_dataloaded[client] = true;
+}
+
 public void DisplayStats(int client){
+	UpdateStats(client);
 	char tmp[128];
 	Handle menu = CreateMenu(MenuNothing);
 	SetMenuTitle(menu, "Vos stats:");
@@ -211,6 +217,9 @@ public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
 }
 
 public void UpdateStats(int client){
+	if(!g_dataloaded[client])
+		return;
+
 	for(int j=1; j < view_as<int>(i_uStat_nosavemax);j++){
 		if(g_Sassoc[j] == i_nostat)
 			continue;
@@ -233,6 +242,8 @@ public Action saveStats(Handle timer){
 	for (int i = 1; i <= MaxClients; i++){
 		if(!IsValidClient(i))
 			continue;
+		if(!g_dataloaded[i])
+			continue;
 
 		GetClientAuthId(i, AuthId_Engine, sSUID, sizeof(sSUID), false);
 		UpdateStats(i);
@@ -244,6 +255,6 @@ public Action saveStats(Handle timer){
 	if(sSCount < 1)
 		return;
 
-	sSQuery[strlen(sSQuery)-1] = ';'; // Dégeger la derniere virgule pour eviter erreur SQL
+	sSQuery[strlen(sSQuery)-1] =0;
 	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, sSQuery);
 }
