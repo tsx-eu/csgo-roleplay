@@ -627,6 +627,7 @@ enum quest_type_type {
 	quest_weekly
 }
 enum int_stat_data {
+	i_nostat = 0,
 	i_Money_OnConnection,
 
 	i_MoneyEarned_Pay, // Salaire + vita + appart
@@ -648,7 +649,7 @@ enum int_stat_data {
 	i_LotoWon,
 
 	i_DrugPickedUp,
-	
+
 	i_Kills,
 	i_Deaths,
 
@@ -667,6 +668,41 @@ enum int_stat_data {
 
 	i_LastDeathTimestamp,
 	i_LastKillTimestamp,
+
+	i_uStat_nosavemax,
+
+	i_uStat_Save = 100,
+
+	i_S_MoneyEarned_Pay,
+	i_S_MoneyEarned_Phone,
+	i_S_MoneyEarned_Mission,
+	i_S_MoneyEarned_Sales,
+	i_S_MoneyEarned_Pickup,
+	i_S_MoneyEarned_CashMachine,
+	i_S_MoneyEarned_Give,
+
+	i_S_MoneySpent_Fines,
+	i_S_MoneySpent_Shop,
+	i_S_MoneySpent_Give,
+	i_S_MoneySpent_Stolen,
+
+	i_S_LotoSpent,
+	i_S_LotoWon,
+
+	i_S_DrugPickedUp,
+	
+	i_S_Kills,
+	i_S_Deaths,
+
+	i_S_ItemUsed,
+	i_S_ItemUsedPrice,
+
+	i_S_TotalBuild,
+
+	i_S_RunDistance,
+
+	i_S_JobSucess,
+	i_S_JobFails,
 
 	i_uStat_max
 };
