@@ -304,7 +304,10 @@ public Action Cmd_Amende(int client, const char[] arg) {
 	rp_SetClientStat(client, i_MoneySpent_Fines, rp_GetClientStat(client, i_MoneySpent_Fines) + amount);
 	rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) + (amount / 4));
 	rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amount);
-
+	
+	rp_SetClientInt(target, i_LastAmende, amount);
+	rp_SetClientInt(target, i_LastAmendeBy, client);
+	
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez pris %i$ a %N{default}.", amount, target);
 	CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N {default}vous a pris %i$.", client, amount);
 
