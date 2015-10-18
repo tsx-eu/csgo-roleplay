@@ -61,11 +61,12 @@ public Action Cmd_Reload(int args) {
 }
 // ----------------------------------------------------------------------------
 public bool fwdCanStart(int client) {
-	int job = rp_GetClientJobID(client);
-	if( job != QUEST_JOBID && job != 109 && job != 108 && job != 107 ) // Police + marshall + gonu + gos
-		return false;
+	int job = rp_GetClientInt(client, i_Job);
 	
-	return (findNearestSerialKiller(client)>=1);
+	if( job >= 1 && job <= 9 || job == 107 || job == 108 || job == 109 ) // Police + marshall + gonu + gos
+		return (findNearestSerialKiller(client)>=1);
+	
+	return false;
 }
 public void Q1_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);

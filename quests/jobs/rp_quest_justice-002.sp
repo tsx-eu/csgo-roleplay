@@ -23,13 +23,11 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
-#define QUEST_UNIQID	"police-001"
+#define QUEST_UNIQID	"justice-001"
 #define	QUEST_NAME		"La justice exprès"
 #define	QUEST_TYPE		quest_daily
 #define	QUEST_JOBID		1
 #define	QUEST_RESUME	"Condamnez un joueur"
-
-// TODO: Pouvoir sélectionner un complice
 
 public Plugin myinfo = {
 	name = "Quête: La justice exprès", author = "KoSSoLaX",
@@ -59,11 +57,11 @@ public Action Cmd_Reload(int args) {
 }
 // ----------------------------------------------------------------------------
 public bool fwdCanStart(int client) {
-	int job = rp_GetClientJobID(client);
+	int job = rp_GetClientInt(client, i_Job);
 	if( job >= 101 && job <= 106 )
-		return false;
+		return true;
 	
-	return true;
+	return false;
 }
 public void Q1_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
@@ -143,7 +141,7 @@ public void Q3_Start(int objectiveID, int client) {
 public void Q1_Done(int objectiveID, int client) {
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
 	
-	int cap = rp_GetRandomCapital(1);
+	int cap = rp_GetRandomCapital(101);
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 1000);
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 1000);
 	
@@ -151,7 +149,7 @@ public void Q1_Done(int objectiveID, int client) {
 public void Q2_Done(int objectiveID, int client) {
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
 	
-	int cap = rp_GetRandomCapital(1);
+	int cap = rp_GetRandomCapital(101);
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 2000);
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 2000);
 	
@@ -159,7 +157,7 @@ public void Q2_Done(int objectiveID, int client) {
 public void Q3_Done(int objectiveID, int client) {
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
 	
-	int cap = rp_GetRandomCapital(1);
+	int cap = rp_GetRandomCapital(101);
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 3000);
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 3000);
 	
