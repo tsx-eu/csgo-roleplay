@@ -304,6 +304,7 @@ enum bool_user_data {
 	b_IsNoPyj,
 	b_HasProtImmu,
 	b_HasQuest,
+	b_IsSearchByTribunal,
 	
 	b_udata_max
 };
