@@ -1246,7 +1246,7 @@ public int eventConvocation_2(Handle menu, MenuAction action, int client, int pa
 			g_TribunalSearch[target][tribunal_search_status] = -1;
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} La recherche sur le joueur %N à durée %.1f minutes.", target, (GetTime()-g_TribunalSearch[target][tribunal_search_starttime])/60.0);
 			LogToGame("[TSX-RP] [RECHERCHE] %L à mis fin à la convocation de %L.", client, target);
-			rp_SetClientBool(client, b_IsSearchByTribunal, false);
+			rp_SetClientBool(target, b_IsSearchByTribunal, false);
 
 		}
 		else if( etat == 1 ) {
@@ -1258,7 +1258,7 @@ public int eventConvocation_2(Handle menu, MenuAction action, int client, int pa
 			CPrintToChatAll("{lightblue} ================================== {default}");
 			LogToGame("[TSX-RP] [RECHERCHE] %L convoqué %L au tribunal n°%i.", client, target, g_TribunalSearch[target][tribunal_search_where]);
 			CreateTimer(30.0, Timer_ConvTribu, target, TIMER_REPEAT);
-			rp_SetClientBool(client, b_IsSearchByTribunal, true);
+			rp_SetClientBool(target, b_IsSearchByTribunal, true);
 		}
 		else if( etat == 4 ) {
 			g_TribunalSearch[target][tribunal_search_status] = 4;
@@ -1269,7 +1269,7 @@ public int eventConvocation_2(Handle menu, MenuAction action, int client, int pa
 			CPrintToChatAll("{lightblue} ================================== {default}");
 			LogToGame("[TSX-RP] [RECHERCHE] %L à lancé une recherche sur %L", client, target);
 			CreateTimer(60.0, Timer_ConvTribu, target, TIMER_REPEAT);
-			rp_SetClientBool(client, b_IsSearchByTribunal, true);
+			rp_SetClientBool(target, b_IsSearchByTribunal, true);
 		}
 	}
 	else if( action == MenuAction_End ) {
@@ -1289,7 +1289,7 @@ public Action Timer_ConvTribu(Handle timer, any target) {
 		g_TribunalSearch[target][tribunal_search_status] = -1;
 		LogToGame("[TSX-RP] [RECHERCHE] %L à été détecté comme présent au tribunal.", target);
 		PrintToChatZone(rp_GetPlayerZone(target), "{lightblue}[TSX-RP]{default} La recherche sur le joueur %N à durée %.1f minutes.", target, (GetTime()-g_TribunalSearch[target][tribunal_search_starttime])/60.0);
-		rp_SetClientBool(client, b_IsSearchByTribunal, false);
+		rp_SetClientBool(target, b_IsSearchByTribunal, false);
 		return Plugin_Stop;
 	}
 	g_TribunalSearch[target][tribunal_search_status]++;
