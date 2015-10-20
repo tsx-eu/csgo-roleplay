@@ -23,23 +23,22 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
-#define QUEST_UNIQID	"police-001"
-#define	QUEST_NAME		"Suivez le lapin blanc"
+#define QUEST_UNIQID	"justice-001"
+#define	QUEST_NAME		"La justice sournoise"
 #define	QUEST_TYPE		quest_daily
-#define	QUEST_JOBID		1
-#define	QUEST_RESUME1	"Pourchasser le tueur en série"
-#define	QUEST_RESUME2	"Arrêtez-le"
+#define	QUEST_JOBID		101
+#define	QUEST_RESUME1	"Tendez lui un piège"
+#define	QUEST_RESUME2	"Condamnez-le"
 
-
-// TODO: Gérer le cas ou le mec à 5tdm puis 4 :c
+// TODO: Pouvoir sélectionner un complice
 
 public Plugin myinfo = {
-	name = "Quête: Suivez le lapin blanc", author = "KoSSoLaX",
-	description = "RolePlay - Quête Police: Suivez le lapin blanc",
+	name = "Quête: La justice sournoise", author = "KoSSoLaX",
+	description = "RolePlay - Quête Justice: La justice sournoise",
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-int g_iQuest, g_iDuration[MAXPLAYERS + 1];
+int g_iQuest, g_iDuration[MAXPLAYERS + 1], g_iDoing[MAXPLAYERS + 1];
 
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
@@ -62,8 +61,7 @@ public Action Cmd_Reload(int args) {
 // ----------------------------------------------------------------------------
 public bool fwdCanStart(int client) {
 	int job = rp_GetClientInt(client, i_Job);
-	
-	if( job >= 1 && job <= 9 || job == 107 || job == 108 || job == 109 ) // Police + marshall + gonu + gos
+	if( job >= 101 && job <= 106 )
 		return (findNearestSerialKiller(client)>=1);
 	
 	return false;
@@ -73,29 +71,31 @@ public void Q1_Start(int objectiveID, int client) {
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Collègue, nos informations indique qu'un meurtrier.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Maitre, nos informations indique qu'un meurtrier.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "en série fait rage en ville.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Nous avons besoin de le prendre en flagrant délis.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Prend le en fillature, jusqu'à se qu'il commète", ITEMDRAW_DISABLED);
-	menu.AddItem("", "un meurtre. Ensuite, arrête le.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Nous besoin qu'il aille pourir en taule.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Assurez-vous, qu'un joueur se fasse tué par lui.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Ensuite, ce joueur porte plainte contre ce meurtrier.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Après quoi, il vous serra possible de faire reigner", ITEMDRAW_DISABLED);
+	menu.AddItem("", "la justice.", ITEMDRAW_DISABLED); 
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Il est important de ne pas te faire répérer, ", ITEMDRAW_DISABLED);
-	menu.AddItem("", "si l'assassin te voit, il ne commetera pas de crime.", ITEMDRAW_DISABLED); 
+	menu.AddItem("", " Tu as 24 heures pour faire condamner ce joueur.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Il doit avoir une amende d'au moins 100$.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "ainsi que 3heures de prison.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Tu as 12 heures pour le prendre en flagrant délis.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 60);
 	
-	g_iDuration[client] = 12 * 60;
+	g_iDuration[client] = 24 * 60;
 }
 public void Q1_Frame(int objectiveID, int client) {
 	
 	g_iDuration[client]--;
 	int nearest = findNearestSerialKiller(client);
 	
-	
-	if( rp_IsTargetSeen(client, nearest) && rp_GetZoneInt(rp_GetPlayerZone(nearest), zone_type_private) == 0 && rp_GetClientInt(nearest, i_LastKillTime)+3 > GetTime() ) { 
+	if( nearest >= 1 && rp_GetZoneInt(rp_GetPlayerZone(nearest), zone_type_type) == 101 ) {
+		g_iDoing[client] = nearest;
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else if( g_iDuration[client] <= 0 ) {
@@ -118,22 +118,23 @@ public void Q2_Start(int objectiveID, int client) {
 		
 		menu.SetTitle("Quète: %s", QUEST_NAME);
 		menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-		menu.AddItem("", "Il a tué! Arrêtez le!", ITEMDRAW_DISABLED);
-		menu.AddItem("", "Quoi qu'il en coute!", ITEMDRAW_DISABLED);
-		
+		menu.AddItem("", "Il est dans le Tribunal!", ITEMDRAW_DISABLED);
+		menu.AddItem("", "Condamner le à au moins 100$ d'amende", ITEMDRAW_DISABLED);
+		menu.AddItem("", "et de 3 heures de prisons.", ITEMDRAW_DISABLED);
 		
 		menu.ExitButton = false;
 		menu.Display(client, 10);
 	}
 	
-	g_iDuration[client] = 1 * 60;
+	g_iDuration[client] = 6 * 60;
 }
 public void Q2_Frame(int objectiveID, int client) {
 	
 	g_iDuration[client]--;
-	int nearest = findNearestSerialKiller(client);
+	int nearest = g_iDoing[client];
 	
-	if( rp_GetClientInt(nearest, i_JailledBy) == client ) {
+	if( rp_GetClientInt(nearest, i_LastAmende) > 100 && rp_GetClientInt(nearest, i_LastAmendeBy) == client && 
+		rp_GetClientInt(nearest, i_JailledBy) == client && rp_GetClientInt(nearest, i_JailTime) >= (3*60)-10 ) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else if( g_iDuration[client] <= 0 ) {
@@ -146,7 +147,7 @@ public void Q2_Frame(int objectiveID, int client) {
 public void Q2_Done(int objectiveID, int client) {
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
 	
-	int cap = rp_GetRandomCapital(1);
+	int cap = rp_GetRandomCapital(101);
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 5000);
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 5000);
 	
