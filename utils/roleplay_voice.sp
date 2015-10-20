@@ -24,6 +24,16 @@
 //#define DEBUG
 Handle g_vAllTalk;
 bool g_bAllTalk = false;
+char g_avocats[][][32] = {
+	{"STEAM_1:0:44606367", "150"},	//Maverick
+	{"STEAM_1:1:93713536", "150"},	//Kiceroh
+	{"STEAM_1:1:12956123", "150"},	//Mendes
+	{"STEAM_1:1:95016136", "150"},	//Bot Diablo
+	{"STEAM_1:1:56912514", "150"},	//Yuskailand
+	{"STEAM_1:0:34370282", "200"},	//Cybug
+	{"STEAM_1:1:32834448", "200"},	//Gobelin
+	{"STEAM_1:1:27282750", "200"}	//Touchepass
+};
 
 public Plugin myinfo = {
 	name = "Utils: VoiceProximity", author = "KoSSoLaX",
@@ -51,6 +61,16 @@ public void OnCvarChange(Handle cvar, const char[] oldVal, const char[] newVal) 
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerHear, fwdHear);
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
+	char steamID[32];
+	GetClientAuthId(client, AuthId_Engine, steamID, sizeof(steamID), false);
+	rp_SetClientInt(client, i_Avocat, -1);
+	for(int i=0; i<sizeof(g_avocats); i++){
+		if(StrEqual(g_avocats[i][0], steamID)){
+			rp_SetClientInt(client, i_Avocat, StringToInt(g_avocats[i][1]));
+			break;
+		}
+	}
+
 }
 public Action fwdCommand(int client, char[] command, char[] arg) {
 	#if defined DEBUG
@@ -223,6 +243,7 @@ public Action Cmd_job(int client, int args){
 	Handle jobmenu = CreateMenu(MenuJobs);
 	SetMenuTitle(jobmenu, "Liste des jobs disponibles:");
 	AddMenuItem(jobmenu, "-1", "Tout afficher");
+	AddMenuItem(jobmenu, "-2", "Avocats");
 	char tmp[12], tmp2[64];
 	bool bJob[MAX_JOBS];
 
@@ -281,7 +302,11 @@ public int MenuJobs(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_
 			for(int i=1; i<MAXPLAYERS+1;i++){
 				if(!IsValidClient(i))
 					continue;
-				if(jobid != -1 && (i == client || rp_GetClientJobID(i) != jobid))
+
+				if(jobid == -2 && rp_GetClientInt(client, i_Avocat)<0)
+					continue;
+
+				if(jobid >= 0 && (i == client || rp_GetClientJobID(i) != jobid))
 					continue;
 
 				Format(tmp2, sizeof(tmp2), "%i", i);
@@ -296,6 +321,10 @@ public int MenuJobs(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_
 					Format(tmp, sizeof(tmp), "[EVENT] %N - %s", i, tmp);
 				else
 					Format(tmp, sizeof(tmp), "%N - %s", i, tmp);
+
+				if(jobid == -2){
+					Format(tmp, sizeof(tmp), "%s (%d$)", tmp, rp_GetClientInt(client, i_Avocat));
+				}
 
 					
 				AddMenuItem(menu, tmp2, tmp);
@@ -342,6 +371,11 @@ public int MenuJobs2(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 				AddMenuItem(menu, tmp2, "Acheter / Vendre une arme");
 				amount++;
 			}
+			if(rp_GetClientInt(client, i_Avocat) > 0){
+				Format(tmp2, sizeof(tmp2), "%i_-5", target);
+				AddMenuItem(menu, tmp2, "Demander ses services d'avocat");
+				amount++;
+			}
 			if(jobid == 101 && !(jobid == 103 || jobid == 104 || jobid == 105 || jobid == 106)){
 				Format(tmp2, sizeof(tmp2), "%i_-4", target);
 				AddMenuItem(menu, tmp2, "Demander pour une audience");
@@ -350,7 +384,7 @@ public int MenuJobs2(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 			else{
 				for(int i=1;i<MAX_ITEMS;i++){
 					rp_GetItemData(i, item_type_job_id, tmp, sizeof(tmp));
-					if(StringToInt(tmp) != jobid)
+					if(StringToInt(tmp) != jobid || StringToInt(tmp)==0)
 						continue;
 
 					rp_GetItemData(i, item_type_name, tmp, sizeof(tmp));
@@ -401,6 +435,9 @@ public int MenuJobs3(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 			}
 			else if(item_id == -4){
 				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin d'un juge, il est actuellement: %s", client, zoneName);
+			}
+			else if(item_id == -5){
+				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin d'un avocat, il est actuellement: %s", client, zoneName);
 			}
 			else{
 				rp_GetItemData(item_id, item_type_name, tmp, sizeof(tmp));

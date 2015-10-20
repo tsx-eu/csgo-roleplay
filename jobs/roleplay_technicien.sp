@@ -524,6 +524,7 @@ public Action Frame_CashMachine(Handle timer, any ent) {
 		EmitSoundToAllAny("ambient/tones/equip3.wav", ent, _, _, _, 0.66);
 		
 		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank)+1);
+		rp_SetClientStat(client, i_MoneyEarned_CashMachine, rp_GetClientStat(client, i_MoneyEarned_CashMachine)+1);
 		
 		int capital_id = rp_GetRandomCapital( rp_GetClientJobID(client) );
 		rp_SetJobCapital( capital_id, rp_GetJobCapital(capital_id)-1 );
@@ -752,6 +753,7 @@ public Action Frame_BigCashMachine(Handle timer, any ent) {
 		EmitSoundToAllAny("ambient/tones/equip3.wav", ent, _, _, _, 1.0);
 		
 		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank)+2);
+		rp_SetClientStat(client, i_MoneyEarned_CashMachine, rp_GetClientStat(client, i_MoneyEarned_CashMachine)+2);
 		
 		int capital_id = rp_GetRandomCapital( rp_GetClientJobID(client) );
 		rp_SetJobCapital( capital_id, rp_GetJobCapital(capital_id)-2 );

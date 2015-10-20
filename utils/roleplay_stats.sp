@@ -169,6 +169,10 @@ public void DisplayStats(int client, bool full){
 
 		AddMenuItem(menu, "", "------------------------------------------", ITEMDRAW_DISABLED);
 
+		Format(tmp, sizeof(tmp), "Nombre d'items utilisés: %d", rp_GetClientStat(client, i_S_ItemUsed));
+		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
+		Format(tmp, sizeof(tmp), "Prix des items utilisés: %d", rp_GetClientStat(client, i_S_ItemUsedPrice));
+		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
 		Format(tmp, sizeof(tmp), "Argent perdu au loto: %d", rp_GetClientStat(client, i_S_LotoSpent));
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
 		Format(tmp, sizeof(tmp), "Argent gagné au loto: %d", rp_GetClientStat(client, i_S_LotoWon));
@@ -219,6 +223,10 @@ public void DisplayStats(int client, bool full){
 			Format(tmp, sizeof(tmp), "Evolution de la vitalité: +%d", RoundToNearest(rp_GetClientFloat(client, fl_Vitality))-rp_GetClientStat(client, i_Vitality_OnConnection));
 		else
 			Format(tmp, sizeof(tmp), "Evolution de la vitalité: %d", RoundToNearest(rp_GetClientFloat(client, fl_Vitality))-rp_GetClientStat(client, i_Vitality_OnConnection));
+		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
+		Format(tmp, sizeof(tmp), "Nombre d'items utilisés: %d", rp_GetClientStat(client, i_ItemUsed));
+		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
+		Format(tmp, sizeof(tmp), "Prix des items utilisés: %d", rp_GetClientStat(client, i_ItemUsedPrice));
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
 		Format(tmp, sizeof(tmp), "Argent perdu au loto: %d", rp_GetClientStat(client, i_LotoSpent));
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);

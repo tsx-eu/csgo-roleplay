@@ -228,22 +228,7 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_Avocat(int client, const char[] arg) {
-	Handle menu = CreateMenu(MenuNothing);
-	SetMenuTitle(menu, "Liste des avocats officiels:");
-	
-	
-	AddMenuItem(menu, "STEAM_1:0:44606367", "Maverick   - 150$");
-	AddMenuItem(menu, "STEAM_1:1:93713536", "Kiceroh    - 150$");
-	AddMenuItem(menu, "STEAM_1:1:12956123", "Mendes     - 150$");
-	AddMenuItem(menu, "STEAM_1:1:95016136", "Bot Diablo - 150$");
-	AddMenuItem(menu, "STEAM_1:1:56912514", "Yuskailand - 150$");
-	AddMenuItem(menu, "STEAM_1:0:34370282", "Cybug      - 200$");
-	AddMenuItem(menu, "STEAM_1:1:32834448", "Gobelin    - 200$");
-	
-	AddMenuItem(menu, "STEAM_1:1:27282750", "Touchepass - 200$");
-	
-	SetMenuExitButton(menu, true);
-	DisplayMenu(menu, client, MENU_TIME_DURATION);
+	FakeClientCommand(client, "say /job");
 	return Plugin_Handled;
 }
 public Action Cmd_Amende(int client, const char[] arg) {
