@@ -377,6 +377,8 @@ enum int_user_data {
 	i_LastAgression,
 	i_LastAmende,
 	i_LastAmendeBy,
+
+	i_Avocat,
 	
 	i_udata_max
 };
