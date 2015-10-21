@@ -96,10 +96,10 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	
 	menu.AddItem("", "Afin de faire sortir notre homme et qu'il passe", ITEMDRAW_DISABLED);
-	menu.AddItem("", "inaperçu, fait sortir un maximum de détenu.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "inaperçu, fait sortir un maximum de détenus.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Nous t'offrons 1000$ par personne libérée", ITEMDRAW_DISABLED);
-	menu.AddItem("", "grace à toi. Pendant toute la durée de ta mission, ", ITEMDRAW_DISABLED);
-	menu.AddItem("", "nous t'environs du matériel nécessaire à tes opérations.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Grâce à toi. Pendant toute la durée de ta mission, ", ITEMDRAW_DISABLED);
+	menu.AddItem("", "nous t'enverrons du matériel nécessaire à tes opérations.", ITEMDRAW_DISABLED);
 	menu.AddItem("", " Tu as 12 heures.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
