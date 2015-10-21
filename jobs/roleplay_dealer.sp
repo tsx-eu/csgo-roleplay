@@ -789,6 +789,11 @@ public Action Cmd_ItemPiedBiche(int args) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a pas de policier connecté.");
 		return Plugin_Handled;
 	}
+	if( rp_GetClientBool(client, b_MaySteal) == false ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas déraciner pour le moment.");
+		return Plugin_Handled;
+	}
 	float vecTarget[3];
 	GetClientAbsOrigin(client, vecTarget);
 	TE_SetupBeamRingPoint(vecTarget, 10.0, 500.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, {255, 0, 0, 200}, 10, 0);
