@@ -151,6 +151,10 @@ public Action Cmd_ItemDrugs(int args) {
 		rp_HookEvent(client, RP_PreHUDColorize, fwdHeroine2, dur);
 	}
 	else if( StrEqual(arg0, "cocaine") ) {
+		if (GetClientHealth(client) >= 500) {
+		ITEM_CANCEL(client, item_id);
+			return Plugin_Handled;
+		}
 		rp_HookEvent(client, RP_PreHUDColorize, fwdCocaine, dur);
 
 		SetEntityHealth(client, 500);
