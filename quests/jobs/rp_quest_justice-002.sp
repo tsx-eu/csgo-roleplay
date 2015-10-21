@@ -68,13 +68,13 @@ public void Q1_Start(int objectiveID, int client) {
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Maitre, nos accordons un bonus pour ", ITEMDRAW_DISABLED);
-	menu.AddItem("", "vos 3 prochaines condamnation.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Maitre, nous vous accordons un bonus pour ", ITEMDRAW_DISABLED);
+	menu.AddItem("", "vos 3 prochaines condamnations.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Pendant ces 24 prochaines heures condamner.", ITEMDRAW_DISABLED);
+	menu.AddItem("", " Pendant ces 24 prochaines heures condamné.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "3 joueurs différents dans votre Tribunal.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Il doivent avoir une amende d'au moins 100$.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Ils doivent avoir une amende d'au moins 100$.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "ainsi que 3 heures de prison, chacun.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	
@@ -109,9 +109,9 @@ public void Q2_Start(int objectiveID, int client) {
 		
 		menu.SetTitle("Quète: %s", QUEST_NAME);
 		menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-		menu.AddItem("", " Condamner encore 2 joueurs différents", ITEMDRAW_DISABLED);
+		menu.AddItem("", " Condamné encore 2 joueurs différents", ITEMDRAW_DISABLED);
 		menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-		menu.AddItem("", "Il doivent avoir une amende d'au moins 100$.", ITEMDRAW_DISABLED);
+		menu.AddItem("", "Ils doivent avoir une amende d'au moins 100$.", ITEMDRAW_DISABLED);
 		menu.AddItem("", "ainsi que 3 heures de prison, chacun.", ITEMDRAW_DISABLED);
 		
 		menu.ExitButton = false;
