@@ -69,9 +69,9 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Collègue, nous avons besoin que vous ", ITEMDRAW_DISABLED);
-	menu.AddItem("", "taziez un maximum d'object illégaux en ville.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "tasiez un maximum d'objets illégaux en ville.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Pendant les 24 prochaines heures, nous doublons tes gains", ITEMDRAW_DISABLED);
-	menu.AddItem("", "de chaque plant de drogue et machines détruite.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "de chaque plants de drogue et machines détruite.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 60);
@@ -103,7 +103,7 @@ public void RP_OnClientTazedItem(int attacker, int reward) {
 	for (int i = 0; i < length; i++) {
 		if( GetArrayCell(g_hDoing, i) == attacker ) {
 			rp_SetClientInt(attacker, i_AddToPay, rp_GetClientInt(attacker, i_AddToPay) + reward);
-			CPrintToChat(attacker, "{lightblue}[TSX-RP]{default} Vous avez gagnez %d$ supplémentaire grace à la quête %s.", reward, QUEST_NAME);
+			CPrintToChat(attacker, "{lightblue}[TSX-RP]{default} Vous avez gagnez %d$ supplémentaires grace à la quête %s.", reward, QUEST_NAME);
 		}
 	}
 }

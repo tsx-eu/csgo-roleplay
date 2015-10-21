@@ -112,7 +112,7 @@ public void Q2_Start(int objectiveID, int client) {
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Vous l'avez !", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Raporte les nous au plus vite", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Rapporte les nous au plus vite", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 30);

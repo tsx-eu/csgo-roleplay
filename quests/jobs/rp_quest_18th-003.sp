@@ -82,9 +82,9 @@ public void Q1_Start(int objectiveID, int client) {
    
    menu.SetTitle("Quète: %s", QUEST_NAME);
    menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-   menu.AddItem("", "Yo man, on a de nouveau projet pour toi.", ITEMDRAW_DISABLED);
+   menu.AddItem("", "Yo man, on a de nouveaux projets pour toi.", ITEMDRAW_DISABLED);
    menu.AddItem("", "On a 5 colis à récupérer en ville. ", ITEMDRAW_DISABLED);
-   menu.AddItem("", "Raporte les nous.", ITEMDRAW_DISABLED);
+   menu.AddItem("", "Rapporte les nous.", ITEMDRAW_DISABLED);
    
    menu.ExitButton = false;
    menu.Display(client, 60);
@@ -130,7 +130,7 @@ public void Q2_Start(int objectiveID, int client) {
    
    menu.SetTitle("Quète: %s", QUEST_NAME);
    menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-   menu.AddItem("", "Tu l'as ! Allez chercher le colis suivant", ITEMDRAW_DISABLED);
+   menu.AddItem("", "Tu l'as ! Va chercher le colis suivant", ITEMDRAW_DISABLED);
    
    menu.ExitButton = false;
    menu.Display(client, 30);
@@ -198,8 +198,8 @@ public void Q3_End(int objectiveID, int client) {
    
    menu.SetTitle("Quète: %s", QUEST_NAME);
    menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-   menu.AddItem("", "Les 18th te remercie pour ta rapidité d'action", ITEMDRAW_DISABLED);
-   menu.AddItem("", "et t'offre: [PvP] AK-47.", ITEMDRAW_DISABLED);
+   menu.AddItem("", "Les 18th te remercient pour ta rapidité d'action", ITEMDRAW_DISABLED);
+   menu.AddItem("", "et t'offrent: [PvP] AK-47.", ITEMDRAW_DISABLED);
    
    menu.ExitButton = false;
    menu.Display(client, 30);
