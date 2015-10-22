@@ -158,6 +158,9 @@ public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 		int target = GetArrayCell(g_hDoing, i);
 		int z = rp_GetPlayerZone(target);
 		
+		if( target == client )
+			continue;
+		
 		for (int j = 0; j < sizeof(zoneID); j++) {
 			if( z == zoneID[j] ) {
 				for (int k = 0; k < sizeof(zoneID); k++) {
