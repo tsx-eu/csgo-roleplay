@@ -252,6 +252,7 @@ public int MenuSetSkin(Handle menu, MenuAction action, int client, int param2) {
 		GetMenuItem(menu, param2, options, sizeof(options));
 		ServerCommand("rp_giveskin %s %d", options, client);
 		rp_SetClientString(client, sz_Skin, options, strlen(options) + 1);
+		rp_IncrementSuccess(client, success_list_vetement);
 	}
 	else if( action == MenuAction_End ) {
 		CloseHandle(menu);
