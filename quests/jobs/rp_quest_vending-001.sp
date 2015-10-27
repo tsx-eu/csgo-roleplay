@@ -23,16 +23,16 @@
 #include <roleplay.inc>   // https://www.ts-x.eu
 
 //#define DEBUG
-#define QUEST_UNIQID   "18th-003"
-#define   QUEST_NAME      "Collecte des déchets"
+#define QUEST_UNIQID   "vending-001"
+#define   QUEST_NAME      "Collecte des matières premières"
 #define   QUEST_TYPE      quest_daily
 #define   QUEST_RESUME1   "Récupérer le colis"
 #define   QUEST_RESUME2   "Apporter les colis à votre planque"
 #define QUEST_ITEM      236
 
 public Plugin myinfo =  {
-	name = "Quête: Collecte des déchets", author = "KoSSoLaX", 
-	description = "RolePlay - Quête 18th/dealer: Collecte des déchets", 
+	name = "Quête: Collecte des matières premières", author = "KoSSoLaX", 
+	description = "RolePlay - Quête 18th/dealer: Collecte des matières premières", 
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
@@ -71,17 +71,22 @@ public Action Cmd_Reload(int args) {
 }
 // ----------------------------------------------------------------------------
 public bool fwdCanStart(int client) {
-	if (rp_GetClientJobID(client) != 181 && rp_GetClientJobID(client) != 81)
-		return false;
+	int jobList[] =  { 11, 21, 31, 51, 61, 71, 81, 111, 121, 131, 181, 191, 211, 221 };
+	int job = rp_GetClientJobID(client);
 	
-	return true;
+	for (int i = 0; i < sizeof(jobList); i++) {
+		if( jobList[i] == job )
+			return true;
+	}
+	
+	return false;
 }
 public void Q1_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Yo man, on a de nouveaux projets pour toi.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Bonjour collègue, on a de nouveaux projets pour toi.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "On a 5 colis à récupérer en ville. ", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Rapporte les nous.", ITEMDRAW_DISABLED);
 	
@@ -172,13 +177,12 @@ public void Q3_Start(int objectiveID, int client) {
 	g_iDuration[client] = 6 * 60;
 }
 public void Q3_Frame(int objectiveID, int client) {
-	static int zoneDest = 89;
 	static float dst[3] =  { -1544.0, -2997.3, -1978.9 };
 	float vec[3];
 	GetClientAbsOrigin(client, vec);
 	
 	g_iDuration[client]--;
-	if (rp_GetPlayerZone(client) == zoneDest) {
+	if ( rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == rp_GetClientJobID(client) ) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else if (g_iDuration[client] <= 0) {
@@ -197,10 +201,7 @@ public void Q3_End(int objectiveID, int client) {
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	if (rp_GetClientJobID(client) == 181)
-		menu.AddItem("", "Les 18th te remercient pour ta rapidité d'action", ITEMDRAW_DISABLED);
-	else
-		menu.AddItem("", "Les dealer te remercient pour ta rapidité d'action", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Votre chef vous remercie pour ta rapidité d'action", ITEMDRAW_DISABLED);
 	menu.AddItem("", "et t'offrent: [PvP] AK-47.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
