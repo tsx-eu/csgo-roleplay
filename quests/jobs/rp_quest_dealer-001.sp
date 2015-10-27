@@ -86,15 +86,16 @@ public void Q1_Start(int objectiveID, int client) {
 }
 public void Q1_Frame(int objectiveID, int client) {
 	g_iDuration[client]--;
+	int count = countPlant(client);
 	
-	if( countPlant(client) >= 10 ) {
+	if( count >= 10 ) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else if( g_iDuration[client] <= 0 ) {
 		rp_QuestStepFail(client, objectiveID);
 	}
 	else {
-		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s", QUEST_NAME, g_iDuration[client], QUEST_RESUME1);
+		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s %d/10", QUEST_NAME, g_iDuration[client], QUEST_RESUME1, count);
 	}
 }
 public void Q1_Abort(int objectiveID, int client) {
@@ -122,6 +123,13 @@ public void RP_OnClientMaxPlantCount(int client, int& max) {
 	for (int i = 0; i < length; i++) {
 		if( GetArrayCell(g_hDoing, i) == client && max < 10 )
 			max = 10;
+	}
+}
+public void RP_OnClientBuildingPrice(int client, int& price) {
+	int length = GetArraySize(g_hDoing);
+	for (int i = 0; i < length; i++) {
+		if( GetArrayCell(g_hDoing, i) == client && rp_GetZoneInt(rp_GetPlayerZone(i), zone_type_type) == 81 )
+			price = 0;
 	}
 }
 public void Q2_Frame(int objectiveID, int client) {

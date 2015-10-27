@@ -41,7 +41,8 @@ bool g_bCanSearchPlant[65];
 Handle g_hDrugTimer[65];
 //forward RP_OnClientMaxPlantCount(int client, int& max);
 //forward RP_OnClientPiedBiche(int client);
-Handle g_hForward_RP_OnClientMaxPlantCount, g_hForward_RP_OnClientPiedBiche;
+//forward RP_OnClientBuildingPrice(int client, int& price);
+Handle g_hForward_RP_OnClientMaxPlantCount, g_hForward_RP_OnClientPiedBiche, g_hForward_RP_OnClientBuildingPrice;
 void doRP_OnClientMaxPlantCount(int client, int& max) {
 	Call_StartForward(g_hForward_RP_OnClientMaxPlantCount);
 	Call_PushCell(client);
@@ -51,6 +52,12 @@ void doRP_OnClientMaxPlantCount(int client, int& max) {
 void doRP_OnClientPiedBiche(int client) {
 	Call_StartForward(g_hForward_RP_OnClientPiedBiche);
 	Call_PushCell(client);
+	Call_Finish();
+}
+void doRP_OnClientBuildingPrice(int client, int& price) {
+	Call_StartForward(g_hForward_RP_OnClientBuildingPrice);
+	Call_PushCell(client);
+	Call_PushCellRef(price);
 	Call_Finish();
 }
 
@@ -65,6 +72,7 @@ public void OnPluginStart() {
 	
 	g_hForward_RP_OnClientMaxPlantCount = CreateGlobalForward("RP_OnClientMaxPlantCount", ET_Event, Param_Cell, Param_CellByRef);
 	g_hForward_RP_OnClientPiedBiche = CreateGlobalForward("RP_OnClientPiedBiche", ET_Event, Param_Cell);
+	g_hForward_RP_OnClientBuildingPrice = CreateGlobalForward("RP_OnClientBuildingPrice", ET_Event, Param_Cell, Param_CellByRef);
 	
 	for (int j = 1; j <= MaxClients; j++)
 		if( IsValidClient(j) )
@@ -726,6 +734,7 @@ public Action fwdOnPlayerBuild(int client, float& cooldown) {
 	
 	Handle menu = CreateMenu(MenuBuildingDealer);
 	char tmp[12], tmp2[64];
+	int prix;
 			
 	SetMenuTitle(menu, " Menu des dealers");
 	
@@ -738,9 +747,11 @@ public Action fwdOnPlayerBuild(int client, float& cooldown) {
 		
 		rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2));
 		
+		prix = rp_GetItemInt(i, item_type_prix) * 3;
+		doRP_OnClientBuildingPrice(client, prix);
 		
 		Format(tmp, sizeof(tmp), "%d", i);
-		Format(tmp2, sizeof(tmp2), "%s %d$", tmp2, rp_GetItemInt(i, item_type_prix) * 3);
+		Format(tmp2, sizeof(tmp2), "%s %d$", tmp2, prix);
 		AddMenuItem(menu, tmp, tmp2);
 		
 	}
@@ -761,6 +772,7 @@ public int MenuBuildingDealer(Handle menu, MenuAction action, int client, int pa
 		
 		if( GetMenuItem(menu, param, szMenuItem, sizeof(szMenuItem)) ) {
 			int mnt = rp_GetItemInt(StringToInt(szMenuItem), item_type_prix) * 3;
+			doRP_OnClientBuildingPrice(client, mnt);
 			
 			if( rp_GetClientInt(client, i_Money) + rp_GetClientInt(client, i_Bank) < mnt ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas assez d'argent.");

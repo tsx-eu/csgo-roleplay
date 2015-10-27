@@ -31,8 +31,8 @@
 
 
 public Plugin myinfo = {
-	name = "Quête: Surveillance des plants", author = "KoSSoLaX",
-	description = "RolePlay - Quête Dealer: Surveillance des plants",
+	name = "Quête: Récolte des plants", author = "KoSSoLaX",
+	description = "RolePlay - Quête Dealer: Récolte des plants",
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
@@ -67,7 +67,18 @@ public bool fwdCanStart(int client) {
 	if( rp_GetClientJobID(client) != QUEST_JOBID )
 		return false;
 	
-	return true;
+	int count = 0;
+	for(int i=1; i<MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		if( rp_GetClientBool(i, b_IsAFK) )
+			continue;
+			
+		if( GetClientTeam(i) == CS_TEAM_CT || (rp_GetClientInt(i, i_Job) >= 1 && rp_GetClientInt(i, i_Job) <= 7 ) )
+			count++;
+	}
+	
+	return (count>=1);
 }
 public void Q1_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
@@ -113,7 +124,6 @@ public void RP_OnClientPiedBiche(int client) {
 }
 public void Q1_Done(int objectiveID, int client) {
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
-	RemoveFromArray(g_hDoing, FindValueInArray(g_hDoing, client));
 	
 	int cap = rp_GetRandomCapital(QUEST_JOBID);
 	
