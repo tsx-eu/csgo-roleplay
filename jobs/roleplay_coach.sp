@@ -504,11 +504,16 @@ public Action Cmd_ItemShoes(int args) {
 	
 	rp_SetClientBool(client, b_HasShoes, true);
 	
+	rp_HookEvent(client, RP_OnAssurance,	fwdAssurance);
 	rp_HookEvent(client, RP_OnFrameSeconde, fwdVitalite);
 	SDKHook(client, SDKHook_OnTakeDamage, fwdNoFallDamage);
 	
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez maintenant la classe avec votre nouvelle paire de baskets!");
 	return Plugin_Handled;
+}
+public Action fwdAssurance(int client, int& amount) {
+	if( rp_GetClientBool(client, b_HasShoes) )
+		amount += 250;
 }
 public Action fwdVitalite(int client) {
 	#if defined DEBUG
