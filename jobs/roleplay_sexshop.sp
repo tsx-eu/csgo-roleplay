@@ -12,6 +12,7 @@
 
 #include <sourcemod>
 #include <sdkhooks>
+#include <cstrike>
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
 #include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
@@ -31,7 +32,6 @@ public Plugin myinfo = {
 };
 
 int g_cBeam, g_cGlow, g_cExplode;
-Handle g_vCapture = INVALID_HANDLE;
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
 	RegServerCmd("rp_item_preserv",		Cmd_ItemPreserv,		"RP-ITEM",	FCVAR_UNREGISTERED);
@@ -47,9 +47,6 @@ public void OnPluginStart() {
 	for (int i = 1; i <= MaxClients; i++) 
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
-}
-public void OnConfigsExecuted() {
-	g_vCapture =  FindConVar("rp_capture");
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
