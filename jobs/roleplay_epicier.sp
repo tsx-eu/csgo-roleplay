@@ -211,14 +211,7 @@ public Action Cmd_ItemCigarette(int args) {
 	int client = GetCmdArgInt(2);
 	
 	
-	if( StrEqual(Arg1, "deg") ) {
-		int item_id = GetCmdArgInt(args);
-		if( rp_GetZoneBit( rp_GetPlayerZone(client) ) & BITZONE_PEACEFULL ) {
-			ITEM_CANCEL(client, item_id);
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit où vous êtes.");
-			return Plugin_Handled;
-		}
-		
+	if( StrEqual(Arg1, "deg") ) {		
 		rp_SetClientInt(client, i_LastAgression, GetTime());
 		float origin[3];
 		GetClientAbsOrigin(client, origin);
@@ -509,9 +502,15 @@ public Action Cmd_ItemCrayons(int args) {
 	}
 	
 	rp_IncrementSuccess(client, success_list_rainbow);
-	rp_HookEvent(client, RP_PrePlayerTalk, fwdTalkCrayon);	
+	rp_HookEvent(client, RP_PrePlayerTalk,	fwdTalkCrayon);	
+	rp_HookEvent(client, RP_OnAssurance,	fwdAssurance);
+	
 	rp_SetClientBool(client, b_Crayon, true);
 	return Plugin_Handled;
+}
+public Action fwdAssurance(int client, int& amount) {
+	if( rp_GetClientBool(client, b_Crayon) )
+		amount += 900;
 }
 public Action fwdTalkCrayon(int client, char[] szSayText, int length, bool local) {
 	
