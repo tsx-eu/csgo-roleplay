@@ -200,7 +200,7 @@ public void Q3_End(int objectiveID, int client) {
 	if (rp_GetClientJobID(client) == 181)
 		menu.AddItem("", "Les 18th te remercient pour ta rapidité d'action", ITEMDRAW_DISABLED);
 	else
-		menu.AddItem("", "Les 18th te remercient pour ta rapidité d'action", ITEMDRAW_DISABLED);
+		menu.AddItem("", "Les dealer te remercient pour ta rapidité d'action", ITEMDRAW_DISABLED);
 	menu.AddItem("", "et t'offrent: [PvP] AK-47.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
