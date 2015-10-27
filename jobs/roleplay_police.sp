@@ -504,6 +504,9 @@ public Action Cmd_Tazer(int client) {
 		}
 		int reward = -1;
 		int owner = rp_GetBuildingData(target, BD_owner);
+		if( !IsValidClient(owner) )
+			owner = 0;
+		
 		GetEdictClassname(target, tmp2, sizeof(tmp2));
 		
 		if( owner != 0 && rp_IsMoveAble(target) && (Tzone == 0 || rp_GetZoneInt(Tzone, zone_type_type) <= 1	) ) {
@@ -1803,7 +1806,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 		}
 		if( StrEqual(g_szJailRaison[type][jail_raison],"Agression physique") 
 			&& !(rp_GetClientInt(client, i_Job) >= 101 || rp_GetClientInt(client, i_Job) >= 106) ) { // Agression physique
-			if(rp_GetClientInt(target, i_LastAgression)+60 < GetTime()){
+			if(rp_GetClientInt(target, i_LastAgression)+30 < GetTime()){
 				rp_SetClientInt(target, i_JailTime, 0);
 				rp_SetClientInt(target, i_jailTime_Last, 0);
 				rp_SetClientInt(target, i_JailledBy, 0);
