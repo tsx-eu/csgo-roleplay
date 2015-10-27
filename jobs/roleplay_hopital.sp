@@ -350,14 +350,9 @@ public Action Cmd_ItemProtImmu(int args) {
 	
 	int client = GetCmdArgInt(1);
 	
-	if(rp_GetClientBool(client, b_HasProtImmu)){
-		ITEM_CANCEL(client, GetCmdArgInt(args));
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous bénéfifiez déjà d'une protection immunitaire.");
-	}
-	else{
-		rp_SetClientBool(client, b_HasProtImmu, true);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous bénéfifiez maintenant d'une protection immunitaire.");
-	}
+	rp_SetClientBool(client, b_HasProtImmu, true);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous bénéfifiez maintenant d'une protection immunitaire.");
+	
 	return Plugin_Handled;
 }
 public Action Cmd_ItemRespawn(int args) {
