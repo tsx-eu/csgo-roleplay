@@ -82,8 +82,8 @@ public Action fwdUse(int client) {
 	int target = GetClientTarget(client);
 	int vehicle = GetEntPropEnt(client, Prop_Send, "m_hVehicle");
 	int passager = rp_GetClientVehiclePassager(client);
-
-	//
+	
+	// 
 	if( vehicle > 0 ) {
 		int speed = GetEntProp(vehicle, Prop_Data, "m_nSpeed");
 		int buttons = GetClientButtons(client);
@@ -94,7 +94,7 @@ public Action fwdUse(int client) {
 	else if( passager > 0 ) {
 		rp_ClientVehiclePassagerExit(client, passager);
 	}
-	else if( rp_IsValidVehicle(target) && rp_IsEntitiesNear(client, target, true) ) {
+	else if( rp_IsValidVehicle(target) && rp_IsEntitiesNear(client, target, true) && rp_IsTutorialOver(client) ) {
 		
 		int driver = GetEntPropEnt(target, Prop_Send, "m_hPlayer");
 		if( driver > 0 ) {
@@ -260,6 +260,8 @@ public Action Cmd_ItemVehicleStuff(int args) {
 		for(int i=1; i<=MaxClients; i++) {
 			if( !IsValidClient(i) )
 				continue;
+			if( !rp_IsTutorialOver(i) )
+				continue;
 			if( rp_GetClientVehiclePassager(i) != target )
 				continue;
 			if( rp_GetClientKeyVehicle(i, target) )
@@ -306,6 +308,8 @@ public Action Cmd_ItemVehicleStuff(int args) {
 			if( rp_GetClientGroupID(i) != gID )
 				continue;
 			if( rp_GetClientKeyVehicle(i, target) )
+				continue;
+			if( !rp_IsTutorialOver(i) )
 				continue;
 			
 			amount++;
