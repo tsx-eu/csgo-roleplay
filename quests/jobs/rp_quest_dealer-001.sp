@@ -128,7 +128,7 @@ public void RP_OnClientMaxPlantCount(int client, int& max) {
 public void RP_OnClientBuildingPrice(int client, int& price) {
 	int length = GetArraySize(g_hDoing);
 	for (int i = 0; i < length; i++) {
-		if( GetArrayCell(g_hDoing, i) == client && rp_GetZoneInt(rp_GetPlayerZone(i), zone_type_type) == 81 )
+		if( GetArrayCell(g_hDoing, i) == client && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == 81 )
 			price = 0;
 	}
 }
