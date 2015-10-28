@@ -177,7 +177,6 @@ public void Q3_Start(int objectiveID, int client) {
 	g_iDuration[client] = 6 * 60;
 }
 public void Q3_Frame(int objectiveID, int client) {
-	static float dst[3] =  { -1544.0, -2997.3, -1978.9 };
 	float vec[3];
 	GetClientAbsOrigin(client, vec);
 	
@@ -190,7 +189,6 @@ public void Q3_Frame(int objectiveID, int client) {
 	}
 	else {
 		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s", QUEST_NAME, g_iDuration[client], QUEST_RESUME2);
-		rp_Effect_BeamBox(client, -1, dst, 255, 255, 255);
 	}
 }
 public void Q3_End(int objectiveID, int client) {
