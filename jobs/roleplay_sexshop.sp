@@ -12,6 +12,7 @@
 
 #include <sourcemod>
 #include <sdkhooks>
+#include <cstrike>
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
 #include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
@@ -31,7 +32,6 @@ public Plugin myinfo = {
 };
 
 int g_cBeam, g_cGlow, g_cExplode;
-Handle g_vCapture = INVALID_HANDLE;
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
 	RegServerCmd("rp_item_preserv",		Cmd_ItemPreserv,		"RP-ITEM",	FCVAR_UNREGISTERED);
@@ -47,9 +47,6 @@ public void OnPluginStart() {
 	for (int i = 1; i <= MaxClients; i++) 
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
-}
-public void OnConfigsExecuted() {
-	g_vCapture =  FindConVar("rp_capture");
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
@@ -164,9 +161,8 @@ public Action Cmd_ItemMenottes(int args){
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit où vous êtes.");
 		return;
 	}
-	char capstatus[16];
-	GetConVarString(g_vCapture, capstatus, 15);
-	if( (rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101) && StrEqual(capstatus,"none")){
+	
+	if( GetClientTeam(client) == CS_TEAM_CT ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit aux forces de l'ordre.");
 		ITEM_CANCEL(client, item_id);
 		return;
@@ -594,18 +590,17 @@ public Action Cmd_ItemLube(int args){
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemLube");
 	#endif
-
 	int client = GetCmdArgInt(1);
-	int item_id = GetCmdArgInt(1);
 
-	if(rp_GetClientBool(client, b_Lube)){
-		CPrintToChat(client,"{lightblue}[TSX-RP]{default} Vous semblez déjà bien lubrifié ;)");
-		ITEM_CANCEL(client, item_id);
-		return Plugin_Handled;
-	}
 	rp_SetClientBool(client, b_Lube, true);
 	rp_HookEvent(client, RP_PreHUDColorize, fwdLube, 30.0);
+	rp_HookEvent(client, RP_OnAssurance,	fwdAssurance);
+	
 	return Plugin_Handled;
+}
+public Action fwdAssurance(int client, int& amount) {
+	if( rp_GetClientBool(client, b_Lube) )
+		amount += 1000;
 }
 
 public Action fwdLube(int client, int color[4]){

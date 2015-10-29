@@ -71,12 +71,12 @@ public void Q1_Start(int objectiveID, int client) {
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Maitre, nos informations indique qu'un meurtrier.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Maitre, nos informations indiquent qu'un meurtrier", ITEMDRAW_DISABLED);
 	menu.AddItem("", "en série fait rage en ville.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Nous besoin qu'il aille pourir en taule.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Assurez-vous, qu'un joueur se fasse tué par lui.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Nous avons besoin qu'il aille pourrir en taule.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Assurez-vous, qu'un joueur se fasse tuer par lui.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Ensuite, ce joueur porte plainte contre ce meurtrier.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Après quoi, il vous serra possible de faire reigner", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Après quoi, il vous serra possible de faire régner", ITEMDRAW_DISABLED);
 	menu.AddItem("", "la justice.", ITEMDRAW_DISABLED); 
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", " Tu as 24 heures pour faire condamner ce joueur.", ITEMDRAW_DISABLED);
@@ -119,8 +119,8 @@ public void Q2_Start(int objectiveID, int client) {
 		menu.SetTitle("Quète: %s", QUEST_NAME);
 		menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 		menu.AddItem("", "Il est dans le Tribunal!", ITEMDRAW_DISABLED);
-		menu.AddItem("", "Condamner le à au moins 100$ d'amende", ITEMDRAW_DISABLED);
-		menu.AddItem("", "et de 3 heures de prisons.", ITEMDRAW_DISABLED);
+		menu.AddItem("", "Condamner le avec au moins 100$ d'amende", ITEMDRAW_DISABLED);
+		menu.AddItem("", "et de 3 heures de prison.", ITEMDRAW_DISABLED);
 		
 		menu.ExitButton = false;
 		menu.Display(client, 10);

@@ -57,6 +57,7 @@ public Action Cmd_ItemStuffPvP(int args) {
 	
 	int amount = 0;
 	int ItemRand[32];
+	bool luck = rp_IsClientLucky(client);
 	
 	for (int i = 1; i <= 4; i++) {
 		ItemRand[amount++] = 239;	// P90-PVP
@@ -64,10 +65,14 @@ public Action Cmd_ItemStuffPvP(int args) {
 		ItemRand[amount++] = 236;	// AK47
 	}
 	
-	ItemRand[amount++] = 27;	// Drapeau
-	ItemRand[amount++] = 67;	// Drapeau
-	ItemRand[amount++] = 118;	// Drapeau
-	ItemRand[amount++] = 126;	// Drapeau	
+	if( Math_GetRandomInt(1, 4) == 4 ) 
+		ItemRand[amount++] = 27;	// Drapeau
+	if( Math_GetRandomInt(1, 4) == 4 )
+		ItemRand[amount++] = 67;	// Drapeau
+	if( Math_GetRandomInt(1, 4) == 4 )
+		ItemRand[amount++] = 118;	// Drapeau
+	if( Math_GetRandomInt(1, 4) == 4 )
+		ItemRand[amount++] = 126;	// Drapeau	
 	
 	ItemRand[amount++] = 238;	// AWP
 	ItemRand[amount++] = 22;	// San-Andreas
@@ -79,13 +84,16 @@ public Action Cmd_ItemStuffPvP(int args) {
 	ItemRand[amount++] = 184;	// Prop d'extérieur
 	ItemRand[amount++] = 6;		// Seringue du Berserker
 	ItemRand[amount++] = 114;	// Big Mac
-	
+	ItemRand[amount++] = 231;	// Cartouches explosives
 	
 	
 	int item_id = ItemRand[ Math_GetRandomInt(0, amount-1) ];
 	rp_ClientGiveItem(client, item_id);
 	if( item_id == 35 )
 		rp_ClientGiveItem(client, item_id, 4);
+	
+	if( (luck || Math_GetRandomInt(1, 100) > 90) && (item_id == 6 || item_id == 64 || item_id == 114 || item_id == 236 || item_id == 239) )
+		rp_ClientGiveItem(client, item_id);
 	
 	char tmp[64];
 	rp_GetItemData(item_id, item_type_name, tmp, sizeof(tmp));

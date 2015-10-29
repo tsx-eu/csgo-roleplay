@@ -37,7 +37,30 @@ public Plugin myinfo = {
 };
 
 int g_cBeam, g_cGlow, g_cExplode;
+bool g_bCanSearchPlant[65];
 Handle g_hDrugTimer[65];
+//forward RP_OnClientMaxPlantCount(int client, int& max);
+//forward RP_OnClientPiedBiche(int client);
+//forward RP_OnClientBuildingPrice(int client, int& price);
+Handle g_hForward_RP_OnClientMaxPlantCount, g_hForward_RP_OnClientPiedBiche, g_hForward_RP_OnClientBuildingPrice;
+void doRP_OnClientMaxPlantCount(int client, int& max) {
+	Call_StartForward(g_hForward_RP_OnClientMaxPlantCount);
+	Call_PushCell(client);
+	Call_PushCellRef(max);
+	Call_Finish();
+}
+void doRP_OnClientPiedBiche(int client) {
+	Call_StartForward(g_hForward_RP_OnClientPiedBiche);
+	Call_PushCell(client);
+	Call_Finish();
+}
+void doRP_OnClientBuildingPrice(int client, int& price) {
+	Call_StartForward(g_hForward_RP_OnClientBuildingPrice);
+	Call_PushCell(client);
+	Call_PushCellRef(price);
+	Call_Finish();
+}
+
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
 	RegServerCmd("rp_item_drug", 		Cmd_ItemDrugs,			"RP-ITEM",	FCVAR_UNREGISTERED);
@@ -46,6 +69,10 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_plant",		Cmd_ItemPlant,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_pilule",		Cmd_ItemPilule,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_moreplant", 	Cmd_ItemMorePlant, 		"RP-ITEM", 	FCVAR_UNREGISTERED);
+	
+	g_hForward_RP_OnClientMaxPlantCount = CreateGlobalForward("RP_OnClientMaxPlantCount", ET_Event, Param_Cell, Param_CellByRef);
+	g_hForward_RP_OnClientPiedBiche = CreateGlobalForward("RP_OnClientPiedBiche", ET_Event, Param_Cell);
+	g_hForward_RP_OnClientBuildingPrice = CreateGlobalForward("RP_OnClientBuildingPrice", ET_Event, Param_Cell, Param_CellByRef);
 	
 	for (int j = 1; j <= MaxClients; j++)
 		if( IsValidClient(j) )
@@ -78,6 +105,7 @@ public void OnMapStart() {
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
 	rp_HookEvent(client, RP_OnPlayerUse,	fwdOnPlayerUse);
+	g_bCanSearchPlant[client] = true;
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemDrugs(int args) {
@@ -152,8 +180,6 @@ public Action Cmd_ItemDrugs(int args) {
 	}
 	else if( StrEqual(arg0, "cocaine") ) {
 		rp_HookEvent(client, RP_PreHUDColorize, fwdCocaine, dur);
-
-		SetEntityHealth(client, 500);
 	}
 	else if( StrEqual(arg0, "champigions") ) {
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdChampi, dur);
@@ -407,9 +433,11 @@ int BuildingPlant(int client, int type) {
 		case 81: max = 14;
 		case 82: max = 10;
 		case 83: max = 6;
-		case 84: max = 4;
-		case 85: max = 2;
+		case 84: max = 5;
+		case 85: max = 4;
 	}
+	doRP_OnClientMaxPlantCount(client, max);
+	
 	for(int i=1; i<=2048; i++) {
 		if( !IsValidEdict(i) )
 			continue;
@@ -700,6 +728,7 @@ public Action fwdOnPlayerBuild(int client, float& cooldown) {
 	
 	Handle menu = CreateMenu(MenuBuildingDealer);
 	char tmp[12], tmp2[64];
+	int prix;
 			
 	SetMenuTitle(menu, " Menu des dealers");
 	
@@ -712,9 +741,11 @@ public Action fwdOnPlayerBuild(int client, float& cooldown) {
 		
 		rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2));
 		
+		prix = rp_GetItemInt(i, item_type_prix) * 3;
+		doRP_OnClientBuildingPrice(client, prix);
 		
 		Format(tmp, sizeof(tmp), "%d", i);
-		Format(tmp2, sizeof(tmp2), "%s %d$", tmp2, rp_GetItemInt(i, item_type_prix) * 3);
+		Format(tmp2, sizeof(tmp2), "%s %d$", tmp2, prix);
 		AddMenuItem(menu, tmp, tmp2);
 		
 	}
@@ -735,6 +766,7 @@ public int MenuBuildingDealer(Handle menu, MenuAction action, int client, int pa
 		
 		if( GetMenuItem(menu, param, szMenuItem, sizeof(szMenuItem)) ) {
 			int mnt = rp_GetItemInt(StringToInt(szMenuItem), item_type_prix) * 3;
+			doRP_OnClientBuildingPrice(client, mnt);
 			
 			if( rp_GetClientInt(client, i_Money) + rp_GetClientInt(client, i_Bank) < mnt ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas assez d'argent.");
@@ -789,6 +821,11 @@ public Action Cmd_ItemPiedBiche(int args) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a pas de policier connecté.");
 		return Plugin_Handled;
 	}
+	if( g_bCanSearchPlant[client] == false ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas déraciner pour le moment.");
+		return Plugin_Handled;
+	}
 	float vecTarget[3];
 	GetClientAbsOrigin(client, vecTarget);
 	TE_SetupBeamRingPoint(vecTarget, 10.0, 500.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, {255, 0, 0, 200}, 10, 0);
@@ -798,8 +835,9 @@ public Action Cmd_ItemPiedBiche(int args) {
 	
 	rp_ClientColorize(client, { 255, 0, 0, 190 } );
 	rp_ClientReveal(client);
-	rp_SetClientBool(client, b_MaySteal, false);
+	g_bCanSearchPlant[client] = false;
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 10.0);
+	rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
 		
 	ServerCommand("sm_effect_panel %d 10.0 \"Déracinage d'un plant...\"", client);
 	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) + 1);
@@ -809,6 +847,13 @@ public Action Cmd_ItemPiedBiche(int args) {
 	
 	return Plugin_Handled;
 }
+public Action fwdZoneChange(int client, int newZone, int oldZone) {
+	int newType = rp_GetZoneInt(newZone, zone_type_type);
+	if( newType == rp_GetClientJobID(client) && newType == 81 ) {
+		g_bCanSearchPlant[client] = true;
+	}
+}
+
 public Action ItemPiedBicheOver(Handle timer, any client) {
 	#if defined DEBUG
 	PrintToServer("ItemPiedBicheOver");
@@ -817,8 +862,6 @@ public Action ItemPiedBicheOver(Handle timer, any client) {
 	float vecOrigin[3];
 	GetClientEyePosition(client, vecOrigin);
 	vecOrigin[2] += 25.0;
-	
-	
 	rp_ClientColorize(client);
 	
 	char tmp[64];
@@ -829,9 +872,7 @@ public Action ItemPiedBicheOver(Handle timer, any client) {
 		return Plugin_Handled;
 	}
 		
-	int amount = 0;
-	int ItemRand[32];	
-	
+	int amount = 0, ItemRand[32];
 	
 	for(int i = 0; i < MAX_ITEMS; i++) {
 		if( rp_GetItemInt(i, item_type_job_id) != 81 )
@@ -852,32 +893,9 @@ public Action ItemPiedBicheOver(Handle timer, any client) {
 	rp_ClientGiveItem(client, item_id, amount);
 	rp_SetClientInt(client, i_LastVolAmount, 200);
 	rp_SetClientInt(client, i_LastVolTarget, -1);
-	
-	int job = rp_GetClientInt(client, i_Job);
-	float time;
-	
-	switch(job) {
-		case 81:	time = 165.0;
-		case 82:	time = 170.0;
-		case 83:	time = 175.0;
-		case 84:	time = 180.0;
-		case 85:	time = 185.0;
-		case 86:	time = 190.0;
-		case 87:	time = 195.0;
-		default:	time = 200.0;
-	}
-	
-	CreateTimer(time, AllowStealing, client);	
+	doRP_OnClientPiedBiche(client);
 	
 	return Plugin_Handled;
-}
-public Action AllowStealing(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("AllowStealing");
-	#endif
-	
-	rp_SetClientBool(client, b_MaySteal, true);
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez à nouveau fouiller le jardin de la place de l'indépendance.");
 }
 
 public Action AllowStealing2(Handle timer, any client) {
@@ -947,7 +965,7 @@ public Action Cmd_ItemPilule(int args){
 			case 181: tptozone = 89;
 			case 191: tptozone = 72;
 			case 211: tptozone = 228;
-			case 221: tptozone = 228;
+			case 221: tptozone = 184;
 		}
 	}
 

@@ -287,10 +287,11 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	int client 	= ReadPackCell(dp);
 	int target	= ReadPackCell(dp);
 	
+	rp_ClientColorize(client);
+	rp_ClientReveal(client);
+	
 	if( !rp_IsEntitiesNear(client, target) || !IsPlayerAlive(client) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être plus proche de la voiture pour la voler.");
-		rp_ClientColorize(client);
-		rp_ClientReveal(client);
 		rp_SetClientBool(client, b_MaySteal, true);
 		return Plugin_Handled;
 	}
@@ -333,8 +334,6 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	
 	rp_SetClientStat(client, i_JobSucess, rp_GetClientStat(client, i_JobSucess) + 1);
 	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
-	rp_ClientColorize(client);
-	rp_ClientReveal(client);
 	rp_SetClientBool(client, b_MaySteal, true);
 	rp_SetClientKeyVehicle(client, target, true);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez maintenant les clés de cette voiture.");

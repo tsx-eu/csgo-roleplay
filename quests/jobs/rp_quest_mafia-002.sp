@@ -78,7 +78,7 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	
 	menu.AddItem("", "Tu dois enquêter sur ses traces pour le retrouver.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Infiltre toi dans les bâtiment que nous t'indiquons.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Infiltres-toi dans les bâtiments que nous t'indiquons.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Nous t'offrons 1000$ par bâtiments infiltrés.", ITEMDRAW_DISABLED);
 	
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
@@ -99,8 +99,8 @@ public void Q2_Start(int objectiveID, int client) {
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Vous avez trouvé des traces de son passage ici.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Mais il n'est pas ici. Infiltre toi dans", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Vous avez trouvé des traces de son passage içi.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Mais il n'y est pas. Infiltre toi dans", ITEMDRAW_DISABLED);
 	menu.AddItem("", "le batiment suivant.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
@@ -171,7 +171,7 @@ public void Q5_Done(int objectiveID, int client) {
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
 }
 int getRandomLocation() {
-	int stack[MAX_ZONES], cpt, tmp;
+	int stack[MAX_ZONES], cpt, tmp, bit;
 	char buffer[32];
 	
 	for (int i = 0; i < MAX_ZONES; i++) {
@@ -179,11 +179,12 @@ int getRandomLocation() {
 		
 		tmp = StringToInt(buffer);
 		
-		if( tmp == 91 || tmp == 101 || tmp == 181 )
+		if( tmp == 91 || tmp == 101)
 			continue;
-		if( tmp == 181 )
-			continue;
-		if( tmp == 101 )
+		
+		bit = rp_GetZoneBit(i);
+		
+		if( bit & BITZONE_JAIL || bit & BITZONE_LACOURS || bit & BITZONE_HAUTESECU || bit & BITZONE_EVENT )
 			continue;
 		
 		if( tmp>0 || StrContains(buffer, "appart_") == 0 ) {

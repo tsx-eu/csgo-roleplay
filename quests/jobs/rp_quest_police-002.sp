@@ -74,9 +74,9 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Collègue, nous avons besoin que vous ", ITEMDRAW_DISABLED);
-	menu.AddItem("", "surveillez la prison. Pendant les 24h prochaines", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Nous t'offrons 35$ pour chaques 10 minutes", ITEMDRAW_DISABLED);
-	menu.AddItem("", "passé à surveiller les prisonniers.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "surveillez la prison. Pendant les prochaines 24h", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Nous t'offrons 35$ pour chaque 10 minute", ITEMDRAW_DISABLED);
+	menu.AddItem("", "passée à surveiller les prisonniers.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Attention, si tu t'absentes nous t'infligerons", ITEMDRAW_DISABLED);
 	menu.AddItem("", "une retenue sur ton salaire!", ITEMDRAW_DISABLED); 
