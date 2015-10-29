@@ -424,24 +424,16 @@ public int MenuJobs3(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 			int item_id = StringToInt(data[1]);
 			char zoneName[64];
 			rp_GetZoneData(rp_GetPlayerZone(client), zone_type_name, zoneName, sizeof(zoneName));
-			if(item_id == -1){
-				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N aimerait être recruté, il est actuellement: %s", client, zoneName);
-			}
-			else if(item_id == -2){
-				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin d'un crochetage de porte, il est actuellement: %s", client, zoneName);
-			}
-			else if(item_id == -3){
-				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N aimerait acheter ou vendre une arme, il est actuellement: %s", client, zoneName);
-			}
-			else if(item_id == -4){
-				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin d'un juge, il est actuellement: %s", client, zoneName);
-			}
-			else if(item_id == -5){
-				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin d'un avocat, il est actuellement: %s", client, zoneName);
-			}
-			else{
-				rp_GetItemData(item_id, item_type_name, tmp, sizeof(tmp));
-				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin de {lime}%s{default}, il est actuellement: %s", client, tmp, zoneName);
+			switch(item_id){
+				case -1: CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N aimerait être recruté, il est actuellement: %s", client, zoneName);
+				case -2: CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin d'un crochetage de porte, il est actuellement: %s", client, zoneName);
+				case -3: CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N aimerait acheter ou vendre une arme, il est actuellement: %s", client, zoneName);
+				case -4: CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin d'un juge, il est actuellement: %s", client, zoneName);
+				case -5: CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin d'un avocat, il est actuellement: %s", client, zoneName);
+				default:{
+					rp_GetItemData(item_id, item_type_name, tmp, sizeof(tmp));
+					CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin de {lime}%s{default}, il est actuellement: %s", client, tmp, zoneName);
+				}
 			}
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} La demande à été envoyée à la personne");
 			ClientCommand(target, "play buttons/blip1.wav");
