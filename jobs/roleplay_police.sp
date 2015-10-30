@@ -2721,11 +2721,6 @@ void StripWeapons(int client ) {
 		if( i == CS_SLOT_KNIFE ) continue; 
 		
 		while( ( wepIdx = GetPlayerWeaponSlot( client, i ) ) != -1 ) {
-			int rnd = rp_GetRandomCapital(1);
-			
-			rp_SetJobCapital(rnd, rp_GetJobCapital(rnd) - 500);
-			rp_SetJobCapital(1, rp_GetJobCapital(1) + 500);
-			
 			RemovePlayerItem( client, wepIdx );
 			RemoveEdict( wepIdx );
 		}
