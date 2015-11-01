@@ -23,17 +23,17 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
-#define QUEST_UNIQID	"dealer-001"
-#define	QUEST_NAME		"Surveillance des plants"
+#define QUEST_UNIQID	"tech-002"
+#define	QUEST_NAME		"Surveillance des machines"
 #define	QUEST_TYPE		quest_daily
-#define	QUEST_JOBID		81
-#define	QUEST_RESUME1	"Déposer 10 plants"
-#define	QUEST_RESUME2	"Protège tes plants"
+#define	QUEST_JOBID		221
+#define	QUEST_RESUME1	"Déposer 10 machines"
+#define	QUEST_RESUME2	"Protège tes machines"
 
 
 public Plugin myinfo = {
-	name = "Quête: Surveillance des plants", author = "KoSSoLaX",
-	description = "RolePlay - Quête Dealer: Surveillance des plants",
+	name = "Quête: Surveillance des machines", author = "KoSSoLaX",
+	description = "RolePlay - Quête Technicien: Surveillance des machines",
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
@@ -71,10 +71,10 @@ public void Q1_Start(int objectiveID, int client) {
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Hey gros, on a nouveau gros client et nous", ITEMDRAW_DISABLED);
-	menu.AddItem("", "avons besoin de toi pour une nouvelle fournée.", ITEMDRAW_DISABLED);
+	menu.AddItem("", " Hey gros, on a nouveau prototype d'imprimante et nous", ITEMDRAW_DISABLED);
+	menu.AddItem("", "avons besoin de toi pour les essayer!", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Vous avez 12 heures pour poser 10 plants", ITEMDRAW_DISABLED);
+	menu.AddItem("", " Vous avez 12 heures pour poser 10 imprimantes", ITEMDRAW_DISABLED);
 	menu.AddItem("", "dans votre planque.", ITEMDRAW_DISABLED);
 	
 	
@@ -86,7 +86,7 @@ public void Q1_Start(int objectiveID, int client) {
 }
 public void Q1_Frame(int objectiveID, int client) {
 	g_iDuration[client]--;
-	int count = countPlant(client);
+	int count = countMachine(client);
 	
 	if( count >= 10 ) {
 		rp_QuestStepComplete(client, objectiveID);
@@ -118,24 +118,18 @@ public void Q2_Start(int objectiveID, int client) {
 	menu.Display(client, 30);
 	g_iDuration[client] = 24 * 60;
 }
-public void RP_OnClientMaxPlantCount(int client, int& max) {
+public void RP_OnClientMaxMachineCount(int client, int& max) {
 	int length = GetArraySize(g_hDoing);
 	for (int i = 0; i < length; i++) {
-		if( GetArrayCell(g_hDoing, i) == client && max < 10 && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == QUEST_JOBID )
-			max = 10;
-	}
-}
-public void RP_OnClientBuildingPrice(int client, int& price) {
-	int length = GetArraySize(g_hDoing);
-	for (int i = 0; i < length; i++) {
-		if( GetArrayCell(g_hDoing, i) == client && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == QUEST_JOBID )
-			price = 0;
+		if( GetArrayCell(g_hDoing, i) == client && rp_GetZoneInt(rp_GetPlayerZone(i), zone_type_type) == QUEST_JOBID ) {
+			max += 10000;
+		}
 	}
 }
 public void Q2_Frame(int objectiveID, int client) {
 	g_iDuration[client]--;
 	
-	if( countPlant(client) == 0 ) {
+	if( countMachine(client) == 0 ) {
 		rp_QuestStepFail(client, objectiveID);
 	}
 	else if( g_iDuration[client] <= 0 ) {
@@ -149,7 +143,7 @@ public void Q2_Done(int objectiveID, int client) {
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
 	
 	int cap = rp_GetRandomCapital(QUEST_JOBID);
-	int amount = countPlant(client) * 500;
+	int amount = countMachine(client) * 500;
 	
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - amount);
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + amount);	
@@ -168,7 +162,7 @@ public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
 			CloseHandle(menu);
 	}
 }
-int countPlant(int client) {
+int countMachine(int client) {
 	int count = 0;
 	char classname[64];
 	
@@ -177,7 +171,7 @@ int countPlant(int client) {
 			continue;
 		
 		GetEdictClassname(i, classname, sizeof(classname));
-		if( StrContains(classname, "rp_plant_") == 0 && rp_GetBuildingData(i, BD_owner) == client ) {
+		if( StrContains(classname, "rp_cashmachine_") == 0 && rp_GetBuildingData(i, BD_owner) == client ) {
 			if( rp_GetZoneInt(rp_GetPlayerZone(i), zone_type_type) == QUEST_JOBID )
 				count++;
 		}
