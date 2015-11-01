@@ -35,7 +35,7 @@ char g_avocats[][][32] = {
 	{"STEAM_0:1:83458579", "150"},	//TackeDown
 	{"STEAM_0:0:115947297", "150"},	//Handicaper
 	{"STEAM_0:1:53413224", "150"}, 	//Mohamed
-	{"STEAM_1:1:36646680)", "150"}	//Lisitz
+	{"STEAM_1:1:36646680", "150"}	//Lisitz
 	
 	
 };
@@ -66,16 +66,19 @@ public void OnCvarChange(Handle cvar, const char[] oldVal, const char[] newVal) 
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerHear, fwdHear);
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
+	rp_HookEvent(client, RP_OnPlayerDataLoaded, fwdDataLoad);
+}
+
+public Action fwdDataLoad(int client){
 	char steamID[32];
-	GetClientAuthId(client, AuthId_Engine, steamID, sizeof(steamID), false);
 	rp_SetClientInt(client, i_Avocat, -1);
+	GetClientAuthId(client, AuthId_Engine, steamID, sizeof(steamID), false);
 	for(int i=0; i<sizeof(g_avocats); i++){
 		if(StrEqual(g_avocats[i][0], steamID)){
 			rp_SetClientInt(client, i_Avocat, StringToInt(g_avocats[i][1]));
 			break;
 		}
 	}
-
 }
 public Action fwdCommand(int client, char[] command, char[] arg) {
 	#if defined DEBUG
@@ -271,26 +274,18 @@ public Action Cmd_job(int client, int args){
 		bJob[job] = true;
 	}
 
-	int amount = 0;
 
 	for(int i=1; i<MAX_JOBS; i++) {
 		if( bJob[i] == false )
 			continue;
-
-		amount++;
 		Format(tmp, sizeof(tmp), "%d", i);
 		rp_GetJobData(i, job_type_name, tmp2, sizeof(tmp2));
 
 		AddMenuItem(jobmenu, tmp, tmp2);
 	}
 
-	if( amount == 0 ) {
-		CloseHandle(jobmenu);
-	}
-	else {
-		SetMenuExitButton(jobmenu, true);
-		DisplayMenu(jobmenu, client, 60);
-	}
+	SetMenuExitButton(jobmenu, true);
+	DisplayMenu(jobmenu, client, 60);
 	return Plugin_Handled;
 }
 
@@ -308,7 +303,7 @@ public int MenuJobs(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_
 				if(!IsValidClient(i))
 					continue;
 
-				if(jobid == -2 && rp_GetClientInt(client, i_Avocat)<0)
+				if(jobid == -2 && rp_GetClientInt(i, i_Avocat) < 0)
 					continue;
 
 				if(jobid >= 0 && (i == client || rp_GetClientJobID(i) != jobid))
@@ -328,7 +323,7 @@ public int MenuJobs(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_
 					Format(tmp, sizeof(tmp), "%N - %s", i, tmp);
 
 				if(jobid == -2){
-					Format(tmp, sizeof(tmp), "%s (%d$)", tmp, rp_GetClientInt(client, i_Avocat));
+					Format(tmp, sizeof(tmp), "%s (%d$)", tmp, rp_GetClientInt(i, i_Avocat));
 				}
 
 					
@@ -376,7 +371,7 @@ public int MenuJobs2(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 				AddMenuItem(menu, tmp2, "Acheter / Vendre une arme");
 				amount++;
 			}
-			if(rp_GetClientInt(client, i_Avocat) > 0){
+			if(rp_GetClientInt(target, i_Avocat) > 0){
 				Format(tmp2, sizeof(tmp2), "%i_-5", target);
 				AddMenuItem(menu, tmp2, "Demander ses services d'avocat");
 				amount++;
@@ -429,24 +424,16 @@ public int MenuJobs3(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 			int item_id = StringToInt(data[1]);
 			char zoneName[64];
 			rp_GetZoneData(rp_GetPlayerZone(client), zone_type_name, zoneName, sizeof(zoneName));
-			if(item_id == -1){
-				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N aimerait être recruté, il est actuellement: %s", client, zoneName);
-			}
-			else if(item_id == -2){
-				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin d'un crochetage de porte, il est actuellement: %s", client, zoneName);
-			}
-			else if(item_id == -3){
-				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N aimerait acheter ou vendre une arme, il est actuellement: %s", client, zoneName);
-			}
-			else if(item_id == -4){
-				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin d'un juge, il est actuellement: %s", client, zoneName);
-			}
-			else if(item_id == -5){
-				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin d'un avocat, il est actuellement: %s", client, zoneName);
-			}
-			else{
-				rp_GetItemData(item_id, item_type_name, tmp, sizeof(tmp));
-				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin de {lime}%s{default}, il est actuellement: %s", client, tmp, zoneName);
+			switch(item_id){
+				case -1: CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N aimerait être recruté, il est actuellement: %s", client, zoneName);
+				case -2: CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin d'un crochetage de porte, il est actuellement: %s", client, zoneName);
+				case -3: CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N aimerait acheter ou vendre une arme, il est actuellement: %s", client, zoneName);
+				case -4: CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin d'un juge, il est actuellement: %s", client, zoneName);
+				case -5: CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin d'un avocat, il est actuellement: %s", client, zoneName);
+				default:{
+					rp_GetItemData(item_id, item_type_name, tmp, sizeof(tmp));
+					CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin de {lime}%s{default}, il est actuellement: %s", client, tmp, zoneName);
+				}
 			}
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} La demande à été envoyée à la personne");
 			ClientCommand(target, "play buttons/blip1.wav");
