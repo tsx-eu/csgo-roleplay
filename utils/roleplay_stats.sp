@@ -93,6 +93,8 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 		SetMenuTitle(menu, "Quelles stats afficher ?");
 		AddMenuItem(menu, "sess", "Sur la connection");
 		AddMenuItem(menu, "full", "Le total");
+		AddMenuItem(menu, "real", "En temps réel");
+		AddMenuItem(menu, "coloc", "Infos appartement");
 		DisplayMenu(menu, client, 60);
 		return Plugin_Handled;
 	}
@@ -127,7 +129,15 @@ public int MenuViewStats(Handle menu, MenuAction action, int client, int param )
 		char szMenuItem[64];
 		
 		if( GetMenuItem(menu, param, szMenuItem, sizeof(szMenuItem)) ) {
-			DisplayStats(client, StrEqual(szMenuItem, "full"));
+			if(StrEqual(szMenuItem, "full"))
+				DisplayStats(client, true);
+			else if(StrEqual(szMenuItem, "sess"))
+				DisplayStats(client, false);
+			else if(StrEqual(szMenuItem, "coloc"))
+				FakeClientCommand(client, "say /infocoloc");
+			else if(StrEqual(szMenuItem, "real"))
+				DisplayRTStats(client);
+
 		}
 	}
 	else if( action == MenuAction_End ) {
@@ -249,6 +259,34 @@ public void DisplayStats(int client, bool full){
 
 	DisplayMenu(menu, client, 60);
 }
+public void DisplayRTStats(int client){
+	if(!g_dataloaded[client])
+		return;
+	char tmp[128];
+	Handle menu = CreateMenu(MenuNothing);
+	int wep_id = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	SetMenuTitle(menu, "Vos stats en temps réel:");
+	Format(tmp, sizeof(tmp), "Nombre de machines: %d", CountMachine(client, false));
+	AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
+	Format(tmp, sizeof(tmp), "Nombre de photocopieuses: %d", CountMachine(client, true));
+	AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
+	Format(tmp, sizeof(tmp), "Nombre de plants: %d", CountPlants(client));
+	AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
+	Format(tmp, sizeof(tmp), "Levels cuts: %d", rp_GetClientInt(client, i_KnifeTrain));
+	AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
+	Format(tmp, sizeof(tmp), "Levels d'esquive: %d", rp_GetClientInt(client, i_Esquive));
+	AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
+	Format(tmp, sizeof(tmp), "Précision de tir: %.2f", rp_GetClientFloat(client, fl_WeaponTrain));
+	AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
+
+	GetEdictClassname(wep_id, tmp, sizeof(tmp));
+	if( StrContains(tmp, "weapon_bayonet") != 0 && StrContains(tmp, "weapon_knife") != 0 ) {
+		AddMenuItem(menu, "", "------ Votre Arme ------", ITEMDRAW_DISABLED);
+		Format(tmp, sizeof(tmp), "Nombre de balles: %d", Weapon_GetPrimaryClip(wep_id));
+		
+	}
+	DisplayMenu(menu, client, 60);
+}
 
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
 	#if defined DEBUG
@@ -314,4 +352,52 @@ public void SaveClient(int client){
 	}
 	sCQuery[strlen(sCQuery)-1] = 0;
 	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, sCQuery);
+}
+
+int CountMachine(int client, bool big) {
+	int count = 0;
+	char classname[64], bigclassname[64], tmp[128];
+	Format(bigclassname, sizeof(bigclassname), "rp_bigcashmachine_%i", client);
+	Format(classname, sizeof(classname), "rp_cashmachine_%i", client);
+	
+	for(int i=MaxClients; i<=2048; i++) {
+		if( !IsValidEdict(i) )
+			continue;
+		if( !IsValidEntity(i) )
+			continue;
+		
+		GetEdictClassname(i, tmp, 63);
+		
+		if(big){
+			if(StrEqual(bigclassname, tmp)){
+				return 1;
+			}
+		}
+		else{
+			if(StrEqual(classname, tmp)){
+				count++;
+			}
+		}
+	}
+	return count;
+}
+int CountPlants(int client){
+	int count;
+	char tmp2[64];
+	Format(tmp2, sizeof(tmp2), "rp_plant_%i_", client);
+	for(int i=1; i<=2048; i++) {
+		if( !IsValidEdict(i) )
+			continue;
+		if( !IsValidEntity(i) )
+			continue;
+		
+		char tmp[64];
+		GetEdictClassname(i, tmp, 63);
+		
+		
+		if( StrContains(tmp, tmp2) == 0 ) {
+			count++;
+		}
+	}
+	return count;
 }
