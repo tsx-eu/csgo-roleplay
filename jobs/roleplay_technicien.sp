@@ -388,7 +388,14 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 	if( rp_GetClientJobID(client) != 221 )
 		return Plugin_Continue;
 	int job = rp_GetClientInt(client, i_Job);
-	int ent = job == 221 ? BuildingBigCashMachine(client) : BuildingCashMachine(client);
+	int max, ent;
+	doRP_OnClientMaxMachineCount(client, max);
+	if(max >= 10000){
+		ent = BuildingCashMachine(client, true);
+		cooldown = 3.0;
+		return Plugin_Stop;
+	}
+	ent = job == 221 ? BuildingBigCashMachine(client) : BuildingCashMachine(client, false);
 	if( ent > 0 ) {
 		rp_SetClientStat(client, i_TotalBuild, rp_GetClientStat(client, i_TotalBuild)+1);
 		switch(job){
@@ -405,7 +412,7 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 	}
 	return Plugin_Stop;
 }
-int BuildingCashMachine(int client) {
+int BuildingCashMachine(int client, bool force=false) {
 	#if defined DEBUG
 	PrintToServer("BuildingCashMachine");
 	#endif
@@ -444,7 +451,7 @@ int BuildingCashMachine(int client) {
 		max += 3;
 	}
 	
-	if( count > (max-1) ) {
+	if( count > (max-1) && !force) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez trop de machine active.");
 		return 0;
 	}
