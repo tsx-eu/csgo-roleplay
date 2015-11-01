@@ -121,14 +121,14 @@ public void Q2_Start(int objectiveID, int client) {
 public void RP_OnClientMaxPlantCount(int client, int& max) {
 	int length = GetArraySize(g_hDoing);
 	for (int i = 0; i < length; i++) {
-		if( GetArrayCell(g_hDoing, i) == client && max < 10 )
+		if( GetArrayCell(g_hDoing, i) == client && max < 10 && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == QUEST_JOBID )
 			max = 10;
 	}
 }
 public void RP_OnClientBuildingPrice(int client, int& price) {
 	int length = GetArraySize(g_hDoing);
 	for (int i = 0; i < length; i++) {
-		if( GetArrayCell(g_hDoing, i) == client && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == 81 )
+		if( GetArrayCell(g_hDoing, i) == client && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == QUEST_JOBID )
 			price = 0;
 	}
 }
