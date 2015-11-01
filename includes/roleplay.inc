@@ -255,7 +255,7 @@ native int rp_QuestCreateInstance(int client, char model[PLATFORM_MAX_PATH], flo
 #define BITZONE_VENTE		(1<<24)
 #define BITZONE_PERQUIZ		(1<<25)
 
-#define MAX_ITEMS	330
+#define MAX_ITEMS	311
 #define MAX_JOBS	230
 
 // ----------------------------------------------------------------------------
