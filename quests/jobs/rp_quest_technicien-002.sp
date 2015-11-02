@@ -107,10 +107,10 @@ public void Q2_Start(int objectiveID, int client) {
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Parfait, assure toi que ces plants arrivent", ITEMDRAW_DISABLED);
-	menu.AddItem("", "à maturation.", ITEMDRAW_DISABLED);
+	menu.AddItem("", " Parfait, assure toi que ces machines produisent", ITEMDRAW_DISABLED);
+	menu.AddItem("", "suffisement longtemps.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Protège tes plants de drogue", ITEMDRAW_DISABLED);
+	menu.AddItem("", " Protège tes machines", ITEMDRAW_DISABLED);
 	menu.AddItem("", "pendant 24 heures durant.", ITEMDRAW_DISABLED);
 	
 	
