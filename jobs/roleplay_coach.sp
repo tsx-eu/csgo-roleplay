@@ -465,7 +465,6 @@ void removeShield(int client) {
 		
 		rp_UnhookEvent(client, RP_OnPlayerDead, fwdPlayerDead);
 		rp_UnhookEvent(client, RP_PostTakeDamageWeapon, fwdTakeDamage);
-		rp_UnhookEvent(client, RP_OnFrameSeconde, fwdPlayerFrame);
 		
 		SDKUnhook(g_iRiotShield[client], SDKHook_SetTransmit, Hook_SetTransmit);
 		SDKUnhook(client, SDKHook_WeaponSwitch, Hook_WeaponSwitch);
