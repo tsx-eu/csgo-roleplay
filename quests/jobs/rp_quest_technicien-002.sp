@@ -121,7 +121,7 @@ public void Q2_Start(int objectiveID, int client) {
 public void RP_OnClientMaxMachineCount(int client, int& max) {
 	int length = GetArraySize(g_hDoing);
 	for (int i = 0; i < length; i++) {
-		if( GetArrayCell(g_hDoing, i) == client && rp_GetZoneInt(rp_GetPlayerZone(i), zone_type_type) == QUEST_JOBID ) {
+		if( GetArrayCell(g_hDoing, i) == client && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == QUEST_JOBID ) {
 			max += 10000;
 		}
 	}
