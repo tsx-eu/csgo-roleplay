@@ -31,7 +31,7 @@
 #define MAX_AREA_DIST		500
 #define	MAX_LOCATIONS		150
 #define	MAX_ZONES			300
-#define MODEL_PRISONNIER	"models/player/rgmodels/rginmate/rginmate.mdl"
+#define MODEL_PRISONNIER	"models/player/custom_player/legacy/sprisioner/sprisioner.mdl"
 #define MODEL_BARRIERE		"models/props_fortifications/police_barrier001_128_reference.mdl"
 
 
