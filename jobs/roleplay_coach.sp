@@ -348,11 +348,6 @@ public Action Cmd_ItemRiotShield(int args) {
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
 	
-	if( (rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101) || GetClientTeam(client) != CS_TEAM_CT ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est réservés aux forces de l'ordre.");
-		ITEM_CANCEL(client, item_id);
-		return Plugin_Handled;
-	}
 	if( g_iRiotShield[client] > 0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà un bouclier anti-émeute.");
 		ITEM_CANCEL(client, item_id);
@@ -383,17 +378,12 @@ public Action Cmd_ItemRiotShield(int args) {
 	
 	rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdTakeDamage);
 	rp_HookEvent(client, RP_OnPlayerDead, fwdPlayerDead);
-	rp_HookEvent(client, RP_OnFrameSeconde, fwdPlayerFrame);
 	
 	g_iRiotShield[client] = ent;
 	SDKHook(ent, SDKHook_SetTransmit, Hook_SetTransmit);
 	SDKHook(client, SDKHook_WeaponSwitch, Hook_WeaponSwitch);
 	
 	return Plugin_Handled;
-}
-public Action fwdPlayerFrame(int client) {
-	if( GetClientTeam(client) != CS_TEAM_CT )
-		removeShield(client);
 }
 public Action Hook_WeaponSwitch(int client, int weapon) {
 	char wepname[64];
