@@ -35,7 +35,7 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-int g_iQuest, g_iDuration[MAXPLAYERS + 1], g_iCurrent[MAXPLAYERS+1], g_bMarked[MAXPLAYERS + 1][64];
+int g_iQuest, g_iDuration[MAXPLAYERS + 1], g_iCurrent[MAXPLAYERS+1], g_iMarked[MAXPLAYERS + 1][64];
 
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
@@ -45,7 +45,7 @@ public void OnPluginStart() {
 		SetFailState("Erreur lors de la création de la quête %s %s", QUEST_UNIQID, QUEST_NAME);
 	
 	int i;
-	rp_QuestAddStep(g_iQuest, i++,	Q1_Start,	Q1_Frame,	Q1_Abort,	Q1_Abort);
+	rp_QuestAddStep(g_iQuest, i++,	Q1_Start,	Q1_Frame,	Q1_Abort,	Q1_Done);
 }
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -84,7 +84,7 @@ public void Q1_Frame(int objectiveID, int client) {
 	int target = getNearestPhone(client, dst);
 	
 	if( target > 0 && dst < 48.0 ) {
-		g_bMarked[client][g_iCurrent[client]++] = true;
+		g_iMarked[client][g_iCurrent[client]++] = target;
 	}
 	else if( g_iCurrent[client] >= count ) {
 		rp_QuestStepComplete(client, objectiveID);
@@ -104,7 +104,10 @@ public void Q1_Abort(int objectiveID, int client) {
 }
 public void Q1_Done(int objectiveID, int client) {
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
-	PrintToChatAll("%d", g_iDuration[client]);
+	
+	int cap = rp_GetRandomCapital(221);
+	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 5000);
+	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 5000);
 }
 // ----------------------------------------------------------------------------
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
@@ -122,7 +125,7 @@ int getMaxPhone() {
 	if( lastTime > GetTime() )
 		return lastRes;
 	
-	int count = 0;
+	lastRes = 0;
 	char classname[64];
 	
 	for (int i = MaxClients; i <= 2048; i++) {
@@ -131,7 +134,7 @@ int getMaxPhone() {
 		
 		GetEdictClassname(i, classname, sizeof(classname));
 		if( StrContains(classname, "rp_phone_") == 0)
-			count++;
+			lastRes++;
 	}
 	
 	lastTime = GetTime() + 30;
@@ -153,7 +156,7 @@ int getNearestPhone(int client, float& nearest) {
 		if( StrContains(classname, "rp_phone_") == 0) {
 			skip = false;
 			for (int j = 0; j <= g_iCurrent[client]; j++) {
-				if( g_bMarked[client][j] == i )
+				if( g_iMarked[client][j] == i )
 					skip = true;
 			}
 			if( skip )
