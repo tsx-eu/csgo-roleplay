@@ -23,7 +23,7 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
-#define QUEST_UNIQID	"Mercenaire-001"
+#define QUEST_UNIQID	"mercenaire-001"
 #define	QUEST_NAME		"Le justicier masqué"
 #define	QUEST_TYPE		quest_daily
 #define	QUEST_JOBID		41
@@ -63,8 +63,10 @@ public bool fwdCanStart(int client) {
 	if( rp_GetClientJobID(client) != QUEST_JOBID )
 		return false;
 
-	if(getFreekiller(client) == -1)
+	if(getFreekiller(client) == -1){
+		PrintToChatAll("Cannot start omg");
 		return false;
+	}
 
 	if(rp_GetClientInt(client, i_ToKill) > 0)
 		return false;
@@ -91,7 +93,7 @@ public void Q1_Start(int objectiveID, int client) {
 	g_iDuration[client] = 12 * 60 + 5;
 	PushArrayCell(g_hDoing, client);
 
-	CreateTimer(2.5, timerStartQuest, client); 
+	CreateTimer(5.0, timerStartQuest, client); 
 }
 
 public Action timerStartQuest(Handle timer, any client) {
@@ -100,10 +102,12 @@ public Action timerStartQuest(Handle timer, any client) {
 	#endif
 	int tokill = getFreekiller(client);
 	if(tokill == -1){
+		PrintToChatAll("Cannot start omg");
 		rp_QuestStepFail(client, 0);
 	}
 	else{
 		g_iToKill[client] = tokill;
+		PrintToChatAll("rp_item_contrat classic %d %d %d 0", client, tokill, client);
 		ServerCommand("rp_item_contrat classic %d %d %d 0", client, tokill, client);
 		rp_HookEvent(client, RP_OnPlayerDead, fwdTueurDead);
 		rp_HookEvent(tokill, RP_OnPlayerDead, fwdTueurKill);
@@ -113,10 +117,14 @@ public Action timerStartQuest(Handle timer, any client) {
 }
 public Action fwdTueurDead(int client, int attacker, float& respawn) {
 	rp_QuestStepFail(client, 0);
+	PrintToChatAll("Fail tueur mort");
 }
 public Action fwdTueurKill(int client, int attacker, float& respawn) {
-	if(g_iToKill[attacker] == client)
+	
+	if(g_iToKill[attacker] == client){
 		rp_QuestStepComplete(client, 0);
+		PrintToChatAll("Winne");
+	}
 }
 
 public void Q1_Frame(int objectiveID, int client) {
@@ -132,6 +140,7 @@ public void Q1_Frame(int objectiveID, int client) {
 }
 
 public void Q1_Abort(int objectiveID, int client) {
+	PrintToChatAll("Q1ABORT");
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
 	RemoveFromArray(g_hDoing, FindValueInArray(g_hDoing, client));
 	rp_UnhookEvent(client, RP_OnPlayerDead, fwdTueurDead);
@@ -140,6 +149,7 @@ public void Q1_Abort(int objectiveID, int client) {
 }
 
 public void Q1_Done(int objectiveID, int client) {
+	PrintToChatAll("Q1DONE");
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
 	rp_UnhookEvent(client, RP_OnPlayerDead, fwdTueurDead);
 	rp_UnhookEvent(g_iToKill[client], RP_OnPlayerDead, fwdTueurKill);
