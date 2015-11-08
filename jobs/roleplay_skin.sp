@@ -412,17 +412,6 @@ public Action CmdItemMask(int args) {
 	}
 	int rand = Math_GetRandomInt(1, 7);
 	char model[128];
-		
-	switch(rand) {
-		case 1: Entity_SetModel(client, "models/player/tm_separatist.mdl");
-		case 2: Entity_SetModel(client, "models/player/tm_professional.mdl");
-		case 3: Entity_SetModel(client, "models/player/tm_pirate.mdl");
-		case 4: Entity_SetModel(client, "models/player/tm_phoenix.mdl");
-		case 5: Entity_SetModel(client, "models/player/tm_leet_varianta.mdl");
-		case 6: Entity_SetModel(client, "models/player/tm_balkan_varianta.mdl");
-		case 7: Entity_SetModel(client, "models/player/tm_anarchist.mdl");
-	}
-	rand = Math_GetRandomInt(1, 7);
 	switch(rand) {
 		case 1: Format(model, sizeof(model), "models/player/holiday/facemasks/facemask_skull.mdl");
 		case 2: Format(model, sizeof(model), "models/player/holiday/facemasks/facemask_wolf.mdl");
