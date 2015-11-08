@@ -63,7 +63,7 @@ public bool fwdCanStart(int client) {
 	if( rp_GetClientJobID(client) != QUEST_JOBID )
 		return false;
 
-	if(getFreekiller(client) == -1){
+	if(getToKill(client) == -1){
 		return false;
 	}
 
@@ -98,7 +98,7 @@ public Action timerStartQuest(Handle timer, any client) {
 	#if defined DEBUG
 	PrintToServer("timerStartQuest");
 	#endif
-	int tokill = getFreekiller(client);
+	int tokill = getToKill(client);
 	if(tokill == -1){
 		rp_QuestStepFail(client, g_ObjectiveID);
 	}
@@ -156,22 +156,20 @@ public void Q1_Done(int objectiveID, int client) {
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 2500);	
 }
 
-public int getFreekiller(int client){
-	int ret = -1,
-		tdm = -1;
+public int getToKill(int client){
 	for (int i = 1; i <= MaxClients; i++){
 		if(client == i)
 			continue;
 		if(!IsValidClient(i))
 			continue;
-		if( rp_GetZoneBit( rp_GetPlayerZone(i) ) & BITZONE_JAIL )
-			continue;
-		if(rp_GetClientInt(i, i_KillingSpread) > tdm){
-			ret = i;
-			tdm = rp_GetClientInt(i, i_KillingSpread);
+		if(rp_GetClientBool(i, b_IsSearchByTribunal)){
+			if( rp_GetZoneBit( rp_GetPlayerZone(i) ) & BITZONE_JAIL )
+				continue;
+
+			return i;
 		}
 	}
-	return ret;
+	return -1;
 }
 
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
