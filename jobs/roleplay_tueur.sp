@@ -135,7 +135,7 @@ public Action Cmd_ItemContrat(int args) {
 	int item_id = GetCmdArgInt(args);
 	
 	if( StrContains(arg1, "justice") == 0 ) {
-		if( rp_GetClientJobID(client) != 101 ) {
+		if( rp_GetClientJobID(client) != 101 && client != vendeur) {
 			ITEM_CANCEL(client, item_id);
 			return Plugin_Handled;
 		}

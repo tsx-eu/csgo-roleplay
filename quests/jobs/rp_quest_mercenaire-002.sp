@@ -23,16 +23,16 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
-#define QUEST_UNIQID	"mercenaire-001"
-#define	QUEST_NAME		"Le justicier masqué"
+#define QUEST_UNIQID	"mercenaire-002"
+#define	QUEST_NAME		"Un coup de main pour la justice"
 #define	QUEST_TYPE		quest_daily
 #define	QUEST_JOBID		41
-#define	QUEST_RESUME1	"Tue le plus grand freekilleur"
+#define	QUEST_RESUME1	"Capturez un recherché"
 
 
 public Plugin myinfo = {
-	name = "Quête: Le justicier masqué", author = "Leethium",
-	description = "RolePlay - Quête Mercenaire: Le justicier masqué",
+	name = "Quête: Un coup de main pour la justice", author = "Leethium",
+	description = "RolePlay - Quête Mercenaire: Un coup de main pour la justice",
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
@@ -79,13 +79,11 @@ public void Q1_Start(int objectiveID, int client) {
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Les forces de la police ont besoin de vous", ITEMDRAW_DISABLED);
-	menu.AddItem("", "un serial killer est actuellement en ville.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Votre mission si vous l'acceptez est de l'eliminer", ITEMDRAW_DISABLED);
+	menu.AddItem("", "La justice à besoin de vous", ITEMDRAW_DISABLED);
+	menu.AddItem("", "une personne est actuellement recherchée.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Votre mission si vous l'acceptez est de la capturer", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Vous avez 12 heures pour éliminer le plus grand", ITEMDRAW_DISABLED);
-	menu.AddItem("", "freekilleur du serveur.", ITEMDRAW_DISABLED);
-	
+	menu.AddItem("", " Vous avez 12 heures pour éliminer le recherché", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 60);
@@ -106,7 +104,7 @@ public Action timerStartQuest(Handle timer, any client) {
 	}
 	else{
 		g_iToKill[client] = tokill;
-		ServerCommand("rp_item_contrat classic %d %d %d 0", client, tokill, client);
+		ServerCommand("rp_item_contrat justice %d %d %d 0", client, tokill, client);
 		rp_HookEvent(client, RP_OnPlayerDead, fwdTueurDead);
 		rp_HookEvent(tokill, RP_OnPlayerDead, fwdTueurKill);
 		rp_HookEvent(tokill, RP_PostTakeDamageWeapon, fwdWeapon);
