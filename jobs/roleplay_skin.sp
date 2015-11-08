@@ -412,17 +412,6 @@ public Action CmdItemMask(int args) {
 	}
 	int rand = Math_GetRandomInt(1, 7);
 	char model[128];
-		
-	switch(rand) {
-		case 1: Entity_SetModel(client, "models/player/tm_separatist.mdl");
-		case 2: Entity_SetModel(client, "models/player/tm_professional.mdl");
-		case 3: Entity_SetModel(client, "models/player/tm_pirate.mdl");
-		case 4: Entity_SetModel(client, "models/player/tm_phoenix.mdl");
-		case 5: Entity_SetModel(client, "models/player/tm_leet_varianta.mdl");
-		case 6: Entity_SetModel(client, "models/player/tm_balkan_varianta.mdl");
-		case 7: Entity_SetModel(client, "models/player/tm_anarchist.mdl");
-	}
-	rand = Math_GetRandomInt(1, 7);
 	switch(rand) {
 		case 1: Format(model, sizeof(model), "models/player/holiday/facemasks/facemask_skull.mdl");
 		case 2: Format(model, sizeof(model), "models/player/holiday/facemasks/facemask_wolf.mdl");
@@ -466,21 +455,22 @@ public Action fwdUse(int client) {
 
 	Handle menu = CreateMenu(MenuTrySkin);
 	SetMenuTitle(menu, "Selection du skin à essayer:");
-
-	AddMenuItem(menu, "models/player/custom/hitman/hitman.mdl", 	"Hitman");
-	AddMenuItem(menu, "models/player/custom/max/max.mdl", 			"Max");
-	AddMenuItem(menu, "models/player/custom/johnny/johnny.mdl", 	"Johnny");
-	AddMenuItem(menu, "models/player/kuristaja/duke/duke.mdl", 		"Duke Nukem");
+	
+	AddMenuItem(menu, "models/player/custom_player/legacy/eva/eva.mdl", 			"Eva");
+	AddMenuItem(menu, "models/player/custom_player/legacy/gauntlet/gauntlet.mdl", 	"Julie");
+	AddMenuItem(menu, "models/player/custom_player/legacy/lightning/lightning.mdl", "Alice");
+	AddMenuItem(menu, "models/player/lara/lara.mdl", 								"Lara");
+	AddMenuItem(menu, "models/player/custom_player/legacy/leon/leon.mdl", 			"Leon");
+	
+	AddMenuItem(menu, "models/player/custom/hitman/hitman.mdl", 					"Hitman");
+	AddMenuItem(menu, "models/player/custom/max/max.mdl", 							"Max");
+	AddMenuItem(menu, "models/player/custom/johnny/johnny.mdl", 					"Johnny");
+	AddMenuItem(menu, "models/player/custom_player/legacy/duke/duke_v3.mdl", 		"Duke Nukem");
 	
 	AddMenuItem(menu, "models/player/custom/zoey/zoey.mdl", 		"Zoey");
 	AddMenuItem(menu, "models/player/custom/francis/francis.mdl", 	"Francis");
 	AddMenuItem(menu, "models/player/custom/ellis/ellis.mdl", 		"Ellis");
 	AddMenuItem(menu, "models/player/custom/nick/nick.mdl", 		"Nick");
-	
-	AddMenuItem(menu, "models/player/resident/sherry6/sherry6.mdl", "Sherry");
-	AddMenuItem(menu, "models/player/resident/leon6/leon6.mdl", 	"Leon");
-	AddMenuItem(menu, "models/player/dr.valencia/dr.valencia.mdl", 	"Dr. Valencia");
-	AddMenuItem(menu, "models/player/domino/domino.mdl", 			"Domino");
 	
 	AddMenuItem(menu, "models/player/tm_anarchist.mdl", 			"Anarchist");
 	AddMenuItem(menu, "models/player/tm_anarchist_varianta.mdl", 	"Anarchist - A");
@@ -547,7 +537,7 @@ public int MenuTrySkin(Handle menu, MenuAction action, int client, int param2) {
 			}
 			char clientModel[128];
 			GetClientModel(client, clientModel, sizeof(clientModel));
-			if( StrEqual(clientModel, "models/player/rgmodels/rginmate/rginmate.mdl") ){
+			if( StrEqual(clientModel, "models/player/custom_player/legacy/sprisioner/sprisioner.mdl") ){
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas essayer cela en tant qu'évadé.");
 				return;
 			}

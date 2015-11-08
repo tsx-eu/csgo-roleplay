@@ -107,10 +107,10 @@ public void Q2_Start(int objectiveID, int client) {
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Parfait, assure toi que ces plants arrivent", ITEMDRAW_DISABLED);
-	menu.AddItem("", "à maturation.", ITEMDRAW_DISABLED);
+	menu.AddItem("", " Parfait, assure toi que ces machines produisent", ITEMDRAW_DISABLED);
+	menu.AddItem("", "suffisement longtemps.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Protège tes plants de drogue", ITEMDRAW_DISABLED);
+	menu.AddItem("", " Protège tes machines", ITEMDRAW_DISABLED);
 	menu.AddItem("", "pendant 24 heures durant.", ITEMDRAW_DISABLED);
 	
 	
@@ -121,7 +121,7 @@ public void Q2_Start(int objectiveID, int client) {
 public void RP_OnClientMaxMachineCount(int client, int& max) {
 	int length = GetArraySize(g_hDoing);
 	for (int i = 0; i < length; i++) {
-		if( GetArrayCell(g_hDoing, i) == client && rp_GetZoneInt(rp_GetPlayerZone(i), zone_type_type) == QUEST_JOBID ) {
+		if( GetArrayCell(g_hDoing, i) == client && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == QUEST_JOBID ) {
 			max += 10000;
 		}
 	}

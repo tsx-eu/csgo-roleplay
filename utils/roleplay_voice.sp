@@ -303,7 +303,7 @@ public int MenuJobs(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_
 				if(!IsValidClient(i))
 					continue;
 
-				if(jobid == -2 && rp_GetClientInt(i, i_Avocat) < 0)
+				if(jobid == -2 && rp_GetClientInt(i, i_Avocat) <= 0)
 					continue;
 
 				if(jobid >= 0 && (i == client || rp_GetClientJobID(i) != jobid))

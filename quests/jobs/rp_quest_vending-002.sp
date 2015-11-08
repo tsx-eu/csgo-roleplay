@@ -26,7 +26,7 @@
 #define QUEST_UNIQID   "vending-002"
 #define QUEST_NAME      "Employé modèle"
 #define QUEST_TYPE      quest_daily
-#define QUEST_RESUME   "Effectuer 10.000$ de vente"
+#define QUEST_RESUME   "Vendre pour 10.000$"
 #define QUEST_ITEM      236
 
 public Plugin myinfo =  {
@@ -45,7 +45,7 @@ public void OnPluginStart() {
 		SetFailState("Erreur lors de la création de la quête %s %s", QUEST_UNIQID, QUEST_NAME);
 	
 	int i;
-	rp_QuestAddStep(g_iQuest, i++, Q1_Start, Q1_Frame, Q1_Abort, Q1_Abort);
+	rp_QuestAddStep(g_iQuest, i++, Q1_Start, Q1_Frame, Q1_Abort, Q1_End);
 }
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -71,8 +71,9 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Bonjour collègue, on a de nouveaux projets pour toi.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "On a 5 colis à récupérer en ville. ", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Rapporte les nous.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "On t'offre un bonus de 2500$ ", ITEMDRAW_DISABLED);
+	menu.AddItem("", "si tu arrives à vendre pour plus de 10 000$", ITEMDRAW_DISABLED);
+	menu.AddItem("", "en moins de 24 heures", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 60);
@@ -95,16 +96,12 @@ public void Q1_Frame(int objectiveID, int client) {
 	
 	if( g_iCurrent[client] >= 10000 ) {
 		rp_QuestStepComplete(client, objectiveID);
-		
-		int cap = rp_GetClientJobID(client);
-		rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 2500);
-		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 2500);
 	}
 	else if (g_iDuration[client] <= 0) {
 		rp_QuestStepFail(client, objectiveID);
 	}
 	else {
-		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s (%d$)", QUEST_NAME, g_iDuration[client], QUEST_RESUME, g_iCurrent[client]);
+		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s (%d%%)", QUEST_NAME, g_iDuration[client], QUEST_RESUME, RoundToCeil(g_iCurrent[client]/10000.0*100.0));
 	}
 }
 public void Q1_End(int objectiveID, int client) {
@@ -118,6 +115,10 @@ public void Q1_End(int objectiveID, int client) {
 	
 	menu.ExitButton = false;
 	menu.Display(client, 10);
+	
+	int cap = rp_GetClientJobID(client);
+	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 2500);
+	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 2500);
 }
 // ----------------------------------------------------------------------------
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
