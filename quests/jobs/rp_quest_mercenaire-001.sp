@@ -36,7 +36,7 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-int g_iQuest, g_iDuration[MAXPLAYERS + 1], g_iToKill[MAXPLAYERS + 1];
+int g_iQuest, g_iDuration[MAXPLAYERS + 1], g_iToKill[MAXPLAYERS + 1], g_ObjectiveID;
 Handle g_hDoing;
 
 public void OnPluginStart() {
@@ -75,6 +75,7 @@ public bool fwdCanStart(int client) {
 }
 
 public void Q1_Start(int objectiveID, int client) {
+	g_ObjectiveID = objectiveID;
 	Menu menu = new Menu(MenuNothing);
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
@@ -103,7 +104,7 @@ public Action timerStartQuest(Handle timer, any client) {
 	int tokill = getFreekiller(client);
 	if(tokill == -1){
 		PrintToChatAll("Cannot start omg");
-		rp_QuestStepFail(client, 0);
+		rp_QuestStepFail(client, g_ObjectiveID);
 	}
 	else{
 		g_iToKill[client] = tokill;
@@ -113,7 +114,7 @@ public Action timerStartQuest(Handle timer, any client) {
 		rp_HookEvent(tokill, RP_OnPlayerDead, fwdTueurKill);
 	}
 	if(!IsValidClient(g_iToKill[client]))
-		rp_QuestStepFail(client, 0);
+		rp_QuestStepFail(client, g_ObjectiveID);
 }
 public Action fwdTueurDead(int client, int attacker, float& respawn) {
 	rp_QuestStepFail(client, 0);
@@ -122,7 +123,7 @@ public Action fwdTueurDead(int client, int attacker, float& respawn) {
 public Action fwdTueurKill(int client, int attacker, float& respawn) {
 	
 	if(g_iToKill[attacker] == client){
-		rp_QuestStepComplete(client, 0);
+		rp_QuestStepComplete(client, g_ObjectiveID);
 		PrintToChatAll("Winne");
 	}
 }
