@@ -135,7 +135,7 @@ public Action Cmd_ItemContrat(int args) {
 	int item_id = GetCmdArgInt(args);
 	
 	if( StrContains(arg1, "justice") == 0 ) {
-		if( rp_GetClientJobID(client) != 101 ) {
+		if( rp_GetClientJobID(client) != 101 && client != vendeur) {
 			ITEM_CANCEL(client, item_id);
 			return Plugin_Handled;
 		}
@@ -157,8 +157,11 @@ public Action Cmd_ItemContrat(int args) {
 	
 	rp_SetClientInt(vendeur, i_ToKill, target);
 	rp_SetClientInt(vendeur, i_ContratFor, client);
-	rp_SetClientInt(vendeur, i_ContratPay, rp_GetItemInt(item_id, item_type_prix) );
-	
+	if(item_id != 0)
+		rp_SetClientInt(vendeur, i_ContratPay, rp_GetItemInt(item_id, item_type_prix) );
+	else
+		rp_SetClientInt(vendeur, i_ContratPay, 0);
+
 	rp_HookEvent(vendeur, RP_OnPlayerDead, fwdTueurDead);
 	rp_HookEvent(target, RP_OnPlayerDead, fwdTueurKill);
 	rp_HookEvent(vendeur, RP_OnFrameSeconde, fwdFrame);
@@ -541,27 +544,28 @@ void SetContratFail(int client, bool time = false) { // time = retro-compatibili
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes mort et n'avez pas remplis votre contrat.");
 	
 	int target = rp_GetClientInt(client, i_ContratFor);
-	
-	if( IsValidClient(target) ) {		
-		
-		if( time )
-			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N n'a pas remplis son contrat à temps.", client);
-		else if( jobClient != 41 ) // si le tueur a démissionné entre temps
-			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N n'est plus mercenaire et ne peut plus remplir votre contrat.", client);
-		else
-			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N a été tué et n'a pas pu remplir son contrat.", client);
-		
-		
-		
-		int prix = rp_GetClientInt(client, i_ContratPay);
-		int reduction = rp_GetClientInt(client, i_Reduction);
-		
-		rp_SetClientInt(target, i_Bank, rp_GetClientInt(target, i_Bank) + prix - (RoundFloat((float(prix) / 100.0) * float(reduction)) / 2));
-		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) - (prix - RoundFloat( (float(prix) / 100.0) * float(reduction))) / 2);
-		rp_SetJobCapital(41, rp_GetJobCapital(41) - (prix / 2));
-	}
-	else {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre employeur est déconnecté, vous ne le remboursez pas.");
+	if(target != client){
+		if( IsValidClient(target) ) {		
+			
+			if( time )
+				CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N n'a pas remplis son contrat à temps.", client);
+			else if( jobClient != 41 ) // si le tueur a démissionné entre temps
+				CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N n'est plus mercenaire et ne peut plus remplir votre contrat.", client);
+			else
+				CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N a été tué et n'a pas pu remplir son contrat.", client);
+			
+			
+			
+			int prix = rp_GetClientInt(client, i_ContratPay);
+			int reduction = rp_GetClientInt(client, i_Reduction);
+			
+			rp_SetClientInt(target, i_Bank, rp_GetClientInt(target, i_Bank) + prix - (RoundFloat((float(prix) / 100.0) * float(reduction)) / 2));
+			rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) - (prix - RoundFloat( (float(prix) / 100.0) * float(reduction))) / 2);
+			rp_SetJobCapital(41, rp_GetJobCapital(41) - (prix / 2));
+		}
+		else {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre employeur est déconnecté, vous ne le remboursez pas.");
+		}
 	}
 	
 	
