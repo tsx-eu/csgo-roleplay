@@ -67,6 +67,7 @@ public Action fwdOnZoneChange(int client, int oldZone, int newZone) {
 		BotMimic_StartRecording(client, name);
 		
 		PrintToConsole(client, "[TSX-RP] [PVP] Vos mouvements sont maintenant enregistré.");
+		LogToGame("[PVP] [RECORD-%d] %L<%d> is recoding as %s ", GetTime(), client, client, name);
 	}
 	else if( newPVP && !oldPVP && BotMimic_IsPlayerRecording(client) ) {
 		BotMimic_StopRecording(client, true);
