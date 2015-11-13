@@ -911,12 +911,12 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 						continue;
 
 					if(rp_GetVehicleInt(target, car_battery) >= 420){
-						rp_SetClientInt( client, i_AddToPay, rp_GetClientInt(client, i_AddToPay)+1000);
+						rp_SetClientInt( client, i_AddToPay, rp_GetClientInt(client, i_AddToPay)+2000);
 						
-						int capital_id = rp_GetRandomCapital( client );
-						rp_SetJobCapital( capital_id, rp_GetJobCapital(capital_id)-1000 );
+						int capital_id = rp_GetRandomCapital( rp_GetClientJobID(client)  );
+						rp_SetJobCapital( capital_id, rp_GetJobCapital(capital_id)-2000 );
 						
-						CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez vendu votre batterie, 1000$ vous seront crédité à la fin de la journée.");
+						CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez vendu votre batterie, 2000$ vous seront crédité à la fin de la journée.");
 						rp_SetVehicleInt(target, car_battery, -1);
 					}
 				}
