@@ -958,7 +958,7 @@ public Action Cmd_ItemPilule(int args){
 			case 91:  tptozone = 13;
 			case 101: tptozone = 76;
 			case 111: tptozone = 100;
-			case 121: tptozone = 282;
+			case 121: tptozone = 283;
 			case 131: tptozone = 61;
 			case 141: tptozone = 61;
 			case 171: tptozone = 65;
