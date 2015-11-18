@@ -237,14 +237,15 @@ public Action fwdTueurKill(int client, int attacker, float& respawn) {
 			}
 			else if( g_iKillerPoint[attacker][competance_type] == 1004 ) {
 				respawn = 0.05;
-				CreateTimer(0.33, SendToTribunal, client);
+				rp_SetClientBool(client, b_SpawnToTribunal, true);
+				rp_HookEvent(client, RP_OnPlayerSpawn, fwdOnRespawn);
 			}
 			else if( g_iKillerPoint[attacker][competance_type] == 1005 ) {
 				rp_SetClientInt(client, i_ToPay, from);
 				rp_SetClientInt(client, i_KidnappedBy, attacker);
-							
-				respawn = 0.05;
-				CreateTimer(0.33, SendToTueur, client);
+				rp_SetClientBool(client, b_SpawnToTueur, true);
+				rp_HookEvent(client, RP_OnPlayerSpawn, fwdOnRespawn);
+				respawn = 0.05;				
 				kidnapping = true;
 			}
 			else {
@@ -258,6 +259,16 @@ public Action fwdTueurKill(int client, int attacker, float& respawn) {
 		return Plugin_Handled; // On retire des logs
 	}
 	return Plugin_Continue;
+}
+public Action fwdOnRespawn(int client) {
+	if( rp_GetClientBool(client, b_SpawnToTueur) ) {
+		rp_SetClientBool(client, b_SpawnToTueur, false);
+		CreateTimer(0.01, SendToTueur, client);
+	}
+	if( rp_GetClientBool(client, b_SpawnToTribunal) ) {
+		rp_SetClientBool(client, b_SpawnToTribunal, false);
+		CreateTimer(0.01, SendToTribunal, client);
+	}
 }
 public Action fwdTueurDead(int client, int attacker, float& respawn) {
 	
@@ -410,7 +421,10 @@ public int AddCompetanceToAssassin(Handle menu, MenuAction action, int client, i
 			rp_SetClientFloat(client, fl_WeaponTrain, 10.0);
 		}
 		else if( StrEqual(options, "usp", false) || StrEqual(options, "awp", false) || StrEqual(options, "pompe", false) ) {
-
+			
+			if( rp_GetZoneBit( rp_GetPlayerZone(client) ) & BITZONE_JAIL || rp_GetZoneBit( rp_GetPlayerZone(client) ) & BITZONE_LACOURS || rp_GetZoneBit( rp_GetPlayerZone(client) ) & BITZONE_HAUTESECU )
+				return;
+			
 			int wepIdx;
 			
 			for( int i = 0; i < 5; i++ ){

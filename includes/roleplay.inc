@@ -264,7 +264,6 @@ native int rp_QuestCreateInstance(int client, char model[PLATFORM_MAX_PATH], flo
 enum bool_user_data {
 	b_isConnected,	// Money,bank, item
 	b_isConnected2, // Success
-	b_Respawning,
 	b_Drugged,
 	b_License1,
 	b_License2,
@@ -307,6 +306,9 @@ enum bool_user_data {
 	b_HasProtImmu,
 	b_HasQuest,
 	b_IsSearchByTribunal,
+	b_SpawnToMetro,
+	b_SpawnToTribunal,
+	b_SpawnToTueur,	
 	
 	b_udata_max
 };
@@ -407,6 +409,7 @@ enum float_user_data {
 	Float:fl_Alcool,
 	Float:fl_LowDamage,
 	Float:fl_HallucinationTime,
+	Float:fl_RespawnTime,
 	
 	fl_udata_max
 };
