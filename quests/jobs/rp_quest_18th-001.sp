@@ -241,7 +241,7 @@ int nearestWeapon(int client) {
 		if (StrContains(classname, "weapon_") == 0 && rp_GetWeaponStorage(i) == true) {
 			owner = Weapon_GetOwner(i);
 			if (owner <= 0)
-				owner = i;
+				continue;
 			
 			Entity_GetAbsOrigin(owner, vecDestination);
 			tmp = GetVectorDistance(vecOrigin, vecDestination);
