@@ -69,7 +69,18 @@ public bool IsValidClient(int client) {
 	
 	return true;
 }
-public int GetClientTarget(int client) {
+int GetClientTarget(int client, float dst[3] = {0.0, 0.0, 0.0}) {
+	static float cacheTime[65];
+	static float cacheDataDst[65][3];
+	static int cacheDataTarget[65];
+	
+	if( cacheTime[client] > GetGameTime() ) {
+		dst[0] = cacheDataDst[client][0];
+		dst[1] = cacheDataDst[client][1];
+		dst[2] = cacheDataDst[client][2];
+		return cacheDataTarget[client];
+	}
+	
 	float vecStart[3], vecAngles[3];
 	GetClientEyePosition(client, vecStart);
 	GetClientEyeAngles(client, vecAngles);
@@ -80,10 +91,12 @@ public int GetClientTarget(int client) {
 		return 0;
 	}
 	
-	int ent = TR_GetEntityIndex(trace);
+	cacheDataTarget[client] = TR_GetEntityIndex(trace);
+	TR_GetEndPosition(cacheDataDst[client], trace);
+	cacheTime[client] = GetGameTime() + 0.025;
 	CloseHandle(trace);
 	
-	return ent;
+	return cacheDataTarget[client];
 }
 public bool FilterToOne(int entity, int mask, any data) {
 	static char classname[64];
@@ -260,6 +273,7 @@ public Action rp_ClientRemoveProp(int client, int target, int item_id) {
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez detruit la machine de %N", owner);
 					CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos machines a faux billet a été detruite.");
 				}
+				
 			}
 			if( StrContains(name, "rp_bigcashmachine_") == 0 ) {
 					
