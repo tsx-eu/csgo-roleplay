@@ -105,7 +105,7 @@ public Action fwdDataLoaded(int client){
 	rp_SetClientStat(client, i_Money_OnConnection, ( rp_GetClientInt(client, i_Money) + rp_GetClientInt(client, i_Bank) ));
 	rp_SetClientStat(client, i_PVP_OnConnection, rp_GetClientInt(client, i_PVP));
 	rp_SetClientStat(client, i_Vitality_OnConnection, RoundToNearest(rp_GetClientFloat(client, fl_Vitality)) );
-	char steamID[32], query[128];
+	char steamID[32], query[256];
 	GetClientAuthId(client, AuthId_Engine, steamID, sizeof(steamID), false);
 	Format(query, sizeof(query), "SELECT `stat_id`, `data` FROM `rp_statdata` WHERE `steamid`=\"%s\"", steamID);
 	SQL_TQuery(rp_GetDatabase(), SQL_StatLoadCB, query, client, DBPrio_High);
@@ -338,11 +338,14 @@ public Action saveStats(Handle timer){
 		return;
 
 	sSQuery[strlen(sSQuery)-1] = 0;
+	#if defined DEBUG
+	PrintToServer(sSQuery);
+	#endif
 	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, sSQuery);
 }
 
 public void SaveClient(int client){
-	static char sCQuery[1024];
+	static char sCQuery[8192];
 	static char sCUID[32];
 	UpdateStats(client);
 	GetClientAuthId(client, AuthId_Engine, sCUID, sizeof(sCUID), false);
