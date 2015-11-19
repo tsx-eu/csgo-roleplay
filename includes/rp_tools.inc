@@ -75,9 +75,7 @@ int GetClientTarget(int client, float dst[3] = {0.0, 0.0, 0.0}) {
 	static int cacheDataTarget[65];
 	
 	if( cacheTime[client] > GetGameTime() ) {
-		dst[0] = cacheDataDst[client][0];
-		dst[1] = cacheDataDst[client][1];
-		dst[2] = cacheDataDst[client][2];
+		dst = cacheDataDst[client];
 		return cacheDataTarget[client];
 	}
 	
@@ -94,6 +92,7 @@ int GetClientTarget(int client, float dst[3] = {0.0, 0.0, 0.0}) {
 	cacheDataTarget[client] = TR_GetEntityIndex(trace);
 	TR_GetEndPosition(cacheDataDst[client], trace);
 	cacheTime[client] = GetGameTime() + 0.025;
+	dst = cacheDataDst[client];
 	CloseHandle(trace);
 	
 	return cacheDataTarget[client];
