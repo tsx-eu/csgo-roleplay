@@ -395,12 +395,12 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 		cooldown = 3.0;
 		return Plugin_Stop;
 	}
-	ent = job == 221 ? BuildingBigCashMachine(client) : BuildingCashMachine(client, false);
+	ent = (job == 221 || job == 222) ? BuildingBigCashMachine(client) : BuildingCashMachine(client, false);
 	if( ent > 0 ) {
 		rp_SetClientStat(client, i_TotalBuild, rp_GetClientStat(client, i_TotalBuild)+1);
 		switch(job){
 			case 221: cooldown = 60.0;
-			case 222: cooldown = 10.0;
+			case 222: cooldown = 120.0;
 			case 223: cooldown = 15.0;
 			case 224: cooldown = 20.0;
 			case 225: cooldown = 25.0;
@@ -430,7 +430,7 @@ int BuildingCashMachine(int client, bool force=false) {
 	
 	switch( rp_GetClientInt(client, i_Job) ) {
 		case 221: max = 15; 
-		case 222: max = 14;
+		case 222: max = 15;
 		case 223: max = 13;
 		case 224: max = 12;
 		case 225: max = 11;
@@ -685,7 +685,7 @@ int BuildingBigCashMachine(int client) {
 	
 	switch( rp_GetClientInt(client, i_Job) ) {
 		case 221: max = 15; 
-		case 222: max = 14;
+		case 222: max = 15;
 		case 223: max = 13;
 		case 224: max = 12;
 		case 225: max = 11;
