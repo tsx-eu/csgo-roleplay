@@ -647,14 +647,16 @@ public Action SendToTueur(Handle timer, any client) {
 	OpenKidnappingMenu(client);
 }
 void clearKidnapping(int client) {
-	rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
-	rp_UnhookEvent(client, RP_OnPlayerDead, fwdDead);
-	rp_UnhookEvent(client, RP_OnFrameSeconde, fwdFrame);
+	if( rp_GetClientInt(client, i_KidnappedBy) > 0 ) {
+		rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
+		rp_UnhookEvent(client, RP_OnPlayerDead, fwdDead);
+		rp_UnhookEvent(client, RP_OnFrameSeconde, fwdFrame);
 	
-	rp_SetClientInt(client, i_KidnappedBy, 0);
-	KillTimer(g_hTimer[client]);
-	g_hTimer[client] = null;
-	g_bShouldOpen[client] = false;
+		rp_SetClientInt(client, i_KidnappedBy, 0);
+		KillTimer(g_hTimer[client]);
+		g_hTimer[client] = null;
+		g_bShouldOpen[client] = false;
+	}
 }
 public Action fwdZoneChange(int client, int newZone, int oldZone) {
 	int newType = rp_GetZoneInt(newZone, zone_type_type);

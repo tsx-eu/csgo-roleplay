@@ -66,7 +66,6 @@ public void OnClientDisconnect(int client) {
 			continue;
 		if( rp_GetVehicleInt(i, car_owner) == client) {
 			VehicleRemove(i);
-			
 		}
 	}
 }
@@ -505,6 +504,9 @@ void VehicleRemove(int vehicle, bool explode = false) {
 	#if defined DEBUG
 	PrintToServer("VehicleRemove");
 	#endif
+	if( vehicle <= 0 )
+		return;
+	
 	CreateTimer(0.1, BatchLeave, vehicle);
 	
 	for(int i=1; i<=MaxClients; i++)
@@ -560,6 +562,9 @@ public Action BatchLeave(Handle timer, any vehicle) {
 	#if defined DEBUG
 	PrintToServer("BatchLeave");
 	#endif
+	
+	if( vehicle <= 0 )
+		return;
 	int client = GetEntPropEnt(vehicle, Prop_Send, "m_hPlayer");
 	
 	if( IsValidClient(client) ) {
@@ -580,7 +585,7 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 	Entity_GetAbsOrigin(ent, vecOrigin);
 
 	ent = EntRefToEntIndex(ent);
-	if( ent < 0 || !IsValidEdict(ent) )
+	if( ent <= 0 || !IsValidEdict(ent) )
 		return Plugin_Handled;
 	
 	if( rp_GetVehicleInt(ent, car_health) <= 0 ) {
