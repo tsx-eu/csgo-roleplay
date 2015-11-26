@@ -144,7 +144,7 @@ public Action Cmd_ItemHamburger(int args) {
 				iItemRand[amount] = i;
 				amount++;
 			}
-			if( lucky && rp_GetItemInt(i, item_type_prix) > 2000 ) { // 2x plus de chance... Si on a de la chance grâce aux portes bonheures
+			if( lucky && rp_GetItemInt(i, item_type_prix) > 2000 ) { // 2x plus de chance... Si on a de la chance grâce aux portes- bonheures
 				iItemRand[amount] = i;
 				amount++;
 			}
