@@ -2407,7 +2407,7 @@ int BuildingBarriere(int client) {
 	
 	SetEntityModel(ent, MODEL_BARRIERE);
 	
-	SetEntProp( ent, Prop_Data, "m_iHealth", 500);
+	SetEntProp( ent, Prop_Data, "m_iHealth", 1000);
 	SetEntProp( ent, Prop_Data, "m_takedamage", 0);
 	
 	SetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity", client);
