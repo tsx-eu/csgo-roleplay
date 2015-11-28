@@ -23,7 +23,7 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
-#define QUEST_UNIQID	"justice-001"
+#define QUEST_UNIQID	"justice-002"
 #define	QUEST_NAME		"La justice exprès"
 #define	QUEST_TYPE		quest_daily
 #define	QUEST_JOBID		1
