@@ -67,7 +67,7 @@ public void Q1_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
-	menu.AddItem("", "Interlocuteur anonyme :, ITEMDRAW_DISABLED);
+	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Collègue, nous avons besoin que vous ", ITEMDRAW_DISABLED);
 	menu.AddItem("", "tasiez un maximum d'objets illégaux en ville.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Pendant les 24 prochaines heures, nous doublons tes gains", ITEMDRAW_DISABLED);
