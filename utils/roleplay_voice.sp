@@ -27,16 +27,11 @@ bool g_bAllTalk = false;
 char g_avocats[][][32] = {
 	{"STEAM_1:0:34370282", "200"},	//CyBuG
 	{"STEAM_1:1:93713536", "150"},	//Kiceroh
-	{"STEAM_1:1:12956123", "150"},	//Mendes
-	{"STEAM_1:1:95016136", "150"},	//Bot Diablo
-	{"STEAM_1:1:56912514", "150"},	//Yuskailand
-	{"STEAM_0:1:83919363", "150"},	//Kaporal
-	{"STEAM_1:1:48928773", "150"},	//Zare
-	{"STEAM_0:1:83458579", "150"},	//TackeDown
-	{"STEAM_0:0:115947297", "150"},	//Handicaper
-	{"STEAM_0:1:53413224", "150"}, 	//Mohamed
-	{"STEAM_1:1:36646680", "150"}	//Lisitz
-	
+	{"STEAM_1:1:94125947", "150"},	//Gold
+	{"STEAM_1:0:100462521", "150"},	//Armory
+	{"STEAM_1:1:87405234", "150"},	//Rothi
+	{"STEAM_1:1:36781942", "150"},	//ChowN
+	{"STEAM_1:0:18960266", "150"} 	//Astraa
 	
 };
 
