@@ -72,17 +72,17 @@ public void Q1_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
-	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Collègue, nos informations indiquent qu'un meurtrier.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Collègue, nos informations indiquent qu'un meurtrier", ITEMDRAW_DISABLED);
 	menu.AddItem("", "en série fait rage en ville.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Nous avons besoin de le prendre en flagrant délit.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Prends filature, jusqu'à ce qu'il commette", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Prends le en filature, jusqu'à ce qu'il commette", ITEMDRAW_DISABLED);
 	menu.AddItem("", "un meurtre. Ensuite, arrête le.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Il est important de ne pas te faire répérer, ", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Il est important de ne pas te faire répérer,", ITEMDRAW_DISABLED);
 	menu.AddItem("", "si l'assassin te voit, il ne commetera pas de crime.", ITEMDRAW_DISABLED); 
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Tu as 12 heures pour le prendre en flagrant délit.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Tu as 12 heures pour le prendre en flagrant délit.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 60);
@@ -109,7 +109,7 @@ public void Q1_Frame(int objectiveID, int client) {
 	}
 }
 public void Q1_Abort(int objectiveID, int client) {
-	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
+	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 }
 public void Q2_Start(int objectiveID, int client) {
 	
@@ -117,9 +117,9 @@ public void Q2_Start(int objectiveID, int client) {
 		Menu menu = new Menu(MenuNothing);
 		
 		menu.SetTitle("Quète: %s", QUEST_NAME);
-		menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-		menu.AddItem("", "Il a tué! Arrêtez le!", ITEMDRAW_DISABLED);
-		menu.AddItem("", "Quoi qu'il en coute!", ITEMDRAW_DISABLED);
+		menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
+		menu.AddItem("", "Il a tué ! Arrêtez le !", ITEMDRAW_DISABLED);
+		menu.AddItem("", "Quoi qu'il en coute !", ITEMDRAW_DISABLED);
 		
 		
 		menu.ExitButton = false;
@@ -144,7 +144,7 @@ public void Q2_Frame(int objectiveID, int client) {
 	}
 }
 public void Q2_Done(int objectiveID, int client) {
-	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
+	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 	
 	int cap = rp_GetRandomCapital(1);
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 5000);
