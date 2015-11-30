@@ -78,13 +78,13 @@ public void Q1_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
-	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Les forces de la police ont besoin de vous", ITEMDRAW_DISABLED);
-	menu.AddItem("", "un serial killer est actuellement en ville.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Les forces de la police ont besoin de vous.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Un serial killer est actuellement en ville.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Votre mission si vous l'acceptez est de l'eliminer", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Vous avez 12 heures pour éliminer le plus grand", ITEMDRAW_DISABLED);
-	menu.AddItem("", "freekilleur du serveur.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Vous avez 12 heures pour éliminer le plus grand", ITEMDRAW_DISABLED);
+	menu.AddItem("", "serial killer du serveur.", ITEMDRAW_DISABLED);
 	
 	
 	menu.ExitButton = false;
@@ -137,7 +137,7 @@ public void Q1_Frame(int objectiveID, int client) {
 }
 
 public void Q1_Abort(int objectiveID, int client) {
-	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
+	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 	RemoveFromArray(g_hDoing, FindValueInArray(g_hDoing, client));
 	rp_UnhookEvent(client, RP_OnPlayerDead, fwdTueurDead);
 	rp_UnhookEvent(g_iToKill[client], RP_OnPlayerDead, fwdTueurKill);
