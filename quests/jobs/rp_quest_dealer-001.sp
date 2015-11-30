@@ -70,12 +70,12 @@ public void Q1_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
-	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Hey gros, on a nouveau gros client et nous", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Hey gros, on a un nouveau gros client et nous", ITEMDRAW_DISABLED);
 	menu.AddItem("", "avons besoin de toi pour une nouvelle fournée.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Vous avez 12 heures pour poser 10 plants", ITEMDRAW_DISABLED);
-	menu.AddItem("", "dans votre planque.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Tu as 12 heures pour poser 10 plants", ITEMDRAW_DISABLED);
+	menu.AddItem("", "dans ta planque.", ITEMDRAW_DISABLED);
 	
 	
 	menu.ExitButton = false;
@@ -106,12 +106,12 @@ public void Q2_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
-	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Parfait, assure toi que ces plants arrivent", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Parfait, assure toi que ces plants arrivent", ITEMDRAW_DISABLED);
 	menu.AddItem("", "à maturation.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Protège tes plants de drogue", ITEMDRAW_DISABLED);
-	menu.AddItem("", "pendant 24 heures durant.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Protège tes plants de drogue", ITEMDRAW_DISABLED);
+	menu.AddItem("", "durant 24 heures.", ITEMDRAW_DISABLED);
 	
 	
 	menu.ExitButton = false;
@@ -146,7 +146,7 @@ public void Q2_Frame(int objectiveID, int client) {
 	}
 }
 public void Q2_Done(int objectiveID, int client) {
-	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
+	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 	
 	int cap = rp_GetRandomCapital(QUEST_JOBID);
 	int amount = countPlant(client) * 500;
@@ -155,7 +155,7 @@ public void Q2_Done(int objectiveID, int client) {
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + amount);	
 }
 public void Q2_Abort(int objectiveID, int client) {
-	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
+	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 }
 // ----------------------------------------------------------------------------
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
