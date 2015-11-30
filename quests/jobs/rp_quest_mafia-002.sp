@@ -72,7 +72,7 @@ public void Q1_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
-	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Mon frère, l'un de nos hommes a disparu.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Nous avons besoin de toi.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
@@ -82,9 +82,9 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.AddItem("", "Nous t'offrons 1000$ par bâtiments infiltrés.", ITEMDRAW_DISABLED);
 	
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Pendant toute la durée de ta mission, ", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Pendant toute la durée de ta mission,", ITEMDRAW_DISABLED);
 	menu.AddItem("", "nous t'enverrons du matériel nécessaire à ta réussite.", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Tu as 6 heures.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Tu as 6 heures.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 60);
@@ -98,8 +98,8 @@ public void Q2_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
-	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Vous avez trouvé des traces de son passage içi.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Vous avez trouvé des traces de son passage ici.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Mais il n'y est pas. Infiltre toi dans", ITEMDRAW_DISABLED);
 	menu.AddItem("", "le batiment suivant.", ITEMDRAW_DISABLED);
 	
@@ -148,7 +148,7 @@ public void Q1_Frame(int objectiveID, int client) {
 	}
 }
 public void Q1_Abort(int objectiveID, int client) {
-	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
+	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 }
 public void Q5_Done(int objectiveID, int client) {
 	Q1_Abort(objectiveID, client);
@@ -156,7 +156,7 @@ public void Q5_Done(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
-	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "La trace s'arrête ici...", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Vous n'avez pas trouvé d'informations supplémentaires.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "La mafia te remercie pour ton enquête", ITEMDRAW_DISABLED);
@@ -168,7 +168,7 @@ public void Q5_Done(int objectiveID, int client) {
 	char item[64]; rp_GetItemData(64, item_type_name, item, sizeof(item)); rp_ClientGiveItem(client, 64); // [PvP] M4A1-S.
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu: %s", item);
 	
-	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
+	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 }
 int getRandomLocation() {
 	int stack[MAX_ZONES], cpt, tmp, bit;
