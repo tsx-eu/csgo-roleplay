@@ -241,7 +241,7 @@ public Action Frame_Microwave(Handle timer, any ent) {
 		return Plugin_Handled;
 	}
 	if(time == 0){
-		EmitSoundToAllAny("ambient/machines/lab_loop1.wav", ent, _, _, _, 0.66);
+		EmitSoundToAllAny("ambient/machines/lab_loop1.wav", ent, _, _, _, 0.33);
 	}
 	rp_SetBuildingData(ent, BD_count, ++time);
 	CreateTimer(1.0, Frame_Microwave, ent);
