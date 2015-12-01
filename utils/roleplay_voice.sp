@@ -376,6 +376,11 @@ public int MenuJobs2(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 				AddMenuItem(menu, tmp2, "Demander pour une audience");
 				amount++;
 			}
+			if(jobid == 61){
++				Format(tmp2, sizeof(tmp2), "%i_-6", target);
++				AddMenuItem(menu, tmp2, "Demander un Appartement");
++				amount++;
++			}
 			else{
 				for(int i=1;i<MAX_ITEMS;i++){
 					rp_GetItemData(i, item_type_job_id, tmp, sizeof(tmp));
@@ -425,6 +430,7 @@ public int MenuJobs3(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 				case -3: CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N aimerait acheter ou vendre une arme, il est actuellement: %s", client, zoneName);
 				case -4: CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin d'un juge, il est actuellement: %s", client, zoneName);
 				case -5: CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin d'un avocat, il est actuellement: %s", client, zoneName);
+				case -6: CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N souhaiterait acheter un appartement, merci de le contacter pour plus de renseignement. Il est actuellement: %s", client, zoneName);
 				default:{
 					rp_GetItemData(item_id, item_type_name, tmp, sizeof(tmp));
 					CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin de {lime}%s{default}, il est actuellement: %s", client, tmp, zoneName);
