@@ -191,6 +191,7 @@ public Action Cmd_ItemMenottes(int args){
 	rp_HookEvent(target, RP_PrePlayerPhysic, fwdFrozen, 5.0);
 	rp_HookEvent(target, RP_PreHUDColorize, fwdTazerRose, 5.0);
 	
+	LogToGame("[TSX-RP] [Menottes] %L a attaché %L.", client, target); // Ajout dans les logs
 	CreateTimer(5.0, Cmd_ItemMenottes_Over, target); // TODO: Laisser rose après 5 secondes.
 }
 public Action Cmd_ItemMenottes_Over(Handle timer, any client) {
