@@ -33,33 +33,34 @@ int g_cBeam, g_cGlow, g_nbMdItems;
 bool g_eMwAct[2048];
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
-	PrecacheSoundAny("ambient/tones/equip2.wav");
-	PrecacheSoundAny("ambient/machines/lab_loop1.wav");
 	RegServerCmd("rp_item_hamburger",	Cmd_ItemHamburger,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_banane",		Cmd_ItemBanane,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	g_nbMdItems = -1;
-	int jobID;
-	for(int i = 0; i < MAX_ITEMS; i++){
-		if( rp_GetItemInt(i, item_type_prix) <= 0 )
-			continue;
-		if( rp_GetItemInt(i, item_type_auto) == 1 )
-			continue;
-		jobID = rp_GetItemInt(i, item_type_job_id);
-		if(jobID != 21)
-			continue;
-
-		g_nbMdItems++;
-	}
-
 	for (int j = 1; j <= MaxClients; j++)
 		if( IsValidClient(j) )
 			OnClientPostAdminCheck(j);
 }
 public void OnMapStart() {
+	PrecacheSoundAny("ambient/tones/equip2.wav");
+	PrecacheSoundAny("ambient/machines/lab_loop1.wav");
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt", true);
 }
 public void OnClientPostAdminCheck(int client){
+	if(g_nbMdItems == -1){
+		int jobID;
+		for(int i = 0; i < MAX_ITEMS; i++){
+			if( rp_GetItemInt(i, item_type_prix) <= 0 )
+				continue;
+			if( rp_GetItemInt(i, item_type_auto) == 1 )
+				continue;
+			jobID = rp_GetItemInt(i, item_type_job_id);
+			if(jobID != 21)
+				continue;
+
+			g_nbMdItems++;
+		}
+	}
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
 }
 // ------------------------------------------------------------------------------
