@@ -351,7 +351,7 @@ public int MenuJobs2(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 			int amount = 0;
 			char tmp[128], tmp2[128];
 
-			if(rp_GetClientInt(target, i_Job)%10 == 1 || rp_GetClientInt(target, i_Job)%10 == 2){
+			if(rp_GetClientInt(target, i_Job)%10 == 1 || rp_GetClientInt(target, i_Job)%10 == 2 || jobid !=1 || jobid != 101){
 				Format(tmp2, sizeof(tmp2), "%i_-1", target);
 				AddMenuItem(menu, tmp2, "Demander à être recruté");
 				amount++;
