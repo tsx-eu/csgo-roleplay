@@ -33,8 +33,6 @@ int g_cBeam, g_cGlow, g_nbMdItems;
 bool g_eMwAct[2048];
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
-	PrecacheSoundAny("ambient/tones/equip2.wav");
-	PrecacheSoundAny("ambient/machines/lab_loop1.wav");
 	RegServerCmd("rp_item_hamburger",	Cmd_ItemHamburger,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_banane",		Cmd_ItemBanane,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	g_nbMdItems = -1;
@@ -56,6 +54,8 @@ public void OnPluginStart() {
 			OnClientPostAdminCheck(j);
 }
 public void OnMapStart() {
+	PrecacheSoundAny("ambient/tones/equip2.wav");
+	PrecacheSoundAny("ambient/machines/lab_loop1.wav");
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt", true);
 }
