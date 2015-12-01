@@ -96,7 +96,7 @@ int BuildingMicrowave(int client) {
 		GetEdictClassname(i, tmp, 63);
 		
 		if( StrEqual(classname, tmp) ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà un microonde.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà un micro-ondes de branché.");
 			return 0;
 		}
 	}
@@ -179,7 +179,7 @@ public void BuildingMicrowave_break(const char[] output, int caller, int activat
 	#endif
 	
 	int client = GetEntPropEnt(caller, Prop_Send, "m_hOwnerEntity");
-	CPrintToChat(client,"{lightblue}[TSX-RP]{default} Votre microonde a été détruit");
+	CPrintToChat(client,"{lightblue}[TSX-RP]{default} Votre micro-ondes vient d'être détruit");
 	
 	float vecOrigin[3];
 	Entity_GetAbsOrigin(caller,vecOrigin);
