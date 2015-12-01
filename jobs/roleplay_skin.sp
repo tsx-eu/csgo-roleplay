@@ -124,11 +124,11 @@ public Action task_ItemLeet(Handle timer, any client) {
 	Handle menu = CreateMenu(MenuSetSkin);
 	SetMenuTitle(menu, "Choisissez un skin:");
 	
-	AddMenuItem(menu, "models/player/tm_leet_varianta.mdl", 	"Phoenix");
-	AddMenuItem(menu, "models/player/tm_leet_variantb.mdl", 	"Phoenix - A");
-	AddMenuItem(menu, "models/player/tm_leet_variantc.mdl",		"Phoenix - B");
-	AddMenuItem(menu, "models/player/tm_leet_variantd.mdl", 	"Phoenix - C");
-	AddMenuItem(menu, "models/player/tm_leet_variante.mdl", 	"Phoenix - D");
+	AddMenuItem(menu, "models/player/tm_leet_varianta.mdl", 	"Leet");
+	AddMenuItem(menu, "models/player/tm_leet_variantb.mdl", 	"Leet - A");
+	AddMenuItem(menu, "models/player/tm_leet_variantc.mdl",		"Leet - B");
+	AddMenuItem(menu, "models/player/tm_leet_variantd.mdl", 	"Leet - C");
+	AddMenuItem(menu, "models/player/tm_leet_variante.mdl", 	"Leet - D");
 	
 	SetMenuExitButton(menu, true);
 	DisplayMenu(menu, client, MENU_TIME_DURATION);
