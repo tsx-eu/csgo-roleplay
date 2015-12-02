@@ -377,10 +377,10 @@ public int MenuJobs2(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 				amount++;
 			}
 			if(jobid == 61){
-+				Format(tmp2, sizeof(tmp2), "%i_-6", target);
-+				AddMenuItem(menu, tmp2, "Demander un Appartement");
-+				amount++;
-+			}
+				Format(tmp2, sizeof(tmp2), "%i_-6", target);
+				AddMenuItem(menu, tmp2, "Demander un Appartement");
+				amount++;
+			}
 			else{
 				for(int i=1;i<MAX_ITEMS;i++){
 					rp_GetItemData(i, item_type_job_id, tmp, sizeof(tmp));
