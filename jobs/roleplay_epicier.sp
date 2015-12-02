@@ -469,7 +469,7 @@ public Action Cmd_ItemLessive(int args) {
 	}
 	
 	SDKHooks_TakeDamage(client, client, client, 5000.0);
-	ForcePlayerSuicide(client);
+	rp_ClientDamage(client, 5000, client);
 	
 	rp_ClientRespawn(client);
 	return Plugin_Handled;
