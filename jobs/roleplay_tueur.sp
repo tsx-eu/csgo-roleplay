@@ -674,14 +674,14 @@ public Action fwdZoneChange(int client, int newZone, int oldZone) {
 			rp_SetClientInt( target, i_ContratFor, rp_GetClientInt(client, i_ToPay) );
 			SetContratFail( target , true);
 			
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez pris la fuite, vous êtes libres !");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez pris la fuite, vous êtes libre !");
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N s'est échappé.", client);
 		}
 		else {
 			TeleportEntity(client,  view_as<float>({-5879.0, -2815.0, -1950.0}), NULL_VECTOR, NULL_VECTOR);
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Une tentative de triche a été détectée.");
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Etes vous sorti correctement, sans triche, sans téléportation?");
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Si c'est le cas, conactez KoSSoLaX.");			
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Etes-vous sorti correctement, sans triche, sans téléportation ?");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Si c'est le cas, contactez KoSSoLaX.");			
 		}
 	}
 }
@@ -793,14 +793,14 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 				if( rp_GetClientJobID(i) != 1 && rp_GetClientJobID(i) != 101 )
 					continue;
 				
-				CPrintToChat(i, "{lightblue}[TSX-RP]{default} Un enlevement a eut lieu. Vous devez libérer %N dans %s.", client, dest);
+				CPrintToChat(i, "{lightblue}[TSX-RP]{default} Un enlèvement a eu lieu. Vous devez libérer %N dans %s.", client, dest);
 				rp_Effect_BeamBox(i, client);
 				ClientCommand(i, "play buttons/blip1.wav");
 			}
 			
 		}
 		else if( StrEqual( options, "crier", false) ) {
-			FakeClientCommand(client, "say \"Au secour, j'ai été enlevé !!!\"");
+			FakeClientCommand(client, "say \"Au secours, j'ai été enlevé !!!\"");
 			
 			OpenKidnappingMenu(client);
 		}
@@ -814,7 +814,7 @@ void OpenKidnappingMenu(int client) {
 		
 	if( g_bShouldOpen[client] && rp_GetZoneInt( rp_GetPlayerZone(client), zone_type_type) == 41 && rp_ClientCanDrawPanel(client) ) {
 		Handle menu = CreateMenu(eventKidnapping);
-		SetMenuTitle(menu, "Vous avez été enlevé! Que faire ?");
+		SetMenuTitle(menu, "Vous avez été enlevé ! Que faire ?");
 			
 		AddMenuItem(menu, "pay", "Payer la rançon de 2500$");
 		AddMenuItem(menu, "free", "Tenter l'évasion");
@@ -886,7 +886,7 @@ public Action Cmd_ItemCryptage(int args) {
 		level = 5;
 		
 	rp_SetClientInt(client, i_Cryptage, level);
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Les détectives vous couvre, vous avez %i/100 de chance d'être caché", level*20);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Les détectives vous couvrent, vous avez %i/100 de chance d'être caché.", level*20);
 	return Plugin_Handled;
 }
 // ----------------------------------------------------------------------------
@@ -900,7 +900,7 @@ public Action Cmd_ItemEnqueteMenu(int args) {
 	int client = StringToInt(arg1);
 	
 	Handle menu = CreateMenu(Cmd_ItemEnqueteMenu_2);
-	SetMenuTitle(menu, "Sélectionner sur qui récupérer des informations:");
+	SetMenuTitle(menu, "Sélectionner sur qui récupérer des informations :");
 	
 	char name[128], tmp[64];
 	GetClientName(client, name, 127);
@@ -973,15 +973,15 @@ public Action Cmd_ItemEnquete(int args) {
 			
 			AddMenu_Blank(client, menu, "Il a tué: %s", tmp);
 			CPrintToChat(killedBy, "{lightblue}[TSX-RP]{default} Votre pot de vin envers un détective privé vient de vous sauver.");
-			LogToGame("[TSX-RP] [ENQUETE] Une enquête effectué sur %L n'a pas montrée qui il a tué pour cause de pot de vin.", target);
+			LogToGame("[TSX-RP] [ENQUETE] Une enquête effectuée sur %L n'a pas montré qui l'a tué pour cause de pot de vin.", target);
 		}
 		else {	
 			AddMenu_Blank(client, menu, "Il a tué: %N", killedBy);
-			LogToGame("[TSX-RP] [ENQUETE] Une enquête effectué sur %L à montrée qu'il a tué %L.", target, killedBy);
+			LogToGame("[TSX-RP] [ENQUETE] Une enquête effectuée sur %L a montré qu'il a tué %L.", target, killedBy);
 		}
 	}
 	else{
-		LogToGame("[TSX-RP] [ENQUETE] Une enquête effectué sur %L à révélée qu'il n'a tué personne", target, killedBy);
+		LogToGame("[TSX-RP] [ENQUETE] Une enquête effectuée sur %L a révélé qu'il n'a tué personne", target, killedBy);
 	}
 	
 	if( rp_GetClientInt(target, i_KillingSpread) > 0 )
@@ -996,15 +996,15 @@ public Action Cmd_ItemEnquete(int args) {
 			
 			AddMenu_Blank(client, menu, "%s, l'a tué", tmp);
 			CPrintToChat(killedBy, "{lightblue}[TSX-RP]{default} Votre pot de vin envers un détective privé vient de vous sauver.");
-			LogToGame("[TSX-RP] [ENQUETE] Une enquête effectué sur %L n'a pas montrée qui l'a tué pour cause de pot de vin.", target);
+			LogToGame("[TSX-RP] [ENQUETE] Une enquête effectuée sur %L n'a pas montré qui l'a tué pour cause de pot de vin.", target);
 		}
 		else {
 			AddMenu_Blank(client, menu, "%N, l'a tué", killed);
-			LogToGame("[TSX-RP] [ENQUETE] Une enquête effectué sur %L à montrée que %L l'a tué.", target, killed);
+			LogToGame("[TSX-RP] [ENQUETE] Une enquête effectuée sur %L a montré que %L l'a tué.", target, killed);
 		}
 	}
 	else{
-		LogToGame("[TSX-RP] [ENQUETE] Une enquête effectué sur %L a révélée qu'il n'a été tué par personne", target, killed);
+		LogToGame("[TSX-RP] [ENQUETE] Une enquête effectuée sur %L a révélée qu'il n'a été tué par personne.", target, killed);
 	}
 	
 	if( IsValidClient(rp_GetClientInt(target, i_LastVol)) ) 
