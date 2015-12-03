@@ -99,7 +99,7 @@ public Action fwdUse(int client) {
 		if( driver > 0 ) {
 			
 			if( rp_GetVehicleInt(target, car_owner) == client && driver != client ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez éjecter le conducteur avec la commande /out");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez éjecter le conducteur avec la commande /out.");
 			}
 			AskToJoinCar(client, target);			
 		}
@@ -672,14 +672,14 @@ void AskToJoinCar(int client, int vehicle) {
 	int driver = GetEntPropEnt(vehicle, Prop_Send, "m_hPlayer");
 	if( g_iBlockedTime[driver][client] != 0 ) {
 		if( (g_iBlockedTime[driver][client]+(6*60)) >= GetTime() ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce conducteur ne vous repondera pas.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce conducteur ne vous repondra pas.");
 			return;
 		}
 	}
 	char tmp[255];	
 	Handle menu = CreateMenu(AskToJoinCar_Menu);
 	
-	Format(tmp, sizeof(tmp), "%N souhaite entrer dans votre voiture.\n L'acceptez-vous?", client);
+	Format(tmp, sizeof(tmp), "%N souhaite entrer dans votre voiture.\n L'acceptez-vous ?", client);
 	SetMenuTitle(menu, tmp);
 	
 	Format(tmp, sizeof(tmp), "%i_%i_1", client, vehicle);	AddMenuItem(menu, tmp, "J'accepte");
