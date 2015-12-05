@@ -2725,7 +2725,7 @@ void StripWeapons(int client ) {
 			RemovePlayerItem( client, wepIdx );
 			RemoveEdict( wepIdx );
 			
-			rp_SetJobCapital(1, rp_GetJobCapital(1) + 100);
+			rp_SetJobCapital(1, rp_GetJobCapital(1) + 250);
 		}
 	}
 	
