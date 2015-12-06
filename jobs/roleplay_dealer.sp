@@ -146,7 +146,7 @@ public Action Cmd_ItemDrugs(int args) {
 			ITEM_CANCEL(client, item_id);
 			return Plugin_Handled;
 		}
-		LogToGame("[TSX-RP] [DROGUE] %N a drogué %N.", client, target);
+		LogToGame("[TSX-RP] [Drogue] %N a drogué %N.", client, target);
 		dur = 30.0;
 		
 		rp_SetClientInt(client, i_LastAgression, GetTime());
