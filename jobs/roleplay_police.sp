@@ -669,11 +669,26 @@ public Action Cmd_Jail(int client) {
 		
 	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
 		ACCESS_DENIED(client);
-	}
-
-	
+	}	
 	if( GetClientTeam(client) == CS_TEAM_T && (job == 8 || job == 9 || job == 107 || job == 108 || job == 109 ) ) {
 		ACCESS_DENIED(client);
+	}
+	
+	float time = GetGameTime();
+		
+	for(int i=1; i<=MaxClients; i++) {
+		if( !IsValidClient(i) || IsPlayerAlive(i) )
+			continue;
+		if( rp_GetClientFloat(client, fl_RespawnTime) > time )
+			continue;
+		
+		int ragdoll = GetEntPropEnt(i, Prop_Send, "m_hRagdoll");
+
+		if( !IsValidEdict(ragdoll) || !IsValidEntity(ragdoll) )
+			ragdoll = i;
+		if( Entity_GetDistance(client, ragdoll) < MAX_AREA_DIST ) {
+			CS_RespawnPlayer(i);
+		}
 	}
 	
 	int target = GetClientTarget(client);
