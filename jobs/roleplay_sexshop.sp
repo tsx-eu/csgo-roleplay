@@ -177,6 +177,10 @@ public Action Cmd_ItemMenottes(int args){
 		ITEM_CANCEL(client, item_id);
 		return;
 	}
+	if( GetEntityMoveType(target) == MOVETYPE_NOCLIP ) {
+		ITEM_CANCEL(client, item_id);
+		return;
+	}
 	if( rp_GetClientBool(target, b_Lube) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N vous glisse entre les mains.", target);
 		ITEM_CANCEL(client, item_id);
@@ -357,7 +361,7 @@ public Action Cmd_ItemAlcool(int args) {
 		GetClientAbsOrigin(client, vecTarget);
 		TE_SetupBeamRingPoint(vecTarget, 10.0, 500.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, { 255, 0, 191, 200}, 10, 0);
 		rp_SetClientInt(client, i_LastAgression, GetTime());
-		LogToGame("[TSX-RP] [Drogue] %N a drogué %N.", client, target);
+		LogToGame("[TSX-RP] [DROGUE] %L a alcoolisé %l.", client, target);
 	}
 
 	float level = rp_GetClientFloat(target, fl_Alcool) + GetCmdArgFloat(2);
