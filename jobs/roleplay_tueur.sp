@@ -190,6 +190,9 @@ public Action Cmd_ItemContrat(int args) {
 		g_iKillerPoint[vendeur][competance_type] = 1005;
 		rp_SetClientInt(target, i_ContratTotal, rp_GetClientInt(target, i_ContratTotal) + 10);
 	}
+	else if( StrContains(arg1, "lupin") == 0 ) {
+		g_iKillerPoint[vendeur][competance_type] = 1006;
+	}
 	return Plugin_Handled;
 }
 // ----------------------------------------------------------------------------
@@ -247,6 +250,23 @@ public Action fwdTueurKill(int client, int attacker, float& respawn) {
 				rp_HookEvent(client, RP_OnPlayerSpawn, fwdOnRespawn);
 				respawn = 0.05;				
 				kidnapping = true;
+			}
+			else if( g_iKillerPoint[attacker][competance_type] == 1006 ) {
+				if((rp_GetClientInt(client, i_Money)+rp_GetClientInt(client, i_Bank)) > 1000){
+					rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - 500);
+					rp_SetClientInt(from, i_Money, rp_GetClientInt(from, i_Money) + 500);
+				}
+				int mnt;
+				
+				for(int i=0; i<MAX_ITEMS; i++) {
+					mnt = rp_GetClientItem(client, i);
+					
+					if( mnt ) {
+						rp_ClientGiveItem(client, i, mnt, true);
+						rp_ClientGiveItem(client, i, -mnt, false);
+					}
+				}
+				respawn *= 1.25;			
 			}
 			else {
 				respawn *= 1.25;

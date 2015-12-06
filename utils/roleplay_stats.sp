@@ -316,7 +316,7 @@ public Action saveStats(Handle timer){
 	#if defined DEBUG
 	PrintToServer("saveStats");
 	#endif
-	static char sSQuery[16384];
+	static char sSQuery[32768];
 	static char sSUID[32];
 	static int sSCount;
 	sSCount = 0;
