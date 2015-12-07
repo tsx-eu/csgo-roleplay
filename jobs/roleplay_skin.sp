@@ -456,14 +456,16 @@ public Action fwdUse(int client) {
 	Handle menu = CreateMenu(MenuTrySkin);
 	SetMenuTitle(menu, "Selection du skin à essayer:");
 	
+	AddMenuItem(menu, "models/player/custom_player/legacy/50cent/50cent.mdl", "50cent");
+	AddMenuItem(menu, "models/player/custom_player/legacy/lloyd/lloyd.mdl", "Loyd");
+	AddMenuItem(menu, "models/player/custom_player/legacy/misty/misty.mdl", "Misty");
+	AddMenuItem(menu, "models/player/custom_player/legacy/bzsoap/bzsoap.mdl", "BZ-Soap");
+	
 	AddMenuItem(menu, "models/player/custom_player/legacy/eva/eva.mdl", "Eva");
-	AddMenuItem(menu, "models/player/custom_player/legacy/gauntlet/gauntlet.mdl", "Julie");
 	AddMenuItem(menu, "models/player/custom_player/legacy/lightning/lightning.mdl", "Alice");
-	AddMenuItem(menu, "models/player/lara/lara.mdl", "Lara");
 	AddMenuItem(menu, "models/player/custom_player/legacy/leon/leon.mdl", "Leon");
 	
 	AddMenuItem(menu, "models/player/custom/hitman/hitman.mdl", "Hitman");
-	AddMenuItem(menu, "models/player/custom/max/max.mdl", "Max");
 	AddMenuItem(menu, "models/player/custom/johnny/johnny.mdl", "Johnny");
 	AddMenuItem(menu, "models/player/custom_player/legacy/duke/duke_v3.mdl", "Duke Nukem");
 	
