@@ -253,9 +253,12 @@ public Action fwdTueurKill(int client, int attacker, float& respawn) {
 			}
 			else if( g_iKillerPoint[attacker][competance_type] == 1006 ) {
 				if((rp_GetClientInt(client, i_Money)+rp_GetClientInt(client, i_Bank)) > 1000){
-					rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - 500);
-					rp_SetClientInt(from, i_Money, rp_GetClientInt(from, i_Money) + 500);
+					rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - 100);
+					rp_SetClientInt(from, i_Money, rp_GetClientInt(from, i_Money) + 100);
 				}
+				respawn *= 1.25;			
+			}
+			else if( g_iKillerPoint[attacker][competance_type] == 1007 ) {
 				int mnt;
 				
 				for(int i=0; i<MAX_ITEMS; i++) {
@@ -266,7 +269,7 @@ public Action fwdTueurKill(int client, int attacker, float& respawn) {
 						rp_ClientGiveItem(client, i, -mnt, false);
 					}
 				}
-				respawn *= 1.25;			
+				respawn *= 4.0;			
 			}
 			else {
 				respawn *= 1.25;
