@@ -24,21 +24,6 @@
 //#define DEBUG
 Handle g_vAllTalk;
 bool g_bAllTalk = false;
-char g_avocats[][][32] = {
-	{"STEAM_1:0:34370282", "200"},	//CyBuG
-	{"STEAM_1:1:93713536", "150"},	//Kiceroh
-	{"STEAM_1:1:12956123", "150"},	//Mendes
-	{"STEAM_1:1:95016136", "150"},	//Bot Diablo
-	{"STEAM_1:1:56912514", "150"},	//Yuskailand
-	{"STEAM_0:1:83919363", "150"},	//Kaporal
-	{"STEAM_1:1:48928773", "150"},	//Zare
-	{"STEAM_0:1:83458579", "150"},	//TackeDown
-	{"STEAM_0:0:115947297", "150"},	//Handicaper
-	{"STEAM_0:1:53413224", "150"}, 	//Mohamed
-	{"STEAM_1:1:36646680", "150"}	//Lisitz
-	
-	
-};
 
 public Plugin myinfo = {
 	name = "Utils: VoiceProximity", author = "KoSSoLaX",
@@ -67,18 +52,6 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerHear, fwdHear);
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 	rp_HookEvent(client, RP_OnPlayerDataLoaded, fwdDataLoad);
-}
-
-public Action fwdDataLoad(int client){
-	char steamID[32];
-	rp_SetClientInt(client, i_Avocat, -1);
-	GetClientAuthId(client, AuthId_Engine, steamID, sizeof(steamID), false);
-	for(int i=0; i<sizeof(g_avocats); i++){
-		if(StrEqual(g_avocats[i][0], steamID)){
-			rp_SetClientInt(client, i_Avocat, StringToInt(g_avocats[i][1]));
-			break;
-		}
-	}
 }
 public Action fwdCommand(int client, char[] command, char[] arg) {
 	#if defined DEBUG
