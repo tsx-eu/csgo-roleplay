@@ -90,7 +90,7 @@ public void Q1_Start(int objectiveID, int client) {
 
 	Menu menu = new Menu(MenuNothing);
 	menu.SetTitle("Quète: %s", QUEST_NAME);
-	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Mon frère, l'un de nos hommes a été arrêté.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Nous avons besoin de toi.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
@@ -100,7 +100,7 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.AddItem("", "Nous t'offrons 1000$ par personne libérée", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Grâce à toi. Pendant toute la durée de ta mission, ", ITEMDRAW_DISABLED);
 	menu.AddItem("", "nous t'enverrons du matériel nécessaire à tes opérations.", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Tu as 12 heures.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Tu as 12 heures.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 60);
@@ -143,7 +143,7 @@ public void Q1_Abort(int objectiveID, int client) {
 		rp_UnhookEvent(i, RP_OnPlayerZoneChange, fwdOnZoneChange);
 	}
 	
-	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
+	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 }
 public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 	static zoneID[3] =  { 20, 257, 291 };
@@ -172,7 +172,7 @@ public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 						
 						rp_ClientSendToSpawn(client, false);
 						
-						CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N vous a libéré", target);
+						CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N vous a libéré.", target);
 						CPrintToChat(target, "{lightblue}[TSX-RP]{default} vous avez libéré %N et reçu une récompense de 1000$.", client);
 						
 						lastFree[client] = GetTime() + g_iDuration[client] + 1;

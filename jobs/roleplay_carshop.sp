@@ -66,7 +66,6 @@ public void OnClientDisconnect(int client) {
 			continue;
 		if( rp_GetVehicleInt(i, car_owner) == client) {
 			VehicleRemove(i);
-			
 		}
 	}
 }
@@ -100,7 +99,7 @@ public Action fwdUse(int client) {
 		if( driver > 0 ) {
 			
 			if( rp_GetVehicleInt(target, car_owner) == client && driver != client ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez éjecter le conducteur avec la commande /out");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez éjecter le conducteur avec la commande /out.");
 			}
 			AskToJoinCar(client, target);			
 		}
@@ -505,6 +504,9 @@ void VehicleRemove(int vehicle, bool explode = false) {
 	#if defined DEBUG
 	PrintToServer("VehicleRemove");
 	#endif
+	if( vehicle <= 0 )
+		return;
+	
 	CreateTimer(0.1, BatchLeave, vehicle);
 	
 	for(int i=1; i<=MaxClients; i++)
@@ -560,6 +562,9 @@ public Action BatchLeave(Handle timer, any vehicle) {
 	#if defined DEBUG
 	PrintToServer("BatchLeave");
 	#endif
+	
+	if( vehicle <= 0 )
+		return;
 	int client = GetEntPropEnt(vehicle, Prop_Send, "m_hPlayer");
 	
 	if( IsValidClient(client) ) {
@@ -580,7 +585,7 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 	Entity_GetAbsOrigin(ent, vecOrigin);
 
 	ent = EntRefToEntIndex(ent);
-	if( ent < 0 || !IsValidEdict(ent) )
+	if( ent <= 0 || !IsValidEdict(ent) )
 		return Plugin_Handled;
 	
 	if( rp_GetVehicleInt(ent, car_health) <= 0 ) {
@@ -667,14 +672,14 @@ void AskToJoinCar(int client, int vehicle) {
 	int driver = GetEntPropEnt(vehicle, Prop_Send, "m_hPlayer");
 	if( g_iBlockedTime[driver][client] != 0 ) {
 		if( (g_iBlockedTime[driver][client]+(6*60)) >= GetTime() ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce conducteur ne vous repondera pas.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce conducteur ne vous repondra pas.");
 			return;
 		}
 	}
 	char tmp[255];	
 	Handle menu = CreateMenu(AskToJoinCar_Menu);
 	
-	Format(tmp, sizeof(tmp), "%N souhaite entrer dans votre voiture.\n L'acceptez-vous?", client);
+	Format(tmp, sizeof(tmp), "%N souhaite entrer dans votre voiture.\n L'acceptez-vous ?", client);
 	SetMenuTitle(menu, tmp);
 	
 	Format(tmp, sizeof(tmp), "%i_%i_1", client, vehicle);	AddMenuItem(menu, tmp, "J'accepte");

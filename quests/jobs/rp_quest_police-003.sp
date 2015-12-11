@@ -67,7 +67,7 @@ public void Q1_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
-	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Collègue, nous avons besoin que vous ", ITEMDRAW_DISABLED);
 	menu.AddItem("", "tasiez un maximum d'objets illégaux en ville.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Pendant les 24 prochaines heures, nous doublons tes gains", ITEMDRAW_DISABLED);
@@ -95,7 +95,7 @@ public void Q1_Frame(int objectiveID, int client) {
 }
 public void Q1_Abort(int objectiveID, int client) {
 	RemoveFromArray(g_hDoing, FindValueInArray(g_hDoing, client));
-	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
+	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 }
 public void RP_OnClientTazedItem(int attacker, int reward) {
 	

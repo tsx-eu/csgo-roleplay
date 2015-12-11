@@ -70,12 +70,12 @@ public void Q1_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
+	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Hey gros, on a un nouveau prototype d'imprimante et nous", ITEMDRAW_DISABLED);
+	menu.AddItem("", "avons besoin de toi pour les essayer !", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Hey gros, on a nouveau prototype d'imprimante et nous", ITEMDRAW_DISABLED);
-	menu.AddItem("", "avons besoin de toi pour les essayer!", ITEMDRAW_DISABLED);
-	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Vous avez 12 heures pour poser 10 imprimantes", ITEMDRAW_DISABLED);
-	menu.AddItem("", "dans votre planque.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Tu as 12 heures pour poser 10 imprimantes", ITEMDRAW_DISABLED);
+	menu.AddItem("", "dans ta planque.", ITEMDRAW_DISABLED);
 	
 	
 	menu.ExitButton = false;
@@ -99,19 +99,18 @@ public void Q1_Frame(int objectiveID, int client) {
 	}
 }
 public void Q1_Abort(int objectiveID, int client) {
-	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
+	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 	RemoveFromArray(g_hDoing, FindValueInArray(g_hDoing, client));
 }
 public void Q2_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
+	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Parfait, assure toi que ces machines produisent", ITEMDRAW_DISABLED);
+	menu.AddItem("", "suffisamment longtemps.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Parfait, assure toi que ces machines produisent", ITEMDRAW_DISABLED);
-	menu.AddItem("", "suffisement longtemps.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Protège tes machines", ITEMDRAW_DISABLED);
-	menu.AddItem("", "pendant 24 heures durant.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Protège tes machines durant 24 heures.", ITEMDRAW_DISABLED);
 	
 	
 	menu.ExitButton = false;
@@ -140,7 +139,7 @@ public void Q2_Frame(int objectiveID, int client) {
 	}
 }
 public void Q2_Done(int objectiveID, int client) {
-	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
+	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 	
 	int cap = rp_GetRandomCapital(QUEST_JOBID);
 	int amount = countMachine(client) * 500;
@@ -149,7 +148,7 @@ public void Q2_Done(int objectiveID, int client) {
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + amount);	
 }
 public void Q2_Abort(int objectiveID, int client) {
-	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
+	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 }
 // ----------------------------------------------------------------------------
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {

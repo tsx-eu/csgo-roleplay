@@ -294,8 +294,8 @@ public Action Cmd_Amende(int client, const char[] arg) {
 	rp_SetClientInt(target, i_LastAmende, amount);
 	rp_SetClientInt(target, i_LastAmendeBy, client);
 	
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez pris %i$ a %N{default}.", amount, target);
-	CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N {default}vous a pris %i$.", client, amount);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez pris une amende de %i$ à %N{default}.", amount, target);
+	CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N {default} vous a prélevé %i$.", client, amount);
 
 	char SteamID[64], szTarget[64];
 		
@@ -514,7 +514,7 @@ public Action Cmd_Tazer(int client) {
 			rp_GetZoneData(Tzone, zone_type_name, tmp, sizeof(tmp));
 			
 			if( IsValidClient( owner ) ){
-				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Un de vos props a été supprimé.");
+				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Un de vos props vient d'être détruit.");
 				LogToGame("[TSX-RP] [TAZER] %L a supprimé un props de %L dans %s", client, owner, tmp );
 			}
 			else{
@@ -557,8 +557,8 @@ public Action Cmd_Tazer(int client) {
 			}
 			
 			if( owner > 0 ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez detruit la machine de %N", owner);
-				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos machines a faux billet a été detruite par un policier.");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez détruit la machine de %N", owner);
+				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos machines à faux billet a été détruite par un policier.");
 			}
 			SDKHooks_TakeDamage(target, client, client, 1000.0);
 		}
@@ -575,8 +575,8 @@ public Action Cmd_Tazer(int client) {
 			}
 			
 			if( owner > 0 ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez detruit la grosse machine de %N", owner);
-				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre grosse machine a faux billet a été detruite par un policier.");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez détruit la grosse machine de %N", owner);
+				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre grosse machine à faux billet a été détruite par un policier.");
 			}
 		}
 		else if ( StrContains(tmp2, "rp_plant_") == 0 ) {
@@ -592,8 +592,8 @@ public Action Cmd_Tazer(int client) {
 			}
 			
 			if( owner > 0 ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez detruit le plant de drogue de %N", owner);
-				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Un de vos plant de drogue a été detruit par un policier.");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez détruit le plant de drogue de %N", owner);
+				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Un de vos plant de drogue a été détruit par un policier.");
 			}
 			
 			if(owner == client)
@@ -669,11 +669,26 @@ public Action Cmd_Jail(int client) {
 		
 	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
 		ACCESS_DENIED(client);
-	}
-
-	
+	}	
 	if( GetClientTeam(client) == CS_TEAM_T && (job == 8 || job == 9 || job == 107 || job == 108 || job == 109 ) ) {
 		ACCESS_DENIED(client);
+	}
+	
+	float time = GetGameTime();
+		
+	for(int i=1; i<=MaxClients; i++) {
+		if( !IsValidClient(i) || IsPlayerAlive(i) )
+			continue;
+		if( rp_GetClientFloat(client, fl_RespawnTime) > time )
+			continue;
+		
+		int ragdoll = GetEntPropEnt(i, Prop_Send, "m_hRagdoll");
+
+		if( !IsValidEdict(ragdoll) || !IsValidEntity(ragdoll) )
+			ragdoll = i;
+		if( Entity_GetDistance(client, ragdoll) < MAX_AREA_DIST ) {
+			CS_RespawnPlayer(i);
+		}
 	}
 	
 	int target = GetClientTarget(client);
@@ -859,8 +874,8 @@ public Action Cmd_Mandat(int client) {
 	
 	if( rp_GetClientItem(target, ITEM_MANDAT) < 10 ) {
 		rp_ClientGiveItem(target, ITEM_MANDAT);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez donner un mandat a: %N", target);
-		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez recu un mandat de: %N", client);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez donné un mandat a: %N", target);
+		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez reçu un mandat de: %N", client);
 	}
 	return Plugin_Handled;
 }
@@ -940,7 +955,7 @@ public void ClientConVar(QueryCookie cookie, int client, ConVarQueryResult resul
 	#endif
 	if( StrEqual(cvarName, "cl_disablehtmlmotd", false) ) {
 		if( StrEqual(cvarValue, "0") == false ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Des problemes d'affichage? Entrer cl_disablehtmlmotd 0 dans votre console puis relancer CS:GO.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Des problemes d'affichage ? Entrer cl_disablehtmlmotd 0 dans votre console puis relancer CS:GO.");
 		}
 	}
 }
@@ -1014,7 +1029,7 @@ public Action Cmd_Jugement(int client, int args) {
 				}
 
 				if(amende > maxAmount){
-					CPrintToChat(client, "{lightblue}[TSX-RP]{default} L'amende excède le montant maximal.");
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} L'amende excède le montant maximum autorisé.");
 					String_GetRandom(random, sizeof(random), sizeof(random) - 1);
 
 					Format(g_szTribunal_DATA[client][tribunal_code], 63, random);
@@ -1045,7 +1060,7 @@ public Action Cmd_Jugement(int client, int args) {
 					return Plugin_Handled;
 				}
 				else if(amende > playermoney){
-					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le joueur n'a que %i$, le jugement à été annulé.", playermoney);
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le joueur n'a que %i$, le jugement a été annulé.", playermoney);
 					String_GetRandom(random, sizeof(random), sizeof(random) - 1);
 
 					Format(g_szTribunal_DATA[client][tribunal_code], 63, random);
@@ -1245,7 +1260,7 @@ public int eventConvocation_2(Handle menu, MenuAction action, int client, int pa
 			g_TribunalSearch[target][tribunal_search_starttime] = GetTime();
 			g_TribunalSearch[target][tribunal_search_where] = FindCharInString(options,'1') != -1 ? 1 : 2;
 			CPrintToChatAll("{lightblue} ================================== {default}");
-			CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est appelé dans le Tribunal N°%i. [%i/3]", target, g_TribunalSearch[target][tribunal_search_where], etat);
+			CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est convoqué dans le Tribunal N°%i. [%i/3]", target, g_TribunalSearch[target][tribunal_search_where], etat);
 			CPrintToChatAll("{lightblue} ================================== {default}");
 			LogToGame("[TSX-RP] [RECHERCHE] %L convoqué %L au tribunal n°%i.", client, target, g_TribunalSearch[target][tribunal_search_where]);
 			CreateTimer(30.0, Timer_ConvTribu, target, TIMER_REPEAT);
@@ -1291,14 +1306,14 @@ public Action Timer_ConvTribu(Handle timer, any target) {
 	}
 	else if(g_TribunalSearch[target][tribunal_search_status] == 4){
 		CPrintToChatAll("{lightblue} ================================== {default}");
-		CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est appelé dans le Tribunal N°%i. [%i/3]", target, g_TribunalSearch[target][tribunal_search_where], g_TribunalSearch[target][tribunal_search_status]);
+		CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est convoqué dans le Tribunal N°%i. [%i/3]", target, g_TribunalSearch[target][tribunal_search_where], g_TribunalSearch[target][tribunal_search_status]);
 		CPrintToChatAll("{lightblue} ================================== {default}");
 		CreateTimer(60.0, Timer_ConvTribu, target, TIMER_REPEAT);
 		return Plugin_Stop;
 	}
 	else{
 		CPrintToChatAll("{lightblue} ================================== {default}");
-		CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est appelé dans le Tribunal N°%i. [%i/3]", target, g_TribunalSearch[target][tribunal_search_where], g_TribunalSearch[target][tribunal_search_status]);
+		CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est convoqué dans le Tribunal N°%i. [%i/3]", target, g_TribunalSearch[target][tribunal_search_where], g_TribunalSearch[target][tribunal_search_status]);
 		CPrintToChatAll("{lightblue} ================================== {default}");
 	}
 	return Plugin_Continue;
@@ -1797,12 +1812,12 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				TeleportEntity(target, view_as<float>({632.0, -1258.0, -1980.0}), NULL_VECTOR, NULL_VECTOR);
 			
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été mis en prison, en attente de jugement par: %N", client);
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez mis: %N {default}en prison du Tribunal.", target);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez mis: %N {default}dans la prison du Tribunal.", target);
 			
 			if( rp_GetClientInt(target, i_JailTime) <= 360 )
 				rp_SetClientInt(target, i_JailTime, 360);
 			
-			LogToGame("[TSX-RP] [TRIBUNAL] %L a mis %L en prison du Tribunal.", client, target);
+			LogToGame("[TSX-RP] [TRIBUNAL] %L a mis %L dans la prison du Tribunal.", client, target);
 			return;
 		}
 		if( StrEqual(g_szJailRaison[type][jail_raison],"Agression physique") 
@@ -2123,7 +2138,7 @@ void start_perquiz(int client, int job) {
 	
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	CPrintToChatAll("{lightblue}[TSX-RP] [POLICE]{default} Début d'une perquisition dans: %s.", tmp);
-	LogToGame("[TSX-RP] [POLICE] %N débute une perquisition dans: %s.",client, tmp);
+	LogToGame("[TSX-RP] [POLICE] %N débute une perquisition dans %s.",client, tmp);
 	
 	if( REP > 0 )
 		CPrintToChatAll("{lightblue}[TSX-RP] [POLICE]{default} %N {default}est prié de se présenter sur les lieux.", REP);
@@ -2139,8 +2154,8 @@ void begin_perquiz(int client, int job) {
 	rp_GetZoneData(JobToZoneID(job), zone_type_name, tmp, sizeof(tmp));
 	
 	CPrintToChatAll("{lightblue} ================================== {default}");
-	CPrintToChatAll("{lightblue}[TSX-RP] [POLICE]{default} Début d'une perquisition dans: %s.", tmp);
-	LogToGame("[TSX-RP] [POLICE] La perquisition dans %s commence.", tmp);
+	CPrintToChatAll("{lightblue}[TSX-RP] [POLICE]{default} Début d'une perquisition dans %s.", tmp);
+	LogToGame("[TSX-RP] [POLICE] La perquisition commence dans %s.", tmp);
 	
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	
@@ -2157,8 +2172,8 @@ void end_perquiz(int client, int job) {
 	rp_GetZoneData(JobToZoneID(job), zone_type_name, tmp, sizeof(tmp));
 	
 	CPrintToChatAll("{lightblue} ================================== {default}");
-	CPrintToChatAll("{lightblue}[TSX-RP] [POLICE]{default} Fin d'une perquisition dans: %s.", tmp);
-	LogToGame("[TSX-RP] [POLICE] %N a mis fin à une perquisition dans: %s.",client, tmp);
+	CPrintToChatAll("{lightblue}[TSX-RP] [POLICE]{default} Fin de la perquisition dans %s.", tmp);
+	LogToGame("[TSX-RP] [POLICE] %N a mis fin à la perquisition dans %s.",client, tmp);
 	
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	
@@ -2180,8 +2195,8 @@ void cancel_perquiz(int client, int job) {
 	rp_GetZoneData(JobToZoneID(job), zone_type_name, tmp, sizeof(tmp));
 	
 	CPrintToChatAll("{lightblue} ================================== {default}");
-	CPrintToChatAll("{lightblue}[TSX-RP] [POLICE]{default} Annulation d'une perquisition dans: %s.", tmp);
-	LogToGame("[TSX-RP] [POLICE] %N a annulé une perquisition dans: %s.",client, tmp);
+	CPrintToChatAll("{lightblue}[TSX-RP] [POLICE]{default} Annulation de la perquisition dans %s.", tmp);
+	LogToGame("[TSX-RP] [POLICE] %N a annulé la perquisition dans %s.",client, tmp);
 	
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	
@@ -2407,7 +2422,7 @@ int BuildingBarriere(int client) {
 	
 	SetEntityModel(ent, MODEL_BARRIERE);
 	
-	SetEntProp( ent, Prop_Data, "m_iHealth", 500);
+	SetEntProp( ent, Prop_Data, "m_iHealth", 1000);
 	SetEntProp( ent, Prop_Data, "m_takedamage", 0);
 	
 	SetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity", client);
@@ -2724,6 +2739,8 @@ void StripWeapons(int client ) {
 		while( ( wepIdx = GetPlayerWeaponSlot( client, i ) ) != -1 ) {
 			RemovePlayerItem( client, wepIdx );
 			RemoveEdict( wepIdx );
+			
+			rp_SetJobCapital(1, rp_GetJobCapital(1) + 250);
 		}
 	}
 	

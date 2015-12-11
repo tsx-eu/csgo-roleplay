@@ -64,13 +64,13 @@ public void Q1_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
-	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Mec! On a besoin de toi au plus vite!", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Interlocuteur anonyme :-", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Mec! On a besoin de toi au plus vite!", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Notre contacte nous informe que la police", ITEMDRAW_DISABLED);
-	menu.AddItem("", "à dissimuler des mouchards sur tout les", ITEMDRAW_DISABLED);
-	menu.AddItem("", "téléphone de la ville.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "a dissimulé des mouchards sur tous les", ITEMDRAW_DISABLED);
+	menu.AddItem("", "téléphones de la ville.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Vous avez 12 heures pour tous les aracher", ITEMDRAW_DISABLED);	
+	menu.AddItem("", "Tu as 12 heures pour tous les aracher", ITEMDRAW_DISABLED);	
 	
 	menu.ExitButton = false;
 	menu.Display(client, 60);
@@ -100,10 +100,10 @@ public void Q1_Frame(int objectiveID, int client) {
 	}
 }
 public void Q1_Abort(int objectiveID, int client) {
-	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
+	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 }
 public void Q1_Done(int objectiveID, int client) {
-	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
+	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 	
 	int cap = rp_GetRandomCapital(221);
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 5000);

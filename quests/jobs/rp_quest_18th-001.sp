@@ -68,15 +68,14 @@ public void Q1_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
-	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Yo man, on a de nouveaux projets pour toi.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Vol une arme de la police, puis ramène", ITEMDRAW_DISABLED);
 	menu.AddItem("", "la nous.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	
-	menu.AddItem("", "Pendant toute la durée de ta mission, ", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Pendant toute la durée de ta mission,", ITEMDRAW_DISABLED);
 	menu.AddItem("", "nous t'enverrons du matériel nécessaire à ta réussite.", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Tu as 12 heures.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Tu as 12 heures, bonne chance.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 60);
@@ -117,8 +116,8 @@ public void Q2_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
-	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Tu l'as ! Rapporte là nous !", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Bien joué, tu l'as ! Rapporte là nous !", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 30);
@@ -150,10 +149,10 @@ public void Q3_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
-	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Bien joué!", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Bien joué !", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Va déposer cet argent en banque,", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Tu pourras garder la moitié.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "tu pourras garder la moitié.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 30);
@@ -188,7 +187,7 @@ public void Q3_End(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
-	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Les 18th te remercient pour ta rapidité d'action", ITEMDRAW_DISABLED);
 	menu.AddItem("", "et t'offrent: [PvP] AK-47.", ITEMDRAW_DISABLED);
 	

@@ -256,7 +256,7 @@ void ConcPlayer(int victim, float center[3], int attacker, bool hh) {
 			
 			float verticalDistance = vecDisplacement[2];
 			vecDisplacement[2] = 0.0;
-			float horizontalDistance = GetVectorLength(vecDisplacement);
+			float horizontalDistance = Math_Min(1.0, GetVectorLength(vecDisplacement));
 			
 			vecDisplacement[0] /= horizontalDistance;
 			vecDisplacement[1] /= horizontalDistance;

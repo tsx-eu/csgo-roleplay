@@ -23,7 +23,7 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
-#define QUEST_UNIQID	"justice-001"
+#define QUEST_UNIQID	"justice-002"
 #define	QUEST_NAME		"La justice exprès"
 #define	QUEST_TYPE		quest_daily
 #define	QUEST_JOBID		1
@@ -67,11 +67,11 @@ public void Q1_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
-	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Maitre, nous vous accordons un bonus pour ", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Maitre, nous vous accordons un bonus pour", ITEMDRAW_DISABLED);
 	menu.AddItem("", "vos 3 prochaines condamnations.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Pendant ces 24 prochaines heures condamné.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Pendant ces 24 prochaines heures condamnez.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "3 joueurs différents dans votre Tribunal.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Ils doivent avoir une amende d'au moins 100$.", ITEMDRAW_DISABLED);
@@ -108,8 +108,8 @@ public void Q2_Start(int objectiveID, int client) {
 		Menu menu = new Menu(MenuNothing);
 		
 		menu.SetTitle("Quète: %s", QUEST_NAME);
-		menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-		menu.AddItem("", " Condamné encore 2 joueurs différents", ITEMDRAW_DISABLED);
+		menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
+		menu.AddItem("", "Condamnez encore 2 joueurs différents", ITEMDRAW_DISABLED);
 		menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 		menu.AddItem("", "Ils doivent avoir une amende d'au moins 100$.", ITEMDRAW_DISABLED);
 		menu.AddItem("", "ainsi que 3 heures de prison, chacun.", ITEMDRAW_DISABLED);
@@ -126,8 +126,8 @@ public void Q3_Start(int objectiveID, int client) {
 		Menu menu = new Menu(MenuNothing);
 		
 		menu.SetTitle("Quète: %s", QUEST_NAME);
-		menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-		menu.AddItem("", " Condamner encore 1 autre joueur", ITEMDRAW_DISABLED);
+		menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
+		menu.AddItem("", "Condamnez encore 1 autre joueur", ITEMDRAW_DISABLED);
 		menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 		menu.AddItem("", "Il doit avoir une amende d'au moins 100$.", ITEMDRAW_DISABLED);
 		menu.AddItem("", "ainsi que 3 heures de prison.", ITEMDRAW_DISABLED);
@@ -139,7 +139,7 @@ public void Q3_Start(int objectiveID, int client) {
 	g_iDuration[client] = 24 * 60;
 }
 public void Q1_Done(int objectiveID, int client) {
-	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
+	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 	
 	int cap = rp_GetRandomCapital(101);
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 1000);
@@ -147,7 +147,7 @@ public void Q1_Done(int objectiveID, int client) {
 	
 }
 public void Q2_Done(int objectiveID, int client) {
-	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
+	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 	
 	int cap = rp_GetRandomCapital(101);
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 2000);
@@ -155,7 +155,7 @@ public void Q2_Done(int objectiveID, int client) {
 	
 }
 public void Q3_Done(int objectiveID, int client) {
-	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
+	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 	
 	int cap = rp_GetRandomCapital(101);
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 3000);
