@@ -51,7 +51,6 @@ public void OnCvarChange(Handle cvar, const char[] oldVal, const char[] newVal) 
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerHear, fwdHear);
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
-	rp_HookEvent(client, RP_OnPlayerDataLoaded, fwdDataLoad);
 }
 public Action fwdCommand(int client, char[] command, char[] arg) {
 	#if defined DEBUG
