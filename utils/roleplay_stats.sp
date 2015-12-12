@@ -22,6 +22,8 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 #define DEBUG
+Handle debuglog;
+
 bool g_dataloaded[MAXPLAYERS];
 int g_iStat_LastSave[MAXPLAYERS][i_uStat_nosavemax];
 int_stat_data g_Sassoc[] = { // Fait le lien entre une stat et sa valeur sauvegardée
@@ -67,7 +69,7 @@ public void OnPluginStart() {
 			OnClientPostAdminCheck(i);
 			fwdDataLoaded(i);
 		}
-
+	debuglog = OpenFile("debugstat.txt", "a+");
 	CreateTimer(15.0, saveStats, _, TIMER_REPEAT);
 }
 
@@ -341,6 +343,7 @@ public Action saveStats(Handle timer){
 	#if defined DEBUG
 	PrintToServer(sSQuery);
 	#endif
+	WriteFileLine(debuglog, sSQuery);
 	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, sSQuery);
 }
 
