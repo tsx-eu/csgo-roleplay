@@ -91,7 +91,7 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	if( StrEqual(command, "compteur") || StrEqual(command, "count") || StrEqual(command, "stats") || StrEqual(command, "stat") || StrEqual(command, "statistics") ) {
 		Handle menu = CreateMenu(MenuViewStats);
 		SetMenuTitle(menu, "Quelles stats afficher ?");
-		AddMenuItem(menu, "sess", "Sur la connection");
+		AddMenuItem(menu, "sess", "Sur la connexion");
 		AddMenuItem(menu, "full", "Le total");
 		AddMenuItem(menu, "real", "En temps réel");
 		AddMenuItem(menu, "coloc", "Infos appartement");

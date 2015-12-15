@@ -24,16 +24,6 @@
 //#define DEBUG
 Handle g_vAllTalk;
 bool g_bAllTalk = false;
-char g_avocats[][][32] = {
-	{"STEAM_1:0:34370282", "200"},	//CyBuG
-	{"STEAM_1:1:93713536", "150"},	//Kiceroh
-	{"STEAM_1:1:94125947", "150"},	//Gold
-	{"STEAM_1:0:100462521", "150"},	//Armory
-	{"STEAM_1:1:87405234", "150"},	//Rothi
-	{"STEAM_1:1:36781942", "150"},	//ChowN
-	{"STEAM_1:0:18960266", "150"} 	//Astraa
-	
-};
 
 public Plugin myinfo = {
 	name = "Utils: VoiceProximity", author = "KoSSoLaX",
@@ -61,19 +51,6 @@ public void OnCvarChange(Handle cvar, const char[] oldVal, const char[] newVal) 
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerHear, fwdHear);
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
-	rp_HookEvent(client, RP_OnPlayerDataLoaded, fwdDataLoad);
-}
-
-public Action fwdDataLoad(int client){
-	char steamID[32];
-	rp_SetClientInt(client, i_Avocat, -1);
-	GetClientAuthId(client, AuthId_Engine, steamID, sizeof(steamID), false);
-	for(int i=0; i<sizeof(g_avocats); i++){
-		if(StrEqual(g_avocats[i][0], steamID)){
-			rp_SetClientInt(client, i_Avocat, StringToInt(g_avocats[i][1]));
-			break;
-		}
-	}
 }
 public Action fwdCommand(int client, char[] command, char[] arg) {
 	#if defined DEBUG

@@ -320,19 +320,19 @@ public int MenuRubanWho(Handle menu, MenuAction action, int client, int param2) 
 		else{
 			target = GetClientAimTarget(client, false);
 			if( target == 0 || !IsValidEdict(target) || !IsValidEntity(target) ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre cible n'est pas valide");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre cible n'est pas valide.");
 				return;
 			}
 			char classname[64];
 			GetEdictClassname(target, classname, sizeof(classname));
 
 			if( StrContains("chicken|player|weapon|prop_physics|", classname) == -1 ){
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre cible n'est pas valide");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre cible n'est pas valide.");
 				return;
 			}
 
 			if( !rp_IsEntitiesNear(client, target) ){
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre cible est trop loin");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre cible est trop loin.");
 				return;
 			}
 		}
@@ -421,7 +421,7 @@ public Action Cmd_ItemSanAndreas(int args) {
 	if( ammo > 5000 )
 		ammo = 5000;
 	Weapon_SetPrimaryClip(wepid, ammo);
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme à maintenant %i balles", ammo);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme a maintenant %i balles", ammo);
 	
 	SDKHook(wepid, SDKHook_Reload, OnWeaponReload);
 	return Plugin_Handled;
@@ -434,7 +434,7 @@ public Action OnWeaponReload(int wepid) {
 		int client = Weapon_GetOwner(wepid);
 		
 		if( cache[client] < GetGameTime() ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme à un San Andreas, il vous reste %d balles dans votre chargeur.", ammo);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme a un San Andreas, il vous reste %d balles dans votre chargeur.", ammo);
 			cache[client] = GetGameTime() + 1.0;
 		}
 		

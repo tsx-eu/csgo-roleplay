@@ -75,7 +75,7 @@ typeset rp_event_enum {
 	function Action(int client, int target, float& dist);		/* RP_OnPlayerHear Est-ce que client peut entendre target ? */
 	function Action(int client, char[] message, int length, bool local);	/* RP_PrePlayerTalk */
 	function Action(int client);								/* RP_OnPlayerDataLoaded */
-	function Action(int client, int money);
+	function Action(int client, int money);						/* RP_OnPlayerSell */
 };
 /*
  * @brief Hook sur un joueur. 
