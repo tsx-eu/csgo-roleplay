@@ -17,6 +17,7 @@
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
 #include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
+#include <csgo_items>   // https://forums.alliedmods.net/showthread.php?t=243009
 
 #define __LAST_REV__ 		"v:0.1.0"
 
@@ -87,6 +88,19 @@ enum tribunal_search_data {
 
 int g_TribunalSearch[MAXPLAYERS+1][tribunal_search_max];
 char g_szTribunal_DATA[65][tribunal_max][64];
+int g_iOriginOwner[2049];
+
+
+DataPack g_hBuyMenu;
+enum BM_Int {
+	BM_Owner,
+	BM_Prix,
+	BM_Munition,
+	BM_Chargeur,
+	BM_PvP,
+	BM_Type,
+	BM_Max
+}
 
 //forward RP_OnClientTazedItem(int attacker, int reward);
 Handle g_hForward_RP_OnClientTazedItem;
@@ -100,7 +114,14 @@ void doRP_OnClientTazedItem(int client, int reward) {
 
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
-	RegConsoleCmd("sm_jugement", Cmd_Jugement);
+	g_hForward_RP_OnClientTazedItem = CreateGlobalForward("RP_OnClientTazedItem", ET_Event, Param_Cell, Param_Cell);
+	g_hBuyMenu = new DataPack();
+	g_hBuyMenu.WriteCell(0);
+	int pos = g_hBuyMenu.Position;
+	g_hBuyMenu.Reset();
+	g_hBuyMenu.WriteCell(pos);
+	
+	RegConsoleCmd("sm_jugement",	Cmd_Jugement);
 	
 	RegServerCmd("rp_item_mandat", 		Cmd_ItemPickLock,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_ratio",		Cmd_ItemRatio,			"RP-ITEM",	FCVAR_UNREGISTERED);
@@ -108,8 +129,6 @@ public void OnPluginStart() {
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
-	
-	g_hForward_RP_OnClientTazedItem = CreateGlobalForward("RP_OnClientTazedItem", ET_Event, Param_Cell, Param_Cell);
 }
 public Action Cmd_SendToJail(int args) {
 	#if defined DEBUG
@@ -121,6 +140,9 @@ public void OnMapStart() {
 	PrecacheModel(MODEL_PRISONNIER, true);
 	PrecacheModel(MODEL_BARRIERE, true);
 }
+public void OnEntityCreated(int id, const char[] classname) {
+	g_iOriginOwner[id] = -1;
+}
 // ----------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
 	#if defined DEBUG
@@ -131,9 +153,17 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
 	rp_HookEvent(client, RP_PreGiveDamage, fwdDmg);
 	rp_HookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);
-	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);
+	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);	
+	rp_HookEvent(client, RP_OnPlayerUse, fwdOnPlayerUse);
 	rp_SetClientBool(client, b_IsSearchByTribunal, false);
 	g_TribunalSearch[client][tribunal_search_status] = -1;
+	
+	SDKHook(client, SDKHook_WeaponEquip, WeaponEquip);
+}
+public Action WeaponEquip(int client, int weapon) {
+	if( g_iOriginOwner[weapon] <= 0 ) {
+		g_iOriginOwner[weapon]  = client;
+	}
 }
 public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 	int job = rp_GetClientInt(client, i_Job);
@@ -534,6 +564,8 @@ public Action Cmd_Tazer(int client) {
 			
 			rp_GetZoneData(Tzone, zone_type_name, tmp, sizeof(tmp));
 			LogToGame("[TSX-RP] [TAZER] %L a supprimé une arme %s dans %s", client, tmp2, tmp);
+			
+			addBuyMenu(client, target);
 			
 			ReplaceString(tmp2, sizeof(tmp2), "weapon_", "");	
 			int prix = 0; CS_GetWeaponPrice(client, CS_AliasToWeaponID(tmp2));
@@ -2737,12 +2769,172 @@ void StripWeapons(int client ) {
 		if( i == CS_SLOT_KNIFE ) continue; 
 		
 		while( ( wepIdx = GetPlayerWeaponSlot( client, i ) ) != -1 ) {
+			
+			addBuyMenu(client, wepIdx);
+			
 			RemovePlayerItem( client, wepIdx );
 			RemoveEdict( wepIdx );
-			
-			rp_SetJobCapital(1, rp_GetJobCapital(1) + 250);
 		}
 	}
 	
 	FakeClientCommand(client, "use weapon_knife");
+}
+
+public Action fwdOnPlayerUse(int client) {
+	#if defined DEBUG
+	PrintToServer("fwdOnPlayerUse");
+	#endif
+	float vecOrigin[3];
+	
+	GetClientAbsOrigin(client, vecOrigin);
+	
+	if( GetVectorDistance(vecOrigin, view_as<float>({ 2550.8, 1663.1, -2015.96 })) < 40.0 ) {
+		Cmd_BuyWeapon(client);
+	}
+	return Plugin_Continue;
+}
+void deleteBuyMenu(int pos) {
+	g_hBuyMenu.Reset();
+	int max = g_hBuyMenu.ReadCell();
+	int position = g_hBuyMenu.Position;
+	
+	DataPack clone = new DataPack();
+	clone.WriteCell(0);
+	
+	char weapon[65];
+	int data[BM_Max];
+	 
+	while( position < max ) {
+		
+	
+		g_hBuyMenu.ReadString(weapon, sizeof(weapon));
+		for (int i = 0; i < view_as<int>(BM_Max); i++) {
+			data[i] = g_hBuyMenu.ReadCell();
+		}
+		
+		if( position != pos) {
+			clone.WriteString(weapon);
+			for (int i = 0; i < view_as<int>(BM_Max); i++) {
+				 clone.WriteCell(data[i]);
+			}
+		}
+		
+		position = g_hBuyMenu.Position;
+	}
+	position = clone.Position;
+	clone.Reset();
+	clone.WriteCell(position);
+	delete g_hBuyMenu;
+	g_hBuyMenu = clone;
+}
+void getBuyMenu(int pos, char weapon[65], int data[BM_Max]) {
+	g_hBuyMenu.Position = pos;
+	
+	g_hBuyMenu.ReadString(weapon, sizeof(weapon));
+	for (int i = 0; i < view_as<int>(BM_Max); i++) {
+		data[i] = g_hBuyMenu.ReadCell();
+	}
+}
+void addBuyMenu(int client, int weaponID) {
+	if( rp_GetWeaponStorage(weaponID) == true )
+		return;
+	
+	int owner = GetEntPropEnt(weaponID, Prop_Send, "m_hPrevOwner");
+	if( IsValidClient(owner) && (rp_GetClientJobID(owner) == 1 || rp_GetClientJobID(owner) == 101) )
+		return;
+	owner = g_iOriginOwner[weaponID];
+	if( IsValidClient(owner) && (rp_GetClientJobID(owner) == 1 || rp_GetClientJobID(owner) == 101) )
+		return;
+	
+	char weapon[65];
+	int data[BM_Max];
+	
+	data[BM_PvP] = rp_GetWeaponGroupID(weaponID);
+	data[BM_Munition] = Weapon_GetPrimaryClip(weaponID);
+	data[BM_Chargeur] = GetEntProp(weaponID, Prop_Send, "m_iPrimaryReserveAmmoCount");
+	
+	CSGO_GetItemDefinitionNameByIndex(GetEntProp(weaponID, Prop_Send, "m_iItemDefinitionIndex"), weapon, sizeof(weapon));
+	ReplaceString(weapon, sizeof(weapon), "weapon_", "");	
+	data[BM_Prix] = CS_GetWeaponPrice(client, CS_AliasToWeaponID(weapon)) / 4;
+	data[BM_Owner] = GetEntProp(weaponID, Prop_Send, "m_OriginalOwnerXuidHigh");
+	
+	g_hBuyMenu.Reset();
+	int pos = g_hBuyMenu.ReadCell();
+	g_hBuyMenu.Position = pos;
+	g_hBuyMenu.WriteString(weapon);
+	for (int i = 0; i < view_as<int>(BM_Max); i++) {
+		g_hBuyMenu.WriteCell(data[i]);
+	}
+	pos = g_hBuyMenu.Position;
+	g_hBuyMenu.Reset();
+	g_hBuyMenu.WriteCell(pos);
+}
+void Cmd_BuyWeapon(int client) {
+	g_hBuyMenu.Reset();
+	int max = g_hBuyMenu.ReadCell();
+	int position = g_hBuyMenu.Position;
+	char name[65], tmp[8], tmp2[65];
+	int data[BM_Max];
+	
+	if( position >= max )
+		return;
+	
+	Menu menu = new Menu(Menu_BuyWeapon);
+	menu.SetTitle("Armes trouvées par la police:");
+	
+	while( position < max ) {
+		
+		getBuyMenu(position, name, data);
+		Format(tmp, sizeof(tmp), "%d", position);
+		Format(tmp2, sizeof(tmp2), "%s (%d/%d) pour %d$", name, data[BM_Munition], data[BM_Chargeur], data[BM_Prix]);
+		menu.AddItem(tmp, tmp2);
+		
+		position = g_hBuyMenu.Position;
+	}
+
+	menu.Display(client, 60);
+	return;
+}
+public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int p_iParam2) {
+	#if defined DEBUG
+	PrintToServer("Menu_BuyWeapon");
+	#endif
+	if (p_oAction == MenuAction_Select) {
+		
+		char szMenu[64];
+		if( GetMenuItem(p_hMenu, p_iParam2, szMenu, sizeof(szMenu)) ) {
+			char name[65];
+			int data[BM_Max];
+			int position = StringToInt(szMenu);
+			getBuyMenu(position, name, data);
+			
+			if( rp_GetClientInt(client, i_Bank) < data[BM_Prix] )
+				return 0;
+			float vecOrigin[3];
+			
+			GetClientAbsOrigin(client, vecOrigin);
+			
+			if( GetVectorDistance(vecOrigin, view_as<float>({ 2550.8, 1663.1, -2015.96 })) > 40.0 )
+				return 0;
+			
+			Format(name, sizeof(name), "weapon_%s", name);			
+			int wepid = GivePlayerItem(client, name);
+	
+			//rp_SetWeaponBallType(wepid, wep_type);
+			//rp_SetWeaponGroupID(wepid, g);
+			Weapon_SetPrimaryClip(wepid, data[BM_Munition]);
+			Client_SetWeaponPlayerAmmoEx(client, wepid, data[BM_Chargeur]);
+			//SetEntProp(wepid, Prop_Send, "m_OriginalOwnerXuidHigh", data[BM_Owner]); // <-- ça marche pas.
+			deleteBuyMenu(position);
+			rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) - data[BM_Prix]);
+			int rnd = rp_GetRandomCapital(1);
+			rp_SetJobCapital(1, rp_GetJobCapital(1) + data[BM_Prix]);
+			rp_SetJobCapital(rnd, rp_GetJobCapital(rnd) - data[BM_Prix]);
+			
+		}		
+	}
+	else if (p_oAction == MenuAction_End) {
+		CloseHandle(p_hMenu);
+	}
+	return 0;
 }
