@@ -167,6 +167,11 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 
 		return Plugin_Handled;
 	}
+	else if( StrEqual(command, "stopsound") ) {
+		ClientCommand(client, "stopsound");
+		FakeClientCommand(client, "stopsound");
+		return Plugin_Handled;
+	}
 	return Plugin_Continue;
 }
 public Action fwdHear(int client, int target, float& dist) {
