@@ -21,7 +21,7 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-//#define DEBUG
+#define DEBUG
 
 public Plugin myinfo = {
 	name = "Jobs: Mc'Do", author = "KoSSoLaX",
@@ -186,7 +186,7 @@ public void BuildingMicrowave_break(const char[] output, int caller, int activat
 	TE_SetupSparks(vecOrigin, view_as<float>({0.0,0.0,1.0}),120,40);
 	TE_SendToAll();
 	rp_UnhookEvent(client, RP_OnPlayerUse, fwdOnPlayerUse);
-	rp_Effect_Explode(vecOrigin, 200.0, 600.0, client);
+	//rp_Effect_Explode(vecOrigin, 200.0, 600.0, activator, "micro_onde");
 }
 public Action fwdOnPlayerUse(int client) {
 	#if defined DEBUG
