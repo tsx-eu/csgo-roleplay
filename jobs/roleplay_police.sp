@@ -2962,6 +2962,7 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 				rp_SetWeaponGroupID(wepid, rp_GetClientGroupID(client));
 
 			Weapon_SetPrimaryClip(wepid, data[BM_Munition]);
+			Weapon_SetPrimaryAmmoCount(wepid, data[BM_Chargeur]);
 			Client_SetWeaponPlayerAmmoEx(client, wepid, data[BM_Chargeur]);
 			//SetEntProp(wepid, Prop_Send, "m_OriginalOwnerXuidHigh", data[BM_Owner]); // <-- ça marche pas.
 			deleteBuyMenu(position);
