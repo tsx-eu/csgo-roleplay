@@ -2852,10 +2852,28 @@ void addBuyMenu(int client, int weaponID) {
 	data[BM_PvP] = rp_GetWeaponGroupID(weaponID);
 	data[BM_Munition] = Weapon_GetPrimaryClip(weaponID);
 	data[BM_Chargeur] = GetEntProp(weaponID, Prop_Send, "m_iPrimaryReserveAmmoCount");
+	data[BM_Type] = view_as<int>(rp_GetWeaponBallType(weaponID));
 	
 	CSGO_GetItemDefinitionNameByIndex(GetEntProp(weaponID, Prop_Send, "m_iItemDefinitionIndex"), weapon, sizeof(weapon));
 	ReplaceString(weapon, sizeof(weapon), "weapon_", "");	
 	data[BM_Prix] = CS_GetWeaponPrice(client, CS_AliasToWeaponID(weapon)) / 4;
+
+	if(data[BM_PvP] > 0)
+		data[BM_Prix] += 250;
+
+	switch(view_as<enum_ball_type>(data[BM_Type])){
+		case ball_type_fire          : data[BM_Prix]+= 250;
+		case ball_type_caoutchouc    : data[BM_Prix]+= 200;
+		case ball_type_poison        : data[BM_Prix]+= 200;
+		case ball_type_vampire       : data[BM_Prix]+= 200;
+		case ball_type_paintball     : data[BM_Prix]+= 50;
+		case ball_type_reflexive     : data[BM_Prix]+= 200;
+		case ball_type_explode       : data[BM_Prix]+= 300;
+		case ball_type_revitalisante : data[BM_Prix]+= 200;
+		case ball_type_nosteal       : data[BM_Prix]+= 50;
+		case ball_type_notk          : data[BM_Prix]+= 50;
+	}
+
 	data[BM_Owner] = GetEntProp(weaponID, Prop_Send, "m_OriginalOwnerXuidHigh");
 	
 	g_hBuyMenu.Reset();
@@ -2873,7 +2891,7 @@ void Cmd_BuyWeapon(int client) {
 	g_hBuyMenu.Reset();
 	int max = g_hBuyMenu.ReadCell();
 	int position = g_hBuyMenu.Position;
-	char name[65], tmp[8], tmp2[65];
+	char name[65], tmp[8], tmp2[129];
 	int data[BM_Max];
 	
 	if( position >= max )
@@ -2886,7 +2904,26 @@ void Cmd_BuyWeapon(int client) {
 		
 		getBuyMenu(position, name, data);
 		Format(tmp, sizeof(tmp), "%d", position);
-		Format(tmp2, sizeof(tmp2), "%s (%d/%d) pour %d$", name, data[BM_Munition], data[BM_Chargeur], data[BM_Prix]);
+
+		if(data[BM_PvP] > 0)
+			Format(tmp2, sizeof(tmp2), "[PvP] ");
+		else
+			Format(tmp2, sizeof(tmp2), "");
+
+		Format(tmp2, sizeof(tmp2), "%s %s (%d/%d) ", tmp2, name, data[BM_Munition], data[BM_Chargeur]);
+		switch(view_as<enum_ball_type>(data[BM_Type])){
+			case ball_type_fire          : Format(tmp2, sizeof(tmp2), "%s Incendiaire", tmp2);
+			case ball_type_caoutchouc    : Format(tmp2, sizeof(tmp2), "%s Caoutchouc", tmp2);
+			case ball_type_poison        : Format(tmp2, sizeof(tmp2), "%s Poison", tmp2);
+			case ball_type_vampire       : Format(tmp2, sizeof(tmp2), "%s Vampirique", tmp2);
+			case ball_type_paintball     : Format(tmp2, sizeof(tmp2), "%s PaintBall", tmp2);
+			case ball_type_reflexive     : Format(tmp2, sizeof(tmp2), "%s Rebondissante", tmp2);
+			case ball_type_explode       : Format(tmp2, sizeof(tmp2), "%s Explosive", tmp2);
+			case ball_type_revitalisante : Format(tmp2, sizeof(tmp2), "%s Revitalisante", tmp2);
+			case ball_type_nosteal       : Format(tmp2, sizeof(tmp2), "%s Anti-Vol", tmp2);
+			case ball_type_notk          : Format(tmp2, sizeof(tmp2), "%s Anti-TK", tmp2);
+		}
+		Format(tmp2, sizeof(tmp2), "%s pour %d$", tmp2, data[BM_Prix]);
 		menu.AddItem(tmp, tmp2);
 		
 		position = g_hBuyMenu.Position;
@@ -2920,8 +2957,10 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			Format(name, sizeof(name), "weapon_%s", name);			
 			int wepid = GivePlayerItem(client, name);
 	
-			//rp_SetWeaponBallType(wepid, wep_type);
-			//rp_SetWeaponGroupID(wepid, g);
+			rp_SetWeaponBallType(wepid, view_as<enum_ball_type>(data[BM_Type]));
+			if(data[BM_PvP] > 0)
+				rp_SetWeaponGroupID(wepid, rp_GetClientGroupID(client));
+
 			Weapon_SetPrimaryClip(wepid, data[BM_Munition]);
 			Client_SetWeaponPlayerAmmoEx(client, wepid, data[BM_Chargeur]);
 			//SetEntProp(wepid, Prop_Send, "m_OriginalOwnerXuidHigh", data[BM_Owner]); // <-- ça marche pas.
