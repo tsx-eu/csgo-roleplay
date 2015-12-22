@@ -321,7 +321,7 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 				else if(StrEqual(type, "sanandreas")){
 					int ammo = Weapon_GetPrimaryClip(wep_id);
 					if( ammo >= 150 ) {
-					PrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme a déja un San Andreas, il vous reste %d balles dans votre chargeur.", ammo);
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme a déja un San Andreas, il vous reste %d balles dans votre chargeur.", ammo);
 					return;
 					}
 					ammo += 1000; if( ammo > 5000 ) ammo = 5000;
