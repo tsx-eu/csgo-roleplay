@@ -357,6 +357,11 @@ public Action Cmd_ItemAlcool(int args) {
 			ITEM_CANCEL(client,item_id);
 			return Plugin_Handled;
 		}
+	if( rp_GetZoneBit( rp_GetPlayerZone(target) ) & BITZONE_PEACEFULL ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit où vous êtes.");
+		return Plugin_Handled;
+	}
 		float vecTarget[3];
 		GetClientAbsOrigin(client, vecTarget);
 		TE_SetupBeamRingPoint(vecTarget, 10.0, 500.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, { 255, 0, 191, 200}, 10, 0);
