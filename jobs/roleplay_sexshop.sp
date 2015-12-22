@@ -357,7 +357,7 @@ public Action Cmd_ItemAlcool(int args) {
 			ITEM_CANCEL(client,item_id);
 			return Plugin_Handled;
 		}
-	if( rp_GetZoneBit( rp_GetPlayerZone(client) ) & BITZONE_PEACEFULL ) {
+	if( rp_GetZoneBit( rp_GetPlayerZone(target) ) & BITZONE_PEACEFULL ) {
 		ITEM_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit où vous êtes.");
 		return Plugin_Handled;
