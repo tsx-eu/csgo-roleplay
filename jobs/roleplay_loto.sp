@@ -27,6 +27,7 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
+int g_iTicketID = 76;
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
 	// Loto
@@ -110,6 +111,25 @@ public Action Cmd_ItemLotoBonus(int args) {
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous vous sentez chanceux aujourd'hui.");
 	rp_IncrementLuck(client);
 }
+public void SQL_GetLotoCount(Handle owner, Handle hQuery, const char[] error, any client) {
+	
+	if( SQL_FetchRow(hQuery) ) {
+		int cpt = SQL_FetchInt(hQuery, 0);
+		
+		if( cpt == 0 ) {
+			char query[1024], szSteamID[32];
+			GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID), false);
+			
+			Format(query, sizeof(query), "INSERT INTO `rp_loto` (`id`, `steamid`) VALUES (NULL, '%s');", szSteamID);
+			SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query, 0, DBPrio_High);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre ticket a été validé. Un tirage exceptionnel pour la brocante de Noël aura lieu mercredi vers 21h30.");
+		}
+		else {
+			rp_ClientGiveItem(client, g_iTicketID, 1, true);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre ticket a déjà été validé. Vous avez été remboursé dans votre banque.");
+		}
+	}		
+}
 public Action Cmd_ItemLoto(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemLoto");
@@ -126,12 +146,10 @@ public Action Cmd_ItemLoto(int args) {
 	
 	if( amount == -1 ) {
 		char query[1024];
+		g_iTicketID = GetCmdArgInt(3);
+		Format(query, sizeof(query), "SELECT COUNT(*) FROM `rp_loto` WHERE `steamid`='%s';", szSteamID);
+		SQL_TQuery(rp_GetDatabase(), SQL_GetLotoCount, query, client, DBPrio_Low);
 		
-		Format(query, sizeof(query), "INSERT INTO `rp_loto` (`id`, `steamid`) VALUES (NULL, '%s');", szSteamID);
-		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query, 0, DBPrio_Low);
-		
-		
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre ticket a été validé. Le tirage a lieu le mardi et le samedi à 21h00.");
 		return Plugin_Handled;
 	}
 	int luck = 100;
