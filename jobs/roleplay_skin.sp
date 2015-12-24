@@ -456,6 +456,8 @@ public Action fwdUse(int client) {
 	Handle menu = CreateMenu(MenuTrySkin);
 	SetMenuTitle(menu, "Selection du skin à essayer:");
 	
+	AddMenuItem(menu, "models/player/custom_player/legacy/santa/santa.mdl", "Père Noël");
+	
 	AddMenuItem(menu, "models/player/custom_player/legacy/50cent/50cent.mdl", "50cent");
 	AddMenuItem(menu, "models/player/custom_player/legacy/lloyd/lloyd.mdl", "Loyd");
 	AddMenuItem(menu, "models/player/custom_player/legacy/misty/misty.mdl", "Misty");
