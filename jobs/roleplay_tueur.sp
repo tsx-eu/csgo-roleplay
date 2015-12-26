@@ -690,7 +690,7 @@ public Action fwdZoneChange(int client, int newZone, int oldZone) {
 		float vecOrigin[3];
 		GetClientAbsOrigin(client, vecOrigin);
 		
-		if( GetVectorDistance(vecDest, vecOrigin) < 128.0 ) {
+		//if( GetVectorDistance(vecDest, vecOrigin) < 128.0 ) {
 			int target = rp_GetClientInt(client, i_KidnappedBy);
 			clearKidnapping(client);
 			
@@ -699,13 +699,13 @@ public Action fwdZoneChange(int client, int newZone, int oldZone) {
 			
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez pris la fuite, vous êtes libre !");
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N s'est échappé.", client);
-		}
-		else {
+		//}
+		/*else {
 			TeleportEntity(client,  view_as<float>({-5879.0, -2815.0, -1950.0}), NULL_VECTOR, NULL_VECTOR);
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Une tentative de triche a été détectée.");
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Etes-vous sorti correctement, sans triche, sans téléportation ?");
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Si c'est le cas, contactez KoSSoLaX.");			
-		}
+		}*/
 	}
 }
 public Action fwdDead(int client, int attacker, float& respawn) {
