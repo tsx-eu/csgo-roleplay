@@ -1915,7 +1915,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 						continue;
 					if(rp_GetClientInt(i, i_LastKilled_Reverse) != target)
 						continue;
-					CPrintToChat(i, "{lightblue}[TSX-RP]{default} Votre assasin à été mis en prison.");
+					CPrintToChat(i, "{lightblue}[TSX-RP]{default} Votre assasin a été mis en prison.");
 				}
 				time_to_spend /= 2;
 			}
@@ -1944,7 +1944,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 						continue;
 					if(rp_GetClientInt(i, i_LastKilled_Reverse) != target)
 						continue;
-					CPrintToChat(i, "{lightblue}[TSX-RP]{default} Votre assasin à été mis en prison.");
+					CPrintToChat(i, "{lightblue}[TSX-RP]{default} Votre assasin a été mis en prison.");
 				}
 			}
 			
