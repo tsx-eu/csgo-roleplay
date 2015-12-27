@@ -291,6 +291,13 @@ public Action Cmd_ItemGiveBonus(int args) {
 		bonus = appart_bonus_paye;
 		mnt = 150;
 	}
+	else if( StrEquel(arg1, "all") ) {
+		for(int i=0; i<appart_bonus_paye; i++) {
+			rp_SetAppartementInt(appartID, view_as<type_appart_bonus>(i), 1);
+		}
+		rp_SetAppartementInt(appartID, appart_bonus_paye, 150);
+		return Plugin_Handled;
+	}
 	else {
 		ITEM_CANCEL(client, itemID);
 		return Plugin_Handled;	
