@@ -790,3 +790,13 @@ public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
 			CloseHandle(menu);
 	}
 }
+
+if( StrEqual(arg1, "all"){
+rp_SetAppartementInt(appartID, appart_bonus_heal, 1);
+rp_SetAppartementInt(appartID, appart_bonus_armor, 1);
+rp_SetAppartementInt(appartID, appart_bonus_garage, 1);
+rp_SetAppartementInt(appartID, appart_bonus_energy, 1);
+rp_SetAppartementInt(appartID, appart_bonus_vitality, 1);
+rp_SetAppartementInt(appartID, appart_bonus_coffre, 1);
+rp_SetAppartementInt(appartID, appart_bonus_paye, 150);
+}
