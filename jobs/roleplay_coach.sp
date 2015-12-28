@@ -107,10 +107,10 @@ public Action Cmd_ItemCut(int args) {
 		
 		rp_IncrementSuccess(client, success_list_coach, amount-add);
 		rp_SetClientInt(client, i_KnifeTrain, 100);
-		if(amount - add == 1)
+		if(add10 == 0 && add1 == 1)
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre entraînement est de 100/100, un niveau d'entrainement vous a été remboursé.");
 		else
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre entraînement est de 100/100, %i niveaux d'entrainement vous ont été remboursés.", amount-add);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre entraînement est de 100/100, %i niveaux d'entrainement vous ont été remboursés.", add10 * 10 + add1);
 		
 		return Plugin_Handled;
 	}
