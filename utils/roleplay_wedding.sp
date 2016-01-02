@@ -80,7 +80,7 @@ public Action Cmd_Mariage(int client) {
 	int job = rp_GetClientInt(client, i_Job);
 	int zoneJuge = rp_GetPlayerZone(client);
 	
-	if( job != 101 && job != 102 && job != 103 && job != 104) { // Au dessus de HJ1 seulement
+	if( job != 101 && job != 102 && job != 103 && job != 104 && job != 105 && job != 106) { // Au dessus de HJ1 seulement
 		ACCESS_DENIED(client);
 	}
 	
