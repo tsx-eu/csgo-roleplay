@@ -474,6 +474,9 @@ public Action Cmd_Tazer(int client) {
 	int target = GetClientTarget(client);
 	if( target <= 0 || !IsValidEdict(target) || !IsValidEntity(target) )
 		return Plugin_Handled;
+
+	if( GetEntityMoveType(target) == MOVETYPE_NOCLIP )
+		return Plugin_Handled;
 	
 	int Tzone = rp_GetPlayerZone(target);
 	
