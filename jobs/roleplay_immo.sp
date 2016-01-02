@@ -275,21 +275,10 @@ public Action Cmd_ItemGiveBonus(int args) {
 		bonus = appart_bonus_vitality;
 	else if( StrEqual(arg1, "coffre") )
 		bonus = appart_bonus_coffre;
-	else if( StrEqual(arg1, "bronze") ) {
-		bonus = appart_bonus_paye;
-		mnt = 50;
-	}
-	else if( StrEqual(arg1, "argent") ) {
-		bonus = appart_bonus_paye;
-		mnt = 75;
-	}
-	else if( StrEqual(arg1, "or") ) {
-		bonus = appart_bonus_paye;
-		mnt = 100;
 	}
 	else if( StrEqual(arg1, "platine") ) {
 		bonus = appart_bonus_paye;
-		mnt = 150;
+		mnt = 175;
 	}
 	else if( StrEquel(arg1, "all") ) {
 		for(int i=0; i<appart_bonus_paye; i++) {
