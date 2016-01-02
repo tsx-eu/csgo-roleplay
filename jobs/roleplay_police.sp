@@ -535,6 +535,9 @@ public Action Cmd_Tazer(int client) {
 		if( (job == 103 || job == 104 || job == 105 || job == 106) && !(rp_GetZoneBit(Czone) & BITZONE_PERQUIZ) ) {
 			ACCESS_DENIED(client);
 		}
+		if( GetClientTeam(client) == CS_TEAM_T && job != 1 && job != 2 && job != 5 && job != 6 && job != 7 ) {
+			ACCESS_DENIED(client);
+		}
 		int reward = -1;
 		int owner = rp_GetBuildingData(target, BD_owner);
 		if( !IsValidClient(owner) )
