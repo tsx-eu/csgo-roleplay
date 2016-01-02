@@ -474,6 +474,9 @@ public Action Cmd_Tazer(int client) {
 	int target = GetClientTarget(client);
 	if( target <= 0 || !IsValidEdict(target) || !IsValidEntity(target) )
 		return Plugin_Handled;
+
+	if( GetEntityMoveType(target) == MOVETYPE_NOCLIP )
+		return Plugin_Handled;
 	
 	int Tzone = rp_GetPlayerZone(target);
 	
@@ -530,6 +533,9 @@ public Action Cmd_Tazer(int client) {
 	else {
 		// Props:
 		if( (job == 103 || job == 104 || job == 105 || job == 106) && !(rp_GetZoneBit(Czone) & BITZONE_PERQUIZ) ) {
+			ACCESS_DENIED(client);
+		}
+		if( GetClientTeam(client) == CS_TEAM_T && job != 1 && job != 2 && job != 5 && job != 6 && job != 7 ) {
 			ACCESS_DENIED(client);
 		}
 		int reward = -1;
@@ -2469,15 +2475,19 @@ int BuildingBarriere(int client) {
 	SetEntityMoveType(ent, MOVETYPE_NONE);
 	
 	CreateTimer(2.0, BuildingBarriere_post, ent);
+	CreateTimer(2.0, BuildingBarriere_client_post, client);
 	rp_SetBuildingData(ent, BD_owner, client);
 	return ent;
+}
+public Action BuildingBarriere_client_post(Handle timer, any client) {
+	SetEntityMoveType(client, MOVETYPE_WALK);
+	return Plugin_Handled;
 }
 public Action BuildingBarriere_post(Handle timer, any entity) {
 	#if defined DEBUG
 	PrintToServer("BuildingBarriere_post");
 	#endif
 	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
-	SetEntityMoveType(client, MOVETYPE_WALK);
 	
 	rp_Effect_BeamBox(client, entity, NULL_VECTOR, 255, 255, 0);
 	
@@ -2956,7 +2966,6 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			
 			Format(name, sizeof(name), "weapon_%s", name);			
 			int wepid = GivePlayerItem(client, name);
-	
 			rp_SetWeaponBallType(wepid, view_as<enum_ball_type>(data[BM_Type]));
 			if(data[BM_PvP] > 0)
 				rp_SetWeaponGroupID(wepid, rp_GetClientGroupID(client));
@@ -2970,7 +2979,7 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			int rnd = rp_GetRandomCapital(1);
 			rp_SetJobCapital(1, rp_GetJobCapital(1) + data[BM_Prix]);
 			rp_SetJobCapital(rnd, rp_GetJobCapital(rnd) - data[BM_Prix]);
-			
+			LogToGame("[TSX-RP] [RESELL] Le joueur %L à acheté %s au commissariat pour %d$", client, name, data[BM_Prix]);			
 		}		
 	}
 	else if (p_oAction == MenuAction_End) {

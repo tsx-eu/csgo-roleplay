@@ -176,7 +176,9 @@ int findNearestSerialKiller(int client) {
 			continue;
 		if( rp_GetClientInt(i, i_KillingSpread) < 5 )
 			continue;
-		if( rp_GetZoneBit( rp_GetPlayerZone(i) ) & BITZONE_JAIL )
+		if( rp_GetZoneBit( rp_GetPlayerZone(i) ) & BITZONE_JAIL)
+			continue;
+		if( rp_GetZoneBit( rp_GetPlayerZone(i) ) & BITZONE_HAUTESECU)
 			continue;
 		
 		Entity_GetAbsOrigin(i, vecDestination);
