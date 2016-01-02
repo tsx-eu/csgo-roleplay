@@ -2472,15 +2472,19 @@ int BuildingBarriere(int client) {
 	SetEntityMoveType(ent, MOVETYPE_NONE);
 	
 	CreateTimer(2.0, BuildingBarriere_post, ent);
+	CreateTimer(2.0, BuildingBarriere_client_post, client);
 	rp_SetBuildingData(ent, BD_owner, client);
 	return ent;
+}
+public Action BuildingBarriere_client_post(Handle timer, any client) {
+	SetEntityMoveType(client, MOVETYPE_WALK);
+	return Plugin_Handled;
 }
 public Action BuildingBarriere_post(Handle timer, any entity) {
 	#if defined DEBUG
 	PrintToServer("BuildingBarriere_post");
 	#endif
 	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
-	SetEntityMoveType(client, MOVETYPE_WALK);
 	
 	rp_Effect_BeamBox(client, entity, NULL_VECTOR, 255, 255, 0);
 	
