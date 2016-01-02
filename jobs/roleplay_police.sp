@@ -2966,7 +2966,6 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			
 			Format(name, sizeof(name), "weapon_%s", name);			
 			int wepid = GivePlayerItem(client, name);
-	
 			rp_SetWeaponBallType(wepid, view_as<enum_ball_type>(data[BM_Type]));
 			if(data[BM_PvP] > 0)
 				rp_SetWeaponGroupID(wepid, rp_GetClientGroupID(client));
@@ -2979,7 +2978,7 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			int rnd = rp_GetRandomCapital(1);
 			rp_SetJobCapital(1, rp_GetJobCapital(1) + data[BM_Prix]);
 			rp_SetJobCapital(rnd, rp_GetJobCapital(rnd) - data[BM_Prix]);
-			
+			LogToGame("[TSX-RP] [RESELL] Le joueur %L à acheté %s au commissariat pour %d$", client, name, data[BM_Prix]);			
 		}		
 	}
 	else if (p_oAction == MenuAction_End) {
