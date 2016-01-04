@@ -217,7 +217,7 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 		AddMenuItem(menu, "notk_50", "Ajouter des cartouches anti team-kill (50$)");
 
 	DisplayMenu(menu, client, 60);
-	return Plugin_Handled;
+	return Plugin_Stop;
 }
 
 public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
