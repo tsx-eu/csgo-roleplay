@@ -576,6 +576,10 @@ public Action Cmd_ItemMaps(int args) {
 	
 	int client = GetCmdArgInt(1);
 	rp_SetClientBool(client, b_Map, true);
+	rp_HookEvent(client, RP_OnAssurance,	fwdAssurance2);
+}
+public Action fwdAssurance2(int client, int& amount) {
+		amount += 1000;
 }
 // ----------------------------------------------------------------------------
 void UningiteEntity(int entity) {

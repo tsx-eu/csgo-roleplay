@@ -1,4 +1,4 @@
-/*
+ass/*
  * Cette oeuvre, création, site ou texte est sous licence Creative Commons Attribution
  * - Pas d’Utilisation Commerciale
  * - Partage dans les Mêmes Conditions 4.0 International. 
@@ -436,11 +436,14 @@ public Action CmdItemMask(int args) {
 	AcceptEntityInput(ent, "SetParentAttachment");
 	
 	SDKHook(ent, SDKHook_SetTransmit, Hook_SetTransmit);
-	
+	rp_HookEvent(client, RP_OnAssurance,	fwdAssurance);
 	rp_SetClientInt(client, i_Mask, ent);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous portez maintenant un masque.");
 	
 	return Plugin_Handled;
+}
+public Action fwdAssurance(int client, int& amount) {
+		amount += 500;
 }
 public Action Hook_SetTransmit(int entity, int client) {
 	if (Entity_GetOwner(entity) == client && rp_GetClientInt(client, i_ThirdPerson) == 0)
