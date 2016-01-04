@@ -695,14 +695,24 @@ public Action Cmd_ItemLampe(int args) {
 	if( StrContains(arg1, "jumelle") != -1 ) {
 		rp_SetClientBool(client, b_Jumelle, true);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez maintenant utiliser vos jumelles (touche H).");
+		rp_HookEvent(client, RP_OnAssurance,	fwdAssurance2);
+}
 	}
 	else if( StrContains(arg1, "lampe") != -1 ) {
 		rp_SetClientBool(client, b_LampePoche, true);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez maintenant utiliser votre visions nocturne (touche H).");
+		rp_HookEvent(client, RP_OnAssurance,	fwdAssurance);
+}
 	}
 	
 	
 	return Plugin_Handled;
+}
+public Action fwdAssurance(int client, int& amount) {
+		amount += 250;
+}
+public Action fwdAssurance2(int client, int& amount) {
+		amount += 300;
 }
 // ----------------------------------------------------------------------------
 void GetClientFrontLocationData( int client, float position[3], float angles[3], float distance = 50.0 ) {

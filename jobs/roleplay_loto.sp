@@ -110,6 +110,10 @@ public Action Cmd_ItemLotoBonus(int args) {
 	int client = GetCmdArgInt(1);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous vous sentez chanceux aujourd'hui.");
 	rp_IncrementLuck(client);
+	rp_HookEvent(client, RP_OnAssurance, fwdAssurance, 30.0);
+}
+public Action fwdAssurance(int client, int& amount) {
+		amount += 250;
 }
 public void SQL_GetLotoCount(Handle owner, Handle hQuery, const char[] error, any client) {
 	

@@ -289,6 +289,7 @@ bool wpnCutDamage(int victim, int attacker, float &damage) {
 				damage *= 0.50;
 				kevlar *= 0.7;
 				kevlar -= 20;
+				
 				kevlar = kevlar>0 ? kevlar : 0;
 				rp_SetClientInt(victim, i_Kevlar, kevlar);
 			}
@@ -375,7 +376,7 @@ public Action Cmd_ItemRiotShield(int args) {
 	SetVariantString("weapon_hand_L");
 	AcceptEntityInput(ent, "SetParentAttachment");
 	TeleportEntity(ent, view_as<float>({ 2.0, 4.0, 0.0 }), view_as<float>({ 300.0, 90.0, 20.0}), NULL_VECTOR);
-	
+	rp_HookEvent(client, RP_OnAssurance,	fwdAssurance2);
 	rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdTakeDamage);
 	rp_HookEvent(client, RP_OnPlayerDead, fwdPlayerDead);
 	
@@ -384,6 +385,9 @@ public Action Cmd_ItemRiotShield(int args) {
 	SDKHook(client, SDKHook_WeaponSwitch, Hook_WeaponSwitch);
 	
 	return Plugin_Handled;
+}
+public Action fwdAssurance2(int client, int& amount) {
+		amount += 250;
 }
 public Action Hook_WeaponSwitch(int client, int weapon) {
 	char wepname[64];
@@ -465,7 +469,7 @@ void removeShield(int client) {
 		
 		rp_UnhookEvent(client, RP_OnPlayerDead, fwdPlayerDead);
 		rp_UnhookEvent(client, RP_PostTakeDamageWeapon, fwdTakeDamage);
-		
+		rp_UnhookEvent(client, RP_OnAssurance,	fwdAssurance2);
 		SDKUnhook(g_iRiotShield[client], SDKHook_SetTransmit, Hook_SetTransmit);
 		SDKUnhook(client, SDKHook_WeaponSwitch, Hook_WeaponSwitch);
 		
