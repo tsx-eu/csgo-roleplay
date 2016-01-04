@@ -436,7 +436,7 @@ public Action CmdItemMask(int args) {
 	AcceptEntityInput(ent, "SetParentAttachment");
 	
 	SDKHook(ent, SDKHook_SetTransmit, Hook_SetTransmit);
-	rp_HookEvent(client, RP_OnAssurance,	fwdAssurance);
+	rp_HookEvent(client, RP_OnAssurance, fwdAssurance, 30.0);
 	rp_SetClientInt(client, i_Mask, ent);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous portez maintenant un masque.");
 	
