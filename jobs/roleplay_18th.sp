@@ -256,6 +256,8 @@ public Action Cmd_ItemPiedBiche(int args) {
 	
 	rp_ClientGiveItem(client, item_id, -rp_GetClientItem(client, item_id));
 	rp_SetClientBool(client, b_MaySteal, false);
+	rp_SetClientInt(client, i_LastVolAmount, 100);
+	rp_SetClientInt(client, i_LastVolTarget, -1);
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 15.0);
 		
 	ServerCommand("sm_effect_panel %d 15.0 \"Crochetage de la voiture...\"", client);
@@ -426,6 +428,8 @@ public Action Cmd_ItemPickLock(int args) {
 	}
 	
 	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) + 1);
+	rp_SetClientInt(client, i_LastVolAmount, 100);
+	rp_SetClientInt(client, i_LastVolTarget, target);
 	ServerCommand("sm_effect_particles %d Aura1 %d", client, RoundToCeil(StealTime));
 	
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, StealTime);
