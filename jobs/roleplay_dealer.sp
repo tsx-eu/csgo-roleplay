@@ -841,6 +841,8 @@ public Action Cmd_ItemPiedBiche(int args) {
 		
 	ServerCommand("sm_effect_panel %d 10.0 \"Déracinage d'un plant...\"", client);
 	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) + 1);
+	rp_SetClientInt(client, i_LastVolAmount, 100);
+	rp_SetClientInt(client, i_LastVolTarget, -1);
 	
 	
 	CreateTimer(10.0, ItemPiedBicheOver, client);

@@ -367,6 +367,8 @@ public Action Cmd_ItemPiedBiche(int args) {
 	
 	rp_ClientGiveItem(client, item_id, -rp_GetClientItem(client, item_id));
 	rp_SetClientBool(client, b_MaySteal, false);
+	rp_SetClientInt(client, i_LastVolAmount, 100);
+	rp_SetClientInt(client, i_LastVolTarget, -1);
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 15.0);
 		
 	ServerCommand("sm_effect_panel %d 15.0 \"Crochetage du distributeur...\"", client);
@@ -537,6 +539,8 @@ public Action Cmd_ItemPickLock(int args) {
 		time = 1.5;
 	
 	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) + 1);
+	rp_SetClientInt(client, i_LastVolAmount, 100);
+	rp_SetClientInt(client, i_LastVolTarget, -1);
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, time);
 	ServerCommand("sm_effect_panel %d %f \"Tentative de crochetage de la porte...\"", client, time);
 	
