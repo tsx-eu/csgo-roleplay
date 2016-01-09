@@ -723,7 +723,7 @@ public Action fwdOnPlayerUse(int client) {
 }
 
 public Action fwdOnPlayerBuild(int client, float& cooldown) {
-	if( rp_GetClientJobID(client) != 81 )
+	if( rp_GetClientJobID(client) != 81 || rp_GetClientInt(client, i_KidnappedBy) > 0)
 		return Plugin_Continue;
 	
 	Handle menu = CreateMenu(MenuBuildingDealer);

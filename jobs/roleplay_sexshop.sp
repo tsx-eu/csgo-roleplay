@@ -388,7 +388,7 @@ public Action Cmd_ItemKevlarBox(int args) {
 	}
 }
 public Action fwdOnPlayerBuild(int client, float& cooldown) {
-	if( rp_GetClientJobID(client) != 191 )
+	if( rp_GetClientJobID(client) != 191 || rp_GetClientInt(client, i_KidnappedBy) > 0)
 		return Plugin_Continue;
 	
 	int ent = BuildingKevlarBox(client);

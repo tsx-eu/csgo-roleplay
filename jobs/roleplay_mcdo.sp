@@ -65,7 +65,7 @@ public void OnClientPostAdminCheck(int client){
 }
 // ------------------------------------------------------------------------------
 public Action fwdOnPlayerBuild(int client, float& cooldown){
-	if( rp_GetClientJobID(client) != 21 )
+	if( rp_GetClientJobID(client) != 21 || rp_GetClientInt(client, i_KidnappedBy) > 0)
 		return Plugin_Continue;
 	
 	int ent = BuildingMicrowave(client);

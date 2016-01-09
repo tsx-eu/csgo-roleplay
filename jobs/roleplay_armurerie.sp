@@ -145,7 +145,7 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
 }
 public Action fwdOnPlayerBuild(int client, float& cooldown){
-	if( rp_GetClientJobID(client) != 111 )
+	if( rp_GetClientJobID(client) != 111 || rp_GetClientInt(client, i_KidnappedBy) > 0 )
 		return Plugin_Continue;
 
 	int wep_id = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");

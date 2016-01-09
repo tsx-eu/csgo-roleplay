@@ -487,7 +487,7 @@ public Action Cmd_ItemHealBox(int args) {
 	}
 }
 public Action fwdOnPlayerBuild(int client, float& cooldown) {
-	if( rp_GetClientJobID(client) != 11 )
+	if( rp_GetClientJobID(client) != 11 || rp_GetClientInt(client, i_KidnappedBy) > 0)
 		return Plugin_Continue;
 	
 	int ent = BuildingHealBox(client);
