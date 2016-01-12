@@ -297,8 +297,8 @@ public Action fwdOnRespawn(int client) {
 	}
 }
 public Action fwdTueurDead(int client, int attacker, float& respawn) {
-	
-	if( rp_GetClientInt(client, i_ToKill) > 0 ) { // Double check.
+	target = rp_GetClientInt(client, i_ToKill);
+	if( rp_GetClientInt(client, i_ToKill) > 0  && attacker == target) { // Double check.
 		SetContratFail(client);
 	}
 	
