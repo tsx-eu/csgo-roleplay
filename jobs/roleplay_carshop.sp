@@ -52,6 +52,7 @@ public void OnPluginStart() {
 public void OnMapStart() {
 	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt", true);
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
+	PrecacheModel("models/sentry/crownvic_test.mdl");
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);
@@ -557,6 +558,29 @@ public Action rp_SetClientVehicleTask(Handle timer, Handle dp) {
 	int client = ReadPackCell(dp);
 	int car = ReadPackCell(dp);
 	rp_SetClientVehicle(client, car, true);
+	/*
+	
+	int prop = CreateEntityByName("prop_physics_override");
+	char model[128];
+	GetClientModel(client, model, sizeof(model));
+	DispatchKeyValue(prop, "model", model);
+	ActivateEntity(prop);
+	DispatchSpawn(prop);
+                                        
+	int enteffects = GetEntProp(prop, Prop_Send, "m_fEffects");  
+	*/
+	//enteffects |= 1;	/* This is EF_BONEMERGE */
+	//enteffects |= 16;	/* This is EF_NOSHADOW */
+	//enteffects |= 64;	/* This is EF_NORECEIVESHADOW */
+	//enteffects |= 128;	/* This is EF_BONEMERGE_FASTCULL */
+	//enteffects |= 512;	/* This is EF_PARENT_ANIMATES */
+	/*
+	SetEntProp(prop, Prop_Send, "m_fEffects", enteffects);
+	SetVariantString("!activator");
+	AcceptEntityInput(prop, "SetParent", car, prop, 0);
+	SetVariantString("vehicle_driver_eyes");
+	AcceptEntityInput(prop, "SetParentAttachment", prop, prop, 0);
+	*/
 }
 public Action BatchLeave(Handle timer, any vehicle) {
 	#if defined DEBUG
