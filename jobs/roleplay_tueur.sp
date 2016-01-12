@@ -1021,7 +1021,7 @@ public Action Cmd_ItemEnquete(int args) {
 			String_GetRandom(tmp, sizeof(tmp), 24);
 			
 			AddMenu_Blank(client, menu, "%s, l'a tué", tmp);
-			CPrintToChat(killedBy, "{lightblue}[TSX-RP]{default} Votre pot de vin envers un détective privé vient de vous sauver.");
+			CPrintToChat(killed, "{lightblue}[TSX-RP]{default} Votre pot de vin envers un détective privé vient de vous sauver.");
 			LogToGame("[TSX-RP] [ENQUETE] Une enquête effectuée sur %L n'a pas montré qui l'a tué pour cause de pot de vin.", target);
 		}
 		else {
