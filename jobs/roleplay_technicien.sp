@@ -385,7 +385,7 @@ public Action Cmd_ItemCash(int args) {
 	return Plugin_Handled;
 }
 public Action fwdOnPlayerBuild(int client, float& cooldown){
-	if( rp_GetClientJobID(client) != 221 )
+	if( rp_GetClientJobID(client) != 221 || rp_GetClientInt(client, i_KidnappedBy) > 0)
 		return Plugin_Continue;
 	int job = rp_GetClientInt(client, i_Job);
 	int max, ent;

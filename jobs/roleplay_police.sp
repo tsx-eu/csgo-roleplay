@@ -2364,7 +2364,7 @@ public Action fwdOnPlayerBuild(int client, float& cooldown) {
 	PrintToServer("fwdOnPlayerBuild_Barriere");
 	#endif
 	
-	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 )
+	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 || rp_GetClientInt(client, i_KidnappedBy) > 0)
 		return Plugin_Continue;
 		
 	if( rp_IsInPVP(client) ){

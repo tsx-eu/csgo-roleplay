@@ -405,7 +405,7 @@ public Action Cmd_ItemPackDebutant(int args) { //Permet d'avoir la CB, le compte
 }
 // ----------------------------------------------------------------------------
 public Action fwdOnPlayerBuild(int client, float& cooldown) {
-	if( rp_GetClientJobID(client) != 211 )
+	if( rp_GetClientJobID(client) != 211 || rp_GetClientInt(client, i_KidnappedBy) > 0)
 		return Plugin_Continue;
 	
 	int ent = BuidlingATM(client);
