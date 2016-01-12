@@ -87,10 +87,7 @@ void DisplayMetroMenu(int client) {
 	AddMenuItem(menu, "metro_paix", 	"Métro: Station de la paix");
 	AddMenuItem(menu, "metro_zoning", 	"Métro: Station Place Station");
 	AddMenuItem(menu, "metro_inno", 	"Métro: Station de l'innovation");
-	AddMenuItem(menu, "metro_pigalle", 	"Métro: Station pigalle");
-	
-	AddMenuItem(menu, "metro_nucleair", "Métro: Station PVP - Nucléaire");
-	AddMenuItem(menu, "metro_tour", 	"Métro: Station PVP - Toit tour");
+	AddMenuItem(menu, "metro_pvp", 		"Métro: Station Belmont");
 	
 	SetMenuPagination(menu, MENU_NO_PAGINATION);
 	SetMenuExitBackButton(menu, false);
