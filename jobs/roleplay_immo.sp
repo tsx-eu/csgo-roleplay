@@ -696,23 +696,21 @@ public Action Cmd_ItemLampe(int args) {
 		rp_SetClientBool(client, b_Jumelle, true);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez maintenant utiliser vos jumelles (touche H).");
 		rp_HookEvent(client, RP_OnAssurance,	fwdAssurance2);
-}
 	}
 	else if( StrContains(arg1, "lampe") != -1 ) {
 		rp_SetClientBool(client, b_LampePoche, true);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez maintenant utiliser votre visions nocturne (touche H).");
 		rp_HookEvent(client, RP_OnAssurance,	fwdAssurance);
-}
 	}
-	
-	
 	return Plugin_Handled;
 }
 public Action fwdAssurance(int client, int& amount) {
-		amount += 250;
+	amount += 250;
+	return Plugin_Changed;
 }
 public Action fwdAssurance2(int client, int& amount) {
-		amount += 300;
+	amount += 300;
+	return Plugin_Changed;
 }
 // ----------------------------------------------------------------------------
 void GetClientFrontLocationData( int client, float position[3], float angles[3], float distance = 50.0 ) {
@@ -749,7 +747,7 @@ public Action Cmd_InfoColoc(int client){
 	for (int i = 1; i <= 48; i++) {
 		if( rp_GetClientKeyAppartement(client, i) ) {
 
-			if(i<10)
+			if(i>100)
 				Format(tmp,127,"--- Garage %i ---",i);
 			else
 				Format(tmp,127,"--- Appartement %i ---",i);

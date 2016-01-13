@@ -1,4 +1,4 @@
-ass/*
+/*
  * Cette oeuvre, création, site ou texte est sous licence Creative Commons Attribution
  * - Pas d’Utilisation Commerciale
  * - Partage dans les Mêmes Conditions 4.0 International. 

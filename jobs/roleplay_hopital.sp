@@ -352,11 +352,12 @@ public Action Cmd_ItemProtImmu(int args) {
 	
 	rp_SetClientBool(client, b_HasProtImmu, true);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous bénéfifiez maintenant d'une protection immunitaire.");
-	rp_HookEvent(client, RP_OnAssurance,	fwdAssurance);
+	rp_HookEvent(client, RP_OnAssurance,	fwdAssurance2);
 	return Plugin_Handled;
 }
-public Action fwdAssurance(int client, int& amount) {
-		amount += 250;
+public Action fwdAssurance2(int client, int& amount) {
+	amount += 250;
+	return Plugin_Changed;
 }
 public Action Cmd_ItemRespawn(int args) {
 	#if defined DEBUG

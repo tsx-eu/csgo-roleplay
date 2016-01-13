@@ -240,11 +240,10 @@ public Action fwdTueurKill(int client, int attacker, float& respawn) {
 			}
 			else if( g_iKillerPoint[attacker][competance_type] == 1004 ) {
 				respawn = 0.05;
-				if( rp_GetClientBool(client, b_IsSearchByTribunal){
-				rp_SetClientBool(client, b_SpawnToTribunal, true);
-				rp_HookEvent(client, RP_OnPlayerSpawn, fwdOnRespawn);
+				if( rp_GetClientBool(client, b_IsSearchByTribunal) ) {
+					rp_SetClientBool(client, b_SpawnToTribunal, true);
+					rp_HookEvent(client, RP_OnPlayerSpawn, fwdOnRespawn);
 				}
-				
 			}
 			else if( g_iKillerPoint[attacker][competance_type] == 1005 ) {
 				rp_SetClientInt(client, i_ToPay, from);
@@ -297,8 +296,8 @@ public Action fwdOnRespawn(int client) {
 	}
 }
 public Action fwdTueurDead(int client, int attacker, float& respawn) {
-	target = rp_GetClientInt(client, i_ToKill);
-	if( rp_GetClientInt(client, i_ToKill) > 0  && attacker == target) { // Double check.
+	int target = rp_GetClientInt(client, i_ToKill);
+	if( target > 0  && attacker == target) { // Double check.
 		SetContratFail(client);
 	}
 	
