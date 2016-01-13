@@ -48,6 +48,12 @@ public void OnPluginStart() {
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
 	}
+	for (int i = MaxClients; i <= 2048; i++) {
+		if( rp_IsValidVehicle(i) ) {
+			SDKHook(i, SDKHook_Touch, VehicleTouch);
+			CreateTimer(3.5, Timer_VehicleRemoveCheck, EntIndexToEntRef(i));
+		}
+	}
 }
 public void OnMapStart() {
 	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt", true);
@@ -177,7 +183,6 @@ public Action Cmd_ItemVehicle(int args) {
 	rp_SetClientKeyVehicle(client, car, true);
 	
 	SDKHook(car, SDKHook_Touch, VehicleTouch);
-	
 	CreateTimer(3.5, Timer_VehicleRemoveCheck, EntIndexToEntRef(car));
 	
 	// Voiture donateur, on la thune wesh
