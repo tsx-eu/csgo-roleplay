@@ -394,8 +394,8 @@ int rp_CreateVehicle(float origin[3], float angle[3], char[] model, int skin, in
 	rp_CreateVehicleLighting(ent, left, right);
 	cam = rp_CreateVehicleCamera(ent);
 	
-	rp_SetVehicleInt(ent, car_light_left_id, left);
-	rp_SetVehicleInt(ent, car_light_right_id, right);
+	//rp_SetVehicleInt(ent, car_light_left_id, left);
+	//rp_SetVehicleInt(ent, car_light_right_id, right);
 	rp_SetVehicleInt(ent, car_light_is_on, 0);
 	rp_SetVehicleInt(ent, car_thirdperson_id, cam);
 	rp_SetVehicleInt(ent, car_health, 1000);
@@ -441,6 +441,7 @@ void rp_CreateVehicleLighting(int vehicle, int& left, int& right) {
 	LightOrigin[2] = origin[2] + z;
 	angles[0] += 15.0;
 	
+	/*
 	// TODO: Check failed
 	left = CreateEntityByName("point_spotlight");
 	ActivateEntity(left);
@@ -475,7 +476,8 @@ void rp_CreateVehicleLighting(int vehicle, int& left, int& right) {
 	
 	SetVariantString("!activator");
 	AcceptEntityInput(right, "SetParent", vehicle);
-	AcceptEntityInput(right, "LightOff");	
+	AcceptEntityInput(right, "LightOff");
+	*/
 }
 int rp_CreateVehicleCamera(int vehicle) {
 	
