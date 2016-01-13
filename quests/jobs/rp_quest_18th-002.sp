@@ -122,7 +122,7 @@ public void Q2_Start(int objectiveID, int client) {
 	g_iDuration[client] = 24 * 60;
 }
 public void Q2_Frame(int objectiveID, int client) {
-	static int zoneDest = 89;
+	static int zoneDest = 71;
 	static float dst[3] =  { -1544.0, -2997.3, -1978.9 };
 	float vec[3];
 	GetClientAbsOrigin(client, vec);

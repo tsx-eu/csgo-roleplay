@@ -135,7 +135,7 @@ public void Q2_Frame(int objectiveID, int client) {
 		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s", QUEST_NAME, g_iDuration[client], QUEST_RESUME);
 		rp_Effect_BeamBox(client, -1, dst, 255, 255, 255);
 		
-		if( rp_GetPlayerZone(client) == 244 || rp_GetPlayerZone(client) == 245 ) {
+		if( rp_GetPlayerZone(client) == 290 ) {
 			if( rp_GetClientItem(client, 3) == 0 ) {
 				char item[64];
 				rp_GetItemData(3, item_type_name, item, sizeof(item));
