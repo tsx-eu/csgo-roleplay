@@ -934,7 +934,7 @@ public Action Cmd_ItemPilule(int args){
 			return Plugin_Handled;
 		}
 		else{
-			for (int i = 1; i <= 48; i++) {
+			for (int i = 1; i <= 200; i++) {
 				if( rp_GetClientKeyAppartement(client, i) ) {
 					tptozone = appartToZoneID(i);
 				}
@@ -942,6 +942,11 @@ public Action Cmd_ItemPilule(int args){
 		}
 	}
 	else if (type == 2){ // Planque
+		
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet item pour le moment.");
+		return Plugin_Handled;
+		
 		if(rp_GetClientJobID(client)==0){
 			ITEM_CANCEL(client, item_id);
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas vous teleporter à votre planque puisque vous êtes sans-emploi.");
@@ -972,9 +977,9 @@ public Action Cmd_ItemPilule(int args){
 	}
 
 	if(tptozone == -1){
-			ITEM_CANCEL(client, item_id);
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Nous n'avons pas trouvé d'endroit où vous teleporter.");
-			return Plugin_Handled;
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Nous n'avons pas trouvé d'endroit où vous teleporter.");
+		return Plugin_Handled;
 	}
 
 	if(type == 1) {
