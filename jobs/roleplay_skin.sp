@@ -23,7 +23,7 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
-#define	ZONE_CABINE 284
+#define	ZONE_CABINE 214
 #define MENU_TIME_DURATION 60
 
 public Plugin myinfo =  {
