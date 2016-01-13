@@ -63,7 +63,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_camera",		Cmd_ItemCamera,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_cryptage",	Cmd_ItemCryptage,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	
-	g_vConfigTueur = CreateConVar("rp_config_kidnapping", "247,248,249,250,258,259-260");
+	g_vConfigTueur = CreateConVar("rp_config_kidnapping", "228,229,230,231,239,240-241");
 	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
@@ -631,7 +631,7 @@ public Action SendToTueur(Handle timer, any client) {
 	PrintToServer("SendToTueur");
 	#endif
 	
-	TeleportEntity(client,  view_as<float>({-5879.0, -2815.0, -1950.0}), NULL_VECTOR, NULL_VECTOR);
+	TeleportEntity(client,  view_as<float>({-5553.0, -2818.0, -1958.0}), NULL_VECTOR, NULL_VECTOR);
 	
 	char classname[64];
 	for(int i=MaxClients; i<=2048; i++) {
