@@ -819,7 +819,7 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 		
 		if( GetMenuItem(menu, param, arg1, sizeof(arg1)) ) {
 			
-			if( rp_GetPlayerZoneAppart(client) <= 0 || rp_GetPlayerZoneAppart(client) >= 10 ) {
+			if( rp_GetPlayerZoneAppart(client) <= 100 || rp_GetPlayerZoneAppart(client) >= 300 ) {
 				return;
 			}
 			
