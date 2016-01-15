@@ -96,7 +96,7 @@ public void Q1_Frame(int objectiveID, int client) {
 		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s", QUEST_NAME, g_iDuration[client], QUEST_RESUME);
 		rp_Effect_BeamBox(client, g_iGoing[client], NULL_VECTOR, 255, 0, 0);
 		
-		if( rp_GetPlayerZone(client) == 244 || rp_GetPlayerZone(client) == 245 ) {
+		if( rp_GetPlayerZone(client) == 195 || rp_GetPlayerZone(client) == 196 ) {
 			if( rp_GetClientItem(client, 3) == 0 ) {
 				char item[64];
 				rp_GetItemData(3, item_type_name, item, sizeof(item));
@@ -120,12 +120,12 @@ public void Q2_Start(int objectiveID, int client) {
 	g_iDuration[client] = 6 * 60;
 }
 public void Q2_Frame(int objectiveID, int client) {
-	static float dst[3] =  { -241.0, 3027.2, -2119.9 };
+	static float dst[3] =  { -316.2, 3204.1, -2119.9 };
 	float vec[3];
 	GetClientAbsOrigin(client, vec);
 	
 	g_iDuration[client]--;
-	if( GetVectorDistance(vec, dst) < 32.0 ) {
+	if( rp_GetPlayerZone(client) == 290 ) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else if( g_iDuration[client] <= 0 ) {
@@ -135,7 +135,7 @@ public void Q2_Frame(int objectiveID, int client) {
 		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s", QUEST_NAME, g_iDuration[client], QUEST_RESUME);
 		rp_Effect_BeamBox(client, -1, dst, 255, 255, 255);
 		
-		if( rp_GetPlayerZone(client) == 290 ) {
+		if( rp_GetPlayerZone(client) == 195 || rp_GetPlayerZone(client) == 196 ) {
 			if( rp_GetClientItem(client, 3) == 0 ) {
 				char item[64];
 				rp_GetItemData(3, item_type_name, item, sizeof(item));

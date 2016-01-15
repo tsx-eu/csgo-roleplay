@@ -2604,13 +2604,39 @@ public int MenuTribunal_GPS(Handle p_hItemMenu, MenuAction p_oAction, int client
 			
 		}
 		else {
+			
+			if( rp_GetClientInt(client, i_GPS) <= 0 )
+				CreateTimer(0.1, GPS_LOOP, client);
 			rp_SetClientInt(client, i_GPS, target);
 		}
 	}
 	else if( p_oAction == MenuAction_End ) {
 		CloseHandle(p_hItemMenu);
 	}
+}
+public Action GPS_LOOP(Handle timer, any client) {
 	
+	if( !IsValidClient(client) )
+		return Plugin_Handled;
+	
+	int target = rp_GetClientInt(client, i_GPS);
+	float vecOrigin[3], vecOrigin2[3];
+	if( target == 0 || !IsValidClient(target) ) {
+		rp_SetClientInt(client, i_GPS, 0);
+		return Plugin_Handled;
+	}
+	
+	GetClientAbsOrigin(client, vecOrigin);
+	GetClientAbsOrigin(target, vecOrigin2);
+	
+	if( GetVectorDistance(vecOrigin, vecOrigin2) <= 200.0 ) {
+		rp_SetClientInt(client, i_GPS, 0);
+		return Plugin_Handled;
+	}
+	
+	ServerCommand("sm_effect_gps %d %d", client, target);
+	CreateTimer(1.0, GPS_LOOP, client);
+	return Plugin_Handled;
 }
 // ----------------------------------------------------------------------------
 void displayTribunal(int client, const char szSteamID[64]) {

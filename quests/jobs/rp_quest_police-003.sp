@@ -60,6 +60,8 @@ public Action Cmd_Reload(int args) {
 public bool fwdCanStart(int client) {
 	if( rp_GetClientJobID(client) != QUEST_JOBID )
 		return false;
+	if( rp_GetClientInt(client, i_Job) == 8 || rp_GetClientInt(client, i_Job) == 9 )
+		return false;
 
 	return (countBlackMarket(client)>5);
 }
