@@ -221,7 +221,7 @@ public Action Cmd_ItemGiveAppartDouble(int args) {
 		ITEM_CANCEL(client, itemID);
 		return Plugin_Handled;
 	}
-	if( !rp_GetClientKeyAppartement(client, appartID) ) {
+	if( rp_GetAppartementInt(appartID, appart_proprio) != client ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes pas propriétaire de cet appartement.");
 		ITEM_CANCEL(client, itemID);
 		return Plugin_Handled;
