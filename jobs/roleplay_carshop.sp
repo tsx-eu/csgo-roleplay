@@ -35,6 +35,9 @@ int g_cExplode, g_cBeam;
 int g_iBlockedTime[65][65];
 float g_lastpos[2049][3];
 
+Handle g_hLookupAttachment = INVALID_HANDLE;
+
+
 
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
@@ -54,6 +57,19 @@ public void OnPluginStart() {
 			CreateTimer(3.5, Timer_VehicleRemoveCheck, EntIndexToEntRef(i));
 		}
 	}
+	
+	Handle hGameConf = LoadGameConfigFile("roleplay");
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "LookupAttachment");
+	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer);
+	g_hLookupAttachment = EndPrepSDKCall();	
+}
+int LookupAttachment(int entity, char[] point) {
+	if( g_hLookupAttachment == INVALID_HANDLE )
+		return -1;
+	
+	return SDKCall(g_hLookupAttachment, entity, point);
 }
 public void OnMapStart() {
 	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt", true);
@@ -607,6 +623,28 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 		VehicleRemove(ent, true);
 		return Plugin_Handled;
 	}
+
+	
+	TE_Start("EffectDispatch");
+	TE_WriteNum("m_nHitBox", GetParticleEffectIndex("Trail2"));
+	
+	TE_WriteFloat("m_vOrigin.x", 0.0);
+	TE_WriteFloat("m_vOrigin.y", 0.0);
+	TE_WriteFloat("m_vOrigin.z", 0.0);
+	TE_WriteFloat("m_vStart.x", 0.0);
+	TE_WriteFloat("m_vStart.y", 0.0);
+	TE_WriteFloat("m_vStart.z", 0.0);
+				
+	TE_WriteNum("entindex", ent);
+	
+	TE_WriteNum("m_fFlags", 0);
+	TE_WriteNum("m_nAttachmentIndex", LookupAttachment(ent, "light_rr")-1);
+	
+	TE_WriteNum("m_iEffectName", GetEffectIndex("ParticleEffect"));
+	TE_WriteNum("m_bPositionsAreRelativeToEntity", 1);
+		
+	TE_SendToAll();
+	
 	
 	if( Vehicle_HasDriver(ent) ){
 		IsNear = true;
@@ -672,6 +710,35 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 	
 	CreateTimer(1.1, Timer_VehicleRemoveCheck, EntIndexToEntRef(ent));
 	return Plugin_Continue;
+}
+int GetEffectIndex(const char[] sEffectName) {
+	static int table = INVALID_STRING_TABLE;
+	
+	if (table == INVALID_STRING_TABLE) {
+		table = FindStringTable("EffectDispatch");
+	}
+	
+	int iIndex = FindStringIndex(table, sEffectName);
+	if(iIndex != INVALID_STRING_INDEX)
+		return iIndex;
+	
+	// This is the invalid string index
+	return 0;
+}
+int GetParticleEffectIndex(const char[] sEffectName){
+	static int table = INVALID_STRING_TABLE;
+	
+	if (table == INVALID_STRING_TABLE)
+	{
+		table = FindStringTable("ParticleEffectNames");
+	}
+	
+	int iIndex = FindStringIndex(table, sEffectName);
+	if(iIndex != INVALID_STRING_INDEX)
+		return iIndex;
+	
+	// This is the invalid string index
+	return 0;
 }
 // ----------------------------------------------------------------------------
 void AskToJoinCar(int client, int vehicle) {
