@@ -175,11 +175,17 @@ int findNearestSerialKiller(int client) {
 			continue;
 		if( rp_GetClientBool(i, b_IsAFK) )
 			continue;
-		if( rp_GetClientInt(i, i_KillingSpread) < 5 )
-			continue;
 		if( rp_GetZoneBit( rp_GetPlayerZone(i) ) & BITZONE_JAIL )
 			continue;
+		if( rp_GetZoneBit( rp_GetPlayerZone(i) ) & BITZONE_HAUTESECU )
+			continue;
+		if( rp_GetZoneBit( rp_GetPlayerZone(i) ) & BITZONE_LACOURS )
+			continue;
+		if( rp_GetZoneBit( rp_GetPlayerZone(i) ) & BITZONE_EVENT )
+			continue;
 		
+		if( rp_GetClientInt(i, i_KillingSpread) < 5 )
+			continue;
 		Entity_GetAbsOrigin(i, vecDestination);
 		tmp = GetVectorDistance(vecOrigin, vecDestination);
 		if( tmp < vecMaxDIST ) {
