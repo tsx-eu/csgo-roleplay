@@ -58,7 +58,6 @@ public void OnPluginStart() {
 public void OnMapStart() {
 	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt", true);
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
-	PrecacheModel("models/sentry/crownvic_test.mdl");
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);
@@ -395,14 +394,13 @@ int rp_CreateVehicle(float origin[3], float angle[3], char[] model, int skin, in
 	delete trace;
 	
 	TeleportEntity(ent, origin, angle, NULL_VECTOR);
-	int left, right, cam;
+	int left, right;
 	rp_CreateVehicleLighting(ent, left, right);
-	cam = rp_CreateVehicleCamera(ent);
 	
 	//rp_SetVehicleInt(ent, car_light_left_id, left);
 	//rp_SetVehicleInt(ent, car_light_right_id, right);
 	rp_SetVehicleInt(ent, car_light_is_on, 0);
-	rp_SetVehicleInt(ent, car_thirdperson_id, cam);
+	//rp_SetVehicleInt(ent, car_thirdperson_id, cam);
 	rp_SetVehicleInt(ent, car_health, 1000);
 	rp_SetVehicleInt(ent, car_klaxon, Math_GetRandomInt(1, 6));
 	
@@ -430,7 +428,7 @@ int rp_CreateVehicle(float origin[3], float angle[3], char[] model, int skin, in
 	return ent;
 }
 void rp_CreateVehicleLighting(int vehicle, int& left, int& right) {
-	
+	/*
 	float origin[3], angles[3], MaxHull[3];
 	Entity_GetAbsOrigin(vehicle, origin);
 	Entity_GetAbsAngles(vehicle, angles);
@@ -446,7 +444,7 @@ void rp_CreateVehicleLighting(int vehicle, int& left, int& right) {
 	LightOrigin[2] = origin[2] + z;
 	angles[0] += 15.0;
 	
-	/*
+	
 	// TODO: Check failed
 	left = CreateEntityByName("point_spotlight");
 	ActivateEntity(left);
@@ -483,30 +481,6 @@ void rp_CreateVehicleLighting(int vehicle, int& left, int& right) {
 	AcceptEntityInput(right, "SetParent", vehicle);
 	AcceptEntityInput(right, "LightOff");
 	*/
-}
-int rp_CreateVehicleCamera(int vehicle) {
-	
-	float origin[3], angles[3];
-	Entity_GetAbsOrigin(vehicle, origin);
-	Entity_GetAbsAngles(vehicle, angles);
-	angles[1] += 90.0;
-	
-	float x = 0.0, y = -200.0, z = 120.0 , radian = DegToRad(angles[1]);
-	origin[0] += (x*Sine(radian)) + (y*Cosine(radian));
-	origin[1] += (x*Cosine(radian)) + (y*Sine(radian));
-	origin[2] += z;
-	angles[0] -= 10.0;
-	
-	int ent = CreateEntityByName("env_fire");
-	
-	DispatchSpawn(ent);
-	ActivateEntity(ent);
-	
-	TeleportEntity(ent, origin, angles, NULL_VECTOR);
-	
-	SetVariantString("!activator");
-	AcceptEntityInput(ent, "SetParent", vehicle);
-	return ent;
 }
 void VehicleRemove(int vehicle, bool explode = false) {
 	#if defined DEBUG
@@ -565,6 +539,16 @@ public Action rp_SetClientVehicleTask(Handle timer, Handle dp) {
 	int client = ReadPackCell(dp);
 	int car = ReadPackCell(dp);
 	rp_SetClientVehicle(client, car, true);
+	
+	int enteffects = GetEntProp(client, Prop_Send, "m_fEffects");
+	enteffects |= 1;	/* This is EF_BONEMERGE */
+	enteffects |= 16;	/* This is EF_NOSHADOW */
+	enteffects &= ~32;	/* This is EF_NODRAW */
+	enteffects |= 64;	/* This is EF_NORECEIVESHADOW */
+	enteffects |= 128;	/* This is EF_BONEMERGE_FASTCULL */
+	enteffects |= 512;	/* This is EF_PARENT_ANIMATES */
+	SetEntProp(client, Prop_Send, "m_fEffects", enteffects);
+	
 	/*
 	
 	int prop = CreateEntityByName("prop_physics_override");
@@ -605,7 +589,7 @@ public Action BatchLeave(Handle timer, any vehicle) {
 		for(int i=1; i<=MaxClients; i++) {
 			if( !IsValidClient(i) )
 				continue;
-			rp_ClientVehicleExit(client, vehicle, true);
+			rp_ClientVehicleExit(i, vehicle, true);
 		}
 	}
 }
