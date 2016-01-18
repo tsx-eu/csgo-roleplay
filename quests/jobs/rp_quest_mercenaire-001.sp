@@ -166,6 +166,8 @@ public int getFreekiller(int client){
 			continue;
 		if(!IsValidClient(i))
 			continue;
+		if( rp_GetClientBool(i, b_IsAFK) )
+			continue;
 		if( rp_GetZoneBit( rp_GetPlayerZone(i) ) & BITZONE_JAIL )
 			continue;
 		if(rp_GetClientInt(i, i_KillingSpread) > tdm){

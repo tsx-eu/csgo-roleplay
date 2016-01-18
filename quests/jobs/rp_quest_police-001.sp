@@ -173,6 +173,8 @@ int findNearestSerialKiller(int client) {
 			continue;
 		if( i == client )
 			continue;
+		if( rp_GetClientBool(i, b_IsAFK) )
+			continue;
 		if( rp_GetClientInt(i, i_KillingSpread) < 5 )
 			continue;
 		if( rp_GetZoneBit( rp_GetPlayerZone(i) ) & BITZONE_JAIL )
