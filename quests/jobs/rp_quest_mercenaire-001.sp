@@ -162,12 +162,22 @@ public int getFreekiller(int client){
 	int ret = -1,
 		tdm = -1;
 	for (int i = 1; i <= MaxClients; i++){
-		if(client == i)
+		if( !IsValidClient(i) )
 			continue;
-		if(!IsValidClient(i))
+		if( i == client )
+			continue;
+		if( rp_GetClientBool(i, b_IsAFK) )
 			continue;
 		if( rp_GetZoneBit( rp_GetPlayerZone(i) ) & BITZONE_JAIL )
 			continue;
+		if( rp_GetZoneBit( rp_GetPlayerZone(i) ) & BITZONE_HAUTESECU )
+			continue;
+		if( rp_GetZoneBit( rp_GetPlayerZone(i) ) & BITZONE_LACOURS )
+			continue;
+		if( rp_GetZoneBit( rp_GetPlayerZone(i) ) & BITZONE_EVENT )
+			continue;
+			
+			
 		if(rp_GetClientInt(i, i_KillingSpread) > tdm){
 			ret = i;
 			tdm = rp_GetClientInt(i, i_KillingSpread);
