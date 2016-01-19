@@ -382,6 +382,9 @@ public Action Cmd_ItemRespawn(int args) {
 	
 	
 	CS_RespawnPlayer(client);
+	SetEntityHealth(client, 500);
+	rp_SetClientInt(client, i_Kevlar, 250);
+	
 	g_iSuccess_last_faster_dead[client] = GetTime();
 	
 	TeleportEntity(client, vecOrigin, NULL_VECTOR, NULL_VECTOR);
