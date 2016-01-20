@@ -731,7 +731,7 @@ public Action Cmd_Jail(int client) {
 	
 	int target = GetClientTarget(client);
 
-	if( rp_GetClientFloat(client, fl_Invincible) > GetGameTime() ) { //en cas de poupée gonflable
+	if( rp_GetClientFloat(target, fl_Invincible) > GetGameTime() ) { //en cas de poupée gonflable
 		ACCESS_DENIED(client);
 	}
 
