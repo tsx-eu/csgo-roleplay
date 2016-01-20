@@ -943,36 +943,31 @@ public Action Cmd_ItemPilule(int args){
 	}
 	else if (type == 2){ // Planque
 		
-		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet item pour le moment.");
-		return Plugin_Handled;
-		
 		if(rp_GetClientJobID(client)==0){
 			ITEM_CANCEL(client, item_id);
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas vous teleporter à votre planque puisque vous êtes sans-emploi.");
 			return Plugin_Handled;
 		}
 		switch(rp_GetClientJobID(client)){
-			case 1:   tptozone = 14;
-			case 11:  tptozone = 200;
-			case 21:  tptozone = 119;
-			case 31:  tptozone = 137;
-			case 41:  tptozone = 1;
-			case 51:  tptozone = 114;
-			case 61:  tptozone = 253;
-			case 71:  tptozone = 160;
-			case 81:  tptozone = 167;
-			case 91:  tptozone = 13;
-			case 101: tptozone = 76;
-			case 111: tptozone = 100;
-			case 121: tptozone = 283;
-			case 131: tptozone = 61;
-			case 141: tptozone = 61;
-			case 171: tptozone = 65;
-			case 181: tptozone = 89;
-			case 191: tptozone = 72;
-			case 211: tptozone = 228;
-			case 221: tptozone = 184;
+			case 1:   tptozone = 11;
+			case 11:  tptozone = 168;
+			case 21:  tptozone = 90;
+			case 31:  tptozone = 111;
+			case 41:  tptozone = 273;
+			case 51:  tptozone = 128;
+			case 61:  tptozone = 19;
+			case 71:  tptozone = 131;
+			case 81:  tptozone = 210;
+			case 91:  tptozone = 288;
+			case 101: tptozone = 68;
+			case 111: tptozone = 200;
+			case 121: tptozone = 215;
+			case 131: tptozone = 266;
+			case 171: tptozone = 75;
+			case 181: tptozone = 71;
+			case 191: tptozone = 276;
+			case 211: tptozone = 179;
+			case 221: tptozone = 147;
 		}
 	}
 
