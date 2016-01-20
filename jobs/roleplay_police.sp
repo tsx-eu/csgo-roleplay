@@ -704,7 +704,7 @@ public Action Cmd_Jail(int client) {
 	PrintToServer("Cmd_Jail");
 	#endif
 	int job = rp_GetClientInt(client, i_Job);
-		
+
 	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
 		ACCESS_DENIED(client);
 	}	
@@ -730,9 +730,14 @@ public Action Cmd_Jail(int client) {
 	}
 	
 	int target = GetClientTarget(client);
+
+	if( !rp_GetClientBool(target, b_CanBeJailed) ) {
+		ACCESS_DENIED(client);
+	}
+
 	if( target <= 0 || !IsValidEdict(target) || !IsValidEntity(target) )
 		return Plugin_Handled;
-	
+
 	int Czone = rp_GetPlayerZone(client);
 	int Cbit = rp_GetZoneBit(Czone);
 	

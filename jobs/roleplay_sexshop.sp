@@ -125,18 +125,27 @@ public Action Cmd_ItemPoupee(int args) {
 	
 	TE_SetupBeamRingPoint(vecTarget, 30.0, 40.0, g_cBeam, g_cGlow, 0, 0, 5.0, 80.0, 0.0, {250, 250, 50, 250}, 0, 0);
 	TE_SendToAll();
-	
+
 	rp_SetClientBool(client, b_MaySteal, false);
-	
-	CreateTimer(30.0, AllowStealing, client);	
+	rp_SetClientBool(client, b_CanBeJailed, false);
+
+	CreateTimer(30.0, AllowStealing, client);
+	CreateTimer(5.0, MakeJailable, client);
 	return Plugin_Handled;
 }
 public Action AllowStealing(Handle timer, any client) {
 	#if defined DEBUG
 	PrintToServer("AllowStealing");
 	#endif
-	
+
 	rp_SetClientBool(client, b_MaySteal, true);
+}
+public Action MakeJailable(Handle timer, any client) {
+	#if defined DEBUG
+	PrintToServer("MakeJailable");
+	#endif
+
+	rp_SetClientBool(client, b_CanBeJailed, true);
 }
 public Action fwdTazerRose(int client, int color[4]) {
 	#if defined DEBUG
