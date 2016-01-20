@@ -168,8 +168,14 @@ public void Q3_Start(int objectiveID, int client) {
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Bien joué !", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Va déposer tout ces colis dans notre", ITEMDRAW_DISABLED);
-	menu.AddItem("", "planque, tu recevras une récompense.", ITEMDRAW_DISABLED);
+	if ( rp_GetClientJobID(client) == 61 ) { //Exception pour les IMMO qui n'ont plus de planque officielle
+		menu.AddItem("", "Va déposer tout ces colis dans la", ITEMDRAW_DISABLED);
+		menu.AddItem("", "disco, tu recevras une récompense.", ITEMDRAW_DISABLED);
+	}
+	else {
+		menu.AddItem("", "Va déposer tout ces colis dans notre", ITEMDRAW_DISABLED);
+		menu.AddItem("", "planque, tu recevras une récompense.", ITEMDRAW_DISABLED);
+	}
 	
 	menu.ExitButton = false;
 	menu.Display(client, 30);
@@ -181,7 +187,11 @@ public void Q3_Frame(int objectiveID, int client) {
 	GetClientAbsOrigin(client, vec);
 	
 	g_iDuration[client]--;
-	if ( rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == rp_GetClientJobID(client) ) {
+	if ( rp_GetClientJobID(client) == 61 //Exception pour les IMMO qui n'ont plus de planque officielle
+		&& rp_GetPlayerZone(client) == 2 ) { //On les envoie dans la disco (zone "2")
+		rp_QuestStepComplete(client, objectiveID);
+	}
+	else if ( rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == rp_GetClientJobID(client) ) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else if (g_iDuration[client] <= 0) {
