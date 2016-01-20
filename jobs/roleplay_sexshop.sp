@@ -127,10 +127,8 @@ public Action Cmd_ItemPoupee(int args) {
 	TE_SendToAll();
 
 	rp_SetClientBool(client, b_MaySteal, false);
-	rp_SetClientBool(client, b_CanBeJailed, false);
 
 	CreateTimer(30.0, AllowStealing, client);
-	CreateTimer(5.0, MakeJailable, client);
 	return Plugin_Handled;
 }
 public Action AllowStealing(Handle timer, any client) {
@@ -139,13 +137,6 @@ public Action AllowStealing(Handle timer, any client) {
 	#endif
 
 	rp_SetClientBool(client, b_MaySteal, true);
-}
-public Action MakeJailable(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("MakeJailable");
-	#endif
-
-	rp_SetClientBool(client, b_CanBeJailed, true);
 }
 public Action fwdTazerRose(int client, int color[4]) {
 	#if defined DEBUG
