@@ -300,6 +300,8 @@ public Action Cmd_ItemHamburger(int args) {
 		}
 	}
 	else if( StrEqual(arg1, "mac") ) {
+		ITEM_CANCEL(client, GetCmdArgInt(args));
+		return Plugin_Handled;
 		
 		if( rp_IsInPVP(client) ) {
 			rp_SetClientFloat(client, fl_CoolDown, rp_GetClientFloat(client, fl_CoolDown) + 5.0);
