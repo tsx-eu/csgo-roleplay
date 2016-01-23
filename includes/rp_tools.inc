@@ -69,7 +69,7 @@ public bool IsValidClient(int client) {
 	
 	return true;
 }
-int GetClientTarget(int client, float dst[3] = {0.0, 0.0, 0.0}) {
+stock int GetClientTarget(int client, float dst[3] = {0.0, 0.0, 0.0}) {
 	static float cacheTime[65];
 	static float cacheDataDst[65][3];
 	static int cacheDataTarget[65];
@@ -357,4 +357,25 @@ public Action rp_ClientRemoveProp(int client, int target, int item_id) {
 	}
 	
 	return Plugin_Continue;
+}
+stock int rp_GetWeaponPrice(int target) {
+	char classname[65], tmp[255], tmp2[255];
+	GetEdictClassname(target, classname, sizeof(classname));
+	
+	for (int i = 1; i < MAX_ITEMS; i++) {
+		rp_GetItemData(i, item_type_extra_cmd, tmp, sizeof(tmp));
+		Format(tmp2, sizeof(tmp2), "rp_giveitem %s", classname);
+		if( StrEqual(tmp, tmp2) ) {
+			rp_GetItemInt(i, item_type_prix);
+			return rp_GetItemInt(i, item_type_prix);
+		}
+	}
+	
+	ReplaceString(classname, sizeof(classname), "weapon_", "");
+	int owner = GetEntPropEnt(target, Prop_Send, "m_hPrevOwner");
+	
+	if( owner > 0 && view_as<int>(CS_AliasToWeaponID(classname)) > 0 )
+		return CS_GetWeaponPrice(owner, CS_AliasToWeaponID(classname));
+	// fallback:
+	return 500; 
 }

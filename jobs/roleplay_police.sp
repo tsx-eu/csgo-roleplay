@@ -571,10 +571,8 @@ public Action Cmd_Tazer(int client) {
 			rp_GetZoneData(Tzone, zone_type_name, tmp, sizeof(tmp));
 			LogToGame("[TSX-RP] [TAZER] %L a supprimé une arme %s dans %s", client, tmp2, tmp);
 			
-			addBuyMenu(client, target);
-			
-			ReplaceString(tmp2, sizeof(tmp2), "weapon_", "");	
-			int prix = 0; CS_GetWeaponPrice(client, CS_AliasToWeaponID(tmp2));
+			addBuyMenu(target);
+			int prix = rp_GetWeaponPrice(target); 
 			
 			reward = prix / 10;
 				
@@ -2814,8 +2812,7 @@ void StripWeapons(int client ) {
 		
 		while( ( wepIdx = GetPlayerWeaponSlot( client, i ) ) != -1 ) {
 			
-			addBuyMenu(client, wepIdx);
-			
+			addBuyMenu(wepIdx);
 			RemovePlayerItem( client, wepIdx );
 			RemoveEdict( wepIdx );
 		}
@@ -2879,7 +2876,7 @@ void getBuyMenu(int pos, char weapon[65], int data[BM_Max]) {
 		data[i] = g_hBuyMenu.ReadCell();
 	}
 }
-void addBuyMenu(int client, int weaponID) {
+void addBuyMenu(int weaponID) {
 	if( rp_GetWeaponStorage(weaponID) == true )
 		return;
 	
@@ -2897,10 +2894,7 @@ void addBuyMenu(int client, int weaponID) {
 	data[BM_Munition] = Weapon_GetPrimaryClip(weaponID);
 	data[BM_Chargeur] = GetEntProp(weaponID, Prop_Send, "m_iPrimaryReserveAmmoCount");
 	data[BM_Type] = view_as<int>(rp_GetWeaponBallType(weaponID));
-	
-	CSGO_GetItemDefinitionNameByIndex(GetEntProp(weaponID, Prop_Send, "m_iItemDefinitionIndex"), weapon, sizeof(weapon));
-	ReplaceString(weapon, sizeof(weapon), "weapon_", "");	
-	data[BM_Prix] = CS_GetWeaponPrice(client, CS_AliasToWeaponID(weapon)) / 4;
+	data[BM_Prix] = rp_GetWeaponPrice(weaponID) / 4;
 
 	if(data[BM_PvP] > 0)
 		data[BM_Prix] += 250;
