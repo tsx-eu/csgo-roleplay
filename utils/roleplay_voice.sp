@@ -93,7 +93,7 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 			return Plugin_Handled;
 		}
 		
-		for (int i = 1; i <= 48; i++) {
+		for (int i = 1; i < 200; i++) {
 			if( !rp_GetClientKeyAppartement(client, i) )
 				continue;
 			

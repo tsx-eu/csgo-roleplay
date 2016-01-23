@@ -744,7 +744,7 @@ public Action Cmd_InfoColoc(int client){
 	int proprio;
 	Handle menu = CreateMenu(MenuNothing);
 	SetMenuTitle(menu, "Information sur vos appartements");
-	for (int i = 1; i <= 48; i++) {
+	for (int i = 1; i < 200; i++) {
 		if( rp_GetClientKeyAppartement(client, i) ) {
 
 			if(i>100)

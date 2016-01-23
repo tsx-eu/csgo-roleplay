@@ -328,7 +328,7 @@ public Action fwdFrame(int client) {
 
 public void ShareKeyAppart(int epoux, int epouse){
 	// Cherche les apparts dont les mariés sont proprio et les partagent
-	for (int i = 1; i <= 48; i++) {
+	for (int i = 1; i < 200; i++) {
 		int proprio = rp_GetAppartementInt(i, appart_proprio);
 		
 		if( proprio == epoux && !rp_GetClientKeyAppartement(epouse, i) ){
