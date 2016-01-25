@@ -199,7 +199,6 @@ native int rp_GetWeaponGroupID(int wepID);									/* Récupère le groupID d'un
 typedef GrenadeFunction = function void (int client, int entity);						/* Créer une grenade. Les 2 callback fctExplode et fctThrow sont appelé. Duration = durée avant que le fctExplode soit appelé*/
 native int rp_CreateGrenade(int client, const char[] name, const char[] model, GrenadeFunction fctThrow, GrenadeFunction fctExplode, float duration);
 // ----------------------------------------------------------------------------
-native void rp_GetWeaponSkinData(int skinID, skin_data typeID, char[] str, int length);		/* Récupère les données de la liste des skins d'arme */
 native void rp_GetLocationData(int zoneID, location_type typeID, char[] str, int length);		/* Récupère les données d'une position (spawn, jail)*/
 native void rp_GetZoneData(int zoneID, zone_type typeID, char[] str, int length);			/* Récupère les données d'une zone banque, police, hosto... */
 native void rp_GetJobData(int jobID, rp_job_type typeID, char[] str, int length);			/* Récupère les données d'un job */
@@ -216,6 +215,7 @@ native Handle rp_CreateSellingMenu();										/* Récupère un pointeur sur le 
 // ----------------------------------------------------------------------------
 native void rp_GetDate(char[] str, int length);
 native void rp_GetTime(int& hour, int& minutes);
+native void rp_GetServerString(rp_serv typeID, char[] str, int length);
 // ----------------------------------------------------------------------------
 native bool rp_ClientCanDrawPanel(int client);
 native void rp_SendPanelToClient(Handle& panel, int client, float duration);
@@ -312,6 +312,7 @@ enum bool_user_data {
 	b_SpawnToMetro,
 	b_SpawnToTribunal,
 	b_SpawnToTueur,	
+	b_HasVilla,
 	
 	b_udata_max
 };
@@ -560,6 +561,12 @@ enum rp_job_type {
 	
 	job_type_max
 };
+enum rp_serv {
+	villaOwnerID = 0,
+	villaOwnerName,
+	
+	rp_serv_max
+};
 
 enum rp_group_type {
 	group_type_name = 0,
@@ -616,12 +623,6 @@ enum car_data {
 	car_battery,
 	
 	car_data_max,
-};
-enum skin_data {
-	skin_id,
-	skin_name,
-	
-	skin_max
 };
 enum type_appart_bonus {
 	appart_bonus_energy,

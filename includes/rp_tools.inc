@@ -133,11 +133,6 @@ public int rp_GetLocationInt(int zoneID, int typeID) {
 	rp_GetLocationData(zoneID, view_as<location_type>(typeID), tmp, sizeof(tmp));
 	return StringToInt(tmp);
 }
-public int rp_GetWeaponSkinInt(int skinID, int typeID) {
-	char tmp[32];
-	rp_GetWeaponSkinData(skinID, view_as<skin_data>(typeID), tmp, sizeof(tmp));
-	return StringToInt(tmp);
-}
 
 public bool rp_IsRemoveAble(int target) {
 	#if defined DEBUG

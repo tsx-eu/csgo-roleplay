@@ -97,9 +97,127 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	if( StrEqual(command, "infocoloc") ) {
 		return Cmd_InfoColoc(client);
 	}
+	if( StrEqual(command, "villa") ) {
+		return Cmd_BedVilla(client);
+	}
 	return Plugin_Continue;
 }
+public Action Cmd_BedVilla(int client){
+	#if defined DEBUG
+	PrintToServer("Cmd_BedVilla");
+	#endif
+	
+	if( rp_GetClientBool(client, b_MaySteal) == false ) {
+		ACCESS_DENIED(client);
+	}
+	rp_SetClientBool(client, b_MaySteal, false);
+	
+	char sql[256];
+	GetClientAuthId(client, AuthId_Engine, sql, sizeof(sql));
+	
+	Format(sql, sizeof(sql), "(SELECT `name`, `amount` FROM `rp_bid`B INNER JOIN`rp_users`U ON U.`steamid`=B.`steamid` ORDER BY `amount` DESC LIMIT 3) UNION (SELECT 'Vous', `amount` FROM `rp_bid` C WHERE `steamid` = '%s')", sql);
+	SQL_TQuery(rp_GetDatabase(), SQL_BedVillaMenu, sql, client);
+	
+	
+	return Plugin_Handled;
+}
+public void SQL_BedVillaMenu(Handle owner, Handle hQuery, const char[] error, any client) {
+	
+	Handle menu = CreateMenu(bedVillaMenu);
+	SetMenuTitle(menu, "Enchère de la Villa:\n jusqu'à dimanche 21 heures\n ");	
+	char nick[65], steamid[65], steamid2[65];
+	rp_GetServerString(villaOwnerID, steamid, sizeof(steamid));
+	GetClientAuthId(client, AuthId_Engine, steamid2, sizeof(steamid2));
+	
+	int max = 0, last = 0;
+	
+	while( SQL_FetchRow(hQuery) ) {
+		last = SQL_FetchInt(hQuery, 1);
+		if( last > max )
+			max = last;
+		
+		SQL_FetchString(hQuery, 0, nick, sizeof(nick));
+		Format(nick, sizeof(nick), "%s: %d$", nick, last);
+		
+		AddMenuItem(menu, nick, nick, ITEMDRAW_DISABLED);
+	}
+	
+	AddMenuItem(menu, "miser", "Miser");
+	if( StrEqual(steamid, steamid2) )
+		AddMenuItem(menu, "key", "Gestion des clés");
+	
+	DisplayMenu(menu, client, 60);
+	
+	rp_SetClientBool(client, b_MaySteal, true);
+}
 
+public int bedVillaMenu(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
+	#if defined DEBUG
+	PrintToServer("bedVillaMenu");
+	#endif
+
+	if( p_oAction == MenuAction_Select) {
+		char szMenuItem[32];
+		if( GetMenuItem(p_hItemMenu, p_iParam2, szMenuItem, sizeof(szMenuItem)) ) {
+			if( StrEqual(szMenuItem, "miser") ) {
+				OpenBedMenu(client);
+			}
+		}
+	}
+	else if (p_oAction == MenuAction_End) {
+		CloseHandle(p_hItemMenu);
+	}
+}
+void OpenBedMenu(int client) {
+	Handle menu = CreateMenu(bedVillaMenu_BED);
+	SetMenuTitle(menu, "Combien souhaitez-vous miser?\n Attention, vous ne serrez remboursé\nqu'à la fin des enchères (dimanche 21 heures)");
+	
+	
+	AddMenuItem(menu, "1",		"1$");
+	AddMenuItem(menu, "10",		"10$");
+	AddMenuItem(menu, "100",	"100$");
+	AddMenuItem(menu, "1000",	"1000$");
+	AddMenuItem(menu, "10000",	"10 000$");
+	AddMenuItem(menu, "100000",	"100 000$");
+	
+	AddMenuItem(menu, "_", " ", ITEMDRAW_SPACER);
+	AddMenuItem(menu, "back",	"Retour");
+	
+	SetMenuPagination(menu, MENU_NO_PAGINATION);
+	DisplayMenu(menu, client, 60);
+}
+public int bedVillaMenu_BED(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
+	#if defined DEBUG
+	PrintToServer("bedVillaMenu_BED");
+	#endif
+
+	if( p_oAction == MenuAction_Select) {
+		char szMenuItem[32];
+		if( GetMenuItem(p_hItemMenu, p_iParam2, szMenuItem, sizeof(szMenuItem)) ) {
+			if( StrEqual(szMenuItem, "back") ) {
+				Cmd_BedVilla(client);
+				return;
+			}
+			int amount = StringToInt(szMenuItem);
+			if( amount > (rp_GetClientInt(client, i_Money)+rp_GetClientInt(client, i_Bank)) ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas assez d'argent.");
+				OpenBedMenu(client);
+				return;
+			}
+			
+			char sql[256];
+			GetClientAuthId(client, AuthId_Engine, sql, sizeof(sql));
+			Format(sql, sizeof(sql), "INSERT INTO `rp_bid` (`steamid`, `amount`) VALUES ('%s', '%d') ON DUPLICATE KEY UPDATE `amount`=`amount`+%d;", sql, amount, amount);
+			SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, sql);
+			rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - amount);
+			
+			OpenBedMenu(client);
+		}
+	}
+	else if (p_oAction == MenuAction_End) {
+		CloseHandle(p_hItemMenu);
+	}
+}
 public Action Cmd_ItemGiveAppart(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemGiveAppart");

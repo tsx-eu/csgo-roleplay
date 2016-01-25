@@ -34,7 +34,6 @@ public Plugin myinfo =  {
 
 // ----------------------------------------------------------------------------
 public void OnPluginStart() {
-	RegServerCmd("rp_item_choseSkin", Cmd_ItemChooseSkin, "RP-ITEM", FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_mask", CmdItemMask, "RP-ITEM", FCVAR_UNREGISTERED);
 	RegServerCmd("rp_giveskin", Cmd_ItemGiveSkin, "RP-ITEM", FCVAR_UNREGISTERED);
 	RegServerCmd("rp_giveknife", Cmd_GiveKnife, "RP-ITEM", FCVAR_UNREGISTERED);
@@ -330,64 +329,6 @@ public Action Cmd_ItemGiveSkin(int args) {
 public Action fwdFrozen(int client, float & speed, float & gravity) {
 	speed = 0.0;
 	return Plugin_Stop;
-}
-// ----------------------------------------------------------------------------
-public Action Cmd_ItemChooseSkin(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemChooseSkin");
-	#endif
-	
-	CreateTimer(0.25, taskChooseSkin, GetCmdArgInt(1));
-}
-public Action taskChooseSkin(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("taskChooseSkin");
-	#endif
-	
-	OpenItemSkin(client, 0);
-}
-void OpenItemSkin(int client, int page = 0) {
-	#if defined DEBUG
-	PrintToServer("OpenItemSkin");
-	#endif
-	
-	Handle menu = CreateMenu(eventChooseSkin);
-	SetMenuTitle(menu, "Selection skin d'arme:");
-	
-	char tmp[12], tmp2[128];
-	for (int i = 0; i < 512; i++) {
-		rp_GetWeaponSkinData(i, skin_id, tmp, sizeof(tmp));
-		if (strlen(tmp) <= 0)
-			continue;
-		
-		rp_GetWeaponSkinData(i, skin_name, tmp2, sizeof(tmp2));
-		AddMenuItem(menu, tmp, tmp2);
-	}
-	
-	SetMenuExitButton(menu, true);
-	DisplayMenuAtItem(menu, client, page, MENU_TIME_DURATION * 3);
-}
-public int eventChooseSkin(Handle menu, MenuAction action, int client, int param) {
-	#if defined DEBUG
-	PrintToServer("eventChooseSkin");
-	#endif
-	
-	if (action == MenuAction_Select) {
-		char szMenuItem[64];
-		
-		if (GetMenuItem(menu, param, szMenuItem, sizeof(szMenuItem))) {
-			
-			rp_SetClientInt(client, i_Skin, StringToInt(szMenuItem));
-			
-			int windex = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-			rp_ClientSwitchWeapon(client, windex);
-			
-			OpenItemSkin(client, RoundToFloor(param / 6.0) * 6);
-		}
-	}
-	else if (action == MenuAction_End) {
-		CloseHandle(menu);
-	}
 }
 // ----------------------------------------------------------------------------
 public Action CmdItemMask(int args) {
