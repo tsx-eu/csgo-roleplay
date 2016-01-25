@@ -1888,10 +1888,13 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			amende = rp_GetClientInt(target, i_KillingSpread) * 200;
 		
 		if( String_StartsWith(g_szJailRaison[type][jail_raison], "Vol") ) {
-			amende += rp_GetClientInt(target, i_LastVolAmount);
 			if( IsValidClient( rp_GetClientInt(target, i_LastVolTarget) ) ) {
 				int tg = rp_GetClientInt(target, i_LastVolTarget);
 				rp_SetClientInt(tg, i_Money, rp_GetClientInt(tg, i_Money) + rp_GetClientInt(target, i_LastVolAmount));
+				rp_SetClientInt(target, i_AddToPay, rp_GetClientInt(target, i_AddToPay) - rp_GetClientInt(target, i_LastVolAmount));
+				
+				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez remboursé votre victime de %d$.", rp_GetClientInt(target, i_LastVolAmount));
+				CPrintToChat(tg, "{lightblue}[TSX-RP]{default} Le voleur a été mis en prison. Vous avez été remboursé de %d$.", rp_GetClientInt(target, i_LastVolAmount));
 			}
 		}
 		else {
