@@ -217,6 +217,8 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 		AddMenuItem(menu, "notk_50", "Ajouter des cartouches anti team-kill (50$)");
 
 	DisplayMenu(menu, client, 60);
+	cooldown = 5.0;
+	
 	return Plugin_Stop;
 }
 
