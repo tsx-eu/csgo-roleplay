@@ -196,7 +196,7 @@ public Action fwdHear(int client, int target, float& dist) {
 		return Plugin_Stop;
 	}
 	
-	if( Ctype != Ttype && (Czone==0||Tzone==0) ) {
+	if( Ctype != Ttype && (Ctype==0||Ttype==0) ) {
 		return Plugin_Stop;
 	}
 	
