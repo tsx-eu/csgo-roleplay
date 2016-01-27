@@ -577,7 +577,7 @@ public int MenuSelectParrain(Handle menu, MenuAction action, int client, int par
 			SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
 		}
 		
-		rp_ClientGiveItem(client, 286);
+		//rp_ClientGiveItem(client, 286);
 		rp_QuestStepComplete(client, g_iQ12);
 		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank)+ 7500);
 		
@@ -628,7 +628,7 @@ public int MenuSelectJob(Handle menu, MenuAction action, int client, int param2)
 		}
 		
 		rp_SetClientInt(client, i_Tutorial, 20);
-		rp_ClientGiveItem(client, 286);
+		//rp_ClientGiveItem(client, 286);
 		rp_QuestStepComplete(client, g_iQ14);
 		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez terminé le tutorial, une voiture vous a été offerte. (Faites /item !)");
