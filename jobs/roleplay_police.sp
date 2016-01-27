@@ -141,7 +141,8 @@ public void OnMapStart() {
 	PrecacheModel(MODEL_BARRIERE, true);
 }
 public void OnEntityCreated(int id, const char[] classname) {
-	g_iOriginOwner[id] = -1;
+	if( id > 0 )
+		g_iOriginOwner[id] = -1;
 }
 // ----------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
@@ -729,7 +730,7 @@ public Action Cmd_Jail(int client) {
 	
 	int target = GetClientTarget(client);
 
-	if( rp_GetClientFloat(target, fl_Invincible) > GetGameTime() ) { //le target utilise une poupée gonflable
+	if( IsValidClient(target) && rp_GetClientFloat(target, fl_Invincible) > GetGameTime() ) { //le target utilise une poupée gonflable
 		ACCESS_DENIED(client);
 	}
 	if( rp_GetClientFloat(client, fl_Invincible) > GetGameTime() ) { //le flic utilise une poupée gonflable
