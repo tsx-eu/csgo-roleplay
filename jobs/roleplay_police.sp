@@ -756,8 +756,11 @@ public Action Cmd_Jail(int client) {
 	}
 	
 	if( (rp_GetZoneInt(Czone, zone_type_type) == 101) // On check si le CT est bien dans le tribunal
-			&& (rp_GetZoneInt(Tzone, zone_type_type) == 101) // On check si la cible est bien dans le tribunal (ticket #1029)
 			&& (job == 101 || job == 102 || job == 103 || job == 104 || job == 105 || job == 106) ) {
+
+		if (rp_GetZoneInt(Tzone, zone_type_type) != 101){ // On check si la cible est bien dans le tribunal (ticket #1029)
+			ACCESS_DENIED(client);
+		}
 
 		if(job == 106 && GetClientTeam(target) == CS_TEAM_CT ){
 			ACCESS_DENIED(client);
