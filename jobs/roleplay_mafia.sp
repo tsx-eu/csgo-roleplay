@@ -278,13 +278,13 @@ public Action Cmd_ItemDoorDefine(int args) {
 	if( !rp_IsValidDoor(door) && IsValidEdict(door) && rp_IsValidDoor(Entity_GetParent(door)) )
 		door = Entity_GetParent(door);
 	
-	int doorID = rp_GetDoorID(door);
 	if( !rp_IsValidDoor(door) || !rp_IsEntitiesNear(client, door) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser une porte.");
 		ITEM_CANCEL(client, item_id);
 		return Plugin_Handled;
 	}
 	
+	int doorID = rp_GetDoorID(door);
 	if( StrEqual(Arg1, "locker") ) {
 		if(g_iDoorDefine_LOCKER[doorID] != 0){
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Un cadenas est déja présent sur cette porte.");
