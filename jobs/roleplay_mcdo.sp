@@ -378,7 +378,7 @@ public Action Cmd_ItemHamburger(int args) {
 		}
 		
 		int item_id = iItemRand[ Math_GetRandomInt(0, amount-1) ];
-		rp_ClientGiveItem(client, item_id, 1);
+		rp_ClientGiveItem(client, item_id, 1, true);
 		
 		rp_GetItemData(item_id, item_type_name, cmd, sizeof(cmd));
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu comme cadeau: %s", cmd);
