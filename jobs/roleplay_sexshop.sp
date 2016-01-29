@@ -366,7 +366,7 @@ public Action Cmd_ItemAlcool(int args) {
 		GetClientAbsOrigin(client, vecTarget);
 		TE_SetupBeamRingPoint(vecTarget, 10.0, 500.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, { 255, 0, 191, 200}, 10, 0);
 		rp_SetClientInt(client, i_LastAgression, GetTime());
-		LogToGame("[TSX-RP] [DROGUE] %L a alcoolisé %l.", client, target);
+		LogToGame("[TSX-RP] [DROGUE] %L a alcoolisé %L.", client, target);
 	}
 
 	float level = rp_GetClientFloat(target, fl_Alcool) + GetCmdArgFloat(2);
