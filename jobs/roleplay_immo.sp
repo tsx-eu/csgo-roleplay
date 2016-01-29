@@ -161,7 +161,6 @@ public Action Task_ItemAppartSerrure(Handle timer, Handle dp) {
 		ITEM_CANCEL(client, item_id);
 		return Plugin_Handled;
 	}
-	rp_ClientGiveItem(client, item_id); // On redonne l'item au gars au cas ou il ferme son menu
 	Handle menu = CreateMenu(MenuSerrureVirer);
 	SetMenuTitle(menu, "Qui faut-il virer de l'appartement ?");
 	char tmp[32], tmp2[32];
@@ -190,13 +189,12 @@ public int MenuSerrureVirer(Handle menu, MenuAction action, int client, int para
 		if(rp_GetClientKeyAppartement(target, appartID)){
 			rp_SetClientInt(target, i_AppartCount, rp_GetClientInt(target, i_AppartCount) - 1);
 			rp_SetClientKeyAppartement(target, appartID, false);
-			rp_ClientGiveItem(client, item_id, -1); // On prend l'item au gars comme il l'a utilisé
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Les clefs de l'appartement ont été retirées à %N.", target);
 		}
 		else{
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le joueur n'a pas les clefs de l'appartement.");
-			rp_SetClientFloat(client, fl_CoolDown, 0.05); // On remet le cooldown du gars à 0 mais on lui redonne pas l'item vu qu'il l'a deja
-		}	
+			ITEM_CANCEL(client, item_id);
+		}
 	}
 	else if( action == MenuAction_End ) {
 		CloseHandle(menu);
@@ -641,7 +639,7 @@ int BuildingTomb(int client) {
 	SetEntityModel(ent, MODEL_GRAVE);
 	
 	SetEntProp( ent, Prop_Data, "m_iHealth", 1000);
-	SetEntProp( ent, Prop_Data, "m_damage", 0);
+	SetEntProp( ent, Prop_Data, "m_takedamage", 0);
 	
 	SetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity", client);
 	
@@ -657,7 +655,7 @@ int BuildingTomb(int client) {
 	CreateTimer(3.0, BuildingTomb_post, ent);
 	rp_SetBuildingData(ent, BD_owner, client);
 	
-	rp_SetClient(client, b_HasGrave, true);
+	rp_SetClientBool(client, b_HasGrave, true);
 	rp_SetClientBool(client, b_SpawnToGrave, true);
 	return 1;
 }
