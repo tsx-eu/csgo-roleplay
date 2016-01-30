@@ -35,9 +35,18 @@ int g_cExplode, g_cBeam;
 int g_iBlockedTime[65][65];
 float g_lastpos[2049][3];
 
-char g_szParticles[][12] =  { "Trail", "Trail2", "Trail3", "Trai4", "Trail5", "Trail7", "Trail8", "Trail9",
-								"Trail10", "Trail11", "Trail12", "Trail13", "Trail14", "Trail15",
-								"Trail_01", "Trail_02", "Trail_03", "Trail_04", "Trail_05", "Trail_06" };
+char g_szParticles[][12] =  {
+	"Trail", 	"Trail2", 	"Trail3", 	"Trail4", 	"Trail5", 	"Trail7",	"Trail8",	"Trail9",
+	"Trail10", 	"Trail11", 	"Trail12", 	"Trail13", 	"Trail14",	"Trail15",
+	"Trail_01", "Trail_02", "Trail_03", "Trail_04"
+};
+char g_szColor[][][32] = {
+	{ "128 0 0", 	"Rubis" },  	{ "255 0 0", 	"Rouge" }, 		{ "255 128 0", 	"Orange" },  	{ "255 255 0", 	"Jaune" }, 
+	{ "128 255 0", 	"Vert-pomme"},  { "0 255 0", 	"Vert" },  		{ "0 128 0", 	"Vert-foncé" }, { "0 255 128", 	"Vert-émeraude" }, 
+	{ "0 255 255", 	"Bleu-ciel" },  { "0 128 255", 	"Bleu-claire" },{ "0 0 255", 	"Bleu" },  		{ "0 0 128", 	"Bleu-Foncé" }, 
+	{ "128 0 255", 	"Mauve" },  	{ "255 0 255", 	"Rose" },  		{ "255 0 128", 	"Fushia" }, 
+	{ "255 255 255","Blanc" },  	{ "128 128 128","Gris" },  		{ "0 0 0", 		"Noir" }
+};
 	
 // ----------------------------------------------------------------------------
 public Action Cmd_Reload(int args) {
@@ -778,28 +787,11 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 				SetMenuTitle(menu2, "Menu du garage");
 				AddMenuItem(menu2, "paint_custom",		"Personnalisé");
 				
-				AddMenuItem(menu, "color 128 0 0", 		"Rubis");
-				AddMenuItem(menu, "color 255 0 0", 		"Rouge");
-				AddMenuItem(menu, "color 255 128 0", 	"Orange");
-				AddMenuItem(menu, "color 255 255 0", 	"Jaune");
-				
-				AddMenuItem(menu, "color 128 255 0", 	"Vert-pomme");
-				AddMenuItem(menu, "color 0 255 0", 		"Vert");
-				AddMenuItem(menu, "color 0 128 0", 		"Vert-foncé");
-				AddMenuItem(menu, "color 0 255 128", 	"Vert-émeraude");
-				
-				AddMenuItem(menu, "color 0 255 255", 	"Bleu-ciel");
-				AddMenuItem(menu, "color 0 128 255", 	"Bleu-claire");
-				AddMenuItem(menu, "color 0 0 255", 		"Bleu");
-				AddMenuItem(menu, "color 0 0 128", 		"Bleu-Foncé");
-				
-				AddMenuItem(menu, "color 128 0 255", 	"Mauve");
-				AddMenuItem(menu, "color 255 0 255", 	"Rose");
-				AddMenuItem(menu, "color 255 0 128", 	"Fushia");	
-				
-				AddMenuItem(menu, "color 255 255 255",	"Blanc");
-				AddMenuItem(menu, "color 128 128 128",	"Gris");
-				AddMenuItem(menu, "color 0 0 0", 		"Noir");
+				char tmp[64];
+				for (int i = 0; i < sizeof(g_szColor); i++) {
+					Format(tmp, sizeof(tmp), "color %s", g_szColor[i][0]);
+					AddMenuItem(menu2, tmp, g_szColor[i][1]);
+				}
 				
 				SetMenuExitButton(menu2, true);
 				DisplayMenu(menu2, client, MENU_TIME_DURATION);
@@ -823,7 +815,7 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 				SetMenuTitle(menu2, "Menu du garage");
 				
 				for (int i = 0; i < sizeof(g_szParticles); i++) {
-					Format(tmp, sizeof(tmp), "Particule %d");
+					Format(tmp, sizeof(tmp), "Particule %d", i+1);
 					AddMenuItem(menu2, tmp, tmp);
 				}
 				SetMenuExitButton(menu2, true);
@@ -884,7 +876,7 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 					char data[2][8];
 					ExplodeString(arg1, " ", data, sizeof(data), sizeof(data[]));
 					
-					rp_SetVehicleInt(target, car_particle, StringToInt(data[1]));
+					rp_SetVehicleInt(target, car_particle, StringToInt(data[1])-1);
 				}
 				else if( StrEqual(arg1, "to_bank") ) {
 					
