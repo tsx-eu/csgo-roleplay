@@ -146,7 +146,7 @@ public void Q1_Abort(int objectiveID, int client) {
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 }
 public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
-	static zoneID[3] =  { 20, 257, 291 };
+	static zoneID[3] =  { 13, 198, 221 };
 	static lastFree[65];
 	
 	if( lastFree[client] > GetTime() )
@@ -183,7 +183,6 @@ public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 	}
 	return Plugin_Continue;
 }
-
 // ----------------------------------------------------------------------------
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
 	if( action == MenuAction_Select ) {
