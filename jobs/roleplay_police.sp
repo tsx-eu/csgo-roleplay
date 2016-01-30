@@ -113,7 +113,14 @@ void doRP_OnClientTazedItem(int client, int reward) {
 }
 
 // ----------------------------------------------------------------------------
+public Action Cmd_Reload(int args) {
+	char name[64];
+	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
+	ServerCommand("sm plugins reload %s", name);
+	return Plugin_Continue;
+}
 public void OnPluginStart() {
+	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	g_hForward_RP_OnClientTazedItem = CreateGlobalForward("RP_OnClientTazedItem", ET_Event, Param_Cell, Param_Cell);
 	g_hBuyMenu = new DataPack();
 	g_hBuyMenu.WriteCell(0);

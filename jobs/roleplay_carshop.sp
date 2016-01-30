@@ -34,13 +34,15 @@ Handle g_hMAX_CAR;
 int g_cExplode, g_cBeam;
 int g_iBlockedTime[65][65];
 float g_lastpos[2049][3];
-
-Handle g_hLookupAttachment = INVALID_HANDLE;
-
-
-
 // ----------------------------------------------------------------------------
+public Action Cmd_Reload(int args) {
+	char name[64];
+	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
+	ServerCommand("sm plugins reload %s", name);
+	return Plugin_Continue;
+}
 public void OnPluginStart() {
+	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	RegServerCmd("rp_item_vehicle", 	Cmd_ItemVehicle,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_vehicle2", 	Cmd_ItemVehicle,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_carstuff", 	Cmd_ItemVehicleStuff,	"RP-ITEM",	FCVAR_UNREGISTERED);
@@ -57,19 +59,6 @@ public void OnPluginStart() {
 			CreateTimer(3.5, Timer_VehicleRemoveCheck, EntIndexToEntRef(i));
 		}
 	}
-	
-	Handle hGameConf = LoadGameConfigFile("roleplay");
-	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "LookupAttachment");
-	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
-	PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer);
-	g_hLookupAttachment = EndPrepSDKCall();	
-}
-int LookupAttachment(int entity, char[] point) {
-	if( g_hLookupAttachment == INVALID_HANDLE )
-		return -1;
-	
-	return SDKCall(g_hLookupAttachment, entity, point);
 }
 public void OnMapStart() {
 	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt", true);
@@ -442,61 +431,6 @@ int rp_CreateVehicle(float origin[3], float angle[3], char[] model, int skin, in
 	
 	LogToGame("[POST] Vehicle Spawning from %N", client);
 	return ent;
-}
-void rp_CreateVehicleLighting(int vehicle, int& left, int& right) {
-	/*
-	float origin[3], angles[3], MaxHull[3];
-	Entity_GetAbsOrigin(vehicle, origin);
-	Entity_GetAbsAngles(vehicle, angles);
-	Entity_GetMaxSize(vehicle, MaxHull);
-	
-	angles[1] += 90.0;
-	
-	float x = 25.0, y = MaxHull[1], z = 30.0, radian = DegToRad(angles[1]);
-	float LightOrigin[3];
-	
-	LightOrigin[0] = origin[0] + (x*Sine(radian)) + (y*Cosine(radian));
-	LightOrigin[1] = origin[1] - (x*Cosine(radian)) + (y*Sine(radian));
-	LightOrigin[2] = origin[2] + z;
-	angles[0] += 15.0;
-	
-	
-	// TODO: Check failed
-	left = CreateEntityByName("point_spotlight");
-	ActivateEntity(left);
-	
-	DispatchKeyValue(left, "spotlightlength",	"500");
-	DispatchKeyValue(left, "spotlightwidth",		"200");
-	DispatchKeyValue(left, "rendercolor",		"255 255 255 5000");
-	DispatchKeyValue(left, "spawnflags", 		"0");
-	DispatchSpawn(left);
-	
-	TeleportEntity(left, LightOrigin, angles, NULL_VECTOR);
-	
-	SetVariantString("!activator");
-	AcceptEntityInput(left, "SetParent", vehicle);
-	AcceptEntityInput(left, "LightOff");
-	
-	x = -25.0;
-	LightOrigin[0] = origin[0] + (x*Sine(radian)) + (y*Cosine(radian));
-	LightOrigin[1] = origin[1] - (x*Cosine(radian)) + (y*Sine(radian));
-	LightOrigin[2] = origin[2] + z;
-	
-	// TODO: Check failed
-	right = CreateEntityByName("point_spotlight");
-	ActivateEntity( right);
-	
-	DispatchKeyValue( right, "spotlightlength",	"500");
-	DispatchKeyValue( right, "spotlightwidth",	"200");
-	DispatchKeyValue( right, "rendercolor",		"255 255 255 5000");
-	DispatchKeyValue( right, "spawnflags",		"0");	
-	DispatchSpawn( right);
-	TeleportEntity( right, LightOrigin, angles, NULL_VECTOR);
-	
-	SetVariantString("!activator");
-	AcceptEntityInput(right, "SetParent", vehicle);
-	AcceptEntityInput(right, "LightOff");
-	*/
 }
 void VehicleRemove(int vehicle, bool explode = false) {
 	#if defined DEBUG

@@ -43,7 +43,14 @@ enum chiruList {
 bool g_bChirurgie[65][ch_Max];
 int g_iSuccess_last_faster_dead[65];
 // ----------------------------------------------------------------------------
-public void OnPluginStart() {	
+public Action Cmd_Reload(int args) {
+	char name[64];
+	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
+	ServerCommand("sm plugins reload %s", name);
+	return Plugin_Continue;
+}
+public void OnPluginStart() {
+	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	RegServerCmd("rp_chirurgie",		Cmd_ItemChirurgie,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	
 	RegServerCmd("rp_item_adrenaline",	Cmd_ItemAdrenaline,		"RP-ITEM",	FCVAR_UNREGISTERED);

@@ -62,7 +62,14 @@ void doRP_OnClientBuildingPrice(int client, int& price) {
 }
 
 // ----------------------------------------------------------------------------
+public Action Cmd_Reload(int args) {
+	char name[64];
+	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
+	ServerCommand("sm plugins reload %s", name);
+	return Plugin_Continue;
+}
 public void OnPluginStart() {
+	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	RegServerCmd("rp_item_drug", 		Cmd_ItemDrugs,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_engrais",		Cmd_ItemEngrais,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_piedbiche", 	Cmd_ItemPiedBiche,		"RP-ITEM",	FCVAR_UNREGISTERED);

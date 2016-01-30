@@ -32,7 +32,14 @@ float vecNull[3];
 int g_cBeam;
 int g_iClientColor[65][4];
 // ----------------------------------------------------------------------------
+public Action Cmd_Reload(int args) {
+	char name[64];
+	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
+	ServerCommand("sm plugins reload %s", name);
+	return Plugin_Continue;
+}
 public void OnPluginStart() {
+	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	RegServerCmd("rp_giveitem",			Cmd_GiveItem,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_giveitem_pvp",		Cmd_GiveItemPvP,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_balltype",	Cmd_ItemBallType,		"RP-ITEM",	FCVAR_UNREGISTERED);

@@ -34,7 +34,14 @@ int g_cBeam;
 int g_iKnifeThrowID = -1;
 int g_iRiotShield[65];
 // ----------------------------------------------------------------------------
+public Action Cmd_Reload(int args) {
+	char name[64];
+	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
+	ServerCommand("sm plugins reload %s", name);
+	return Plugin_Continue;
+}
 public void OnPluginStart() {
+	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	RegServerCmd("rp_item_cut",			Cmd_ItemCut,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_lancercut",	Cmd_ItemCutThrow,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_cutnone",		Cmd_ItemCutRemove,		"RP-ITEM",	FCVAR_UNREGISTERED);

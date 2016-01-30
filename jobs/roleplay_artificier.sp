@@ -35,7 +35,14 @@ int g_cBeam, g_cGlow, g_cShockWave, g_cShockWave2, g_cExplode;
 bool g_bC4Expl[2049];
 
 // ----------------------------------------------------------------------------
+public Action Cmd_Reload(int args) {
+	char name[64];
+	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
+	ServerCommand("sm plugins reload %s", name);
+	return Plugin_Continue;
+}
 public void OnPluginStart() {
+	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	RegServerCmd("rp_item_firework",	Cmd_ItemFireWork,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_highjump",	Cmd_ItemHighJump,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	//RegServerCmd("rp_item_mine",		Cmd_ItemMine,			"RP-ITEM",  FCVAR_UNREGISTERED); <-- Désactivé à cause d'un bug CSGO. A réinsérer plus tard :>

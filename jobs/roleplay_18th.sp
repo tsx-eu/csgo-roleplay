@@ -44,7 +44,14 @@ forward void RP_On18thStealWeapon(int client, int victim, int weaponID);
 Handle g_RP_On18thStealWeapon;
 
 // ----------------------------------------------------------------------------
+public Action Cmd_Reload(int args) {
+	char name[64];
+	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
+	ServerCommand("sm plugins reload %s", name);
+	return Plugin_Continue;
+}
 public void OnPluginStart() {
+	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	g_RP_On18thStealWeapon = CreateGlobalForward("RP_On18thStealWeapon", ET_Event, Param_Cell, Param_Cell, Param_Cell);
 	
 	RegServerCmd("rp_item_piedbiche", 	Cmd_ItemPiedBiche,		"RP-ITEM",	FCVAR_UNREGISTERED);	

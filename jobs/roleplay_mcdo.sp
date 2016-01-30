@@ -32,7 +32,14 @@ public Plugin myinfo = {
 int g_cBeam, g_cGlow, g_nbMdItems;
 bool g_eMwAct[2048];
 // ----------------------------------------------------------------------------
+public Action Cmd_Reload(int args) {
+	char name[64];
+	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
+	ServerCommand("sm plugins reload %s", name);
+	return Plugin_Continue;
+}
 public void OnPluginStart() {
+	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	RegServerCmd("rp_item_hamburger",	Cmd_ItemHamburger,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_banane",		Cmd_ItemBanane,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	g_nbMdItems = -1;
