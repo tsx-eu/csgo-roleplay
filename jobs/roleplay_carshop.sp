@@ -399,13 +399,7 @@ int rp_CreateVehicle(float origin[3], float angle[3], char[] model, int skin, in
 	delete trace;
 	
 	TeleportEntity(ent, origin, angle, NULL_VECTOR);
-	int left, right;
-	rp_CreateVehicleLighting(ent, left, right);
-	
-	//rp_SetVehicleInt(ent, car_light_left_id, left);
-	//rp_SetVehicleInt(ent, car_light_right_id, right);
 	rp_SetVehicleInt(ent, car_light_is_on, 0);
-	//rp_SetVehicleInt(ent, car_thirdperson_id, cam);
 	rp_SetVehicleInt(ent, car_health, 1000);
 	rp_SetVehicleInt(ent, car_klaxon, Math_GetRandomInt(1, 6));
 	
