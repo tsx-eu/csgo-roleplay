@@ -14,6 +14,7 @@
 #include <sdkhooks>
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
+#include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
 
 #define __LAST_REV__ 		"v:0.1.1"
 
@@ -35,10 +36,25 @@ int g_cExplode, g_cBeam;
 int g_iBlockedTime[65][65];
 float g_lastpos[2049][3];
 
-char g_szParticles[][12] =  {
-	"Trail", 	"Trail2", 	"Trail3", 	"Trail4", 	"Trail5", 	"Trail7",	"Trail8",	"Trail9",
-	"Trail10", 	"Trail11", 	"Trail12", 	"Trail13", 	"Trail14",	"Trail15",
-	"Trail_01", "Trail_02", "Trail_03", "Trail_04"
+char g_szParticles[][][32] =  {
+	{ "Trail",     	"Propulseur" },
+    { "Trail2",		"Fusée n°1" },
+    { "Trail3",    "Petit cube bleu" },
+    { "Trail4",    "Fumé verte" },
+    { "Trail5",    "Seringue" },
+    { "Trail7",    "Petite fumé verte" },
+    { "Trail8",    "Fumé blanche et bleu" },
+    { "Trail9",    "Drogue n°1" },
+    { "Trail10",    "Bulle bleu n°1" },
+    { "Trail11",    "Fumée Or" },
+    { "Trail12",    "Fumée bleu" },
+    { "Trail13",    "Bulle bleu °2" },
+    { "Trail14",    "Drogue °2" },
+    { "Trail15",     "Fusée °2" },
+    { "Trail_01",    "Fumé bleu n°1" },
+    { "Trail_02",    "Fumé verte" },
+    { "Trail_03",    "Fumé bleu et rose" },
+    { "Trail_04",    "SANS NOM LOL" },
 };
 char g_szColor[][][32] = {
 	{ "128 0 0", 	"Rubis" },  	{ "255 0 0", 	"Rouge" }, 		{ "255 128 0", 	"Orange" },  	{ "255 255 0", 	"Jaune" }, 
@@ -56,7 +72,7 @@ public Action Cmd_Reload(int args) {
 	return Plugin_Continue;
 }
 public void OnPluginStart() {
-	RegServerCmd("rp_quest_reload", Cmd_Reload);
+	RegServerCmd("rp_quest_reload", 	Cmd_Reload);
 	RegServerCmd("rp_item_vehicle", 	Cmd_ItemVehicle,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_vehicle2", 	Cmd_ItemVehicle,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_carstuff", 	Cmd_ItemVehicleStuff,	"RP-ITEM",	FCVAR_UNREGISTERED);
@@ -80,8 +96,27 @@ public void OnMapStart() {
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);
+	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
+	
 	for (int i = 1; i < 65; i++)
 		g_iBlockedTime[client][i] = 0;
+}
+public Action fwdCommand(int client, char[] command, char[] arg) {
+	if( StrEqual(command, "radio") ) {
+		int vehicle = Client_GetVehicle(client);
+		
+		if( rp_GetVehicleInt(vehicle, car_radio_station) <= 0 ) {
+			ACCESS_DENIED(client);
+		}
+		if( !rp_IsValidVehicle(vehicle) ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être dans une voiture pour utiliser cette commande");
+			return Plugin_Handled;
+		}
+		
+		displayRadioMenu(client);
+		return Plugin_Handled;
+	}
+	return Plugin_Continue;
 }
 public void OnClientDisconnect(int client) {
 	for (int i = MaxClients+1; i <= 2048; i++) {
@@ -418,6 +453,7 @@ int rp_CreateVehicle(float origin[3], float angle[3], char[] model, int skin, in
 	rp_SetVehicleInt(ent, car_light_g, -1);
 	rp_SetVehicleInt(ent, car_light_b, -1);
 	rp_SetVehicleInt(ent, car_battery, -1);
+	rp_SetVehicleInt(ent, car_radio_station, -1);
 	rp_SetVehicleInt(ent, car_particle, -1);	
 	rp_SetVehicleInt(ent, car_health, 1000);
 	rp_SetVehicleInt(ent, car_klaxon, Math_GetRandomInt(1, 6));
@@ -479,6 +515,12 @@ void VehicleRemove(int vehicle, bool explode = false) {
 		}
 	}
 	dettachVehicleLight(vehicle);
+	
+	if( rp_GetVehicleInt(vehicle, car_radio_station) > 0 ) {
+		char arg2[64];
+		Format(arg2, sizeof(arg2), "DeadlyDesire/princeton/disco/%i.wav", rp_GetVehicleInt(vehicle, car_radio_station));
+		StopSoundAny(vehicle, SNDCHAN_VOICE, arg2);
+	}
 	
 	ServerCommand("sm_effect_fading %i 2.5 1", vehicle);
 	rp_ScheduleEntityInput(vehicle, 2.5, "KillHierarchy");
@@ -596,8 +638,8 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 			int batterie = rp_GetVehicleInt(ent, car_battery);
 			
 			if( particule != -1 ) {
-				ServerCommand("sm_effect_particles %d %s 1 light_rl", ent, g_szParticles[particule]);
-				ServerCommand("sm_effect_particles %d %s 1 light_rr", ent, g_szParticles[particule]);	
+				ServerCommand("sm_effect_particles %d %s 1 light_rl", ent, g_szParticles[particule][0]);
+				ServerCommand("sm_effect_particles %d %s 1 light_rr", ent, g_szParticles[particule][0]);	
 			}
 			attachVehicleLight(ent);
 			
@@ -775,15 +817,67 @@ void DisplayGarageMenu(int client) {
 	
 	AddMenuItem(menu, "to_bank", 	"Ranger la voiture");
 	AddMenuItem(menu, "from_bank", 	"Sortir la voiture");
-	AddMenuItem(menu, "colors", 		"Peindre la voiture");	
+	AddMenuItem(menu, "colors", 	"Peindre la voiture");	
 	AddMenuItem(menu, "particles", 	"Ajouter des effets");
 	AddMenuItem(menu, "neons", 		"Ajouter un néon");
 	
 	AddMenuItem(menu, "repair", 	"Reparer la voiture");
 	AddMenuItem(menu, "battery", 	"Vendre la batterie");
+	AddMenuItem(menu, "radio", 		"Installer une batterie");
 	
 	SetMenuExitButton(menu, true);
 	DisplayMenu(menu, client, MENU_TIME_DURATION);
+}
+void displayRadioMenu(int client) {
+	Handle menu = CreateMenu(eventRadioMenu);
+	SetMenuTitle(menu, "Menu de la radio");
+		
+	AddMenuItem(menu, "start", "Allumer la radio");
+	AddMenuItem(menu, "stop", "Eteindre la radio");
+	
+	AddMenuItem(menu, "prev", "Radio suivante");
+	AddMenuItem(menu, "next", "Radio précédente");
+
+	SetMenuExitButton(menu, true);
+	DisplayMenu(menu, client, MENU_TIME_DURATION);
+}
+public int eventRadioMenu(Handle menu, MenuAction action, int client, int param) {
+	if( action == MenuAction_Select ) {
+		char arg1[64], arg2[64];
+		
+		if( GetMenuItem(menu, param, arg1, sizeof(arg1)) ) {
+			int vehicle = Client_GetVehicle(client);
+			
+			if( rp_IsValidVehicle(vehicle) ) {
+				
+				if( rp_GetVehicleInt(vehicle, car_radio_station) <= 0 )
+					return;
+				
+				int station = rp_GetVehicleInt(vehicle, car_radio_station);
+				
+				if( StrEqual(arg1, "prev") )
+					station--;
+				else if( StrEqual(arg1, "next") )
+					station++;
+				
+				if( station <= 0 )
+					station = 24;
+				if( station >= 25 )
+					station = 1;
+					
+				rp_SetVehicleInt(vehicle, car_radio_station, station);
+				
+				Format(arg2, sizeof(arg2), "DeadlyDesire/princeton/disco/%i.wav", station);
+				
+				if( !StrEqual(arg1, "stop") )
+					EmitSoundToClientAny(client, arg2, vehicle, SNDCHAN_VOICE, SNDLEVEL_NORMAL, SND_NOFLAGS, 0.33);
+				else
+					StopSoundAny(vehicle, SNDCHAN_VOICE, arg2);
+				
+				displayRadioMenu(client);
+			}
+		}
+	}
 }
 public int eventGarageMenu(Handle menu, MenuAction action, int client, int param) {
 	#if defined DEBUG
@@ -877,7 +971,7 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 				
 				for (int i = 0; i < sizeof(g_szParticles); i++) {
 					Format(tmp, sizeof(tmp), "Particule %d", i+1);
-					AddMenuItem(menu2, tmp, tmp);
+					AddMenuItem(menu2, tmp, g_szParticles[i][1]);
 				}
 				SetMenuExitButton(menu2, true);
 				DisplayMenu(menu2, client, MENU_TIME_DURATION);
@@ -936,6 +1030,9 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 					rp_SetVehicleInt(target, car_light_b, StringToInt(data[3]));
 					dettachVehicleLight(target);
 					attachVehicleLight(target);
+				}
+				else if( StrEqual(arg1, "radio") ) {
+					rp_SetVehicleInt(target, car_radio_station, 1);
 				}
 				else if( StrContains(arg1, "Particule ") == 0 ) {
 					char data[2][8];

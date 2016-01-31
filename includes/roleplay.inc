@@ -613,6 +613,7 @@ enum car_data {
 	car_light_r,
 	car_light_g,
 	car_light_b,
+	car_radio_station,
 	car_thirdperson_id,
 	car_klaxon,
 	car_owner,
