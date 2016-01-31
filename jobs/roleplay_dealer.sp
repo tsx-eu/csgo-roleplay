@@ -514,6 +514,7 @@ int BuildingPlant(int client, int type) {
 	
 	rp_SetBuildingData(ent, BD_started, GetTime());
 	rp_SetBuildingData(ent, BD_max, 3);
+	rp_SetBuildingData(ent, BD_count, 0);
 	rp_SetBuildingData(ent, BD_owner, client);
 	
 	CreateTimer(3.0, BuildingPlant_post, ent);
