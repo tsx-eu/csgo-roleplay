@@ -609,10 +609,10 @@ enum location_type {
 	location_type_max
 };
 enum car_data {
-	car_light_left_id = 0,
-	car_light_right_id,
-	car_light_middle_id,
-	car_light_is_on,
+	car_light = 0,
+	car_light_r,
+	car_light_g,
+	car_light_b,
 	car_thirdperson_id,
 	car_klaxon,
 	car_owner,

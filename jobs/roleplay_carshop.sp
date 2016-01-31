@@ -197,8 +197,6 @@ public Action Cmd_ItemVehicle(int args) {
 	rp_SetVehicleInt(car, car_owner, client);
 	rp_SetVehicleInt(car, car_item_id, item_id);
 	rp_SetVehicleInt(car, car_maxPassager, max);
-	rp_SetVehicleInt(car, car_battery, -1);
-	rp_SetVehicleInt(car, car_particle, -1);
 	
 	rp_SetClientKeyVehicle(client, car, true);
 	
@@ -415,7 +413,12 @@ int rp_CreateVehicle(float origin[3], float angle[3], char[] model, int skin, in
 	delete trace;
 	
 	TeleportEntity(ent, origin, angle, NULL_VECTOR);
-	rp_SetVehicleInt(ent, car_light_is_on, 0);
+	rp_SetVehicleInt(ent, car_light, -1);
+	rp_SetVehicleInt(ent, car_light_r, -1);
+	rp_SetVehicleInt(ent, car_light_g, -1);
+	rp_SetVehicleInt(ent, car_light_b, -1);
+	rp_SetVehicleInt(ent, car_battery, -1);
+	rp_SetVehicleInt(ent, car_particle, -1);	
 	rp_SetVehicleInt(ent, car_health, 1000);
 	rp_SetVehicleInt(ent, car_klaxon, Math_GetRandomInt(1, 6));
 	
@@ -449,6 +452,10 @@ void VehicleRemove(int vehicle, bool explode = false) {
 	if( vehicle <= 0 )
 		return;
 	
+	int client = GetEntPropEnt(vehicle, Prop_Send, "m_hPlayer");
+	if( IsValidClient(client) )
+		rp_ClientVehicleExit(client, vehicle, true);
+
 	CreateTimer(0.1, BatchLeave, vehicle);
 	
 	for(int i=1; i<=MaxClients; i++)
@@ -471,23 +478,10 @@ void VehicleRemove(int vehicle, bool explode = false) {
 			TE_SendToAll(time);
 		}
 	}
-	
-	int light = rp_GetVehicleInt(vehicle, car_light_left_id);
-	if( light > 0 && IsValidEdict(light) && IsValidEntity(light) ) {
-		rp_ScheduleEntityInput(light, 1.0, "Kill");
-		AcceptEntityInput(light, "LightOff");
-		rp_SetVehicleInt(vehicle, car_light_left_id, 0);
-	}
-	
-	light = rp_GetVehicleInt(vehicle, car_light_right_id);
-	if( light > 0 && IsValidEdict(light) && IsValidEntity(light) ) {
-		rp_ScheduleEntityInput(light, 1.0, "Kill");
-		AcceptEntityInput(light, "LightOff");
-		rp_SetVehicleInt(vehicle, car_light_right_id, 0);
-	}
+	dettachVehicleLight(vehicle);
 	
 	ServerCommand("sm_effect_fading %i 2.5 1", vehicle);
-	rp_ScheduleEntityInput(vehicle, 2.5, "Kill");
+	rp_ScheduleEntityInput(vehicle, 2.5, "KillHierarchy");
 }
 // ----------------------------------------------------------------------------
 public Action rp_SetClientVehicleTask(Handle timer, Handle dp) {
@@ -529,6 +523,51 @@ public Action BatchLeave(Handle timer, any vehicle) {
 		}
 	}
 }
+void attachVehicleLight(int vehicle) {
+	if( rp_GetVehicleInt(vehicle, car_light) > 0 ||  rp_GetVehicleInt(vehicle, car_light_r) == -1 ||  rp_GetVehicleInt(vehicle, car_light_g) == -1 ||  rp_GetVehicleInt(vehicle, car_light_b) == -1 )
+		return;
+		
+	char model[128], color[128];
+	Format(color, sizeof(color), "%d %d %d 800", rp_GetVehicleInt(vehicle, car_light_r), rp_GetVehicleInt(vehicle, car_light_g), rp_GetVehicleInt(vehicle, car_light_b));
+	Entity_GetModel(vehicle, model, sizeof(model));
+	
+	int ent = CreateEntityByName("env_projectedtexture");
+	DispatchKeyValue(ent, "nearz", "22");
+	DispatchKeyValue(ent, "farz", "64");
+	DispatchKeyValue(ent, "texturename", "effects/flashlight001");
+	DispatchKeyValue(ent, "lightcolor", color);
+	DispatchKeyValue(ent, "spawnflags", "3");
+	
+	if( StrContains(model, "dirtbike") != -1 )
+		DispatchKeyValue(ent, "lightfov", "90");
+	else
+		DispatchKeyValue(ent, "lightfov", "170");
+	
+	DispatchKeyValue(ent, "brightnessscale", "50");
+	DispatchKeyValue(ent, "lightworld", "1");
+	
+	DispatchSpawn(ent);
+	
+	SetVariantString("!activator");
+	AcceptEntityInput(ent, "SetParent", vehicle);
+	TeleportEntity(ent, view_as<float>({0.0, 0.0, 24.0}), view_as<float>({ 90.0, 0.0, 0.0 }), NULL_VECTOR);
+	
+	rp_SetVehicleInt(vehicle, car_light, ent);
+}
+void dettachVehicleLight(int vehicle) {
+	if( rp_GetVehicleInt(vehicle, car_light) <= 0 )
+		return;
+		
+	char class[128];
+	int ent = rp_GetVehicleInt(vehicle, car_light);
+	GetEdictClassname(ent, class, sizeof(class));
+	
+	if( StrEqual(class, "env_projectedtexture") && Entity_GetParent(ent) == vehicle )
+		AcceptEntityInput(ent, "Kill");
+	
+	rp_SetVehicleInt(vehicle, car_light, -1);
+	
+}
 public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 
 	bool IsNear = false;
@@ -544,7 +583,10 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 		return Plugin_Handled;
 	}
 	
-	
+	int owner = rp_GetVehicleInt(ent, car_owner);
+	if( !Vehicle_HasDriver(ent) && (!IsValidClient(owner) || Entity_GetDistance(owner, ent) > 512) )
+		dettachVehicleLight(ent);
+		
 	if( Vehicle_HasDriver(ent) ) {
 		IsNear = true;
 		int driver = GetEntPropEnt(ent, Prop_Send, "m_hPlayer");
@@ -557,6 +599,7 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 				ServerCommand("sm_effect_particles %d %s 1 light_rl", ent, g_szParticles[particule]);
 				ServerCommand("sm_effect_particles %d %s 1 light_rr", ent, g_szParticles[particule]);	
 			}
+			attachVehicleLight(ent);
 			
 			if( batterie != -1 ) {
 				if( rp_GetVehicleInt(ent, car_battery) < 420 ) {
@@ -569,6 +612,9 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 				}
 			}
 			g_lastpos[ent] = vecOrigin;
+		}
+		else {
+			dettachVehicleLight(ent);
 		}
 	}
 	else if( rp_GetZoneBit(rp_GetPlayerZone(ent)) & BITZONE_PARKING )
@@ -729,9 +775,9 @@ void DisplayGarageMenu(int client) {
 	
 	AddMenuItem(menu, "to_bank", 	"Ranger la voiture");
 	AddMenuItem(menu, "from_bank", 	"Sortir la voiture");
-	AddMenuItem(menu, "paint", 		"Peindre la voiture");
-	
+	AddMenuItem(menu, "colors", 		"Peindre la voiture");	
 	AddMenuItem(menu, "particles", 	"Ajouter des effets");
+	AddMenuItem(menu, "neons", 		"Ajouter un néon");
 	
 	AddMenuItem(menu, "repair", 	"Reparer la voiture");
 	AddMenuItem(menu, "battery", 	"Vendre la batterie");
@@ -782,10 +828,10 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 				DisplayMenu(menu2, client, MENU_TIME_DURATION);
 				return;
 			}
-			else if( StrEqual(arg1, "paint") ) {
+			else if( StrEqual(arg1, "colors") ) {
 				Handle menu2 = CreateMenu(eventGarageMenu);
 				SetMenuTitle(menu2, "Menu du garage");
-				AddMenuItem(menu2, "paint_custom",		"Personnalisé");
+				AddMenuItem(menu2, "colors_custom",		"Personnalisé");
 				
 				char tmp[64];
 				for (int i = 0; i < sizeof(g_szColor); i++) {
@@ -797,7 +843,8 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 				DisplayMenu(menu2, client, MENU_TIME_DURATION);
 				return;
 			}
-			else if( StrEqual(arg1, "paint_custom") ) {
+			
+			else if( StrEqual(arg1, "colors_custom") ) {
 				Handle menu2 = CreateMenu(eventGarageMenu);
 				SetMenuTitle(menu2, "Menu du garage");
 				AddMenuItem(menu2, "white",	"Ajouter du blanc");
@@ -805,6 +852,20 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 				AddMenuItem(menu2, "red", 	"Ajouter du rouge");
 				AddMenuItem(menu2, "green", "Ajouter du vert");
 				AddMenuItem(menu2, "bleue", "Ajouter du bleu");
+				SetMenuExitButton(menu2, true);
+				DisplayMenu(menu2, client, MENU_TIME_DURATION);
+				return;
+			}
+			else if( StrEqual(arg1, "neons") ) {
+				Handle menu2 = CreateMenu(eventGarageMenu);
+				SetMenuTitle(menu2, "Menu du garage");
+				
+				char tmp[64];
+				for (int i = 0; i < sizeof(g_szColor); i++) {
+					Format(tmp, sizeof(tmp), "neon %s", g_szColor[i][0]);
+					AddMenuItem(menu2, tmp, g_szColor[i][1]);
+				}
+				
 				SetMenuExitButton(menu2, true);
 				DisplayMenu(menu2, client, MENU_TIME_DURATION);
 				return;
@@ -863,14 +924,18 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 						color[2] = StringToInt(data[3]);
 					}
 					
-					for(int i=0; i<3; i++) {
-						if( color[i] > 255 )
-							color[i] = 255;
-						if( color[i] < 0 )
-							color[i] = 0;
-					}
-					
 					ServerCommand("sm_effect_colorize %d %d %d %d 255", target, color[0], color[1], color[2]);
+				}
+				else if( StrContains(arg1, "neon ") == 0 ) {
+					char data[4][8];
+					ExplodeString(arg1, " ", data, sizeof(data), sizeof(data[]));
+					
+					
+					rp_SetVehicleInt(target, car_light_r, StringToInt(data[1]));
+					rp_SetVehicleInt(target, car_light_g, StringToInt(data[2]));
+					rp_SetVehicleInt(target, car_light_b, StringToInt(data[3]));
+					dettachVehicleLight(target);
+					attachVehicleLight(target);
 				}
 				else if( StrContains(arg1, "Particule ") == 0 ) {
 					char data[2][8];
