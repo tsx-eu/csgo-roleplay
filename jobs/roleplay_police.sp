@@ -1395,11 +1395,18 @@ public Action Cmd_Tribunal(int client) {
 	SetMenuTitle(menu, "  Tribunal \n--------------------");
 
 	if( job == 101 || job == 102 || job == 103 || job == 104 ) {
-		AddMenuItem(menu, "forum",		"Juger les cas du forum");
+		if( GetConVarInt(FindConVar("hostport")) == 27015 )
+			AddMenuItem(menu, "forum",		"Juger les cas du forum");
+		else
+			AddMenuItem(menu, "forum", "Juger les cas du forum", ITEMDRAW_DISABLED);
+			
 		AddMenuItem(menu, "connected",	"Juger un joueur présent");
 		AddMenuItem(menu, "disconnect",	"Juger un joueur récement déconnecté");
 	}
-	AddMenuItem(menu, "stats",		"Voir les stats d'un joueur");
+	if( GetConVarInt(FindConVar("hostport")) == 27015 )
+		AddMenuItem(menu, "stats",		"Voir les stats d'un joueur");
+	else
+		AddMenuItem(menu, "stats", 	"Voir les stats d'un joueur", ITEMDRAW_DISABLED);
 
 	SetMenuExitButton(menu, true);
 	DisplayMenu(menu, client, MENU_TIME_DURATION);
