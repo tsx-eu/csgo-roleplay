@@ -24,9 +24,9 @@
 //#define DEBUG
 #define MENU_TIME_DURATION 	30
 #define CONTACT_DIST		500
-#define	ITEM_REPAIR			310
-#define	ITEM_NEONS			301
-#define	ITEM_PARTICULES		277
+#define	ITEM_REPAIR			176
+#define	ITEM_NEONS			193
+#define	ITEM_PARTICULES		181
 
 
 public Plugin myinfo = {
@@ -861,12 +861,11 @@ void DisplayGarageMenu(int client) {
 	AddMenuItem(menu, "to_bank", 	"Ranger la voiture");
 	AddMenuItem(menu, "from_bank", 	"Sortir la voiture");
 	AddMenuItem(menu, "colors", 	"Peindre la voiture");	
-	AddMenuItem(menu, "particles", 	"Ajouter des effets");
+	AddMenuItem(menu, "particles", 	"Ajouter des particules");
 	AddMenuItem(menu, "neons", 		"Ajouter un néon");
 	
 	AddMenuItem(menu, "repair", 	"Reparer la voiture");
 	AddMenuItem(menu, "battery", 	"Vendre la batterie");
-	AddMenuItem(menu, "radio", 		"Installer une batterie");
 	
 	SetMenuExitButton(menu, true);
 	DisplayMenu(menu, client, MENU_TIME_DURATION);
