@@ -24,6 +24,10 @@
 //#define DEBUG
 #define MENU_TIME_DURATION 	30
 #define CONTACT_DIST		500
+#define	ITEM_REPAIR			310
+#define	ITEM_NEONS			301
+#define	ITEM_PARTICULES		277
+
 
 public Plugin myinfo = {
 	name = "Jobs: CARSHOP", author = "KoSSoLaX",
@@ -32,29 +36,29 @@ public Plugin myinfo = {
 };
 
 Handle g_hMAX_CAR;
-int g_cExplode, g_cBeam;
+int g_cExplode;
 int g_iBlockedTime[65][65];
 float g_lastpos[2049][3];
 
 char g_szParticles[][][32] =  {
-	{ "Trail",     	"Propulseur" },
-    { "Trail2",		"Fusée n°1" },
+    { "Trail",     "Propulseur" },
+    { "Trail2",    "Fusée n°1" },
     { "Trail3",    "Petit cube bleu" },
     { "Trail4",    "Fumé verte" },
     { "Trail5",    "Seringue" },
     { "Trail7",    "Petite fumé verte" },
     { "Trail8",    "Fumé blanche et bleu" },
     { "Trail9",    "Drogue n°1" },
-    { "Trail10",    "Bulle bleu n°1" },
-    { "Trail11",    "Fumée Or" },
-    { "Trail12",    "Fumée bleu" },
-    { "Trail13",    "Bulle bleu °2" },
-    { "Trail14",    "Drogue °2" },
-    { "Trail15",     "Fusée °2" },
-    { "Trail_01",    "Fumé bleu n°1" },
-    { "Trail_02",    "Fumé verte" },
-    { "Trail_03",    "Fumé bleu et rose" },
-    { "Trail_04",    "SANS NOM LOL" },
+    { "Trail10",   "Bulle bleu n°1" },
+    { "Trail11",   "Fumée Or" },
+    { "Trail12",   "Fumée bleu" },
+    { "Trail13",   "Bulle bleu °2" },
+    { "Trail14",   "Drogue °2" },
+    { "Trail15",   "Trait jaune et vert" },
+    { "Trail_01",  "Fusée n°2" },
+    { "Trail_02",  "Fumé bleu n°2" },
+    { "Trail_03",  "Fumé verte" },
+    { "Trail_04",  "Fumé bleu et rose" },
 };
 char g_szColor[][][32] = {
 	{ "128 0 0", 	"Rubis" },  	{ "255 0 0", 	"Rouge" }, 		{ "255 128 0", 	"Orange" },  	{ "255 255 0", 	"Jaune" }, 
@@ -92,15 +96,32 @@ public void OnPluginStart() {
 }
 public void OnMapStart() {
 	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt", true);
-	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
+	rp_HookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
 	
 	for (int i = 1; i < 65; i++)
 		g_iBlockedTime[client][i] = 0;
 }
+
+public Action fwdOnPlayerBuild(int client, float& cooldown){
+	if( rp_GetClientJobID(client) != 51 )
+		return Plugin_Continue;
+	
+	Handle menu = CreateMenu(SpawnVehicle);
+	SetMenuTitle(menu, "Une voiture pour 6 minutes");
+
+	AddMenuItem(menu, "mustang",	"Mustang (500$)");
+	AddMenuItem(menu, "moto", 		"Moto (250$)");
+
+	DisplayMenu(menu, client, 60);
+	cooldown = 5.0;
+	
+	return Plugin_Stop;
+}
+
 public Action fwdCommand(int client, char[] command, char[] arg) {
 	if( StrEqual(command, "radio") ) {
 		int vehicle = Client_GetVehicle(client);
@@ -169,6 +190,18 @@ public Action fwdUse(int client) {
 	}
 }
 // ----------------------------------------------------------------------------
+int countVehicle(int client) {
+	int count = 0;
+	for(int i=MaxClients; i<=2048; i++) {
+		if( !rp_IsValidVehicle(i) )
+			continue;
+		
+		count++;
+		if( rp_GetVehicleInt(i, car_owner) == client )
+			count += 5;
+	}
+	return count;
+}
 public Action Cmd_ItemVehicle(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemVehicle");
@@ -188,32 +221,11 @@ public Action Cmd_ItemVehicle(int args) {
 		return;
 	}
 	
-	if( StrContains(arg1, "crownvic_cvpi") >  0 ) {
-		if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
-			CAR_CANCEL(client, item_id);
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est réservé aux forces de l'ordre.");
-			return;
-		}
-	}
-	if( StrContains(arg1, "hummer") != -1 )
-		max = 4;
-	if( StrContains(arg1, "crownvic") != -1 )
-		max = 4;
-	
-	int count = 0;
-	for(int i=1; i<=2048; i++) {
-		if( !rp_IsValidVehicle(i) )
-			continue;
-		
-		count++;
-	}
-	
-	if( count >= GetConVarInt(g_hMAX_CAR) ) {
+	if( countVehicle(client) >= GetConVarInt(g_hMAX_CAR) ) {
 		CAR_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il y a trop de voiture sur le serveur pour l'instant.");
 		return;			
 	}
-	
 	
 	float vecOrigin[3], vecAngles[3];
 	GetClientAbsOrigin(client, vecOrigin);
@@ -242,9 +254,7 @@ public Action Cmd_ItemVehicle(int args) {
 	char arg0[128];
 	GetCmdArg(0, arg0, sizeof(arg0));
 	if( StrEqual(arg0, "rp_item_vehicle2") ) {
-		ServerCommand("sm_effect_colorize %d 32 64 255 255", car);
-		TE_SetupBeamFollow(car, g_cBeam, 0, 30.0, 8.0, 0.1, 250, {32, 64, 255, 255});
-		TE_SendToAll();
+		// TODO:
 	}
 	
 	return;
@@ -389,6 +399,42 @@ public Action Cmd_ItemVehicleStuff(int args) {
 		rp_SetVehicleInt(target, car_battery, 0);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre voiture est maintenant équipée d'une batterie secondaire.");
 	}
+	else if( StrEqual(arg1, "radio") ){
+		if(rp_GetVehicleInt(target, car_radio_station)!= -1){
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre voiture est déjà équipée d'une radio.");
+			ITEM_CANCEL(client, item_id);
+			return Plugin_Handled;
+		}
+		rp_SetVehicleInt(target, car_radio_station, 1);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre voiture est maintenant équipée d'une radio.");
+	}
+	else if( StrEqual(arg1, "boost") ){
+		if( rp_GetVehicleInt(target, car_boost) != -1){
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre voiture est déjà équipée d'un boost.");
+			ITEM_CANCEL(client, item_id);
+			return Plugin_Handled;
+		}
+		
+		char ScriptPath[PLATFORM_MAX_PATH], buffer[8][64];
+		Entity_GetModel(target, ScriptPath, sizeof(ScriptPath));
+		int amount = ExplodeString(ScriptPath, "/", buffer, sizeof(buffer), sizeof(buffer[]));
+		if( amount > 0 ) {
+			ReplaceString(buffer[amount-1], sizeof(buffer[]), ".mdl", "");
+			Format(ScriptPath, sizeof(ScriptPath), "scripts/vehicles/%s2.txt", buffer[amount-1]);
+			
+			if( FileExists(ScriptPath) ) {
+				DispatchKeyValue(target, "vehiclescript", 		ScriptPath);
+				ServerCommand("vehicle_flushscript");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre voiture est maintenant équipée d'un boost.");
+			}
+			else {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible d'installer un boost dans votre voiture.");
+				ITEM_CANCEL(client, item_id);
+			}
+		}
+		
+		
+	}
 	
 	return Plugin_Handled;
 }
@@ -454,6 +500,7 @@ int rp_CreateVehicle(float origin[3], float angle[3], char[] model, int skin, in
 	rp_SetVehicleInt(ent, car_light_b, -1);
 	rp_SetVehicleInt(ent, car_battery, -1);
 	rp_SetVehicleInt(ent, car_radio_station, -1);
+	rp_SetVehicleInt(ent, car_boost, -1);
 	rp_SetVehicleInt(ent, car_particle, -1);	
 	rp_SetVehicleInt(ent, car_health, 1000);
 	rp_SetVehicleInt(ent, car_klaxon, Math_GetRandomInt(1, 6));
@@ -631,8 +678,7 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 		
 	if( Vehicle_HasDriver(ent) ) {
 		IsNear = true;
-		int driver = GetEntPropEnt(ent, Prop_Send, "m_hPlayer");
-		
+		int driver = GetEntPropEnt(ent, Prop_Send, "m_hPlayer");		
 		if( GetVectorDistance(g_lastpos[ent], vecOrigin) > 50.0 && !rp_GetClientBool(driver, b_IsAFK) ) {
 			int particule = rp_GetVehicleInt(ent, car_particle);
 			int batterie = rp_GetVehicleInt(ent, car_battery);
@@ -654,9 +700,6 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 				}
 			}
 			g_lastpos[ent] = vecOrigin;
-		}
-		else {
-			dettachVehicleLight(ent);
 		}
 	}
 	else if( rp_GetZoneBit(rp_GetPlayerZone(ent)) & BITZONE_PARKING )
@@ -841,6 +884,56 @@ void displayRadioMenu(int client) {
 	SetMenuExitButton(menu, true);
 	DisplayMenu(menu, client, MENU_TIME_DURATION);
 }
+void displayColorMenu(int client) {
+	Handle menu2 = CreateMenu(eventGarageMenu);
+	SetMenuTitle(menu2, "Menu du garage");
+	AddMenuItem(menu2, "colors_custom",		"Personnalisé");
+			
+	char tmp[64];
+	for (int i = 0; i < sizeof(g_szColor); i++) {
+		Format(tmp, sizeof(tmp), "color %s", g_szColor[i][0]);
+		AddMenuItem(menu2, tmp, g_szColor[i][1]);
+	}
+	
+	SetMenuExitButton(menu2, true);
+	DisplayMenu(menu2, client, MENU_TIME_DURATION);
+}
+void displayColorMenu2(int client) {
+	Handle menu2 = CreateMenu(eventGarageMenu);
+	SetMenuTitle(menu2, "Menu du garage");
+	AddMenuItem(menu2, "white",	"Ajouter du blanc");
+	AddMenuItem(menu2, "black",	"Ajouter du noir");
+	AddMenuItem(menu2, "red", 	"Ajouter du rouge");
+	AddMenuItem(menu2, "green", "Ajouter du vert");
+	AddMenuItem(menu2, "bleue", "Ajouter du bleu");
+	SetMenuExitButton(menu2, true);
+	DisplayMenu(menu2, client, MENU_TIME_DURATION);
+}
+void displayNeonMenu(int client) {
+	Handle menu2 = CreateMenu(eventGarageMenu);
+	SetMenuTitle(menu2, "Menu du garage");
+				
+	char tmp[64];
+	for (int i = 0; i < sizeof(g_szColor); i++) {
+		Format(tmp, sizeof(tmp), "neon %s", g_szColor[i][0]);
+		AddMenuItem(menu2, tmp, g_szColor[i][1]);
+	}
+			
+	SetMenuExitButton(menu2, true);
+	DisplayMenu(menu2, client, MENU_TIME_DURATION);
+}
+void displayParticleMenu(int client) {
+	Handle menu2 = CreateMenu(eventGarageMenu);
+	char tmp[64];
+	SetMenuTitle(menu2, "Menu du garage");
+				
+	for (int i = 0; i < sizeof(g_szParticles); i++) {
+		Format(tmp, sizeof(tmp), "Particule %d", i+1);
+		AddMenuItem(menu2, tmp, g_szParticles[i][1]);
+	}
+	SetMenuExitButton(menu2, true);
+	DisplayMenu(menu2, client, MENU_TIME_DURATION);
+}
 public int eventRadioMenu(Handle menu, MenuAction action, int client, int param) {
 	if( action == MenuAction_Select ) {
 		char arg1[64], arg2[64];
@@ -883,7 +976,7 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 	#if defined DEBUG
 	PrintToServer("eventGarageMenu");
 	#endif
-	static int last[65];
+	static int last[65], offset;
 	
 	
 	if( action == MenuAction_Select ) {
@@ -923,58 +1016,19 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 				return;
 			}
 			else if( StrEqual(arg1, "colors") ) {
-				Handle menu2 = CreateMenu(eventGarageMenu);
-				SetMenuTitle(menu2, "Menu du garage");
-				AddMenuItem(menu2, "colors_custom",		"Personnalisé");
-				
-				char tmp[64];
-				for (int i = 0; i < sizeof(g_szColor); i++) {
-					Format(tmp, sizeof(tmp), "color %s", g_szColor[i][0]);
-					AddMenuItem(menu2, tmp, g_szColor[i][1]);
-				}
-				
-				SetMenuExitButton(menu2, true);
-				DisplayMenu(menu2, client, MENU_TIME_DURATION);
+				displayColorMenu(client);
 				return;
 			}
-			
 			else if( StrEqual(arg1, "colors_custom") ) {
-				Handle menu2 = CreateMenu(eventGarageMenu);
-				SetMenuTitle(menu2, "Menu du garage");
-				AddMenuItem(menu2, "white",	"Ajouter du blanc");
-				AddMenuItem(menu2, "black",	"Ajouter du noir");
-				AddMenuItem(menu2, "red", 	"Ajouter du rouge");
-				AddMenuItem(menu2, "green", "Ajouter du vert");
-				AddMenuItem(menu2, "bleue", "Ajouter du bleu");
-				SetMenuExitButton(menu2, true);
-				DisplayMenu(menu2, client, MENU_TIME_DURATION);
+				displayColorMenu2(client);
 				return;
 			}
 			else if( StrEqual(arg1, "neons") ) {
-				Handle menu2 = CreateMenu(eventGarageMenu);
-				SetMenuTitle(menu2, "Menu du garage");
-				
-				char tmp[64];
-				for (int i = 0; i < sizeof(g_szColor); i++) {
-					Format(tmp, sizeof(tmp), "neon %s", g_szColor[i][0]);
-					AddMenuItem(menu2, tmp, g_szColor[i][1]);
-				}
-				
-				SetMenuExitButton(menu2, true);
-				DisplayMenu(menu2, client, MENU_TIME_DURATION);
+				displayNeonMenu(client);
 				return;
 			}
 			else if( StrEqual(arg1, "particles") ) {
-				Handle menu2 = CreateMenu(eventGarageMenu);
-				char tmp[64];
-				SetMenuTitle(menu2, "Menu du garage");
-				
-				for (int i = 0; i < sizeof(g_szParticles); i++) {
-					Format(tmp, sizeof(tmp), "Particule %d", i+1);
-					AddMenuItem(menu2, tmp, g_szParticles[i][1]);
-				}
-				SetMenuExitButton(menu2, true);
-				DisplayMenu(menu2, client, MENU_TIME_DURATION);
+				displayParticleMenu(client);
 				return;
 			}
 			
@@ -985,8 +1039,13 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 					continue;
 				
 				if( StrEqual(arg1, "red") ||  StrEqual(arg1, "green") ||  StrEqual(arg1, "bleue") ||  StrEqual(arg1, "white") ||  StrEqual(arg1, "black") || StrContains(arg1, "color ") == 0 ) {
+
 					int color[4];
-					Entity_GetRenderColor(target, color);
+					if( offset == -1 )
+						offset = GetEntSendPropOffs(target, "m_clrRender", true);
+					for(int i=0; i<3; i++)
+						color[i] = GetEntData(target, offset+i, 1);
+					color[3] = 255;
 					
 					if( color[0] >= 250 && color[1] >= 250 && color[2] >= 250 && last[client] != target ) {
 						rp_IncrementSuccess(client, success_list_carshop);
@@ -997,18 +1056,23 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 					
 					if( StrEqual(arg1, "red") ) {
 						color[0] += j;	color[1] -= j;	color[2] -= j;
+						displayColorMenu2(client);
 					}
 					else if( StrEqual(arg1, "green") ) {
 						color[0] -= j;	color[1] += j;	color[2] -= j;
+						displayColorMenu2(client);
 					}
 					else if( StrEqual(arg1, "bleue") ) {
 						color[0] -= j;	color[1] -= j;	color[2] += j;
+						displayColorMenu2(client);
 					}
 					else if( StrEqual(arg1, "white") ) {
 						color[0] += j;	color[1] += j;	color[2] += j;
+						displayColorMenu2(client);
 					}
 					else if( StrEqual(arg1, "black") ) {
 						color[0] -= j;	color[1] -= j;	color[2] -= j;
+						displayColorMenu2(client);
 					}
 					else {
 						char data[4][8];
@@ -1016,29 +1080,49 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 						color[0] = StringToInt(data[1]);
 						color[1] = StringToInt(data[2]);
 						color[2] = StringToInt(data[3]);
+						displayColorMenu(client);
 					}
 					
 					ServerCommand("sm_effect_colorize %d %d %d %d 255", target, color[0], color[1], color[2]);
 				}
 				else if( StrContains(arg1, "neon ") == 0 ) {
+					
+					
+					if( rp_GetVehicleInt(target, car_light_r) == -1 ) {
+						if( rp_GetClientItem(client, ITEM_NEONS, true) <= 0 ) {
+							CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas de kit de néons en banque.");
+							DisplayGarageMenu(client);
+							return;
+						}
+						rp_ClientGiveItem(client, ITEM_NEONS, -1, true);
+					}
+					
 					char data[4][8];
 					ExplodeString(arg1, " ", data, sizeof(data), sizeof(data[]));
-					
 					
 					rp_SetVehicleInt(target, car_light_r, StringToInt(data[1]));
 					rp_SetVehicleInt(target, car_light_g, StringToInt(data[2]));
 					rp_SetVehicleInt(target, car_light_b, StringToInt(data[3]));
 					dettachVehicleLight(target);
 					attachVehicleLight(target);
-				}
-				else if( StrEqual(arg1, "radio") ) {
-					rp_SetVehicleInt(target, car_radio_station, 1);
+					displayNeonMenu(client);
 				}
 				else if( StrContains(arg1, "Particule ") == 0 ) {
+					
+					if( rp_GetVehicleInt(target, car_particle) == -1 ) {
+						if( rp_GetClientItem(client, ITEM_PARTICULES, true) <= 0 ) {
+							CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas de kit de particules en banque.");
+							DisplayGarageMenu(client);
+							return;
+						}
+						rp_ClientGiveItem(client, ITEM_PARTICULES, -1, true);
+					}
+					
 					char data[2][8];
 					ExplodeString(arg1, " ", data, sizeof(data), sizeof(data[]));
 					
 					rp_SetVehicleInt(target, car_particle, StringToInt(data[1])-1);
+					displayParticleMenu(client);
 				}
 				else if( StrEqual(arg1, "to_bank") ) {
 					
@@ -1058,17 +1142,17 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 					rp_SetVehicleInt(target, car_health, 0);
 					
 					int itemID = rp_GetVehicleInt(target, car_item_id);
-					rp_ClientGiveItem(client, itemID, 1, true);					
+					rp_ClientGiveItem(client, itemID, 1, true);
+					DisplayGarageMenu(client);
 				}
 				else if( StrEqual(arg1, "repair") ) {
 					
-					if( rp_GetClientItem(client, 310, true) <= 0 ) {
+					if( rp_GetClientItem(client, ITEM_REPAIR, true) <= 0 ) {
 						CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas de kit de carrosserie en banque.");
 						DisplayGarageMenu(client);
 						return;
 					}
-					
-					rp_ClientGiveItem(client, 310, -1, true);		
+					rp_ClientGiveItem(client, ITEM_REPAIR, -1, true);
 					
 					int heal = rp_GetVehicleInt(target, car_health) + 1000;
 					if( heal >= 2500 ) {
@@ -1076,6 +1160,7 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 					}
 					
 					rp_SetVehicleInt(target, car_health, heal);
+					DisplayGarageMenu(client);
 				}
 				else if( StrEqual(arg1, "battery") ) {
 					if( rp_GetVehicleInt(target, car_owner) != client )
@@ -1090,10 +1175,10 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 						CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez vendu votre batterie, 2000$ vous seront crédité à la fin de la journée.");
 						rp_SetVehicleInt(target, car_battery, -1);
 					}
+					
+					DisplayGarageMenu(client);
 				}
 			}
-			
-			DisplayGarageMenu(client);
 		}
 	}
 	else if( action == MenuAction_End ) {
@@ -1122,4 +1207,68 @@ public int eventGarageMenu2(Handle menu, MenuAction action, int client, int para
 	else if( action == MenuAction_End ) {
 		CloseHandle(menu);
 	}
+}
+public int SpawnVehicle(Handle menu, MenuAction action, int client, int param) {
+	if( action == MenuAction_Select ) {
+		char arg1[64];
+		
+		if( GetMenuItem(menu, param, arg1, sizeof(arg1)) ) {
+			
+			char model[128];
+			int prix;
+			
+			if( StrEqual(arg1, "mustang") ) {
+				Format(model, sizeof(model), "models/natalya/vehicles/natalya_mustang_csgo_2016.mdl");
+				prix = 500;
+			}
+			else if( StrEqual(arg1, "moto") ) {
+				Format(model, sizeof(model), "models/natalya/vehicles/dirtbike.mdl");
+				prix = 250;
+			}
+			
+			int skinid = 1;
+			
+			if( rp_GetZoneBit( rp_GetPlayerZone(client) ) & BITZONE_PEACEFULL ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit où vous êtes.");
+				return;
+			}
+			
+			if( countVehicle(client) >= GetConVarInt(g_hMAX_CAR) ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il y a trop de voiture sur le serveur pour l'instant.");
+				return;			
+			}
+			
+			float vecOrigin[3], vecAngles[3];
+			GetClientAbsOrigin(client, vecOrigin);
+			vecOrigin[2] += 10.0;
+			
+			GetClientEyeAngles(client, vecAngles);
+			vecAngles[0] = vecAngles[2] = 0.0;
+			vecAngles[1] -= 90.0;
+			
+			int car = rp_CreateVehicle(vecOrigin, vecAngles, model, skinid, client);
+			if( !car ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a pas assez de place ici.");
+				return;
+			}
+			
+			rp_SetVehicleInt(car, car_owner, client);
+			rp_SetVehicleInt(car, car_item_id, -1);
+			rp_SetVehicleInt(car, car_maxPassager, 1);
+			rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - prix);
+			rp_SetClientKeyVehicle(client, car, true);
+			
+			SDKHook(car, SDKHook_Touch, VehicleTouch);
+			CreateTimer(3.5, Timer_VehicleRemoveCheck, EntIndexToEntRef(car));
+			CreateTimer(360.0, Timer_VehicleRemove, EntIndexToEntRef(car));
+		}
+	}
+}
+public Action Timer_VehicleRemove(Handle timer, any ent) {
+	ent = EntRefToEntIndex(ent);
+	if( ent <= 0 || !IsValidEdict(ent) )
+		return Plugin_Handled;
+	
+	VehicleRemove(ent, true);
+	return Plugin_Handled;
 }
