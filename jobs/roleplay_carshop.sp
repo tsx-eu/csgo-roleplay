@@ -1040,7 +1040,7 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 				if( StrEqual(arg1, "red") ||  StrEqual(arg1, "green") ||  StrEqual(arg1, "bleue") ||  StrEqual(arg1, "white") ||  StrEqual(arg1, "black") || StrContains(arg1, "color ") == 0 ) {
 
 					int color[4];
-					if( offset == -1 )
+					if( offset == 0 )
 						offset = GetEntSendPropOffs(target, "m_clrRender", true);
 					for(int i=0; i<3; i++)
 						color[i] = GetEntData(target, offset+i, 1);
