@@ -41,24 +41,24 @@ int g_iBlockedTime[65][65];
 float g_lastpos[2049][3];
 
 char g_szParticles[][][32] =  {
-    { "Trail",     "Propulseur" },
-    { "Trail2",    "Fusée n°1" },
-    { "Trail3",    "Petit cube bleu" },
-    { "Trail4",    "Fumé verte" },
-    { "Trail5",    "Seringue" },
-    { "Trail7",    "Petite fumé verte" },
-    { "Trail8",    "Fumé blanche et bleu" },
-    { "Trail9",    "Drogue n°1" },
-    { "Trail10",   "Bulle bleu n°1" },
-    { "Trail11",   "Fumée Or" },
-    { "Trail12",   "Fumée bleu" },
-    { "Trail13",   "Bulle bleu °2" },
-    { "Trail14",   "Drogue °2" },
-    { "Trail15",   "Trait jaune et vert" },
-    { "Trail_01",  "Fusée n°2" },
-    { "Trail_02",  "Fumé bleu n°2" },
-    { "Trail_03",  "Fumé verte" },
-    { "Trail_04",  "Fumé bleu et rose" },
+	{ "Trail",		"Propulseur" },
+	{ "Trail2",		"Fusée n°1" },
+	{ "Trail3",		"Petit cube bleu" },
+	{ "Trail4",		"Fumé verte" },
+	{ "Trail5",		"Seringue" },
+	{ "Trail7",		"Petite fumé verte" },
+	{ "Trail8",		"Fumé blanche et bleu" },
+	{ "Trail9",		"Drogue n°1" },
+	{ "Trail10",	"Bulle bleu n°1" },
+	{ "Trail11",	"Fumée Or" },
+	{ "Trail12",	"Fumée bleu" },
+	{ "Trail13",	"Bulle bleu °2" },
+	{ "Trail14",	"Drogue °2" },
+	{ "Trail15",	"Trait jaune et vert" },
+	{ "Trail_01",	"Fusée n°2" },
+	{ "Trail_02",	"Fumé bleu n°2" },
+	{ "Trail_03",	"Fumé verte" },
+	{ "Trail_04",	"Fumé bleu et rose" },
 };
 char g_szColor[][][32] = {
 	{ "128 0 0", 	"Rubis" },  	{ "255 0 0", 	"Rouge" }, 		{ "255 128 0", 	"Orange" },  	{ "255 255 0", 	"Jaune" }, 
@@ -105,7 +105,18 @@ public void OnClientPostAdminCheck(int client) {
 	for (int i = 1; i < 65; i++)
 		g_iBlockedTime[client][i] = 0;
 }
-
+public void OnClientDisconnect(int client) {
+	for (int i = MaxClients+1; i <= 2048; i++) {
+		if( !IsValidEdict(i) )
+			continue;
+		if( !IsValidEntity(i) )
+			continue;
+		if( rp_GetVehicleInt(i, car_owner) == client) {
+			VehicleRemove(i);
+		}
+	}
+}
+// ----------------------------------------------------------------------------
 public Action fwdOnPlayerBuild(int client, float& cooldown){
 	if( rp_GetClientJobID(client) != 51 )
 		return Plugin_Continue;
@@ -121,7 +132,6 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 	
 	return Plugin_Stop;
 }
-
 public Action fwdCommand(int client, char[] command, char[] arg) {
 	if( StrEqual(command, "radio") ) {
 		int vehicle = Client_GetVehicle(client);
@@ -138,17 +148,6 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 		return Plugin_Handled;
 	}
 	return Plugin_Continue;
-}
-public void OnClientDisconnect(int client) {
-	for (int i = MaxClients+1; i <= 2048; i++) {
-		if( !IsValidEdict(i) )
-			continue;
-		if( !IsValidEntity(i) )
-			continue;
-		if( rp_GetVehicleInt(i, car_owner) == client) {
-			VehicleRemove(i);
-		}
-	}
 }
 public Action fwdUse(int client) {
 	int app = rp_GetPlayerZoneAppart(client);
@@ -1138,7 +1137,7 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 						continue;
 					}
 					
-					rp_SetVehicleInt(target, car_health, 0);
+					VehicleRemove(target, false);
 					
 					int itemID = rp_GetVehicleInt(target, car_item_id);
 					rp_ClientGiveItem(client, itemID, 1, true);
@@ -1189,7 +1188,7 @@ public int eventGarageMenu2(Handle menu, MenuAction action, int client, int para
 	PrintToServer("eventGarageMenu2");
 	#endif
 	if( action == MenuAction_Select ) {
-		char szMenuItem[64];
+		char szMenuItem[128];
 		
 		if( GetMenuItem(menu, param, szMenuItem, sizeof(szMenuItem)) ) {
 			
@@ -1271,3 +1270,4 @@ public Action Timer_VehicleRemove(Handle timer, any ent) {
 	VehicleRemove(ent, true);
 	return Plugin_Handled;
 }
+// ----------------------------------------------------------------------------
