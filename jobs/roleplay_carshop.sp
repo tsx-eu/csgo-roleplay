@@ -252,8 +252,19 @@ public Action Cmd_ItemVehicle(int args) {
 	// Voiture donateur, on la thune wesh
 	char arg0[128];
 	GetCmdArg(0, arg0, sizeof(arg0));
-	if( StrEqual(arg0, "rp_item_vehicle2") ) {
-		// TODO:
+	if( StrEqual(arg0, "rp_item_vehicle2") && StrEqual(arg1, "models/natalya/vehicles/natalya_mustang_csgo_2016.mdl") ) {
+		
+		ServerCommand("sm_effect_colorize %d 255 64 32 255", car);
+		rp_SetVehicleInt(car, car_particle, 9);
+		rp_SetVehicleInt(car, car_battery, 1);
+		rp_SetVehicleInt(car, car_light_r, 255);
+		rp_SetVehicleInt(car, car_light_g, 64);
+		rp_SetVehicleInt(car, car_light_b, 32);
+		rp_SetVehicleInt(car, car_radio_station, 1);
+		rp_SetVehicleInt(car, car_boost, 1);
+		DispatchKeyValue(car, "vehiclescript", 	"scripts/vehicles/natalya_mustang_csgo_20163.txt");
+		ServerCommand("vehicle_flushscript");
+		attachVehicleLight(car);
 	}
 	
 	return;
