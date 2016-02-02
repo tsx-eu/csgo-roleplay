@@ -723,7 +723,7 @@ public Action Cmd_Jail(int client) {
 	for(int i=1; i<=MaxClients; i++) {
 		if( !IsValidClient(i) || IsPlayerAlive(i) )
 			continue;
-		if( rp_GetClientFloat(client, fl_RespawnTime) > time )
+		if( rp_GetClientFloat(i, fl_RespawnTime) > time )
 			continue;
 		
 		int ragdoll = GetEntPropEnt(i, Prop_Send, "m_hRagdoll");
@@ -821,8 +821,10 @@ public Action Cmd_Jail(int client) {
 
 	if( rp_IsValidVehicle(target) ) {
 		int client2 = GetEntPropEnt(target, Prop_Send, "m_hPlayer");
-		if( IsValidClient(client2) )
+		if( IsValidClient(client2) ) {
 			rp_ClientVehicleExit(client2, target, true);
+			CPrintToChat(client2, "{lightblue}[TSX-RP]{default} %N vous a sorti de votre voiture.", client);
+		}
 		return Plugin_Handled;
 	}
 	else if( !IsValidClient(target) ) {
@@ -2909,8 +2911,11 @@ void addBuyMenu(int weaponID) {
 	owner = g_iOriginOwner[weaponID];
 	if( IsValidClient(owner) && (rp_GetClientJobID(owner) == 1 || rp_GetClientJobID(owner) == 101) )
 		return;
-	
+
 	char weapon[65];
+	GetEdictClassname(weaponID, weapon, sizeof(weapon));
+	ReplaceString(weapon, sizeof(weapon), "weapon_", "");
+	
 	int data[BM_Max];
 	
 	data[BM_PvP] = rp_GetWeaponGroupID(weaponID);
@@ -2970,8 +2975,12 @@ void Cmd_BuyWeapon(int client) {
 			Format(tmp2, sizeof(tmp2), "[PvP] ");
 		else
 			Format(tmp2, sizeof(tmp2), "");
-
-		Format(tmp2, sizeof(tmp2), "%s %s (%d/%d) ", tmp2, name, data[BM_Munition], data[BM_Chargeur]);
+		
+		if( data[BM_Munition] == -1 )
+			Format(tmp2, sizeof(tmp2), "%s %s (1) ", tmp2, name);
+		else
+			Format(tmp2, sizeof(tmp2), "%s %s (%d/%d) ", tmp2, name, data[BM_Munition] , data[BM_Chargeur]);
+			
 		switch(view_as<enum_ball_type>(data[BM_Type])){
 			case ball_type_fire          : Format(tmp2, sizeof(tmp2), "%s Incendiaire", tmp2);
 			case ball_type_caoutchouc    : Format(tmp2, sizeof(tmp2), "%s Caoutchouc", tmp2);
@@ -3020,15 +3029,20 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			rp_SetWeaponBallType(wepid, view_as<enum_ball_type>(data[BM_Type]));
 			if(data[BM_PvP] > 0)
 				rp_SetWeaponGroupID(wepid, rp_GetClientGroupID(client));
-
-			Weapon_SetPrimaryClip(wepid, data[BM_Munition]);
-			Weapon_SetPrimaryAmmoCount(wepid, data[BM_Chargeur]);
-			Client_SetWeaponPlayerAmmoEx(client, wepid, data[BM_Chargeur]);
-			//SetEntProp(wepid, Prop_Send, "m_OriginalOwnerXuidHigh", data[BM_Owner]); // <-- ça marche pas.
+			
+			if( data[BM_Munition] != -1 ) {
+				Weapon_SetPrimaryClip(wepid, data[BM_Munition]);
+				Weapon_SetPrimaryAmmoCount(wepid, data[BM_Chargeur]);
+				Client_SetWeaponPlayerAmmoEx(client, wepid, data[BM_Chargeur]);
+			}
+			
 			deleteBuyMenu(position);
 			rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) - data[BM_Prix]);
-			int rnd = rp_GetRandomCapital(1);
-			rp_SetJobCapital(1, rp_GetJobCapital(1) + data[BM_Prix]);
+			
+			int rnd = rp_GetRandomCapital(1);			
+			rp_SetJobCapital(1, RoundFloat(float(rp_GetJobCapital(1)) + float(data[BM_Prix]) * 0.75));
+			rp_SetJobCapital(101, RoundFloat(float(rp_GetJobCapital(101)) + float(data[BM_Prix]) * 0.75));
+			
 			rp_SetJobCapital(rnd, rp_GetJobCapital(rnd) - data[BM_Prix]);
 			LogToGame("[TSX-RP] [RESELL] Le joueur %L à acheté %s au commissariat pour %d$", client, name, data[BM_Prix]);			
 		}		
