@@ -215,6 +215,28 @@ void CheckLotery() {
 	PrintToServer("CheckLotery");
 	#endif
 	
+ 	/* Explication du tirage:
+	10 boules dans un sac. 4 noire, 3 rouge, 2 verte, 1 jaune
+
+	On mélange le sac. On prend la 1ière qui arrive.
+
+	C'est une verte. On retire toute les vertes. 						<- PROBA NOIRE: 4/10	ROUGE: 3/10	VERT: 2/10	JAUNE: 1/10.
+	On prend la suivante. C'est une rouge. On retire toute les rouges	<- PROBA NOIRE: 4/7		ROUGE: 3/7	JAUNE: 1/7
+	On prend la suivante, c'est une noire. On retire les noires.		<- PROBA NOIRE: 4/5		JAUNE: 1/7
+	
+	FIN.
+	
+	En d'autre mots. La boule noire à 6/10 de NE PAS être choisie en premier. Bref, vous avez plus de chances de gagner...
+	Mais pas forcément au premier rang. Ce qui rend les jeux en groupe inutile. Au 2ème rang, vous avez 3/7 de perdre. Au 3eme 1/5 de perdre.
+	
+	Notez aussi qu'en jouant en groupe, il vous est impossible de gagner à la fois le rang 1, et le rang 2. Qu'en jouant séparément, oui.
+	Vous avez avez aussi joué beaucoup plus gros. À vos risques et péril. Vous faites un vrai quitte ou double. Vous savez aussi que
+	seul le rang 1 permet de gagner plus que votre mise. Vous diminuez donc par 3 vos chances pour gagner 2x plus. Est-ce raisonable?
+	
+	Vous n'avez certes que 5% de chance de tout perdre dans cet exemple, mais il n'y a pas que 4 joueurs qui jouent au loto RP.
+	Plus il y en a, plus vos chances de perdre augmentent.
+	*/
+	
 	SQL_TQuery( rp_GetDatabase() , SQL_GetLoteryWiner, "SELECT DISTINCT T.`steamid`,`name` FROM ( SELECT `steamid` FROM `rp_loto` ORDER BY RAND()  ) AS T INNER JOIN `rp_users` U ON U.`steamid`=T.`steamid` LIMIT 3;");
 }
 public void SQL_GetLoteryWiner(Handle owner, Handle hQuery, const char[] error, any none) {
