@@ -830,6 +830,14 @@ public Action Cmd_Jail(int client) {
 	else if( !IsValidClient(target) ) {
 		return Plugin_Handled;
 	}
+
+	if ( Client_GetVehicle(target) > 0 ) {
+		if( IsValidClient(target) ) {
+			rp_ClientVehicleExit(target, Client_GetVehicle(target), true);
+			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N vous a sorti de votre voiture.", client);
+		}
+		return Plugin_Handled;
+	}
 	
 	if( GetClientTeam(target) == CS_TEAM_CT && !(job == 101 || job == 102 || job == 103 ) ) {
 		ACCESS_DENIED(client);
