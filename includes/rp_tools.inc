@@ -133,6 +133,11 @@ public int rp_GetLocationInt(int zoneID, int typeID) {
 	rp_GetLocationData(zoneID, view_as<location_type>(typeID), tmp, sizeof(tmp));
 	return StringToInt(tmp);
 }
+public int rp_GetServerInt(rp_serv typeID) {
+	char tmp[64];
+	rp_GetServerString(typeID, tmp, sizeof(tmp));
+	return StringToInt(tmp);
+}
 
 public bool rp_IsRemoveAble(int target) {
 	#if defined DEBUG

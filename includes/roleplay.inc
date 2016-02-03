@@ -564,6 +564,7 @@ enum rp_job_type {
 enum rp_serv {
 	villaOwnerID = 0,
 	villaOwnerName,
+	lotoCagnotte,
 	
 	rp_serv_max
 };
