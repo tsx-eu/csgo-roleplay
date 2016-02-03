@@ -838,9 +838,6 @@ public Action Cmd_Jail(int client) {
 		}
 		return Plugin_Handled;
 	}
-	else if( !IsValidClient(target) ) {
-		return Plugin_Handled;
-	}
 	
 	if( GetClientTeam(target) == CS_TEAM_CT && !(job == 101 || job == 102 || job == 103 ) ) {
 		ACCESS_DENIED(client);
