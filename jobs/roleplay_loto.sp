@@ -41,6 +41,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_loto",		Cmd_ItemLoto,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_loto_bonus",	Cmd_ItemLotoBonus,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_stuffpvp", 	Cmd_ItemStuffPvP, 		"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegAdminCmd("rp_force_loto", 		CmdForceLoto, 			ADMFLAG_ROOT);
 	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
@@ -200,4 +201,68 @@ public Action Cmd_ItemLoto(int args) {
 
 
 	return Plugin_Handled;
+}
+// ------------------------------------------------------------------------------
+public Action CmdForceLoto(int client, int args) {
+	#if defined DEBUG
+	PrintToServer("CmdForceLoto");
+	#endif
+	CheckLotery();
+	return Plugin_Handled;
+}
+void CheckLotery() {
+	#if defined DEBUG
+	PrintToServer("CheckLotery");
+	#endif
+	
+	SQL_TQuery( rp_GetDatabase() , SQL_GetLoteryWiner, "SELECT DISTINCT T.`steamid`,`name` FROM ( SELECT `steamid` FROM `rp_loto` ORDER BY RAND()  ) AS T INNER JOIN `rp_users` U ON U.`steamid`=T.`steamid` LIMIT 3;");
+}
+public void SQL_GetLoteryWiner(Handle owner, Handle hQuery, const char[] error, any none) {
+	#if defined DEBUG
+	PrintToServer("SQL_GetLoteryWiner");
+	#endif
+	int place = 0;
+	int gain = 0;
+	CPrintToChatAll("{lightblue} ================================== {default}");
+	char szSteamID[32], szName[64];
+	
+	int g_iLOTO = rp_GetServerInt(lotoCagnotte);
+	
+	while( SQL_FetchRow(hQuery) ) {
+		place++;
+		
+		SQL_FetchString(hQuery, 0, szSteamID, sizeof(szSteamID));
+		SQL_FetchString(hQuery, 1, szName, sizeof(szName));
+		
+		if( place == 1 ) {
+			gain = (g_iLOTO/100*70);
+			CPrintToChatAll("{lightblue}[TSX-RP]{default} Le gagnant de la loterie est... %s et remporte %d$!", szName, gain);
+		}
+		else if( place == 2 ) {
+			gain = (g_iLOTO/100*20);
+			CPrintToChatAll("{lightblue}[TSX-RP]{default} suivit de.... %s et remporte %d$!", szName, gain);
+		}
+		else if( place == 3 ) {
+			gain = (g_iLOTO/100*10);
+			CPrintToChatAll("{lightblue}[TSX-RP]{default} %s remporte le lot de consolation de %d$!", szName, gain);
+		}
+		LogToGame("[LOTO-%d] %s %s %d", place, szName, szSteamID, gain);
+		
+		
+		char szQuery[1024];
+		Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_users2` (`steamid`,  `bank`) VALUES ('%s', %d);", szSteamID, gain);
+		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
+		
+		Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_sell` (`id`, `steamid`, `job_id`, `timestamp`, `item_type`, `item_id`, `item_name`, `amount`) VALUES (NULL, '%s', '%i', '%i', '4', '%i', '%s', '%i');",
+		szSteamID, 171, GetTime(), -1, "LOTO", gain);			
+		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
+		
+		Format(szQuery, sizeof(szQuery), "UPDATE `rp_success` SET `lotto`='-1' WHERE `SteamID`='%s';", szSteamID);
+		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
+	}
+	
+	rp_SetJobCapital(171, rp_GetJobCapital(171) - g_iLOTO);
+	
+	CPrintToChatAll("{lightblue} ================================== {default}");
+	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, "TRUNCATE rp_loto");
 }
