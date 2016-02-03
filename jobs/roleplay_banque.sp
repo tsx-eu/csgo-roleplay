@@ -149,7 +149,7 @@ public Action Cmd_ItemBankCard(int args) {
 	int client = GetCmdArgInt(1);
 	rp_SetClientBool(client, b_HaveCard, true);
 	
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre carte banquaire est maintenant active.");
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre carte bancaire est maintenant active.");
 	rp_ClientSave(client);
 }
 public Action Cmd_ItemBankKey(int args) {
@@ -159,7 +159,7 @@ public Action Cmd_ItemBankKey(int args) {
 	
 	int client = GetCmdArgInt(1);
 	rp_SetClientBool(client, b_HaveAccount, true);
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre compte banquaire est maintenant actif.");
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre compte bancaire est maintenant actif.");
 	rp_ClientSave(client);
 }
 public Action Cmd_ItemBankSwap(int args) {
