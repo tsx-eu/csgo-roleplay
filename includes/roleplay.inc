@@ -216,6 +216,7 @@ native Handle rp_CreateSellingMenu();										/* Récupère un pointeur sur le 
 native void rp_GetDate(char[] str, int length);
 native void rp_GetTime(int& hour, int& minutes);
 native void rp_GetServerString(rp_serv typeID, char[] str, int length);
+native void rp_SetServerString(rp_serv typeID, char[] str, int length);
 // ----------------------------------------------------------------------------
 native bool rp_ClientCanDrawPanel(int client);
 native void rp_SendPanelToClient(Handle& panel, int client, float duration);
