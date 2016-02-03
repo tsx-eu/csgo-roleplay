@@ -286,5 +286,5 @@ public void SQL_GetLoteryWiner(Handle owner, Handle hQuery, const char[] error, 
 	rp_SetJobCapital(171, rp_GetJobCapital(171) - g_iLOTO);
 	
 	CPrintToChatAll("{lightblue} ================================== {default}");
-	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, "TRUNCATE rp_loto");
+	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, "TRUNCATE `rp_loto`");
 }
