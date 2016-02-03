@@ -81,6 +81,9 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_lampe", 		Cmd_ItemLampe,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_jumelle", 	Cmd_ItemLampe,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	
+	RegAdminCmd("rp_force_appart", 		CmdForceAppart, 			ADMFLAG_ROOT);
+	
+	
 	for (int i = 1; i <= MaxClients; i++) 
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
@@ -931,4 +934,57 @@ public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
 		if( menu != INVALID_HANDLE )
 			CloseHandle(menu);
 	}
+}
+// ----------------------------------------------------------------------------
+public Action CmdForceAppart(int client, int args) {
+	#if defined DEBUG
+	PrintToServer("CmdForceAppart");
+	#endif
+	
+	CheckAppart();
+	return Plugin_Handled;
+}
+void CheckAppart() {
+	SQL_TQuery(rp_GetDatabase(), SQL_GetAppartWiner, "SELECT B.`steamid`, `name`, `amount` FROM `rp_bid` B INNER JOIN `rp_users` U ON B.`steamid`=U.`steamid` ORDER BY `amount` DESC;");
+}
+public void SQL_GetAppartWiner(Handle owner, Handle hQuery, const char[] error, any none) {
+	int gain, place = 0;
+	CPrintToChatAll("{lightblue} ================================== {default}");
+	char szSteamID[32], szName[64], szQuery[1024], szSteamID2[32];
+	
+	while( SQL_FetchRow(hQuery) ) {
+		
+		SQL_FetchString(hQuery, 0, szSteamID, sizeof(szSteamID));
+		gain = SQL_FetchInt(hQuery, 2);
+		
+		if( place == 0 ) {
+			SQL_FetchString(hQuery, 1, szName, sizeof(szName));	
+			
+			CPrintToChatAll("{lightblue}[TSX-RP]{default} Le gagnant de la villa est... %s pour %d$!", szName, gain);
+			rp_SetServerString(villaOwnerID,  	szSteamID, sizeof(szSteamID));
+			rp_SetServerString(villaOwnerName,  szName, sizeof(szName));
+			
+			for( int i = 1; i <= MaxClients; i++) {
+				if( !IsValidClient(i) )
+					continue;
+				rp_SetClientBool(i, b_HasVilla, false);
+				
+				GetClientAuthId(i, AuthId_Engine, szSteamID2, sizeof(szSteamID2));
+				if( StrEqual(szSteamID, szSteamID2) )
+					rp_SetClientBool(i, b_HasVilla, true);
+			}
+			
+			Format(szQuery, sizeof(szQuery), "UPDATE `rp_users` SET `hasVilla`='0' WHERE `steamid`<>'%s'", szSteamID);
+			SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
+			Format(szQuery, sizeof(szQuery), "UPDATE `rp_users` SET `hasVilla`='1' WHERE `steamid`='%s'", szSteamID);
+			SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
+		}
+		else {
+			Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_users2` (`steamid`,  `bank`) VALUES ('%s', %d);", szSteamID, gain);
+			SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
+		}
+		place++;
+	}
+	
+	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, "TRUNCATE `rp_bid`");
 }
