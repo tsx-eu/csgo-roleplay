@@ -33,7 +33,14 @@ public Plugin myinfo =  {
 };
 
 // ----------------------------------------------------------------------------
+public Action Cmd_Reload(int args) {
+	char name[64];
+	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
+	ServerCommand("sm plugins reload %s", name);
+	return Plugin_Continue;
+}
 public void OnPluginStart() {
+	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	RegServerCmd("rp_item_mask", CmdItemMask, "RP-ITEM", FCVAR_UNREGISTERED);
 	RegServerCmd("rp_giveskin", Cmd_ItemGiveSkin, "RP-ITEM", FCVAR_UNREGISTERED);
 	RegServerCmd("rp_giveknife", Cmd_GiveKnife, "RP-ITEM", FCVAR_UNREGISTERED);
