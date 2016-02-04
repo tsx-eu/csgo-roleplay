@@ -918,7 +918,7 @@ public Action Cmd_ItemCryptage(int args) {
 		level = 5;
 		
 	rp_SetClientInt(client, i_Cryptage, level);
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Les détectives vous couvrent, vous avez %i/100 de chance d'être caché.", level*20);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Les mercenaires vous couvrent, vous avez %i/100 de chance d'être caché.", level*20);
 	return Plugin_Handled;
 }
 // ----------------------------------------------------------------------------
@@ -1004,7 +1004,7 @@ public Action Cmd_ItemEnquete(int args) {
 			String_GetRandom(tmp, sizeof(tmp), 24);
 			
 			AddMenu_Blank(client, menu, "Il a tué: %s", tmp);
-			CPrintToChat(killedBy, "{lightblue}[TSX-RP]{default} Votre pot de vin envers un détective privé vient de vous sauver.");
+			CPrintToChat(killedBy, "{lightblue}[TSX-RP]{default} Votre pot de vin envers un mercenaire vient de vous sauver.");
 			LogToGame("[TSX-RP] [ENQUETE] Une enquête effectuée sur %L n'a pas montré qui l'a tué pour cause de pot de vin.", target);
 		}
 		else {	
@@ -1027,7 +1027,7 @@ public Action Cmd_ItemEnquete(int args) {
 			String_GetRandom(tmp, sizeof(tmp), 24);
 			
 			AddMenu_Blank(client, menu, "%s, l'a tué", tmp);
-			CPrintToChat(killed, "{lightblue}[TSX-RP]{default} Votre pot de vin envers un détective privé vient de vous sauver.");
+			CPrintToChat(killed, "{lightblue}[TSX-RP]{default} Votre pot de vin envers un mercenaire vient de vous sauver.");
 			LogToGame("[TSX-RP] [ENQUETE] Une enquête effectuée sur %L n'a pas montré qui l'a tué pour cause de pot de vin.", target);
 		}
 		else {
