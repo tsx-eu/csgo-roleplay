@@ -111,13 +111,15 @@ public void OnClientPostAdminCheck(int client) {
 }
 public Action fwdLoaded(int client) {
 	rp_SetClientKeyAppartement(client, 50, rp_GetClientBool(client, b_HasVilla) );
+	if( rp_GetClientBool(client, b_HasVilla) )
+		rp_SetClientInt(client, i_AppartCount, rp_GetClientInt(client, i_AppartCount) + 1);
 }
 // ----------------------------------------------------------------------------
 public Action fwdCommand(int client, char[] command, char[] arg) {
 	#if defined DEBUG
 	PrintToServer("fwdCommand");
 	#endif
-	if( StrEqual(command, "infocoloc") ) {
+	if( StrEqual(command, "infocoloc") ||  StrEqual(command, "infocolloc") ) {
 		return Cmd_InfoColoc(client);
 	}
 	if( StrEqual(command, "villa") ) {
@@ -881,7 +883,6 @@ public void SQL_BedVillaMenu(Handle owner, Handle hQuery, const char[] error, an
 	
 	rp_SetClientBool(client, b_MaySteal, true);
 }
-
 public int bedVillaMenu(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
 	#if defined DEBUG
 	PrintToServer("bedVillaMenu");
@@ -953,11 +954,11 @@ public int bedVillaMenu_KEY(Handle p_hItemMenu, MenuAction p_oAction, int client
 			int target = StringToInt(szMenuItem);
 			rp_SetClientBool(target, b_HasVilla, true);
 			rp_SetClientKeyAppartement(target, 50, true);
+			rp_SetClientInt(target, i_AppartCount, rp_GetClientInt(target, i_AppartCount) + 1);
 			GetClientAuthId(target, AuthId_Engine, szMenuItem, sizeof(szMenuItem));
 			
 			Format(szQuery, sizeof(szQuery), "UPDATE `rp_users` SET `hasVilla`='1' WHERE `steamid`='%s'", szMenuItem);
 			SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery, DBPrio_High);
-			OpenBedMenu(client);
 		}
 	}
 	else if (p_oAction == MenuAction_End) {
@@ -1038,7 +1039,7 @@ public void SQL_GetAppartWiner(Handle owner, Handle hQuery, const char[] error, 
 		if( place == 0 ) {
 			SQL_FetchString(hQuery, 1, szName, sizeof(szName));	
 			
-			CPrintToChatAll("{lightblue}[TSX-RP]{default} Le gagnant de la villa est... %s pour %d$!", szName, gain);
+			CPrintToChatAll("{lightblue}[TSX-RP]{default} Le gagnant de la villa est... %s(%s) pour %d$!", szName, szSteamID, gain);
 			rp_SetServerString(villaOwnerID,  	szSteamID, sizeof(szSteamID));
 			rp_SetServerString(villaOwnerName,  szName, sizeof(szName));
 			
@@ -1052,12 +1053,17 @@ public void SQL_GetAppartWiner(Handle owner, Handle hQuery, const char[] error, 
 				if( StrEqual(szSteamID, szSteamID2) ) {
 					rp_SetClientBool(i, b_HasVilla, true);
 					rp_SetClientKeyAppartement(i, 50, true);
+					rp_SetClientInt(i, i_AppartCount, rp_GetClientInt(i, i_AppartCount) + 1);
 				}
 			}
 			
 			Format(szQuery, sizeof(szQuery), "UPDATE `rp_users` SET `hasVilla`='0' WHERE `steamid`<>'%s'", szSteamID);
 			SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
+			
 			Format(szQuery, sizeof(szQuery), "UPDATE `rp_users` SET `hasVilla`='1' WHERE `steamid`='%s'", szSteamID);
+			SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
+			
+			Format(szQuery, sizeof(szQuery), "UPDATE `rp_servers` SET `villaOwner`='%s'", szSteamID);
 			SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
 		}
 		else {
