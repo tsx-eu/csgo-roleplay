@@ -33,7 +33,14 @@ public Plugin myinfo = {
 
 int g_cBeam, g_cGlow, g_cExplode;
 // ----------------------------------------------------------------------------
+public Action Cmd_Reload(int args) {
+	char name[64];
+	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
+	ServerCommand("sm plugins reload %s", name);
+	return Plugin_Continue;
+}
 public void OnPluginStart() {
+	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	RegServerCmd("rp_item_preserv",		Cmd_ItemPreserv,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_poupee",		Cmd_ItemPoupee,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_menottes",	Cmd_ItemMenottes,		"RP-ITEM",	FCVAR_UNREGISTERED);
@@ -362,6 +369,11 @@ public Action Cmd_ItemAlcool(int args) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit où vous êtes.");
 			return Plugin_Handled;
 		}
+		if( rp_GetClientFloat(target, fl_Alcool) > 0.0 ) {
+			ITEM_CANCEL(client, item_id);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N a trop bu, il n'est pas raisonable de lui donner à boire.", target);
+			return Plugin_Handled;
+		}
 		float vecTarget[3];
 		GetClientAbsOrigin(client, vecTarget);
 		TE_SetupBeamRingPoint(vecTarget, 10.0, 500.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, { 255, 0, 191, 200}, 10, 0);
@@ -372,7 +384,7 @@ public Action Cmd_ItemAlcool(int args) {
 	float level = rp_GetClientFloat(target, fl_Alcool) + GetCmdArgFloat(2);
 	rp_SetClientFloat(target, fl_Alcool, level);
 	rp_IncrementSuccess(target, success_list_alcool_abuse);	
-	if( level > 6.0 ) {
+	if( level > 4.0 ) {
 		SDKHooks_TakeDamage(target, target, target, (25 + GetClientHealth(target))/2.0);
 	}
 	return Plugin_Handled;
