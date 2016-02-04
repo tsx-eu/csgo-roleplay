@@ -668,14 +668,13 @@ void dettachVehicleLight(int vehicle) {
 	
 }
 public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
-
-	bool IsNear = false;
-	float vecOrigin[3];
-	Entity_GetAbsOrigin(ent, vecOrigin);
-
 	ent = EntRefToEntIndex(ent);
 	if( ent <= 0 || !IsValidEdict(ent) )
 		return Plugin_Handled;
+	
+	bool IsNear = false;
+	float vecOrigin[3];
+	Entity_GetAbsOrigin(ent, vecOrigin);
 	
 	if( rp_GetVehicleInt(ent, car_health) <= 0 ) {
 		VehicleRemove(ent, true);
@@ -1092,6 +1091,13 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 						displayColorMenu(client);
 					}
 					
+					for(int i=0; i<3; i++) {
+						if( color[i] > 255 )
+							color[i] = 255;
+						else if( color[i] < 0 )
+							color[i] = 0;
+					}
+						
 					ServerCommand("sm_effect_colorize %d %d %d %d 255", target, color[0], color[1], color[2]);
 				}
 				else if( StrContains(arg1, "neon ") == 0 ) {
