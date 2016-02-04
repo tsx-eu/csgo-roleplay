@@ -63,7 +63,7 @@ char g_szParticles[][][32] =  {
 char g_szColor[][][32] = {
 	{ "128 0 0", 	"Rubis" },  	{ "255 0 0", 	"Rouge" }, 		{ "255 128 0", 	"Orange" },  	{ "255 255 0", 	"Jaune" }, 
 	{ "128 255 0", 	"Vert-pomme"},  { "0 255 0", 	"Vert" },  		{ "0 128 0", 	"Vert-foncé" }, { "0 255 128", 	"Vert-émeraude" }, 
-	{ "0 255 255", 	"Bleu-ciel" },  { "0 128 255", 	"Bleu-claire" },{ "0 0 255", 	"Bleu" },  		{ "0 0 128", 	"Bleu-Foncé" }, 
+	{ "0 255 255", 	"Bleu-ciel" },  { "0 128 255", 	"Bleu-clair" },	{ "0 0 255", 	"Bleu" },  		{ "0 0 128", 	"Bleu-Foncé" }, 
 	{ "128 0 255", 	"Mauve" },  	{ "255 0 255", 	"Rose" },  		{ "255 0 128", 	"Fushia" }, 
 	{ "255 255 255","Blanc" },  	{ "128 128 128","Gris" },  		{ "0 0 0", 		"Noir" }
 };
