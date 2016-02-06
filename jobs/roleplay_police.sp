@@ -502,7 +502,7 @@ public Action Cmd_Tazer(int client) {
 			}
 		}
 		if( rp_GetClientBool(target, b_Lube) && Math_GetRandomInt(1, 5) != 5) {
-			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N vous glisse entre les mains.", target);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N vous glisse entre les mains.", target);
 			return Plugin_Handled;
 		}
 		
