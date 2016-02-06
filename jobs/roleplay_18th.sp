@@ -250,7 +250,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 	
 	if( rp_GetZoneBit(rp_GetPlayerZone(target)) & BITZONE_PARKING ) {
 		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler cette voiture sur un parking.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler de voiture dans le garage.");
 		return Plugin_Handled;
 	}
 
@@ -629,7 +629,7 @@ int findPlayerWeapon(int client, int target) {
 }
 public Action OnWeaponDrop(int client, int weapon) {
 	
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas lâcher vos armes pendant qu'un 18th vous vol, tirez dessus !");
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas lâcher vos armes pendant qu'un 18th vous vol, tirez lui dessus !");
 	return Plugin_Handled;
 }
 public Action fwdDamage(int client, int attacker, float& damage) {

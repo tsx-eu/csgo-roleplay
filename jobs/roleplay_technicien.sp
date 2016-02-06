@@ -51,7 +51,14 @@ void doRP_OnClientMaxMachineCount(int client, int& max) {
 	Call_Finish();
 }
 // ----------------------------------------------------------------------------
+public Action Cmd_Reload(int args) {
+	char name[64];
+	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
+	ServerCommand("sm plugins reload %s", name);
+	return Plugin_Continue;
+}
 public void OnPluginStart() {
+	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	// Technicien
 	RegServerCmd("rp_item_biokev", 		Cmd_ItemBioKev,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_bioyeux", 	Cmd_ItemBioYeux,		"RP-ITEM",	FCVAR_UNREGISTERED);

@@ -63,7 +63,7 @@ char g_szParticles[][][32] =  {
 char g_szColor[][][32] = {
 	{ "128 0 0", 	"Rubis" },  	{ "255 0 0", 	"Rouge" }, 		{ "255 128 0", 	"Orange" },  	{ "255 255 0", 	"Jaune" }, 
 	{ "128 255 0", 	"Vert-pomme"},  { "0 255 0", 	"Vert" },  		{ "0 128 0", 	"Vert-foncé" }, { "0 255 128", 	"Vert-émeraude" }, 
-	{ "0 255 255", 	"Bleu-ciel" },  { "0 128 255", 	"Bleu-claire" },{ "0 0 255", 	"Bleu" },  		{ "0 0 128", 	"Bleu-Foncé" }, 
+	{ "0 255 255", 	"Bleu-ciel" },  { "0 128 255", 	"Bleu-clair" },	{ "0 0 255", 	"Bleu" },  		{ "0 0 128", 	"Bleu-Foncé" }, 
 	{ "128 0 255", 	"Mauve" },  	{ "255 0 255", 	"Rose" },  		{ "255 0 128", 	"Fushia" }, 
 	{ "255 255 255","Blanc" },  	{ "128 128 128","Gris" },  		{ "0 0 0", 		"Noir" }
 };
@@ -668,14 +668,13 @@ void dettachVehicleLight(int vehicle) {
 	
 }
 public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
-
-	bool IsNear = false;
-	float vecOrigin[3];
-	Entity_GetAbsOrigin(ent, vecOrigin);
-
 	ent = EntRefToEntIndex(ent);
 	if( ent <= 0 || !IsValidEdict(ent) )
 		return Plugin_Handled;
+	
+	bool IsNear = false;
+	float vecOrigin[3];
+	Entity_GetAbsOrigin(ent, vecOrigin);
 	
 	if( rp_GetVehicleInt(ent, car_health) <= 0 ) {
 		VehicleRemove(ent, true);
@@ -1092,6 +1091,13 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 						displayColorMenu(client);
 					}
 					
+					for(int i=0; i<3; i++) {
+						if( color[i] > 255 )
+							color[i] = 255;
+						else if( color[i] < 0 )
+							color[i] = 0;
+					}
+						
 					ServerCommand("sm_effect_colorize %d %d %d %d 255", target, color[0], color[1], color[2]);
 				}
 				else if( StrContains(arg1, "neon ") == 0 ) {

@@ -2638,8 +2638,8 @@ public int MenuTribunal_GPS(Handle p_hItemMenu, MenuAction p_oAction, int client
 		
 		if( Math_GetRandomInt(1, 100) < rp_GetClientInt(target, i_Cryptage)*20 ) {
 			
-			CPrintToChat(target, "{lightblue}[TSX-RP]{default} Votre pot de vin envers un détective privé vient de vous sauver.");
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Un pot de vin envers un détective privé vient de le sauver...");
+			CPrintToChat(target, "{lightblue}[TSX-RP]{default} Votre pot de vin envers un mercenaire vient de vous sauver.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Un pot de vin envers un mercenaire vient de le sauver...");
 			
 		}
 		else {
@@ -2732,7 +2732,7 @@ public Action Cmd_ItemPickLock(int args) {
 	float time = 0.5;
 	
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, time);
-	ServerCommand("sm_effect_panel %d %f \"Crochetage de la porte...\"", client, time);
+	ServerCommand("sm_effect_panel %d %f \"Ouverture de la porte...\"", client, time);
 	
 	rp_ClientColorize(client, { 255, 0, 0, 190} );
 	rp_ClientReveal(client);
