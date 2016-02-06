@@ -223,7 +223,7 @@ public Action fwdOnPlayerUse(int client) {
 			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 50 ) {
 				int time = rp_GetBuildingData(i, BD_count);
 				int maxtime = rp_GetBuildingData(i, BD_max);
-				if( time >= maxtime &&  rp_GetBuildingInt( ent, BD_owner )){
+				if( time >= maxtime &&  rp_GetBuildingInt( i, BD_owner )){
 					rp_SetBuildingData(i, BD_count, 0);
 					giveHamburger(client);
 				}
