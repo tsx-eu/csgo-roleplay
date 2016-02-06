@@ -214,7 +214,6 @@ public Action fwdOnPlayerUse(int client) {
 		if( !IsValidEntity(i) )
 			continue;
 		
-		
 		GetEdictClassname(i, tmp, 63);
 		if(g_eMwAct[i])
 			continue;
@@ -224,7 +223,7 @@ public Action fwdOnPlayerUse(int client) {
 			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 50 ) {
 				int time = rp_GetBuildingData(i, BD_count);
 				int maxtime = rp_GetBuildingData(i, BD_max);
-				if(time >= maxtime){
+				if( time >= maxtime &&  rp_GetBuildingInt( i, BD_owner )){
 					rp_SetBuildingData(i, BD_count, 0);
 					giveHamburger(client);
 				}
@@ -256,7 +255,7 @@ public Action Frame_Microwave(Handle timer, any ent) {
 }
 public void giveHamburger(int client){
 	int mci = Math_GetRandomInt(0, g_nbMdItems);
-	int j = 0, jobID;
+	int j = 0, jobID;	
 	for(int i = 0; i < MAX_ITEMS; i++){
 		if( rp_GetItemInt(i, item_type_prix) <= 0 )
 			continue;
