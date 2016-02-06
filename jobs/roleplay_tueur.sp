@@ -398,8 +398,8 @@ void OpenSelectSkill(int client) {
 	Handle menu = CreateMenu(AddCompetanceToAssassin);
 	SetMenuTitle(menu, tmp);
 	
-	if( g_iKillerPoint[client] && StrEqual(command, "skill")) {
-		AddMenuItem(menu, "Annule", "Annuler mon contrat");
+	if( g_iKillerPoint[client][competance_left] && StrEqual(commands, "skill") {
+		AddMenuItem(menu, "annule", "Annuler mon contrat");
 	}
 	if( !g_iKillerPoint[client][competance_cut] ) {
 		AddMenuItem(menu, "cut", "Cut Maximum");
@@ -444,7 +444,7 @@ public int AddCompetanceToAssassin(Handle menu, MenuAction action, int client, i
 		if( g_iKillerPoint[client][competance_left] <= 0 ) {
 			return;
 		}
-		if( StrEqual(options, "Annule")){
+		if( StrEqual(options, "annule", false){
 			SetContratFail(client);
 		}
 		else if( StrEqual(options, "cut", false) ) {
