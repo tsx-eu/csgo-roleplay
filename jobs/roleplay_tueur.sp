@@ -388,9 +388,6 @@ void OpenSelectSkill(int client) {
 	#if defined DEBUG
 	PrintToServer("OpenSelectSkill");
 	#endif
-	if( g_iKillerPoint[client][competance_left] <= 0 ) {
-		return;
-	}
 	
 	char tmp[255];
 	Format(tmp, 254, "Sélectionner les compétences a utiliser (%i)", g_iKillerPoint[client][competance_left]);
@@ -398,31 +395,30 @@ void OpenSelectSkill(int client) {
 	Handle menu = CreateMenu(AddCompetanceToAssassin);
 	SetMenuTitle(menu, tmp);
 	
-	if( g_iKillerPoint[client][competance_left] && StrEqual(commands, "skill") {
-		AddMenuItem(menu, "annule", "Annuler mon contrat");
-	}
-	if( !g_iKillerPoint[client][competance_cut] ) {
+	AddMenuItem(menu, "annule", "Annuler mon contrat");
+	
+	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_cut] ) {
 		AddMenuItem(menu, "cut", "Cut Maximum");
 	}
-	if( !g_iKillerPoint[client][competance_tir] ) {
+	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_tir] ) {
 		AddMenuItem(menu, "tir", "Precision Maximum");
 	}
-	if( !g_iKillerPoint[client][competance_usp] && ( !g_iKillerPoint[client][competance_awp] && !g_iKillerPoint[client][competance_pompe] )) { //On ne peut pas selectionner une arme si on en déjà choisi une auparavant
+	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_usp] && ( !g_iKillerPoint[client][competance_awp] && !g_iKillerPoint[client][competance_pompe] )) { //On ne peut pas selectionner une arme si on en déjà choisi une auparavant
 		AddMenuItem(menu, "usp", "M4 / Usp");
 	}
-	if( !g_iKillerPoint[client][competance_awp] && ( !g_iKillerPoint[client][competance_usp] && !g_iKillerPoint[client][competance_pompe] )) {
+	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_awp] && ( !g_iKillerPoint[client][competance_usp] && !g_iKillerPoint[client][competance_pompe] )) {
 		AddMenuItem(menu, "awp", "AWP / Cz75");
 	}
-	if( !g_iKillerPoint[client][competance_pompe] && ( !g_iKillerPoint[client][competance_awp] && !g_iKillerPoint[client][competance_usp] )) {
+	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_pompe] && ( !g_iKillerPoint[client][competance_awp] && !g_iKillerPoint[client][competance_usp] )) {
 		AddMenuItem(menu, "pompe", "Nova / Deagle");
 	}
-	if( !g_iKillerPoint[client][competance_invis] ) {
+	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_invis] ) {
 		AddMenuItem(menu, "inv", "Invisibilité");
 	}
-	if( !g_iKillerPoint[client][competance_hp] ) {
+	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_hp] ) {
 		AddMenuItem(menu, "vie", "Vie");
 	}
-	if( !g_iKillerPoint[client][competance_vitesse] ) {
+	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_vitesse] ) {
 		AddMenuItem(menu, "vit", "Vitesse");
 	}
 	
@@ -441,11 +437,12 @@ public int AddCompetanceToAssassin(Handle menu, MenuAction action, int client, i
 			OpenSelectSkill(client);
 			return;
 		}
-		if( g_iKillerPoint[client][competance_left] <= 0 ) {
-			return;
-		}
-		if( StrEqual(options, "annule", false){
+		
+		if( StrEqual(options, "annule", false) ) {
 			SetContratFail(client);
+		}
+		else if( g_iKillerPoint[client][competance_left] <= 0 ) {
+			return;
 		}
 		else if( StrEqual(options, "cut", false) ) {
 			g_iKillerPoint[client][competance_cut] = 1;
