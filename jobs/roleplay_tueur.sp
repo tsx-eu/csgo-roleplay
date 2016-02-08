@@ -473,26 +473,20 @@ public int AddCompetanceToAssassin(Handle menu, MenuAction action, int client, i
 			if( StrEqual(options, "usp", false) ){
 				g_iKillerPoint[client][competance_usp] = 1;
 				
-				int skin = GivePlayerItem(client, "weapon_usp_silencer");
-				rp_SetClientWeaponSkin(client, skin);
-				skin = GivePlayerItem(client, "weapon_m4a1_silencer");
-				rp_SetClientWeaponSkin(client, skin);
+				GivePlayerItem(client, "weapon_usp_silencer");
+				GivePlayerItem(client, "weapon_m4a1_silencer");
 			}
 			else if( StrEqual(options, "awp", false) ){
 				g_iKillerPoint[client][competance_awp] = 1;
 				
-				int skin = GivePlayerItem(client, "weapon_cz75a");
-				rp_SetClientWeaponSkin(client, skin);
-				skin = GivePlayerItem(client, "weapon_awp");
-				rp_SetClientWeaponSkin(client, skin);
+				GivePlayerItem(client, "weapon_cz75a");
+				GivePlayerItem(client, "weapon_awp");
 			}
 			else if( StrEqual(options, "pompe", false) ){
 				g_iKillerPoint[client][competance_pompe] = 1;
 				
-				int skin = GivePlayerItem(client, "weapon_deagle");
-				rp_SetClientWeaponSkin(client, skin);
-				skin = GivePlayerItem(client, "weapon_nova");
-				rp_SetClientWeaponSkin(client, skin);
+				GivePlayerItem(client, "weapon_deagle");
+				GivePlayerItem(client, "weapon_nova");
 			}
 		}
 		else if( StrEqual(options, "inv", false) ) {
@@ -783,8 +777,7 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 			float delay = 20.0;
 			float time = 0.0;
 			
-			int skin = GivePlayerItem(client, "weapon_deagle");
-			rp_SetClientWeaponSkin(client, skin);
+			GivePlayerItem(client, "weapon_deagle");
 			
 			// TODO: Utiliser une CVAR ? 
 			char door[128], doors[12][12];

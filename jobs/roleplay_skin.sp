@@ -42,9 +42,7 @@ public Action Cmd_Reload(int args) {
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	RegServerCmd("rp_item_mask", CmdItemMask, "RP-ITEM", FCVAR_UNREGISTERED);
-	RegServerCmd("rp_giveskin", Cmd_ItemGiveSkin, "RP-ITEM", FCVAR_UNREGISTERED);
-	RegServerCmd("rp_giveknife", Cmd_GiveKnife, "RP-ITEM", FCVAR_UNREGISTERED);
-	
+	RegServerCmd("rp_giveskin", Cmd_ItemGiveSkin, "RP-ITEM", FCVAR_UNREGISTERED);	
 	RegServerCmd("rp_skin_separatist", Cmd_ItemSeparatist);
 	RegServerCmd("rp_skin_professional", Cmd_ItemProfessional);
 	RegServerCmd("rp_skin_pirate", Cmd_ItemPirate);
@@ -265,35 +263,6 @@ public int MenuSetSkin(Handle menu, MenuAction action, int client, int param2) {
 	}
 }
 // ----------------------------------------------------------------------------
-public Action Cmd_GiveKnife(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_GiveKnife");
-	#endif
-	char arg1[64];
-	GetCmdArg(1, arg1, sizeof(arg1));
-	
-	int client = GetCmdArgInt(2);
-	int item_id = GetCmdArgInt(args);
-	
-	if (item_id > 0) {
-		char tmp[128];
-		rp_GetItemData(item_id, item_type_extra_cmd, tmp, sizeof(tmp));
-		
-		if (StrContains(tmp, "rp_giveknife weapon") == 0) {
-			// Skin is valid applying permanantly.	
-			rp_SetClientInt(client, i_KnifeSkin, item_id);
-		}
-	}
-	
-	int iWeapon = GetPlayerWeaponSlot(client, 2);
-	if (iWeapon > 0) {
-		RemovePlayerItem(client, iWeapon);
-		RemoveEdict(iWeapon);
-	}
-	int iItem = GivePlayerItem(client, arg1);
-	EquipPlayerWeapon(client, iItem);
-	rp_SetClientWeaponSkin(client, iItem);
-}
 public Action Cmd_ItemGiveSkin(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemGiveSkin");

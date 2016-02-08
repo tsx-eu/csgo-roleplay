@@ -223,7 +223,7 @@ public Action fwdOnPlayerUse(int client) {
 			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 50 ) {
 				int time = rp_GetBuildingData(i, BD_count);
 				int maxtime = rp_GetBuildingData(i, BD_max);
-				if( time >= maxtime &&  rp_GetBuildingInt( i, BD_owner )){
+				if( time >= maxtime &&  rp_GetBuildingData( i, BD_owner )) {
 					rp_SetBuildingData(i, BD_count, 0);
 					giveHamburger(client);
 				}
@@ -326,8 +326,7 @@ public Action Cmd_ItemHamburger(int args) {
 	else if( StrEqual(arg1, "chicken") ) {
 		
 		if( Math_GetRandomInt(1, 4) == 4 ) {
-			int wepID = GivePlayerItem(client, "weapon_mac10");
-			rp_SetClientWeaponSkin(client, wepID);
+			GivePlayerItem(client, "weapon_mac10");
 		}
 		else {
 			int ent = CreateEntityByName("chicken");
