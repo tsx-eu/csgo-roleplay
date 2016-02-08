@@ -360,10 +360,6 @@ public Action Cmd_ItemHamburger(int args) {
 			
 			if( jobID <= 0 || jobID == 61 || jobID == 91 ) // Aucun, Appart, Mafia
 				continue;
-			if( jobID == 51 && Math_GetRandomInt(0, 1) ) // Moins de chance pour carshop stp
-				continue;
-			
-			
 			
 			rp_GetItemData(i, item_type_extra_cmd, cmd, sizeof(cmd));
 			if( strlen(cmd) <= 1 ) // UNKNOWN
