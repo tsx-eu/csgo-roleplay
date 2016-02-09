@@ -422,7 +422,7 @@ public int MenuJobs3(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 			ClientCommand(target, "play buttons/blip1.wav");
 			rp_Effect_BeamBox(target, client, NULL_VECTOR, 122, 122, 0);
 			Handle dp;
-			CreateDataTimer(1.0, ClientTargetTracer, dp, TIMER_REPEAT);
+			CreateDataTimer(1.0, ClientTargetTracer, dp);
 			WritePackCell(dp, client);
 			WritePackCell(dp, target);
 			WritePackCell(dp, GetTime());
@@ -440,15 +440,16 @@ public Action ClientTargetTracer(Handle timer, Handle dp) {
 	int starttime = ReadPackCell(dp);
 	if(!IsValidClient(client) || !IsValidClient(target)){
 		CloseHandle(dp);
-		return Plugin_Stop;
+		return Plugin_Handled;
 	}
 	
 	rp_Effect_BeamBox(target, client, NULL_VECTOR, 122, 122, 0);
 
 	if(starttime + 5 < GetTime()){
 		CloseHandle(dp);
-		return Plugin_Stop;
+		return Plugin_Handled;
 	}
 	
-	return Plugin_Continue;
+	CreateDataTimer(1.0, ClientTargetTracer, dp);
+	return Plugin_Handled;
 }
