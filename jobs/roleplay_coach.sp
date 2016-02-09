@@ -170,6 +170,7 @@ public Action Cmd_ItemCutThrow(int args) {
 	#endif
 	
 	int client = GetCmdArgInt(1);
+	rp_SetClientInt(client, i_LastShot, GetTime());
 	g_iKnifeThrowID = GetCmdArgInt(args);
 	
 	rp_SetClientInt(client, i_LastAgression, GetTime());
