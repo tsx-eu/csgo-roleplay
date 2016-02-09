@@ -403,7 +403,8 @@ public Action fwdWeapon(int victim, int attacker, float &damage, int wepID, floa
 			}
 			
 			rp_SetClientFloat(victim, fl_FrozenTime, GetGameTime() + 1.5);
-			ServerCommand("sm_effect_flash %d 1.5 180", victim);
+			if(!rp_GetClientBool(victim, b_ChiruYeux))
+				ServerCommand("sm_effect_flash %d 1.5 180", victim);
 		}
 		case ball_type_poison: {
 			damage *= 0.66;

@@ -386,6 +386,7 @@ enum int_user_data {
 	i_ItemBankCount,
 
 	i_LastAgression,
+	i_LastShot,
 	i_LastAmende,
 	i_LastAmendeBy,
 

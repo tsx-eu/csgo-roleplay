@@ -310,8 +310,8 @@ public Action Cmd_ItemNano(int args) {
 			
 			TE_SetupBeamPoints(vecStart, vecEnd, g_cBeam, 0, 0, 0, 1.0, 5.0, 5.0, 1, 0.5, {255, 255, 255, 192}, 0);
 			TE_SendToAll();
-			
-			ServerCommand("sm_effect_flash %d 5.0 255", i);
+			if(!rp_GetClientBool(i, b_ChiruYeux))
+				ServerCommand("sm_effect_flash %d 5.0 255", i);
 		}
 	}
 	else if( StrEqual(arg1, "unprop") ) {

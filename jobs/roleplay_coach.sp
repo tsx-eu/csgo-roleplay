@@ -170,6 +170,7 @@ public Action Cmd_ItemCutThrow(int args) {
 	#endif
 	
 	int client = GetCmdArgInt(1);
+	rp_SetClientInt(client, i_LastShot, GetTime());
 	g_iKnifeThrowID = GetCmdArgInt(args);
 	
 	rp_SetClientInt(client, i_LastAgression, GetTime());
@@ -288,7 +289,8 @@ bool wpnCutDamage(int victim, int attacker, float &damage) {
 			damage *= 0.0;
 
 			rp_SetClientFloat(victim, fl_FrozenTime, GetGameTime() + 1.5);
-			ServerCommand("sm_effect_flash %d 1.5 180", victim);
+			if(!rp_GetClientBool(victim, b_ChiruYeux))
+				ServerCommand("sm_effect_flash %d 1.5 180", victim);
 		}
 		case ball_type_antikevlar: {
 			int kevlar = rp_GetClientInt(victim, i_Kevlar);

@@ -133,6 +133,11 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_mandat", 		Cmd_ItemPickLock,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_ratio",		Cmd_ItemRatio,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_SendToJail",		Cmd_SendToJail,			"RP-ITEM",	FCVAR_UNREGISTERED);
+
+	HookEvent("bullet_impact", Event_Bullet_Impact);
+	HookEvent("weapon_fire", Event_Weapon_Fire);
+
+
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
@@ -1914,6 +1919,23 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				return;
 			}
 		}
+		if( StrEqual(g_szJailRaison[type][jail_raison],"Tir dans la rue") 
+			&& !(rp_GetClientInt(client, i_Job) >= 101 || rp_GetClientInt(client, i_Job) >= 106) ) { // Tir dans la rue
+			if(rp_GetClientInt(target, i_LastShot)+30 < GetTime()){
+				rp_SetClientInt(target, i_JailTime, 0);
+				rp_SetClientInt(target, i_jailTime_Last, 0);
+				rp_SetClientInt(target, i_JailledBy, 0);
+				
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N{default} à été libéré car il n'a pas effectué de tir.", target);
+				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été libéré car vous n'avez pas effectué de tir.", client);
+				
+				LogToGame("[TSX-RP] [JAIL] %L à été libéré car il n'avait pas effectué de tir", target);
+				
+				rp_ClientResetSkin(target);
+				rp_ClientSendToSpawn(target, true);
+				return;
+			}
+		}
 		
 		int amende = StringToInt(g_szJailRaison[type][jail_amende]);
 		
@@ -2793,6 +2815,20 @@ public Action fwdDmg(int attacker, int victim, float& damage) {
 		rp_SetClientInt(attacker, i_LastAgression, GetTime());
 
 	return Plugin_Continue;
+}
+public void Event_Bullet_Impact(Event event, const char[] name, bool dontBroadcast){
+	int client = GetClientOfUserId(event.GetInt("userid"));
+		
+	rp_SetClientInt(client, i_LastShot, GetTime());
+}
+public void Event_Weapon_Fire(Event event, const char[] name, bool dontBroadcast){
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	char weapon[64];
+	event.GetString("weapon", weapon, sizeof(weapon));
+	if( StrContains(weapon, "weapon_bayonet") == 0 || StrContains(weapon, "weapon_knife") == 0 )
+		return;
+
+	rp_SetClientInt(client, i_LastShot, GetTime());
 }
 public Action fwdUse(int client){
 	int zone = rp_GetPlayerZone(client);
