@@ -123,6 +123,11 @@ public int rp_GetJobInt(int jobID, int typeID) {
 	rp_GetJobData(jobID, view_as<rp_job_type>(typeID), tmp, sizeof(tmp));
 	return StringToInt(tmp);
 }
+public int rp_GetGroupInt(int groupID, int typeID) {
+	char tmp[32];
+	rp_GetGroupData(groupID, view_as<rp_group_type>(typeID), tmp, sizeof(tmp));
+	return StringToInt(tmp);
+}
 public int rp_GetZoneInt(int zoneID, int typeID) {
 	char tmp[32];
 	rp_GetZoneData(zoneID, view_as<zone_type>(typeID), tmp, sizeof(tmp));

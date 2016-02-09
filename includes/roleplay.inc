@@ -218,6 +218,8 @@ native void rp_GetDate(char[] str, int length);
 native void rp_GetTime(int& hour, int& minutes);
 native void rp_GetServerString(rp_serv typeID, char[] str, int length);
 native void rp_SetServerString(rp_serv typeID, char[] str, int length);
+native int rp_SetCaptureInt(rp_capture_zone zoneID, int value);
+native int rp_GetCaptureInt(rp_capture_zone zoneID);
 // ----------------------------------------------------------------------------
 native bool rp_ClientCanDrawPanel(int client);
 native void rp_SendPanelToClient(Handle& panel, int client, float duration);
@@ -513,8 +515,7 @@ enum building_prop_data {
 	building_prop_data_max
 };
 enum rp_capture_zone {
-	cap_nuclear =  0,
-	cap_tower,
+	cap_bunker =  0,
 	cap_villa,
 	cap_disableItem,
 	capture_max
