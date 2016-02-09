@@ -289,7 +289,8 @@ bool wpnCutDamage(int victim, int attacker, float &damage) {
 			damage *= 0.0;
 
 			rp_SetClientFloat(victim, fl_FrozenTime, GetGameTime() + 1.5);
-			ServerCommand("sm_effect_flash %d 1.5 180", victim);
+			if(!rp_GetClientBool(victim, b_ChiruYeux))
+				ServerCommand("sm_effect_flash %d 1.5 180", victim);
 		}
 		case ball_type_antikevlar: {
 			int kevlar = rp_GetClientInt(victim, i_Kevlar);

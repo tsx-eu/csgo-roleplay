@@ -1124,7 +1124,8 @@ public Action fwdWeapon(int victim, int attacker, float &damage, int wepID, floa
 				rp_SetClientFloat(victim, fl_FrozenTime, GetGameTime() + 1.5);
 				rp_SetClientFloat(victim, fl_TazerTime, GetGameTime() + 7.5);
 				
-				ServerCommand("sm_effect_flash %d 1.5 180", victim);
+				if(!rp_GetClientBool(victim, b_ChiruYeux))
+					ServerCommand("sm_effect_flash %d 1.5 180", victim);
 						
 				if( rp_GetClientInt(attacker,i_Protect_Last) == victim ) {
 					int heal = GetClientHealth(him);
