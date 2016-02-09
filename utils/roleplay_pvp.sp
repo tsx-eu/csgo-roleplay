@@ -26,6 +26,17 @@
 // TODO: Timer pour "CaptureCalculation"... 
 // TODO: Corrigé le printHUD
 // TODO: Ajouté la précision de tire. En gérant le cas des mecs qui se déconnecte.
+// TODO: Gérer les groupes défenseurs et attaquant
+// TODO: Corrigé big-mac
+// TODO: Respawn les défenseurs dans la tour
+// TODO: 50 points de base par membre connecté
+// TODO: A check +250 points par drapeau
+// TODO: Système ELO pour gagner des points en tuant un joueur.
+// TODO: La défense ne peut pas déposer de drapeau
+// TODO: Un attaquant passe défenseur s'il a 100 points de plus que le défenseur actuel.
+// TODO: Gagnant = celui qui a le plus de point.
+// TODO: Dégat divisé par 2 entre chaque gang attaquant
+// TODO: Dégat divisé par 2 entre quelqu'un du même gang
 
 //#define DEBUG
 #define MAX_GROUPS		150
