@@ -286,6 +286,7 @@ public Action Cmd_ItemHamburger(int args) {
 		float vita = rp_GetClientFloat(client, fl_Vitality);
 		
 		rp_SetClientFloat(client, fl_Vitality, vita + 256.0);
+		rp_Effect_Particle("sm_effect_particles %d Trail12 5 facemask", client);
 		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ressentez votre vitalité s'augmenter (%.1f -> %.1f).", vita, vita+256.0);
 	}
