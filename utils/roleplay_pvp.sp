@@ -27,7 +27,7 @@
 // TODO: Ajouté la précision de tire. En gérant le cas des mecs qui se déconnecte.
 // TODO: Gérer les groupes défenseurs et attaquant
 // TODO: Corrigé big-mac
-// TODO: Respawn les défenseurs dans la tour
+// TODO: Respawn les défenseurs dans la tour (+godmod temporaire)
 // TODO: 50 points de base par membre connecté
 // TODO: A check +250 points par drapeau
 // TODO: Système ELO pour gagner des points en tuant un joueur.
@@ -37,6 +37,7 @@
 // TODO: Dégat divisé par 2 entre chaque gang attaquant
 // TODO: Dégat divisé par 2 entre quelqu'un du même gang
 // TODO: Vérifier à quoi sert: CTF_SpawnFlag_Delay
+// TODO: Configuration d'item sauvegardée pour retrait rapide en banque
 
 //#define DEBUG
 #define MAX_GROUPS		150
