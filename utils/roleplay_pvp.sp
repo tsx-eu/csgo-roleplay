@@ -21,7 +21,6 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-// TODO: Respawn les défenseurs dans la tour (+godmod temporaire)
 // TODO: 50 points de base par membre connecté
 // TODO: A check +250 points par drapeau
 // TODO: Système ELO pour gagner des points en tuant un joueur.
@@ -50,6 +49,7 @@ float g_fLastDrop[65];
 int g_iFlagData[MAX_ENTITIES+1][flag_data_max];
 // -----------------------------------------------------------------------------------------------------------------
 Handle g_hCapturable = INVALID_HANDLE;
+Handle g_hGodTimer[65];
 int g_iCapture_POINT[MAX_GROUPS][capture_max];
 bool g_bIsInCaptureMode = false;
 int g_cBeam;
@@ -109,11 +109,6 @@ public Action Cmd_ItemFlag(int args) {
 	int item_id = GetCmdArgInt(args);
 	int gID = rp_GetClientGroupID(client);
 	
-	if( !IsPlayerAlive(client)) {
-		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes mort.");
-		return;
-	}	
 	if( gID == 0 ) {
 		ITEM_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas de groupe.");
@@ -217,7 +212,6 @@ public Action FlagThink(Handle timer, any data) {
 			if( rp_GetCaptureInt(cap_bunker) != g_iFlagData[entity][data_group] )
 				g_iCapture_POINT[g_iFlagData[entity][data_group]][cap_bunker] += FLAG_POINTS;
 			
-			float vecOrigin[3];
 			Entity_GetAbsOrigin(entity, vecOrigin);
 			
 			TE_SetupBeamRingPoint(vecOrigin, 1.0, 50.0, g_cBeam, g_cBeam, 0, 30, 2.0, 5.0, 1.0, color, 10, 0);
@@ -435,6 +429,7 @@ public Action CAPTURE_Tick(Handle timer, any none) {
 public Action fwdSpawn(int client) {
 	if( rp_GetClientGroupID(client) == rp_GetCaptureInt(cap_bunker) )
 		CreateTimer(0.25, fwdSpawn_ToRespawn, client);
+	
 	return Plugin_Continue;
 }
 public Action fwdSpawn_ToRespawn(Handle timer, any client) {
@@ -453,6 +448,7 @@ public Action fwdSpawn_ToRespawn(Handle timer, any client) {
 		
 		TeleportEntity(client, rand, NULL_VECTOR, NULL_VECTOR);
 		FakeClientCommand(client, "say /stuck");
+		Client_SetSpawnProtect(client, true);
 	}
 }
 public Action fwdDead(int victim, int attacker, float& respawn) {
@@ -737,4 +733,38 @@ void GDM_Get(int client, int& shot, int& damage, int& hitbox) {
 	shot = array[gdm_shot];
 	damage = array[gdm_damage];
 	hitbox = array[gdm_hitbox];	
+}
+// -----------------------------------------------------------------------------------------------------------------
+void Client_SetSpawnProtect(int client, bool status) {
+	if( status == true ) {
+		rp_HookEvent(client, RP_OnPlayerZoneChange, fwdGODZoneChange);
+		rp_HookEvent(client, RP_OnPlayerDead, fwdGodPlayerDead);
+		SDKHook(client, SDKHook_FireBulletsPost, fwdGodFireBullet);
+		g_hGodTimer[client] = CreateTimer(10.0, GOD_Expire, client);
+		rp_ClientColorize(client, view_as<int>({255, 255, 255, 100}));
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez 10 secondes de protection.");
+	}
+	else {
+		rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdGODZoneChange);
+		rp_UnhookEvent(client, RP_OnPlayerDead, fwdGodPlayerDead);
+		SDKUnhook(client, SDKHook_FireBulletsPost, fwdGodFireBullet);
+		rp_ClientColorize(client);
+		g_hGodTimer[client] = INVALID_HANDLE;
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre protection a expiré.");
+	}
+}
+public Action fwdGODZoneChange(int client, int oldZone, int newZone) {
+	if( oldZone == ZONE_RESPAWN && newZone != ZONE_RESPAWN ) {
+		Client_SetSpawnProtect(client, false);
+	}
+}
+public Action fwdGodPlayerDead(int client, int attacker, float& respawn) {
+	Client_SetSpawnProtect(client, false);
+}
+public void fwdGodFireBullet(int client, int shot, const char[] weaponname) {
+	Client_SetSpawnProtect(client, false);
+}
+public Action GOD_Expire(Handle timer, any client) {
+	if( !g_hGodTimer[client] )
+		Client_SetSpawnProtect(client, false);
 }
