@@ -22,12 +22,12 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 // TODO: Un attaquant passe défenseur s'il a 100 points de plus que le défenseur actuel.
-// TODO: Gagnant = celui qui a le plus de point.
 // TODO: Dégat divisé par 2 entre chaque gang attaquant
 // TODO: Dégat divisé par 2 entre quelqu'un du même gang
 // TODO: Vérifier à quoi sert: CTF_SpawnFlag_Delay
 // TODO: Configuration d'item sauvegardée pour retrait rapide en banque
 // TODO: Corrigé big-mac
+// TODO: Ajouter les TAG.
 
 //#define DEBUG
 #define MAX_GROUPS		150
@@ -37,6 +37,7 @@
 #define ZONE_RESPAWN	230
 #define	FLAG_SPEED		250.0
 #define	FLAG_POINTS		250
+#define ELO_FACTEUR_K	40.0
 
 // -----------------------------------------------------------------------------------------------------------------
 enum flag_data { data_group, data_skin, data_red, data_green, data_blue, data_time, data_owner, flag_data_max };
@@ -68,8 +69,10 @@ public void OnPluginStart() {
 			OnClientPostAdminCheck(i);
 }
 public void OnConfigsExecuted() {
-	g_hCapturable = FindConVar("rp_capture");
-	HookConVarChange(g_hCapturable, OnCvarChange);
+	if( g_hCapturable == INVALID_HANDLE ) {
+		g_hCapturable = FindConVar("rp_capture");
+		HookConVarChange(g_hCapturable, OnCvarChange);
+	}
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt");
@@ -79,10 +82,10 @@ public void OnCvarChange(Handle cvar, const char[] oldVal, const char[] newVal) 
 	PrintToServer("OnCvarChange");
 	#endif	
 	if( cvar == g_hCapturable ) {
-		if( StrEqual(oldVal, "none") && StrEqual(newVal, "active") ) {
+		if( !g_bIsInCaptureMode && StrEqual(oldVal, "none") && StrEqual(newVal, "active") ) {
 			CAPTURE_Start();
 		}
-		else if( StrEqual(oldVal, "active") && StrEqual(newVal, "none") ) {
+		else if( g_bIsInCaptureMode && StrEqual(oldVal, "active") && StrEqual(newVal, "none") ) {
 			CAPTURE_Stop();
 		}
 	}
@@ -311,7 +314,7 @@ void CAPTURE_Start() {
 			
 	for(int i=1; i<MAX_ZONES; i++) {
 		if( rp_GetZoneBit(i) & BITZONE_PVP ) {
-				ServerCommand("rp_force_clean %d full", i);
+			ServerCommand("rp_force_clean %d full", i);
 		}
 	}
 	
@@ -399,10 +402,12 @@ void CAPTURE_Reward() {
 	}	
 }
 public Action CAPTURE_Tick(Handle timer, any none) {
+	static int lastGang = -1;
+	
 	if( !g_bIsInCaptureMode )
 		return Plugin_Handled;
 	
-	char strBuffer[4][8], tmp[64];
+	char strBuffer[4][8], tmp[64], tmp2[64];
 	int color[4], defense = rp_GetCaptureInt(cap_bunker);
 	float mins[3], maxs[3];
 	mins[0] = rp_GetZoneFloat(ZONE_BUNKER, zone_type_min_x);
@@ -420,15 +425,25 @@ public Action CAPTURE_Tick(Handle timer, any none) {
 	color[3] = 255;
 	
 	Effect_DrawBeamBoxToAll(mins, maxs, g_cBeam, g_cBeam, 0, 30, 2.0, 5.0, 5.0, 2, 1.0, color, 0);
-	for (int i = MaxClients; i <= MAX_ENTITIES; i++) {
-		if( !IsValidEdict(i) || !IsValidEntity(i) )
-			continue;
+	
+	if( lastGang != defense ) {
+		Format(tmp2, sizeof(tmp2), "%d %d %d", color[0], color[1], color[2]);
 		
-		GetEdictClassname(i, tmp, sizeof(tmp));
-		if( StrEqual(tmp, "point_spotlight") ) {
-			SetEntityRenderColor(i, color[0], color[1], color[2], color[3]);
+		
+		for (int i = MaxClients; i <= MAX_ENTITIES; i++) {
+			if( !IsValidEdict(i) || !IsValidEntity(i) )
+				continue;
+			if( !rp_IsInPVP(i) )
+				continue;
+			
+			GetEdictClassname(i, tmp, sizeof(tmp));
+			if( StrEqual(tmp, "point_spotlight") ) {
+				SetVariantString(tmp2);
+				AcceptEntityInput(i, "SetColor");
+			}
 		}
 	}
+	lastGang = defense;
 	
 	CreateTimer(1.0, CAPTURE_Tick);
 	return Plugin_Handled;
@@ -745,26 +760,26 @@ void GDM_ELOKill(int client, int target) {
 	
 	cDelta = 1.0/((Pow(10.0, - (attacker[gdm_elo] - victim[gdm_elo]) / 400.0)) + 1.0);
 	tDelta = 1.0/((Pow(10.0, - (victim[gdm_elo] - attacker[gdm_elo]) / 400.0)) + 1.0);
-	cElo = RoundFloat(float(attacker[gdm_elo]) + 16.0 * (1.0 - cDelta));
-	tElo = RoundFloat(float(victim[gdm_elo]) + 16.0 * (0.0 - tDelta));
+	cElo = RoundFloat(float(attacker[gdm_elo]) + ELO_FACTEUR_K * (1.0 - cDelta));
+	tElo = RoundFloat(float(victim[gdm_elo]) + ELO_FACTEUR_K * (0.0 - tDelta));
 	cgID = rp_GetClientGroupID(client);
 	tgID = rp_GetClientGroupID(target);
 	
-	g_iCapture_POINT[ tgID ] -= tElo;
-	g_iCapture_POINT[ cgID ] += cElo;
+	g_iCapture_POINT[ tgID ] += tElo - victim[gdm_elo];
+	g_iCapture_POINT[ cgID ] += cElo - attacker[gdm_elo];
 	if( g_iCapture_POINT[ tgID ] < 0 ) {
 		g_iCapture_POINT[ cgID ] += g_iCapture_POINT[tgID];
 		g_iCapture_POINT[ tgID ] = 0;
 	}
 	
-	PrintToChatAll("Attaquant: ANCIEN %d NOUVEAU %d", cElo, attacker[gdm_elo]);
-	PrintToChatAll("Victime: ANCIEN %d NOUVEAU %d", tElo, victim[gdm_elo]);	
+	PrintToChatAll("Attaquant: NOUVEAU %d ANCIEN %d", cElo, attacker[gdm_elo]);
+	PrintToChatAll("Victime: NOUVEAU %d ANCIEN %d", tElo, victim[gdm_elo]);	
 	
 	attacker[gdm_elo] = cElo;
 	victim[gdm_elo] = tElo;
 	
 	g_hGlobalDamage.SetArray(szSteamID, attacker, sizeof(attacker));
-	g_hGlobalDamage.SetArray(szSteamID, victim, sizeof(victim));
+	g_hGlobalDamage.SetArray(szSteamID2, victim, sizeof(victim));
 	
 }
 // -----------------------------------------------------------------------------------------------------------------
