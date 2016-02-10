@@ -21,8 +21,6 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-// TODO: 50 points de base par membre connecté
-// TODO: A check +250 points par drapeau
 // TODO: Système ELO pour gagner des points en tuant un joueur.
 // TODO: La défense ne peut pas déposer de drapeau
 // TODO: Un attaquant passe défenseur s'il a 100 points de plus que le défenseur actuel.
@@ -50,7 +48,7 @@ int g_iFlagData[MAX_ENTITIES+1][flag_data_max];
 // -----------------------------------------------------------------------------------------------------------------
 Handle g_hCapturable = INVALID_HANDLE;
 Handle g_hGodTimer[65];
-int g_iCapture_POINT[MAX_GROUPS][capture_max];
+int g_iCapture_POINT[MAX_GROUPS];
 bool g_bIsInCaptureMode = false;
 int g_cBeam;
 StringMap g_hGlobalDamage;
@@ -210,7 +208,7 @@ public Action FlagThink(Handle timer, any data) {
 		if( rp_GetPlayerZone(entity) == ZONE_BUNKER ) {
 			
 			if( rp_GetCaptureInt(cap_bunker) != g_iFlagData[entity][data_group] )
-				g_iCapture_POINT[g_iFlagData[entity][data_group]][cap_bunker] += FLAG_POINTS;
+				g_iCapture_POINT[g_iFlagData[entity][data_group]] += FLAG_POINTS;
 			
 			Entity_GetAbsOrigin(entity, vecOrigin);
 			
@@ -275,9 +273,10 @@ void CAPTURE_Start() {
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	
 	g_bIsInCaptureMode = true;
+	int gID;
 			
 	for(int i=1; i<MAX_GROUPS; i++) {
-		g_iCapture_POINT[i][cap_bunker] = 0;			
+		g_iCapture_POINT[i] = 0;			
 	}
 
 	for(int i=1; i<=MaxClients; i++) {
@@ -288,6 +287,9 @@ void CAPTURE_Start() {
 		rp_HookEvent(i, RP_OnPlayerHUD, fwdHUD);
 		rp_HookEvent(i, RP_OnPlayerSpawn, fwdSpawn);
 		SDKHook(i, SDKHook_FireBulletsPost, fwdFireBullet);
+		gID = rp_GetClientGroupID(i);
+		g_iCapture_POINT[gID] += 50;
+		
 		
 		if( !rp_IsInPVP(i) )
 			continue;
@@ -304,6 +306,8 @@ void CAPTURE_Start() {
 		
 		ClientCommand(i, "play *tsx/roleplay/bombing.mp3");
 	}
+	
+	g_iCapture_POINT[rp_GetCaptureInt(cap_bunker)] += 2000;
 			
 	for(int i=1; i<MAX_ZONES; i++) {
 		if( rp_GetZoneBit(i) & BITZONE_PVP ) {
@@ -341,11 +345,11 @@ void CAPTURE_Stop() {
 	for(int i=1; i<MAX_GROUPS; i++) {
 		if( rp_GetGroupInt(i, group_type_chef)!= 1 )
 			continue;
-		if( maxPoint > g_iCapture_POINT[i][cap_bunker] )
+		if( maxPoint > g_iCapture_POINT[i] )
 			continue;
 
 		winner = i;
-		maxPoint = g_iCapture_POINT[i][cap_bunker];
+		maxPoint = g_iCapture_POINT[i];
 	}
 			
 	rp_GetGroupData(winner, group_type_name, tmp, sizeof(tmp));
@@ -383,7 +387,7 @@ void CAPTURE_Reward() {
 		}
 
 		int gID = rp_GetClientGroupID(client);
-		int bonus = RoundToCeil(g_iCapture_POINT[gID][cap_bunker] / 200.0);
+		int bonus = RoundToCeil(g_iCapture_POINT[gID] / 200.0);
 		
 		rp_ClientGiveItem(client, 309, amount + 3 + bonus, true);
 		rp_GetItemData(309, item_type_name, tmp, sizeof(tmp));
@@ -479,16 +483,16 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 			if(rp_GetGroupInt(i, group_type_chef) != 1 )
 				continue;
 				
-			if( g_iCapture_POINT[i][cap_bunker] == 0 && gID != i )
+			if( g_iCapture_POINT[i] == 0 && gID != i )
 				continue;
 			
 			rp_GetGroupData(i, group_type_name, tmp, sizeof(tmp));
 			ExplodeString(tmp, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
 				
 			if( gID == i )
-				Format(szHUD, size, "%s [%s]: %d\n", szHUD, optionsBuff[1], g_iCapture_POINT[i][cap_bunker]);
+				Format(szHUD, size, "%s [%s]: %d\n", szHUD, optionsBuff[1], g_iCapture_POINT[i]);
 			else
-				Format(szHUD, size, "%s %s: %d\n", szHUD, optionsBuff[1], g_iCapture_POINT[i][cap_bunker]);
+				Format(szHUD, size, "%s %s: %d\n", szHUD, optionsBuff[1], g_iCapture_POINT[i]);
 				
 		}
 		
@@ -542,7 +546,7 @@ void addGangPoint(int client, int type, int amount=1) {
 	
 	int group = rp_GetClientGroupID(client);
 	if( group > 0 && g_bIsInCaptureMode ) {
-		g_iCapture_POINT[group][type] += amount;
+		g_iCapture_POINT[group] += amount;
 		if( g_iCapture_POINT[group][type] < 0 )
 			g_iCapture_POINT[group][type] = 0;
 	}
