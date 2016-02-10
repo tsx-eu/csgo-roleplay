@@ -318,6 +318,8 @@ void CAPTURE_Start() {
 	CreateTimer(1.0, CAPTURE_Tick);
 	
 	HookEvent("player_hurt", Event_PlayerHurt, EventHookMode_Post);
+	HookEvent("player_hurt", fwdGod_PlayerHurt, EventHookMode_Pre);
+	
 }
 void CAPTURE_Stop() {
 	#if defined DEBUG
@@ -364,6 +366,8 @@ void CAPTURE_Stop() {
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	
 	UnhookEvent("player_hurt", Event_PlayerHurt, EventHookMode_Post);
+	UnhookEvent("player_hurt", fwdGod_PlayerHurt, EventHookMode_Pre);
+	
 	
 	CAPTURE_Reward();
 }
@@ -514,6 +518,7 @@ public Action Event_PlayerHurt(Handle event, char[] name, bool dontBroadcast) {
 	hitgroup = GetEventInt(event, "hitgroup");
 	
 	GetEventString(event, "weapon", weapon, sizeof(weapon));
+	
 	if( StrEqual(weapon, "inferno") || StrEqual(weapon, "hegrenade") ) { // TODO: Ajouter les explosifs du rp
 		return Plugin_Continue;
 	}
@@ -527,17 +532,6 @@ public Action Event_PlayerHurt(Handle event, char[] name, bool dontBroadcast) {
 public Action SwitchToFirst(Handle timer, any client) {
 	if( rp_GetClientInt(client, i_ThirdPerson) == 0 )
 		ClientCommand(client, "firstperson");
-}
-void TE_SetupDynamicLight(const float vecOrigin[3], int r, int g, int b, int iExponent, float fRadius, float fTime, float fDecay) {
-	TE_Start("Dynamic Light");
-	TE_WriteVector("m_vecOrigin",vecOrigin);
-	TE_WriteNum("r",r);
-	TE_WriteNum("g",g);
-	TE_WriteNum("b",b);
-	TE_WriteNum("exponent",iExponent);
-	TE_WriteFloat("m_fRadius",fRadius);
-	TE_WriteFloat("m_fTime",fTime);
-	TE_WriteFloat("m_fDecay",fDecay);
 }
 // -----------------------------------------------------------------------------------------------------------------
 int CTF_SpawnFlag(float vecOrigin[3], int skin, int color[3]) {
@@ -696,9 +690,6 @@ void CTF_FlagTouched(int client, int flag) {
 	CreateTimer(0.5, SwitchToFirst, client);
 	
 	SDKHook(flag, SDKHook_SetTransmit, SDKHideFlag);
-	
-	TE_SetupDynamicLight(vecOrigin, StringToInt(strBuffer[0]), StringToInt(strBuffer[1]), StringToInt(strBuffer[2]), 5, 200.0, 0.1, 0.1);
-	TE_SendToClient(client);
 }
 public Action CTF_SpawnFlag_Delay(Handle timer, any ent2) {
 	TeleportEntity(ent2, view_as<float>({30.0, 0.0, 0.0}), view_as<float>({0.0, 90.0, 0.0}), NULL_VECTOR);
@@ -781,17 +772,17 @@ void Client_SetSpawnProtect(int client, bool status) {
 	if( status == true ) {
 		rp_HookEvent(client, RP_OnPlayerZoneChange, fwdGODZoneChange);
 		rp_HookEvent(client, RP_OnPlayerDead, fwdGodPlayerDead);
-		SDKHook(client, SDKHook_FireBulletsPost, fwdGodFireBullet);
 		g_hGodTimer[client] = CreateTimer(10.0, GOD_Expire, client);
 		rp_ClientColorize(client, view_as<int>({255, 255, 255, 100}));
+		SetEntProp(client, Prop_Data, "m_takedamage", 0);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez 10 secondes de protection.");
 	}
 	else {
 		rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdGODZoneChange);
 		rp_UnhookEvent(client, RP_OnPlayerDead, fwdGodPlayerDead);
-		SDKUnhook(client, SDKHook_FireBulletsPost, fwdGodFireBullet);
 		rp_ClientColorize(client);
 		g_hGodTimer[client] = INVALID_HANDLE;
+		SetEntProp(client, Prop_Data, "m_takedamage", 2);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre protection a expiré.");
 	}
 }
@@ -805,6 +796,18 @@ public Action fwdGodPlayerDead(int client, int attacker, float& respawn) {
 }
 public void fwdGodFireBullet(int client, int shot, const char[] weaponname) {
 	Client_SetSpawnProtect(client, false);
+}
+public Action fwdGod_PlayerHurt(Handle event, char[] name, bool dontBroadcast) {
+	int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
+	
+	if(  g_hGodTimer[attacker] ) {
+		Client_SetSpawnProtect(attacker, false);
+	}
+}
+public Action OnPlayerRunCmd(int client, int& buttons) {
+	if( (buttons & (IN_ATTACK|IN_ATTACK2)) && g_hGodTimer[client] ) {
+		Client_SetSpawnProtect(client, false);
+	}
 }
 public Action GOD_Expire(Handle timer, any client) {
 	if( !g_hGodTimer[client] )
