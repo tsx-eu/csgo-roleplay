@@ -21,7 +21,6 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-// TODO: Ajouté la précision de tire. En gérant le cas des mecs qui se déconnecte.
 // TODO: Gérer les groupes défenseurs et attaquant
 // TODO: Corrigé big-mac
 // TODO: Respawn les défenseurs dans la tour (+godmod temporaire)
@@ -45,16 +44,7 @@
 #define	FLAG_POINTS		250
 
 // -----------------------------------------------------------------------------------------------------------------
-enum flag_data {
-	data_group,
-	data_skin,
-	data_red,
-	data_green,
-	data_blue,
-	data_time,
-	data_owner,
-	flag_data_max
-}
+enum flag_data { data_group, data_skin, data_red, data_green, data_blue, data_time, data_owner, flag_data_max };
 int g_iClientFlag[65];
 float g_fLastDrop[65];
 int g_iFlagData[MAX_ENTITIES+1][flag_data_max];
@@ -63,6 +53,8 @@ Handle g_hCapturable = INVALID_HANDLE;
 int g_iCapture_POINT[MAX_GROUPS][capture_max];
 bool g_bIsInCaptureMode = false;
 int g_cBeam;
+StringMap g_hGlobalDamage;
+enum damage_data { gdm_shot, gdm_damage, gdm_hitbox, gdm_elo, gdm_max };
 // -----------------------------------------------------------------------------------------------------------------
 
 public Plugin myinfo = {
@@ -73,6 +65,7 @@ public Plugin myinfo = {
 public void OnPluginStart() {
 	RegConsoleCmd("drop", FlagDrop);
 	RegServerCmd("rp_item_spawnflag", 	Cmd_ItemFlag,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	g_hGlobalDamage = new StringMap();
 	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
@@ -102,6 +95,7 @@ public void OnClientPostAdminCheck(int client) {
 	if( g_bIsInCaptureMode ) {
 		rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
 		rp_HookEvent(client, RP_OnPlayerHUD, fwdHUD);
+		SDKHook(client, SDKHook_FireBulletsPost, fwdFireBullet);
 	}
 }
 // -----------------------------------------------------------------------------------------------------------------
@@ -296,6 +290,7 @@ void CAPTURE_Start() {
 		
 		rp_HookEvent(i, RP_OnPlayerDead, fwdDead);
 		rp_HookEvent(i, RP_OnPlayerHUD, fwdHUD);
+		SDKHook(i, SDKHook_FireBulletsPost, fwdFireBullet);
 		
 		if( !rp_IsInPVP(i) )
 			continue;
@@ -320,6 +315,8 @@ void CAPTURE_Start() {
 	}
 	
 	CreateTimer(1.0, CAPTURE_Tick);
+	
+	HookEvent("player_hurt", Event_PlayerHurt, EventHookMode_Post);
 }
 void CAPTURE_Stop() {
 	#if defined DEBUG
@@ -340,6 +337,7 @@ void CAPTURE_Stop() {
 		
 		rp_UnhookEvent(i, RP_OnPlayerDead, fwdDead);
 		rp_UnhookEvent(i, RP_OnPlayerHUD, fwdHUD);
+		SDKUnhook(i, SDKHook_FireBulletsPost, fwdFireBullet);
 	}
 	
 	for(int i=1; i<MAX_GROUPS; i++) {
@@ -362,7 +360,9 @@ void CAPTURE_Stop() {
 			
 	CPrintToChatAll("{lightblue} Le bunker appartient maintenant à... %s !", optionsBuff[1]);			
 	CPrintToChatAll("{lightblue} ================================== {default}");
-
+	
+	UnhookEvent("player_hurt", Event_PlayerHurt, EventHookMode_Post);
+	
 	CAPTURE_Reward();
 }
 void CAPTURE_Reward() {
@@ -466,6 +466,29 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 		
 		return Plugin_Changed;
 	}
+	return Plugin_Continue;
+}
+public void fwdFireBullet(int client, int shot, const char[] weaponname) {
+	PrintToChatAll("--> Client: %d shot: %d, Weapon: %s", client, shot, weaponname);
+	GDM_Add(client, shot);
+}
+public Action Event_PlayerHurt(Handle event, char[] name, bool dontBroadcast) {
+	char weapon[64];
+	int victim, attacker, damage, hitgroup;
+	
+	victim 	= GetClientOfUserId(GetEventInt(event, "userid"));
+	attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
+	damage = GetEventInt(event, "dmg_health");	
+	hitgroup = GetEventInt(event, "hitgroup");
+	
+	GetEventString(event, "weapon", weapon, sizeof(weapon));
+	if( StrEqual(weapon, "inferno") || StrEqual(weapon, "hegrenade") ) { // TODO: Ajouter les explosifs du rp
+		return Plugin_Continue;
+	}
+	
+	PrintToChatAll("--> Victime: %d Attaquant: %d Dégat: %d, Hitbox: %d", victim, attacker, damage, hitgroup);
+	
+	GDM_Add(attacker, 0, damage, hitgroup);
 	return Plugin_Continue;
 }
 // -----------------------------------------------------------------------------------------------------------------
@@ -659,4 +682,27 @@ void CTF_FlagTouched(int client, int flag) {
 }
 public Action CTF_SpawnFlag_Delay(Handle timer, any ent2) {
 	TeleportEntity(ent2, view_as<float>({30.0, 0.0, 0.0}), view_as<float>({0.0, 90.0, 0.0}), NULL_VECTOR);
+}
+// -----------------------------------------------------------------------------------------------------------------
+void GDM_Add(int client, int shot = 0, int damage=0, int hitbox=0) {
+	char szSteamID[32];
+	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
+	
+	int array[gdm_max];
+	g_hGlobalDamage.GetArray(szSteamID, array, sizeof(array));
+	array[gdm_shot] += shot;
+	array[gdm_damage] += damage;
+	array[gdm_hitbox] += hitbox;	
+	
+	g_hGlobalDamage.SetArray(szSteamID, array, sizeof(array));
+}
+void GDM_Get(int client, int& shot, int& damage, int& hitbox) {
+	char szSteamID[32];
+	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
+	
+	int array[gdm_max];
+	g_hGlobalDamage.GetArray(szSteamID, array, sizeof(array));
+	shot = array[gdm_shot];
+	damage = array[gdm_damage];
+	hitbox = array[gdm_hitbox];	
 }
