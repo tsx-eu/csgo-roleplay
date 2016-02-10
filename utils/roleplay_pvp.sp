@@ -21,8 +21,6 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-// TODO: Gérer les groupes défenseurs et attaquant
-// TODO: Corrigé big-mac
 // TODO: Respawn les défenseurs dans la tour (+godmod temporaire)
 // TODO: 50 points de base par membre connecté
 // TODO: A check +250 points par drapeau
@@ -34,12 +32,14 @@
 // TODO: Dégat divisé par 2 entre quelqu'un du même gang
 // TODO: Vérifier à quoi sert: CTF_SpawnFlag_Delay
 // TODO: Configuration d'item sauvegardée pour retrait rapide en banque
+// TODO: Corrigé big-mac
 
 //#define DEBUG
 #define MAX_GROUPS		150
 #define MAX_ZONES		310
 #define	MAX_ENTITIES	2048
 #define	ZONE_BUNKER		235
+#define ZONE_RESPAWN	230
 #define	FLAG_SPEED		250.0
 #define	FLAG_POINTS		250
 
@@ -95,6 +95,7 @@ public void OnClientPostAdminCheck(int client) {
 	if( g_bIsInCaptureMode ) {
 		rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
 		rp_HookEvent(client, RP_OnPlayerHUD, fwdHUD);
+		rp_HookEvent(client, RP_OnPlayerSpawn, fwdSpawn);
 		SDKHook(client, SDKHook_FireBulletsPost, fwdFireBullet);
 	}
 }
@@ -116,6 +117,11 @@ public Action Cmd_ItemFlag(int args) {
 	if( gID == 0 ) {
 		ITEM_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas de groupe.");
+		return;
+	}
+	if( rp_GetCaptureInt(cap_bunker) == gID ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le gang défenseur ne peut pas utiliser de drapeau.");
 		return;
 	}
 	if( rp_IsInPVP(client) ) {
@@ -194,16 +200,22 @@ public Action FlagThink(Handle timer, any data) {
 	if( !IsValidEdict(entity) )
 		return Plugin_Handled;
 	
+	float vecFlag[3], vecOrigin[3], vecOrigin2[3];
 	int color[4];
 	color[0] = g_iFlagData[entity][data_red];
 	color[1] = g_iFlagData[entity][data_green];
 	color[2] = g_iFlagData[entity][data_blue];
 	color[3] = 200;
 	
+	if( IsValidClient(g_iFlagData[entity][data_owner]) ) {
+		return Plugin_Handled;
+	}
+	
 	if( g_bIsInCaptureMode ) {
 		if( rp_GetPlayerZone(entity) == ZONE_BUNKER ) {
 			
-			g_iCapture_POINT[g_iFlagData[entity][data_group]][cap_bunker] += FLAG_POINTS;
+			if( rp_GetCaptureInt(cap_bunker) != g_iFlagData[entity][data_group] )
+				g_iCapture_POINT[g_iFlagData[entity][data_group]][cap_bunker] += FLAG_POINTS;
 			
 			float vecOrigin[3];
 			Entity_GetAbsOrigin(entity, vecOrigin);
@@ -216,13 +228,6 @@ public Action FlagThink(Handle timer, any data) {
 		}
 	}
 	
-	float vecFlag[3], vecOrigin[3], vecOrigin2[3];
-	
-	
-	if( IsValidClient(g_iFlagData[entity][data_owner]) ) {
-		return Plugin_Handled;
-	}
-	
 	if( g_iFlagData[entity][data_time]+60 < GetTime() ) {
 		int gID = g_iFlagData[entity][data_group];
 		for(int i=1; i<=MaxClients; i++) {
@@ -233,10 +238,7 @@ public Action FlagThink(Handle timer, any data) {
 		}
 		AcceptEntityInput(entity, "KillHierarchy");
 		return Plugin_Handled;
-	}
-	
-	
-	
+	}	
 	
 	GetEntPropVector(entity, Prop_Send, "m_vecOrigin", vecFlag);
 	vecFlag[2] += 25.0;
@@ -290,6 +292,7 @@ void CAPTURE_Start() {
 		
 		rp_HookEvent(i, RP_OnPlayerDead, fwdDead);
 		rp_HookEvent(i, RP_OnPlayerHUD, fwdHUD);
+		rp_HookEvent(i, RP_OnPlayerSpawn, fwdSpawn);
 		SDKHook(i, SDKHook_FireBulletsPost, fwdFireBullet);
 		
 		if( !rp_IsInPVP(i) )
@@ -337,6 +340,7 @@ void CAPTURE_Stop() {
 		
 		rp_UnhookEvent(i, RP_OnPlayerDead, fwdDead);
 		rp_UnhookEvent(i, RP_OnPlayerHUD, fwdHUD);
+		rp_UnhookEvent(i, RP_OnPlayerSpawn, fwdSpawn);
 		SDKUnhook(i, SDKHook_FireBulletsPost, fwdFireBullet);
 	}
 	
@@ -428,6 +432,29 @@ public Action CAPTURE_Tick(Handle timer, any none) {
 	return Plugin_Handled;
 }
 // -----------------------------------------------------------------------------------------------------------------
+public Action fwdSpawn(int client) {
+	if( rp_GetClientGroupID(client) == rp_GetCaptureInt(cap_bunker) )
+		CreateTimer(0.25, fwdSpawn_ToRespawn, client);
+	return Plugin_Continue;
+}
+public Action fwdSpawn_ToRespawn(Handle timer, any client) {
+	if( rp_GetClientGroupID(client) == rp_GetCaptureInt(cap_bunker) && IsValidClient(client) ) {
+		float mins[3], maxs[3], rand[3];
+		mins[0] = rp_GetZoneFloat(ZONE_RESPAWN, zone_type_min_x);
+		mins[1] = rp_GetZoneFloat(ZONE_RESPAWN, zone_type_min_y);
+		mins[2] = rp_GetZoneFloat(ZONE_RESPAWN, zone_type_min_z);
+		maxs[0] = rp_GetZoneFloat(ZONE_RESPAWN, zone_type_max_x);
+		maxs[1] = rp_GetZoneFloat(ZONE_RESPAWN, zone_type_max_y);
+		maxs[2] = rp_GetZoneFloat(ZONE_RESPAWN, zone_type_max_z);
+		
+		rand[0] = Math_GetRandomFloat(mins[0] + 64.0, maxs[0] - 64.0);
+		rand[1] = Math_GetRandomFloat(mins[1] + 64.0, maxs[1] - 64.0);
+		rand[2] = mins[0] + 32.0;
+		
+		TeleportEntity(client, rand, NULL_VECTOR, NULL_VECTOR);
+		FakeClientCommand(client, "say /stuck");
+	}
+}
 public Action fwdDead(int victim, int attacker, float& respawn) {
 	if( g_iClientFlag[victim] > 0 ) {
 		CTF_DropFlag(victim, false);
@@ -435,17 +462,22 @@ public Action fwdDead(int victim, int attacker, float& respawn) {
 	
 	addGangPoint(attacker, cap_bunker, 10);
 	rp_IncrementSuccess(attacker, success_list_killpvp2);
-	return Plugin_Continue;
+	respawn = 0.25;
+	return Plugin_Handled;
 }
 public Action fwdHUD(int client, char[] szHUD, const int size) {
 	
 	int gID = rp_GetClientGroupID(client);
+	int defTeam = rp_GetCaptureInt(cap_bunker);
 	char optionsBuff[4][32], tmp[128];
 	
 	if( g_bIsInCaptureMode && gID > 0 ) {
 		
-		Format(szHUD, size, "PvP: Capture du bunker \n");
-		
+		Format(szHUD, size, "PvP: Capture du bunker");
+		if( gID == defTeam )
+			Format(szHUD, size, " - Défense");
+		else
+			Format(szHUD, size, " - Attaque");
 		
 		for(int i=1; i<MAX_GROUPS; i++) {
 			if(rp_GetGroupInt(i, group_type_chef) != 1 )
