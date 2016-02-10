@@ -77,7 +77,7 @@ typeset rp_event_enum {
 	function Action(int client, char[] message, int length, bool local);	/* RP_PrePlayerTalk */
 	function Action(int client);								/* RP_OnPlayerDataLoaded */
 	function Action(int client, int money);						/* RP_OnPlayerSell */
-	function Action(int client, char[] szHUD);					/* RP_OnPlayerHUD */
+	function Action(int client, char[] szHUD, const int maxSize);			/* RP_OnPlayerHUD */
 };
 /*
  * @brief Hook sur un joueur. 

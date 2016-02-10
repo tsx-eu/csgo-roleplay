@@ -133,6 +133,11 @@ public int rp_GetZoneInt(int zoneID, int typeID) {
 	rp_GetZoneData(zoneID, view_as<zone_type>(typeID), tmp, sizeof(tmp));
 	return StringToInt(tmp);
 }
+public float rp_GetZoneFloat(int zoneID, int typeID) {
+	char tmp[32];
+	rp_GetZoneData(zoneID, view_as<zone_type>(typeID), tmp, sizeof(tmp));
+	return StringToFloat(tmp);
+}
 public int rp_GetLocationInt(int zoneID, int typeID) {
 	char tmp[32];
 	rp_GetLocationData(zoneID, view_as<location_type>(typeID), tmp, sizeof(tmp));

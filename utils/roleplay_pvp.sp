@@ -21,9 +21,6 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-// TODO: Activer les hooks uniquement si capture est activé.
-// TODO: Timer pour "CaptureCalculation"... 
-// TODO: Corrigé le printHUD
 // TODO: Ajouté la précision de tire. En gérant le cas des mecs qui se déconnecte.
 // TODO: Gérer les groupes défenseurs et attaquant
 // TODO: Corrigé big-mac
@@ -45,6 +42,7 @@
 #define	MAX_ENTITIES	2048
 #define	ZONE_BUNKER		235
 #define	FLAG_SPEED		250.0
+#define	FLAG_POINTS		250
 
 // -----------------------------------------------------------------------------------------------------------------
 enum flag_data {
@@ -90,84 +88,21 @@ public void OnMapStart() {
 public void OnCvarChange(Handle cvar, const char[] oldVal, const char[] newVal) {
 	#if defined DEBUG
 	PrintToServer("OnCvarChange");
-	#endif
-	int winner = 0;
-	int maxPoint = 0;
-	char optionsBuff[4][32], tmp[256];
-	
+	#endif	
 	if( cvar == g_hCapturable ) {
 		if( StrEqual(oldVal, "none") && StrEqual(newVal, "active") ) {
-
-			CPrintToChatAll("{lightblue} ================================== {default}");
-			CPrintToChatAll("{lightblue} Le bunker peut maintenant être capturé! {default}");
-			CPrintToChatAll("{lightblue} ================================== {default}");
-			
-			g_bIsInCaptureMode = true;
-			
-			for(int i=1; i<MAX_GROUPS; i++) {
-				g_iCapture_POINT[i][cap_bunker] = 0;			
-			}
-
-			for(int i=1; i<=MaxClients; i++) {
-				if( !IsValidClient(i) || !rp_IsInPVP(i) )
-					continue;
-				
-				int v = Client_GetVehicle(i);
-				if( v > 0 )
-					rp_ClientVehicleExit(i, v, true);
-				
-				rp_ClientDamage(i, 10000, 1);
-				if( g_iClientFlag[i] > 0 ) {
-					AcceptEntityInput(g_iClientFlag[i], "KillHierarchy");
-					g_iClientFlag[i] = 0;
-				}
-				
-				ClientCommand(i, "play *tsx/roleplay/bombing.mp3");
-			}
-			
-			for(int i=1; i<MAX_ZONES; i++) {
-				if( rp_GetZoneBit(i) & BITZONE_PVP ) {
-					ServerCommand("rp_force_clean %d full", i);
-				}
-			}
+			CAPTURE_Start();
 		}
 		else if( StrEqual(oldVal, "active") && StrEqual(newVal, "none") ) {
-
-			CPrintToChatAll("{lightblue} ================================== {default}");
-			CPrintToChatAll("{lightblue} Le bunker ne peut plus être capturés. {default}");
-			CPrintToChatAll("{lightblue} ================================== {default}");
-			
-			g_bIsInCaptureMode = false;
-			
-			for(int i=1; i<MAX_GROUPS; i++) {
-				if( rp_GetGroupInt(i, group_type_chef)!= 1 )
-					continue;
-
-				if( maxPoint > g_iCapture_POINT[i][cap_bunker] )
-					continue;
-
-				winner = i;
-				maxPoint = g_iCapture_POINT[i][cap_bunker];
-			}
-			
-			rp_GetGroupData(winner, group_type_name, tmp, sizeof(tmp));
-			ExplodeString(tmp, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
-			
-			char fmt[1024];
-			Format(fmt, sizeof(fmt), "UPDATE `rp_servers` SET `bunkerCap`='%i';';", winner);
-			SQL_TQuery( rp_GetDatabase(), SQL_QueryCallBack, fmt);
-			rp_SetCaptureInt(cap_bunker, winner);
-			
-			CPrintToChatAll("{lightblue} Le bunker appartient maintenant à... %s !", optionsBuff[1]);			
-			CPrintToChatAll("{lightblue} ================================== {default}");
-
-			GiveCashBack();
+			CAPTURE_Stop();
 		}
 	}
 }
 public void OnClientPostAdminCheck(int client) {
-	rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
-	rp_HookEvent(client, RP_OnPlayerHUD, fwdHUD);
+	if( g_bIsInCaptureMode ) {
+		rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
+		rp_HookEvent(client, RP_OnPlayerHUD, fwdHUD);
+	}
 }
 // -----------------------------------------------------------------------------------------------------------------
 public Action Cmd_ItemFlag(int args) {
@@ -274,24 +209,7 @@ public Action FlagThink(Handle timer, any data) {
 	if( g_bIsInCaptureMode ) {
 		if( rp_GetPlayerZone(entity) == ZONE_BUNKER ) {
 			
-			int oldGang = rp_GetCaptureInt(cap_bunker);
-			rp_SetCaptureInt(cap_bunker, g_iFlagData[entity][data_group]);
-			
-			for(int i=1; i<=MaxClients; i++) {
-				if( !IsValidClient(i) )
-					continue;
-				
-				int gID = rp_GetClientGroupID(i);
-				if( gID == 0 )
-					continue;
-				
-				if( gID == rp_GetCaptureInt(cap_bunker) ) {
-					ClientCommand(i, "play common/stuck1");
-				}
-				else if( gID == oldGang ) {
-					ClientCommand(i, "play common/stuck2");
-				}
-			}
+			g_iCapture_POINT[g_iFlagData[entity][data_group]][cap_bunker] += FLAG_POINTS;
 			
 			float vecOrigin[3];
 			Entity_GetAbsOrigin(entity, vecOrigin);
@@ -358,6 +276,158 @@ public Action SDKHideFlag(int from, int to ) {
 	return Plugin_Continue;
 }
 // -----------------------------------------------------------------------------------------------------------------
+void CAPTURE_Start() {
+	#if defined DEBUG
+	PrintToServer("CAPTURE_Start");
+	#endif
+	CPrintToChatAll("{lightblue} ================================== {default}");
+	CPrintToChatAll("{lightblue} Le bunker peut maintenant être capturé! {default}");
+	CPrintToChatAll("{lightblue} ================================== {default}");
+	
+	g_bIsInCaptureMode = true;
+			
+	for(int i=1; i<MAX_GROUPS; i++) {
+		g_iCapture_POINT[i][cap_bunker] = 0;			
+	}
+
+	for(int i=1; i<=MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		
+		rp_HookEvent(i, RP_OnPlayerDead, fwdDead);
+		rp_HookEvent(i, RP_OnPlayerHUD, fwdHUD);
+		
+		if( !rp_IsInPVP(i) )
+			continue;
+		
+		int v = Client_GetVehicle(i);
+		if( v > 0 )
+			rp_ClientVehicleExit(i, v, true);
+		
+		rp_ClientDamage(i, 10000, 1);
+		if( g_iClientFlag[i] > 0 ) {
+			AcceptEntityInput(g_iClientFlag[i], "KillHierarchy");
+			g_iClientFlag[i] = 0;
+		}
+		
+		ClientCommand(i, "play *tsx/roleplay/bombing.mp3");
+	}
+			
+	for(int i=1; i<MAX_ZONES; i++) {
+		if( rp_GetZoneBit(i) & BITZONE_PVP ) {
+				ServerCommand("rp_force_clean %d full", i);
+		}
+	}
+	
+	CreateTimer(1.0, CAPTURE_Tick);
+}
+void CAPTURE_Stop() {
+	#if defined DEBUG
+	PrintToServer("CAPTURE_Stop");
+	#endif
+	int winner, maxPoint = 0;
+	char optionsBuff[4][32], tmp[256];
+	
+	CPrintToChatAll("{lightblue} ================================== {default}");
+	CPrintToChatAll("{lightblue} Le bunker ne peut plus être capturés. {default}");
+	CPrintToChatAll("{lightblue} ================================== {default}");
+	
+	g_bIsInCaptureMode = false;
+	
+	for(int i=1; i<=MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		
+		rp_UnhookEvent(i, RP_OnPlayerDead, fwdDead);
+		rp_UnhookEvent(i, RP_OnPlayerHUD, fwdHUD);
+	}
+	
+	for(int i=1; i<MAX_GROUPS; i++) {
+		if( rp_GetGroupInt(i, group_type_chef)!= 1 )
+			continue;
+		if( maxPoint > g_iCapture_POINT[i][cap_bunker] )
+			continue;
+
+		winner = i;
+		maxPoint = g_iCapture_POINT[i][cap_bunker];
+	}
+			
+	rp_GetGroupData(winner, group_type_name, tmp, sizeof(tmp));
+	ExplodeString(tmp, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
+			
+	char fmt[1024];
+	Format(fmt, sizeof(fmt), "UPDATE `rp_servers` SET `bunkerCap`='%i';';", winner);
+	SQL_TQuery( rp_GetDatabase(), SQL_QueryCallBack, fmt);
+	rp_SetCaptureInt(cap_bunker, winner);
+			
+	CPrintToChatAll("{lightblue} Le bunker appartient maintenant à... %s !", optionsBuff[1]);			
+	CPrintToChatAll("{lightblue} ================================== {default}");
+
+	CAPTURE_Reward();
+}
+void CAPTURE_Reward() {
+	#if defined DEBUG
+	PrintToServer("CAPTURE_Reward");
+	#endif
+	int amount;
+	char tmp[128];
+	
+	for(int client=1; client<=GetMaxClients(); client++) {
+		if( !IsValidClient(client) || rp_GetClientGroupID(client) == 0 )
+			continue;
+		
+		if( rp_GetClientGroupID(client) == rp_GetCaptureInt(cap_bunker) ) {
+			amount = 10;
+			rp_IncrementSuccess(client, success_list_pvpkill, 100);
+		}
+		else {
+			amount = 1;
+		}
+
+		int gID = rp_GetClientGroupID(client);
+		int bonus = RoundToCeil(g_iCapture_POINT[gID][cap_bunker] / 200.0);
+		
+		rp_ClientGiveItem(client, 309, amount + 3 + bonus, true);
+		rp_GetItemData(309, item_type_name, tmp, sizeof(tmp));
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu %d %s, en récompense de la capture.", amount+3+bonus, tmp);
+	}	
+}
+public Action CAPTURE_Tick(Handle timer, any none) {
+	if( !g_bIsInCaptureMode )
+		return Plugin_Handled;
+	
+	char strBuffer[4][8], tmp[64];
+	int color[4], defense = rp_GetCaptureInt(cap_bunker);
+	float mins[3], maxs[3];
+	mins[0] = rp_GetZoneFloat(ZONE_BUNKER, zone_type_min_x);
+	mins[1] = rp_GetZoneFloat(ZONE_BUNKER, zone_type_min_y);
+	mins[2] = rp_GetZoneFloat(ZONE_BUNKER, zone_type_min_z);
+	maxs[0] = rp_GetZoneFloat(ZONE_BUNKER, zone_type_max_x);
+	maxs[1] = rp_GetZoneFloat(ZONE_BUNKER, zone_type_max_y);
+	maxs[2] = rp_GetZoneFloat(ZONE_BUNKER, zone_type_max_z);
+	
+	rp_GetGroupData(defense, group_type_color, tmp, sizeof(tmp));
+	ExplodeString(tmp, ",", strBuffer, sizeof(strBuffer), sizeof(strBuffer[]));
+	color[0] = StringToInt(strBuffer[0]);
+	color[1] = StringToInt(strBuffer[1]);
+	color[2] = StringToInt(strBuffer[2]);
+	color[3] = 255;
+	
+	Effect_DrawBeamBoxToAll(mins, maxs, g_cBeam, g_cBeam, 0, 30, 2.0, 5.0, 5.0, 2, 1.0, color, 0);
+	for (int i = MaxClients; i <= MAX_ENTITIES; i++) {
+		if( !IsValidEdict(i) || !IsValidEntity(i) )
+			continue;
+		
+		GetEdictClassname(i, tmp, sizeof(tmp));
+		if( StrEqual(tmp, "point_spotlight") ) {
+			SetEntityRenderColor(i, color[0], color[1], color[2], color[3]);
+		}
+	}
+	
+	CreateTimer(1.0, CAPTURE_Tick);
+	return Plugin_Handled;
+}
+// -----------------------------------------------------------------------------------------------------------------
 public Action fwdDead(int victim, int attacker, float& respawn) {
 	if( g_iClientFlag[victim] > 0 ) {
 		CTF_DropFlag(victim, false);
@@ -367,9 +437,7 @@ public Action fwdDead(int victim, int attacker, float& respawn) {
 	rp_IncrementSuccess(attacker, success_list_killpvp2);
 	return Plugin_Continue;
 }
-public Action fwdHUD(int client, char[] szHUD) {
-	int size = 256;
-	// TODO: Fix size...
+public Action fwdHUD(int client, char[] szHUD, const int size) {
 	
 	int gID = rp_GetClientGroupID(client);
 	char optionsBuff[4][32], tmp[128];
@@ -405,47 +473,6 @@ public Action SwitchToFirst(Handle timer, any client) {
 	if( rp_GetClientInt(client, i_ThirdPerson) == 0 )
 		ClientCommand(client, "firstperson");
 }
-void captureCalculation() {
-	static bool which=true;
-	
-	if( !isInCaptureMode() )
-		return;
-	#if defined DEBUG
-	PrintToServer("captureCalculation");
-	#endif
-	
-	
-	g_iCapture_POINT[rp_GetCaptureInt(cap_bunker)][cap_bunker]++;
-	
-	
-	float mins[3], maxs[3];
-	int zone = g_iZoneNuke;
-	int gID = g_iCapture[cap_nuclear];
-	
-	if( which ) {
-		zone = g_iZoneTower;
-		gID = g_iCapture[cap_tower];
-	}
-	which = !which;
-	
-	mins[0] = StringToFloat(g_szZoneList[zone][zone_type_min_x]);
-	mins[1] = StringToFloat(g_szZoneList[zone][zone_type_min_y]);
-	mins[2] = StringToFloat(g_szZoneList[zone][zone_type_min_z]);
-	
-	maxs[0] = StringToFloat(g_szZoneList[zone][zone_type_max_x]);
-	maxs[1] = StringToFloat(g_szZoneList[zone][zone_type_max_y]);
-	maxs[2] = StringToFloat(g_szZoneList[zone][zone_type_max_z]);
-	
-	char strBuffer[4][8];
-	int color[4];
-	ExplodeString(g_szGroupList[gID][group_type_color], ",", strBuffer, sizeof(strBuffer), sizeof(strBuffer[]));
-	color[0] = StringToInt(strBuffer[0]);
-	color[1] = StringToInt(strBuffer[1]);
-	color[2] = StringToInt(strBuffer[2]);
-	color[3] = 255;
-	
-	Effect_DrawBeamBoxToAll(mins, maxs, g_cBeam, g_cBeam, 0, 30, 2.0, 5.0, 5.0, 2, 1.0, color, 0);	
-}
 void TE_SetupDynamicLight(const float vecOrigin[3], int r, int g, int b, int iExponent, float fRadius, float fTime, float fDecay) {
 	TE_Start("Dynamic Light");
 	TE_WriteVector("m_vecOrigin",vecOrigin);
@@ -468,33 +495,6 @@ void addGangPoint(int client, int type, int amount=1) {
 		if( g_iCapture_POINT[group][type] < 0 )
 			g_iCapture_POINT[group][type] = 0;
 	}
-}
-void GiveCashBack() {
-	#if defined DEBUG
-	PrintToServer("GiveCashBack");
-	#endif
-	int amount;
-	char tmp[128];
-	
-	for(int client=1; client<=GetMaxClients(); client++) {
-		if( !IsValidClient(client) || rp_GetClientGroupID(client) == 0 )
-			continue;
-		
-		if( rp_GetClientGroupID(client) == rp_GetCaptureInt(cap_bunker) ) {
-			amount = 10;
-			rp_IncrementSuccess(client, success_list_pvpkill, 100);
-		}
-		else {
-			amount = 1;
-		}
-
-		int gID = rp_GetClientGroupID(client);
-		int bonus = RoundToCeil(g_iCapture_POINT[gID][cap_bunker] / 200.0);
-		
-		rp_ClientGiveItem(client, 309, amount + 3 + bonus, true);
-		rp_GetItemData(309, item_type_name, tmp, sizeof(tmp));
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu %d %s, en récompense de la capture.", amount+3+bonus, tmp);
-	}	
 }
 // -----------------------------------------------------------------------------------------------------------------
 int CTF_SpawnFlag(float vecOrigin[3], int skin, int color[3]) {
