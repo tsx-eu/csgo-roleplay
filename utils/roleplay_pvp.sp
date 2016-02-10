@@ -21,8 +21,6 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-// TODO: Système ELO pour gagner des points en tuant un joueur.
-// TODO: La défense ne peut pas déposer de drapeau
 // TODO: Un attaquant passe défenseur s'il a 100 points de plus que le défenseur actuel.
 // TODO: Gagnant = celui qui a le plus de point.
 // TODO: Dégat divisé par 2 entre chaque gang attaquant
@@ -91,6 +89,7 @@ public void OnCvarChange(Handle cvar, const char[] oldVal, const char[] newVal) 
 }
 public void OnClientPostAdminCheck(int client) {
 	if( g_bIsInCaptureMode ) {
+		GDM_Init(client);
 		rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
 		rp_HookEvent(client, RP_OnPlayerHUD, fwdHUD);
 		rp_HookEvent(client, RP_OnPlayerSpawn, fwdSpawn);
@@ -283,6 +282,7 @@ void CAPTURE_Start() {
 		if( !IsValidClient(i) )
 			continue;
 		
+		GDM_Init(i);
 		rp_HookEvent(i, RP_OnPlayerDead, fwdDead);
 		rp_HookEvent(i, RP_OnPlayerHUD, fwdHUD);
 		rp_HookEvent(i, RP_OnPlayerSpawn, fwdSpawn);
@@ -460,7 +460,7 @@ public Action fwdDead(int victim, int attacker, float& respawn) {
 		CTF_DropFlag(victim, false);
 	}
 	
-	addGangPoint(attacker, cap_bunker, 10);
+	GDM_ELOKill(attacker, victim);
 	rp_IncrementSuccess(attacker, success_list_killpvp2);
 	respawn = 0.25;
 	return Plugin_Handled;
@@ -538,18 +538,6 @@ void TE_SetupDynamicLight(const float vecOrigin[3], int r, int g, int b, int iEx
 	TE_WriteFloat("m_fRadius",fRadius);
 	TE_WriteFloat("m_fTime",fTime);
 	TE_WriteFloat("m_fDecay",fDecay);
-}
-void addGangPoint(int client, int type, int amount=1) {
-	#if defined DEBUG
-	PrintToServer("addGangPoint");
-	#endif
-	
-	int group = rp_GetClientGroupID(client);
-	if( group > 0 && g_bIsInCaptureMode ) {
-		g_iCapture_POINT[group] += amount;
-		if( g_iCapture_POINT[group][type] < 0 )
-			g_iCapture_POINT[group][type] = 0;
-	}
 }
 // -----------------------------------------------------------------------------------------------------------------
 int CTF_SpawnFlag(float vecOrigin[3], int skin, int color[3]) {
@@ -716,6 +704,17 @@ public Action CTF_SpawnFlag_Delay(Handle timer, any ent2) {
 	TeleportEntity(ent2, view_as<float>({30.0, 0.0, 0.0}), view_as<float>({0.0, 90.0, 0.0}), NULL_VECTOR);
 }
 // -----------------------------------------------------------------------------------------------------------------
+void GDM_Init(int client) {
+	char szSteamID[32];
+	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
+	
+	int array[gdm_max];
+	
+	if( !g_hGlobalDamage.GetArray(szSteamID, array, sizeof(array)) ) {
+		array[gdm_elo] = 1500;
+		g_hGlobalDamage.SetArray(szSteamID, array, sizeof(array));
+	}
+}
 void GDM_Add(int client, int shot = 0, int damage=0, int hitbox=0) {
 	char szSteamID[32];
 	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
@@ -724,7 +723,7 @@ void GDM_Add(int client, int shot = 0, int damage=0, int hitbox=0) {
 	g_hGlobalDamage.GetArray(szSteamID, array, sizeof(array));
 	array[gdm_shot] += shot;
 	array[gdm_damage] += damage;
-	array[gdm_hitbox] += hitbox;	
+	array[gdm_hitbox] += hitbox;
 	
 	g_hGlobalDamage.SetArray(szSteamID, array, sizeof(array));
 }
@@ -737,6 +736,45 @@ void GDM_Get(int client, int& shot, int& damage, int& hitbox) {
 	shot = array[gdm_shot];
 	damage = array[gdm_damage];
 	hitbox = array[gdm_hitbox];	
+}
+void GDM_ELOKill(int client, int target) {
+	#if defined DEBUG
+	PrintToServer("GDM_ELOKill");
+	#endif
+	
+	char szSteamID[32], szSteamID2[32];
+	int attacker[gdm_max], victim[gdm_max], cgID, tgID, cElo, tElo;
+	float cDelta, tDelta;
+	
+	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
+	GetClientAuthId(target, AuthId_Engine, szSteamID2, sizeof(szSteamID2));
+	
+	g_hGlobalDamage.GetArray(szSteamID, attacker, sizeof(attacker));
+	g_hGlobalDamage.GetArray(szSteamID2, victim, sizeof(victim));
+	
+	cDelta = 1.0/((Pow(10.0, - (attacker[gdm_elo] - victim[gdm_elo]) / 400.0)) + 1.0);
+	tDelta = 1.0/((Pow(10.0, - (victim[gdm_elo] - attacker[gdm_elo]) / 400.0)) + 1.0);
+	cElo = RoundFloat(float(attacker[gdm_elo]) + 16.0 * (1.0 - cDelta));
+	tElo = RoundFloat(float(victim[gdm_elo]) + 16.0 * (0.0 - tDelta));
+	cgID = rp_GetClientGroupID(client);
+	tgID = rp_GetClientGroupID(target);
+	
+	g_iCapture_POINT[ tgID ] -= tElo;
+	g_iCapture_POINT[ cgID ] += cElo;
+	if( g_iCapture_POINT[ tgID ] < 0 ) {
+		g_iCapture_POINT[ cgID ] += g_iCapture_POINT[tgID];
+		g_iCapture_POINT[ tgID ] = 0;
+	}
+	
+	PrintToChatAll("Attaquant: ANCIEN %d NOUVEAU %d", cElo, attacker[gdm_elo]);
+	PrintToChatAll("Victime: ANCIEN %d NOUVEAU %d", tElo, victim[gdm_elo]);	
+	
+	attacker[gdm_elo] = cElo;
+	victim[gdm_elo] = tElo;
+	
+	g_hGlobalDamage.SetArray(szSteamID, attacker, sizeof(attacker));
+	g_hGlobalDamage.SetArray(szSteamID, victim, sizeof(victim));
+	
 }
 // -----------------------------------------------------------------------------------------------------------------
 void Client_SetSpawnProtect(int client, bool status) {
