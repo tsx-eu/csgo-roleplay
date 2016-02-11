@@ -200,17 +200,29 @@ public Action Cmd_ItemContrat(int args) {
 	else if( StrContains(arg1, "lupin") == 0 ) {
 		g_iKillerPoint[vendeur][competance_type] = 1006;
 	}
+	
+	
+	if( !IsValidClient(target) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre cible s'est déconnectée.");
+		SetContratFail(client);
+	}
 	return Plugin_Handled;
 }
 // ----------------------------------------------------------------------------
 public Action fwdFrame(int client) {
 	int target = rp_GetClientInt(client, i_ToKill);
-	if( target > 0 ) {
-		rp_Effect_BeamBox(client, target, NULL_VECTOR, 255, 0, 0);
-	}
-	if(rp_GetClientJobID(client) != 41) {
+	
+	if( !IsValidClient(target) ) {
 		SetContratFail(client);
 	}
+	else if(rp_GetClientJobID(client) != 41) {
+		SetContratFail(client);
+	}
+	else {
+		rp_Effect_BeamBox(client, target, NULL_VECTOR, 255, 0, 0);
+	}
+	
+	return Plugin_Continue;
 }
 public Action fwdTueurKill(int client, int attacker, float& respawn) {
 	if( rp_GetClientInt(attacker, i_ToKill) == client && rp_GetClientInt(client, i_KidnappedBy) != attacker ) {
