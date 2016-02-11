@@ -21,10 +21,6 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-// TODO: Un attaquant passe défenseur s'il a 100 points de plus que le défenseur actuel.
-// TODO: Dégat divisé par 2 entre chaque gang attaquant
-// TODO: Dégat divisé par 2 entre quelqu'un du même gang
-// TODO: Vérifier à quoi sert: CTF_SpawnFlag_Delay
 // TODO: Configuration d'item sauvegardée pour retrait rapide en banque
 // TODO: Corrigé big-mac
 // TODO: Ajouter les TAG.
@@ -272,6 +268,8 @@ void CAPTURE_Start() {
 	CPrintToChatAll("{lightblue} Le bunker peut maintenant être capturé! {default}");
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	
+	CAPTURE_UpdateLight();
+	
 	g_bIsInCaptureMode = true;
 	int gID;
 			
@@ -318,9 +316,9 @@ void CAPTURE_Start() {
 	CreateTimer(1.0, CAPTURE_Tick);
 	
 	HookEvent("player_hurt", Event_PlayerHurt, EventHookMode_Post);
-	HookEvent("player_shoot", Event_PlayerShoot, EventHookMode_Post);
+	HookEvent("weapon_fire", Event_PlayerShoot, EventHookMode_Post);
 	HookEvent("player_hurt", fwdGod_PlayerHurt, EventHookMode_Pre);
-	HookEvent("player_shoot", fwdGod_PlayerShoot, EventHookMode_Pre);	
+	HookEvent("weapon_fire", fwdGod_PlayerShoot, EventHookMode_Pre);	
 }
 void CAPTURE_Stop() {
 	#if defined DEBUG
@@ -345,8 +343,6 @@ void CAPTURE_Stop() {
 	}
 	
 	for(int i=1; i<MAX_GROUPS; i++) {
-		if( rp_GetGroupInt(i, group_type_chef)!= 1 )
-			continue;
 		if( maxPoint > g_iCapture_POINT[i] )
 			continue;
 
@@ -366,11 +362,35 @@ void CAPTURE_Stop() {
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	
 	UnhookEvent("player_hurt", Event_PlayerHurt, EventHookMode_Post);
+	UnhookEvent("weapon_fire", Event_PlayerShoot, EventHookMode_Post);
 	UnhookEvent("player_hurt", fwdGod_PlayerHurt, EventHookMode_Pre);
-	UnhookEvent("player_hurt", fwdGod_PlayerHurt, EventHookMode_Pre);
-	UnhookEvent("player_shoot", fwdGod_PlayerShoot, EventHookMode_Pre);	
+	UnhookEvent("weapon_fire", fwdGod_PlayerShoot, EventHookMode_Pre);	
 	
 	CAPTURE_Reward();
+}
+void CAPTURE_UpdateLight() {
+	char strBuffer[4][32], tmp[64], tmp2[64];
+	int color[4],  defense = rp_GetCaptureInt(cap_bunker);
+	
+	rp_GetGroupData(defense, group_type_color, tmp, sizeof(tmp));
+	ExplodeString(tmp, ",", strBuffer, sizeof(strBuffer), sizeof(strBuffer[]));
+	color[0] = StringToInt(strBuffer[0]);
+	color[1] = StringToInt(strBuffer[1]);
+	color[2] = StringToInt(strBuffer[2]);
+	color[3] = 255;
+	
+	Format(tmp2, sizeof(tmp2), "%d %d %d", color[0], color[1], color[2]);
+	
+	for (int i = MaxClients; i <= MAX_ENTITIES; i++) {
+		if( !IsValidEdict(i) || !IsValidEntity(i) )
+			continue;
+		
+		GetEdictClassname(i, tmp, sizeof(tmp));
+		if( StrEqual(tmp, "point_spotlight") && rp_IsInPVP(i) ) {
+			SetVariantString(tmp2);
+			AcceptEntityInput(i, "SetColor");
+		}
+	}
 }
 void CAPTURE_Reward() {
 	#if defined DEBUG
@@ -400,13 +420,11 @@ void CAPTURE_Reward() {
 	}	
 }
 public Action CAPTURE_Tick(Handle timer, any none) {
-	static int lastGang = -1;
-	
 	if( !g_bIsInCaptureMode )
 		return Plugin_Handled;
 	
-	char strBuffer[4][8], tmp[64], tmp2[64];
-	int color[4], defense = rp_GetCaptureInt(cap_bunker);
+	char strBuffer[4][32], tmp[64];
+	int color[4], maxPoint, winner, defense = rp_GetCaptureInt(cap_bunker);
 	float mins[3], maxs[3];
 	mins[0] = rp_GetZoneFloat(ZONE_BUNKER, zone_type_min_x);
 	mins[1] = rp_GetZoneFloat(ZONE_BUNKER, zone_type_min_y);
@@ -414,6 +432,25 @@ public Action CAPTURE_Tick(Handle timer, any none) {
 	maxs[0] = rp_GetZoneFloat(ZONE_BUNKER, zone_type_max_x);
 	maxs[1] = rp_GetZoneFloat(ZONE_BUNKER, zone_type_max_y);
 	maxs[2] = rp_GetZoneFloat(ZONE_BUNKER, zone_type_max_z);
+	
+	for(int i=1; i<MAX_GROUPS; i++) {
+		if( maxPoint > g_iCapture_POINT[i] )
+			continue;
+
+		winner = i;
+		maxPoint = g_iCapture_POINT[i];
+	}
+
+	if( maxPoint+100 >= g_iCapture_POINT[defense] && winner != defense ) {
+		rp_GetGroupData(winner, group_type_name, tmp, sizeof(tmp));
+		ExplodeString(tmp, " - ", strBuffer, sizeof(strBuffer), sizeof(strBuffer[]));
+		CPrintToChatAll("{lightblue} ================================== {default}");
+		CPrintToChatAll("{lightblue} Le bunker est maintenant défendu par les %s! {default}", strBuffer[1]);
+		CPrintToChatAll("{lightblue} ================================== {default}");
+		defense = winner;
+		rp_SetCaptureInt(cap_bunker, defense);
+		CAPTURE_UpdateLight();
+	}
 	
 	rp_GetGroupData(defense, group_type_color, tmp, sizeof(tmp));
 	ExplodeString(tmp, ",", strBuffer, sizeof(strBuffer), sizeof(strBuffer[]));
@@ -423,25 +460,6 @@ public Action CAPTURE_Tick(Handle timer, any none) {
 	color[3] = 255;
 	
 	Effect_DrawBeamBoxToAll(mins, maxs, g_cBeam, g_cBeam, 0, 30, 2.0, 5.0, 5.0, 2, 1.0, color, 0);
-	
-	if( lastGang != defense ) {
-		Format(tmp2, sizeof(tmp2), "%d %d %d", color[0], color[1], color[2]);
-		
-		
-		for (int i = MaxClients; i <= MAX_ENTITIES; i++) {
-			if( !IsValidEdict(i) || !IsValidEntity(i) )
-				continue;
-			if( !rp_IsInPVP(i) )
-				continue;
-			
-			GetEdictClassname(i, tmp, sizeof(tmp));
-			if( StrEqual(tmp, "point_spotlight") ) {
-				SetVariantString(tmp2);
-				AcceptEntityInput(i, "SetColor");
-			}
-		}
-	}
-	lastGang = defense;
 	
 	CreateTimer(1.0, CAPTURE_Tick);
 	return Plugin_Handled;
@@ -483,7 +501,6 @@ public Action fwdDead(int victim, int attacker, float& respawn) {
 	return Plugin_Handled;
 }
 public Action fwdHUD(int client, char[] szHUD, const int size) {
-	
 	int gID = rp_GetClientGroupID(client);
 	int defTeam = rp_GetCaptureInt(cap_bunker);
 	char optionsBuff[4][32], tmp[128];
@@ -492,14 +509,11 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 		
 		Format(szHUD, size, "PvP: Capture du bunker");
 		if( gID == defTeam )
-			Format(szHUD, size, "%s - Défense", szHUD);
+			Format(szHUD, size, "%s - Défense\n", szHUD);
 		else
-			Format(szHUD, size, "%s - Attaque", szHUD);
+			Format(szHUD, size, "%s - Attaque\n", szHUD);
 		
 		for(int i=1; i<MAX_GROUPS; i++) {
-			if(rp_GetGroupInt(i, group_type_chef) != 1 )
-				continue;
-				
 			if( g_iCapture_POINT[i] == 0 && gID != i )
 				continue;
 			
@@ -538,6 +552,15 @@ public Action Event_PlayerHurt(Handle event, char[] name, bool dontBroadcast) {
 	
 	return Plugin_Continue;
 }
+public Action fwdTakeDamage(int victim, int attacker, float& damage, int wepID, float pos[3]) {
+	if( rp_GetClientGroupID(victim) == rp_GetClientGroupID(attacker) )
+		damage /= 2.0;
+	if( rp_GetClientGroupID(attacker) != rp_GetCaptureInt(cap_bunker) && rp_GetClientGroupID(victim) != rp_GetCaptureInt(cap_bunker) )
+		damage /= 2.0;
+	if( rp_GetClientGroupID(victim) == 0 || rp_GetClientGroupID(attacker) == 0  )
+		damage *= 0.0;
+	return Plugin_Changed;
+}
 // -----------------------------------------------------------------------------------------------------------------
 public Action SwitchToFirst(Handle timer, any client) {
 	if( rp_GetClientInt(client, i_ThirdPerson) == 0 )
@@ -545,12 +568,9 @@ public Action SwitchToFirst(Handle timer, any client) {
 }
 // -----------------------------------------------------------------------------------------------------------------
 int CTF_SpawnFlag(float vecOrigin[3], int skin, int color[3]) {
-	
-	char szSkin[12];
-	char szColor[32];
+	char szSkin[12], szColor[32];
 	Format(szSkin, sizeof(szSkin), "%d", skin);
 	Format(szColor, sizeof(szColor), "%d %d %d", color[0], color[1], color[2]);
-	
 	
 	int ent1 = CreateEntityByName("hegrenade_projectile");
 	if( !IsValidEdict(ent1) )
@@ -601,8 +621,7 @@ int CTF_SpawnFlag(float vecOrigin[3], int skin, int color[3]) {
 	SetEntityRenderMode(ent2, RENDER_TRANSALPHA);
 	SetEntityRenderColor(ent1, 0, 0, 0, 0);
 	SetEntityRenderColor(ent2, color[0], color[1], color[2],  255);
-	
-	CreateTimer(0.1, CTF_SpawnFlag_Delay, ent2);
+	CreateTimer(0.01, CTF_SpawnFlag_Delay, ent2);
 	
 	g_iFlagData[ent1][data_skin] = skin;
 	g_iFlagData[ent1][data_red] = color[0];
@@ -617,20 +636,20 @@ int CTF_SpawnFlag(float vecOrigin[3], int skin, int color[3]) {
 }
 void CTF_DropFlag(int client, int thrown) {
 	
-	int flag = g_iClientFlag[client];
+	int flag, color[3], gID, skin;
+	float vecOrigin[3], vecAngles[3], vecPush[3];
+	
+	flag = g_iClientFlag[client];
 	g_iClientFlag[client] = 0;
 	g_fLastDrop[client] = GetGameTime();
-	
-	int skin = g_iFlagData[flag][data_skin];
-	int color[3];
+	skin = g_iFlagData[flag][data_skin];
 	color[0] = g_iFlagData[flag][data_red];
 	color[1] = g_iFlagData[flag][data_green];
 	color[2] = g_iFlagData[flag][data_blue];
-	int gID = g_iFlagData[flag][data_group];
+	gID = g_iFlagData[flag][data_group];
 	
 	AcceptEntityInput(flag, "KillHierarchy");
 	
-	float vecOrigin[3], vecAngles[3], vecPush[3];
 	GetClientEyeAngles(client, vecAngles);
 	GetClientEyePosition(client, vecOrigin);
 	vecAngles[0] += 10.0;
@@ -822,3 +841,4 @@ public Action GOD_Expire(Handle timer, any client) {
 	if( g_hGodTimer[client] != INVALID_HANDLE )
 		Client_SetSpawnProtect(client, false);
 }
+// -----------------------------------------------------------------------------------------------------------------
