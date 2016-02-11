@@ -53,7 +53,6 @@ int g_cBeam;
 StringMap g_hGlobalDamage;
 enum damage_data { gdm_shot, gdm_damage, gdm_hitbox, gdm_elo, gdm_max };
 // -----------------------------------------------------------------------------------------------------------------
-
 public Plugin myinfo = {
 	name = "Utils: PvP", author = "KoSSoLaX",
 	description = "RolePlay - Utils: PvP",
@@ -96,7 +95,6 @@ public void OnClientPostAdminCheck(int client) {
 		rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
 		rp_HookEvent(client, RP_OnPlayerHUD, fwdHUD);
 		rp_HookEvent(client, RP_OnPlayerSpawn, fwdSpawn);
-		SDKHook(client, SDKHook_FireBulletsPost, fwdFireBullet);
 	}
 }
 // -----------------------------------------------------------------------------------------------------------------
@@ -289,7 +287,6 @@ void CAPTURE_Start() {
 		rp_HookEvent(i, RP_OnPlayerDead, fwdDead);
 		rp_HookEvent(i, RP_OnPlayerHUD, fwdHUD);
 		rp_HookEvent(i, RP_OnPlayerSpawn, fwdSpawn);
-		SDKHook(i, SDKHook_FireBulletsPost, fwdFireBullet);
 		gID = rp_GetClientGroupID(i);
 		g_iCapture_POINT[gID] += 50;
 		
@@ -321,8 +318,9 @@ void CAPTURE_Start() {
 	CreateTimer(1.0, CAPTURE_Tick);
 	
 	HookEvent("player_hurt", Event_PlayerHurt, EventHookMode_Post);
+	HookEvent("player_shoot", Event_PlayerShoot, EventHookMode_Post);
 	HookEvent("player_hurt", fwdGod_PlayerHurt, EventHookMode_Pre);
-	
+	HookEvent("player_shoot", fwdGod_PlayerShoot, EventHookMode_Pre);	
 }
 void CAPTURE_Stop() {
 	#if defined DEBUG
@@ -344,7 +342,6 @@ void CAPTURE_Stop() {
 		rp_UnhookEvent(i, RP_OnPlayerDead, fwdDead);
 		rp_UnhookEvent(i, RP_OnPlayerHUD, fwdHUD);
 		rp_UnhookEvent(i, RP_OnPlayerSpawn, fwdSpawn);
-		SDKUnhook(i, SDKHook_FireBulletsPost, fwdFireBullet);
 	}
 	
 	for(int i=1; i<MAX_GROUPS; i++) {
@@ -361,7 +358,7 @@ void CAPTURE_Stop() {
 	ExplodeString(tmp, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
 			
 	char fmt[1024];
-	Format(fmt, sizeof(fmt), "UPDATE `rp_servers` SET `bunkerCap`='%i';';", winner);
+	Format(fmt, sizeof(fmt), "UPDATE `rp_servers` SET `bunkerCap`='%i';", winner);
 	SQL_TQuery( rp_GetDatabase(), SQL_QueryCallBack, fmt);
 	rp_SetCaptureInt(cap_bunker, winner);
 			
@@ -370,7 +367,8 @@ void CAPTURE_Stop() {
 	
 	UnhookEvent("player_hurt", Event_PlayerHurt, EventHookMode_Post);
 	UnhookEvent("player_hurt", fwdGod_PlayerHurt, EventHookMode_Pre);
-	
+	UnhookEvent("player_hurt", fwdGod_PlayerHurt, EventHookMode_Pre);
+	UnhookEvent("player_shoot", fwdGod_PlayerShoot, EventHookMode_Pre);	
 	
 	CAPTURE_Reward();
 }
@@ -451,7 +449,7 @@ public Action CAPTURE_Tick(Handle timer, any none) {
 // -----------------------------------------------------------------------------------------------------------------
 public Action fwdSpawn(int client) {
 	if( rp_GetClientGroupID(client) == rp_GetCaptureInt(cap_bunker) )
-		CreateTimer(0.25, fwdSpawn_ToRespawn, client);
+		CreateTimer(0.01, fwdSpawn_ToRespawn, client);
 	
 	return Plugin_Continue;
 }
@@ -467,7 +465,7 @@ public Action fwdSpawn_ToRespawn(Handle timer, any client) {
 		
 		rand[0] = Math_GetRandomFloat(mins[0] + 64.0, maxs[0] - 64.0);
 		rand[1] = Math_GetRandomFloat(mins[1] + 64.0, maxs[1] - 64.0);
-		rand[2] = mins[0] + 32.0;
+		rand[2] = mins[2] + 32.0;
 		
 		TeleportEntity(client, rand, NULL_VECTOR, NULL_VECTOR);
 		FakeClientCommand(client, "say /stuck");
@@ -494,9 +492,9 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 		
 		Format(szHUD, size, "PvP: Capture du bunker");
 		if( gID == defTeam )
-			Format(szHUD, size, " - Défense");
+			Format(szHUD, size, "%s - Défense", szHUD);
 		else
-			Format(szHUD, size, " - Attaque");
+			Format(szHUD, size, "%s - Attaque", szHUD);
 		
 		for(int i=1; i<MAX_GROUPS; i++) {
 			if(rp_GetGroupInt(i, group_type_chef) != 1 )
@@ -519,28 +517,25 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 	}
 	return Plugin_Continue;
 }
-public void fwdFireBullet(int client, int shot, const char[] weaponname) {
-	PrintToChatAll("--> Client: %d shot: %d, Weapon: %s", client, shot, weaponname);
-	GDM_Add(client, shot);
+public Action Event_PlayerShoot(Handle event, char[] name, bool dontBroadcast) {
+	int client = GetClientOfUserId(GetEventInt(event, "userid"));
+	GDM_Add(client, 1);
+	
+	return Plugin_Continue;
 }
 public Action Event_PlayerHurt(Handle event, char[] name, bool dontBroadcast) {
 	char weapon[64];
-	int victim, attacker, damage, hitgroup;
+	int attacker, damage, hitgroup;
 	
-	victim 	= GetClientOfUserId(GetEventInt(event, "userid"));
 	attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
 	damage = GetEventInt(event, "dmg_health");	
 	hitgroup = GetEventInt(event, "hitgroup");
 	
 	GetEventString(event, "weapon", weapon, sizeof(weapon));
 	
-	if( StrEqual(weapon, "inferno") || StrEqual(weapon, "hegrenade") ) { // TODO: Ajouter les explosifs du rp
-		return Plugin_Continue;
-	}
+	if( hitgroup > 0 )
+		GDM_Add(attacker, 0, damage, hitgroup);
 	
-	PrintToChatAll("--> Victime: %d Attaquant: %d Dégat: %d, Hitbox: %d", victim, attacker, damage, hitgroup);
-	
-	GDM_Add(attacker, 0, damage, hitgroup);
 	return Plugin_Continue;
 }
 // -----------------------------------------------------------------------------------------------------------------
@@ -796,12 +791,13 @@ void Client_SetSpawnProtect(int client, bool status) {
 		rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdGODZoneChange);
 		rp_UnhookEvent(client, RP_OnPlayerDead, fwdGodPlayerDead);
 		rp_ClientColorize(client);
-		g_hGodTimer[client] = INVALID_HANDLE;
+		delete g_hGodTimer[client];
+		g_hGodTimer[client] = INVALID_HANDLE; 
 		SetEntProp(client, Prop_Data, "m_takedamage", 2);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre protection a expiré.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre protection a expirée.");
 	}
 }
-public Action fwdGODZoneChange(int client, int oldZone, int newZone) {
+public Action fwdGODZoneChange(int client, int newZone, int oldZone) {
 	if( oldZone == ZONE_RESPAWN && newZone != ZONE_RESPAWN ) {
 		Client_SetSpawnProtect(client, false);
 	}
@@ -809,22 +805,20 @@ public Action fwdGODZoneChange(int client, int oldZone, int newZone) {
 public Action fwdGodPlayerDead(int client, int attacker, float& respawn) {
 	Client_SetSpawnProtect(client, false);
 }
-public void fwdGodFireBullet(int client, int shot, const char[] weaponname) {
-	Client_SetSpawnProtect(client, false);
-}
 public Action fwdGod_PlayerHurt(Handle event, char[] name, bool dontBroadcast) {
 	int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
-	
-	if(  g_hGodTimer[attacker] ) {
+	if(  g_hGodTimer[attacker] != INVALID_HANDLE ) {
 		Client_SetSpawnProtect(attacker, false);
 	}
 }
-public Action OnPlayerRunCmd(int client, int& buttons) {
-	if( (buttons & (IN_ATTACK|IN_ATTACK2)) && g_hGodTimer[client] ) {
+public Action fwdGod_PlayerShoot(Handle event, char[] name, bool dontBroadcast) {
+	int client = GetClientOfUserId(GetEventInt(event, "userid"));
+	if(  g_hGodTimer[client] != INVALID_HANDLE ) {
 		Client_SetSpawnProtect(client, false);
 	}
+	return Plugin_Continue;
 }
 public Action GOD_Expire(Handle timer, any client) {
-	if( !g_hGodTimer[client] )
+	if( g_hGodTimer[client] != INVALID_HANDLE )
 		Client_SetSpawnProtect(client, false);
 }
