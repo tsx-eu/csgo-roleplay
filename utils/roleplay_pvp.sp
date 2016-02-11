@@ -21,8 +21,6 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-// TODO: Configuration d'item sauvegardée pour retrait rapide en banque
-// TODO: Corrigé big-mac
 // TODO: Ajouter les TAG.
 
 //#define DEBUG
@@ -494,9 +492,10 @@ public Action fwdDead(int victim, int attacker, float& respawn) {
 	if( g_iClientFlag[victim] > 0 ) {
 		CTF_DropFlag(victim, false);
 	}
-	
-	GDM_ELOKill(attacker, victim);
-	rp_IncrementSuccess(attacker, success_list_killpvp2);
+	if( victim != attacker ) {
+		GDM_ELOKill(attacker, victim);
+		rp_IncrementSuccess(attacker, success_list_killpvp2);
+	}
 	respawn = 0.25;
 	return Plugin_Handled;
 }
