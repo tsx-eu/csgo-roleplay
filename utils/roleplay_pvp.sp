@@ -45,7 +45,7 @@ Handle g_hGodTimer[65];
 int g_iCapture_POINT[MAX_GROUPS];
 bool g_bIsInCaptureMode = false;
 int g_cBeam;
-StringMap g_hGlobalDamage;
+StringMap g_hGlobalDamage, g_hGlobalSteamID;
 enum damage_data { gdm_shot, gdm_touch, gdm_damage, gdm_hitbox, gdm_elo, gdm_flag, gdm_max };
 TopMenu g_hStatsMenu;
 TopMenuObject g_hStatsMenu_Shoot, g_hStatsMenu_Head, g_hStatsMenu_Damage, g_hStatsMenu_Flag, g_hStatsMenu_ELO;
@@ -59,6 +59,7 @@ public void OnPluginStart() {
 	RegConsoleCmd("drop", FlagDrop);
 	RegServerCmd("rp_item_spawnflag", 	Cmd_ItemFlag,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	g_hGlobalDamage = new StringMap();
+	g_hGlobalSteamID = new StringMap();
 	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
@@ -740,8 +741,9 @@ public Action CTF_SpawnFlag_Delay(Handle timer, any ent2) {
 }
 // -----------------------------------------------------------------------------------------------------------------
 void GDM_Init(int client) {
-	char szSteamID[32];
+	char szSteamID[32], tmp[65];
 	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
+	GetClientName(client, tmp, sizeof(tmp));
 	
 	int array[gdm_max];
 	
@@ -749,6 +751,8 @@ void GDM_Init(int client) {
 		array[gdm_elo] = 1500;
 		g_hGlobalDamage.SetArray(szSteamID, array, sizeof(array));
 	}
+	
+	g_hGlobalSteamID.SetString(szSteamID, tmp, true);
 }
 void GDM_RegisterHit(int client, int damage=0, int hitbox=0) {
 	char szSteamID[32];
@@ -759,6 +763,7 @@ void GDM_RegisterHit(int client, int damage=0, int hitbox=0) {
 	array[gdm_touch]++;
 	array[gdm_damage] += damage;
 	array[gdm_hitbox] += (hitbox == 1 ? 1:0);
+	
 	g_hGlobalDamage.SetArray(szSteamID, array, sizeof(array));
 }
 void GDM_RegisterFlag(int client) {
@@ -817,77 +822,51 @@ void GDM_ELOKill(int client, int target) {
 void GDM_Resume() {
 	StringMapSnapshot KeyList = g_hGlobalDamage.Snapshot();
 	int array[gdm_max], nbrParticipant = KeyList.Length;
-	char szSteamID[32], tmp[64], key[64];
-	float delta, bestPrecision, bestHeadshot;
-	int bestPrecisionKey, bestHeadshotKey, bestEloKey, bestDamageKey, bestFlagKey;
-	int bestElo, bestDamage, bestFlag;
+	char szSteamID[32], tmp[64], key[64], name[64];
+	float delta;
 	
-	for (int i = 0; i < nbrParticipant; i++) {
-		KeyList.GetKey(i, szSteamID, sizeof(szSteamID));
-		g_hGlobalDamage.GetArray(szSteamID, array, sizeof(array));
-		
-		delta = float(array[gdm_shot]) / float(array[gdm_touch]);
-		if( delta > bestPrecision ) {
-			bestPrecision = delta;
-			bestPrecisionKey = i;
-		}
-
-		delta = float(array[gdm_touch]) / float(array[gdm_hitbox]);
-		if( delta > bestHeadshot ) {
-			bestHeadshot = delta;
-			bestHeadshotKey = i;
-		}
-		
-		if( array[gdm_damage] > bestDamage ) {
-			bestDamage = array[gdm_damage];
-			bestDamageKey = i;
-		}
-		if( array[gdm_flag] > bestFlag ) {
-			bestFlag = array[gdm_flag];
-			bestFlagKey = i;
-		}
-		if( array[gdm_elo] > bestElo ) {
-			bestElo = array[gdm_elo];
-			bestEloKey = i;
-		}
-	}
-	
-	if( g_hStatsMenu != INVALID_HANDLE ) {
+	if( g_hStatsMenu != INVALID_HANDLE )
 		delete g_hStatsMenu;
-	}
 	g_hStatsMenu = new TopMenu (MenuPvPResume);
 	g_hStatsMenu.CacheTitles = true;
 	
 	g_hStatsMenu_Shoot = g_hStatsMenu.AddCategory("shoot", MenuPvPResume);
-	KeyList.GetKey(bestPrecisionKey, szSteamID, sizeof(szSteamID));
-	Format(key, sizeof(key), "shoot_%s", szSteamID); 
-	Format(tmp, sizeof(tmp), "%s: %.1f", szSteamID, bestPrecision * 100.0); 
-	g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Shoot, "", 0, tmp);
-	
 	g_hStatsMenu_Head = g_hStatsMenu.AddCategory("head", MenuPvPResume);
-	KeyList.GetKey(bestHeadshotKey, szSteamID, sizeof(szSteamID));
-	Format(key, sizeof(key), "head_%s", szSteamID); 
-	Format(tmp, sizeof(tmp), "%s: %.1f", szSteamID, bestHeadshot * 100.0);
-	g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Head, "", 0, tmp);
-	
 	g_hStatsMenu_Damage = g_hStatsMenu.AddCategory("damage", MenuPvPResume);
-	KeyList.GetKey(bestDamageKey, szSteamID, sizeof(szSteamID));
-	Format(key, sizeof(key), "damage_%s", szSteamID); 
-	Format(tmp, sizeof(tmp), "%s: %d", szSteamID, bestDamage);
-	g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Damage, "", 0, tmp);
-	
 	g_hStatsMenu_Flag = g_hStatsMenu.AddCategory("flag", MenuPvPResume);
-	KeyList.GetKey(bestFlagKey, szSteamID, sizeof(szSteamID));
-	Format(key, sizeof(key), "flag_%s", szSteamID); 
-	Format(tmp, sizeof(tmp), "%s: %d", szSteamID, bestFlag);
-	g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Flag, "", 0, tmp);
-	
 	g_hStatsMenu_ELO = g_hStatsMenu.AddCategory("elo", MenuPvPResume);
-	KeyList.GetKey(bestEloKey, szSteamID, sizeof(szSteamID));
-	Format(key, sizeof(key), "elo_%s", szSteamID); 
-	Format(tmp, sizeof(tmp), "%s: %d", szSteamID, bestElo);
-	g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_ELO, "", 0, tmp);
+	
+	for (int i = 0; i < nbrParticipant; i++) {
+		KeyList.GetKey(i, szSteamID, sizeof(szSteamID));
+		g_hGlobalDamage.GetArray(szSteamID, array, sizeof(array));
+		g_hGlobalSteamID.GetString(szSteamID, name, sizeof(name));
 		
+		delta = float(array[gdm_shot]) / float(array[gdm_touch]);
+		Format(key, sizeof(key), "shoot_%f_%s", delta, szSteamID); 
+		Format(tmp, sizeof(tmp), "%s: %f", name, delta);
+		g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Shoot, "", 0, tmp);
+		
+		delta = float(array[gdm_hitbox]) / float(array[gdm_touch]);
+		Format(key, sizeof(key), "head_%f_%s", delta, szSteamID); 
+		Format(tmp, sizeof(tmp), "%s: %f", name, delta);
+		g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Head, "", 0, tmp);
+		
+		delta = float(array[gdm_damage]);
+		Format(key, sizeof(key), "damage_%f_%s", delta, szSteamID); 
+		Format(tmp, sizeof(tmp), "%s: %f", name, delta);
+		g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Damage, "", 0, tmp);
+		
+		delta = float(array[gdm_flag]);
+		Format(key, sizeof(key), "flag_%f_%s", delta, szSteamID); 
+		Format(tmp, sizeof(tmp), "%s: %f", name, delta);
+		g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Flag, "", 0, tmp);
+		
+		delta = float(array[gdm_elo]);
+		Format(key, sizeof(key), "elo_%f_%s", delta, szSteamID); 
+		Format(tmp, sizeof(tmp), "%s: %f", name, delta);
+		g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_ELO, "", 0, tmp);
+	}
+	
 	
 	for (int client = 1; client <= MaxClients; client++) {
 		if( !IsValidClient(client) )
