@@ -15,6 +15,7 @@
 #include <smlib>
 #include <colors_csgo>
 #include <basecomm>
+#include <topmenus>
 
 #define __LAST_REV__ 		"v:0.1.0"
 
@@ -34,7 +35,7 @@
 #define ELO_FACTEUR_K	40.0
 
 // -----------------------------------------------------------------------------------------------------------------
-enum flag_data { data_group, data_skin, data_red, data_green, data_blue, data_time, data_owner, flag_data_max };
+enum flag_data { data_group, data_skin, data_red, data_green, data_blue, data_time, data_owner, data_lastOwner, flag_data_max };
 int g_iClientFlag[65];
 float g_fLastDrop[65];
 int g_iFlagData[MAX_ENTITIES+1][flag_data_max];
@@ -45,7 +46,9 @@ int g_iCapture_POINT[MAX_GROUPS];
 bool g_bIsInCaptureMode = false;
 int g_cBeam;
 StringMap g_hGlobalDamage;
-enum damage_data { gdm_shot, gdm_damage, gdm_hitbox, gdm_elo, gdm_max };
+enum damage_data { gdm_shot, gdm_touch, gdm_damage, gdm_hitbox, gdm_elo, gdm_flag, gdm_max };
+TopMenu g_hStatsMenu;
+TopMenuObject g_hStatsMenu_Shoot, g_hStatsMenu_Head, g_hStatsMenu_Damage, g_hStatsMenu_Flag, g_hStatsMenu_ELO;
 // -----------------------------------------------------------------------------------------------------------------
 public Plugin myinfo = {
 	name = "Utils: PvP", author = "KoSSoLaX",
@@ -66,6 +69,14 @@ public void OnConfigsExecuted() {
 		g_hCapturable = FindConVar("rp_capture");
 		HookConVarChange(g_hCapturable, OnCvarChange);
 	}
+	
+	g_hStatsMenu = new TopMenu (MenuPvPResume);
+	g_hStatsMenu.CacheTitles = false;
+	g_hStatsMenu_Shoot = g_hStatsMenu.AddCategory("shoot", MenuPvPResume);
+	g_hStatsMenu_Head = g_hStatsMenu.AddCategory("head", MenuPvPResume);
+	g_hStatsMenu_Damage = g_hStatsMenu.AddCategory("damage", MenuPvPResume);
+	g_hStatsMenu_Flag = g_hStatsMenu.AddCategory("flag", MenuPvPResume);
+	g_hStatsMenu_ELO = g_hStatsMenu.AddCategory("elo", MenuPvPResume);
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt");
@@ -201,8 +212,10 @@ public Action FlagThink(Handle timer, any data) {
 	if( g_bIsInCaptureMode ) {
 		if( rp_GetPlayerZone(entity) == ZONE_BUNKER ) {
 			
-			if( rp_GetCaptureInt(cap_bunker) != g_iFlagData[entity][data_group] )
+			if( rp_GetCaptureInt(cap_bunker) != g_iFlagData[entity][data_group] ) {
 				g_iCapture_POINT[g_iFlagData[entity][data_group]] += FLAG_POINTS;
+				GDM_RegisterFlag(g_iFlagData[entity][data_lastOwner]);
+			}
 			
 			Entity_GetAbsOrigin(entity, vecOrigin);
 			
@@ -374,6 +387,7 @@ void CAPTURE_Stop() {
 	UnhookEvent("weapon_fire", fwdGod_PlayerShoot, EventHookMode_Pre);	
 	
 	CAPTURE_Reward();
+	GDM_Resume();
 }
 void CAPTURE_UpdateLight() {
 	char strBuffer[4][32], tmp[64], tmp2[64];
@@ -541,7 +555,7 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 }
 public Action Event_PlayerShoot(Handle event, char[] name, bool dontBroadcast) {
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
-	GDM_Add(client, 1);
+	GDM_RegisterShoot(client);
 	
 	return Plugin_Continue;
 }
@@ -556,7 +570,7 @@ public Action Event_PlayerHurt(Handle event, char[] name, bool dontBroadcast) {
 	GetEventString(event, "weapon", weapon, sizeof(weapon));
 	
 	if( hitgroup > 0 )
-		GDM_Add(attacker, 0, damage, hitgroup);
+		GDM_RegisterHit(attacker, damage, hitgroup);
 	
 	return Plugin_Continue;
 }
@@ -664,6 +678,7 @@ void CTF_DropFlag(int client, int thrown) {
 	
 	flag = CTF_SpawnFlag(vecOrigin, skin, color);
 	g_iFlagData[flag][data_group] = gID;
+	g_iFlagData[flag][data_lastOwner] = client;
 	
 	if( thrown ) {
 		
@@ -743,27 +758,34 @@ void GDM_Init(int client) {
 		g_hGlobalDamage.SetArray(szSteamID, array, sizeof(array));
 	}
 }
-void GDM_Add(int client, int shot = 0, int damage=0, int hitbox=0) {
+void GDM_RegisterHit(int client, int damage=0, int hitbox=0) {
 	char szSteamID[32];
 	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
 	
 	int array[gdm_max];
 	g_hGlobalDamage.GetArray(szSteamID, array, sizeof(array));
-	array[gdm_shot] += shot;
+	array[gdm_touch]++;
 	array[gdm_damage] += damage;
-	array[gdm_hitbox] += hitbox;
-	
+	array[gdm_hitbox] += (hitbox == 1 ? 1:0);
 	g_hGlobalDamage.SetArray(szSteamID, array, sizeof(array));
 }
-void GDM_Get(int client, int& shot, int& damage, int& hitbox) {
+void GDM_RegisterFlag(int client) {
 	char szSteamID[32];
 	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
 	
 	int array[gdm_max];
 	g_hGlobalDamage.GetArray(szSteamID, array, sizeof(array));
-	shot = array[gdm_shot];
-	damage = array[gdm_damage];
-	hitbox = array[gdm_hitbox];	
+	array[gdm_flag]++;
+	g_hGlobalDamage.SetArray(szSteamID, array, sizeof(array));
+}
+void GDM_RegisterShoot(int client) {
+	char szSteamID[32];
+	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
+	
+	int array[gdm_max];
+	g_hGlobalDamage.GetArray(szSteamID, array, sizeof(array));
+	array[gdm_shot]++;
+	g_hGlobalDamage.SetArray(szSteamID, array, sizeof(array));
 }
 void GDM_ELOKill(int client, int target) {
 	#if defined DEBUG
@@ -794,15 +816,71 @@ void GDM_ELOKill(int client, int target) {
 		g_iCapture_POINT[ tgID ] = 0;
 	}
 	
-	PrintToChatAll("Attaquant: NOUVEAU %d ANCIEN %d", cElo, attacker[gdm_elo]);
-	PrintToChatAll("Victime: NOUVEAU %d ANCIEN %d", tElo, victim[gdm_elo]);	
-	
 	attacker[gdm_elo] = cElo;
 	victim[gdm_elo] = tElo;
 	
 	g_hGlobalDamage.SetArray(szSteamID, attacker, sizeof(attacker));
 	g_hGlobalDamage.SetArray(szSteamID2, victim, sizeof(victim));
+}
+void GDM_Resume() {
+	StringMapSnapshot KeyList = g_hGlobalDamage.Snapshot();
+	int array[gdm_max], nbrParticipant = KeyList.Length;
+	char szSteamID[32], tmp[64];
+	float delta, bestPrecision, bestHeadshot;
+	int bestPrecisionKey, bestHeadshotKey, bestEloKey, bestDamageKey, bestFlagKey;
+	int bestElo, bestDamage, bestFlag;
 	
+	for (int i = 0; i < nbrParticipant; i++) {
+		KeyList.GetKey(i, szSteamID, sizeof(szSteamID));
+		g_hGlobalDamage.GetArray(szSteamID, array, sizeof(array));
+		
+		delta = float(array[gdm_shot]) / float(array[gdm_touch]);
+		if( delta > bestPrecision ) {
+			bestPrecision = delta;
+			bestPrecisionKey = i;
+		}
+
+		delta = float(array[gdm_touch]) / float(array[gdm_hitbox]);
+		if( delta > bestHeadshot ) {
+			bestHeadshot = delta;
+			bestHeadshotKey = i;
+		}
+		
+		if( array[gdm_damage] > bestDamage ) {
+			bestDamage = array[gdm_damage];
+			bestDamageKey = i;
+		}
+		if( array[gdm_flag] > bestFlag ) {
+			bestFlag = array[gdm_flag];
+			bestFlagKey = i;
+		}
+		if( array[gdm_elo] > bestElo ) {
+			bestElo = array[gdm_elo];
+			bestEloKey = i;
+		}
+	}
+	
+	KeyList.GetKey(bestPrecisionKey, szSteamID, sizeof(szSteamID)); Format(tmp, sizeof(tmp), "%s: %.1f%", szSteamID, bestPrecision * 100.0); 
+	g_hStatsMenu.AddItem(tmp, MenuPvPResume, g_hStatsMenu_Shoot);
+	
+	KeyList.GetKey(bestHeadshotKey, szSteamID, sizeof(szSteamID)); Format(tmp, sizeof(tmp), "%s: %.1f%", szSteamID, bestHeadshot * 100.0);
+	g_hStatsMenu.AddItem(tmp, MenuPvPResume, g_hStatsMenu_Head);
+	
+	KeyList.GetKey(bestDamageKey, szSteamID, sizeof(szSteamID)); Format(tmp, sizeof(tmp), "%s: %d", szSteamID, bestDamage);
+	g_hStatsMenu.AddItem(tmp, MenuPvPResume, g_hStatsMenu_Damage);
+	
+	KeyList.GetKey(bestFlagKey, szSteamID, sizeof(szSteamID)); Format(tmp, sizeof(tmp), "%s: %d", szSteamID, bestFlag);
+	g_hStatsMenu.AddItem(tmp, MenuPvPResume, g_hStatsMenu_Flag);
+	
+	KeyList.GetKey(bestEloKey, szSteamID, sizeof(szSteamID)); Format(tmp, sizeof(tmp), "%s: %d", szSteamID, bestElo);
+	g_hStatsMenu.AddItem(tmp, MenuPvPResume, g_hStatsMenu_ELO);
+		
+	
+	for (int client = 1; client <= MaxClients; client++) {
+		if( !IsValidClient(client) )
+			continue;
+		g_hStatsMenu.Display(client, TopMenuPosition_Start);
+	}
 }
 // -----------------------------------------------------------------------------------------------------------------
 void Client_SetSpawnProtect(int client, bool status) {
@@ -850,3 +928,19 @@ public Action GOD_Expire(Handle timer, any client) {
 		Client_SetSpawnProtect(client, false);
 }
 // -----------------------------------------------------------------------------------------------------------------
+public void MenuPvPResume(Handle topmenu, TopMenuAction action, TopMenuObject topobj_id, int param, char[] buffer, int maxlength) {
+	if (action == TopMenuAction_DisplayTitle || action == TopMenuAction_DisplayOption) {
+		if( topobj_id == g_hStatsMenu_Shoot )
+			Format(buffer, maxlength, "Meilleur précisions de tir");
+		else if( topobj_id == g_hStatsMenu_Head )
+			Format(buffer, maxlength, "Le plus de tir dans la tête");
+		else if( topobj_id == g_hStatsMenu_Damage )
+			Format(buffer, maxlength, "Le plus de dégâts");
+		else if( topobj_id == g_hStatsMenu_Flag )
+			Format(buffer, maxlength, "Le plus de drapeau posé");
+		else if( topobj_id == g_hStatsMenu_ELO )
+			Format(buffer, maxlength, "Le meilleur en PvP");
+	}
+	else if (action == TopMenuAction_SelectOption) {
+	}
+}
