@@ -69,14 +69,6 @@ public void OnConfigsExecuted() {
 		g_hCapturable = FindConVar("rp_capture");
 		HookConVarChange(g_hCapturable, OnCvarChange);
 	}
-	
-	g_hStatsMenu = new TopMenu (MenuPvPResume);
-	g_hStatsMenu.CacheTitles = false;
-	g_hStatsMenu_Shoot = g_hStatsMenu.AddCategory("shoot", MenuPvPResume);
-	g_hStatsMenu_Head = g_hStatsMenu.AddCategory("head", MenuPvPResume);
-	g_hStatsMenu_Damage = g_hStatsMenu.AddCategory("damage", MenuPvPResume);
-	g_hStatsMenu_Flag = g_hStatsMenu.AddCategory("flag", MenuPvPResume);
-	g_hStatsMenu_ELO = g_hStatsMenu.AddCategory("elo", MenuPvPResume);
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt");
@@ -825,7 +817,7 @@ void GDM_ELOKill(int client, int target) {
 void GDM_Resume() {
 	StringMapSnapshot KeyList = g_hGlobalDamage.Snapshot();
 	int array[gdm_max], nbrParticipant = KeyList.Length;
-	char szSteamID[32], tmp[64];
+	char szSteamID[32], tmp[64], key[64];
 	float delta, bestPrecision, bestHeadshot;
 	int bestPrecisionKey, bestHeadshotKey, bestEloKey, bestDamageKey, bestFlagKey;
 	int bestElo, bestDamage, bestFlag;
@@ -860,20 +852,41 @@ void GDM_Resume() {
 		}
 	}
 	
-	KeyList.GetKey(bestPrecisionKey, szSteamID, sizeof(szSteamID)); Format(tmp, sizeof(tmp), "%s: %.1f%", szSteamID, bestPrecision * 100.0); 
-	g_hStatsMenu.AddItem(tmp, MenuPvPResume, g_hStatsMenu_Shoot);
+	if( g_hStatsMenu != INVALID_HANDLE ) {
+		delete g_hStatsMenu;
+	}
+	g_hStatsMenu = new TopMenu (MenuPvPResume);
+	g_hStatsMenu.CacheTitles = true;
 	
-	KeyList.GetKey(bestHeadshotKey, szSteamID, sizeof(szSteamID)); Format(tmp, sizeof(tmp), "%s: %.1f%", szSteamID, bestHeadshot * 100.0);
-	g_hStatsMenu.AddItem(tmp, MenuPvPResume, g_hStatsMenu_Head);
+	g_hStatsMenu_Shoot = g_hStatsMenu.AddCategory("shoot", MenuPvPResume);
+	KeyList.GetKey(bestPrecisionKey, szSteamID, sizeof(szSteamID));
+	Format(key, sizeof(key), "shoot_%s", szSteamID); 
+	Format(tmp, sizeof(tmp), "%s: %.1f", szSteamID, bestPrecision * 100.0); 
+	g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Shoot, "", 0, tmp);
 	
-	KeyList.GetKey(bestDamageKey, szSteamID, sizeof(szSteamID)); Format(tmp, sizeof(tmp), "%s: %d", szSteamID, bestDamage);
-	g_hStatsMenu.AddItem(tmp, MenuPvPResume, g_hStatsMenu_Damage);
+	g_hStatsMenu_Head = g_hStatsMenu.AddCategory("head", MenuPvPResume);
+	KeyList.GetKey(bestHeadshotKey, szSteamID, sizeof(szSteamID));
+	Format(key, sizeof(key), "head_%s", szSteamID); 
+	Format(tmp, sizeof(tmp), "%s: %.1f", szSteamID, bestHeadshot * 100.0);
+	g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Head, "", 0, tmp);
 	
-	KeyList.GetKey(bestFlagKey, szSteamID, sizeof(szSteamID)); Format(tmp, sizeof(tmp), "%s: %d", szSteamID, bestFlag);
-	g_hStatsMenu.AddItem(tmp, MenuPvPResume, g_hStatsMenu_Flag);
+	g_hStatsMenu_Damage = g_hStatsMenu.AddCategory("damage", MenuPvPResume);
+	KeyList.GetKey(bestDamageKey, szSteamID, sizeof(szSteamID));
+	Format(key, sizeof(key), "damage_%s", szSteamID); 
+	Format(tmp, sizeof(tmp), "%s: %d", szSteamID, bestDamage);
+	g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Damage, "", 0, tmp);
 	
-	KeyList.GetKey(bestEloKey, szSteamID, sizeof(szSteamID)); Format(tmp, sizeof(tmp), "%s: %d", szSteamID, bestElo);
-	g_hStatsMenu.AddItem(tmp, MenuPvPResume, g_hStatsMenu_ELO);
+	g_hStatsMenu_Flag = g_hStatsMenu.AddCategory("flag", MenuPvPResume);
+	KeyList.GetKey(bestFlagKey, szSteamID, sizeof(szSteamID));
+	Format(key, sizeof(key), "flag_%s", szSteamID); 
+	Format(tmp, sizeof(tmp), "%s: %d", szSteamID, bestFlag);
+	g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Flag, "", 0, tmp);
+	
+	g_hStatsMenu_ELO = g_hStatsMenu.AddCategory("elo", MenuPvPResume);
+	KeyList.GetKey(bestEloKey, szSteamID, sizeof(szSteamID));
+	Format(key, sizeof(key), "elo_%s", szSteamID); 
+	Format(tmp, sizeof(tmp), "%s: %d", szSteamID, bestElo);
+	g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_ELO, "", 0, tmp);
 		
 	
 	for (int client = 1; client <= MaxClients; client++) {
@@ -930,7 +943,9 @@ public Action GOD_Expire(Handle timer, any client) {
 // -----------------------------------------------------------------------------------------------------------------
 public void MenuPvPResume(Handle topmenu, TopMenuAction action, TopMenuObject topobj_id, int param, char[] buffer, int maxlength) {
 	if (action == TopMenuAction_DisplayTitle || action == TopMenuAction_DisplayOption) {
-		if( topobj_id == g_hStatsMenu_Shoot )
+		if( topobj_id == INVALID_TOPMENUOBJECT ) 
+			Format(buffer, maxlength, "Statistiques PvP:");
+		else if( topobj_id == g_hStatsMenu_Shoot )
 			Format(buffer, maxlength, "Meilleur précisions de tir");
 		else if( topobj_id == g_hStatsMenu_Head )
 			Format(buffer, maxlength, "Le plus de tir dans la tête");
@@ -941,8 +956,9 @@ public void MenuPvPResume(Handle topmenu, TopMenuAction action, TopMenuObject to
 		else if( topobj_id == g_hStatsMenu_ELO )
 			Format(buffer, maxlength, "Le meilleur en PvP");
 		else
-			GetTopMenuObjName(topmenu, topobj_id, buffer, maxlength);
+			GetTopMenuInfoString(topmenu, topobj_id, buffer, maxlength);
 	}
 	else if (action == TopMenuAction_SelectOption) {
+		g_hStatsMenu.Display(param, TopMenuPosition_Start);
 	}
 }
