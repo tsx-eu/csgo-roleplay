@@ -940,6 +940,8 @@ public void MenuPvPResume(Handle topmenu, TopMenuAction action, TopMenuObject to
 			Format(buffer, maxlength, "Le plus de drapeau posé");
 		else if( topobj_id == g_hStatsMenu_ELO )
 			Format(buffer, maxlength, "Le meilleur en PvP");
+		else
+			GetTopMenuObjName(topmenu, topobj_id, buffer, maxlength);
 	}
 	else if (action == TopMenuAction_SelectOption) {
 	}
