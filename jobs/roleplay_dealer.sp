@@ -942,9 +942,10 @@ public Action Cmd_ItemPilule(int args){
 			return Plugin_Handled;
 		}
 		else{
-			for (int i = 1; i <= 200; i++) {
+			for (int i = 1; i < 200; i++) {
 				if( rp_GetClientKeyAppartement(client, i) ) {
 					tptozone = appartToZoneID(i);
+					break;
 				}
 			}
 		}
