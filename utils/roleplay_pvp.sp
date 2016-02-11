@@ -268,6 +268,11 @@ void CAPTURE_Start() {
 	
 	CAPTURE_UpdateLight();
 	
+	int wall = Entity_FindByName("job=201__-pvp_wall", "func_brush");
+	if( wall > 0 )
+		AcceptEntityInput(wall, "Disable");
+	
+	
 	g_bIsInCaptureMode = true;
 	int gID;
 			
@@ -328,6 +333,10 @@ void CAPTURE_Stop() {
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	CPrintToChatAll("{lightblue} Le bunker ne peut plus être capturés. {default}");
 	CPrintToChatAll("{lightblue} ================================== {default}");
+	
+	int wall = Entity_FindByName("job=201__-pvp_wall", "func_brush");
+	if( wall > 0 )
+		AcceptEntityInput(wall, "Enable");
 	
 	g_bIsInCaptureMode = false;
 	
@@ -484,7 +493,7 @@ public Action fwdSpawn_ToRespawn(Handle timer, any client) {
 		rand[2] = mins[2] + 32.0;
 		
 		TeleportEntity(client, rand, NULL_VECTOR, NULL_VECTOR);
-		FakeClientCommand(client, "say /stuck");
+		FakeClientCommand(client, "sm_stuck");
 		Client_SetSpawnProtect(client, true);
 	}
 }
