@@ -821,9 +821,8 @@ void GDM_ELOKill(int client, int target) {
 }
 void GDM_Resume() {
 	StringMapSnapshot KeyList = g_hGlobalDamage.Snapshot();
-	int array[gdm_max], nbrParticipant = KeyList.Length;
+	int array[gdm_max], delta, nbrParticipant = KeyList.Length;
 	char szSteamID[32], tmp[64], key[64], name[64];
-	float delta;
 	
 	if( g_hStatsMenu != INVALID_HANDLE )
 		delete g_hStatsMenu;
@@ -841,29 +840,29 @@ void GDM_Resume() {
 		g_hGlobalDamage.GetArray(szSteamID, array, sizeof(array));
 		g_hGlobalSteamID.GetString(szSteamID, name, sizeof(name));
 		
-		delta = float(array[gdm_shot]) / float(array[gdm_touch]);
-		Format(key, sizeof(key), "shoot_%f_%s", delta, szSteamID); 
-		Format(tmp, sizeof(tmp), "%s: %f", name, delta);
+		delta = RoundFloat(float(array[gdm_shot]) / float(array[gdm_touch]+1) * 1000.0);
+		Format(key, sizeof(key), "shoot_%9d_%s", 1000000000-delta, szSteamID); 
+		Format(tmp, sizeof(tmp), "%s: %.1f", name, float(delta)/10.0);
 		g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Shoot, "", 0, tmp);
 		
-		delta = float(array[gdm_hitbox]) / float(array[gdm_touch]);
-		Format(key, sizeof(key), "head_%f_%s", delta, szSteamID); 
-		Format(tmp, sizeof(tmp), "%s: %f", name, delta);
+		delta = RoundFloat(float(array[gdm_hitbox]) / float(array[gdm_touch]+1) * 1000.0);
+		Format(key, sizeof(key), "head_%09d_%s", 1000000000 - delta, szSteamID); 
+		Format(tmp, sizeof(tmp), "%s: %.1f", name, float(delta)/10.0);
 		g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Head, "", 0, tmp);
 		
-		delta = float(array[gdm_damage]);
-		Format(key, sizeof(key), "damage_%f_%s", delta, szSteamID); 
-		Format(tmp, sizeof(tmp), "%s: %f", name, delta);
+		delta = array[gdm_damage];
+		Format(key, sizeof(key), "damage_%09d_%s", 1000000000 - delta, szSteamID); 
+		Format(tmp, sizeof(tmp), "%s: %d", name, delta);
 		g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Damage, "", 0, tmp);
 		
-		delta = float(array[gdm_flag]);
-		Format(key, sizeof(key), "flag_%f_%s", delta, szSteamID); 
-		Format(tmp, sizeof(tmp), "%s: %f", name, delta);
+		delta = array[gdm_flag];
+		Format(key, sizeof(key), "flag_%09d_%s", 1000000000 - delta, szSteamID); 
+		Format(tmp, sizeof(tmp), "%s: %d", name, delta);
 		g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Flag, "", 0, tmp);
 		
-		delta = float(array[gdm_elo]);
-		Format(key, sizeof(key), "elo_%f_%s", delta, szSteamID); 
-		Format(tmp, sizeof(tmp), "%s: %f", name, delta);
+		delta = array[gdm_elo];
+		Format(key, sizeof(key), "elo_%09d_%s", 1000000000 - delta, szSteamID); 
+		Format(tmp, sizeof(tmp), "%s: %d", name, delta);
 		g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_ELO, "", 0, tmp);
 	}
 	
