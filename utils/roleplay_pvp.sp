@@ -23,6 +23,11 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 // TODO: Ajouter les TAG.
+// TODO: équilibrage big-mac
+// TODO: Invisible quand on est en godmod
+// TODO: Couleur rouge/bleu pour attaque/défense
+// TODO: Clarifier qui attaquer, avertir quand on se trompe
+// TODO: Clarifier load/save d'item 
 
 //#define DEBUG
 #define MAX_GROUPS		150
@@ -31,7 +36,7 @@
 #define	ZONE_BUNKER		235
 #define ZONE_RESPAWN	230
 #define	FLAG_SPEED		250.0
-#define	FLAG_POINTS		250
+#define	FLAG_POINTS		100
 #define ELO_FACTEUR_K	40.0
 
 // -----------------------------------------------------------------------------------------------------------------
@@ -287,7 +292,7 @@ void CAPTURE_Start() {
 	int gID;
 			
 	for(int i=1; i<MAX_GROUPS; i++) {
-		g_iCapture_POINT[i] = 0;			
+		g_iCapture_POINT[i] = 0;
 	}
 
 	for(int i=1; i<=MaxClients; i++) {
@@ -301,6 +306,8 @@ void CAPTURE_Start() {
 		rp_HookEvent(i, RP_PostPlayerPhysic, fwdPhysics);
 		gID = rp_GetClientGroupID(i);
 		g_iCapture_POINT[gID] += 50;
+		if( rp_GetClientInt(i, i_Group) == gID ) 
+			g_iCapture_POINT[gID] += 100;
 		
 		
 		if( !(rp_GetZoneBit(rp_GetPlayerZone(i)) & BITZONE_PVP) )
@@ -320,7 +327,7 @@ void CAPTURE_Start() {
 		ClientCommand(i, "play *tsx/roleplay/bombing.mp3");
 	}
 	
-	g_iCapture_POINT[rp_GetCaptureInt(cap_bunker)] += 2000;
+	g_iCapture_POINT[rp_GetCaptureInt(cap_bunker)] += 1000;
 			
 	for(int i=1; i<MAX_ZONES; i++) {
 		if( rp_GetZoneBit(i) & BITZONE_PVP ) {
@@ -462,7 +469,7 @@ public Action CAPTURE_Tick(Handle timer, any none) {
 		maxPoint = g_iCapture_POINT[i];
 	}
 
-	if( maxPoint+100 >= g_iCapture_POINT[defense] && winner != defense ) {
+	if( maxPoint+(FLAG_POINTS*5) >= g_iCapture_POINT[defense] && winner != defense ) {
 		rp_GetGroupData(winner, group_type_name, tmp, sizeof(tmp));
 		ExplodeString(tmp, " - ", strBuffer, sizeof(strBuffer), sizeof(strBuffer[]));
 		CPrintToChatAll("{lightblue} ================================== {default}");
@@ -487,6 +494,10 @@ public Action CAPTURE_Tick(Handle timer, any none) {
 }
 // -----------------------------------------------------------------------------------------------------------------
 public Action fwdSpawn(int client) {
+	Client_SetSpawnProtect(client, true);
+	SetEntityHealth(client, 500);
+	rp_SetClientInt(client, i_Kevlar, 250);
+	
 	if( rp_GetClientGroupID(client) == rp_GetCaptureInt(cap_bunker) )
 		CreateTimer(0.01, fwdSpawn_ToRespawn, client);
 	
@@ -508,7 +519,6 @@ public Action fwdSpawn_ToRespawn(Handle timer, any client) {
 		
 		TeleportEntity(client, rand, NULL_VECTOR, NULL_VECTOR);
 		FakeClientCommand(client, "sm_stuck");
-		Client_SetSpawnProtect(client, true);
 	}
 }
 public Action fwdDead(int victim, int attacker, float& respawn) {
@@ -555,8 +565,8 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 	return Plugin_Continue;
 }
 public Action fwdPhysics(int client, float& speed, float& gravity) {
-	speed = (speed > 2.0 ? 2.0:speed);
-	gravity = (gravity < 0.5 ? 0.5:gravity);
+	speed = (speed > 1.5 ? 1.5:speed);
+	gravity = (gravity < 0.66 ? 0.66:gravity);
 	return Plugin_Stop;
 }
 public Action Event_PlayerShoot(Handle event, char[] name, bool dontBroadcast) {
@@ -582,9 +592,9 @@ public Action Event_PlayerHurt(Handle event, char[] name, bool dontBroadcast) {
 }
 public Action fwdTakeDamage(int victim, int attacker, float& damage, int wepID, float pos[3]) {
 	if( rp_GetClientGroupID(victim) == rp_GetClientGroupID(attacker) )
-		damage /= 2.0;
+		damage *= 0.0;
 	if( rp_GetClientGroupID(attacker) != rp_GetCaptureInt(cap_bunker) && rp_GetClientGroupID(victim) != rp_GetCaptureInt(cap_bunker) )
-		damage /= 2.0;
+		damage *= 0.0;
 	if( rp_GetClientGroupID(victim) == 0 || rp_GetClientGroupID(attacker) == 0  )
 		damage *= 0.0;
 	return Plugin_Changed;
@@ -906,9 +916,9 @@ void Client_SetSpawnProtect(int client, bool status) {
 	}
 }
 public Action fwdGODZoneChange(int client, int newZone, int oldZone) {
-	if( oldZone == ZONE_RESPAWN && newZone != ZONE_RESPAWN ) {
-		Client_SetSpawnProtect(client, false);
-	}
+	//if( oldZone == ZONE_RESPAWN && newZone != ZONE_RESPAWN ) {
+	//	Client_SetSpawnProtect(client, false);
+	//}
 }
 public Action fwdGodPlayerDead(int client, int attacker, float& respawn) {
 	Client_SetSpawnProtect(client, false);
