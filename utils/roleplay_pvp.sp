@@ -209,6 +209,8 @@ public Action FlagThink(Handle timer, any data) {
 			
 			if( rp_GetCaptureInt(cap_bunker) != g_iFlagData[entity][data_group] ) {
 				g_iCapture_POINT[g_iFlagData[entity][data_group]] += FLAG_POINTS;
+				g_iCapture_POINT[rp_GetCaptureInt(cap_bunker)] -= FLAG_POINTS;
+				
 				GDM_RegisterFlag(g_iFlagData[entity][data_lastOwner]);
 			}
 			
