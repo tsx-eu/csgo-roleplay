@@ -57,6 +57,7 @@ public Plugin myinfo = {
 };
 public void OnPluginStart() {
 	RegConsoleCmd("drop", FlagDrop);
+	RegConsoleCmd("sm_pvp", Cmd_PvPMenu);
 	RegServerCmd("rp_item_spawnflag", 	Cmd_ItemFlag,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	g_hGlobalDamage = new StringMap();
 	g_hGlobalSteamID = new StringMap();
@@ -93,6 +94,7 @@ public void OnClientPostAdminCheck(int client) {
 		rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
 		rp_HookEvent(client, RP_OnPlayerHUD, fwdHUD);
 		rp_HookEvent(client, RP_OnPlayerSpawn, fwdSpawn);
+		rp_HookEvent(client, RP_PostPlayerPhysic, fwdPhysics);
 	}
 }
 // -----------------------------------------------------------------------------------------------------------------
@@ -115,9 +117,9 @@ public Action Cmd_ItemFlag(int args) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le gang défenseur ne peut pas utiliser de drapeau.");
 		return;
 	}
-	if( rp_IsInPVP(client) ) {
+	if( rp_GetZoneBit(rp_GetPlayerZone(client)) & BITZONE_PVP ) {
 		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être hors de la PvP.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être hors du bunker.");
 		return;
 	}
 	
@@ -294,18 +296,20 @@ void CAPTURE_Start() {
 		rp_HookEvent(i, RP_OnPlayerDead, fwdDead);
 		rp_HookEvent(i, RP_OnPlayerHUD, fwdHUD);
 		rp_HookEvent(i, RP_OnPlayerSpawn, fwdSpawn);
+		rp_HookEvent(i, RP_PostPlayerPhysic, fwdPhysics);
 		gID = rp_GetClientGroupID(i);
 		g_iCapture_POINT[gID] += 50;
 		
 		
-		if( !rp_IsInPVP(i) )
+		if( !(rp_GetZoneBit(rp_GetPlayerZone(i)) & BITZONE_PVP) )
 			continue;
 		
 		int v = Client_GetVehicle(i);
 		if( v > 0 )
 			rp_ClientVehicleExit(i, v, true);
 		
-		rp_ClientDamage(i, 10000, 1);
+		rp_ClientDamage(i, 10000,  i);
+		ForcePlayerSuicide(i);
 		if( g_iClientFlag[i] > 0 ) {
 			AcceptEntityInput(g_iClientFlag[i], "KillHierarchy");
 			g_iClientFlag[i] = 0;
@@ -353,6 +357,7 @@ void CAPTURE_Stop() {
 		rp_UnhookEvent(i, RP_OnPlayerDead, fwdDead);
 		rp_UnhookEvent(i, RP_OnPlayerHUD, fwdHUD);
 		rp_UnhookEvent(i, RP_OnPlayerSpawn, fwdSpawn);
+		rp_UnhookEvent(i, RP_PostPlayerPhysic, fwdPhysics);
 	}
 	
 	for(int i=1; i<MAX_GROUPS; i++) {
@@ -512,7 +517,8 @@ public Action fwdDead(int victim, int attacker, float& respawn) {
 		GDM_ELOKill(attacker, victim);
 		rp_IncrementSuccess(attacker, success_list_killpvp2);
 	}
-	respawn = 0.25;
+	if( rp_GetClientGroupID(victim) == rp_GetCaptureInt(cap_bunker) )
+		respawn = 0.25;
 	return Plugin_Handled;
 }
 public Action fwdHUD(int client, char[] szHUD, const int size) {
@@ -545,6 +551,11 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 		return Plugin_Changed;
 	}
 	return Plugin_Continue;
+}
+public Action fwdPhysics(int client, float& speed, float& gravity) {
+	speed = (speed > 2.0 ? 2.0:speed);
+	gravity = (gravity < 0.5 ? 0.5:gravity);
+	return Plugin_Stop;
 }
 public Action Event_PlayerShoot(Handle event, char[] name, bool dontBroadcast) {
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
@@ -840,32 +851,31 @@ void GDM_Resume() {
 		g_hGlobalDamage.GetArray(szSteamID, array, sizeof(array));
 		g_hGlobalSteamID.GetString(szSteamID, name, sizeof(name));
 		
-		delta = RoundFloat(float(array[gdm_shot]) / float(array[gdm_touch]+1) * 1000.0);
-		Format(key, sizeof(key), "shoot_%9d_%s", 1000000000-delta, szSteamID); 
-		Format(tmp, sizeof(tmp), "%s: %.1f", name, float(delta)/10.0);
+		delta = RoundFloat(float(array[gdm_touch]) / float(array[gdm_shot]+1) * 1000.0);
+		Format(key, sizeof(key), "s%06d_%s", 1000000-delta, szSteamID); 
+		Format(tmp, sizeof(tmp), "%4.1f - %s", float(delta)/10.0, name);
 		g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Shoot, "", 0, tmp);
 		
 		delta = RoundFloat(float(array[gdm_hitbox]) / float(array[gdm_touch]+1) * 1000.0);
-		Format(key, sizeof(key), "head_%09d_%s", 1000000000 - delta, szSteamID); 
-		Format(tmp, sizeof(tmp), "%s: %.1f", name, float(delta)/10.0);
+		Format(key, sizeof(key), "h%06d_%s", 1000000 - delta, szSteamID); 
+		Format(tmp, sizeof(tmp), "%4.1f - %s", float(delta)/10.0, name);
 		g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Head, "", 0, tmp);
 		
 		delta = array[gdm_damage];
-		Format(key, sizeof(key), "damage_%09d_%s", 1000000000 - delta, szSteamID); 
-		Format(tmp, sizeof(tmp), "%s: %d", name, delta);
+		Format(key, sizeof(key), "d%06d_%s", 1000000 - delta, szSteamID); 
+		Format(tmp, sizeof(tmp), "%6d - %s", delta, name);
 		g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Damage, "", 0, tmp);
 		
 		delta = array[gdm_flag];
-		Format(key, sizeof(key), "flag_%09d_%s", 1000000000 - delta, szSteamID); 
-		Format(tmp, sizeof(tmp), "%s: %d", name, delta);
+		Format(key, sizeof(key), "f%06d_%s", 1000000 - delta, szSteamID); 
+		Format(tmp, sizeof(tmp), "%6d - %s", delta, name);
 		g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Flag, "", 0, tmp);
 		
 		delta = array[gdm_elo];
-		Format(key, sizeof(key), "elo_%09d_%s", 1000000000 - delta, szSteamID); 
-		Format(tmp, sizeof(tmp), "%s: %d", name, delta);
+		Format(key, sizeof(key), "e%06d_%s", 1000000 - delta, szSteamID); 
+		Format(tmp, sizeof(tmp), "%6d - %s", delta, name);
 		g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_ELO, "", 0, tmp);
 	}
-	
 	
 	for (int client = 1; client <= MaxClients; client++) {
 		if( !IsValidClient(client) )
@@ -933,10 +943,16 @@ public void MenuPvPResume(Handle topmenu, TopMenuAction action, TopMenuObject to
 			Format(buffer, maxlength, "Le plus de drapeau posé");
 		else if( topobj_id == g_hStatsMenu_ELO )
 			Format(buffer, maxlength, "Le meilleur en PvP");
-		else
+		else 
 			GetTopMenuInfoString(topmenu, topobj_id, buffer, maxlength);
 	}
 	else if (action == TopMenuAction_SelectOption) {
 		g_hStatsMenu.Display(param, TopMenuPosition_Start);
 	}
+}
+public Action Cmd_PvPMenu(int client, int args) {
+	if( g_hStatsMenu == INVALID_HANDLE )
+		return Plugin_Handled;
+	g_hStatsMenu.Display(client, TopMenuPosition_Start);
+	return Plugin_Handled;
 }

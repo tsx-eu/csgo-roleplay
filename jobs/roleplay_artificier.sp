@@ -735,6 +735,9 @@ public Action Cmd_ItemHighJump(int args) {
 	ServerCommand("sm_effect_particles %d Trail5 1 lfoot", client);
 	ServerCommand("sm_effect_particles %d Trail5 1 rfoot", client);
 	
+	if( rp_GetZoneBit(rp_GetPlayerZone(client)) & BITZONE_PVP ) {
+		rp_SetClientFloat(client, fl_CoolDown, rp_GetClientFloat(client, fl_CoolDown) + 5.0);
+	}
 	
 	return Plugin_Handled;
 }

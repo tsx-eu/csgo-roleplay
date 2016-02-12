@@ -220,6 +220,10 @@ public Action Cmd_ItemPropulseur(int args) {
 	
 	ServerCommand("sm_effect_particles %d Trail12 1 lfoot", client);
 	ServerCommand("sm_effect_particles %d Trail12 1 rfoot", client);
+	
+	if( rp_GetZoneBit(rp_GetPlayerZone(client)) & BITZONE_PVP ) {
+		rp_SetClientFloat(client, fl_CoolDown, rp_GetClientFloat(client, fl_CoolDown) + 5.0);
+	}
 }
 // ------------------------------------------------------------------------------
 public Action Cmd_ItemNano(int args) {
