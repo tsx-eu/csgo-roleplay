@@ -22,7 +22,7 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
-//bool g_dataloaded[MAXPLAYERS];
+bool g_dataloaded[MAXPLAYERS];
 int g_iStat_LastSave[MAXPLAYERS][i_uStat_nosavemax];
 int_stat_data g_Sassoc[] = { // Fait le lien entre une stat et sa valeur sauvegardée
 	i_nostat, // Pas une stat à save
@@ -68,11 +68,11 @@ public void OnPluginStart() {
 			fwdDataLoaded(i);
 		}
 	}
-	//CreateTimer(15.0, saveStats, _, TIMER_REPEAT);
+	CreateTimer(120.0, saveStats, _, TIMER_REPEAT);
 }
 
 public void OnClientPostAdminCheck(int client) {
-	//g_dataloaded[client] = false;
+	g_dataloaded[client] = false;
 	rp_HookEvent(client, RP_OnPlayerDataLoaded, fwdDataLoaded);
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 	for(int i=0; i<view_as<int>(i_uStat_max); i++)
@@ -105,10 +105,10 @@ public Action fwdDataLoaded(int client){
 	rp_SetClientStat(client, i_Money_OnConnection, ( rp_GetClientInt(client, i_Money) + rp_GetClientInt(client, i_Bank) ));
 	rp_SetClientStat(client, i_PVP_OnConnection, rp_GetClientInt(client, i_PVP));
 	rp_SetClientStat(client, i_Vitality_OnConnection, RoundToNearest(rp_GetClientFloat(client, fl_Vitality)) );
-	//char steamID[32], query[256];
-//	GetClientAuthId(client, AuthId_Engine, steamID, sizeof(steamID), false);
-//	Format(query, sizeof(query), "SELECT `stat_id`, `data` FROM `rp_statdata` WHERE `steamid`=\"%s\"", steamID);
-//	SQL_TQuery(rp_GetDatabase(), SQL_StatLoadCB, query, client, DBPrio_High);
+	char steamID[32], query[256];
+	GetClientAuthId(client, AuthId_Engine, steamID, sizeof(steamID), false);
+	Format(query, sizeof(query), "SELECT `stat_id`, `data` FROM `rp_statdata` WHERE `steamid`=\"%s\"", steamID);
+	SQL_TQuery(rp_GetDatabase(), SQL_StatLoadCB, query, client, DBPrio_High);
 }
 
 public void SQL_StatLoadCB(Handle owner, Handle row, const char[] error, any client) {
@@ -117,7 +117,7 @@ public void SQL_StatLoadCB(Handle owner, Handle row, const char[] error, any cli
 	        rp_SetClientStat(client, view_as<int_stat_data>(SQL_FetchInt(row, 0)), SQL_FetchInt(row, 1));
 	    }
 	}
-//	g_dataloaded[client] = true;
+	g_dataloaded[client] = true;
 }
 
 public int MenuViewStats(Handle menu, MenuAction action, int client, int param ) {
@@ -146,8 +146,8 @@ public int MenuViewStats(Handle menu, MenuAction action, int client, int param )
 }
 
 public void DisplayStats(int client, bool full){
-	//if(!g_dataloaded[client])
-	//	return;
+	if(!g_dataloaded[client])
+		return;
 	UpdateStats(client);
 	char tmp[128];
 	Handle menu = CreateMenu(MenuNothing);
@@ -260,8 +260,8 @@ public void DisplayStats(int client, bool full){
 	DisplayMenu(menu, client, 60);
 }
 public void DisplayRTStats(int client){
-//	if(!g_dataloaded[client])
-//		return;
+	if(!g_dataloaded[client])
+		return;
 	char tmp[128];
 	Handle menu = CreateMenu(MenuNothing);
 	int wep_id = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
@@ -299,8 +299,8 @@ public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
 }
 
 public void UpdateStats(int client){
-	//if(!g_dataloaded[client])
-	//	return;
+	if(!g_dataloaded[client])
+		return;
 
 	for(int j=1; j < view_as<int>(i_uStat_nosavemax);j++){
 		if(g_Sassoc[j] == i_nostat)
@@ -320,8 +320,8 @@ public Action saveStats(Handle timer){
 	for (int i = 1; i <= MaxClients; i++){
 		if(!IsValidClient(i))
 			continue;
-//		if(!g_dataloaded[i])
-//			continue;
+		if(!g_dataloaded[i])
+			continue;
 		UpdateStats(i);
 		SaveClient(i);
 	}
