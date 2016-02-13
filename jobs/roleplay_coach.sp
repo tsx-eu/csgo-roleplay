@@ -78,9 +78,9 @@ public Action Cmd_ItemPackEquipement(int args){
 
 	int client = GetCmdArg(1);
 
-	GivePlayerItem(client, i_KnifeTrain, 100);
-	GivePlayerItem(client, i_Esquive, 100);
-	GivePlayerItem(client, fl_WeaponTrain, 5.0);
+	rp_SetClientInt(client, i_KnifeTrain, 100);
+	rp_SetClientInt(client, i_Esquive, 100);
+	rp_SetClientFloat(client, fl_WeaponTrain, 5.0);
 
 	FakeClientCommand(client, "say /item");
 
