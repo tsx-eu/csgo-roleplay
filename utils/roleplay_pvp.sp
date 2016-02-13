@@ -99,7 +99,12 @@ public void OnClientPostAdminCheck(int client) {
 		rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
 		rp_HookEvent(client, RP_OnPlayerHUD, fwdHUD);
 		rp_HookEvent(client, RP_OnPlayerSpawn, fwdSpawn);
+		rp_HookEvent(client, RP_OnFrameSeconde, fwdFrame);
 		rp_HookEvent(client, RP_PostPlayerPhysic, fwdPhysics);
+		rp_HookEvent(client, RP_OnFrameSeconde, fwdFrame);
+		rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdTakeDamage);
+		rp_HookEvent(client, RP_PostTakeDamageKnife, fwdTakeDamage);
+		SDKHook(client, SDKHook_SetTransmit, fwdGodHide2);
 	}
 }
 // -----------------------------------------------------------------------------------------------------------------
@@ -304,6 +309,11 @@ void CAPTURE_Start() {
 		rp_HookEvent(i, RP_OnPlayerHUD, fwdHUD);
 		rp_HookEvent(i, RP_OnPlayerSpawn, fwdSpawn);
 		rp_HookEvent(i, RP_PostPlayerPhysic, fwdPhysics);
+		rp_HookEvent(i, RP_OnFrameSeconde, fwdFrame);
+		rp_HookEvent(i, RP_PostTakeDamageWeapon, fwdTakeDamage);
+		rp_HookEvent(i, RP_PostTakeDamageKnife, fwdTakeDamage);
+		SDKHook(i, SDKHook_SetTransmit, fwdGodHide2);
+		
 		gID = rp_GetClientGroupID(i);
 		g_iCapture_POINT[gID] += 50;
 		if( rp_GetClientInt(i, i_Group) == gID ) 
@@ -367,6 +377,10 @@ void CAPTURE_Stop() {
 		rp_UnhookEvent(i, RP_OnPlayerHUD, fwdHUD);
 		rp_UnhookEvent(i, RP_OnPlayerSpawn, fwdSpawn);
 		rp_UnhookEvent(i, RP_PostPlayerPhysic, fwdPhysics);
+		rp_UnhookEvent(i, RP_OnFrameSeconde, fwdFrame);
+		rp_UnhookEvent(i, RP_PostTakeDamageWeapon, fwdTakeDamage);
+		rp_UnhookEvent(i, RP_PostTakeDamageKnife, fwdTakeDamage);
+		SDKUnhook(i, SDKHook_SetTransmit, fwdGodHide2);
 	}
 	
 	for(int i=1; i<MAX_GROUPS; i++) {
@@ -564,6 +578,14 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 	}
 	return Plugin_Continue;
 }
+public Action fwdFrame(int client) {
+	if( rp_GetCaptureInt(cap_bunker) == rp_GetClientGroupID(client) ) 
+		rp_ClientColorize(client, { 0, 0, 255, 255 } );
+	else
+		rp_ClientColorize(client, { 255, 0, 0, 255 } );
+		
+	return Plugin_Continue;
+}
 public Action fwdPhysics(int client, float& speed, float& gravity) {
 	speed = (speed > 1.5 ? 1.5:speed);
 	gravity = (gravity < 0.66 ? 0.66:gravity);
@@ -592,12 +614,12 @@ public Action Event_PlayerHurt(Handle event, char[] name, bool dontBroadcast) {
 }
 public Action fwdTakeDamage(int victim, int attacker, float& damage, int wepID, float pos[3]) {
 	if( rp_GetClientGroupID(victim) == rp_GetClientGroupID(attacker) )
-		damage *= 0.0;
+		return Plugin_Handled;
 	if( rp_GetClientGroupID(attacker) != rp_GetCaptureInt(cap_bunker) && rp_GetClientGroupID(victim) != rp_GetCaptureInt(cap_bunker) )
-		damage *= 0.0;
+		return Plugin_Handled;
 	if( rp_GetClientGroupID(victim) == 0 || rp_GetClientGroupID(attacker) == 0  )
-		damage *= 0.0;
-	return Plugin_Changed;
+		return Plugin_Handled;
+	return Plugin_Continue;
 }
 // -----------------------------------------------------------------------------------------------------------------
 public Action SwitchToFirst(Handle timer, any client) {
@@ -898,27 +920,32 @@ void GDM_Resume() {
 // -----------------------------------------------------------------------------------------------------------------
 void Client_SetSpawnProtect(int client, bool status) {
 	if( status == true ) {
-		rp_HookEvent(client, RP_OnPlayerZoneChange, fwdGODZoneChange);
 		rp_HookEvent(client, RP_OnPlayerDead, fwdGodPlayerDead);
+		SDKHook(client, SDKHook_SetTransmit, fwdGodHideMe);
 		g_hGodTimer[client] = CreateTimer(10.0, GOD_Expire, client);
-		rp_ClientColorize(client, view_as<int>({255, 255, 255, 100}));
 		SetEntProp(client, Prop_Data, "m_takedamage", 0);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez 10 secondes de protection.");
+		SDKHook(client, SDKHook_SetTransmit, fwdGodHideMe);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez 10 secondes de spawn-protection.");
 	}
 	else {
-		rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdGODZoneChange);
 		rp_UnhookEvent(client, RP_OnPlayerDead, fwdGodPlayerDead);
-		rp_ClientColorize(client);
-		delete g_hGodTimer[client];
+		SDKUnhook(client, SDKHook_SetTransmit, fwdGodHideMe);
+		if( g_hGodTimer[client] != INVALID_HANDLE )
+			delete g_hGodTimer[client];
 		g_hGodTimer[client] = INVALID_HANDLE; 
 		SetEntProp(client, Prop_Data, "m_takedamage", 2);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre protection a expirée.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre spawn-protection a expirée.");
 	}
 }
-public Action fwdGODZoneChange(int client, int newZone, int oldZone) {
-	//if( oldZone == ZONE_RESPAWN && newZone != ZONE_RESPAWN ) {
-	//	Client_SetSpawnProtect(client, false);
-	//}
+public Action fwdGodHideMe(int client, int target) {
+	if( client != target )
+		return Plugin_Handled;
+	return Plugin_Continue;
+}
+public Action fwdGodHide2(int client, int target) {
+	if( g_hGodTimer[target] != INVALID_HANDLE && client != target )
+		return Plugin_Handled;
+	return Plugin_Continue;
 }
 public Action fwdGodPlayerDead(int client, int attacker, float& respawn) {
 	Client_SetSpawnProtect(client, false);
