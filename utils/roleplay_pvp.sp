@@ -23,11 +23,6 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 // TODO: Ajouter les TAG.
-// TODO: équilibrage big-mac
-// TODO: Invisible quand on est en godmod
-// TODO: Couleur rouge/bleu pour attaque/défense
-// TODO: Clarifier qui attaquer, avertir quand on se trompe
-// TODO: Clarifier load/save d'item 
 
 //#define DEBUG
 #define MAX_GROUPS		150
@@ -554,12 +549,21 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 	
 	if( g_bIsInCaptureMode && gID > 0 ) {
 		
-		Format(szHUD, size, "PvP: Capture du bunker");
-		if( gID == defTeam )
-			Format(szHUD, size, "%s - Défense\n", szHUD);
-		else
-			Format(szHUD, size, "%s - Attaque\n", szHUD);
+		Format(szHUD, size, "PvP: ");
+		if( gID == defTeam ) {
+			Format(szHUD, size, "%s Défense du Bunker\n", szHUD);
+			Format(szHUD, size, "%s Tuer les ROUGES\n", szHUD);
+		}
+		else {
+			Format(szHUD, size, "%s Attaque du Bunker\n", szHUD);
+			Format(szHUD, size, "%s Tuer les BLEUS\n", szHUD);
+		}
 		
+		if( g_hGodTimer[client] != INVALID_HANDLE )
+			Format(szHUD, size, "%s SPAWN-PROTECT\n", szHUD);
+		else
+			Format(szHUD, size, "%s \n", szHUD);
+			
 		for(int i=1; i<MAX_GROUPS; i++) {
 			if( g_iCapture_POINT[i] == 0 && gID != i )
 				continue;
