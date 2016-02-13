@@ -478,7 +478,7 @@ public Action CAPTURE_Tick(Handle timer, any none) {
 		maxPoint = g_iCapture_POINT[i];
 	}
 
-	if( maxPoint+(FLAG_POINTS*5) >= g_iCapture_POINT[defense] && winner != defense ) {
+	if( maxPoint-(FLAG_POINTS*5) >= g_iCapture_POINT[defense] && winner != defense ) {
 		rp_GetGroupData(winner, group_type_name, tmp, sizeof(tmp));
 		ExplodeString(tmp, " - ", strBuffer, sizeof(strBuffer), sizeof(strBuffer[]));
 		CPrintToChatAll("{lightblue} ================================== {default}");
@@ -506,6 +506,7 @@ public Action fwdSpawn(int client) {
 	Client_SetSpawnProtect(client, true);
 	SetEntityHealth(client, 500);
 	rp_SetClientInt(client, i_Kevlar, 250);
+	rp_SetClientFloat(client, fl_CoolDown, 0.0);
 	
 	if( rp_GetClientGroupID(client) == rp_GetCaptureInt(cap_bunker) )
 		CreateTimer(0.01, fwdSpawn_ToRespawn, client);
@@ -550,19 +551,10 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 	if( g_bIsInCaptureMode && gID > 0 ) {
 		
 		Format(szHUD, size, "PvP: ");
-		if( gID == defTeam ) {
+		if( gID == defTeam )
 			Format(szHUD, size, "%s Défense du Bunker\n", szHUD);
-			Format(szHUD, size, "%s Tuer les ROUGES\n", szHUD);
-		}
-		else {
-			Format(szHUD, size, "%s Attaque du Bunker\n", szHUD);
-			Format(szHUD, size, "%s Tuer les BLEUS\n", szHUD);
-		}
-		
-		if( g_hGodTimer[client] != INVALID_HANDLE )
-			Format(szHUD, size, "%s SPAWN-PROTECT\n", szHUD);
 		else
-			Format(szHUD, size, "%s \n", szHUD);
+			Format(szHUD, size, "%s Attaque du Bunker\n", szHUD);
 			
 		for(int i=1; i<MAX_GROUPS; i++) {
 			if( g_iCapture_POINT[i] == 0 && gID != i )
@@ -583,10 +575,18 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 	return Plugin_Continue;
 }
 public Action fwdFrame(int client) {
-	if( rp_GetCaptureInt(cap_bunker) == rp_GetClientGroupID(client) ) 
-		rp_ClientColorize(client, { 0, 0, 255, 255 } );
-	else
-		rp_ClientColorize(client, { 255, 0, 0, 255 } );
+	
+	if( g_hGodTimer[client] != INVALID_HANDLE ) {
+		PrintHintText(client, "Vous êtes en spawn-protection");
+	}
+	else if( rp_GetCaptureInt(cap_bunker) == rp_GetClientGroupID(client) ) {
+		rp_ClientColorize(client, { 64, 64, 255, 255 } );
+		PrintHintText(client, "Vous êtes en défense.\n     <font color='#ff3333'>Tuez les <b>ROUGES</b></font>");
+	}
+	else {
+		rp_ClientColorize(client, { 255, 64, 64, 255 } );
+		PrintHintText(client, "Vous êtes en attaque.\n     <font color='#3333ff'>Tuez les <b>BLEUS</b></font>");
+	}
 		
 	return Plugin_Continue;
 }
