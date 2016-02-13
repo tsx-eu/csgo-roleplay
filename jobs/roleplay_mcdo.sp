@@ -307,18 +307,15 @@ public Action Cmd_ItemHamburger(int args) {
 	}
 	else if( StrEqual(arg1, "mac") ) {
 		
-		if( rp_IsInPVP(client) ) {
-			rp_SetClientFloat(client, fl_Reflect, GetGameTime() + 3.0);
-		}
-		else {
-			rp_SetClientFloat(client, fl_Reflect, GetGameTime() + 5.0);
-		}
+		rp_SetClientFloat(client, fl_Reflect, GetGameTime() + 5.0);
 		
 		float vecTarget[3];
 		GetClientAbsOrigin(client, vecTarget);
 		
 		TE_SetupBeamRingPoint(vecTarget, 10.0, 300.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, {255, 255, 0, 50}, 10, 0);
 		TE_SendToAll();
+		
+		ServerCommand("sm_effect_particles %d Trail11 5 facemask", client);
 	}
 	else if( StrEqual(arg1, "chicken") ) {
 		
