@@ -76,7 +76,7 @@ public Action Cmd_ItemPackEquipement(int args){
 	PrintToServer("Cmd_ItemPackEquipement");
 	#endif									
 
-	int client = GetCmdArg(1);
+	int client = GetCmdArgInt(1);
 
 	rp_SetClientInt(client, i_KnifeTrain, 100);
 	rp_SetClientInt(client, i_Esquive, 100);
