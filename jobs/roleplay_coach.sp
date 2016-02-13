@@ -49,6 +49,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_knifetype",	Cmd_ItemKnifeType,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_permi_tir",	Cmd_ItemPermiTir,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_shoes", 		Cmd_ItemShoes, 			"RP-ITEM", 	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_packequipement", Cmd_ItemPackEquipement, "RP-ITEM", FCVAR_UNREGISTERED);
 	
 	RegServerCmd("rp_item_riotshield",	Cmd_ItemRiotShield,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	
@@ -68,6 +69,22 @@ public void OnClientPostAdminCheck(int client) {
 }
 public void OnClientDisconnect(int client) {
 	removeShield(client);
+}
+// ----------------------------------------------------------------------------
+public Action Cmd_ItemPackEquipement(int args){
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemPackEquipement");
+	#endif									
+
+	int client = GetCmdArg(1);
+
+	GivePlayerItem(client, i_KnifeTrain, 100);
+	GivePlayerItem(client, i_Esquive, 100);
+	GivePlayerItem(client, fl_WeaponTrain, 5.0);
+
+	FakeClientCommand(client, "say /item");
+
+	return Plugin_Handled;
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemCut(int args) {
