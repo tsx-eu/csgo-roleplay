@@ -180,22 +180,22 @@ public int eventMariage_2(Handle menu, MenuAction action, int client, int param2
 		if( rp_GetZoneInt(pos_3, zone_type_type) != 101 ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes pas au tribunal, le mariage ne peut pas se dérouler.");
 			CloseHandle(menu);
-			return Plugin_Handled;
+			return;
 		}
 		if( pos_1 != pos_3 ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'est pas dans la même salle de tribunal que vous, le mariage ne peut pas se dérouler", target_1);
 			CloseHandle(menu);
-			return Plugin_Handled;
+			return;
 		}
 		if( pos_2 != pos_3 ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'est pas dans la même salle de tribunal que vous, le mariage ne peut pas se dérouler", target_1);
 			CloseHandle(menu);
-			return Plugin_Handled;
+			return;
 		}
-		if( rp_GetClientInt(target_1, i_MarriedTo) != -1 || rp_GetClientInt(target_2, i_MarriedTo) != -1 ){
+		if( rp_GetClientInt(target_1, i_MarriedTo) != -1 && rp_GetClientInt(target_2, i_MarriedTo) != -1 ){
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous essayez d'unir quelqu'un déjà marié, le mariage ne peut pas se dérouler.");
 			CloseHandle(menu);
-			return Plugin_Handled;
+			return;
 		}
 		
 		// Message à toute la salle
