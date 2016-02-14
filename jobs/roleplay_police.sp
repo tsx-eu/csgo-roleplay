@@ -434,6 +434,7 @@ public Action Cmd_Vis(int client) {
 		ACCESS_DENIED(client);
 	}
 	
+	
 	if( !rp_GetClientBool(client, b_Invisible)) {
 
 		
@@ -445,16 +446,20 @@ public Action Cmd_Vis(int client) {
 		
 		if( job  == 6 ) {
 			rp_SetClientFloat(client, fl_invisibleTime, GetGameTime() + 30.0);
+			SetEntPropFloat(client, Prop_Send, "m_flModelScale", rp_GetClientFloat(client, fl_Size));
 			CreateTimer(120.0, AllowStealing, client);
 		}
 		else if ( job == 5 ) {
 			rp_SetClientFloat(client, fl_invisibleTime, GetGameTime() + 60.0);
+			SetEntPropFloat(client, Prop_Send, "m_flModelScale", rp_GetClientFloat(client, fl_Size));
 			CreateTimer(150.0, AllowStealing, client);
 		}
 		else if (job == 1 ||  job== 2 ) {
 			rp_SetClientFloat(client, fl_invisibleTime, GetGameTime() + 90.0);
+			SetEntPropFloat(client, Prop_Send, "m_flModelScale", rp_GetClientFloat(client, fl_Size));
 			rp_SetClientBool(client, b_MaySteal, true);
-		}
+	
+	}
 		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes maintenant invisible.");
 	}
@@ -463,6 +468,7 @@ public Action Cmd_Vis(int client) {
 	}
 	return Plugin_Handled;
 }
+ 
 public Action Cmd_Tazer(int client) {
 	#if defined DEBUG
 	PrintToServer("Cmd_Tazer");
