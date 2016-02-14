@@ -355,7 +355,7 @@ void CAPTURE_Stop() {
 	char optionsBuff[4][32], tmp[256];
 	
 	CPrintToChatAll("{lightblue} ================================== {default}");
-	CPrintToChatAll("{lightblue} Le bunker ne peut plus être capturés. {default}");
+	CPrintToChatAll("{lightblue} Le bunker ne peut plus être capturé. {default}");
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	
 	int wall = Entity_FindByName("job=201__-pvp_wall", "func_brush");
@@ -983,7 +983,7 @@ public void MenuPvPResume(Handle topmenu, TopMenuAction action, TopMenuObject to
 		else if( topobj_id == g_hStatsMenu_Damage )
 			Format(buffer, maxlength, "Le plus de dégâts");
 		else if( topobj_id == g_hStatsMenu_Flag )
-			Format(buffer, maxlength, "Le plus de drapeau posé");
+			Format(buffer, maxlength, "Le plus de drapeaux posés");
 		else if( topobj_id == g_hStatsMenu_ELO )
 			Format(buffer, maxlength, "Le meilleur en PvP");
 		else 
