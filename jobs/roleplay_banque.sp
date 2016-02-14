@@ -407,7 +407,7 @@ public Action Cmd_ItemPackDebutant(int args) { //Permet d'avoir la CB, le compte
 	rp_SetClientBool(client, b_HaveAccount, true);
 	
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre carte banquaire, votre compte banquaire et votre RIB sont maintenant actifs.");
-	
+
 	rp_ClientSave(client);
 }
 // ----------------------------------------------------------------------------

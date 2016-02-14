@@ -820,6 +820,8 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 			}
 			
 			g_bShouldOpen[client] = false;
+
+			FreeKidnapping(client);
 		}
 		else if( StrEqual( options, "cops", false) ) {
 			
