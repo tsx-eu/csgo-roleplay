@@ -169,7 +169,7 @@ public int eventMariage_2(Handle menu, MenuAction action, int client, int param2
 		ExplodeString(options, "_", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
 		
 		int target_1 = StringToInt(optionsBuff[0]); // premiere personne à marier
-		int target_2 = StringToInt(optionsBuff[1]); // seconde
+		int target_2 = StringToInt(optionsBuff[0]); // seconde
 		int zoneJuge = StringToInt(optionsBuff[2]);	// salle du juge
 		
 		int pos_1 = rp_GetPlayerZone(target_1);
@@ -192,7 +192,7 @@ public int eventMariage_2(Handle menu, MenuAction action, int client, int param2
 			CloseHandle(menu);
 			return;
 		}
-		if( rp_GetClientInt(target_1, i_MarriedTo) != -1 && rp_GetClientInt(target_2, i_MarriedTo) != -1 ){
+		if( rp_GetClientInt(target_1, i_MarriedTo) == 0 || rp_GetClientInt(target_2, i_MarriedTo) == 0 ){
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous essayez d'unir quelqu'un déjà marié, le mariage ne peut pas se dérouler.");
 			CloseHandle(menu);
 			return;
