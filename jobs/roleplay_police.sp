@@ -779,6 +779,10 @@ public Action Cmd_Jail(int client) {
 		if(job == 106 && GetClientTeam(target) == CS_TEAM_CT ){
 			ACCESS_DENIED(client);
 		}
+		if( !IsValidClient(target) ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un joueur");
+			return Plugin_Handled;
+		}
 
 		int maxAmount = 0;
 		switch( job ) {
@@ -2383,6 +2387,10 @@ public Action fwdFrozen(int client, float& speed, float& gravity) {
 	PrintToServer("fwdFrozen");
 	#endif
 	speed = 0.0;
+	
+	FakeClientCommand(target, "use weapon_knife");
+	FakeClientCommand(target, "use weapon_knifegg");
+	
 	return Plugin_Stop;
 }
 public Action fwdTazerBlue(int client, int color[4]) {
