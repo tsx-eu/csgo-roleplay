@@ -289,7 +289,7 @@ public int MenuCheque(Handle p_hItemMenu, MenuAction p_oAction, int client, int 
 			
 			// Setup menu
 			Handle hGiveMenu = CreateMenu(MenuCheque2);
-			SetMenuTitle(hGiveMenu, "Sélectionnez un objet à acheter:");
+			SetMenuTitle(hGiveMenu, "Sélectionner un objet à acheter:");
 			
 			for(int i = 0; i < MAX_ITEMS; i++) {
 				
