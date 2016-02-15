@@ -220,6 +220,7 @@ public Action Cmd_ItemPropulseur(int args) {
 	
 	ServerCommand("sm_effect_particles %d Trail12 1 lfoot", client);
 	ServerCommand("sm_effect_particles %d Trail12 1 rfoot", client);
+	
 }
 // ------------------------------------------------------------------------------
 public Action Cmd_ItemNano(int args) {
@@ -310,8 +311,8 @@ public Action Cmd_ItemNano(int args) {
 			
 			TE_SetupBeamPoints(vecStart, vecEnd, g_cBeam, 0, 0, 0, 1.0, 5.0, 5.0, 1, 0.5, {255, 255, 255, 192}, 0);
 			TE_SendToAll();
-			
-			ServerCommand("sm_effect_flash %d 5.0 255", i);
+			if(!rp_GetClientBool(i, b_ChiruYeux))
+				ServerCommand("sm_effect_flash %d 5.0 255", i);
 		}
 	}
 	else if( StrEqual(arg1, "unprop") ) {
@@ -805,10 +806,8 @@ public Action Frame_BigCashMachine(Handle timer, any ent) {
 	return Plugin_Handled;
 }
 float GetMachineTime(int client) {
-	if( rp_GetClientPvPBonus(client, cap_tower) && rp_GetClientPvPBonus(client, cap_nuclear) )
-		return Math_GetRandomFloat(9.0, 13.0);
-	else if( rp_GetClientPvPBonus(client, cap_tower) )
-		return Math_GetRandomFloat(13.0, 18.0);
+	if( rp_GetClientBool(client, b_HasVilla) || rp_GetClientPvPBonus(client, cap_villa) )
+		return Math_GetRandomFloat(12.0, 18.0);
 	else
 		return Math_GetRandomFloat(18.0, 22.0);
 }

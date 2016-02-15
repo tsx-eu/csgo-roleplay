@@ -133,6 +133,11 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_mandat", 		Cmd_ItemPickLock,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_ratio",		Cmd_ItemRatio,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_SendToJail",		Cmd_SendToJail,			"RP-ITEM",	FCVAR_UNREGISTERED);
+
+	HookEvent("bullet_impact", Event_Bullet_Impact);
+	HookEvent("weapon_fire", Event_Weapon_Fire);
+
+
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
@@ -161,7 +166,6 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
 	rp_HookEvent(client, RP_PreGiveDamage, fwdDmg);
 	rp_HookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);
-	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);	
 	rp_HookEvent(client, RP_OnPlayerUse, fwdOnPlayerUse);
 	rp_SetClientBool(client, b_IsSearchByTribunal, false);
 	g_TribunalSearch[client][tribunal_search_status] = -1;
@@ -502,7 +506,7 @@ public Action Cmd_Tazer(int client) {
 			}
 		}
 		if( rp_GetClientBool(target, b_Lube) && Math_GetRandomInt(1, 5) != 5) {
-			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N vous glisse entre les mains.", target);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N vous glisse entre les mains.", target);
 			return Plugin_Handled;
 		}
 		
@@ -512,7 +516,10 @@ public Action Cmd_Tazer(int client) {
 		rp_HookEvent(target, RP_PrePlayerPhysic, fwdFrozen, 7.5);
 		
 		rp_SetClientFloat(target, fl_TazerTime, GetGameTime()+9.0);
-		rp_SetClientFloat(target, fl_FrozenTime, GetGameTime()+7.5);	
+		rp_SetClientFloat(target, fl_FrozenTime, GetGameTime()+7.5);
+		
+		FakeClientCommand(target, "use weapon_knife");
+		FakeClientCommand(target, "use weapon_knifegg");
 		
 
 		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été tazé par %N", client);
@@ -770,6 +777,10 @@ public Action Cmd_Jail(int client) {
 
 		if(job == 106 && GetClientTeam(target) == CS_TEAM_CT ){
 			ACCESS_DENIED(client);
+		}
+		if( !IsValidClient(target) ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un joueur");
+			return Plugin_Handled;
 		}
 
 		int maxAmount = 0;
@@ -1911,6 +1922,23 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				return;
 			}
 		}
+		if( StrEqual(g_szJailRaison[type][jail_raison],"Tir dans la rue") 
+			&& !(rp_GetClientInt(client, i_Job) >= 101 || rp_GetClientInt(client, i_Job) >= 106) ) { // Tir dans la rue
+			if(rp_GetClientInt(target, i_LastShot)+30 < GetTime()){
+				rp_SetClientInt(target, i_JailTime, 0);
+				rp_SetClientInt(target, i_jailTime_Last, 0);
+				rp_SetClientInt(target, i_JailledBy, 0);
+				
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N{default} à été libéré car il n'a pas effectué de tir.", target);
+				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été libéré car vous n'avez pas effectué de tir.", client);
+				
+				LogToGame("[TSX-RP] [JAIL] %L à été libéré car il n'avait pas effectué de tir", target);
+				
+				rp_ClientResetSkin(target);
+				rp_ClientSendToSpawn(target, true);
+				return;
+			}
+		}
 		
 		int amende = StringToInt(g_szJailRaison[type][jail_amende]);
 		
@@ -2358,6 +2386,10 @@ public Action fwdFrozen(int client, float& speed, float& gravity) {
 	PrintToServer("fwdFrozen");
 	#endif
 	speed = 0.0;
+	
+	FakeClientCommand(client, "use weapon_knife");
+	FakeClientCommand(client, "use weapon_knifegg");
+	
 	return Plugin_Stop;
 }
 public Action fwdTazerBlue(int client, int color[4]) {
@@ -2791,47 +2823,20 @@ public Action fwdDmg(int attacker, int victim, float& damage) {
 
 	return Plugin_Continue;
 }
-/*public Action fwdUse(int client){
-	int zone = rp_GetPlayerZone(client);
-	int job = rp_GetClientJobID(client);
-	if(zone != 14)
-		return Plugin_Continue;
-	if(job != 1 && job != 101)
-		return Plugin_Continue;
-
-	if( rp_ClientCanDrawPanel(client) && rp_GetPlayerZone(client) != 14 ) {
-		Handle menu = CreateMenu(menuPoliceCar);
-		SetMenuTitle(menu, "Voitures de police");
-		AddMenuItem(menu, "buycar", "Acheter une voiture (500$)");
-		DisplayMenu(menu, client, 5);
-	}
-	
-	return Plugin_Handled;
-}
-public int menuPoliceCar(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
-	#if defined DEBUG
-	PrintToServer("menuPoliceCar");
-	#endif
-
-	if (p_oAction == MenuAction_Select) {
-		char szMenuItem[32];
-		if(rp_GetPlayerZone(client) != 14)
-			return;
+public void Event_Bullet_Impact(Event event, const char[] name, bool dontBroadcast){
+	int client = GetClientOfUserId(event.GetInt("userid"));
 		
-		if (GetMenuItem(p_hItemMenu, p_iParam2, szMenuItem, sizeof(szMenuItem))) {
-			if(StrEqual(szMenuItem, "buycar")){
-				if(rp_GetClientInt(client, i_Bank) + rp_GetClientInt(client, i_Money) >= 500){
-					rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - 500);
-					rp_SetJobCapital( 51, rp_GetJobCapital(51)+500 );
-					ServerCommand("rp_item_vehicle models/sentry/07crownvic_cvpi.mdl 0 %i -1", client);
-				}
-			}
-		}
-	}
-	else if (p_oAction == MenuAction_End) {
-		CloseHandle(p_hItemMenu);
-	}
-}*/
+	rp_SetClientInt(client, i_LastShot, GetTime());
+}
+public void Event_Weapon_Fire(Event event, const char[] name, bool dontBroadcast){
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	char weapon[64];
+	event.GetString("weapon", weapon, sizeof(weapon));
+	if( StrContains(weapon, "weapon_bayonet") == 0 || StrContains(weapon, "weapon_knife") == 0 )
+		return;
+
+	rp_SetClientInt(client, i_LastShot, GetTime());
+}
 // ----------------------------------------------------------------------------
 void StripWeapons(int client ) {
 	#if defined DEBUG

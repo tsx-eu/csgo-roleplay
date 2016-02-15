@@ -429,16 +429,13 @@ public Action Cmd_ItemAdrenaline(int args) {
 		return;
 	}
 	
-	int heal = GetClientHealth(client); heal += 100;
-	SetEntityHealth(client, heal);
-	
 	for (float i = 0.0; i <= 10.0; i+= 0.2) {
 		rp_HookEvent(client, RP_PostPlayerPhysic, fwdAdrenalineSpeed, i);
 		rp_HookEvent(client, RP_PostGiveDamageWeapon, fwdBerserk, i);
-		rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdBerserk, i);
+		rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdBerserk2, i);
 	}
 	
-	ServerCommand("sm_effect_particles %d Trail11 11 weapon_bone", client);
+	ServerCommand("sm_effect_particles %d Trail8 11 weapon_hand_R", client);
 	
 	rp_SetClientBool(client, b_Drugged, true);	
 	CreateTimer( 10.5, ItemDrugStop, client);
@@ -447,11 +444,11 @@ public Action fwdAdrenalineSpeed(int client, float& speed, float& gravity) {
 	#if defined DEBUG
 	PrintToServer("fwdAdrenalineSpeed");
 	#endif
-	speed -= 0.03;
-	gravity += 0.03;
+	speed -= 0.02;
+	gravity += 0.02;
 	
-	if( speed <= 0.0 ) {
-		speed = 0.0;
+	if( speed <= 0.25 ) {
+		speed = 0.25;
 		return Plugin_Stop;
 	}
 	
@@ -484,6 +481,15 @@ public Action fwdBerserk(int attacker, int victim, float &damage, int wepID, flo
 	#endif
 	
 	damage *= 1.05;
+	
+	return Plugin_Changed;
+}
+public Action fwdBerserk2(int attacker, int victim, float &damage, int wepID, float pos[3]) {
+	#if defined DEBUG
+	PrintToServer("fwdGiveBerserk2");
+	#endif
+	
+	damage *= 1.0125;
 	
 	return Plugin_Changed;
 }

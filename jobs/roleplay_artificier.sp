@@ -735,7 +735,6 @@ public Action Cmd_ItemHighJump(int args) {
 	ServerCommand("sm_effect_particles %d Trail5 1 lfoot", client);
 	ServerCommand("sm_effect_particles %d Trail5 1 rfoot", client);
 	
-	
 	return Plugin_Handled;
 }
 // ------------------------------------------------------------------------------

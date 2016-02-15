@@ -200,17 +200,29 @@ public Action Cmd_ItemContrat(int args) {
 	else if( StrContains(arg1, "lupin") == 0 ) {
 		g_iKillerPoint[vendeur][competance_type] = 1006;
 	}
+	
+	
+	if( !IsValidClient(target) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre cible s'est déconnectée.");
+		SetContratFail(client);
+	}
 	return Plugin_Handled;
 }
 // ----------------------------------------------------------------------------
 public Action fwdFrame(int client) {
 	int target = rp_GetClientInt(client, i_ToKill);
-	if( target > 0 ) {
-		rp_Effect_BeamBox(client, target, NULL_VECTOR, 255, 0, 0);
-	}
-	if(rp_GetClientJobID(client) != 41) {
+	
+	if( !IsValidClient(target) ) {
 		SetContratFail(client);
 	}
+	else if(rp_GetClientJobID(client) != 41) {
+		SetContratFail(client);
+	}
+	else {
+		rp_Effect_BeamBox(client, target, NULL_VECTOR, 255, 0, 0);
+	}
+	
+	return Plugin_Continue;
 }
 public Action fwdTueurKill(int client, int attacker, float& respawn) {
 	if( rp_GetClientInt(attacker, i_ToKill) == client && rp_GetClientInt(client, i_KidnappedBy) != attacker ) {
@@ -388,9 +400,6 @@ void OpenSelectSkill(int client) {
 	#if defined DEBUG
 	PrintToServer("OpenSelectSkill");
 	#endif
-	if( g_iKillerPoint[client][competance_left] <= 0 ) {
-		return;
-	}
 	
 	char tmp[255];
 	Format(tmp, 254, "Sélectionner les compétences a utiliser (%i)", g_iKillerPoint[client][competance_left]);
@@ -398,31 +407,30 @@ void OpenSelectSkill(int client) {
 	Handle menu = CreateMenu(AddCompetanceToAssassin);
 	SetMenuTitle(menu, tmp);
 	
-	if( g_iKillerPoint[client][competance_left] && StrEqual(commands, "skill") {
-		AddMenuItem(menu, "annule", "Annuler mon contrat");
-	}
-	if( !g_iKillerPoint[client][competance_cut] ) {
+	AddMenuItem(menu, "annule", "Annuler mon contrat");
+	
+	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_cut] ) {
 		AddMenuItem(menu, "cut", "Cut Maximum");
 	}
-	if( !g_iKillerPoint[client][competance_tir] ) {
+	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_tir] ) {
 		AddMenuItem(menu, "tir", "Precision Maximum");
 	}
-	if( !g_iKillerPoint[client][competance_usp] && ( !g_iKillerPoint[client][competance_awp] && !g_iKillerPoint[client][competance_pompe] )) { //On ne peut pas selectionner une arme si on en déjà choisi une auparavant
+	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_usp] && ( !g_iKillerPoint[client][competance_awp] && !g_iKillerPoint[client][competance_pompe] )) { //On ne peut pas selectionner une arme si on en déjà choisi une auparavant
 		AddMenuItem(menu, "usp", "M4 / Usp");
 	}
-	if( !g_iKillerPoint[client][competance_awp] && ( !g_iKillerPoint[client][competance_usp] && !g_iKillerPoint[client][competance_pompe] )) {
+	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_awp] && ( !g_iKillerPoint[client][competance_usp] && !g_iKillerPoint[client][competance_pompe] )) {
 		AddMenuItem(menu, "awp", "AWP / Cz75");
 	}
-	if( !g_iKillerPoint[client][competance_pompe] && ( !g_iKillerPoint[client][competance_awp] && !g_iKillerPoint[client][competance_usp] )) {
+	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_pompe] && ( !g_iKillerPoint[client][competance_awp] && !g_iKillerPoint[client][competance_usp] )) {
 		AddMenuItem(menu, "pompe", "Nova / Deagle");
 	}
-	if( !g_iKillerPoint[client][competance_invis] ) {
+	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_invis] ) {
 		AddMenuItem(menu, "inv", "Invisibilité");
 	}
-	if( !g_iKillerPoint[client][competance_hp] ) {
+	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_hp] ) {
 		AddMenuItem(menu, "vie", "Vie");
 	}
-	if( !g_iKillerPoint[client][competance_vitesse] ) {
+	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_vitesse] ) {
 		AddMenuItem(menu, "vit", "Vitesse");
 	}
 	
@@ -441,11 +449,12 @@ public int AddCompetanceToAssassin(Handle menu, MenuAction action, int client, i
 			OpenSelectSkill(client);
 			return;
 		}
-		if( g_iKillerPoint[client][competance_left] <= 0 ) {
-			return;
-		}
-		if( StrEqual(options, "annule", false){
+		
+		if( StrEqual(options, "annule", false) ) {
 			SetContratFail(client);
+		}
+		else if( g_iKillerPoint[client][competance_left] <= 0 ) {
+			return;
 		}
 		else if( StrEqual(options, "cut", false) ) {
 			g_iKillerPoint[client][competance_cut] = 1;
@@ -476,26 +485,20 @@ public int AddCompetanceToAssassin(Handle menu, MenuAction action, int client, i
 			if( StrEqual(options, "usp", false) ){
 				g_iKillerPoint[client][competance_usp] = 1;
 				
-				int skin = GivePlayerItem(client, "weapon_usp_silencer");
-				rp_SetClientWeaponSkin(client, skin);
-				skin = GivePlayerItem(client, "weapon_m4a1_silencer");
-				rp_SetClientWeaponSkin(client, skin);
+				GivePlayerItem(client, "weapon_usp_silencer");
+				GivePlayerItem(client, "weapon_m4a1_silencer");
 			}
 			else if( StrEqual(options, "awp", false) ){
 				g_iKillerPoint[client][competance_awp] = 1;
 				
-				int skin = GivePlayerItem(client, "weapon_cz75a");
-				rp_SetClientWeaponSkin(client, skin);
-				skin = GivePlayerItem(client, "weapon_awp");
-				rp_SetClientWeaponSkin(client, skin);
+				GivePlayerItem(client, "weapon_cz75a");
+				GivePlayerItem(client, "weapon_awp");
 			}
 			else if( StrEqual(options, "pompe", false) ){
 				g_iKillerPoint[client][competance_pompe] = 1;
 				
-				int skin = GivePlayerItem(client, "weapon_deagle");
-				rp_SetClientWeaponSkin(client, skin);
-				skin = GivePlayerItem(client, "weapon_nova");
-				rp_SetClientWeaponSkin(client, skin);
+				GivePlayerItem(client, "weapon_deagle");
+				GivePlayerItem(client, "weapon_nova");
 			}
 		}
 		else if( StrEqual(options, "inv", false) ) {
@@ -786,8 +789,7 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 			float delay = 20.0;
 			float time = 0.0;
 			
-			int skin = GivePlayerItem(client, "weapon_deagle");
-			rp_SetClientWeaponSkin(client, skin);
+			GivePlayerItem(client, "weapon_deagle");
 			
 			// TODO: Utiliser une CVAR ? 
 			char door[128], doors[12][12];
@@ -818,8 +820,6 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 			}
 			
 			g_bShouldOpen[client] = false;
-
-			FreeKidnapping(client);
 		}
 		else if( StrEqual( options, "cops", false) ) {
 			
@@ -1136,7 +1136,8 @@ public Action fwdWeapon(int victim, int attacker, float &damage, int wepID, floa
 				rp_SetClientFloat(victim, fl_FrozenTime, GetGameTime() + 1.5);
 				rp_SetClientFloat(victim, fl_TazerTime, GetGameTime() + 7.5);
 				
-				ServerCommand("sm_effect_flash %d 1.5 180", victim);
+				if(!rp_GetClientBool(victim, b_ChiruYeux))
+					ServerCommand("sm_effect_flash %d 1.5 180", victim);
 						
 				if( rp_GetClientInt(attacker,i_Protect_Last) == victim ) {
 					int heal = GetClientHealth(him);

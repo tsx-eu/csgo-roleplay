@@ -223,7 +223,7 @@ public Action fwdOnPlayerUse(int client) {
 			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 50 ) {
 				int time = rp_GetBuildingData(i, BD_count);
 				int maxtime = rp_GetBuildingData(i, BD_max);
-				if( time >= maxtime &&  rp_GetBuildingInt( i, BD_owner )){
+				if( time >= maxtime &&  rp_GetBuildingData( i, BD_owner )) {
 					rp_SetBuildingData(i, BD_count, 0);
 					giveHamburger(client);
 				}
@@ -286,7 +286,7 @@ public Action Cmd_ItemHamburger(int args) {
 		float vita = rp_GetClientFloat(client, fl_Vitality);
 		
 		rp_SetClientFloat(client, fl_Vitality, vita + 256.0);
-		
+		ServerCommand("sm_effect_particles %d Trail12 5 facemask", client);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ressentez votre vitalité s'augmenter (%.1f -> %.1f).", vita, vita+256.0);
 	}
 	if( StrEqual(arg1, "energy") || StrEqual(arg1, "max") ) {
@@ -306,28 +306,21 @@ public Action Cmd_ItemHamburger(int args) {
 		}
 	}
 	else if( StrEqual(arg1, "mac") ) {
-		ITEM_CANCEL(client, GetCmdArgInt(args));
-		return Plugin_Handled;
 		
-		if( rp_IsInPVP(client) ) {
-			rp_SetClientFloat(client, fl_CoolDown, rp_GetClientFloat(client, fl_CoolDown) + 5.0);
-			rp_SetClientFloat(client, fl_Reflect, GetGameTime() + 3.0);
-		}
-		else {
-			rp_SetClientFloat(client, fl_Reflect, GetGameTime() + 5.0);
-		}
+		rp_SetClientFloat(client, fl_Reflect, GetGameTime() + 5.0);
 		
 		float vecTarget[3];
 		GetClientAbsOrigin(client, vecTarget);
 		
 		TE_SetupBeamRingPoint(vecTarget, 10.0, 300.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, {255, 255, 0, 50}, 10, 0);
 		TE_SendToAll();
+		
+		ServerCommand("sm_effect_particles %d Trail11 5 facemask", client);
 	}
 	else if( StrEqual(arg1, "chicken") ) {
 		
 		if( Math_GetRandomInt(1, 4) == 4 ) {
-			int wepID = GivePlayerItem(client, "weapon_mac10");
-			rp_SetClientWeaponSkin(client, wepID);
+			GivePlayerItem(client, "weapon_mac10");
 		}
 		else {
 			int ent = CreateEntityByName("chicken");
@@ -361,10 +354,6 @@ public Action Cmd_ItemHamburger(int args) {
 			
 			if( jobID <= 0 || jobID == 61 || jobID == 91 ) // Aucun, Appart, Mafia
 				continue;
-			if( jobID == 51 && Math_GetRandomInt(0, 1) ) // Moins de chance pour carshop stp
-				continue;
-			
-			
 			
 			rp_GetItemData(i, item_type_extra_cmd, cmd, sizeof(cmd));
 			if( strlen(cmd) <= 1 ) // UNKNOWN

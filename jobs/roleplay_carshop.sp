@@ -516,8 +516,11 @@ int rp_CreateVehicle(float origin[3], float angle[3], char[] model, int skin, in
 	rp_SetVehicleInt(ent, car_klaxon, Math_GetRandomInt(1, 6));
 	
 	SetEntProp(ent, Prop_Data, "m_takedamage", DAMAGE_NO); // Nope
-	SetEntProp(ent, Prop_Data, "m_nNextThinkTick", -1);
+	//SetEntProp(ent, Prop_Data, "m_nNextThinkTick", -1);
 	SetEntProp(ent, Prop_Data, "m_bHasGun", 0);
+	
+	SDKHook(ent, SDKHook_Think, OnThink);	
+	
 	
 //	AcceptEntityInput(ent, "HandBrakeOn");
 	AcceptEntityInput(ent, "TurnOff");
@@ -537,6 +540,10 @@ int rp_CreateVehicle(float origin[3], float angle[3], char[] model, int skin, in
 	
 	LogToGame("[POST] Vehicle Spawning from %N", client);
 	return ent;
+}
+public void OnThink(int ent) {
+	SetEntPropFloat(ent, Prop_Data, "m_flTurnOffKeepUpright", 1.0);
+	SetEntProp(ent, Prop_Send, "m_bEnterAnimOn", 0);
 }
 void VehicleRemove(int vehicle, bool explode = false) {
 	#if defined DEBUG

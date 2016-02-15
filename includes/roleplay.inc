@@ -39,10 +39,11 @@ enum rp_event {
 	RP_OnPlayerSteal,			/* Un joueur execute le /vol */
 	RP_OnPlayerZoneChange,		/* Un joueur change de zone */
 	
-	RP_OnPlayerHear,		/* Peut-il entendre un autre joueur ? */
-	RP_PrePlayerTalk,		/* J'écris un message dans le chat  */
+	RP_OnPlayerHear,			/* Peut-il entendre un autre joueur ? */
+	RP_PrePlayerTalk,			/* J'écris un message dans le chat  */
 	RP_OnPlayerDataLoaded,		/* Quand le joueur a chargé */
-	RP_OnPlayerSell,		/* Quand un joueur fait une vente */
+	RP_OnPlayerSell,			/* Quand un joueur fait une vente */
+	RP_OnPlayerHUD,			/* A chaque fois que le HUD à gauche se refresh */
 	
 	RP_EventMax
 }
@@ -68,14 +69,15 @@ typeset rp_event_enum {
 	function Action(int victim, int attacker, float& respawn);			/* RP_OnPlayerDead == return Plugin_Handled = cacher des logs */
 	function Action(int client, float& cooldown);					/* RP_OnPlayerBuild */
 	function Action(int client);								/* RP_OnPlayerUse */
-	function Action(int client, char[] command, char[] arg);	/* RP_OnPlayerCommand */
+	function Action(int client, char[] command, char[] arg);			/* RP_OnPlayerCommand */
 	function Action(int client, int target, float& cooldown);			/* RP_OnPlayerSteal */
-	function Action(int client, int newZoneID, int oldZoneID);		/* RP_OnPlayerZoneChange */
+	function Action(int client, int newZoneID, int oldZoneID);			/* RP_OnPlayerZoneChange */
 	
-	function Action(int client, int target, float& dist);		/* RP_OnPlayerHear Est-ce que client peut entendre target ? */
+	function Action(int client, int target, float& dist);				/* RP_OnPlayerHear Est-ce que client peut entendre target ? */
 	function Action(int client, char[] message, int length, bool local);	/* RP_PrePlayerTalk */
 	function Action(int client);								/* RP_OnPlayerDataLoaded */
 	function Action(int client, int money);						/* RP_OnPlayerSell */
+	function Action(int client, char[] szHUD, const int maxSize);			/* RP_OnPlayerHUD */
 };
 /*
  * @brief Hook sur un joueur. 
@@ -187,7 +189,6 @@ native bool rp_GetClientKeyDoor(int client, int doorID);								/* Le joueur a-t
 native void rp_SetDoorLock(int doorID, bool status); 								/* Verouille ou déverouille un doorID */
 native void rp_ClientOpenDoor(int client, int doorID, bool status);					/* Le joueur ouvre, ou referme la porte. Ne fonctionne pas si la porte est lockée. TODO: Vérif s'il fait un doorID ou entID */
 // ----------------------------------------------------------------------------
-native void rp_SetClientWeaponSkin(int client, int wepID);							/* Définir le skin d'une arme par rapport au chois perso d'un joueur */
 native void rp_SetWeaponGroupID(int wepID, int groupID);							/* Défini le numéro de groupe d'une arme. cf rp_GetClientGroupID */
 native void rp_SetWeaponBallType(int wepID, enum_ball_type typeID);					/* Défini le type de balle d'une arme */
 native void rp_SetClientKnifeType(int client, enum_ball_type typeID);					/* Défini le type de couteau qu'un joueur porte... (Incendiaire, poison, para, etc) */
@@ -217,6 +218,8 @@ native void rp_GetDate(char[] str, int length);
 native void rp_GetTime(int& hour, int& minutes);
 native void rp_GetServerString(rp_serv typeID, char[] str, int length);
 native void rp_SetServerString(rp_serv typeID, char[] str, int length);
+native int rp_SetCaptureInt(rp_capture_zone zoneID, int value);
+native int rp_GetCaptureInt(rp_capture_zone zoneID);
 // ----------------------------------------------------------------------------
 native bool rp_ClientCanDrawPanel(int client);
 native void rp_SendPanelToClient(Handle& panel, int client, float duration);
@@ -229,6 +232,7 @@ native void rp_QuestStepFail(int client, int objectiveID);
 native int rp_RegisterQuest(char uniqID[32], char name[64], quest_type_type type, QuestFctInit CanStart);
 native void rp_QuestAddStep(int questID, int stepID, QuestFct start, QuestFct frame, QuestFct abort, QuestFct done);
 native int rp_QuestCreateInstance(int client, char model[PLATFORM_MAX_PATH], float vecPos[3]);
+native bool rp_IsGrabbed(int entity);
 // ----------------------------------------------------------------------------
 
 #define ACCESS_DENIED(%1)	CPrintToChat(%1, "{lightblue}[TSX-RP]{default} Vous n'avez pas accès à cette commande.");	return Plugin_Handled
@@ -329,7 +333,6 @@ enum int_user_data {
 	i_LastKilled,
 	i_LastKilled_Reverse,
 	i_Client,
-	i_Skin,
 	i_LastForcedSave,
 	i_ToKill,
 	i_ContratFor,
@@ -370,7 +373,6 @@ enum int_user_data {
 	i_Tutorial,
 	i_TeleportTo,
 	i_Disposed,
-	i_KnifeSkin,
 	i_Mask,
 	i_AppartCount,
 	i_LastKillTime,
@@ -382,8 +384,10 @@ enum int_user_data {
 	
 	i_ItemCount,
 	i_ItemBankCount,
+	i_ItemCountSaved,
 
 	i_LastAgression,
+	i_LastShot,
 	i_LastAmende,
 	i_LastAmendeBy,
 
@@ -513,8 +517,7 @@ enum building_prop_data {
 	building_prop_data_max
 };
 enum rp_capture_zone {
-	cap_nuclear =  0,
-	cap_tower,
+	cap_bunker =  0,
 	cap_villa,
 	cap_disableItem,
 	capture_max

@@ -922,7 +922,9 @@ public void SQL_BedVillaMenuKey(Handle owner, Handle hQuery, const char[] error,
 		SQL_FetchString(hQuery, 0, steamid, sizeof(steamid));
 		AddMenuItem(menu, steamid, steamid, ITEMDRAW_DISABLED);
 	}
-	AddMenuItem(menu, "add",	"Ajouté une clés");
+	
+	if( i < 8 )
+		AddMenuItem(menu, "add",	"Ajouté une clés");
 	DisplayMenu(menu, client, 60);
 	
 	rp_SetClientBool(client, b_MaySteal, true);

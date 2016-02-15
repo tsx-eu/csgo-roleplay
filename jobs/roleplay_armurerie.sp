@@ -68,8 +68,7 @@ public Action Cmd_GiveItem(int args) {
 	
 	
 	int client = GetCmdArgInt(2);
-	int wpnID = GivePlayerItem(client, Arg1);
-	rp_SetClientWeaponSkin(client, wpnID);
+	GivePlayerItem(client, Arg1);
 	return Plugin_Handled;
 }
 public Action Cmd_GiveItemPvP(int args) {
@@ -81,10 +80,7 @@ public Action Cmd_GiveItemPvP(int args) {
 	GetCmdArg(1, Arg1, sizeof(Arg1));
 	
 	int client = GetCmdArgInt(2);
-	int wpnID = GivePlayerItem(client, Arg1);
-	
-	rp_SetClientWeaponSkin(client, wpnID);
-	
+	int wpnID = GivePlayerItem(client, Arg1);	
 	int group = rp_GetClientGroupID(client);
 	rp_SetWeaponGroupID(wpnID, group);
 }
@@ -407,7 +403,8 @@ public Action fwdWeapon(int victim, int attacker, float &damage, int wepID, floa
 			}
 			
 			rp_SetClientFloat(victim, fl_FrozenTime, GetGameTime() + 1.5);
-			ServerCommand("sm_effect_flash %d 1.5 180", victim);
+			if(!rp_GetClientBool(victim, b_ChiruYeux))
+				ServerCommand("sm_effect_flash %d 1.5 180", victim);
 		}
 		case ball_type_poison: {
 			damage *= 0.66;
@@ -523,7 +520,6 @@ public Action Cmd_ItemRedraw(int args) {
 	RemoveEdict( wep_id );
 	
 	wep_id = GivePlayerItem(client, classname);
-	rp_SetClientWeaponSkin(client, wep_id);
 	rp_SetWeaponBallType(wep_id, wep_type);
 	rp_SetWeaponGroupID(wep_id, g);
 	rp_SetWeaponStorage(wep_id, s);
