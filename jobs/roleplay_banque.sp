@@ -289,7 +289,7 @@ public int MenuCheque(Handle p_hItemMenu, MenuAction p_oAction, int client, int 
 			
 			// Setup menu
 			Handle hGiveMenu = CreateMenu(MenuCheque2);
-			SetMenuTitle(hGiveMenu, "Sélectionner un objet à acheter:");
+			SetMenuTitle(hGiveMenu, "Sélectionnez un objet à acheter:");
 			
 			for(int i = 0; i < MAX_ITEMS; i++) {
 				
@@ -344,7 +344,7 @@ public int MenuCheque2(Handle p_hItemMenu, MenuAction p_oAction, int client, int
 			// Setup menu
 			Handle hGiveMenu = rp_CreateSellingMenu();			
 			
-			SetMenuTitle(hGiveMenu, "Sélectionner combien en acheter:");
+			SetMenuTitle(hGiveMenu, "Sélectionnez combien en acheter:");
 			int amount = 0;
 			for(int i = 1; i <= 100; i++) {
 				
@@ -406,7 +406,7 @@ public Action Cmd_ItemPackDebutant(int args) { //Permet d'avoir la CB, le compte
 	rp_SetClientBool(client, b_PayToBank, true);
 	rp_SetClientBool(client, b_HaveAccount, true);
 	
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre carte banquaire, votre compte banquaire et votre RIB sont maintenant actifs.");
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre carte bancaire, votre compte bancaire et votre RIB sont maintenant actifs.");
 
 	rp_ClientSave(client);
 }
