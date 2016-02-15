@@ -2799,7 +2799,7 @@ public Action fwdUse(int client){
 	if(job != 1 && job != 101)
 		return Plugin_Continue;
 
-	if( rp_ClientCanDrawPanel(client) ) {
+	if( rp_ClientCanDrawPanel(client) && rp_GetPlayerZone(client) != 14 ) {
 		Handle menu = CreateMenu(menuPoliceCar);
 		SetMenuTitle(menu, "Voitures de police");
 		AddMenuItem(menu, "buycar", "Acheter une voiture (500$)");
