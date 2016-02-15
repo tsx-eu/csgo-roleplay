@@ -429,7 +429,7 @@ public Action Cmd_ItemAdrenaline(int args) {
 		return;
 	}
 	
-	int heal = GetClientHealth(client); heal += 100;
+	int heal = GetClientHealth(client); heal += 0;
 	SetEntityHealth(client, heal);
 	
 	for (float i = 0.0; i <= 10.0; i+= 0.2) {
