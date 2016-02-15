@@ -2791,7 +2791,7 @@ public Action fwdDmg(int attacker, int victim, float& damage) {
 
 	return Plugin_Continue;
 }
-public Action fwdUse(int client){
+/*public Action fwdUse(int client){
 	int zone = rp_GetPlayerZone(client);
 	int job = rp_GetClientJobID(client);
 	if(zone != 14)
@@ -2831,7 +2831,7 @@ public int menuPoliceCar(Handle p_hItemMenu, MenuAction p_oAction, int client, i
 	else if (p_oAction == MenuAction_End) {
 		CloseHandle(p_hItemMenu);
 	}
-}
+}*/
 // ----------------------------------------------------------------------------
 void StripWeapons(int client ) {
 	#if defined DEBUG
