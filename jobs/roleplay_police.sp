@@ -950,6 +950,11 @@ public Action Cmd_Mandat(int client) {
 		ACCESS_DENIED(client);
 	}
 	
+	if(!IsValidClient(target)){	
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un joueur");
+		return Plugin_Handled;
+	}
+	
 	if( rp_GetClientItem(target, ITEM_MANDAT) < 10 ) {
 		rp_ClientGiveItem(target, ITEM_MANDAT);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez donné un mandat a: %N", target);
