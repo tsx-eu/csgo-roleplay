@@ -3058,7 +3058,8 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			
 			rp_SetJobCapital(rnd, rp_GetJobCapital(rnd) - data[BM_Prix]);
 			LogToGame("[TSX-RP] [RESELL] Le joueur %L à acheté %s au commissariat pour %d$", client, name, data[BM_Prix]);			
-		}else {
+		}
+		else if(GetMenuItem(p_hMenu, p_iParam2, szMenu, sizeof(szMenu)) == 0) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Désolé il n'y a pas d'armes disponibles pour le moment.");
 		}
 	}
