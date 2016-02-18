@@ -977,6 +977,12 @@ void Client_SetSpawnProtect(int client, bool status) {
 		SetEntProp(client, Prop_Data, "m_takedamage", 0);
 		SDKHook(client, SDKHook_SetTransmit, fwdGodHideMe);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez 10 secondes de spawn-protection.");
+		
+		int wep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+		if( wep > 0 && IsValidEdict(wep) && IsValidEntity(wep) ) {
+			SetEntPropFloat(wep, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + 10.0);
+			SetEntPropFloat(wep, Prop_Send, "m_flNextSecondaryAttack", GetGameTime() + 10.0);
+		}
 	}
 	else {
 		rp_UnhookEvent(client, RP_OnPlayerDead, fwdGodPlayerDead);
@@ -986,6 +992,12 @@ void Client_SetSpawnProtect(int client, bool status) {
 		g_hGodTimer[client] = INVALID_HANDLE; 
 		SetEntProp(client, Prop_Data, "m_takedamage", 2);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre spawn-protection a expirée.");
+		
+		int wep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+		if( wep > 0 && IsValidEdict(wep) && IsValidEntity(wep) ) {
+			SetEntPropFloat(wep, Prop_Send, "m_flNextPrimaryAttack", GetGameTime());
+			SetEntPropFloat(wep, Prop_Send, "m_flNextSecondaryAttack", GetGameTime());
+		}
 	}
 }
 public Action fwdGodHideMe(int client, int target) {
