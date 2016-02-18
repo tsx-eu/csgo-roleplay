@@ -151,7 +151,7 @@ public Action Cmd_ItemFlag(int args) {
 		if( g_iFlagData[i][data_group] == gID ) {
 			count++;
 			
-			if( count >= 2 ) {
+			if( count >= 3 ) {
 				
 				if( gID == rp_GetClientInt(client, i_Group) ) {
 					if( IsValidClient(g_iFlagData[i][data_owner]) ) {
@@ -161,7 +161,7 @@ public Action Cmd_ItemFlag(int args) {
 					AcceptEntityInput(i, "KillHierarchy");
 				}
 				else {
-					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il y a déjà 2 drapeaux pour votre équipe sur le terrain.");
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il y a déjà 3 drapeaux pour votre équipe sur le terrain.");
 					ITEM_CANCEL(client, item_id);
 					return;
 				}
@@ -217,6 +217,8 @@ public Action FlagThink(Handle timer, any data) {
 				g_iCapture_POINT[rp_GetCaptureInt(cap_bunker)] -= FLAG_POINTS;
 				
 				GDM_RegisterFlag(g_iFlagData[entity][data_lastOwner]);
+				
+				PrintHintText(g_iFlagData[entity][data_lastOwner], "<b>Drapeau posé !</b>\n <font color='#33ff33'>+%d</span> points !", FLAG_POINTS);
 			}
 			
 			Entity_GetAbsOrigin(entity, vecOrigin);
@@ -392,21 +394,24 @@ void CAPTURE_Stop() {
 			rp_ClientColorize(i);
 	}
 	
+	int totalPoints = 0;
 	for(int i=1; i<MAX_GROUPS; i++) {
 		if( maxPoint > g_iCapture_POINT[i] )
 			continue;
 
 		winner = i;
 		maxPoint = g_iCapture_POINT[i];
+		totalPoints += g_iCapture_POINT[i];
 	}
 			
 	rp_GetGroupData(winner, group_type_name, tmp, sizeof(tmp));
 	ExplodeString(tmp, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
 			
 	char fmt[1024];
-	Format(fmt, sizeof(fmt), "UPDATE `rp_servers` SET `bunkerCap`='%i';", winner);
+	Format(fmt, sizeof(fmt), "UPDATE `rp_servers` SET `bunkerCap`='%i', `capVilla`='%i';", winner, winner);
 	SQL_TQuery( rp_GetDatabase(), SQL_QueryCallBack, fmt);
 	rp_SetCaptureInt(cap_bunker, winner);
+	rp_SetCaptureInt(cap_villa, winner);
 			
 	CPrintToChatAll("{lightblue} Le bunker appartient maintenant à... %s !", optionsBuff[1]);			
 	CPrintToChatAll("{lightblue} ================================== {default}");
@@ -416,7 +421,7 @@ void CAPTURE_Stop() {
 	UnhookEvent("player_hurt", fwdGod_PlayerHurt, EventHookMode_Pre);
 	UnhookEvent("weapon_fire", fwdGod_PlayerShoot, EventHookMode_Pre);	
 	
-	CAPTURE_Reward();
+	CAPTURE_Reward(totalPoints);
 	GDM_Resume();
 }
 void CAPTURE_UpdateLight() {
@@ -443,7 +448,7 @@ void CAPTURE_UpdateLight() {
 		}
 	}
 }
-void CAPTURE_Reward() {
+void CAPTURE_Reward(int totalPoints) {
 	#if defined DEBUG
 	PrintToServer("CAPTURE_Reward");
 	#endif
@@ -454,16 +459,18 @@ void CAPTURE_Reward() {
 		if( !IsValidClient(client) || rp_GetClientGroupID(client) == 0 )
 			continue;
 		
-		if( rp_GetClientGroupID(client) == rp_GetCaptureInt(cap_bunker) ) {
+		
+		int gID = rp_GetClientGroupID(client);
+		int bonus = RoundToCeil(g_iCapture_POINT[gID] / 250.0);
+		
+		if( gID == rp_GetCaptureInt(cap_bunker) ) {
 			amount = 10;
 			rp_IncrementSuccess(client, success_list_pvpkill, 100);
+			bonus += RoundToCeil(totalPoints-g_iCapture_POINT[gID] / 250.0);
 		}
 		else {
 			amount = 1;
 		}
-
-		int gID = rp_GetClientGroupID(client);
-		int bonus = RoundToCeil(g_iCapture_POINT[gID] / 200.0);
 		
 		rp_ClientGiveItem(client, 309, amount + 3 + bonus, true);
 		rp_GetItemData(309, item_type_name, tmp, sizeof(tmp));
@@ -550,7 +557,8 @@ public Action fwdDead(int victim, int attacker, float& respawn) {
 		CTF_DropFlag(victim, false);
 	}
 	if( victim != attacker ) {
-		GDM_ELOKill(attacker, victim);
+		int points = GDM_ELOKill(attacker, victim);
+		PrintHintText(attacker, "<b>Kill !</b>\n <font color='#33ff33'>+%d</span> points !", points);
 		rp_IncrementSuccess(attacker, success_list_killpvp2);
 	}
 	if( rp_GetClientGroupID(victim) == rp_GetCaptureInt(cap_bunker) )
@@ -601,6 +609,8 @@ public Action fwdFrame(int client) {
 		rp_ClientColorize(client, { 255, 64, 64, 255 } );
 		PrintHintText(client, "Vous êtes en attaque.\n     <font color='#3333ff'>Tuez les <b>BLEUS</b></font>");
 	}
+	
+	
 	
 	int vehicle = Client_GetVehicle(client);
 	if( rp_IsValidVehicle(vehicle) ) {
@@ -861,7 +871,7 @@ void GDM_RegisterShoot(int client) {
 	array[gdm_shot]++;
 	g_hGlobalDamage.SetArray(szSteamID, array, sizeof(array));
 }
-void GDM_ELOKill(int client, int target) {
+int GDM_ELOKill(int client, int target) {
 	#if defined DEBUG
 	PrintToServer("GDM_ELOKill");
 	#endif
@@ -895,6 +905,8 @@ void GDM_ELOKill(int client, int target) {
 	
 	g_hGlobalDamage.SetArray(szSteamID, attacker, sizeof(attacker));
 	g_hGlobalDamage.SetArray(szSteamID2, victim, sizeof(victim));
+	
+	return cElo;
 }
 void GDM_Resume() {
 	StringMapSnapshot KeyList = g_hGlobalDamage.Snapshot();
