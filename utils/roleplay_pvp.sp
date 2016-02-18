@@ -88,6 +88,8 @@ public void OnCvarChange(Handle cvar, const char[] oldVal, const char[] newVal) 
 	}
 }
 public void OnClientPostAdminCheck(int client) {
+	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
+	
 	if( g_bIsInCaptureMode ) {
 		GDM_Init(client);
 		rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
@@ -98,7 +100,6 @@ public void OnClientPostAdminCheck(int client) {
 		rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdTakeDamage);
 		rp_HookEvent(client, RP_PostTakeDamageKnife, fwdTakeDamage);
 		rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
-		rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 		SDKHook(client, SDKHook_SetTransmit, fwdGodHide2);
 	}
 }
@@ -310,7 +311,6 @@ void CAPTURE_Start() {
 		rp_HookEvent(i, RP_PostTakeDamageWeapon, fwdTakeDamage);
 		rp_HookEvent(i, RP_PostTakeDamageKnife, fwdTakeDamage);
 		rp_HookEvent(i, RP_OnPlayerZoneChange, fwdZoneChange);
-		rp_HookEvent(i, RP_OnPlayerCommand, fwdCommand);
 		SDKHook(i, SDKHook_SetTransmit, fwdGodHide2);
 		
 		gID = rp_GetClientGroupID(i);
@@ -388,7 +388,6 @@ void CAPTURE_Stop() {
 		rp_UnhookEvent(i, RP_PostTakeDamageWeapon, fwdTakeDamage);
 		rp_UnhookEvent(i, RP_PostTakeDamageKnife, fwdTakeDamage);
 		rp_UnhookEvent(i, RP_OnPlayerZoneChange, fwdZoneChange);
-		rp_UnhookEvent(i, RP_OnPlayerCommand, fwdCommand);
 		SDKUnhook(i, SDKHook_SetTransmit, fwdGodHide2);
 		if( IsPlayerAlive(i) )
 			rp_ClientColorize(i);
@@ -466,7 +465,7 @@ void CAPTURE_Reward(int totalPoints) {
 		if( gID == rp_GetCaptureInt(cap_bunker) ) {
 			amount = 10;
 			rp_IncrementSuccess(client, success_list_pvpkill, 100);
-			bonus += RoundToCeil(totalPoints-g_iCapture_POINT[gID] / 250.0);
+			bonus += RoundToCeil((totalPoints-g_iCapture_POINT[gID]) / 250.0);
 		}
 		else {
 			amount = 1;
@@ -973,31 +972,29 @@ void Client_SetSpawnProtect(int client, bool status) {
 	if( status == true ) {
 		rp_HookEvent(client, RP_OnPlayerDead, fwdGodPlayerDead);
 		SDKHook(client, SDKHook_SetTransmit, fwdGodHideMe);
+		SDKHook(client, SDKHook_PreThink, fwdGodThink);
 		g_hGodTimer[client] = CreateTimer(10.0, GOD_Expire, client);
 		SetEntProp(client, Prop_Data, "m_takedamage", 0);
-		SDKHook(client, SDKHook_SetTransmit, fwdGodHideMe);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez 10 secondes de spawn-protection.");
 		
-		int wep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-		if( wep > 0 && IsValidEdict(wep) && IsValidEntity(wep) ) {
-			SetEntPropFloat(wep, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + 10.0);
-			SetEntPropFloat(wep, Prop_Send, "m_flNextSecondaryAttack", GetGameTime() + 10.0);
-		}
+		
 	}
 	else {
 		rp_UnhookEvent(client, RP_OnPlayerDead, fwdGodPlayerDead);
 		SDKUnhook(client, SDKHook_SetTransmit, fwdGodHideMe);
+		SDKUnhook(client, SDKHook_PreThink, fwdGodThink);
 		if( g_hGodTimer[client] != INVALID_HANDLE )
 			delete g_hGodTimer[client];
 		g_hGodTimer[client] = INVALID_HANDLE; 
 		SetEntProp(client, Prop_Data, "m_takedamage", 2);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre spawn-protection a expirée.");
-		
-		int wep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-		if( wep > 0 && IsValidEdict(wep) && IsValidEntity(wep) ) {
-			SetEntPropFloat(wep, Prop_Send, "m_flNextPrimaryAttack", GetGameTime());
-			SetEntPropFloat(wep, Prop_Send, "m_flNextSecondaryAttack", GetGameTime());
-		}
+	}
+}
+public Action fwdGodThink(int client) {
+	int wep = Client_GetWeapon(client, "weapon_knife");
+	if( wep > 0 && IsValidEdict(wep) && IsValidEntity(wep) ) {
+		SetEntPropFloat(wep, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + 0.25);
+		SetEntPropFloat(wep, Prop_Send, "m_flNextSecondaryAttack", GetGameTime() + 0.25);
 	}
 }
 public Action fwdGodHideMe(int client, int target) {
