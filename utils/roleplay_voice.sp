@@ -176,8 +176,11 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 }
 public Action fwdHear(int client, int target, float& dist) {
 	
-	int Czone = rp_GetPlayerZone(client), Ctype = rp_GetZoneInt(Czone, zone_type_type);
-	int Tzone = rp_GetPlayerZone(target), Ttype = rp_GetZoneInt(Tzone, zone_type_type), Tbit = rp_GetZoneBit(Tzone);
+	char Ctype[64], Ttype[64];
+	int Czone = rp_GetPlayerZone(client);
+	int Tzone = rp_GetPlayerZone(target), Tbit = rp_GetZoneBit(Tzone);
+	rp_GetZoneData(Czone, zone_type_type, Ctype, sizeof(Ctype));
+	rp_GetZoneData(Tzone, zone_type_type, Ttype, sizeof(Ttype));
 	
 	if( IsValidClient(target) ) {
 		if( rp_GetClientBool(target, b_IsMuteVocal) )
@@ -196,7 +199,7 @@ public Action fwdHear(int client, int target, float& dist) {
 		return Plugin_Stop;
 	}
 	
-	if( Ctype != Ttype && (Ctype==0||Ttype==0) ) {
+	if( !StrEqual(Ctype, Ttype) ) {
 		return Plugin_Stop;
 	}
 	
