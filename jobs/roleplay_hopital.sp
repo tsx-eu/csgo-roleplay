@@ -423,10 +423,16 @@ public Action Cmd_ItemAdrenaline(int args) {
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
 	
+	if( !rp_GetClientBool(client, b_MaySteal) ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet item pour le moment.");
+		return Plugin_Handled;
+	}
+	
 	if( rp_GetClientBool(client, b_Drugged) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes déjà drogué.");
 		ITEM_CANCEL(client, item_id);
-		return;
+		return Plugin_Handled;
 	}
 	
 	for (float i = 0.0; i <= 10.0; i+= 0.2) {
@@ -439,6 +445,17 @@ public Action Cmd_ItemAdrenaline(int args) {
 	
 	rp_SetClientBool(client, b_Drugged, true);	
 	CreateTimer( 10.5, ItemDrugStop, client);
+	rp_SetClientBool(client, b_MaySteal, false);
+	CreateTimer(30.0, AllowStealing, client);
+	
+	return Plugin_Handled;
+}
+public Action AllowStealing(Handle timer, any client) {
+	#if defined DEBUG
+	PrintToServer("AllowStealing");
+	#endif
+
+	rp_SetClientBool(client, b_MaySteal, true);
 }
 public Action fwdAdrenalineSpeed(int client, float& speed, float& gravity) {
 	#if defined DEBUG

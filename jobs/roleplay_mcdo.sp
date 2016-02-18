@@ -281,6 +281,7 @@ public Action Cmd_ItemHamburger(int args) {
 	GetCmdArg(1, arg1, 11);
 	
 	int client = GetCmdArgInt(2);
+	int item_id = GetCmdArgInt(args);
 	
 	if( StrEqual(arg1, "vital") || StrEqual(arg1, "max") ) {
 		float vita = rp_GetClientFloat(client, fl_Vitality);
@@ -307,6 +308,11 @@ public Action Cmd_ItemHamburger(int args) {
 	}
 	else if( StrEqual(arg1, "mac") ) {
 		
+		if( !rp_GetClientBool(client, b_MaySteal) ) {
+			ITEM_CANCEL(client, item_id);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet item pour le moment.");
+			return Plugin_Handled;
+		}
 		rp_SetClientFloat(client, fl_Reflect, GetGameTime() + 5.0);
 		
 		float vecTarget[3];
@@ -316,6 +322,15 @@ public Action Cmd_ItemHamburger(int args) {
 		TE_SendToAll();
 		
 		ServerCommand("sm_effect_particles %d Trail11 5 facemask", client);
+		
+		if( rp_IsInPVP(client) ) {
+			rp_SetClientBool(client, b_MaySteal, false);
+			
+			if( rp_GetClientGroupID(client) == rp_GetCaptureInt(cap_bunker) )
+				CreateTimer(10.0, AllowStealing, client);
+			else
+				CreateTimer(60.0, AllowStealing, client);
+		}
 	}
 	else if( StrEqual(arg1, "chicken") ) {
 		
@@ -434,10 +449,14 @@ public Action Cmd_ItemHamburger(int args) {
 	else if( StrEqual(arg1, "spacy") ) {
 		rp_SetClientKnifeType(client, ball_type_fire);
 	}
-	
-	
-	
 	return Plugin_Handled;
+}
+public Action AllowStealing(Handle timer, any client) {
+	#if defined DEBUG
+	PrintToServer("AllowStealing");
+	#endif
+
+	rp_SetClientBool(client, b_MaySteal, true);
 }
 public Action Cmd_ItemBanane(int args) {
 	#if defined DEBUG
