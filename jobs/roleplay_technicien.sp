@@ -806,7 +806,9 @@ public Action Frame_BigCashMachine(Handle timer, any ent) {
 	return Plugin_Handled;
 }
 float GetMachineTime(int client) {
-	if( rp_GetClientBool(client, b_HasVilla) || rp_GetClientPvPBonus(client, cap_villa) )
+	if( rp_GetClientBool(client, b_HasVilla) && rp_GetClientPvPBonus(client, cap_villa) )
+		return Math_GetRandomFloat(8.0, 12.0);
+	else if( rp_GetClientBool(client, b_HasVilla) || rp_GetClientPvPBonus(client, cap_villa) )
 		return Math_GetRandomFloat(12.0, 18.0);
 	else
 		return Math_GetRandomFloat(18.0, 22.0);
