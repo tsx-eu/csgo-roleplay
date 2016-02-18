@@ -597,19 +597,22 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 }
 public Action fwdFrame(int client) {
 	
-	if( g_hGodTimer[client] != INVALID_HANDLE ) {
-		PrintHintText(client, "Vous êtes en spawn-protection");
-	}
-	else if( rp_GetCaptureInt(cap_bunker) == rp_GetClientGroupID(client) ) {
-		rp_ClientColorize(client, { 64, 64, 255, 255 } );
-		PrintHintText(client, "Vous êtes en défense.\n     <font color='#ff3333'>Tuez les <b>ROUGES</b></font>");
+	if( rp_GetClientGroupID(client) ) {
+		if( g_hGodTimer[client] != INVALID_HANDLE ) {
+			PrintHintText(client, "Vous êtes en spawn-protection");
+		}
+		else if( rp_GetCaptureInt(cap_bunker) == rp_GetClientGroupID(client) ) {
+			rp_ClientColorize(client, { 64, 64, 255, 255 } );
+			PrintHintText(client, "Vous êtes en défense.\n     <font color='#ff3333'>Tuez les <b>ROUGES</b></font>");
+		}
+		else {
+			rp_ClientColorize(client, { 255, 64, 64, 255 } );
+			PrintHintText(client, "Vous êtes en attaque.\n     <font color='#3333ff'>Tuez les <b>BLEUS</b></font>");
+		}
 	}
 	else {
-		rp_ClientColorize(client, { 255, 64, 64, 255 } );
-		PrintHintText(client, "Vous êtes en attaque.\n     <font color='#3333ff'>Tuez les <b>BLEUS</b></font>");
+		PrintHintText(client, "Un event PVP est en cours.\n Vous n'y participez pas.");
 	}
-	
-	
 	
 	int vehicle = Client_GetVehicle(client);
 	if( rp_IsValidVehicle(vehicle) ) {
