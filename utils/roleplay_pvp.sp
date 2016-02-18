@@ -388,6 +388,8 @@ void CAPTURE_Stop() {
 		rp_UnhookEvent(i, RP_OnPlayerZoneChange, fwdZoneChange);
 		rp_UnhookEvent(i, RP_OnPlayerCommand, fwdCommand);
 		SDKUnhook(i, SDKHook_SetTransmit, fwdGodHide2);
+		if( IsPlayerAlive(i) )
+			rp_ClientColorize(i);
 	}
 	
 	for(int i=1; i<MAX_GROUPS; i++) {
