@@ -31,7 +31,7 @@
 #define	ZONE_BUNKER		235
 #define ZONE_RESPAWN	230
 #define	FLAG_SPEED		250.0
-#define	FLAG_POINTS		100
+#define	FLAG_POINTS		200
 #define ELO_FACTEUR_K	40.0
 
 // -----------------------------------------------------------------------------------------------------------------
@@ -96,9 +96,9 @@ public void OnClientPostAdminCheck(int client) {
 		rp_HookEvent(client, RP_OnPlayerSpawn, fwdSpawn);
 		rp_HookEvent(client, RP_OnFrameSeconde, fwdFrame);
 		rp_HookEvent(client, RP_PostPlayerPhysic, fwdPhysics);
-		rp_HookEvent(client, RP_OnFrameSeconde, fwdFrame);
 		rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdTakeDamage);
 		rp_HookEvent(client, RP_PostTakeDamageKnife, fwdTakeDamage);
+		rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
 		SDKHook(client, SDKHook_SetTransmit, fwdGodHide2);
 	}
 }
@@ -307,6 +307,7 @@ void CAPTURE_Start() {
 		rp_HookEvent(i, RP_OnFrameSeconde, fwdFrame);
 		rp_HookEvent(i, RP_PostTakeDamageWeapon, fwdTakeDamage);
 		rp_HookEvent(i, RP_PostTakeDamageKnife, fwdTakeDamage);
+		rp_HookEvent(i, RP_OnPlayerZoneChange, fwdZoneChange);
 		SDKHook(i, SDKHook_SetTransmit, fwdGodHide2);
 		
 		gID = rp_GetClientGroupID(i);
@@ -375,6 +376,7 @@ void CAPTURE_Stop() {
 		rp_UnhookEvent(i, RP_OnFrameSeconde, fwdFrame);
 		rp_UnhookEvent(i, RP_PostTakeDamageWeapon, fwdTakeDamage);
 		rp_UnhookEvent(i, RP_PostTakeDamageKnife, fwdTakeDamage);
+		rp_UnhookEvent(i, RP_OnPlayerZoneChange, fwdZoneChange);
 		SDKUnhook(i, SDKHook_SetTransmit, fwdGodHide2);
 	}
 	
@@ -478,7 +480,7 @@ public Action CAPTURE_Tick(Handle timer, any none) {
 		maxPoint = g_iCapture_POINT[i];
 	}
 
-	if( maxPoint-(FLAG_POINTS*5) >= g_iCapture_POINT[defense] && winner != defense ) {
+	if( maxPoint-(FLAG_POINTS*4) >= g_iCapture_POINT[defense] && winner != defense ) {
 		rp_GetGroupData(winner, group_type_name, tmp, sizeof(tmp));
 		ExplodeString(tmp, " - ", strBuffer, sizeof(strBuffer), sizeof(strBuffer[]));
 		CPrintToChatAll("{lightblue} ================================== {default}");
@@ -587,6 +589,13 @@ public Action fwdFrame(int client) {
 		rp_ClientColorize(client, { 255, 64, 64, 255 } );
 		PrintHintText(client, "Vous êtes en attaque.\n     <font color='#3333ff'>Tuez les <b>BLEUS</b></font>");
 	}
+	
+	int vehicle = Client_GetVehicle(client);
+	if( rp_IsValidVehicle(vehicle) ) {
+		if( rp_GetPlayerZone(vehicle) == ZONE_RESPAWN ) {
+			rp_SetVehicleInt(vehicle, car_health, rp_GetVehicleInt(vehicle, car_health) - 100);
+		}
+	}
 		
 	return Plugin_Continue;
 }
@@ -623,6 +632,13 @@ public Action fwdTakeDamage(int victim, int attacker, float& damage, int wepID, 
 		return Plugin_Handled;
 	if( rp_GetClientGroupID(victim) == 0 || rp_GetClientGroupID(attacker) == 0  )
 		return Plugin_Handled;
+	return Plugin_Continue;
+}
+public Action fwdZoneChange(int client, int newZone, int oldZone) {
+	if( newZone == ZONE_RESPAWN &&  rp_GetCaptureInt(cap_bunker) != rp_GetClientGroupID(client) ) {
+		rp_ClientDamage(client, 10000, client);
+		ForcePlayerSuicide(client);
+	}
 	return Plugin_Continue;
 }
 // -----------------------------------------------------------------------------------------------------------------
