@@ -57,7 +57,6 @@ public Plugin myinfo = {
 };
 public void OnPluginStart() {
 	RegConsoleCmd("drop", FlagDrop);
-	RegConsoleCmd("sm_pvp", Cmd_PvPMenu);
 	RegServerCmd("rp_item_spawnflag", 	Cmd_ItemFlag,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	g_hGlobalDamage = new StringMap();
 	g_hGlobalSteamID = new StringMap();
@@ -99,6 +98,7 @@ public void OnClientPostAdminCheck(int client) {
 		rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdTakeDamage);
 		rp_HookEvent(client, RP_PostTakeDamageKnife, fwdTakeDamage);
 		rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
+		rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 		SDKHook(client, SDKHook_SetTransmit, fwdGodHide2);
 	}
 }
@@ -308,6 +308,7 @@ void CAPTURE_Start() {
 		rp_HookEvent(i, RP_PostTakeDamageWeapon, fwdTakeDamage);
 		rp_HookEvent(i, RP_PostTakeDamageKnife, fwdTakeDamage);
 		rp_HookEvent(i, RP_OnPlayerZoneChange, fwdZoneChange);
+		rp_HookEvent(i, RP_OnPlayerCommand, fwdCommand);
 		SDKHook(i, SDKHook_SetTransmit, fwdGodHide2);
 		
 		gID = rp_GetClientGroupID(i);
@@ -348,6 +349,14 @@ void CAPTURE_Start() {
 	HookEvent("player_hurt", fwdGod_PlayerHurt, EventHookMode_Pre);
 	HookEvent("weapon_fire", fwdGod_PlayerShoot, EventHookMode_Pre);	
 }
+public Action fwdCommand(int client, char[] command, char[] arg) {
+	if( StrEqual(command, "pvp") ) {
+		if( g_hStatsMenu != INVALID_HANDLE )
+			g_hStatsMenu.Display(client, TopMenuPosition_Start);
+		return Plugin_Handled;
+	}
+	return Plugin_Continue;
+}
 void CAPTURE_Stop() {
 	#if defined DEBUG
 	PrintToServer("CAPTURE_Stop");
@@ -377,6 +386,7 @@ void CAPTURE_Stop() {
 		rp_UnhookEvent(i, RP_PostTakeDamageWeapon, fwdTakeDamage);
 		rp_UnhookEvent(i, RP_PostTakeDamageKnife, fwdTakeDamage);
 		rp_UnhookEvent(i, RP_OnPlayerZoneChange, fwdZoneChange);
+		rp_UnhookEvent(i, RP_OnPlayerCommand, fwdCommand);
 		SDKUnhook(i, SDKHook_SetTransmit, fwdGodHide2);
 	}
 	
@@ -905,30 +915,37 @@ void GDM_Resume() {
 		g_hGlobalDamage.GetArray(szSteamID, array, sizeof(array));
 		g_hGlobalSteamID.GetString(szSteamID, name, sizeof(name));
 		
-		delta = RoundFloat(float(array[gdm_touch]) / float(array[gdm_shot]+1) * 1000.0);
-		Format(key, sizeof(key), "s%06d_%s", 1000000-delta, szSteamID); 
-		Format(tmp, sizeof(tmp), "%4.1f - %s", float(delta)/10.0, name);
-		g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Shoot, "", 0, tmp);
+		if( array[gdm_touch] != 0 && array[gdm_shot] != 0  ) {
+			delta = RoundFloat(float(array[gdm_touch]) / float(array[gdm_shot]+1) * 1000.0);
+			Format(key, sizeof(key), "s%06d_%s", 1000000-delta, szSteamID); 
+			Format(tmp, sizeof(tmp), "%4.1f - %s", float(delta)/10.0, name);
+			g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Shoot, "", 0, tmp);
+			
+			delta = RoundFloat(float(array[gdm_hitbox]) / float(array[gdm_touch]+1) * 1000.0);
+			Format(key, sizeof(key), "h%06d_%s", 1000000 - delta, szSteamID); 
+			Format(tmp, sizeof(tmp), "%4.1f - %s", float(delta)/10.0, name);
+			g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Head, "", 0, tmp);
+			
+			delta = array[gdm_elo];
+			Format(key, sizeof(key), "e%06d_%s", 1000000 - delta, szSteamID); 
+			Format(tmp, sizeof(tmp), "%6d - %s", delta, name);
+			g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_ELO, "", 0, tmp);
+		}
+		if( array[gdm_touch] != 0 ) {
+			delta = array[gdm_damage];
+			Format(key, sizeof(key), "d%06d_%s", 1000000 - delta, szSteamID); 
+			Format(tmp, sizeof(tmp), "%6d - %s", delta, name);
+			g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Damage, "", 0, tmp);
+			
+		}		
+		if( array[gdm_flag] != 0 ) {
+			delta = array[gdm_flag];
+			Format(key, sizeof(key), "f%06d_%s", 1000000 - delta, szSteamID); 
+			Format(tmp, sizeof(tmp), "%6d - %s", delta, name);
+			g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Flag, "", 0, tmp);
+		}
 		
-		delta = RoundFloat(float(array[gdm_hitbox]) / float(array[gdm_touch]+1) * 1000.0);
-		Format(key, sizeof(key), "h%06d_%s", 1000000 - delta, szSteamID); 
-		Format(tmp, sizeof(tmp), "%4.1f - %s", float(delta)/10.0, name);
-		g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Head, "", 0, tmp);
 		
-		delta = array[gdm_damage];
-		Format(key, sizeof(key), "d%06d_%s", 1000000 - delta, szSteamID); 
-		Format(tmp, sizeof(tmp), "%6d - %s", delta, name);
-		g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Damage, "", 0, tmp);
-		
-		delta = array[gdm_flag];
-		Format(key, sizeof(key), "f%06d_%s", 1000000 - delta, szSteamID); 
-		Format(tmp, sizeof(tmp), "%6d - %s", delta, name);
-		g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Flag, "", 0, tmp);
-		
-		delta = array[gdm_elo];
-		Format(key, sizeof(key), "e%06d_%s", 1000000 - delta, szSteamID); 
-		Format(tmp, sizeof(tmp), "%6d - %s", delta, name);
-		g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_ELO, "", 0, tmp);
 	}
 	
 	for (int client = 1; client <= MaxClients; client++) {
@@ -1008,10 +1025,4 @@ public void MenuPvPResume(Handle topmenu, TopMenuAction action, TopMenuObject to
 	else if (action == TopMenuAction_SelectOption) {
 		g_hStatsMenu.Display(param, TopMenuPosition_Start);
 	}
-}
-public Action Cmd_PvPMenu(int client, int args) {
-	if( g_hStatsMenu == INVALID_HANDLE )
-		return Plugin_Handled;
-	g_hStatsMenu.Display(client, TopMenuPosition_Start);
-	return Plugin_Handled;
 }
