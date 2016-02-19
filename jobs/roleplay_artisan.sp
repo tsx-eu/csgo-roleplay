@@ -167,7 +167,7 @@ void displayBuildMenu(int client, int itemID) {
 			for (int j = 0; j < magic.Length; j++) { // Pour chaque items de la recette:
 				magic.GetArray(j, data);
 					
-				if( clientItem[data[craft_raw]] < data[craft_amount]*count ) {
+				if( clientItem[data[craft_raw]] < data[craft_amount]*count ) { // Si on a moins de l'item que celui demandé dans la recetteXcount
 					can = false;
 					break;
 				}
