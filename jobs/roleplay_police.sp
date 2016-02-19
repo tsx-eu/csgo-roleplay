@@ -3076,16 +3076,16 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 void explainJail(int client, int jailReason, int cop) {
 	
 	if( StrContains(g_szJailRaison[jailReason][jail_raison], "Garde ") == 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} La raison de votre garde à vue peut être que vous avez des actions interdites lors d'une perquisition; que vous étiez convoqué au Tribunal.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} La raison de votre garde à vue est que vous avez fait des actions interdites lors d'une perquisition; que vous étiez convoqué au Tribunal.");
 		if( rp_GetClientInt(cop, i_Job) <= 7 )
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il est possible aussi qu'un haut gradé dans la police vous a faits plusieurs sommations vous demandant d'arrêter vos bétises.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il est possible aussi qu'un haut gradé de la police vous est fait plusieurs sommations vous demandant d'arrêter vos bétises.");
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Meurtre") == 0 ) {
 		if( IsValidClient(rp_GetClientInt(client, i_LastKilled)) )
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez tué %N en présence du policier %N. Que ce soit légitimes défense, ou non un meurtre reste illégal.", rp_GetClientInt(client, i_LastKilled), cop);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez tué %N en présence du policier %N. Que ce soit légitime défense, ou non un meurtre reste illégal.", rp_GetClientInt(client, i_LastKilled), cop);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Agression ") == 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez agressé un autre citoyen en présence du policier %N. Que ce soit légitimes défense ou non; que vous avez faits des dégâts ou non: une agression reste une agression.", cop); 
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez agressé un autre citoyen en présence du policier %N. Que ce soit légitime défense ou non; que vous avez fait des dégâts ou non: une agression reste une agression.", cop); 
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Sachez que cette peine vous libère automatiquement si aucune agression n'a été détectée dans les 30 dernières secondes");
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Intrusion ") == 0 ) {
@@ -3104,7 +3104,7 @@ void explainJail(int client, int jailReason, int cop) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez insulté un citoyen ou un agent des forces de l'ordre.");
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Trafique ") == 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous aviez posé des plants de drogue, imprimante à faux billet, ou demandé de l'aider pour une mission. Cela est interdit.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez posé des plants de drogue, imprimante(s) à faux billet, ou demandé à quelqu'un de vous aidez pour une mission. Cela est interdit.");
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Nuisance ") == 0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez fait trop de bruit sur un lieu publique.");
