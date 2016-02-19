@@ -30,6 +30,12 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
+enum craft_type {
+	craft_raw,
+	craft_amount,
+	craft_rate,
+	craft_type_max
+}
 // ----------------------------------------------------------------------------
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -39,7 +45,7 @@ public Action Cmd_Reload(int args) {
 }
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
-	SQL_TQuery(rp_GetDatabase(), SQL_LoadReceipe, "SELECT `itemid`, `raw`, `amount` FROM `rp_csgo`.`rp_craft` ORDER BY `itemid`, `raw`;", 0, DBPrio_Low);
+	SQL_TQuery(rp_GetDatabase(), SQL_LoadReceipe, "SELECT `itemid`, `raw`, `amount`, REPLACE(`extra_cmd`, 'rp_item_primal ', '') `rate` FROM `rp_csgo`.`rp_craft` C INNER JOIN `rp_items` I ON C.`raw`=I.`id` ORDER BY `itemid`, `raw`", 0, DBPrio_Low);
 	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
@@ -52,14 +58,15 @@ public void SQL_LoadReceipe(Handle owner, Handle hQuery, const char[] error, any
 	}
 	g_hReceipe = new StringMap();
 	
-	int data[2];
+	int data[craft_type_max];
 	char itemID[12];
 	ArrayList magic;
 	
 	while( SQL_FetchRow(hQuery) ) {
 		SQL_FetchString(hQuery, 0, itemID, sizeof(itemID));
-		data[0] = SQL_FetchInt(hQuery, 1);
-		data[1] = SQL_FetchInt(hQuery, 2);
+		data[craft_raw] = SQL_FetchInt(hQuery, 1);
+		data[craft_amount] = SQL_FetchInt(hQuery, 2);
+		data[craft_rate] = SQL_FetchInt(hQuery, 3);
 		
 		if( !g_hReceipe.GetValue(itemID, magic) ) {
 			magic = new ArrayList(sizeof(data), 0);
@@ -117,6 +124,8 @@ void displayRecyclingMenu(int client, int itemID) {
 		for(int i = 0; i < MAX_ITEMS; i++) {
 			if( rp_GetClientItem(client, i) <= 0 )
 				continue;
+			if( getDuration(i) <= -0.1 )
+				continue;
 			
 			rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2));
 			Format(tmp, sizeof(tmp), "recycle %d", i);
@@ -129,13 +138,15 @@ void displayRecyclingMenu(int client, int itemID) {
 		Format(tmp2, sizeof(tmp2), "== Artisanat: Recycler: %s", tmp2);
 		SetMenuTitle(menu, tmp2);
 		
+		float duration = getDuration(itemID);
 		Format(tmp, sizeof(tmp), "recycle %d %d", itemID, rp_GetClientItem(client, itemID));
-		AddMenuItem(menu, tmp, "Tout recycler");
+		Format(tmp2, sizeof(tmp2), "Tout recycler (%.1fsec)", duration*rp_GetClientItem(client, itemID));
+		AddMenuItem(menu, tmp, tmp2);
 		
 		for(int i = 1; i <= rp_GetClientItem(client, itemID); i++) {
 			
 			Format(tmp, sizeof(tmp), "recycle %d %d", itemID, i);
-			Format(tmp2, sizeof(tmp2), "Recycler %d", i);
+			Format(tmp2, sizeof(tmp2), "Recycler %d (%.1fsec)", i, duration*i);
 			
 			AddMenuItem(menu, tmp, tmp2);
 		}
@@ -152,7 +163,7 @@ public int eventArtisanMenu(Handle menu, MenuAction action, int client, int para
 	if( action == MenuAction_Select ) {
 		char options[64], buffer[3][16];
 		ArrayList magic;
-		int data[2];
+		int data[craft_type_max];
 		
 		GetMenuItem(menu, param2, options, sizeof(options));
 		
@@ -166,14 +177,28 @@ public int eventArtisanMenu(Handle menu, MenuAction action, int client, int para
 				displayRecyclingMenu(client, StringToInt(buffer[1]));
 			else if( g_hReceipe.GetValue(buffer[1], magic) ) {
 				
-				rp_GetItemData(StringToInt(buffer[1]), item_type_name, options, sizeof(options));
-				PrintToChatAll("pour démonter %s il y a %d matières premières", options, magic.Length);
+				int itemID = StringToInt(buffer[1]);
+				int amount = StringToInt(buffer[2]);
+				if( amount > rp_GetClientItem(client, itemID) )
+					amount = rp_GetClientItem(client, itemID);
+				float duration = getDuration(itemID) * float(amount);
+				
+				rp_GetItemData(itemID, item_type_name, options, sizeof(options));
+				rp_ClientGiveItem(client, StringToInt(buffer[1]), -amount);
+				
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous commencer à recycler %dx %s. Cette opération va durer %.1f seconde%s.", amount, options, duration, duration>=2.0?"s":"");
 				
 				for (int i = 0; i < magic.Length; i++) {
 					magic.GetArray(i, data);
-					rp_GetItemData(data[0], item_type_name, options, sizeof(options));
-					PrintToChatAll("%dx %s", data[1], options);
+					for (int j = 0; j < data[craft_amount]; j++) {
+						if( data[craft_rate] >= Math_GetRandomInt(0, 100) )
+							rp_ClientGiveItem(client, data[craft_raw]);
+					}
 				}
+				
+				ServerCommand("sm_effect_panel %d %f \"Recyclage de %dx %s\"", client, duration, amount, options);
+				rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, duration);
+				return;
 			}
 		}
 		
@@ -184,4 +209,26 @@ public int eventArtisanMenu(Handle menu, MenuAction action, int client, int para
 	else if( action == MenuAction_End ) {
 		CloseHandle(menu);
 	}
+}
+public Action fwdFrozen(int client, float& speed, float& gravity) {
+	speed = 0.0;
+	gravity = 0.0; 
+	return Plugin_Stop;
+}
+float getDuration(int itemID) {
+	char tmp[12];
+	int data[craft_type_max];
+	Format(tmp, sizeof(tmp), "%d", itemID);
+	
+	ArrayList magic;
+	if( !g_hReceipe.GetValue(tmp, magic) )
+		return -1.0;
+	
+	
+	float duration = 0.0;
+	for (int i = 0; i < magic.Length; i++) {
+		magic.GetArray(i, data);
+		duration += 0.01 * data[craft_amount];
+	}
+	return duration;
 }
