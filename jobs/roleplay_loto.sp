@@ -65,7 +65,7 @@ public Action Cmd_ItemStuffPvP(int args) {
 	int client = GetCmdArgInt(1);
 	
 	int amount = 0;
-	int ItemRand[32];
+	int ItemRand[64];
 	bool luck = rp_IsClientLucky(client);
 	
 	for (int i = 1; i <= 4; i++) {
@@ -87,7 +87,6 @@ public Action Cmd_ItemStuffPvP(int args) {
 	ItemRand[amount++] = 22;	// San-Andreas
 	ItemRand[amount++] = 46;	// Incendiaire
 	ItemRand[amount++] = 66;	// Sucette Duo
-	ItemRand[amount++] = 242;	// Hummer
 	ItemRand[amount++] = 94;	// EMP
 	ItemRand[amount++] = 35;	// Cocaine
 	ItemRand[amount++] = 184;	// Prop d'extérieur
@@ -103,7 +102,7 @@ public Action Cmd_ItemStuffPvP(int args) {
 	if( item_id == 35 )
 		rp_ClientGiveItem(client, item_id, 4);
 	
-	if( (luck || Math_GetRandomInt(1, 100) > 90) && (item_id == 6 || item_id == 64 || item_id == 114 || item_id == 236 || item_id == 239) )
+	if( (luck || Math_GetRandomInt(1, 100) > 80) && (item_id == 6 || item_id == 64 || item_id == 114 || item_id == 236 || item_id == 239) )
 		rp_ClientGiveItem(client, item_id);
 	
 	char tmp[64];
