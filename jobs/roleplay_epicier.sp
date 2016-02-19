@@ -86,7 +86,7 @@ void DisplayMetroMenu(int client) {
 		return;
 	
 	Handle menu = CreateMenu(eventMetroMenu);
-	SetMenuTitle(menu, "== Station de métro: ==");
+	SetMenuTitle(menu, "== Station de métro ==");
 	
 	if( GetConVarInt(g_hEVENT) == 1 )
 		AddMenuItem(menu, "metro_event", "Métro: Station événementiel");
