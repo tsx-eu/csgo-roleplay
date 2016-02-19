@@ -56,13 +56,15 @@ public void SQL_LoadReceipe(Handle owner, Handle hQuery, const char[] error, any
 	char itemID[12];
 	ArrayList magic;
 	
-	if( SQL_FetchRow(hQuery) ) {
+	while( SQL_FetchRow(hQuery) ) {
 		SQL_FetchString(hQuery, 0, itemID, sizeof(itemID));
 		data[0] = SQL_FetchInt(hQuery, 1);
 		data[1] = SQL_FetchInt(hQuery, 2);
 		
-		if( !g_hReceipe.GetValue(itemID, magic) )
-			magic = new ArrayList(sizeof(data), 32);
+		if( !g_hReceipe.GetValue(itemID, magic) ) {
+			magic = new ArrayList(sizeof(data), 0);
+			g_hReceipe.SetValue(itemID, magic);
+		}
 		magic.PushArray(data, sizeof(data));
 	}
 	return;
@@ -115,7 +117,6 @@ void displayRecyclingMenu(int client, int itemID) {
 		for(int i = 0; i < MAX_ITEMS; i++) {
 			if( rp_GetClientItem(client, i) <= 0 )
 				continue;
-						
 			
 			rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2));
 			Format(tmp, sizeof(tmp), "recycle %d", i);
@@ -161,21 +162,19 @@ public int eventArtisanMenu(Handle menu, MenuAction action, int client, int para
 		else if( StrContains(options, "recycl", false) == 0 ) {
 			ExplodeString(options, " ", buffer, sizeof(buffer), sizeof(buffer[]));
 			
-			if( StringToInt(buffer[2]) != 0 )
+			if( StringToInt(buffer[2]) == 0 )
 				displayRecyclingMenu(client, StringToInt(buffer[1]));
 			else if( g_hReceipe.GetValue(buffer[1], magic) ) {
 				
 				rp_GetItemData(StringToInt(buffer[1]), item_type_name, options, sizeof(options));
-				PrintToChatAll("pour démonter %s il faut: ", options);
+				PrintToChatAll("pour démonter %s il y a %d matières premières", options, magic.Length);
 				
 				for (int i = 0; i < magic.Length; i++) {
 					magic.GetArray(i, data);
-					
 					rp_GetItemData(data[0], item_type_name, options, sizeof(options));
-					PrintToChatAll("%d %s", data[1], options);
+					PrintToChatAll("%dx %s", data[1], options);
 				}
 			}
-			PrintToChatAll("%s %s %s", options, buffer[1], buffer[2]);
 		}
 		
 		else if( StrEqual(options, "learn", false) ) {
