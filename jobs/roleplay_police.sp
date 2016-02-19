@@ -950,6 +950,11 @@ public Action Cmd_Mandat(int client) {
 		ACCESS_DENIED(client);
 	}
 	
+	if(!IsValidClient(target)){	
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un joueur");
+		return Plugin_Handled;
+	}
+	
 	if( rp_GetClientItem(target, ITEM_MANDAT) < 10 ) {
 		rp_ClientGiveItem(target, ITEM_MANDAT);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez donné un mandat a: %N", target);
@@ -3058,7 +3063,10 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			
 			rp_SetJobCapital(rnd, rp_GetJobCapital(rnd) - data[BM_Prix]);
 			LogToGame("[TSX-RP] [RESELL] Le joueur %L à acheté %s au commissariat pour %d$", client, name, data[BM_Prix]);			
-		}		
+		}
+		else if(GetMenuItem(p_hMenu, p_iParam2, szMenu, sizeof(szMenu)) == 0) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Désolé il n'y a pas d'armes disponibles pour le moment.");
+		}
 	}
 	else if (p_oAction == MenuAction_End) {
 		CloseHandle(p_hMenu);
