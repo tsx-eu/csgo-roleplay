@@ -2940,7 +2940,7 @@ void addBuyMenu(int weaponID) {
 	data[BM_Munition] = Weapon_GetPrimaryClip(weaponID);
 	data[BM_Chargeur] = GetEntProp(weaponID, Prop_Send, "m_iPrimaryReserveAmmoCount");
 	data[BM_Type] = view_as<int>(rp_GetWeaponBallType(weaponID));
-	data[BM_Prix] = rp_GetWeaponPrice(weaponID) / 4;
+	data[BM_Prix] = 50 + rp_GetWeaponPrice(weaponID) / 4;
 
 	if(data[BM_PvP] > 0)
 		data[BM_Prix] += 250;
@@ -2978,8 +2978,10 @@ void Cmd_BuyWeapon(int client) {
 	char name[65], tmp[8], tmp2[129];
 	int data[BM_Max];
 	
-	if( position >= max )
+	if( position >= max ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Désolé il n'y a pas d'armes disponibles pour le moment.");
 		return;
+	}
 	
 	Menu menu = new Menu(Menu_BuyWeapon);
 	menu.SetTitle("Armes trouvées par la police:");
@@ -3059,13 +3061,10 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			
 			int rnd = rp_GetRandomCapital(1);			
 			rp_SetJobCapital(1, RoundFloat(float(rp_GetJobCapital(1)) + float(data[BM_Prix]) * 0.75));
-			rp_SetJobCapital(101, RoundFloat(float(rp_GetJobCapital(101)) + float(data[BM_Prix]) * 0.75));
+			rp_SetJobCapital(101, RoundFloat(float(rp_GetJobCapital(101)) + float(data[BM_Prix]) * 0.25));
 			
 			rp_SetJobCapital(rnd, rp_GetJobCapital(rnd) - data[BM_Prix]);
 			LogToGame("[TSX-RP] [RESELL] Le joueur %L à acheté %s au commissariat pour %d$", client, name, data[BM_Prix]);			
-		}
-		else if(GetMenuItem(p_hMenu, p_iParam2, szMenu, sizeof(szMenu)) == 0) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Désolé il n'y a pas d'armes disponibles pour le moment.");
 		}
 	}
 	else if (p_oAction == MenuAction_End) {
