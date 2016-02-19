@@ -3076,7 +3076,7 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 void explainJail(int client, int jailReason, int cop) {
 	
 	if( StrContains(g_szJailRaison[jailReason][jail_raison], "Garde ") == 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} La raison de votre garde à vue est que vous avez fait des actions interdites lors d'une perquisition; que vous étiez convoqué au Tribunal.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} La raison de votre garde à vue est que vous avez fait des actions interdites lors d'une perquisition; ou que vous étiez convoqué au Tribunal.");
 		if( rp_GetClientInt(cop, i_Job) <= 7 )
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il est possible aussi qu'un haut gradé de la police vous est fait plusieurs sommations vous demandant d'arrêter vos bétises.");
 	}
