@@ -31,7 +31,7 @@
 #define	ZONE_BUNKER		235
 #define ZONE_RESPAWN	230
 #define	FLAG_SPEED		250.0
-#define	FLAG_POINTS		200
+#define	FLAG_POINTS		150
 #define ELO_FACTEUR_K	40.0
 
 // -----------------------------------------------------------------------------------------------------------------
@@ -100,7 +100,6 @@ public void OnClientPostAdminCheck(int client) {
 		rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdTakeDamage);
 		rp_HookEvent(client, RP_PostTakeDamageKnife, fwdTakeDamage);
 		rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
-		SDKHook(client, SDKHook_SetTransmit, fwdGodHide2);
 	}
 }
 // -----------------------------------------------------------------------------------------------------------------
@@ -199,7 +198,7 @@ public Action FlagThink(Handle timer, any data) {
 	if( !IsValidEdict(entity) )
 		return Plugin_Handled;
 	
-	float vecFlag[3], vecOrigin[3], vecOrigin2[3];
+	float vecFlag[3], vecOrigin[3];
 	int color[4];
 	color[0] = g_iFlagData[entity][data_red];
 	color[1] = g_iFlagData[entity][data_green];
@@ -247,25 +246,6 @@ public Action FlagThink(Handle timer, any data) {
 	GetEntPropVector(entity, Prop_Send, "m_vecOrigin", vecFlag);
 	vecFlag[2] += 25.0;
 	
-	for(int client=1; client<=MaxClients; client++) {
-		if( !IsValidClient(client) || !IsPlayerAlive(client) )
-			continue;
-		if( g_iClientFlag[client] > 0 )
-			continue;		
-		if( g_iFlagData[entity][data_group] != rp_GetClientGroupID(client) )
-			continue;
-			
-		GetClientAbsOrigin(client, vecOrigin);
-		GetClientEyePosition(client, vecOrigin2);
-		
-		TE_SetupBeamPoints(vecOrigin, vecFlag, g_cBeam, g_cBeam, 0, 30, 0.2, 1.0, 1.0, 1, 0.0, color, 10);
-		TE_SendToClient(client);
-		
-		if( GetVectorDistance(vecOrigin, vecFlag) <= 52.0 || GetVectorDistance(vecOrigin2, vecFlag) <= 52.0 ) {
-			CTF_FlagTouched(client, entity);
-		}
-	}
-	
 	CreateTimer(0.1, FlagThink, data);
 	return Plugin_Handled;
 }
@@ -311,15 +291,17 @@ void CAPTURE_Start() {
 		rp_HookEvent(i, RP_PostTakeDamageWeapon, fwdTakeDamage);
 		rp_HookEvent(i, RP_PostTakeDamageKnife, fwdTakeDamage);
 		rp_HookEvent(i, RP_OnPlayerZoneChange, fwdZoneChange);
-		SDKHook(i, SDKHook_SetTransmit, fwdGodHide2);
 		
 		gID = rp_GetClientGroupID(i);
 		g_iCapture_POINT[gID] += 50;
 		if( rp_GetClientInt(i, i_Group) == gID ) 
 			g_iCapture_POINT[gID] += 100;
 		
+		ClientCommand(i, "play *tsx/roleplay/bombing.mp3");
 		
 		if( !(rp_GetZoneBit(rp_GetPlayerZone(i)) & BITZONE_PVP) )
+			continue;
+		if( rp_GetClientInt(i, i_Group) == gID ) 
 			continue;
 		
 		int v = Client_GetVehicle(i);
@@ -333,10 +315,10 @@ void CAPTURE_Start() {
 			g_iClientFlag[i] = 0;
 		}
 		
-		ClientCommand(i, "play *tsx/roleplay/bombing.mp3");
+		
 	}
 	
-	g_iCapture_POINT[rp_GetCaptureInt(cap_bunker)] += 1000;
+	g_iCapture_POINT[rp_GetCaptureInt(cap_bunker)] += 1250;
 			
 	for(int i=1; i<MAX_ZONES; i++) {
 		if( rp_GetZoneBit(i) & BITZONE_PVP ) {
@@ -388,7 +370,7 @@ void CAPTURE_Stop() {
 		rp_UnhookEvent(i, RP_PostTakeDamageWeapon, fwdTakeDamage);
 		rp_UnhookEvent(i, RP_PostTakeDamageKnife, fwdTakeDamage);
 		rp_UnhookEvent(i, RP_OnPlayerZoneChange, fwdZoneChange);
-		SDKUnhook(i, SDKHook_SetTransmit, fwdGodHide2);
+
 		if( IsPlayerAlive(i) )
 			rp_ClientColorize(i);
 	}
@@ -460,12 +442,12 @@ void CAPTURE_Reward(int totalPoints) {
 		
 		
 		int gID = rp_GetClientGroupID(client);
-		int bonus = RoundToCeil(g_iCapture_POINT[gID] / 250.0);
+		int bonus = RoundToCeil(g_iCapture_POINT[gID] / 200.0);
 		
 		if( gID == rp_GetCaptureInt(cap_bunker) ) {
 			amount = 10;
 			rp_IncrementSuccess(client, success_list_pvpkill, 100);
-			bonus += RoundToCeil((totalPoints-g_iCapture_POINT[gID]) / 250.0);
+			bonus += RoundToCeil((totalPoints-g_iCapture_POINT[gID]) / 200.0);
 		}
 		else {
 			amount = 1;
@@ -1002,11 +984,6 @@ public Action fwdGodThink(int client) {
 }
 public Action fwdGodHideMe(int client, int target) {
 	if( client != target )
-		return Plugin_Handled;
-	return Plugin_Continue;
-}
-public Action fwdGodHide2(int client, int target) {
-	if( g_hGodTimer[target] != INVALID_HANDLE && client != target )
 		return Plugin_Handled;
 	return Plugin_Continue;
 }
