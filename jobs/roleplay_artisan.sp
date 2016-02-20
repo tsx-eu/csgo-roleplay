@@ -161,25 +161,23 @@ void displayBuildMenu(int client, int itemID) {
 		if( !g_hReceipe.GetValue(tmp, magic) )
 			return;
 		
-		int count = 1;
-		can = true;
-		do {
-			for (int j = 0; j < magic.Length; j++) { // Pour chaque items de la recette:
-				magic.GetArray(j, data);
-					
-				if( clientItem[data[craft_raw]] < data[craft_amount]*count ) { // Si on a moins de l'item que celui demandé dans la recetteXcount
-					can = false;
-					break;
-				}
-			}
+		int min = 999999999, delta;
+		float duration = getDuration(itemID);
+		
+		for (int j = 0; j < magic.Length; j++) { // Pour chaque items de la recette:
+			magic.GetArray(j, data);
 			
-			if( can ) {
-				Format(tmp, sizeof(tmp), "build %d %d", itemID, count);
-				Format(tmp2, sizeof(tmp2), "Construire %d", count);
-				AddMenuItem(menu, tmp, tmp2);
-				count++;
-			}
-		} while (count <= 100 && can);
+			delta = clientItem[data[craft_raw]] / data[craft_amount];
+			if( delta < min )
+				min = delta;
+		}
+		
+		for (int i = 1; i <= min; i++) {
+			Format(tmp, sizeof(tmp), "build %d %d", itemID, i);
+			Format(tmp2, sizeof(tmp2), "Constuire %d (%.1fsec)", i, duration*i);
+			
+			AddMenuItem(menu, tmp, tmp2);
+		}
 	}
 	
 	DisplayMenu(menu, client, 30);
@@ -248,6 +246,38 @@ public int eventArtisanMenu(Handle menu, MenuAction action, int client, int para
 		if( StrContains(options, "build", false) == 0 ) {
 			if( StringToInt(buffer[2]) == 0 )
 				displayBuildMenu(client, StringToInt(buffer[1]));
+			else if( g_hReceipe.GetValue(buffer[1], magic) ) {
+				
+				int itemID = StringToInt(buffer[1]);
+				int amount = StringToInt(buffer[2]);
+				float duration = getDuration(itemID) * float(amount);
+				
+				rp_GetItemData(itemID, item_type_name, options, sizeof(options));
+				
+				
+				int min = 999999999, delta;
+				
+				for (int j = 0; j < magic.Length; j++) { // Pour chaque items de la recette:
+					magic.GetArray(j, data);
+					
+					delta = rp_GetClientItem(client,data[craft_raw]) / data[craft_amount];
+					if( delta < min )
+						min = delta;
+				}
+				if( min < amount )
+					amount = min;
+				
+				rp_ClientGiveItem(client, StringToInt(buffer[1]), amount);
+				for (int i = 0; i < magic.Length; i++) {  // Pour chaque items de la recette:
+					magic.GetArray(i, data);
+					rp_ClientGiveItem(client, data[craft_raw], -(data[craft_amount]*amount));
+				}
+				
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous commencer à construire %dx %s. Cette opération va durer %.1f seconde%s.", amount, options, duration, duration>=2.0?"s":"");
+				ServerCommand("sm_effect_panel %d %f \"Création de %dx %s\"", client, duration, amount, options);
+				rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, duration);
+				
+			}
 		}
 		else if( StrContains(options, "recycl", false) == 0 ) {
 			if( StringToInt(buffer[2]) == 0 )
