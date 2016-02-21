@@ -51,8 +51,6 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_permi",		Cmd_ItemPermi,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_distrib",		Cmd_ItemDistrib,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 	
-	RegServerCmd("rp_item_spawntag",	Cmd_SpawnTag,			"RP-ITEM",	FCVAR_UNREGISTERED);
-	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
@@ -544,47 +542,3 @@ public Action DamageATM(int victim, int &attacker, int &inflictor, float &damage
 	return Plugin_Continue;
 }
 
-
-public Action Cmd_SpawnTag(int args) {
-	static iPrecached[MAX_ITEMS];
-	#if defined DEBUG
-	PrintToServer("Cmd_SpawnTag");
-	#endif
-	
-	char gang[12], path[128];
-	GetCmdArg(1, gang, sizeof(gang));
-	
-	int client = GetCmdArgInt(2);
-	int item_id = GetCmdArgInt(args);
-	
-	Format(path, sizeof(path), "deadlydesire/groups/princeton/%s_small.vmt", gang);
-	
-	if( !IsDecalPrecached(path) || iPrecached[item_id] < 0 ) {
-		iPrecached[item_id] = PrecacheDecal(path);
-	}
-	
-	float origin[3], origin2[3], angles[3];
-	GetClientEyeAngles(client, angles);
-	GetClientEyePosition(client, origin);
-	
-	Handle tr = TR_TraceRayFilterEx(origin, angles, MASK_SOLID, RayType_Infinite, FilterToOne, client);
-	if( tr && TR_DidHit(tr) ) {
-		TR_GetEndPosition(origin2, tr);
-		if( GetVectorDistance(origin, origin2) <= 128.0 ) {
-			
-			TE_Start("World Decal");
-			TE_WriteVector("m_vecOrigin",origin2);
-			TE_WriteNum("m_nIndex", iPrecached[item_id]);
-			TE_SendToAll();
-			
-			rp_IncrementSuccess(client, success_list_graffiti);
-		}
-		else {
-			ITEM_CANCEL(client, item_id);
-		}
-	}
-	else {
-		ITEM_CANCEL(client, item_id);
-	}
-	CloseHandle(tr);
-}

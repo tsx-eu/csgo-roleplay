@@ -22,8 +22,6 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-// TODO: Ajouter les TAG.
-
 //#define DEBUG
 #define MAX_GROUPS		150
 #define MAX_ZONES		310
@@ -58,6 +56,8 @@ public Plugin myinfo = {
 public void OnPluginStart() {
 	RegConsoleCmd("drop", FlagDrop);
 	RegServerCmd("rp_item_spawnflag", 	Cmd_ItemFlag,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_spawntag",	Cmd_SpawnTag,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	
 	g_hGlobalDamage = new StringMap();
 	g_hGlobalSteamID = new StringMap();
 	
@@ -103,6 +103,56 @@ public void OnClientPostAdminCheck(int client) {
 	}
 }
 // -----------------------------------------------------------------------------------------------------------------
+
+public Action Cmd_SpawnTag(int args) {
+	static iPrecached[MAX_GROUPS];
+	#if defined DEBUG
+	PrintToServer("Cmd_SpawnTag");
+	#endif
+	
+	char gang[64], path[128];
+	GetCmdArg(1, gang, sizeof(gang));
+	
+	int client = GetCmdArgInt(2);
+	int item_id = GetCmdArgInt(args);
+	int groupID = rp_GetClientGroupID(client);
+	
+	if( groupID == 0 ) {
+		ITEM_CANCEL(client, item_id);
+	}
+	rp_GetGroupData(groupID, group_type_tag, gang, sizeof(gang));
+	
+	Format(path, sizeof(path), "deadlydesire/groups/princeton/%s_small.vmt", gang);
+	
+	if( !IsDecalPrecached(path) || iPrecached[groupID] < 0 ) {
+		iPrecached[groupID] = PrecacheDecal(path);
+	}
+	
+	float origin[3], origin2[3], angles[3];
+	GetClientEyeAngles(client, angles);
+	GetClientEyePosition(client, origin);
+	
+	Handle tr = TR_TraceRayFilterEx(origin, angles, MASK_SOLID, RayType_Infinite, FilterToOne, client);
+	if( tr && TR_DidHit(tr) ) {
+		TR_GetEndPosition(origin2, tr);
+		if( GetVectorDistance(origin, origin2) <= 128.0 ) {
+			
+			TE_Start("World Decal");
+			TE_WriteVector("m_vecOrigin",origin2);
+			TE_WriteNum("m_nIndex", iPrecached[item_id]);
+			TE_SendToAll();
+			
+			rp_IncrementSuccess(client, success_list_graffiti);
+		}
+		else {
+			ITEM_CANCEL(client, item_id);
+		}
+	}
+	else {
+		ITEM_CANCEL(client, item_id);
+	}
+	CloseHandle(tr);
+}
 public Action Cmd_ItemFlag(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemFlag");

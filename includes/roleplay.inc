@@ -583,6 +583,7 @@ enum rp_group_type {
 	group_type_color,
 	group_type_buy,
 	group_type_skin,
+	group_type_tag,
 	
 	group_type_max
 };
