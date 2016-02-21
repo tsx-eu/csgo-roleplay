@@ -327,7 +327,7 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	
 	if( !rp_GetClientKeyVehicle(client, target) ) {
 			
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %d billets ont été sorti de la boîte à gants.", rand);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %d billets ont été sortis de la boîte à gants.", rand);
 			
 		while(rand >= 1 ) {
 			rand--;
@@ -590,11 +590,11 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 int findPlayerWeapon(int client, int target) {
 	
 	if( !rp_IsTutorialOver(target) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur n'a pas terminé le tutorial.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur n'a pas terminé le tutoriel.");
 		return -1;
 	}
 	if( rp_GetClientBool(target, b_Stealing) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Quelqu'un d'autre est déjà entrain de voler ce joueur.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Quelqu'un d'autre est déjà en train de voler ce joueur.");
 		return -1;
 	}
 	
@@ -607,7 +607,7 @@ int findPlayerWeapon(int client, int target) {
 		return -1;
 	}
 	if( rp_GetClientJobID(target) == 181 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler un autre 18th");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler un autre 18th.");
 		return -1;
 	}
 	
