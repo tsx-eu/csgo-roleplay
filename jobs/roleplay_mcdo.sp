@@ -389,13 +389,13 @@ public Action Cmd_ItemHamburger(int args) {
 			}
 		}
 		
-		int item_id = iItemRand[ Math_GetRandomInt(0, amount-1) ];
-		rp_ClientGiveItem(client, item_id, 1, StrEqual(arg1, "happy"));
+		int rand = iItemRand[ Math_GetRandomInt(0, amount-1) ];
+		rp_ClientGiveItem(client, rand, 1, StrEqual(arg1, "happy"));
 		
-		rp_GetItemData(item_id, item_type_name, cmd, sizeof(cmd));
+		rp_GetItemData(rand, item_type_name, cmd, sizeof(cmd));
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu comme cadeau: %s", cmd);
 		
-		if( item_id == GetCmdArgInt(args) )
+		if( rand == GetCmdArgInt(args) )
 			rp_IncrementSuccess(client, success_list_mcdo);
 	}
 	else if( StrEqual(arg1, "box") ) { // TODO: Move to roleplay_armurerie
@@ -418,9 +418,9 @@ public Action Cmd_ItemHamburger(int args) {
 		}
 		
 		char cmd[128];
-		int item_id = iItemRand[ Math_GetRandomInt(0, amount-1) ];
-		rp_ClientGiveItem(client, item_id, 1, true);
-		rp_GetItemData(item_id, item_type_name, cmd, sizeof(cmd));
+		int rand = iItemRand[ Math_GetRandomInt(0, amount-1) ];
+		rp_ClientGiveItem(client, rand, 1, true);
+		rp_GetItemData(rand, item_type_name, cmd, sizeof(cmd));
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu comme cadeau: %s", cmd);
 	}
 	else if( StrEqual(arg1, "drugs") ) { // TODO: Move to roleplay_dealer
@@ -439,11 +439,11 @@ public Action Cmd_ItemHamburger(int args) {
 			amount++;
 		}
 		
-		int item_id = iItemRand[ Math_GetRandomInt(0, amount-1) ];
+		int rand = iItemRand[ Math_GetRandomInt(0, amount-1) ];
 		int rnd = 7+Math_GetRandomPow(1, 5);
-		rp_ClientGiveItem(client, item_id, rnd, true);
+		rp_ClientGiveItem(client, rand, rnd, true);
 		
-		rp_GetItemData(item_id, item_type_name, cmd, sizeof(cmd));
+		rp_GetItemData(rand, item_type_name, cmd, sizeof(cmd));
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu comme cadeau: %dx %s", rnd, cmd);
 	}
 	else if( StrEqual(arg1, "spacy") ) {
