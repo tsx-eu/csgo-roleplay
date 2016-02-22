@@ -358,7 +358,7 @@ public Action Cmd_ItemCash(int args) {
 	
 	int client = GetCmdArgInt(1);
 	
-	if( rp_GetClientJobID(client) == 1 ) {
+	if( rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit aux forces de l'ordre.");
 		return Plugin_Handled;
 	}
@@ -656,7 +656,7 @@ public Action Cmd_ItemCashBig(int args) {
 	
 	int client = GetCmdArgInt(1);
 	
-	if( rp_GetClientJobID(client) == 1 ) {
+	if( rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit aux forces de l'ordre.");
 		return Plugin_Handled;
 	}
