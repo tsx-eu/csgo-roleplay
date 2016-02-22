@@ -410,7 +410,7 @@ public Action Cmd_ItemPlant(int args) {
 	int type = GetCmdArgInt(1);
 	int client = GetCmdArgInt(2);
 	
-	if(rp_GetClientJobId(client) == 1 || rp_GetClientJobId(client) == 101 && BuildingPlant(client, type) == 1){
+	if(rp_GetClientJobId(client) == 1 || rp_GetClientJobId(client) == 101 && BuildingPlant(client, type) >= 2){
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez poser qu'un plant.");	
 		return Plugin_Handled;
 	}
