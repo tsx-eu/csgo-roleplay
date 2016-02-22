@@ -27,7 +27,7 @@
 #define MAX_ZONES		310
 #define	MAX_ENTITIES	2048
 #define	ZONE_BUNKER		235
-#define ZONE_RESPAWN	230
+#define ZONE_RESPAWN	231
 #define	FLAG_SPEED		250.0
 #define	FLAG_POINTS		150
 #define ELO_FACTEUR_K	40.0
@@ -110,10 +110,8 @@ public Action Cmd_SpawnTag(int args) {
 	PrintToServer("Cmd_SpawnTag");
 	#endif
 	
-	char gang[64], path[128];
-	GetCmdArg(1, gang, sizeof(gang));
-	
-	int client = GetCmdArgInt(2);
+	char gang[64], path[128];	
+	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
 	int groupID = rp_GetClientGroupID(client);
 	
@@ -139,7 +137,7 @@ public Action Cmd_SpawnTag(int args) {
 			
 			TE_Start("World Decal");
 			TE_WriteVector("m_vecOrigin",origin2);
-			TE_WriteNum("m_nIndex", iPrecached[item_id]);
+			TE_WriteNum("m_nIndex", iPrecached[groupID]);
 			TE_SendToAll();
 			
 			rp_IncrementSuccess(client, success_list_graffiti);
@@ -248,7 +246,7 @@ public Action FlagThink(Handle timer, any data) {
 	if( !IsValidEdict(entity) )
 		return Plugin_Handled;
 	
-	float vecFlag[3], vecOrigin[3];
+	float vecOrigin[3];
 	int color[4];
 	color[0] = g_iFlagData[entity][data_red];
 	color[1] = g_iFlagData[entity][data_green];
@@ -291,12 +289,9 @@ public Action FlagThink(Handle timer, any data) {
 		}
 		AcceptEntityInput(entity, "KillHierarchy");
 		return Plugin_Handled;
-	}	
+	}
 	
-	GetEntPropVector(entity, Prop_Send, "m_vecOrigin", vecFlag);
-	vecFlag[2] += 25.0;
-	
-	CreateTimer(0.1, FlagThink, data);
+	CreateTimer(0.25, FlagThink, data);
 	return Plugin_Handled;
 }
 public Action SDKHideFlag(int from, int to ) {
@@ -568,6 +563,7 @@ public Action fwdSpawn(int client) {
 public Action fwdSpawn_ToRespawn(Handle timer, any client) {
 	if( rp_GetClientGroupID(client) == rp_GetCaptureInt(cap_bunker) && IsValidClient(client) ) {
 		float mins[3], maxs[3], rand[3];
+		bool found = false;
 		mins[0] = rp_GetZoneFloat(ZONE_RESPAWN, zone_type_min_x);
 		mins[1] = rp_GetZoneFloat(ZONE_RESPAWN, zone_type_min_y);
 		mins[2] = rp_GetZoneFloat(ZONE_RESPAWN, zone_type_min_z);
@@ -575,14 +571,60 @@ public Action fwdSpawn_ToRespawn(Handle timer, any client) {
 		maxs[1] = rp_GetZoneFloat(ZONE_RESPAWN, zone_type_max_y);
 		maxs[2] = rp_GetZoneFloat(ZONE_RESPAWN, zone_type_max_z);
 		
-		rand[0] = Math_GetRandomFloat(mins[0] + 64.0, maxs[0] - 64.0);
-		rand[1] = Math_GetRandomFloat(mins[1] + 64.0, maxs[1] - 64.0);
-		rand[2] = mins[2] + 32.0;
+		for(int i=0; i<16; i++){
+			
+			rand[0] = Math_GetRandomFloat(mins[0] + 64.0, maxs[0] - 64.0);
+			rand[1] = Math_GetRandomFloat(mins[1] + 64.0, maxs[1] - 64.0);
+			rand[2] = Math_GetRandomFloat(mins[2] + 32.0, maxs[2] - 64.0);
+			
+			if( !CanTP(rand, client) )
+				continue;
+			
+			found = true;
+			break;
+		}
+		if( !found ) {
+			mins[0] = rp_GetZoneFloat(ZONE_RESPAWN-1, zone_type_min_x);
+			mins[1] = rp_GetZoneFloat(ZONE_RESPAWN-1, zone_type_min_y);
+			mins[2] = rp_GetZoneFloat(ZONE_RESPAWN-1, zone_type_min_z);
+			maxs[0] = rp_GetZoneFloat(ZONE_RESPAWN-1, zone_type_max_x);
+			maxs[1] = rp_GetZoneFloat(ZONE_RESPAWN-1, zone_type_max_y);
+			maxs[2] = rp_GetZoneFloat(ZONE_RESPAWN-1, zone_type_max_z);
+			
+			rand[0] = Math_GetRandomFloat(mins[0] + 64.0, maxs[0] - 64.0);
+			rand[1] = Math_GetRandomFloat(mins[1] + 64.0, maxs[1] - 64.0);
+			rand[2] = mins[2] + 32.0;
+		}
 		
 		TeleportEntity(client, rand, NULL_VECTOR, NULL_VECTOR);
 		FakeClientCommand(client, "sm_stuck");
 	}
 }
+bool CanTP(float pos[3], int client) {
+	static float mins[3], maxs[3];
+	static bool init = false;
+	bool ret;
+	
+	if( !init ) {
+		GetClientMins(client, mins);
+		GetClientMaxs(client, maxs);
+		init = true;
+	}
+	
+	Handle tr;
+	tr = TR_TraceHullEx(pos, pos, mins, maxs, MASK_PLAYERSOLID);
+	ret = !TR_DidHit(tr);
+	CloseHandle(tr);
+    #if defined DEBUG
+		if( !ret ) {
+			TR_GetEndPosition(maxs, tr);
+			TE_SetupBeamRingPoint(maxs, 1.0, 1.5, g_cBeam, g_cBeam, 0, 30, 10.0, 1.0, 1.0, { 255, 255, 255, 255 }, 10, 0);
+			TE_SendToAll();
+		}
+	#endif
+	return ret;
+}
+
 public Action fwdDead(int victim, int attacker, float& respawn) {
 	if( g_iClientFlag[victim] > 0 ) {
 		CTF_DropFlag(victim, false);
@@ -736,7 +778,7 @@ int CTF_SpawnFlag(float vecOrigin[3], int skin, int color[3]) {
 	
 	
 	SetEntProp(ent1, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_DEBRIS);
-	SetEntProp(ent1, Prop_Send, "m_usSolidFlags", FSOLID_NOT_SOLID);
+	SetEntProp(ent1, Prop_Send, "m_usSolidFlags", FSOLID_TRIGGER);
 	SetEntProp(ent2, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_DEBRIS);
 	SetEntProp(ent2, Prop_Send, "m_usSolidFlags", FSOLID_NOT_SOLID);
 	
@@ -766,9 +808,21 @@ int CTF_SpawnFlag(float vecOrigin[3], int skin, int color[3]) {
 	g_iFlagData[ent1][data_time] = GetTime();
 	g_iFlagData[ent1][data_owner] = 0;
 	
+	SDKHook(ent1, SDKHook_Touch, SDKTouch);
+	
 	CreateTimer(0.01, FlagThink, EntIndexToEntRef(ent1));
 	
 	return ent1;
+}
+public Action SDKTouch(int entity, int client) {
+	if( !IsValidClient(client) )
+		return Plugin_Continue;
+	if( g_iClientFlag[client] > 0 )
+		return Plugin_Continue;
+	if( g_iFlagData[entity][data_group] != rp_GetClientGroupID(client) )
+		return Plugin_Continue;
+	CTF_FlagTouched(client, entity);
+	return Plugin_Continue;
 }
 void CTF_DropFlag(int client, int thrown) {
 	
@@ -1008,11 +1062,13 @@ void Client_SetSpawnProtect(int client, bool status) {
 		rp_HookEvent(client, RP_OnPlayerDead, fwdGodPlayerDead);
 		SDKHook(client, SDKHook_SetTransmit, fwdGodHideMe);
 		SDKHook(client, SDKHook_PreThink, fwdGodThink);
-		g_hGodTimer[client] = CreateTimer(10.0, GOD_Expire, client);
+		float duration = 10.0;
+		if( rp_GetCaptureInt(cap_bunker) == rp_GetClientGroupID(client) )
+			duration = 15.0;
+		
+		g_hGodTimer[client] = CreateTimer(duration, GOD_Expire, client);
 		SetEntProp(client, Prop_Data, "m_takedamage", 0);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez 10 secondes de spawn-protection.");
-		
-		
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez %d secondes de spawn-protection.", RoundFloat(duration));
 	}
 	else {
 		rp_UnhookEvent(client, RP_OnPlayerDead, fwdGodPlayerDead);
