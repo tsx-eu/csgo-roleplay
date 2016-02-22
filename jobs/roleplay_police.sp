@@ -2392,9 +2392,6 @@ public Action fwdFrozen(int client, float& speed, float& gravity) {
 	#endif
 	speed = 0.0;
 	
-	FakeClientCommand(client, "use weapon_knife");
-	FakeClientCommand(client, "use weapon_knifegg");
-	
 	return Plugin_Stop;
 }
 public Action fwdTazerBlue(int client, int color[4]) {
