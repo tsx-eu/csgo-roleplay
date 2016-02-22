@@ -479,7 +479,7 @@ int BuildingPlant(int client, int type) {
 		max += 1;
 	}
 			
-	if(rp_GetClientJobId(client) == 1 || rp_GetClientJobId(client) == 101){
+	if(rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101){
 		max = 1;
 	}
 	
