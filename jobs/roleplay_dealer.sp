@@ -478,6 +478,10 @@ int BuildingPlant(int client, int type) {
 	if( appart > 0 && rp_GetAppartementInt(appart, appart_bonus_coffre) ) {
 		max += 1;
 	}
+			
+	if(rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101){
+		max = 1;
+	}
 	
 	if( count >= max ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez trop de plants actifs.");
