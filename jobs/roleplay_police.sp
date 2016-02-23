@@ -75,6 +75,7 @@ enum tribunal_type {
 	tribunal_duration,
 	tribunal_code,
 	tribunal_option,
+	tribunal_uniqID,
 	
 	tribunal_max
 }
@@ -169,6 +170,7 @@ public void OnClientPostAdminCheck(int client) {
 	rp_SetClientBool(client, b_IsSearchByTribunal, false);
 	g_TribunalSearch[client][tribunal_search_status] = -1;
 	
+	CreateTimer(0.01, AllowStealing, client);
 	SDKHook(client, SDKHook_WeaponEquip, WeaponEquip);
 }
 public Action WeaponEquip(int client, int weapon) {
@@ -1171,28 +1173,17 @@ public Action Cmd_Jugement(int client, int args) {
 			);
 
 			SQL_TQuery(DB, SQL_QueryCallBack, szQuery);
-			
-			ReplaceString(g_szTribunal_DATA[client][tribunal_steamid], sizeof(g_szTribunal_DATA[][]), "STEAM_1", "STEAM_0");
-			ReplaceString(SteamID, sizeof(SteamID), "STEAM_1", "STEAM_0");
-			
-			Format(szQuery, sizeof(szQuery), "INSERT INTO `ts-x`.`srv_bans` (`id`, `SteamID`, `StartTime`, `EndTime`, `Length`, `adminSteamID`, `BanReason`, `game`)");
-			Format(szQuery, sizeof(szQuery), "%s VALUES (NULL, '%s', UNIX_TIMESTAMP(), (UNIX_TIMESTAMP()+'%i'), '%i', '%s', '%s', 'tribunal'); ",
-			szQuery, g_szTribunal_DATA[client][tribunal_steamid], StringToInt(g_szTribunal_DATA[client][tribunal_duration])*60, StringToInt(g_szTribunal_DATA[client][tribunal_duration])*60, SteamID, buffer_reason);
-			
-			SQL_TQuery(DB, SQL_QueryCallBack, szQuery);
 
-			LogToGame("[TSX-RP] [TRIBUNAL_V2] le juge %s %s a condamné %s à faire %s heures de prison et à payer %i$ pour %s",
-				UserName,
-				SteamID,
+			LogToGame("[TSX-RP] [TRIBUNAL-FORUM] le juge %L a condamné %s à faire %s heures de prison et à payer %i$ pour %s",
+				client,
 				g_szTribunal_DATA[client][tribunal_steamid],
 				g_szTribunal_DATA[client][tribunal_duration],
 				amende,
 				szReason
 			);
 
-			CPrintToChatAll("{lightblue}[TSX-RP]{default} Le juge %s %s a condamné %s à faire %s heures de prison et à payer %i$ pour %s",
-				UserName,
-				SteamID,
+			CPrintToChatAll("{lightblue}[TSX-RP]{default} Le juge %N a condamné %s à faire %s heures de prison et à payer %i$ pour %s",
+				client,
 				g_szTribunal_DATA[client][tribunal_steamid],
 				g_szTribunal_DATA[client][tribunal_duration],
 				amende,
@@ -1200,25 +1191,17 @@ public Action Cmd_Jugement(int client, int args) {
 			);
 		}
 		else{
-			LogToGame("[TSX-RP] [TRIBUNAL_V2] le juge %s %s a acquitté %s pour %s",
-				UserName, SteamID, g_szTribunal_DATA[client][tribunal_steamid], szReason);
+			LogToGame("[TSX-RP] [TRIBUNAL-FORUM] le juge %L a acquitté %s pour %s",
+				client, g_szTribunal_DATA[client][tribunal_steamid], szReason);
 
-			CPrintToChatAll("{lightblue}[TSX-RP]{default} Le juge %s %s a acquitté %s pour %s",
-				UserName, SteamID, g_szTribunal_DATA[client][tribunal_steamid], szReason);
+			CPrintToChatAll("{lightblue}[TSX-RP]{default} Le juge %N a acquitté %s pour %s",
+				client, g_szTribunal_DATA[client][tribunal_steamid], szReason);
 		}
 
 		if( StrEqual(g_szTribunal_DATA[client][tribunal_option], "forum") ) {
-			char steamid0[64];
-			strcopy(steamid0,63,g_szTribunal_DATA[client][tribunal_steamid]);
-			ReplaceString(steamid0, sizeof(steamid0), "STEAM_1", "STEAM_0");
-			char steamid1[64];
-			strcopy(steamid1,63,g_szTribunal_DATA[client][tribunal_steamid]);
-			ReplaceString(steamid0, sizeof(steamid0), "STEAM_0", "STEAM_1");
 
-			Format(szQuery, sizeof(szQuery), "DELETE FROM `ts-x`.`site_report` WHERE `report_steamid`='%s' OR `report_steamid`='%s';", steamid0, steamid1);
-			SQL_TQuery(DB, SQL_QueryCallBack, szQuery);
-			
-			Format(szQuery, sizeof(szQuery), "DELETE FROM `ts-x`.`site_tribunal` WHERE `report_steamid`='%s' OR `report_steamid`='%s';", steamid0, steamid1);
+			Format(szQuery, sizeof(szQuery), "UPDATE `ts-x`.`site_report` SET `jail`='%s', `amende`='%d', `juge`='%s' WHERE `id`='%s';",
+				g_szTribunal_DATA[client][tribunal_duration], amende, SteamID, g_szTribunal_DATA[client][tribunal_uniqID]);
 			SQL_TQuery(DB, SQL_QueryCallBack, szQuery);
 		}
 		
@@ -1456,9 +1439,9 @@ public int MenuTribunal_main(Handle p_hItemMenu, MenuAction p_oAction, int clien
 			SQL_LockDatabase(DB);
 			
 			char szQuery[1024];
-			Format(szQuery, sizeof(szQuery), "SELECT `site_report`.`report_steamid`,COUNT(*) AS count FROM `ts-x`.`site_report`,`ts-x`.`site_tribunal` WHERE");
-			Format(szQuery, sizeof(szQuery), "%s `site_tribunal`.`report_steamid`=`site_report`.`report_steamid` GROUP BY", szQuery);
-			Format(szQuery, sizeof(szQuery), "%s `site_report`.`report_steamid` HAVING COUNT(*) >= 5 ORDER BY count DESC;", szQuery);
+			Format(szQuery, sizeof(szQuery), "SELECT R.`id`, `report_steamid`, COUNT(`vote`) vote FROM `ts-x`.`site_report` R");
+			Format(szQuery, sizeof(szQuery), "%s LEFT JOIN `ts-x`.`site_report_votes` V ON V.`reportid`=R.`id`", szQuery);
+			Format(szQuery, sizeof(szQuery), "%s WHERE V.`vote`='1' AND R.`jail`=-1 GROUP BY R.`id` ORDER BY vote DESC;", szQuery);
 			
 			Handle hQuery = SQL_Query(DB, szQuery);
 			
@@ -1466,11 +1449,11 @@ public int MenuTribunal_main(Handle p_hItemMenu, MenuAction p_oAction, int clien
 				while( SQL_FetchRow(hQuery) ) {
 					
 					char tmp[255], tmp2[255], szSteam[32];
+					int id = SQL_FetchInt(hQuery, 0);
+					SQL_FetchString(hQuery, 1, szSteam, sizeof(szSteam));
+					int count=SQL_FetchInt(hQuery, 2);
 					
-					SQL_FetchString(hQuery, 0, szSteam, sizeof(szSteam));
-					int count=SQL_FetchInt(hQuery, 1);
-					
-					Format(tmp, sizeof(tmp), "%s %s", options, szSteam);
+					Format(tmp, sizeof(tmp), "%s %s %d", options, szSteam, id);
 					
 					Format(tmp2, sizeof(tmp2), "[%i] %s", count, szSteam);
 					AddMenuItem(menu, tmp, tmp2);
@@ -1496,7 +1479,7 @@ public int MenuTribunal_main(Handle p_hItemMenu, MenuAction p_oAction, int clien
 					continue;				
 				
 				GetClientAuthId(i, AuthId_Engine, szSteam, sizeof(szSteam), false);
-				Format(tmp, sizeof(tmp), "%s %s", options, szSteam);
+				Format(tmp, sizeof(tmp), "%s %s %s", options, szSteam, szSteam);
 				
 				Format(tmp2, sizeof(tmp2), "%N - %s", i, szSteam);
 				AddMenuItem(menu, tmp, tmp2);
@@ -1533,7 +1516,7 @@ public int MenuTribunal_main(Handle p_hItemMenu, MenuAction p_oAction, int clien
 					if( found )
 						continue;
 					
-					Format(tmp, sizeof(tmp), "%s %s", options, szSteam);
+					Format(tmp, sizeof(tmp), "%s %s %s", options, szSteam, szSteam);
 					Format(tmp2, sizeof(tmp2), "%s - %s", tmp2, szSteam);
 					AddMenuItem(menu, tmp, tmp2);
 				}
@@ -1558,7 +1541,7 @@ public int MenuTribunal_main(Handle p_hItemMenu, MenuAction p_oAction, int clien
 				
 				GetClientAuthId(i, AuthId_Engine, szSteam, sizeof(szSteam), false);
 				
-				Format(tmp, sizeof(tmp), "%s %s", options, szSteam);
+				Format(tmp, sizeof(tmp), "%s %s %s", options, szSteam, szSteam);
 				
 				Format(tmp2, sizeof(tmp2), "%N - %s", i, szSteam);
 				AddMenuItem(menu, tmp, tmp2);
@@ -1578,42 +1561,25 @@ public int MenuTribunal_selectplayer(Handle p_hItemMenu, MenuAction p_oAction, i
 	PrintToServer("MenuTribunal_selectplayer");
 	#endif
 	if( p_oAction == MenuAction_Select && client != 0) {
-		char buff_options[255], options[2][64], option[64], szSteamID[64];
+		char buff_options[255], options[3][64], tmp[255], tmp2[255], szTitle[128], szURL[512];
 		GetMenuItem(p_hItemMenu, p_iParam2, buff_options, 254);
-		
 		ExplodeString(buff_options, " ", options, sizeof(options), sizeof(options[]));
-		strcopy(option, sizeof(option), options[0]);
-		strcopy(szSteamID, sizeof(szSteamID), options[1]);
 		
+		Format(szTitle, sizeof(szTitle), "Tribunal: %s", options[1]);
+		Format(szURL, sizeof(szURL), "https://www.ts-x.eu/popup.php?url=/index.php?page=roleplay2&sharp=/tribunal/case/%s", options[2]);
 		
-		char uniqID[64], szIP[64], szQuery[1024];
-		String_GetRandom(uniqID, sizeof(uniqID), 32);
-		GetClientIP(client, szIP, sizeof(szIP));
-		
-		Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_tribunal` (`uniqID`, `timestamp`, `steamid`, `IP`) VALUES ('%s', '%i', '%s', '%s');", uniqID, GetTime(), szSteamID, szIP);
-		Handle DB = rp_GetDatabase();
-		
-		PrintToServer("LOCK-1");
-		SQL_LockDatabase(DB);
-		SQL_Query(DB, szQuery);
-		SQL_UnlockDatabase(DB);
-		PrintToServer("UNLOCK-1");
-		
-		char szTitle[128], szURL[512];
-		Format(szTitle, sizeof(szTitle), "Tribunal: %s", szSteamID);
-		Format(szURL, sizeof(szURL), "http://www.ts-x.eu/popup.php?url=/index.php?page=tribunal&action=case&steamid=%s&tokken=%s", szSteamID, uniqID);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Si la page ne s'ouvre pas, un lien est disponible dans votre console.");
+		PrintToConsole(client, "--> https://www.ts-x.eu/index.php?page=roleplay2#/tribunal/case/%s", options[2]);
 		
 		ShowMOTDPanel(client, szTitle, szURL, MOTDPANEL_TYPE_URL);
 		
-		if( !StrEqual(option, "stats") ) {
+		if( !StrEqual(options[0], "stats") ) {
 			
 			Handle menu = CreateMenu(MenuTribunal_Apply);
 			SetMenuTitle(menu, "  Tribunal - Sélection de la peine \n--------------------");
 			
-			char tmp[255], tmp2[255];
-			
 			for(int i=0; i<=100; i+=2) {
-				Format(tmp, sizeof(tmp), "%s %s %i", option, szSteamID, i);
+				Format(tmp, sizeof(tmp), "%s %s %s %i", options[0], options[1], options[2], i);
 				Format(tmp2, sizeof(tmp2), "%i heures", i);
 				AddMenuItem(menu, tmp, tmp2);
 			}
@@ -1633,7 +1599,7 @@ public int MenuTribunal_Apply(Handle p_hItemMenu, MenuAction p_oAction, int clie
 	PrintToServer("MenuTribunal_Apply");
 	#endif
 	if( p_oAction == MenuAction_Select && client != 0) {
-		char buff_options[255], options[3][64];
+		char buff_options[255], options[4][64];
 		GetMenuItem(p_hItemMenu, p_iParam2, buff_options, 254);
 		
 		ExplodeString(buff_options, " ", options, sizeof(options), sizeof(options[]));
@@ -1643,7 +1609,8 @@ public int MenuTribunal_Apply(Handle p_hItemMenu, MenuAction p_oAction, int clie
 		
 		strcopy(g_szTribunal_DATA[client][tribunal_option], 63, options[0]);
 		strcopy(g_szTribunal_DATA[client][tribunal_steamid], 63, options[1]);
-		strcopy(g_szTribunal_DATA[client][tribunal_duration], 63, options[2]);
+		strcopy(g_szTribunal_DATA[client][tribunal_uniqID], 63, options[2]);
+		strcopy(g_szTribunal_DATA[client][tribunal_duration], 63, options[3]);
 		strcopy(g_szTribunal_DATA[client][tribunal_code], 63, random);
 		if(StringToInt(g_szTribunal_DATA[client][tribunal_duration]) > 0)
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Afin de confirmer votre jugement, tappez maintenant /jugement amende %s raison", random);
