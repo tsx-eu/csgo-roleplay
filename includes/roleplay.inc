@@ -393,6 +393,11 @@ enum int_user_data {
 
 	i_Avocat,
 	
+	i_ArtisanXP,
+	i_ArtisanLevel,
+	i_ArtisanPoints,
+	
+	
 	i_udata_max
 };
 enum float_user_data {

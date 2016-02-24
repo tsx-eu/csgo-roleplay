@@ -21,6 +21,7 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 StringMap g_hReceipe;
+bool g_bCanCraft[65][MAX_ITEMS];
 
 //#define DEBUG
 
@@ -82,6 +83,18 @@ public void OnClientPostAdminCheck(int client) {
 	#endif
 	
 	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);
+	for(int i = 0; i < MAX_ITEMS; i++)
+		g_bCanCraft[client][i] = false;
+	
+	char szSteamID[65], query[1024];
+	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
+	Format(query, sizeof(query), "SELECT `itemid` FROM `rp_craft_book` WHERE `steamid`='%s' AND `itemid`>0 AND `itemid`<%d;", szSteamID, MAX_ITEMS);
+	SQL_TQuery(rp_GetDatabase(), SQL_LoadCraftbook, query, client);
+}
+public void SQL_LoadCraftbook(Handle owner, Handle hQuery, const char[] error, any client) {
+	while( SQL_FetchRow(hQuery) ) {
+		g_bCanCraft[client][SQL_FetchInt(hQuery, 0)] = true;
+	}
 }
 public Action fwdUse(int client) {
 	if( rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == 31 ) {
@@ -129,6 +142,8 @@ void displayBuildMenu(int client, int itemID) {
 		SetMenuTitle(menu, "== Artisanat: Constuire");
 		
 		for(int i = 0; i < MAX_ITEMS; i++) {
+			if( !g_bCanCraft[client][i] )
+				continue;
 			Format(tmp, sizeof(tmp), "%d", i);
 			if( !g_hReceipe.GetValue(tmp, magic) )
 				continue;
@@ -229,6 +244,32 @@ void displayRecyclingMenu(int client, int itemID) {
 
 	DisplayMenu(menu, client, 30);
 }
+void displayLearngMenu(int client) {
+
+	char tmp[64], tmp2[64];
+	ArrayList magic;
+	int count = rp_GetClientInt(client, i_ArtisanPoints);
+	
+	Handle menu = CreateMenu(eventArtisanMenu);
+	SetMenuTitle(menu, "== Artisanat: Apprendre");
+		
+	for(int i = 0; i < MAX_ITEMS; i++) {
+		if( g_bCanCraft[client][i] )
+			continue;
+		
+		Format(tmp, sizeof(tmp), "%d", i);
+		if( !g_hReceipe.GetValue(tmp, magic) )
+			continue;
+		if( count*250 < rp_GetItemInt(i, item_type_prix) )
+			continue;
+		
+		rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2));
+		Format(tmp, sizeof(tmp), "learn %d", i);
+		Format(tmp2, sizeof(tmp2), "%s (%i)",tmp2, RoundToCeil(float(rp_GetItemInt(i, item_type_prix)) / 250.0));
+		AddMenuItem(menu, tmp, tmp2);
+	}
+	DisplayMenu(menu, client, 30);
+}
 public int eventArtisanMenu(Handle menu, MenuAction action, int client, int param2) {
 	#if defined DEBUG
 	PrintToServer("eventArtisanMenu");
@@ -310,9 +351,23 @@ public int eventArtisanMenu(Handle menu, MenuAction action, int client, int para
 				return;
 			}
 		}
-		
-		else if( StrEqual(options, "learn", false) ) {
-			
+		else if( StrContains(options, "learn", false) == 0 ) {
+			if( StringToInt(buffer[1]) == 0 )
+				displayLearngMenu(client);
+			else {
+				int itemID = StringToInt(buffer[1]);
+				int count = rp_GetClientInt(client, i_ArtisanPoints);
+				if( count*250 < rp_GetItemInt(itemID, item_type_prix) ) {
+					return;
+				}
+				
+				g_bCanCraft[client][itemID] = true;
+				rp_SetClientInt(client, i_ArtisanPoints, count - RoundToCeil(float(rp_GetItemInt(itemID, item_type_prix)) / 250.0));
+				char query[1024], szSteamID[32];
+				GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
+				Format(query, sizeof(query), "INSERT INTO `rp_craft_book` (`steamid`, `itemid`) VALUES ('%s', '%d');", szSteamID, itemID);
+				SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
+			}
 		}
 	}
 	else if( action == MenuAction_End ) {
