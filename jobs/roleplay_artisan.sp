@@ -25,6 +25,8 @@ bool g_bCanCraft[65][MAX_ITEMS];
 
 //#define DEBUG
 
+// TODO: Trier les craft par job.
+
 public Plugin myinfo = {
 	name = "Jobs: ARTISAN", author = "KoSSoLaX",
 	description = "RolePlay - Jobs: Artisan",
@@ -46,11 +48,17 @@ public Action Cmd_Reload(int args) {
 }
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
+	RegConsoleCmd("rp_givemepoint", CmdGivePoint);
+	
 	SQL_TQuery(rp_GetDatabase(), SQL_LoadReceipe, "SELECT `itemid`, `raw`, `amount`, REPLACE(`extra_cmd`, 'rp_item_primal ', '') `rate` FROM `rp_csgo`.`rp_craft` C INNER JOIN `rp_items` I ON C.`raw`=I.`id` ORDER BY `itemid`, `raw`", 0, DBPrio_Low);
 	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
+}
+public Action CmdGivePoint(int client, int args) {
+	rp_SetClientInt(client, i_ArtisanPoints, rp_GetClientInt(client, i_ArtisanPoints) + 1);
+	return Plugin_Handled;
 }
 public void SQL_LoadReceipe(Handle owner, Handle hQuery, const char[] error, any client) {
 	if( g_hReceipe ) {
@@ -400,7 +408,7 @@ public int eventArtisanMenu(Handle menu, MenuAction action, int client, int para
 			if( StringToInt(buffer[2]) == 0 )
 				displayLearngMenu("learn", client, StringToInt(buffer[1]));
 			else {
-				int itemID = StringToInt(buffer[1]);
+				int itemID = StringToInt(buffer[2]);
 				int count = rp_GetClientInt(client, i_ArtisanPoints);
 				if( count*250 < rp_GetItemInt(itemID, item_type_prix) ) {
 					return;
