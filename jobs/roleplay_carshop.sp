@@ -27,6 +27,7 @@
 #define	ITEM_REPAIR			176
 #define	ITEM_NEONS			193
 #define	ITEM_PARTICULES		181
+#define	ITEM_KLAXON		191
 
 
 public Plugin myinfo = {
