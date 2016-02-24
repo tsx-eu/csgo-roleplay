@@ -116,9 +116,11 @@ void displayArtisanMenu(int client) {
 	
 	AddMenuItem(menu, "build", 	"Constuire");
 	AddMenuItem(menu, "recycl", "Recycler");
-	AddMenuItem(menu, "learn", 	"Apprendre");
+	AddMenuItem(menu, "learn", 	"Apprendre"); // TODO: Classer par job
+	AddMenuItem(menu, "book", 	"Livre des recettes"); // Comment faire un item
+	AddMenuItem(menu, "stats", 	"Vos informations"); // Niveau, XP, fatigue, ... 
 	
-
+	
 	DisplayMenu(menu, client, 30);
 }
 void displayBuildMenu(int client, int itemID) {
@@ -127,13 +129,10 @@ void displayBuildMenu(int client, int itemID) {
 		return;
 	}
 	
-	int clientItem[MAX_ITEMS];
-	for(int i = 0; i < MAX_ITEMS; i++) {
+	int clientItem[MAX_ITEMS], data[craft_type_max];
+	for(int i = 0; i < MAX_ITEMS; i++)
 		clientItem[i] = rp_GetClientItem(client, i);
-	}
-	
 	char tmp[64], tmp2[64];
-	int data[craft_type_max];
 	bool can;
 	ArrayList magic;
 	
@@ -159,11 +158,12 @@ void displayBuildMenu(int client, int itemID) {
 				}
 			}
 			
-			if( can ) {
-				rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2));
-				Format(tmp, sizeof(tmp), "build %d", i);
+			rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2));
+			Format(tmp, sizeof(tmp), "build %d", i);
+			if( can )
 				AddMenuItem(menu, tmp, tmp2);
-			}
+			else
+				AddMenuItem(menu, tmp, tmp2, ITEMDRAW_DISABLED);
 		}
 	}
 	else {
@@ -245,13 +245,14 @@ void displayRecyclingMenu(int client, int itemID) {
 	DisplayMenu(menu, client, 30);
 }
 void displayLearngMenu(int client) {
-
 	char tmp[64], tmp2[64];
+	bool can;
 	ArrayList magic;
-	int count = rp_GetClientInt(client, i_ArtisanPoints);
-	
+	int clientItem[MAX_ITEMS], data[craft_type_max], count = rp_GetClientInt(client, i_ArtisanPoints);
+	for(int i = 0; i < MAX_ITEMS; i++)
+		clientItem[i] = rp_GetClientItem(client, i);
 	Handle menu = CreateMenu(eventArtisanMenu);
-	SetMenuTitle(menu, "== Artisanat: Apprendre");
+	SetMenuTitle(menu, "== Artisanat: Apprendre (%d)", count);
 		
 	for(int i = 0; i < MAX_ITEMS; i++) {
 		if( g_bCanCraft[client][i] )
@@ -263,7 +264,22 @@ void displayLearngMenu(int client) {
 		if( count*250 < rp_GetItemInt(i, item_type_prix) )
 			continue;
 		
+		can = true;
+		for (int j = 0; j < magic.Length; j++) {
+			magic.GetArray(j, data);
+				
+			if( clientItem[data[craft_raw]] < data[craft_amount] ) {
+				can = false;
+				break;
+			}
+		}
+		
+		if( !can )
+			continue;
+		
 		rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2));
+		if( StrContains(tmp2, "MISSING") == 0 )
+			continue;
 		Format(tmp, sizeof(tmp), "learn %d", i);
 		Format(tmp2, sizeof(tmp2), "%s (%i)",tmp2, RoundToCeil(float(rp_GetItemInt(i, item_type_prix)) / 250.0));
 		AddMenuItem(menu, tmp, tmp2);
