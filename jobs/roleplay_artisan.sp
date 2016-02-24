@@ -259,7 +259,7 @@ void displayLearngMenu(char[] type, int client, int jobID) {
 	ArrayList magic;
 	Handle menu = CreateMenu(eventArtisanMenu);
 	int count = rp_GetClientInt(client, i_ArtisanPoints);
-	bool skip = StrEqual(type, "learn") ? false : true;
+	bool can, skip = StrEqual(type, "learn") ? false : true;
 	if( !skip && count == 0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez aucun point d'apprentissage.");
 		return;
@@ -281,22 +281,24 @@ void displayLearngMenu(char[] type, int client, int jobID) {
 	}
 	else {
 		for(int i = 0; i < MAX_ITEMS; i++) {
-			if( g_bCanCraft[client][i] )
+			if( g_bCanCraft[client][i]  && !skip )
 				continue;
 			if( rp_GetItemInt(i, item_type_job_id) != jobID )
 				continue;
 			Format(tmp, sizeof(tmp), "%d", i);
 			if( !g_hReceipe.GetValue(tmp, magic) )
 				continue;
+			can = true;
 			if( count*250 < rp_GetItemInt(i, item_type_prix) && !skip )
-				continue;
+				can = false;
 			
 			rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2));
 			if( StrContains(tmp2, "MISSING") == 0 )
 				continue;
 			Format(tmp, sizeof(tmp), "%s %d %d", type, jobID, i);
 			Format(tmp2, sizeof(tmp2), "%s (%i)",tmp2, RoundToCeil(float(rp_GetItemInt(i, item_type_prix)) / 250.0));
-			AddMenuItem(menu, tmp, tmp2);
+			
+			AddMenuItem(menu, tmp, tmp2, (can?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED));
 		}
 	}
 	DisplayMenu(menu, client, 30);
@@ -319,7 +321,7 @@ void displayBook(int client, int itemID) {
 		
 		rp_GetItemData(data[craft_raw], item_type_name, tmp, sizeof(tmp));
 		Format(tmp2, sizeof(tmp2), "%dx%s (%d%%)", data[craft_amount], tmp, data[craft_rate]);
-		AddMenuItem(menu, tmp, tmp2);
+		AddMenuItem(menu, tmp, tmp2, ITEMDRAW_DISABLED);
 	}
 	DisplayMenu(menu, client, 30);
 }
