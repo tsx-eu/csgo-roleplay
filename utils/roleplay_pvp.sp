@@ -483,7 +483,7 @@ void CAPTURE_Reward(int totalPoints) {
 	PrintToServer("CAPTURE_Reward");
 	#endif
 	int amount;
-	char tmp[128];
+	char tmp[128], szSteamID[32];
 	
 	for(int client=1; client<=GetMaxClients(); client++) {
 		if( !IsValidClient(client) || rp_GetClientGroupID(client) == 0 )
@@ -501,6 +501,12 @@ void CAPTURE_Reward(int totalPoints) {
 		else {
 			amount = 1;
 		}
+		
+		GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
+	
+		int array[gdm_max];
+		g_hGlobalDamage.GetArray(szSteamID, array, sizeof(array));
+		amount = RoundFloat( float(array[gdm_elo]) / 1500.0 * float(amount) );
 		
 		rp_ClientGiveItem(client, 309, amount + 3 + bonus, true);
 		rp_GetItemData(309, item_type_name, tmp, sizeof(tmp));
