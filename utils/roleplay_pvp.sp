@@ -29,7 +29,7 @@
 #define	ZONE_BUNKER		235
 #define ZONE_RESPAWN	231
 #define	FLAG_SPEED		250.0
-#define	FLAG_POINTS		150
+#define	FLAG_POINTS		100
 #define ELO_FACTEUR_K	40.0
 
 // -----------------------------------------------------------------------------------------------------------------
@@ -40,7 +40,7 @@ int g_iFlagData[MAX_ENTITIES+1][flag_data_max];
 // -----------------------------------------------------------------------------------------------------------------
 Handle g_hCapturable = INVALID_HANDLE;
 Handle g_hGodTimer[65];
-int g_iCapture_POINT[MAX_GROUPS];
+int g_iCapture_POINT[MAX_GROUPS], g_iCaptureStart;
 bool g_bIsInCaptureMode = false;
 int g_cBeam;
 StringMap g_hGlobalDamage, g_hGlobalSteamID;
@@ -261,8 +261,10 @@ public Action FlagThink(Handle timer, any data) {
 		if( rp_GetPlayerZone(entity) == ZONE_BUNKER ) {
 			
 			if( rp_GetCaptureInt(cap_bunker) != g_iFlagData[entity][data_group] ) {
-				g_iCapture_POINT[g_iFlagData[entity][data_group]] += FLAG_POINTS;
-				g_iCapture_POINT[rp_GetCaptureInt(cap_bunker)] -= FLAG_POINTS;
+				
+				int point = RoundFloat((float(GetTime() - g_iCaptureStart)/(30.0*60.0*60.0)) * float(FLAG_POINTS));
+				g_iCapture_POINT[g_iFlagData[entity][data_group]] += point;
+				g_iCapture_POINT[rp_GetCaptureInt(cap_bunker)] -= point;
 				
 				GDM_RegisterFlag(g_iFlagData[entity][data_lastOwner]);
 				
@@ -310,6 +312,7 @@ void CAPTURE_Start() {
 	CPrintToChatAll("{lightblue} Le bunker peut maintenant être capturé! {default}");
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	
+	g_iCaptureStart = GetTime();
 	CAPTURE_UpdateLight();
 	
 	int wall = Entity_FindByName("job=201__-pvp_wall", "func_brush");
