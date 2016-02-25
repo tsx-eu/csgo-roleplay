@@ -641,7 +641,13 @@ public Action fwdDead(int victim, int attacker, float& respawn) {
 	}
 	if( victim != attacker ) {
 		int points = GDM_ELOKill(attacker, victim);
-		PrintHintText(attacker, "<b>Kill !</b>\n <font color='#33ff33'>+%d</span> points !", points);
+		if( rp_GetCaptureInt(cap_bunker) == rp_GetClientGroupID(attacker) ) {
+			g_iCapture_POINT[rp_GetClientGroupID(attacker)] += (points/2);
+			PrintHintText(attacker, "<b>Kill !</b>\n <font color='#33ff33'>+%d</span> points !", points+(points/2));
+		}
+		else {
+			PrintHintText(attacker, "<b>Kill !</b>\n <font color='#33ff33'>+%d</span> points !", points);
+		}
 		g_flClientLastScore[attacker] = GetGameTime();
 		rp_IncrementSuccess(attacker, success_list_killpvp2);
 	}
