@@ -35,7 +35,7 @@
 // -----------------------------------------------------------------------------------------------------------------
 enum flag_data { data_group, data_skin, data_red, data_green, data_blue, data_time, data_owner, data_lastOwner, flag_data_max };
 int g_iClientFlag[65];
-float g_fLastDrop[65];
+float g_fLastDrop[65], g_flClientLastScore[65];
 int g_iFlagData[MAX_ENTITIES+1][flag_data_max];
 // -----------------------------------------------------------------------------------------------------------------
 Handle g_hCapturable = INVALID_HANDLE;
@@ -267,6 +267,7 @@ public Action FlagThink(Handle timer, any data) {
 				GDM_RegisterFlag(g_iFlagData[entity][data_lastOwner]);
 				
 				PrintHintText(g_iFlagData[entity][data_lastOwner], "<b>Drapeau posé !</b>\n <font color='#33ff33'>+%d</span> points !", FLAG_POINTS);
+				g_flClientLastScore[g_iFlagData[entity][data_lastOwner]] = GetGameTime();
 			}
 			
 			Entity_GetAbsOrigin(entity, vecOrigin);
@@ -632,6 +633,7 @@ public Action fwdDead(int victim, int attacker, float& respawn) {
 	if( victim != attacker ) {
 		int points = GDM_ELOKill(attacker, victim);
 		PrintHintText(attacker, "<b>Kill !</b>\n <font color='#33ff33'>+%d</span> points !", points);
+		g_flClientLastScore[attacker] = GetGameTime();
 		rp_IncrementSuccess(attacker, success_list_killpvp2);
 	}
 	if( rp_GetClientGroupID(victim) == rp_GetCaptureInt(cap_bunker) )
@@ -672,7 +674,11 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 public Action fwdFrame(int client) {
 	
 	if( rp_GetClientGroupID(client) ) {
-		if( g_hGodTimer[client] != INVALID_HANDLE ) {
+		
+		if( g_flClientLastScore[client]+3.0 > GetGameTime() ) {
+			//
+		}
+		else if( g_hGodTimer[client] != INVALID_HANDLE ) {
 			PrintHintText(client, "Vous êtes en spawn-protection");
 		}
 		else if( rp_GetCaptureInt(cap_bunker) == rp_GetClientGroupID(client) ) {
