@@ -183,9 +183,9 @@ public Action Cmd_ItemFlag(int args) {
 	}
 	
 	char classname[64];
-	int count = 0;
-	
-	for(int i=1; i<MAX_ENTITIES; i++) {
+	int stackDrapeau[MAX_ENTITIES], stackCount;
+
+	for(int i=MaxClients; i<MAX_ENTITIES; i++) {
 		if( !IsValidEdict(i) )
 			continue;
 		if( !IsValidEntity(i) )
@@ -195,25 +195,27 @@ public Action Cmd_ItemFlag(int args) {
 		if( !StrEqual(classname, "ctf_flag") )
 			continue;
 		
-		
 		if( g_iFlagData[i][data_group] == gID ) {
-			count++;
-			
-			if( count >= 3 ) {
+			stackDrapeau[stackCount++] == i;
+		}
+	}
+	if( stackCount >= 2 ) {
+		bool can = false;
+		
+		for (int i = 0; i < stackCount; i++) {
+			PrintToChatAll("checking: %d", i);
+			if( IsValidClient(g_iFlagData[ stackDrapeau[i] ][data_owner]) )
+				continue;
 				
-				if( gID == rp_GetClientInt(client, i_Group) ) {
-					if( IsValidClient(g_iFlagData[i][data_owner]) ) {
-						g_iClientFlag[g_iFlagData[i][data_owner]] = 0;
-					}
-					
-					AcceptEntityInput(i, "KillHierarchy");
-				}
-				else {
-					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il y a déjà 3 drapeaux pour votre équipe sur le terrain.");
-					ITEM_CANCEL(client, item_id);
-					return;
-				}
-			}
+			AcceptEntityInput(i, "KillHierarchy");
+			can = true;
+			break;
+		}
+		
+		if( !can ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il y a déjà 2 drapeaux pour votre équipe sur le terrain.");
+			ITEM_CANCEL(client, item_id);
+			return;
 		}
 	}
 	
