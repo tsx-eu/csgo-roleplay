@@ -1199,9 +1199,12 @@ public Action Cmd_Jugement(int client, int args) {
 		}
 
 		if( StrEqual(g_szTribunal_DATA[client][tribunal_option], "forum") ) {
-
-			Format(szQuery, sizeof(szQuery), "UPDATE `ts-x`.`site_report` SET `jail`='%s', `amende`='%d', `juge`='%s' WHERE `id`='%s';",
-				g_szTribunal_DATA[client][tribunal_duration], amende, SteamID, g_szTribunal_DATA[client][tribunal_uniqID]);
+			
+			char reason[sizeof(szReason) * 2 + 1];
+			SQL_EscapeString(rp_GetDatabase(), szReason, reason, sizeof(reason));
+			
+			Format(szQuery, sizeof(szQuery), "UPDATE `ts-x`.`site_report` SET `jail`='%s', `amende`='%d', `juge`='%s', `reason`='%s' WHERE `id`='%s';",
+				g_szTribunal_DATA[client][tribunal_duration], amende, SteamID, reason, g_szTribunal_DATA[client][tribunal_uniqID]);
 			SQL_TQuery(DB, SQL_QueryCallBack, szQuery);
 		}
 		
