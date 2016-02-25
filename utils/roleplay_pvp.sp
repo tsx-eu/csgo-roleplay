@@ -29,7 +29,8 @@
 #define	ZONE_BUNKER		235
 #define ZONE_RESPAWN	231
 #define	FLAG_SPEED		250.0
-#define	FLAG_POINTS		100
+#define	FLAG_POINT_MAX	150
+#define FLAG_POINT_MIN	50
 #define ELO_FACTEUR_K	40.0
 
 // -----------------------------------------------------------------------------------------------------------------
@@ -40,7 +41,8 @@ int g_iFlagData[MAX_ENTITIES+1][flag_data_max];
 // -----------------------------------------------------------------------------------------------------------------
 Handle g_hCapturable = INVALID_HANDLE;
 Handle g_hGodTimer[65];
-int g_iCapture_POINT[MAX_GROUPS], g_iCaptureStart;
+int g_iCapture_POINT[MAX_GROUPS];
+float g_flCaptureStart;
 bool g_bIsInCaptureMode = false;
 int g_cBeam;
 StringMap g_hGlobalDamage, g_hGlobalSteamID;
@@ -263,14 +265,14 @@ public Action FlagThink(Handle timer, any data) {
 		if( rp_GetPlayerZone(entity) == ZONE_BUNKER ) {
 			
 			if( rp_GetCaptureInt(cap_bunker) != g_iFlagData[entity][data_group] ) {
+				int point = RoundFloat(FLAG_POINT_MAX - ((FLAG_POINT_MAX - FLAG_POINT_MIN) * (GetGameTime() - g_flCaptureStart) / (30.0 * 60.0)));
 				
-				int point = RoundFloat((float(GetTime() - g_iCaptureStart)/(30.0*60.0*60.0)) * float(FLAG_POINTS));
 				g_iCapture_POINT[g_iFlagData[entity][data_group]] += point;
 				g_iCapture_POINT[rp_GetCaptureInt(cap_bunker)] -= point;
 				
 				GDM_RegisterFlag(g_iFlagData[entity][data_lastOwner]);
 				
-				PrintHintText(g_iFlagData[entity][data_lastOwner], "<b>Drapeau posé !</b>\n <font color='#33ff33'>+%d</span> points !", FLAG_POINTS);
+				PrintHintText(g_iFlagData[entity][data_lastOwner], "<b>Drapeau posé !</b>\n <font color='#33ff33'>+%d</span> points !", point);
 				g_flClientLastScore[g_iFlagData[entity][data_lastOwner]] = GetGameTime();
 			}
 			
@@ -314,7 +316,7 @@ void CAPTURE_Start() {
 	CPrintToChatAll("{lightblue} Le bunker peut maintenant être capturé! {default}");
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	
-	g_iCaptureStart = GetTime();
+	g_flCaptureStart = GetGameTime();
 	CAPTURE_UpdateLight();
 	
 	int wall = Entity_FindByName("job=201__-pvp_wall", "func_brush");
@@ -537,7 +539,7 @@ public Action CAPTURE_Tick(Handle timer, any none) {
 		maxPoint = g_iCapture_POINT[i];
 	}
 
-	if( maxPoint-(FLAG_POINTS*4) >= g_iCapture_POINT[defense] && winner != defense ) {
+	if( maxPoint-500 >= g_iCapture_POINT[defense] && winner != defense ) {
 		rp_GetGroupData(winner, group_type_name, tmp, sizeof(tmp));
 		ExplodeString(tmp, " - ", strBuffer, sizeof(strBuffer), sizeof(strBuffer[]));
 		CPrintToChatAll("{lightblue} ================================== {default}");
