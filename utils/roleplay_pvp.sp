@@ -638,11 +638,16 @@ bool CanTP(float pos[3], int client) {
 }
 
 public Action fwdDead(int victim, int attacker, float& respawn) {
+	bool dropped = false;
 	if( g_iClientFlag[victim] > 0 ) {
 		CTF_DropFlag(victim, false);
+		dropped = true;
 	}
 	if( victim != attacker ) {
 		int points = GDM_ELOKill(attacker, victim);
+		if( dropped )
+			points += (points / 4);
+			
 		if( rp_GetCaptureInt(cap_bunker) == rp_GetClientGroupID(attacker) ) {
 			g_iCapture_POINT[rp_GetClientGroupID(attacker)] += (points/2);
 			PrintHintText(attacker, "<b>Kill !</b>\n <font color='#33ff33'>+%d</span> points !", points+(points/2));
