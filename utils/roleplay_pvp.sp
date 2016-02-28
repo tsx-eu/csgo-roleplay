@@ -205,7 +205,6 @@ public Action Cmd_ItemFlag(int args) {
 	}
 	if( stackCount >= 2 ) {
 		bool can = false;
-		PrintToServer("a");
 		for (int i = 0; i < stackCount; i++) {
 			if( IsValidClient(g_iFlagData[ stackDrapeau[i] ][data_owner]) )
 				continue;
