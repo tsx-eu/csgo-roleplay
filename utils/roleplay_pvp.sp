@@ -28,7 +28,7 @@
 #define	MAX_ENTITIES	2048
 #define	ZONE_BUNKER		235
 #define ZONE_RESPAWN	231
-#define	FLAG_SPEED		250.0
+#define	FLAG_SPEED		280.0
 #define	FLAG_POINT_MAX	150
 #define FLAG_POINT_MIN	50
 #define ELO_FACTEUR_K	40.0
@@ -119,6 +119,7 @@ public Action Cmd_SpawnTag(int args) {
 	
 	if( groupID == 0 ) {
 		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
 	}
 	rp_GetGroupData(groupID, group_type_tag, gang, sizeof(gang));
 	
@@ -152,6 +153,7 @@ public Action Cmd_SpawnTag(int args) {
 		ITEM_CANCEL(client, item_id);
 	}
 	CloseHandle(tr);
+	return Plugin_Handled;
 }
 public Action Cmd_ItemFlag(int args) {
 	#if defined DEBUG
@@ -198,18 +200,16 @@ public Action Cmd_ItemFlag(int args) {
 			continue;
 		
 		if( g_iFlagData[i][data_group] == gID ) {
-			stackDrapeau[stackCount++] == i;
+			stackDrapeau[stackCount++] = i;
 		}
 	}
 	if( stackCount >= 2 ) {
 		bool can = false;
-		
+		PrintToServer("a");
 		for (int i = 0; i < stackCount; i++) {
-			PrintToChatAll("checking: %d", i);
 			if( IsValidClient(g_iFlagData[ stackDrapeau[i] ][data_owner]) )
 				continue;
-				
-			AcceptEntityInput(i, "KillHierarchy");
+			AcceptEntityInput(stackDrapeau[i], "KillHierarchy");
 			can = true;
 			break;
 		}
@@ -878,12 +878,7 @@ void CTF_DropFlag(int client, int thrown) {
 	g_iFlagData[flag][data_group] = gID;
 	g_iFlagData[flag][data_lastOwner] = client;
 	
-	if( thrown ) {
-		
-		vecOrigin[0] = (vecOrigin[0] + (60.0 * Cosine( DegToRad( vecAngles[1] ) ) ) );
-		vecOrigin[1] = (vecOrigin[1] + (60.0 * Sine( DegToRad( vecAngles[1] ) ) ) );
-		vecOrigin[2] = (vecOrigin[2] - 20.0);
-		
+	if( thrown ) {		
 		Entity_GetAbsVelocity(client, vecPush);
 		
 		
