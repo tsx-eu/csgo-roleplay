@@ -173,6 +173,7 @@ public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 						rp_ClientSendToSpawn(client, false);
 						
 						CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N vous a libéré.", target);
+						PrintHintText(client,"{lightblue}[TSX-RP]{red} Vous avez été libéré de prison par %N . Vous avez donc été teleporté sur la map ! Ne vous faites pas prendre par les forces de l'ordre. ", target);
 						CPrintToChat(target, "{lightblue}[TSX-RP]{default} vous avez libéré %N et reçu une récompense de 1000$.", client);
 						
 						lastFree[client] = GetTime() + g_iDuration[client] + 1;
