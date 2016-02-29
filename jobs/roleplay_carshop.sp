@@ -27,6 +27,7 @@
 #define	ITEM_REPAIR			176
 #define	ITEM_NEONS			193
 #define	ITEM_PARTICULES		181
+#define	ITEM_KLAXON		191
 
 
 public Plugin myinfo = {
@@ -879,6 +880,7 @@ void DisplayGarageMenu(int client) {
 	AddMenuItem(menu, "colors", 	"Peindre la voiture");	
 	AddMenuItem(menu, "particles", 	"Ajouter des particules");
 	AddMenuItem(menu, "neons", 		"Ajouter un néon");
+	AddMenuItem(menu, "klaxon", 		"Changer de klaxon");
 	
 	AddMenuItem(menu, "repair", 	"Reparer la voiture");
 	AddMenuItem(menu, "battery", 	"Vendre la batterie");
@@ -948,6 +950,24 @@ void displayParticleMenu(int client) {
 	}
 	SetMenuExitButton(menu2, true);
 	DisplayMenu(menu2, client, MENU_TIME_DURATION);
+}
+void displayKlaxonMenu(int client, bool firstTime = false){
+	if(firstTime){
+		if( rp_GetClientItem(client, ITEM_KLAXON, true) <= 0 ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas de kit de klaxon en banque.");
+			return;
+		}
+		rp_ClientGiveItem(client, ITEM_KLAXON, -1, true);
+	}
+
+	char tmp[32];
+	Menu menu = new Menu(eventGarageMenu);
+	menu.SetTitle("Changer de klaxon");
+	for(int i=1; i<=6; i++){
+		Format(tmp, sizeof(tmp), "Klaxon %d", i);
+		menu.AddItem(tmp, tmp);
+	}
+	menu.Display(client, 60);
 }
 public int eventRadioMenu(Handle menu, MenuAction action, int client, int param) {
 	if( action == MenuAction_Select ) {
@@ -1044,6 +1064,10 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 			}
 			else if( StrEqual(arg1, "particles") ) {
 				displayParticleMenu(client);
+				return;
+			}
+			else if( StrEqual(arg1, "klaxon") ){
+				displayKlaxonMenu(client, true);
 				return;
 			}
 			
@@ -1145,6 +1169,16 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 					
 					rp_SetVehicleInt(target, car_particle, StringToInt(data[1])-1);
 					displayParticleMenu(client);
+				}
+				else if(StrContains(arg1, "Klaxon ") == 0 ) {
+					char data[2][8];
+					char tmp[255];
+					int sound = StringToInt(data[1]);
+					ExplodeString(arg1, " ", data, sizeof(data), sizeof(data[]));
+					rp_SetVehicleInt(target, car_klaxon, sound);
+					displayKlaxonMenu(client);
+					Format(tmp, sizeof(tmp), "*vehicles/v8/beep_%i.mp3", sound);
+					EmitSoundToClientAny(client, tmp, target, 6, SNDLEVEL_CAR, SND_NOFLAGS, SNDVOL_NORMAL);
 				}
 				else if( StrEqual(arg1, "to_bank") ) {
 					
