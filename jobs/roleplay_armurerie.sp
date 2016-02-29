@@ -326,11 +326,12 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 				else if(StrEqual(type, "sanandreas")){
 					int ammo = Weapon_GetPrimaryClip(wep_id);
 					if( ammo >= 150 ) {
-					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme a déjà un San Andreas, il vous reste %d balles dans votre chargeur.", ammo);
-					return;
+						CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme a déjà un San Andreas, il vous reste %d balles dans votre chargeur.", ammo);
+						return;
 					}
 					ammo += 1000; if( ammo > 5000 ) ammo = 5000;
 					Weapon_SetPrimaryClip(wep_id, ammo);
+					SDKHook(wep_id, SDKHook_Reload, OnWeaponReload);
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme à maintenant %i balles", ammo);
 					sellerjob = 31;
 				}
@@ -343,9 +344,24 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 	else if (p_oAction == MenuAction_End) {
 		CloseHandle(p_hItemMenu);
 	}
-
 }
 
+public Action OnWeaponReload(int wepid) {
+	static float cache[65];
+	
+	int ammo = Weapon_GetPrimaryClip(wepid);
+	if( ammo >= 150 ) {
+		int client = Weapon_GetOwner(wepid);
+		
+		if( cache[client] < GetGameTime() ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme a un San Andreas, il vous reste %d balles dans votre chargeur.", ammo);
+			cache[client] = GetGameTime() + 1.0;
+		}
+		
+		return Plugin_Handled;
+	}
+	return Plugin_Continue;
+}
 public int ModifyWeaponPVP(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2){
 	#if defined DEBUG
 	PrintToServer("ModifyWeaponPVP");
