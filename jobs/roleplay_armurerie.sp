@@ -324,22 +324,18 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 					sellerjob = 111;
 				}
 				else if(StrEqual(type, "sanandreas")){
-					static float cache[65];
 					
 					int ammo = Weapon_GetPrimaryClip(wep_id);
 					if( ammo >= 150 ) {
-						if(cache[client] < GetGameTime() ) {	
 							CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme a déjà un San Andreas, il vous reste %d balles dans votre chargeur.", ammo);
-							cache[client] = GetGameTime() + 1.0;
-						}
-					
-						return;
-					
+						return;			
 					}
 					ammo += 1000; if( ammo > 5000 ) ammo = 5000;
 					Weapon_SetPrimaryClip(wep_id, ammo);
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme à maintenant %i balles", ammo);
 					sellerjob = 31;
+					
+					SDKHook(wep_id, SDKHook_Reload, OnWeaponReload);
 				}
 				rp_SetJobCapital( sellerjob, rp_GetJobCapital(sellerjob)+price );
 				FakeClientCommand(client, "say /build");
