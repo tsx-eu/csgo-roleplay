@@ -406,7 +406,7 @@ public int eventArtisanMenu(Handle menu, MenuAction action, int client, int para
 						}
 					}
 				}
-				
+				duration = 1.0;
 				ServerCommand("sm_effect_panel %d %f \"Recyclage de %dx %s\"", client, duration, amount, options);
 				rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, duration);
 				return;
@@ -489,6 +489,10 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	
 	ArrayList magic;
 	int data[craft_type_max];
+	char tmp[64];
+	Format(tmp, sizeof(tmp), "%d", itemID);
+	if( !g_hReceipe.GetValue(tmp, magic) )
+		return Plugin_Stop;
 					
 	for (int j = 0; j < magic.Length; j++) { // Pour chaque items de la recette:
 		magic.GetArray(j, data);
@@ -508,9 +512,11 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	WritePackCell(dp, total);
 	WritePackCell(dp, amount-1);
 	
+	if( amount <= 0 )
+		return Plugin_Stop;
+	
 	Handle menu = CreateMenu(eventArtisanMenu);
 	SetMenuTitle(menu, "== Artisanat: Construction");
-	char tmp[64];
 	getLoadingBar(tmp, sizeof(tmp), (float(total)-float(amount)) / float(total) );
 	AddMenuItem(menu, tmp, tmp);
 	DisplayMenu(menu, client, 1);
