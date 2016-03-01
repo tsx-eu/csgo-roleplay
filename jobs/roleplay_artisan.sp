@@ -139,7 +139,7 @@ void displayArtisanMenu(int client) {
 	
 	for (int i = 0; i <= 100; i++) {
 		char tmp[43], tmp2[64];
-		getLoadingBar(tmp, sizeof(tmp), i / 100.0);
+		getLoadingBar2(tmp, sizeof(tmp), i / 100.0);
 		Format(tmp2, sizeof(tmp2)-1, "%s   = %d", tmp, i);
 		AddMenuItem(menu, tmp2, tmp2);
 	}
@@ -509,6 +509,23 @@ void getLoadingBar(char[] str, int length, float percent) {
 		else if( left > 0.5 )
 			Format(str, length, "%s░", str);
 		else if( left > 0.25 )
+			Format(str, length, "%s▒", str);
+	}
+}
+
+void getLoadingBar2(char[] str, int length, float percent) {
+	int full = RoundToFloor(percent * 100);
+	int left = full % 10;
+	full = (full - left) / 10;
+	for(int i=0; i<full; i++)
+		Format(str, length, "%s█", str);
+	
+	if(left > 0){
+		if(left > 7)
+			Format(str, length, "%s▓", str);
+		else if(left > 4)
+			Format(str, length, "%s░", str);
+		else if(left > 1)
 			Format(str, length, "%s▒", str);
 	}
 }
