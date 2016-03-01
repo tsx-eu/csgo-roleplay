@@ -368,7 +368,6 @@ public int eventArtisanMenu(Handle menu, MenuAction action, int client, int para
 	if( action == MenuAction_Select ) {
 		char options[64], buffer[4][16];
 		ArrayList magic;
-		int data[craft_type_max];
 		
 		GetMenuItem(menu, param2, options, sizeof(options));
 		ExplodeString(options, " ", buffer, sizeof(buffer), sizeof(buffer[]));
@@ -378,38 +377,14 @@ public int eventArtisanMenu(Handle menu, MenuAction action, int client, int para
 			if( StringToInt(buffer[3]) == 0 )
 				displayBuildMenu(client, StringToInt(buffer[1]), StringToInt(buffer[2]));
 			else if( g_hReceipe.GetValue(buffer[2], magic) ) {			
-				startBuilding(client, StringToInt(buffer[2]), StringToInt(buffer[3]), StringToInt(buffer[3]));
+				startBuilding(client, StringToInt(buffer[2]), StringToInt(buffer[3]), StringToInt(buffer[3]), 1);
 			}
 		}
 		else if( StrContains(options, "recycl", false) == 0 ) {
 			if( StringToInt(buffer[2]) == 0 )
 				displayRecyclingMenu(client, StringToInt(buffer[1]));
 			else if( g_hReceipe.GetValue(buffer[1], magic) ) {
-				
-				int itemID = StringToInt(buffer[1]);
-				int amount = StringToInt(buffer[2]);
-				if( amount > rp_GetClientItem(client, itemID) )
-					amount = rp_GetClientItem(client, itemID);
-				float duration = getDuration(itemID) * float(amount);
-				
-				rp_GetItemData(itemID, item_type_name, options, sizeof(options));
-				rp_ClientGiveItem(client, StringToInt(buffer[1]), -amount);
-				
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous commencer à recycler %dx %s. Cette opération va durer %.1f seconde%s.", amount, options, duration, duration>=2.0?"s":"");
-				
-				for (int i = 0; i < magic.Length; i++) {  // Pour chaque items de la recette:
-					magic.GetArray(i, data);
-					for (int j = 0; j < data[craft_amount]; j++) { // Pour chaque quantité nécessaire de la recette
-						for (int k = 0; k < amount; k++) { // On multiplie par la quantité
-							if( data[craft_rate] >= Math_GetRandomInt(0, 100) ) // De facon aléatoire
-								rp_ClientGiveItem(client, data[craft_raw]);
-						}
-					}
-				}
-				duration = 1.0;
-				ServerCommand("sm_effect_panel %d %f \"Recyclage de %dx %s\"", client, duration, amount, options);
-				rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, duration);
-				return;
+				startBuilding(client, StringToInt(buffer[1]), StringToInt(buffer[2]), StringToInt(buffer[2]), -1);
 			}
 		}
 		else if( StrContains(options, "learn", false) == 0 ) {
@@ -461,12 +436,15 @@ float getDuration(int itemID) {
 		magic.GetArray(i, data);
 		duration += 0.01 * data[craft_amount];
 	}
+	
 	return duration;
 }
-void startBuilding(int client, int itemID, int total, int amount) {
+void startBuilding(int client, int itemID, int total, int amount, int positive) {
 	
 	float duration = getDuration(itemID);
-
+	
+	MENU_ShowCraftin(client, 0.0, positive);
+	
 	if( amount > 0 && duration >= -0.0001 ) {
 		Handle dp;
 		CreateDataTimer(duration, stopBuilding, dp, TIMER_DATA_HNDL_CLOSE|TIMER_REPEAT);
@@ -474,6 +452,7 @@ void startBuilding(int client, int itemID, int total, int amount) {
 		WritePackCell(dp, itemID);
 		WritePackCell(dp, total);
 		WritePackCell(dp, amount);
+		WritePackCell(dp, positive);
 	}
 }
 public Action stopBuilding(Handle timer, Handle dp) {
@@ -482,6 +461,7 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	int itemID = ReadPackCell(dp);
 	int total = ReadPackCell(dp);
 	int amount = ReadPackCell(dp);
+	int positive = ReadPackCell(dp);
 	
 	if( !IsValidClient(client) ) {
 		return Plugin_Stop;
@@ -493,39 +473,59 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	Format(tmp, sizeof(tmp), "%d", itemID);
 	if( !g_hReceipe.GetValue(tmp, magic) )
 		return Plugin_Stop;
-					
-	for (int j = 0; j < magic.Length; j++) { // Pour chaque items de la recette:
-		magic.GetArray(j, data);
-		
-		if( data[craft_amount] > rp_GetClientItem(client,data[craft_raw]) )
+	
+	if( positive > 0 ) {
+		for (int j = 0; j < magic.Length; j++) { // Pour chaque items de la recette:
+			magic.GetArray(j, data);
+			
+			if( data[craft_amount] > rp_GetClientItem(client,data[craft_raw]) )
+				return Plugin_Stop;
+		}
+	}
+	else {
+		if( rp_GetClientItem(client, itemID) <= 0 )
 			return Plugin_Stop;
 	}
 	
-	rp_ClientGiveItem(client, itemID, 1);
+	rp_ClientGiveItem(client, itemID, positive);
 	for (int i = 0; i < magic.Length; i++) {  // Pour chaque items de la recette:
 		magic.GetArray(i, data);
-		rp_ClientGiveItem(client, data[craft_raw], -data[craft_amount]);
+		
+		if( positive )
+			rp_ClientGiveItem(client, data[craft_raw], -data[craft_amount]);
+		else
+			for (int j = 0; j < data[craft_amount]; j++) // Pour chaque quantité nécessaire de la recette
+				if( data[craft_rate] >= Math_GetRandomInt(0, 100) ) // De facon aléatoire
+					rp_ClientGiveItem(client, data[craft_raw]);
+		
 	}
 	ResetPack(dp);
 	WritePackCell(dp, client);
 	WritePackCell(dp, itemID);
 	WritePackCell(dp, total);
 	WritePackCell(dp, --amount);
+	WritePackCell(dp, positive);
+	
+	MENU_ShowCraftin(client, (float(total) - float(amount)) / float(total), positive);
 	
 	if( amount <= 0 )
 		return Plugin_Stop;
 	
-	Handle menu = CreateMenu(eventArtisanMenu);
-	SetMenuTitle(menu, "== Artisanat: Construction");
-	Format(tmp, sizeof(tmp), "");
-	getLoadingBar(tmp, sizeof(tmp), (float(total)-float(amount)) / float(total) );
-	AddMenuItem(menu, tmp, tmp);
-	DisplayMenu(menu, client, 1);
-	
 	return Plugin_Continue;
 }
-
-
+void MENU_ShowCraftin(int client, float percent, int positive) {
+	char tmp[64];
+	Handle menu = CreateMenu(eventArtisanMenu);
+	if( positive > 0 )
+		SetMenuTitle(menu, "== Artisanat: Construction");
+	else
+		SetMenuTitle(menu, "== Artisanat: Recyclage");
+	
+	
+	getLoadingBar(tmp, sizeof(tmp), percent );
+	AddMenuItem(menu, tmp, tmp);
+	DisplayMenu(menu, client, 1);
+}
 void getLoadingBar(char[] str, int length, float percent) {
 	int full = RoundToFloor(length * percent / GetCharBytes("█"));
 	float left = (length * percent / GetCharBytes("█")) - float(full);
