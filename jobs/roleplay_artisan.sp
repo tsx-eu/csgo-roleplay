@@ -516,16 +516,20 @@ void getLoadingBar(char[] str, int length, float percent) {
 void getLoadingBar2(char[] str, int length, float percent) {
 	int full = RoundToFloor(percent * 100);
 	int left = full % 10;
+	int factor = length / 20;
 	full = (full - left) / 10;
-	for(int i=0; i<full; i++)
-		Format(str, length, "%s█", str);
-	
-	if(left > 0){
-		if(left > 7)
-			Format(str, length, "%s▓", str);
-		else if(left > 4)
-			Format(str, length, "%s░", str);
-		else if(left > 1)
-			Format(str, length, "%s▒", str);
+	for(int j=0; j<factor; j++){
+		for(int i=0; i<full; i++)
+			Format(str, length, "%s█", str);
+	}
+	for(int j=0; j<factor; j++){
+		if(left > 0){
+			if(left > 7)
+				Format(str, length, "%s▓", str);
+			else if(left > 4)
+				Format(str, length, "%s░", str);
+			else if(left > 1)
+				Format(str, length, "%s▒", str);
+		}
 	}
 }
