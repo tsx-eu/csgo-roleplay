@@ -510,13 +510,14 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	WritePackCell(dp, client);
 	WritePackCell(dp, itemID);
 	WritePackCell(dp, total);
-	WritePackCell(dp, amount-1);
+	WritePackCell(dp, --amount);
 	
 	if( amount <= 0 )
 		return Plugin_Stop;
 	
 	Handle menu = CreateMenu(eventArtisanMenu);
 	SetMenuTitle(menu, "== Artisanat: Construction");
+	Format(tmp, sizeof(tmp), "");
 	getLoadingBar(tmp, sizeof(tmp), (float(total)-float(amount)) / float(total) );
 	AddMenuItem(menu, tmp, tmp);
 	DisplayMenu(menu, client, 1);
