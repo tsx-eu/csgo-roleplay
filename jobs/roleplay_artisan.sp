@@ -25,7 +25,7 @@ bool g_bCanCraft[65][MAX_ITEMS];
 
 //#define DEBUG
 
-// TODO: Trier les craft par job.
+int lstJOB[] =  { 11, 21, 31, 41, 51, 61, 71, 81, 111, 121, 131, 171, 191, 211, 221 };
 
 public Plugin myinfo = {
 	name = "Jobs: ARTISAN", author = "KoSSoLaX",
@@ -106,9 +106,17 @@ public void SQL_LoadCraftbook(Handle owner, Handle hQuery, const char[] error, a
 }
 public Action fwdUse(int client) {
 	if( rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == 31 ) {
-		if( rp_IsValidDoor(GetClientTarget(client)) )
-			return Plugin_Continue;
+		int target = GetClientTarget(client);
 		
+		if( IsValidEdict(target) && IsValidEntity(target) ) {
+			if( rp_IsValidDoor(target) )
+				return Plugin_Continue;
+			char classname[65];
+			GetEdictClassname(target, classname, sizeof(classname));
+			if( StrContains(classname, "rp_bank_") == 0 ) {
+				return Plugin_Continue;
+			}
+		}
 		displayArtisanMenu(client);
 		return Plugin_Handled;
 	}
@@ -131,7 +139,7 @@ void displayArtisanMenu(int client) {
 	
 	DisplayMenu(menu, client, 30);
 }
-void displayBuildMenu(int client, int itemID) {
+void displayBuildMenu(int client, int jobID, int itemID) {
 	if( rp_GetClientInt(client, i_ItemCount) == 0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez aucune matière première.");
 		return;
@@ -140,16 +148,31 @@ void displayBuildMenu(int client, int itemID) {
 	int clientItem[MAX_ITEMS], data[craft_type_max];
 	for(int i = 0; i < MAX_ITEMS; i++)
 		clientItem[i] = rp_GetClientItem(client, i);
-	char tmp[64], tmp2[64];
+	
+	char tmp[64], tmp2[64], prettyJob[2][64];
 	bool can;
 	ArrayList magic;
 	
 	Handle menu = CreateMenu(eventArtisanMenu);
-	if( itemID == 0 ) {
+	if( jobID == 0 ) {
+		SetMenuTitle(menu, "== Artisanat: Constuire");
+		AddMenuItem(menu, "build -1", "Tous les jobs");
+		
+		for (int i = 0; i < sizeof(lstJOB); i++) {
+			
+			rp_GetJobData(lstJOB[i], job_type_name, tmp, sizeof(tmp));
+			ExplodeString(tmp, " - ", prettyJob, sizeof(prettyJob), sizeof(prettyJob[]));
+			Format(tmp, sizeof(tmp), "build %d", lstJOB[i]);
+			AddMenuItem(menu, tmp, prettyJob[1]);
+		}
+	}
+	else if( itemID == 0 ) {
 		SetMenuTitle(menu, "== Artisanat: Constuire");
 		
 		for(int i = 0; i < MAX_ITEMS; i++) {
 			if( !g_bCanCraft[client][i] )
+				continue;
+			if( rp_GetItemInt(i, item_type_job_id) != jobID && jobID != -1 )
 				continue;
 			Format(tmp, sizeof(tmp), "%d", i);
 			if( !g_hReceipe.GetValue(tmp, magic) )
@@ -167,11 +190,15 @@ void displayBuildMenu(int client, int itemID) {
 			}
 			
 			rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2));
-			Format(tmp, sizeof(tmp), "build %d", i);
-			if( can )
-				AddMenuItem(menu, tmp, tmp2);
-			else
-				AddMenuItem(menu, tmp, tmp2, ITEMDRAW_DISABLED);
+			if( can ) {
+				Format(tmp, sizeof(tmp), "build %d %d", jobID, i);
+			}
+			else {
+				Format(tmp, sizeof(tmp), "book %d %d", jobID, i);
+				Format(tmp2, sizeof(tmp2), "%s - M.P. insuffisante", tmp2);
+			}
+			
+			AddMenuItem(menu, tmp, tmp2);
 		}
 	}
 	else {
@@ -196,7 +223,7 @@ void displayBuildMenu(int client, int itemID) {
 		}
 		
 		for (int i = 1; i <= min; i++) {
-			Format(tmp, sizeof(tmp), "build %d %d", itemID, i);
+			Format(tmp, sizeof(tmp), "build %d %d %d", jobID, itemID, i);
 			Format(tmp2, sizeof(tmp2), "Constuire %d (%.1fsec)", i, duration*i);
 			
 			AddMenuItem(menu, tmp, tmp2);
@@ -252,13 +279,13 @@ void displayRecyclingMenu(int client, int itemID) {
 
 	DisplayMenu(menu, client, 30);
 }
-void displayLearngMenu(char[] type, int client, int jobID) {
-	static int lstJOB[] =  { 11, 21, 31, 41, 51, 61, 71, 81, 111, 121, 131, 171, 191, 211, 221 };
+void displayLearngMenu(char[] type, int client, int jobID, int itemID) {
 	
 	char tmp[64], tmp2[64], prettyJob[2][64];
 	ArrayList magic;
 	Handle menu = CreateMenu(eventArtisanMenu);
 	int count = rp_GetClientInt(client, i_ArtisanPoints);
+	int data[craft_type_max];
 	bool can, skip = StrEqual(type, "learn") ? false : true;
 	if( !skip && count == 0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez aucun point d'apprentissage.");
@@ -279,9 +306,11 @@ void displayLearngMenu(char[] type, int client, int jobID) {
 			AddMenuItem(menu, tmp, prettyJob[1]);
 		}
 	}
-	else {
+	else if( itemID == 0 ) {
 		for(int i = 0; i < MAX_ITEMS; i++) {
 			if( g_bCanCraft[client][i]  && !skip )
+				continue;
+			if( !g_bCanCraft[client][i]  && skip )
 				continue;
 			if( rp_GetItemInt(i, item_type_job_id) != jobID )
 				continue;
@@ -301,28 +330,26 @@ void displayLearngMenu(char[] type, int client, int jobID) {
 			AddMenuItem(menu, tmp, tmp2, (can?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED));
 		}
 	}
-	DisplayMenu(menu, client, 30);
-}
-void displayBook(int client, int itemID) {
-	char tmp[64], tmp2[64];
-	ArrayList magic;
-	int data[craft_type_max];
-	
-	Format(tmp, sizeof(tmp), "%d", itemID);
-	if( !g_hReceipe.GetValue(tmp, magic) )
-		return;
+	else {
+		rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
+		SetMenuTitle(menu, "== Artisanat: Livre: %s", tmp);
 		
-	Handle menu = CreateMenu(eventArtisanMenu);
-	rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
-	SetMenuTitle(menu, "== Artisanat: Livre: %s", tmp);
-	
-	for (int j = 0; j < magic.Length; j++) { // Pour chaque items de la recette:
-		magic.GetArray(j, data);
+		Format(tmp, sizeof(tmp), "%d", itemID);
+		g_hReceipe.GetValue(tmp, magic);
 		
-		rp_GetItemData(data[craft_raw], item_type_name, tmp, sizeof(tmp));
-		Format(tmp2, sizeof(tmp2), "%dx%s (%d%%)", data[craft_amount], tmp, data[craft_rate]);
-		AddMenuItem(menu, tmp, tmp2, ITEMDRAW_DISABLED);
+		for (int j = 0; j < magic.Length; j++) { // Pour chaque items de la recette:
+			magic.GetArray(j, data);
+			
+			rp_GetItemData(data[craft_raw], item_type_name, tmp, sizeof(tmp));
+			Format(tmp2, sizeof(tmp2), "%dx%s (%d%%)", data[craft_amount], tmp, data[craft_rate]);
+			AddMenuItem(menu, tmp2, tmp2, ITEMDRAW_DISABLED);
+		}
+		if( !skip )  {
+			Format(tmp, sizeof(tmp), "%s %d %d 1", type, jobID, itemID);
+			AddMenuItem(menu, tmp, "Apprendre");
+		}
 	}
+	
 	DisplayMenu(menu, client, 30);
 }
 public int eventArtisanMenu(Handle menu, MenuAction action, int client, int param2) {
@@ -331,21 +358,21 @@ public int eventArtisanMenu(Handle menu, MenuAction action, int client, int para
 	#endif
 	
 	if( action == MenuAction_Select ) {
-		char options[64], buffer[3][16];
+		char options[64], buffer[4][16];
 		ArrayList magic;
 		int data[craft_type_max];
 		
 		GetMenuItem(menu, param2, options, sizeof(options));
 		ExplodeString(options, " ", buffer, sizeof(buffer), sizeof(buffer[]));
-		PrintToChat(client, "%s-->%s,%s,%s", options, buffer[0], buffer[1], buffer[2]);
+		PrintToChat(client, "%s-->%s,%s,%s,%s", options, buffer[0], buffer[1], buffer[2], buffer[3]);
 		
 		if( StrContains(options, "build", false) == 0 ) {
-			if( StringToInt(buffer[2]) == 0 )
-				displayBuildMenu(client, StringToInt(buffer[1]));
-			else if( g_hReceipe.GetValue(buffer[1], magic) ) {
+			if( StringToInt(buffer[3]) == 0 )
+				displayBuildMenu(client, StringToInt(buffer[1]), StringToInt(buffer[2]));
+			else if( g_hReceipe.GetValue(buffer[2], magic) ) {
 				
-				int itemID = StringToInt(buffer[1]);
-				int amount = StringToInt(buffer[2]);
+				int itemID = StringToInt(buffer[2]);
+				int amount = StringToInt(buffer[3]);
 				float duration = getDuration(itemID) * float(amount);
 				
 				rp_GetItemData(itemID, item_type_name, options, sizeof(options));
@@ -407,8 +434,8 @@ public int eventArtisanMenu(Handle menu, MenuAction action, int client, int para
 			}
 		}
 		else if( StrContains(options, "learn", false) == 0 ) {
-			if( StringToInt(buffer[2]) == 0 )
-				displayLearngMenu("learn", client, StringToInt(buffer[1]));
+			if( StringToInt(buffer[3]) == 0 )
+				displayLearngMenu("learn", client, StringToInt(buffer[1]), StringToInt(buffer[2]));
 			else {
 				int itemID = StringToInt(buffer[2]);
 				int count = rp_GetClientInt(client, i_ArtisanPoints);
@@ -425,10 +452,8 @@ public int eventArtisanMenu(Handle menu, MenuAction action, int client, int para
 			}
 		}
 		else if( StrContains(options, "book", false) == 0 ) {
-			if( StringToInt(buffer[2]) == 0 )
-				displayLearngMenu("book", client, StringToInt(buffer[1]));
-			else
-				displayBook(client, StringToInt(buffer[2]));
+			if( StringToInt(buffer[3]) == 0 )
+				displayLearngMenu("book", client, StringToInt(buffer[1]), StringToInt(buffer[2]));
 		}
 	}
 	else if( action == MenuAction_End ) {
@@ -441,6 +466,8 @@ public Action fwdFrozen(int client, float& speed, float& gravity) {
 	return Plugin_Stop;
 }
 float getDuration(int itemID) {
+	if( rp_GetItemInt(itemID, item_type_job_id) == 91 )
+		return -1.0;
 	char tmp[12];
 	int data[craft_type_max];
 	Format(tmp, sizeof(tmp), "%d", itemID);
