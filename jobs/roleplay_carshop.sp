@@ -27,7 +27,6 @@
 #define	ITEM_REPAIR			176
 #define	ITEM_NEONS			193
 #define	ITEM_PARTICULES		181
-#define	ITEM_KLAXON		191
 
 
 public Plugin myinfo = {
@@ -951,15 +950,7 @@ void displayParticleMenu(int client) {
 	SetMenuExitButton(menu2, true);
 	DisplayMenu(menu2, client, MENU_TIME_DURATION);
 }
-void displayKlaxonMenu(int client, bool firstTime = false){
-	if(firstTime){
-		if( rp_GetClientItem(client, ITEM_KLAXON, true) <= 0 ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas de kit de klaxon en banque.");
-			return;
-		}
-		rp_ClientGiveItem(client, ITEM_KLAXON, -1, true);
-	}
-
+void displayKlaxonMenu(int client){
 	char tmp[32];
 	Menu menu = new Menu(eventGarageMenu);
 	menu.SetTitle("Changer de klaxon");
@@ -1067,7 +1058,7 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 				return;
 			}
 			else if( StrEqual(arg1, "klaxon") ){
-				displayKlaxonMenu(client, true);
+				displayKlaxonMenu(client);
 				return;
 			}
 			
