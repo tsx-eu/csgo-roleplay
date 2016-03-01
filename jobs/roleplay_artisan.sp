@@ -137,6 +137,14 @@ void displayArtisanMenu(int client) {
 	AddMenuItem(menu, "stats", 	"Vos informations"); // Niveau, XP, fatigue, ... 
 	
 	
+	for (int i = 0; i <= 100; i++) {
+		char tmp[43], tmp2[64];
+		getLoadingBar(tmp, sizeof(tmp), i / 100.0);
+		Format(tmp2, sizeof(tmp2)-1, "%s   = %d", tmp, i);
+		AddMenuItem(menu, tmp2, tmp2);
+	}
+	
+	
 	DisplayMenu(menu, client, 30);
 }
 void displayBuildMenu(int client, int jobID, int itemID) {
@@ -483,4 +491,24 @@ float getDuration(int itemID) {
 		duration += 0.01 * data[craft_amount];
 	}
 	return duration;
+}
+
+void getLoadingBar(char[] str, int length, float percent) {
+	int full = RoundToFloor(length * percent / GetCharBytes("█"));
+	float left = (length * percent / GetCharBytes("█")) - float(full);
+	if( full > length )
+		full = length;
+	
+	for (int i = 0; i < full; i++)
+		Format(str, length, "%s█", str);
+	
+	
+	if( full < length ) {
+		if( left > 0.75 ) 
+			Format(str, length, "%s▓", str);
+		else if( left > 0.5 )
+			Format(str, length, "%s░", str);
+		else if( left > 0.25 )
+			Format(str, length, "%s▒", str);
+	}
 }
