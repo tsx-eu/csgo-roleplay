@@ -377,37 +377,8 @@ public int eventArtisanMenu(Handle menu, MenuAction action, int client, int para
 		if( StrContains(options, "build", false) == 0 ) {
 			if( StringToInt(buffer[3]) == 0 )
 				displayBuildMenu(client, StringToInt(buffer[1]), StringToInt(buffer[2]));
-			else if( g_hReceipe.GetValue(buffer[2], magic) ) {
-				
-				int itemID = StringToInt(buffer[2]);
-				int amount = StringToInt(buffer[3]);
-				float duration = getDuration(itemID) * float(amount);
-				
-				rp_GetItemData(itemID, item_type_name, options, sizeof(options));
-				
-				
-				int min = 999999999, delta;
-				
-				for (int j = 0; j < magic.Length; j++) { // Pour chaque items de la recette:
-					magic.GetArray(j, data);
-					
-					delta = rp_GetClientItem(client,data[craft_raw]) / data[craft_amount];
-					if( delta < min )
-						min = delta;
-				}
-				if( min < amount )
-					amount = min;
-				
-				rp_ClientGiveItem(client, StringToInt(buffer[1]), amount);
-				for (int i = 0; i < magic.Length; i++) {  // Pour chaque items de la recette:
-					magic.GetArray(i, data);
-					rp_ClientGiveItem(client, data[craft_raw], -(data[craft_amount]*amount));
-				}
-				
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous commencer à construire %dx %s. Cette opération va durer %.1f seconde%s.", amount, options, duration, duration>=2.0?"s":"");
-				ServerCommand("sm_effect_panel %d %f \"Création de %dx %s\"", client, duration, amount, options);
-				rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, duration);
-				
+			else if( g_hReceipe.GetValue(buffer[2], magic) ) {			
+				startBuilding(client, StringToInt(buffer[2]), StringToInt(buffer[3]), StringToInt(buffer[3]));
 			}
 		}
 		else if( StrContains(options, "recycl", false) == 0 ) {
@@ -492,6 +463,61 @@ float getDuration(int itemID) {
 	}
 	return duration;
 }
+void startBuilding(int client, int itemID, int total, int amount) {
+	
+	float duration = getDuration(itemID);
+
+	if( amount > 0 && duration >= -0.0001 ) {
+		Handle dp;
+		CreateDataTimer(duration, stopBuilding, dp, TIMER_DATA_HNDL_CLOSE|TIMER_REPEAT);
+		WritePackCell(dp, client);
+		WritePackCell(dp, itemID);
+		WritePackCell(dp, total);
+		WritePackCell(dp, amount);
+	}
+}
+public Action stopBuilding(Handle timer, Handle dp) {
+	ResetPack(dp);
+	int client = ReadPackCell(dp);
+	int itemID = ReadPackCell(dp);
+	int total = ReadPackCell(dp);
+	int amount = ReadPackCell(dp);
+	
+	if( !IsValidClient(client) ) {
+		return Plugin_Stop;
+	}
+	
+	ArrayList magic;
+	int data[craft_type_max];
+					
+	for (int j = 0; j < magic.Length; j++) { // Pour chaque items de la recette:
+		magic.GetArray(j, data);
+		
+		if( data[craft_amount] > rp_GetClientItem(client,data[craft_raw]) )
+			return Plugin_Stop;
+	}
+	
+	rp_ClientGiveItem(client, itemID, 1);
+	for (int i = 0; i < magic.Length; i++) {  // Pour chaque items de la recette:
+		magic.GetArray(i, data);
+		rp_ClientGiveItem(client, data[craft_raw], -data[craft_amount]);
+	}
+	ResetPack(dp);
+	WritePackCell(dp, client);
+	WritePackCell(dp, itemID);
+	WritePackCell(dp, total);
+	WritePackCell(dp, amount-1);
+	
+	Handle menu = CreateMenu(eventArtisanMenu);
+	SetMenuTitle(menu, "== Artisanat: Construction");
+	char tmp[64];
+	getLoadingBar(tmp, sizeof(tmp), (float(total)-float(amount)) / float(total) );
+	AddMenuItem(menu, tmp, tmp);
+	DisplayMenu(menu, client, 1);
+	
+	return Plugin_Continue;
+}
+
 
 void getLoadingBar(char[] str, int length, float percent) {
 	int full = RoundToFloor(length * percent / GetCharBytes("█"));
