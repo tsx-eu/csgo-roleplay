@@ -3031,7 +3031,7 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			rp_SetJobCapital(101, RoundFloat(float(rp_GetJobCapital(101)) + float(data[BM_Prix]) * 0.25));
 			
 			rp_SetJobCapital(rnd, rp_GetJobCapital(rnd) - data[BM_Prix]);
-			LogToGame("[TSX-RP] [RESELL] Le joueur %L à acheté %s au commissariat pour %d$", client, name, data[BM_Prix]);			
+			LogToGame("[TSX-RP] [RESELL] %L à vendu %s au commissariat a %d", client, name, client);			
 		}
 	}
 	else if (p_oAction == MenuAction_End) {
