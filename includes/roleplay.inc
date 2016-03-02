@@ -154,6 +154,7 @@ native int rp_Effect_ParticlePath(int entity, char[] effect, const float src[3],
 native void rp_Effect_Tazer(int client, int target);								/* Affiche un trait du tazer entre un joueur et une cible */
 native void rp_Effect_SpawnMoney(float origin[3], bool high = false);						/* Spawn des billets 20-50$. High = true -> 200-500$. Penser à retirer la thune d'un capital */
 native void rp_Effect_BeamBox(int client, int target = -1, float origin[3] = NULL_VECTOR, int red = 0, int green = 255, int blue = 0); /* Affiche un lazer tracant entre un joueur et une cible */
+native void rp_Effect_LoadingBar(char[] str, int length, float percent);
 // ----------------------------------------------------------------------------
 native int rp_Effect_Explode(float origin[3], float damage, float length, int entity=0, char[] weapon = "");	/* Inflige des dégats aux alentours */
 native void rp_Effect_Push(float origin[3], float radius, float speed, int ignore = -1);		/* Pousse toutes les entités aux alentours. Ou utiliser qql math compris dans le /push. Cette fonction est lourde... */

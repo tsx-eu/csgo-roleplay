@@ -49,6 +49,8 @@ public Action Cmd_Reload(int args) {
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	RegConsoleCmd("rp_givemepoint", CmdGivePoint);
+	RegConsoleCmd("rp_givemexp", CmdGiveXP);
+	
 	
 	SQL_TQuery(rp_GetDatabase(), SQL_LoadReceipe, "SELECT `itemid`, `raw`, `amount`, REPLACE(`extra_cmd`, 'rp_item_primal ', '') `rate` FROM `rp_csgo`.`rp_craft` C INNER JOIN `rp_items` I ON C.`raw`=I.`id` ORDER BY `itemid`, `raw`", 0, DBPrio_Low);
 	
@@ -57,7 +59,15 @@ public void OnPluginStart() {
 			OnClientPostAdminCheck(i);
 }
 public Action CmdGivePoint(int client, int args) {
-	rp_SetClientInt(client, i_ArtisanPoints, rp_GetClientInt(client, i_ArtisanPoints) + 1);
+	rp_SetClientInt(client, i_ArtisanPoints, 0);
+	rp_SetClientInt(client, i_ArtisanLevel, 1);
+	rp_SetClientInt(client, i_ArtisanXP, 0);
+	displayStatsMenu(client);
+	return Plugin_Handled;
+}
+public Action CmdGiveXP(int client, int args) {
+	ClientGiveXP(client, GetCmdArgInt(1));
+	displayStatsMenu(client);
 	return Plugin_Handled;
 }
 public void SQL_LoadReceipe(Handle owner, Handle hQuery, const char[] error, any client) {
@@ -104,6 +114,12 @@ public void SQL_LoadCraftbook(Handle owner, Handle hQuery, const char[] error, a
 		g_bCanCraft[client][SQL_FetchInt(hQuery, 0)] = true;
 	}
 }
+// ----------------------------------------------------------------------------
+public Action fwdFrozen(int client, float& speed, float& gravity) {
+	speed = 0.0;
+	gravity = 0.0; 
+	return Plugin_Stop;
+}
 public Action fwdUse(int client) {
 	if( rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == 31 ) {
 		int target = GetClientTarget(client);
@@ -122,6 +138,7 @@ public Action fwdUse(int client) {
 	}
 	return Plugin_Continue;
 }
+// ----------------------------------------------------------------------------
 void displayArtisanMenu(int client) {
 	#if defined DEBUG
 	PrintToServer("displayArtisanMenu");
@@ -135,15 +152,6 @@ void displayArtisanMenu(int client) {
 	AddMenuItem(menu, "learn", 	"Apprendre");
 	AddMenuItem(menu, "book", 	"Livre des recettes");
 	AddMenuItem(menu, "stats", 	"Vos informations"); // Niveau, XP, fatigue, ... 
-	
-	
-	for (int i = 0; i <= 100; i++) {
-		char tmp[43], tmp2[64];
-		getLoadingBar2(tmp, sizeof(tmp), i / 100.0);
-		Format(tmp2, sizeof(tmp2)-1, "%s   = %d", tmp, i);
-		AddMenuItem(menu, tmp2, tmp2);
-	}
-	
 	
 	DisplayMenu(menu, client, 30);
 }
@@ -360,6 +368,25 @@ void displayLearngMenu(char[] type, int client, int jobID, int itemID) {
 	
 	DisplayMenu(menu, client, 30);
 }
+void displayStatsMenu(int client) {
+	Handle menu = CreateMenu(eventArtisanMenu);
+	SetMenuTitle(menu, "== Artisanat: Votre profil");
+	
+	char tmp[128], tmp2[32];
+	Format(tmp, sizeof(tmp), "Niveau: %d", rp_GetClientInt(client, i_ArtisanLevel));
+	AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
+	
+	float pc = rp_GetClientInt(client, i_ArtisanXP) / float(getNextLevel(rp_GetClientInt(client, i_ArtisanLevel)));
+	rp_Effect_LoadingBar(tmp2, sizeof(tmp2),  pc );
+	Format(tmp, sizeof(tmp), "Expérience: %s %.1f%%", tmp2, pc*100.0 );
+	AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
+	
+	
+	Format(tmp, sizeof(tmp), "Points de compétance: %d", rp_GetClientInt(client, i_ArtisanPoints));
+	AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
+	
+	DisplayMenu(menu, client, 30);
+}
 public int eventArtisanMenu(Handle menu, MenuAction action, int client, int param2) {
 	#if defined DEBUG
 	PrintToServer("eventArtisanMenu");
@@ -376,16 +403,14 @@ public int eventArtisanMenu(Handle menu, MenuAction action, int client, int para
 		if( StrContains(options, "build", false) == 0 ) {
 			if( StringToInt(buffer[3]) == 0 )
 				displayBuildMenu(client, StringToInt(buffer[1]), StringToInt(buffer[2]));
-			else if( g_hReceipe.GetValue(buffer[2], magic) ) {			
+			else if( g_hReceipe.GetValue(buffer[2], magic) )		
 				startBuilding(client, StringToInt(buffer[2]), StringToInt(buffer[3]), StringToInt(buffer[3]), 1);
-			}
 		}
 		else if( StrContains(options, "recycl", false) == 0 ) {
 			if( StringToInt(buffer[2]) == 0 )
 				displayRecyclingMenu(client, StringToInt(buffer[1]));
-			else if( g_hReceipe.GetValue(buffer[1], magic) ) {
+			else if( g_hReceipe.GetValue(buffer[1], magic) )
 				startBuilding(client, StringToInt(buffer[1]), StringToInt(buffer[2]), StringToInt(buffer[2]), -1);
-			}
 		}
 		else if( StrContains(options, "learn", false) == 0 ) {
 			if( StringToInt(buffer[3]) == 0 )
@@ -409,36 +434,15 @@ public int eventArtisanMenu(Handle menu, MenuAction action, int client, int para
 			if( StringToInt(buffer[3]) == 0 )
 				displayLearngMenu("book", client, StringToInt(buffer[1]), StringToInt(buffer[2]));
 		}
+		else if( StrContains(options, "stats", false) == 0 ) {
+			displayStatsMenu(client);
+		}
 	}
 	else if( action == MenuAction_End ) {
 		CloseHandle(menu);
 	}
 }
-public Action fwdFrozen(int client, float& speed, float& gravity) {
-	speed = 0.0;
-	gravity = 0.0; 
-	return Plugin_Stop;
-}
-float getDuration(int itemID) {
-	if( rp_GetItemInt(itemID, item_type_job_id) == 91 )
-		return -1.0;
-	char tmp[12];
-	int data[craft_type_max];
-	Format(tmp, sizeof(tmp), "%d", itemID);
-	
-	ArrayList magic;
-	if( !g_hReceipe.GetValue(tmp, magic) )
-		return -1.0;
-	
-	
-	float duration = 0.0;
-	for (int i = 0; i < magic.Length; i++) {
-		magic.GetArray(i, data);
-		duration += 0.01 * data[craft_amount];
-	}
-	
-	return duration;
-}
+// ----------------------------------------------------------------------------
 void startBuilding(int client, int itemID, int total, int amount, int positive) {
 	
 	float duration = getDuration(itemID);
@@ -513,6 +517,7 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	
 	return Plugin_Continue;
 }
+// ----------------------------------------------------------------------------
 void MENU_ShowCraftin(int client, float percent, int positive) {
 	char tmp[64];
 	Handle menu = CreateMenu(eventArtisanMenu);
@@ -522,43 +527,46 @@ void MENU_ShowCraftin(int client, float percent, int positive) {
 		SetMenuTitle(menu, "== Artisanat: Recyclage");
 	
 	
-	getLoadingBar(tmp, sizeof(tmp), percent );
+	rp_Effect_LoadingBar(tmp, sizeof(tmp), percent );
 	AddMenuItem(menu, tmp, tmp);
 	DisplayMenu(menu, client, 1);
 }
-void getLoadingBar(char[] str, int length, float percent) {
-	int full = RoundToFloor(length * percent / GetCharBytes("█"));
-	float left = (length * percent / GetCharBytes("█")) - float(full);
-	if( full > length )
-		full = length;
+float getDuration(int itemID) {
+	if( rp_GetItemInt(itemID, item_type_job_id) == 91 )
+		return -1.0;
+	char tmp[12];
+	int data[craft_type_max];
+	Format(tmp, sizeof(tmp), "%d", itemID);
 	
-	for (int i = 0; i < full; i++)
-		Format(str, length, "%s█", str);
+	ArrayList magic;
+	if( !g_hReceipe.GetValue(tmp, magic) )
+		return -1.0;
 	
 	
-	if( full < length ) {
-		if( left > 0.75 ) 
-			Format(str, length, "%s▓", str);
-		else if( left > 0.5 )
-			Format(str, length, "%s░", str);
-		else if( left > 0.25 )
-			Format(str, length, "%s▒", str);
+	float duration = 0.0;
+	for (int i = 0; i < magic.Length; i++) {
+		magic.GetArray(i, data);
+		duration += 0.01 * data[craft_amount];
 	}
+	
+	return duration;
 }
-
-void getLoadingBar2(char[] str, int length, float percent) {
-	int full = RoundToFloor(percent * 100);
-	int left = full % 10;
-	full = (full - left) / 10;
-	for(int i=0; i<full; i++)
-		Format(str, length, "%s█", str);
+int getNextLevel(int level) {
+	return level * level * 750;
+}
+int ClientGiveXP(int client, int xp) {
+	int baseXP = rp_GetClientInt(client, i_ArtisanXP) + xp;
+	int baseLVL = rp_GetClientInt(client, i_ArtisanLevel);
+	int basePoint = rp_GetClientInt(client, i_ArtisanPoints);
 	
-	if(left > 0){
-		if(left > 7)
-			Format(str, length, "%s▓", str);
-		else if(left > 4)
-			Format(str, length, "%s░", str);
-		else if(left > 1)
-			Format(str, length, "%s▒", str);
+	while( baseXP >= getNextLevel(baseLVL) ) {
+		baseXP -= getNextLevel(baseLVL);
+		baseLVL++;
+		basePoint += Math_GetRandomInt(2, 3);
 	}
+	
+	rp_SetClientInt(client, i_ArtisanXP, baseXP);
+	rp_SetClientInt(client, i_ArtisanLevel, baseLVL);
+	rp_SetClientInt(client, i_ArtisanPoints, basePoint);
+	
 }
