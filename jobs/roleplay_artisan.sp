@@ -14,6 +14,7 @@
 #include <sdkhooks>
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
+#include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
 
 #define __LAST_REV__ 		"v:0.1.0"
 
@@ -24,6 +25,8 @@ StringMap g_hReceipe;
 bool g_bCanCraft[65][MAX_ITEMS];
 
 //#define DEBUG
+#define MODEL_TABLE1 	"models/props/de_boathouse/table_drafting01.mdl"
+#define MODEL_TABLE2	"models/props/de_boathouse/table_drafting02.mdl"
 
 int lstJOB[] =  { 11, 21, 31, 41, 51, 61, 71, 81, 111, 121, 131, 171, 191, 211, 221 };
 
@@ -48,9 +51,10 @@ public Action Cmd_Reload(int args) {
 }
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
-	RegConsoleCmd("rp_givemepoint", CmdGivePoint);
+	RegConsoleCmd("rp_resetpoint", CmdResetPoint);
 	RegConsoleCmd("rp_givemexp", CmdGiveXP);
 	
+	RegServerCmd("rp_item_crafttable",		Cmd_ItemCraftTable,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 	
 	SQL_TQuery(rp_GetDatabase(), SQL_LoadReceipe, "SELECT `itemid`, `raw`, `amount`, REPLACE(`extra_cmd`, 'rp_item_primal ', '') `rate` FROM `rp_csgo`.`rp_craft` C INNER JOIN `rp_items` I ON C.`raw`=I.`id` ORDER BY `itemid`, `raw`", 0, DBPrio_Low);
 	
@@ -58,7 +62,24 @@ public void OnPluginStart() {
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
 }
-public Action CmdGivePoint(int client, int args) {
+public void OnMapStart() {
+	PrecacheModel(MODEL_TABLE1);
+	PrecacheModel(MODEL_TABLE2);
+}
+public Action Cmd_ItemCraftTable(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemCraftTable");
+	#endif
+	int client = GetCmdArgInt(1);
+	int item_id = GetCmdArgInt(args);
+	
+	if( BuidlingTABLE(client) == 0 ) {
+		ITEM_CANCEL(client, item_id);
+	}
+	
+	return Plugin_Handled;
+}
+public Action CmdResetPoint(int client, int args) {
 	rp_SetClientInt(client, i_ArtisanPoints, 0);
 	rp_SetClientInt(client, i_ArtisanLevel, 1);
 	rp_SetClientInt(client, i_ArtisanXP, 0);
@@ -100,7 +121,9 @@ public void OnClientPostAdminCheck(int client) {
 	PrintToServer("OnClientPostAdminCheck");
 	#endif
 	
-	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);
+	rp_HookEvent(client, RP_OnPlayerUse, 	fwdUse);
+	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
+	
 	for(int i = 0; i < MAX_ITEMS; i++)
 		g_bCanCraft[client][i] = false;
 	
@@ -125,18 +148,31 @@ public Action fwdUse(int client) {
 		int target = GetClientTarget(client);
 		
 		if( IsValidEdict(target) && IsValidEntity(target) ) {
-			if( rp_IsValidDoor(target) )
-				return Plugin_Continue;
 			char classname[65];
 			GetEdictClassname(target, classname, sizeof(classname));
-			if( StrContains(classname, "rp_bank_") == 0 ) {
-				return Plugin_Continue;
+			if( StrContains(classname, "rp_table__") == 0 ) {
+				displayArtisanMenu(client);
+				return Plugin_Handled;
 			}
 		}
-		displayArtisanMenu(client);
-		return Plugin_Handled;
 	}
 	return Plugin_Continue;
+}
+public Action fwdOnPlayerBuild(int client, float& cooldown) {
+	if( rp_GetClientJobID(client) != 31 )
+		return Plugin_Continue;
+	
+	int ent = BuidlingTABLE(client);
+	
+	if( ent > 0 ) {
+		rp_SetClientStat(client, i_TotalBuild, rp_GetClientStat(client, i_TotalBuild)+1);
+		rp_ScheduleEntityInput(ent, 120.0, "Kill");
+		cooldown = 120.0;
+	}
+	else 
+		cooldown = 3.0;
+	
+	return Plugin_Stop;
 }
 // ----------------------------------------------------------------------------
 void displayArtisanMenu(int client) {
@@ -380,7 +416,6 @@ void displayStatsMenu(int client) {
 	
 	DisplayMenu(menu, client, 30);
 }
-
 public int eventArtisanMenu(Handle menu, MenuAction action, int client, int param2) {
 	#if defined DEBUG
 	PrintToServer("eventArtisanMenu");
@@ -589,4 +624,96 @@ void addStatsToMenu(int client, Handle menu) {
 	
 	Format(tmp, sizeof(tmp), "Points de compétance: %d", rp_GetClientInt(client, i_ArtisanPoints));
 	AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
+}
+// ----------------------------------------------------------------------------
+int BuidlingTABLE(int client) {
+	#if defined DEBUG
+	PrintToServer("BuidlingTABLE");
+	#endif
+	
+	if( !rp_IsBuildingAllowed(client) )
+		return 0;	
+	
+	char classname[64], tmp[64];
+	
+	Format(classname, sizeof(classname), "rp_table__%i", client);	
+	float vecOrigin[3];
+	GetClientAbsOrigin(client, vecOrigin);
+	int count;
+	for(int i=1; i<=2048; i++) {
+		if( !IsValidEdict(i) )
+			continue;
+		if( !IsValidEntity(i) )
+			continue;
+		
+		GetEdictClassname(i, tmp, sizeof(tmp));
+		
+		if( StrEqual(classname, tmp) ) {
+			count++;
+			if( count >= 1 ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà une table de placées.");
+				return 0;
+			}
+		}
+	}
+	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Construction en cours...");
+
+	EmitSoundToAllAny("player/ammo_pack_use.wav", client);
+	
+	int ent = CreateEntityByName("prop_physics_override");
+	count = Math_GetRandomInt(0, 1);
+	DispatchKeyValue(ent, "classname", classname);
+	if( count )
+		DispatchKeyValue(ent, "model", MODEL_TABLE1);
+	else
+		DispatchKeyValue(ent, "model", MODEL_TABLE2);
+	DispatchSpawn(ent);
+	ActivateEntity(ent);
+	
+	if( count )
+		DispatchKeyValue(ent, "model", MODEL_TABLE1);
+	else
+		DispatchKeyValue(ent, "model", MODEL_TABLE2);
+	
+	SetEntProp( ent, Prop_Data, "m_iHealth", 10000);
+	SetEntProp( ent, Prop_Data, "m_takedamage", 0);
+	
+	SetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity", client);
+	
+	float vecAngles[3]; GetClientEyeAngles(client, vecAngles); vecAngles[0] = vecAngles[2] = 0.0;
+	TeleportEntity(ent, vecOrigin, vecAngles, NULL_VECTOR);
+	
+	SetEntityRenderMode(ent, RENDER_NONE);
+	ServerCommand("sm_effect_fading \"%i\" \"3.0\" \"0\"", ent);
+	
+	SetEntityMoveType(client, MOVETYPE_NONE);
+	SetEntityMoveType(ent, MOVETYPE_NONE);
+	
+	CreateTimer(3.0, BuildingTABLE_post, ent);
+	rp_SetBuildingData(ent, BD_owner, client);
+	return ent;
+}
+public Action BuildingTABLE_post(Handle timer, any entity) {
+	#if defined DEBUG
+	PrintToServer("BuildingTABLE_post");
+	#endif
+	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
+	SetEntityMoveType(client, MOVETYPE_WALK);
+	
+	rp_Effect_BeamBox(client, entity, NULL_VECTOR, 255, 255, 0);
+	
+	SetEntProp(entity, Prop_Data, "m_takedamage", 2);
+	HookSingleEntityOutput(entity, "OnBreak", BuildingTABLE_break);
+	return Plugin_Handled;
+}
+public void BuildingTABLE_break(const char[] output, int caller, int activator, float delay) {
+	#if defined DEBUG
+	PrintToServer("BuildingTABLE_break");
+	#endif
+	
+	int owner = GetEntPropEnt(caller, Prop_Send, "m_hOwnerEntity");
+	if( IsValidClient(owner) ) {
+		CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre table de craft a été détruite.");
+	}
 }
