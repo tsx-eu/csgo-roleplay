@@ -208,10 +208,11 @@ void displayBuildMenu(int client, int jobID, int itemID) {
 			rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2));
 			if( can ) {
 				Format(tmp, sizeof(tmp), "build %d %d", jobID, i);
+				Format(tmp2, sizeof(tmp2), "[> %s <]", tmp2);
 			}
 			else {
 				Format(tmp, sizeof(tmp), "book %d %d", jobID, i);
-				Format(tmp2, sizeof(tmp2), "%s - M.P. insuffisante", tmp2);
+				Format(tmp2, sizeof(tmp2), "%s", tmp2);
 			}
 			
 			AddMenuItem(menu, tmp, tmp2);
@@ -238,10 +239,13 @@ void displayBuildMenu(int client, int jobID, int itemID) {
 				min = delta;
 		}
 		
+		Format(tmp, sizeof(tmp), "build %d %d %d", jobID, itemID, min);
+		Format(tmp2, sizeof(tmp2), "Tout Construire (%d) (%.1fsec)", min, duration*min + (min*GetTickInterval()));
+		AddMenuItem(menu, tmp, tmp2);
+			
 		for (int i = 1; i <= min; i++) {
 			Format(tmp, sizeof(tmp), "build %d %d %d", jobID, itemID, i);
-			Format(tmp2, sizeof(tmp2), "Constuire %d (%.1fsec)", i, duration*i);
-			
+			Format(tmp2, sizeof(tmp2), "Constuire %d (%.1fsec)", i, duration*i + (i*GetTickInterval()));
 			AddMenuItem(menu, tmp, tmp2);
 		}
 	}
@@ -280,13 +284,13 @@ void displayRecyclingMenu(int client, int itemID) {
 		
 		float duration = getDuration(itemID);
 		Format(tmp, sizeof(tmp), "recycle %d %d", itemID, rp_GetClientItem(client, itemID));
-		Format(tmp2, sizeof(tmp2), "Tout recycler (%.1fsec)", duration*rp_GetClientItem(client, itemID));
+		Format(tmp2, sizeof(tmp2), "Tout recycler (%d) (%.1fsec)", rp_GetClientItem(client, itemID), duration*rp_GetClientItem(client, itemID) + (rp_GetClientItem(client, itemID)*GetTickInterval()));
 		AddMenuItem(menu, tmp, tmp2);
 		
 		for(int i = 1; i <= rp_GetClientItem(client, itemID); i++) {
 			
 			Format(tmp, sizeof(tmp), "recycle %d %d", itemID, i);
-			Format(tmp2, sizeof(tmp2), "Recycler %d (%.1fsec)", i, duration*i);
+			Format(tmp2, sizeof(tmp2), "Recycler %d (%.1fsec)", i, duration*i + (i*GetTickInterval()));
 			
 			AddMenuItem(menu, tmp, tmp2);
 		}
@@ -372,21 +376,11 @@ void displayStatsMenu(int client) {
 	Handle menu = CreateMenu(eventArtisanMenu);
 	SetMenuTitle(menu, "== Artisanat: Votre profil");
 	
-	char tmp[128], tmp2[32];
-	Format(tmp, sizeof(tmp), "Niveau: %d", rp_GetClientInt(client, i_ArtisanLevel));
-	AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
-	
-	float pc = rp_GetClientInt(client, i_ArtisanXP) / float(getNextLevel(rp_GetClientInt(client, i_ArtisanLevel)));
-	rp_Effect_LoadingBar(tmp2, sizeof(tmp2),  pc );
-	Format(tmp, sizeof(tmp), "Expérience: %s %.1f%%", tmp2, pc*100.0 );
-	AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
-	
-	
-	Format(tmp, sizeof(tmp), "Points de compétance: %d", rp_GetClientInt(client, i_ArtisanPoints));
-	AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
+	addStatsToMenu(client, menu);
 	
 	DisplayMenu(menu, client, 30);
 }
+
 public int eventArtisanMenu(Handle menu, MenuAction action, int client, int param2) {
 	#if defined DEBUG
 	PrintToServer("eventArtisanMenu");
@@ -491,16 +485,23 @@ public Action stopBuilding(Handle timer, Handle dp) {
 			return Plugin_Stop;
 	}
 	
+	
 	rp_ClientGiveItem(client, itemID, positive);
 	for (int i = 0; i < magic.Length; i++) {  // Pour chaque items de la recette:
 		magic.GetArray(i, data);
 		
-		if( positive )
+		if( positive > 0 ) {
+			ClientGiveXP(client, rp_GetItemInt(data[craft_raw], item_type_prix));
 			rp_ClientGiveItem(client, data[craft_raw], -data[craft_amount]);
-		else
-			for (int j = 0; j < data[craft_amount]; j++) // Pour chaque quantité nécessaire de la recette
-				if( data[craft_rate] >= Math_GetRandomInt(0, 100) ) // De facon aléatoire
+		}
+		else {
+			for (int j = 0; j < data[craft_amount]; j++) { // Pour chaque quantité nécessaire de la recette
+				if( data[craft_rate] >= Math_GetRandomInt(0, 100) ) { // De facon aléatoire
+					ClientGiveXP(client, rp_GetItemInt(data[craft_raw], item_type_prix));
 					rp_ClientGiveItem(client, data[craft_raw]);
+				}
+			}
+		}
 		
 	}
 	ResetPack(dp);
@@ -529,6 +530,9 @@ void MENU_ShowCraftin(int client, float percent, int positive) {
 	
 	rp_Effect_LoadingBar(tmp, sizeof(tmp), percent );
 	AddMenuItem(menu, tmp, tmp);
+	
+	addStatsToMenu(client, menu);
+	
 	DisplayMenu(menu, client, 1);
 }
 float getDuration(int itemID) {
@@ -552,7 +556,7 @@ float getDuration(int itemID) {
 	return duration;
 }
 int getNextLevel(int level) {
-	return level * level * 750;
+	return RoundToFloor(Pow(float(level), 1.8) * 750);
 }
 int ClientGiveXP(int client, int xp) {
 	int baseXP = rp_GetClientInt(client, i_ArtisanXP) + xp;
@@ -562,11 +566,27 @@ int ClientGiveXP(int client, int xp) {
 	while( baseXP >= getNextLevel(baseLVL) ) {
 		baseXP -= getNextLevel(baseLVL);
 		baseLVL++;
-		basePoint += Math_GetRandomInt(2, 3);
+		basePoint += Math_GetRandomInt(1, 3);
 	}
 	
 	rp_SetClientInt(client, i_ArtisanXP, baseXP);
 	rp_SetClientInt(client, i_ArtisanLevel, baseLVL);
 	rp_SetClientInt(client, i_ArtisanPoints, basePoint);
 	
+}
+void addStatsToMenu(int client, Handle menu) {
+	char tmp[128], tmp2[32];
+	Format(tmp, sizeof(tmp), "Niveau: %d", rp_GetClientInt(client, i_ArtisanLevel));
+	AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
+	
+	float pc = rp_GetClientInt(client, i_ArtisanXP) / float(getNextLevel(rp_GetClientInt(client, i_ArtisanLevel)));
+	rp_Effect_LoadingBar(tmp2, sizeof(tmp2),  pc );
+	Format(tmp, sizeof(tmp), "Expérience: %s %.1f%%", tmp2, pc*100.0 );
+	AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
+	
+	Format(tmp, sizeof(tmp), "Expérience: %d/%d", rp_GetClientInt(client, i_ArtisanXP), getNextLevel(rp_GetClientInt(client, i_ArtisanLevel)));
+	AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
+	
+	Format(tmp, sizeof(tmp), "Points de compétance: %d", rp_GetClientInt(client, i_ArtisanPoints));
+	AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
 }
