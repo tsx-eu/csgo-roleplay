@@ -524,8 +524,9 @@ public Action stopBuilding(Handle timer, Handle dp) {
 			return Plugin_Stop;
 	}
 	
+	int level = rp_GetClientInt(client, i_ArtisanLevel);
 	float flFatigue = rp_GetClientFloat(client, fl_ArtisanFatigue);
-	float f = float(rp_GetItemInt(itemID, item_type_prix)) / 75000.0 / (float(rp_GetClientInt(client, i_ArtisanLevel))*0.75);
+	float f = float(rp_GetItemInt(itemID, item_type_prix)) / 75000.0 / (float(level)*0.75);
 	flFatigue += f;
 	if( failed )
 		flFatigue += f;
@@ -552,7 +553,7 @@ public Action stopBuilding(Handle timer, Handle dp) {
 			magic.GetArray(i, data);
 				
 			for (int j = 0; j < data[craft_amount]; j++) { // Pour chaque quantité nécessaire de la recette
-				if( data[craft_rate] >= Math_GetRandomInt(0, 100) ) { // De facon aléatoire
+				if( (data[craft_rate]+level) >= Math_GetRandomInt(0, 100) ) { // De facon aléatoire
 					ClientGiveXP(client, rp_GetItemInt(data[craft_raw], item_type_prix));
 					rp_ClientGiveItem(client, data[craft_raw]);
 				}
