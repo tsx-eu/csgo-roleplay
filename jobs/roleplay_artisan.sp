@@ -145,11 +145,9 @@ public Action fwdFrozen(int client, float& speed, float& gravity) {
 	return Plugin_Stop;
 }
 public Action fwdUse(int client) {
-	if( rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == 31 ) {
-		if( isNearTable(client) ) {
-			displayArtisanMenu(client);
-			return Plugin_Handled;
-		}
+	if( isNearTable(client) ) {
+		displayArtisanMenu(client);
+		return Plugin_Handled;
 	}
 	return Plugin_Continue;
 }
@@ -536,26 +534,32 @@ public Action stopBuilding(Handle timer, Handle dp) {
 		flFatigue = 1.0;
 	rp_SetClientFloat(client, fl_ArtisanFatigue, flFatigue);
 	
-	if( !failed ) {	
+	if( positive > 0 ) { // Craft
+		if( !failed )  // Si on échoue pas on give l'item
+			rp_ClientGiveItem(client, itemID, positive);
+		
+		for (int i = 0; i < magic.Length; i++) {  // Pour chaque items de la recette:
+			magic.GetArray(i, data);
+				
+			ClientGiveXP(client, rp_GetItemInt(data[craft_raw], item_type_prix));
+			rp_ClientGiveItem(client, data[craft_raw], -data[craft_amount]);		
+		}
+	}
+	else if( !failed ) { // Recyclage, si on le rate pas on prend l'item.
 		rp_ClientGiveItem(client, itemID, positive);
 		
 		for (int i = 0; i < magic.Length; i++) {  // Pour chaque items de la recette:
 			magic.GetArray(i, data);
 				
-			if( positive > 0 ) {
-				ClientGiveXP(client, rp_GetItemInt(data[craft_raw], item_type_prix));
-				rp_ClientGiveItem(client, data[craft_raw], -data[craft_amount]);
-			}
-			else {
-				for (int j = 0; j < data[craft_amount]; j++) { // Pour chaque quantité nécessaire de la recette
-					if( data[craft_rate] >= Math_GetRandomInt(0, 100) ) { // De facon aléatoire
-						ClientGiveXP(client, rp_GetItemInt(data[craft_raw], item_type_prix));
-						rp_ClientGiveItem(client, data[craft_raw]);
-					}
+			for (int j = 0; j < data[craft_amount]; j++) { // Pour chaque quantité nécessaire de la recette
+				if( data[craft_rate] >= Math_GetRandomInt(0, 100) ) { // De facon aléatoire
+					ClientGiveXP(client, rp_GetItemInt(data[craft_raw], item_type_prix));
+					rp_ClientGiveItem(client, data[craft_raw]);
 				}
-			}		
+			}	
 		}
 	}
+	
 	ResetPack(dp);
 	WritePackCell(dp, client);
 	WritePackCell(dp, itemID);
