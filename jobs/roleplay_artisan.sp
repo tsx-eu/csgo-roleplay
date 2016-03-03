@@ -101,7 +101,17 @@ public Action Cmd_ItemCraftBook(int args) {
 	
 	int type;
 	
-	if( StrEqual(arg, "xp") )
+	if( StrEqual(arg, "level") ) {
+		ClientGiveXP(client, 2500);
+		displayStatsMenu(client);
+		return Plugin_Handled;
+	}
+	else if( StrEqual(arg, "point") ) {
+		rp_SetClientInt(client, i_ArtisanPoints, rp_GetClientInt(client, i_ArtisanPoints) + Math_GetRandomInt(1, 5));
+		displayStatsMenu(client);
+		return Plugin_Handled;
+	}
+	else if( StrEqual(arg, "xp") )
 		type = book_xp;
 	else if( StrEqual(arg, "sleep") )
 		type = book_sleep;
@@ -119,6 +129,7 @@ public Action Cmd_ItemCraftBook(int args) {
 	else
 		g_flClientBook[client][type] = GetTickedTime() + (60.0 * 6.0);
 	
+	displayStatsMenu(client);
 	return Plugin_Handled;
 }
 public Action CmdResetPoint(int client, int args) {
