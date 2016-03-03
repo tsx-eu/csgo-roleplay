@@ -1005,6 +1005,7 @@ int GDM_ELOKill(int client, int target) {
 	cgID = rp_GetClientGroupID(client);
 	tgID = rp_GetClientGroupID(target);
 	
+	int tmp = cElo - attacker[gdm_elo];
 	g_iCapture_POINT[ tgID ] += tElo - victim[gdm_elo];
 	g_iCapture_POINT[ cgID ] += cElo - attacker[gdm_elo];
 	if( g_iCapture_POINT[ tgID ] < 0 ) {
@@ -1018,7 +1019,7 @@ int GDM_ELOKill(int client, int target) {
 	g_hGlobalDamage.SetArray(szSteamID, attacker, sizeof(attacker));
 	g_hGlobalDamage.SetArray(szSteamID2, victim, sizeof(victim));
 	
-	return cElo;
+	return tmp;
 }
 void GDM_Resume() {
 	StringMapSnapshot KeyList = g_hGlobalDamage.Snapshot();
