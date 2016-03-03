@@ -80,9 +80,10 @@ public Action Cmd_ItemCraftTable(int args) {
 	return Plugin_Handled;
 }
 public Action CmdResetPoint(int client, int args) {
-	rp_SetClientInt(client, i_ArtisanPoints, 0);
+	rp_SetClientInt(client, i_ArtisanPoints, 1);
 	rp_SetClientInt(client, i_ArtisanLevel, 1);
 	rp_SetClientInt(client, i_ArtisanXP, 0);
+	rp_SetClientFloat(client, fl_ArtisanFatigue, 0.0);
 	displayStatsMenu(client);
 	return Plugin_Handled;
 }
@@ -145,15 +146,9 @@ public Action fwdFrozen(int client, float& speed, float& gravity) {
 }
 public Action fwdUse(int client) {
 	if( rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == 31 ) {
-		int target = GetClientTarget(client);
-		
-		if( IsValidEdict(target) && IsValidEntity(target) ) {
-			char classname[65];
-			GetEdictClassname(target, classname, sizeof(classname));
-			if( StrContains(classname, "rp_table__") == 0 ) {
-				displayArtisanMenu(client);
-				return Plugin_Handled;
-			}
+		if( isNearTable(client) ) {
+			displayArtisanMenu(client);
+			return Plugin_Handled;
 		}
 	}
 	return Plugin_Continue;
@@ -166,7 +161,7 @@ public Action fwdOnPlayerBuild(int client, float& cooldown) {
 	
 	if( ent > 0 ) {
 		rp_SetClientStat(client, i_TotalBuild, rp_GetClientStat(client, i_TotalBuild)+1);
-		rp_ScheduleEntityInput(ent, 120.0, "Kill");
+		rp_ScheduleEntityInput(ent, 300.0, "Kill");
 		cooldown = 120.0;
 	}
 	else 
@@ -476,7 +471,7 @@ void startBuilding(int client, int itemID, int total, int amount, int positive) 
 	
 	float duration = getDuration(itemID);
 	
-	MENU_ShowCraftin(client, 0.0, positive);
+	MENU_ShowCraftin(client, total, amount, positive, 0);
 	
 	if( amount > 0 && duration >= -0.0001 ) {
 		Handle dp;
@@ -486,6 +481,7 @@ void startBuilding(int client, int itemID, int total, int amount, int positive) 
 		WritePackCell(dp, total);
 		WritePackCell(dp, amount);
 		WritePackCell(dp, positive);
+		WritePackCell(dp, 0);
 	}
 }
 public Action stopBuilding(Handle timer, Handle dp) {
@@ -495,9 +491,19 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	int total = ReadPackCell(dp);
 	int amount = ReadPackCell(dp);
 	int positive = ReadPackCell(dp);
+	int fatigue = ReadPackCell(dp);
+	bool failed = false;
 	
 	if( !IsValidClient(client) ) {
 		return Plugin_Stop;
+	}
+	if( !isNearTable(client) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes plus a coté d'une table de craft.");
+		return Plugin_Stop;
+	}
+	if( float(Math_GetRandomInt(5, 1000)) <= (rp_GetClientFloat(client, fl_ArtisanFatigue)*1000.0) ) {
+		fatigue++;
+		failed = true;
 	}
 	
 	ArrayList magic;
@@ -520,24 +526,35 @@ public Action stopBuilding(Handle timer, Handle dp) {
 			return Plugin_Stop;
 	}
 	
+	float flFatigue = rp_GetClientFloat(client, fl_ArtisanFatigue);
+	float f = float(rp_GetItemInt(itemID, item_type_prix)) / 75000.0 / (float(rp_GetClientInt(client, i_ArtisanLevel))*0.75);
+	flFatigue += f;
+	if( failed )
+		flFatigue += f;
 	
-	rp_ClientGiveItem(client, itemID, positive);
-	for (int i = 0; i < magic.Length; i++) {  // Pour chaque items de la recette:
-		magic.GetArray(i, data);
+	if( flFatigue > 1.0 )
+		flFatigue = 1.0;
+	rp_SetClientFloat(client, fl_ArtisanFatigue, flFatigue);
+	
+	if( !failed ) {	
+		rp_ClientGiveItem(client, itemID, positive);
 		
-		if( positive > 0 ) {
-			ClientGiveXP(client, rp_GetItemInt(data[craft_raw], item_type_prix));
-			rp_ClientGiveItem(client, data[craft_raw], -data[craft_amount]);
-		}
-		else {
-			for (int j = 0; j < data[craft_amount]; j++) { // Pour chaque quantité nécessaire de la recette
-				if( data[craft_rate] >= Math_GetRandomInt(0, 100) ) { // De facon aléatoire
-					ClientGiveXP(client, rp_GetItemInt(data[craft_raw], item_type_prix));
-					rp_ClientGiveItem(client, data[craft_raw]);
-				}
+		for (int i = 0; i < magic.Length; i++) {  // Pour chaque items de la recette:
+			magic.GetArray(i, data);
+				
+			if( positive > 0 ) {
+				ClientGiveXP(client, rp_GetItemInt(data[craft_raw], item_type_prix));
+				rp_ClientGiveItem(client, data[craft_raw], -data[craft_amount]);
 			}
+			else {
+				for (int j = 0; j < data[craft_amount]; j++) { // Pour chaque quantité nécessaire de la recette
+					if( data[craft_rate] >= Math_GetRandomInt(0, 100) ) { // De facon aléatoire
+						ClientGiveXP(client, rp_GetItemInt(data[craft_raw], item_type_prix));
+						rp_ClientGiveItem(client, data[craft_raw]);
+					}
+				}
+			}		
 		}
-		
 	}
 	ResetPack(dp);
 	WritePackCell(dp, client);
@@ -545,8 +562,9 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	WritePackCell(dp, total);
 	WritePackCell(dp, --amount);
 	WritePackCell(dp, positive);
+	WritePackCell(dp, fatigue);
 	
-	MENU_ShowCraftin(client, (float(total) - float(amount)) / float(total), positive);
+	MENU_ShowCraftin(client, total, amount, positive, fatigue);
 	
 	if( amount <= 0 )
 		return Plugin_Stop;
@@ -554,7 +572,7 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------
-void MENU_ShowCraftin(int client, float percent, int positive) {
+void MENU_ShowCraftin(int client, int total, int amount, int positive, int fatigue) {
 	char tmp[64];
 	Handle menu = CreateMenu(eventArtisanMenu);
 	if( positive > 0 )
@@ -562,9 +580,13 @@ void MENU_ShowCraftin(int client, float percent, int positive) {
 	else
 		SetMenuTitle(menu, "== Artisanat: Recyclage");
 	
+	float percent = (float(total) - float(amount)) / float(total);
 	
 	rp_Effect_LoadingBar(tmp, sizeof(tmp), percent );
-	AddMenuItem(menu, tmp, tmp);
+	AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
+	
+	Format(tmp, sizeof(tmp), "%d / %d réussi%s, %d échec%s", total-amount-fatigue, total, total-amount-fatigue>1?"s":"", fatigue, fatigue > 1 ? "s":"");
+	AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
 	
 	addStatsToMenu(client, menu);
 	
@@ -609,6 +631,16 @@ int ClientGiveXP(int client, int xp) {
 	rp_SetClientInt(client, i_ArtisanPoints, basePoint);
 	
 }
+bool isNearTable(int client) {
+	char classname[65];
+	int target = GetClientTarget(client);
+	if( IsValidEdict(target) && IsValidEntity(target) ) {
+		GetEdictClassname(target, classname, sizeof(classname));
+		if( StrContains(classname, "rp_table__") == 0 && rp_IsEntitiesNear(client, target, true) )
+			return true;
+	}
+	return false;
+}
 void addStatsToMenu(int client, Handle menu) {
 	char tmp[128], tmp2[32];
 	Format(tmp, sizeof(tmp), "Niveau: %d", rp_GetClientInt(client, i_ArtisanLevel));
@@ -619,7 +651,9 @@ void addStatsToMenu(int client, Handle menu) {
 	Format(tmp, sizeof(tmp), "Expérience: %s %.1f%%", tmp2, pc*100.0 );
 	AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
 	
-	Format(tmp, sizeof(tmp), "Expérience: %d/%d", rp_GetClientInt(client, i_ArtisanXP), getNextLevel(rp_GetClientInt(client, i_ArtisanLevel)));
+	tmp2[0] = 0; pc = rp_GetClientFloat(client, fl_ArtisanFatigue);
+	rp_Effect_LoadingBar(tmp2, sizeof(tmp2),  pc );
+	Format(tmp, sizeof(tmp), "Fatigue: %s %.1f%%", tmp2, pc*100.0 );
 	AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
 	
 	Format(tmp, sizeof(tmp), "Points de compétance: %d", rp_GetClientInt(client, i_ArtisanPoints));
