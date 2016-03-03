@@ -21,8 +21,25 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
+enum craft_type {
+	craft_raw,
+	craft_amount,
+	craft_rate,
+	craft_type_max
+}
+enum craft_book {
+	book_xp,
+	book_sleep,
+	book_focus,
+	book_speed,
+	book_steal,
+	book_luck,
+	book_max
+}
+
 StringMap g_hReceipe;
 bool g_bCanCraft[65][MAX_ITEMS];
+float g_flClientBook[65][book_max];
 
 //#define DEBUG
 #define MODEL_TABLE1 	"models/props/de_boathouse/table_drafting01.mdl"
@@ -35,13 +52,6 @@ public Plugin myinfo = {
 	description = "RolePlay - Jobs: Artisan",
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
-
-enum craft_type {
-	craft_raw,
-	craft_amount,
-	craft_rate,
-	craft_type_max
-}
 // ----------------------------------------------------------------------------
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -55,6 +65,8 @@ public void OnPluginStart() {
 	RegConsoleCmd("rp_givemexp", CmdGiveXP);
 	
 	RegServerCmd("rp_item_crafttable",		Cmd_ItemCraftTable,		"RP-ITEM", 	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_craftbook",		Cmd_ItemCraftBook,		"RP-ITEM", 	FCVAR_UNREGISTERED);
+	
 	
 	SQL_TQuery(rp_GetDatabase(), SQL_LoadReceipe, "SELECT `itemid`, `raw`, `amount`, REPLACE(`extra_cmd`, 'rp_item_primal ', '') `rate` FROM `rp_csgo`.`rp_craft` C INNER JOIN `rp_items` I ON C.`raw`=I.`id` ORDER BY `itemid`, `raw`", 0, DBPrio_Low);
 	
@@ -76,6 +88,36 @@ public Action Cmd_ItemCraftTable(int args) {
 	if( BuidlingTABLE(client) == 0 ) {
 		ITEM_CANCEL(client, item_id);
 	}
+	
+	return Plugin_Handled;
+}
+public Action Cmd_ItemCraftBook(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemCraftBook");
+	#endif
+	char arg[32];
+	GetCmdArg(1, arg, sizeof(arg));
+	int client = GetCmdArgInt(2);
+	
+	int type;
+	
+	if( StrEqual(arg, "xp") )
+		type = book_xp;
+	else if( StrEqual(arg, "sleep") )
+		type = book_sleep;
+	else if( StrEqual(arg, "focus") )
+		type = book_focus;
+	else if( StrEqual(arg, "speed") )
+		type = book_sleep;
+	else if( StrEqual(arg, "steal") )
+		type = book_steal;
+	else if( StrEqual(arg, "luck") )
+		type = book_luck;
+	
+	if( g_flClientBook[client][type] > GetTickedTime() )
+		g_flClientBook[client][type] += (60.0 * 6.0);
+	else
+		g_flClientBook[client][type] = GetTickedTime() + (60.0 * 6.0);
 	
 	return Plugin_Handled;
 }
@@ -125,6 +167,8 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse, 	fwdUse);
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
 	
+	for(int i = 0; i < view_as<int>(book_max); i++)
+		g_flClientBook[client][i] = 0.0;
 	for(int i = 0; i < MAX_ITEMS; i++)
 		g_bCanCraft[client][i] = false;
 	
@@ -166,6 +210,12 @@ public Action fwdOnPlayerBuild(int client, float& cooldown) {
 		cooldown = 3.0;
 	
 	return Plugin_Stop;
+}
+public Action RP_CanClientStealItem(int client, int target) {
+	if( isNearTable(target) && g_flClientBook[target][book_steal] > GetTickedTime() ) {
+		return Plugin_Stop;
+	}
+	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------
 void displayArtisanMenu(int client) {
@@ -258,7 +308,7 @@ void displayBuildMenu(int client, int jobID, int itemID) {
 			return;
 		
 		int min = 999999999, delta;
-		float duration = getDuration(itemID);
+		float duration = getDuration(client, itemID);
 		
 		for (int j = 0; j < magic.Length; j++) { // Pour chaque items de la recette:
 			magic.GetArray(j, data);
@@ -297,7 +347,7 @@ void displayRecyclingMenu(int client, int itemID) {
 		for(int i = 0; i < MAX_ITEMS; i++) {
 			if( rp_GetClientItem(client, i) <= 0 )
 				continue;
-			if( getDuration(i) <= -0.1 )
+			if( getDuration(client, i) <= -0.1 )
 				continue;
 			
 			rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2));
@@ -311,7 +361,7 @@ void displayRecyclingMenu(int client, int itemID) {
 		Format(tmp2, sizeof(tmp2), "== Artisanat: Recycler: %s", tmp2);
 		SetMenuTitle(menu, tmp2);
 		
-		float duration = getDuration(itemID);
+		float duration = getDuration(client, itemID);
 		Format(tmp, sizeof(tmp), "recycle %d %d", itemID, rp_GetClientItem(client, itemID));
 		Format(tmp2, sizeof(tmp2), "Tout recycler (%d) (%.1fsec)", rp_GetClientItem(client, itemID), duration*rp_GetClientItem(client, itemID) + (rp_GetClientItem(client, itemID)*GetTickInterval()));
 		AddMenuItem(menu, tmp, tmp2);
@@ -407,6 +457,34 @@ void displayStatsMenu(int client) {
 	
 	addStatsToMenu(client, menu);
 	
+	char tmp[64];
+	
+	if( g_flClientBook[client][book_xp] > GetTickedTime() ) {
+		Format(tmp, sizeof(tmp), "Bonus: +%50% d'expérience: %.1f minute(s).", (g_flClientBook[client][book_xp] - GetTickedTime()) / 60.0);
+		AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
+	}
+	if( g_flClientBook[client][book_sleep] > GetTickedTime() ) {
+		Format(tmp, sizeof(tmp), "Bonus: -%50% de fatigue: %.1f minute(s).", (g_flClientBook[client][book_sleep] - GetTickedTime()) / 60.0);
+		AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
+	}
+	if( g_flClientBook[client][book_focus] > GetTickedTime() ) {
+		Format(tmp, sizeof(tmp), "Bonus: +%50% de concentration: %.1f minute(s).", (g_flClientBook[client][book_focus] - GetTickedTime()) / 60.0);
+		AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
+	}
+	if( g_flClientBook[client][book_speed] > GetTickedTime() ) {
+		Format(tmp, sizeof(tmp), "Bonus: +%100% de vitesse: %.1f minute(s).", (g_flClientBook[client][book_speed] - GetTickedTime()) / 60.0);
+		AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
+	}
+	if( g_flClientBook[client][book_luck] > GetTickedTime() ) {
+		Format(tmp, sizeof(tmp), "Bonus: +%5% de chance: %.1f minute(s).", (g_flClientBook[client][book_luck] - GetTickedTime()) / 60.0);
+		AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
+	}
+	if( g_flClientBook[client][book_steal] > GetTickedTime() ) {
+		Format(tmp, sizeof(tmp), "Protection vol d'inventaire: %.1f minute(s).", (g_flClientBook[client][book_steal] - GetTickedTime()) / 60.0);
+		AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
+	}
+	
+	
 	DisplayMenu(menu, client, 30);
 }
 public int eventArtisanMenu(Handle menu, MenuAction action, int client, int param2) {
@@ -467,7 +545,9 @@ public int eventArtisanMenu(Handle menu, MenuAction action, int client, int para
 // ----------------------------------------------------------------------------
 void startBuilding(int client, int itemID, int total, int amount, int positive) {
 	
-	float duration = getDuration(itemID);
+	float duration = getDuration(client, itemID);
+	
+	ServerCommand("sm_effect_particles %d dust_embers %f facemask", client, duration);
 	
 	MENU_ShowCraftin(client, total, amount, positive, 0);
 	
@@ -500,17 +580,24 @@ public Action stopBuilding(Handle timer, Handle dp) {
 		return Plugin_Stop;
 	}
 	if( float(Math_GetRandomInt(5, 1000)) <= (rp_GetClientFloat(client, fl_ArtisanFatigue)*1000.0) ) {
+		
 		fatigue++;
 		failed = true;
+		
+		if( g_flClientBook[client][book_focus] > GetTickedTime() && Math_GetRandomInt(1, 4) == 4 ) {
+			fatigue--;
+			failed = false;
+		}
 	}
 	
 	ArrayList magic;
 	int data[craft_type_max];
 	char tmp[64];
 	Format(tmp, sizeof(tmp), "%d", itemID);
+	
 	if( !g_hReceipe.GetValue(tmp, magic) )
 		return Plugin_Stop;
-	
+		
 	if( positive > 0 ) {
 		for (int j = 0; j < magic.Length; j++) { // Pour chaque items de la recette:
 			magic.GetArray(j, data);
@@ -527,6 +614,9 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	int level = rp_GetClientInt(client, i_ArtisanLevel);
 	float flFatigue = rp_GetClientFloat(client, fl_ArtisanFatigue);
 	float f = float(rp_GetItemInt(itemID, item_type_prix)) / 75000.0 / (float(level)*0.75);
+	if( g_flClientBook[client][book_sleep] > GetTickedTime() )
+		f -= (f / 2.0);
+	
 	flFatigue += f;
 	if( failed )
 		flFatigue += f;
@@ -539,6 +629,9 @@ public Action stopBuilding(Handle timer, Handle dp) {
 		if( !failed )  // Si on échoue pas on give l'item
 			rp_ClientGiveItem(client, itemID, positive);
 		
+		if( g_flClientBook[client][book_luck] > GetTickedTime() && Math_GetRandomInt(0, 1000) < 50 )
+			rp_ClientGiveItem(client, itemID, positive);
+		
 		for (int i = 0; i < magic.Length; i++) {  // Pour chaque items de la recette:
 			magic.GetArray(i, data);
 				
@@ -548,12 +641,18 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	}
 	else if( !failed ) { // Recyclage, si on le rate pas on prend l'item.
 		rp_ClientGiveItem(client, itemID, positive);
+		if( g_flClientBook[client][book_luck] > GetTickedTime() && Math_GetRandomInt(0, 1000) < 50 )
+			rp_ClientGiveItem(client, itemID, -positive);
+		
+		int focus = 0;
+		if( g_flClientBook[client][book_focus] > GetTickedTime() )
+			focus += 25;
 		
 		for (int i = 0; i < magic.Length; i++) {  // Pour chaque items de la recette:
 			magic.GetArray(i, data);
 				
 			for (int j = 0; j < data[craft_amount]; j++) { // Pour chaque quantité nécessaire de la recette
-				if( (data[craft_rate]+level) >= Math_GetRandomInt(0, 100) ) { // De facon aléatoire
+				if( (data[craft_rate]+level+focus) >= Math_GetRandomInt(0, 100) ) { // De facon aléatoire
 					ClientGiveXP(client, rp_GetItemInt(data[craft_raw], item_type_prix));
 					rp_ClientGiveItem(client, data[craft_raw]);
 				}
@@ -573,6 +672,8 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	
 	if( amount <= 0 )
 		return Plugin_Stop;
+	
+	ServerCommand("sm_effect_particles %d dust_embers %f facemask", client, getDuration(client, itemID));
 	
 	return Plugin_Continue;
 }
@@ -597,7 +698,7 @@ void MENU_ShowCraftin(int client, int total, int amount, int positive, int fatig
 	
 	DisplayMenu(menu, client, 1);
 }
-float getDuration(int itemID) {
+float getDuration(int client, int itemID) {
 	if( rp_GetItemInt(itemID, item_type_job_id) == 91 )
 		return -1.0;
 	char tmp[12];
@@ -615,12 +716,18 @@ float getDuration(int itemID) {
 		duration += 0.01 * data[craft_amount];
 	}
 	
+	if( g_flClientBook[client][book_speed] > GetTickedTime() )
+		duration -= (duration / 2.0);
+	
 	return duration;
 }
 int getNextLevel(int level) {
 	return RoundToFloor(Pow(float(level), 1.8) * 750);
 }
 int ClientGiveXP(int client, int xp) {
+	if( g_flClientBook[client][book_xp] > GetTickedTime() )
+		xp += (xp / 2);
+	
 	int baseXP = rp_GetClientInt(client, i_ArtisanXP) + xp;
 	int baseLVL = rp_GetClientInt(client, i_ArtisanLevel);
 	int basePoint = rp_GetClientInt(client, i_ArtisanPoints);
