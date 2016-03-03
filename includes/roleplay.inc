@@ -426,6 +426,8 @@ enum float_user_data {
 	Float:fl_HallucinationTime,
 	Float:fl_RespawnTime,
 	
+	Float:fl_ArtisanFatigue,
+	
 	fl_udata_max
 };
 enum sz_user_data {
