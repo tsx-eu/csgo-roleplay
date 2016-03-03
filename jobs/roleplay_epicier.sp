@@ -566,6 +566,8 @@ public Action fwdTalkCrayon(int client, char[] szSayText, int length, bool local
 	rp_GetZoneData(rp_GetPlayerZone( client ), zone_type_name, tmp, sizeof(tmp));
 	ReplaceString(szSayText, length, "{zone}", tmp);
 	
+	IntToString( rp_GetServerInt(lotoCagnotte), tmp, sizeof(tmp));
+	ReplaceString(szSayText, length, "{cagnotte}", tmp);
 	
 	ReplaceString(szSayText, length, "[TSX-RP]", "");	
 	ReplaceString(szSayText, length, "{white}", "{default}");
