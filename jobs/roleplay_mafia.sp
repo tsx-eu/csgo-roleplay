@@ -40,6 +40,17 @@ public Plugin myinfo = {
 
 int g_cBeam, g_cGlow, g_cExplode;
 int g_iDoorDefine_ALARM[2049], g_iDoorDefine_LOCKER[2049];
+Handle g_hForward_RP_OnClientStealItem;
+bool doRP_CanClientStealItem(int client, int target) {
+	Action a;
+	Call_StartForward(g_hForward_RP_OnClientStealItem);
+	Call_PushCell(client);
+	Call_PushCellRef(target);
+	Call_Finish(a);
+	if( a == Plugin_Handled || a == Plugin_Stop )
+		return false;
+	return true;
+}
 // ----------------------------------------------------------------------------
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -54,6 +65,8 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_picklock2", 	Cmd_ItemPickLock,		"RP-ITEM",	FCVAR_UNREGISTERED);	
 	// Epicier
 	RegServerCmd("rp_item_doorDefine",	Cmd_ItemDoorDefine,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	
+	g_hForward_RP_OnClientStealItem = CreateGlobalForward("RP_CanClientStealItem", ET_Event, Param_Cell, Param_Cell);
 	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
@@ -102,7 +115,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	else
 		amount = Math_GetRandomInt(1, VOL_MAX);
 	
-	if( VOL_MAX > 0 && money <= 0 && rp_GetClientInt(client, i_Job) <= 93 && !rp_IsClientNew(target) ) {
+	if( VOL_MAX > 0 && money <= 0 && rp_GetClientInt(client, i_Job) <= 93 && !rp_IsClientNew(target) && doRP_CanClientStealItem(client, target) ) {
 		amount = 0;
 		
 		for(int i = 0; i < MAX_ITEMS; i++) {
