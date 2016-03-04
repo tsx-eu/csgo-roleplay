@@ -45,7 +45,7 @@ bool doRP_CanClientStealItem(int client, int target) {
 	Action a;
 	Call_StartForward(g_hForward_RP_OnClientStealItem);
 	Call_PushCell(client);
-	Call_PushCellRef(target);
+	Call_PushCell(target);
 	Call_Finish(a);
 	if( a == Plugin_Handled || a == Plugin_Stop )
 		return false;
