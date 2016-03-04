@@ -61,10 +61,7 @@ public Action Cmd_Reload(int args) {
 	return Plugin_Continue;
 }
 public void OnPluginStart() {
-	RegServerCmd("rp_quest_reload", Cmd_Reload);
-	RegConsoleCmd("rp_resetpoint", CmdResetPoint);
-	RegConsoleCmd("rp_givemexp", CmdGiveXP);
-	
+	RegServerCmd("rp_quest_reload", Cmd_Reload);	
 	RegServerCmd("rp_item_crafttable",		Cmd_ItemCraftTable,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_craftbook",		Cmd_ItemCraftBook,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 	
@@ -130,19 +127,6 @@ public Action Cmd_ItemCraftBook(int args) {
 	else
 		g_flClientBook[client][type] = GetTickedTime() + (60.0 * 6.0);
 	
-	displayStatsMenu(client);
-	return Plugin_Handled;
-}
-public Action CmdResetPoint(int client, int args) {
-	rp_SetClientInt(client, i_ArtisanPoints, 1);
-	rp_SetClientInt(client, i_ArtisanLevel, 1);
-	rp_SetClientInt(client, i_ArtisanXP, 0);
-	rp_SetClientFloat(client, fl_ArtisanFatigue, 0.0);
-	displayStatsMenu(client);
-	return Plugin_Handled;
-}
-public Action CmdGiveXP(int client, int args) {
-	ClientGiveXP(client, GetCmdArgInt(1));
 	displayStatsMenu(client);
 	return Plugin_Handled;
 }

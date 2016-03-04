@@ -46,6 +46,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_assurance",	Cmd_ItemAssurance,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_forward",		Cmd_ItemForward,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_noAction",	Cmd_ItemNoAction,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_primal",		Cmd_ItemForward,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_cheque",		Cmd_ItemCheque,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_packdebutant",Cmd_ItemPackDebutant, 	"RP-ITEM", 	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_permi",		Cmd_ItemPermi,			"RP-ITEM",	FCVAR_UNREGISTERED);
@@ -55,6 +56,7 @@ public void OnPluginStart() {
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
 }
+
 public void OnMapStart() {
 	PrecacheModel(MODEL_CASH, true);
 }
@@ -195,7 +197,7 @@ public Action Cmd_ItemNoAction(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemNoAction");
 	#endif
-	int client = GetCmdArgInt(1);
+	int client = GetCmdArgInt(args-1);
 	int item_id = GetCmdArgInt(args);
 	char name[64];
 	
@@ -378,7 +380,7 @@ public Action Cmd_ItemForward(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemForward");
 	#endif
-	int client = GetCmdArgInt(1);
+	int client = GetCmdArgInt(args-1);
 	int item_id = GetCmdArgInt(args);
 	char tmp[64];
 	int mnt = rp_GetClientItem(client, item_id);
