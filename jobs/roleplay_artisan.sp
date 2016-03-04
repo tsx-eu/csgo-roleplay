@@ -28,17 +28,18 @@ enum craft_type {
 	craft_type_max
 }
 enum craft_book {
-	book_xp,
-	book_sleep,
-	book_focus,
-	book_speed,
-	book_steal,
-	book_luck,
+	Float:book_xp,
+	Float:book_sleep,
+	Float:book_focus,
+	Float:book_speed,
+	Float:book_steal,
+	Float:book_luck,
 	book_max
 }
 
 StringMap g_hReceipe;
 bool g_bCanCraft[65][MAX_ITEMS];
+bool g_bInCraft[65];
 float g_flClientBook[65][book_max];
 
 //#define DEBUG
@@ -99,7 +100,7 @@ public Action Cmd_ItemCraftBook(int args) {
 	GetCmdArg(1, arg, sizeof(arg));
 	int client = GetCmdArgInt(2);
 	
-	int type;
+	craft_book type;
 	
 	if( StrEqual(arg, "level") ) {
 		ClientGiveXP(client, 2500);
@@ -182,6 +183,7 @@ public void OnClientPostAdminCheck(int client) {
 		g_flClientBook[client][i] = 0.0;
 	for(int i = 0; i < MAX_ITEMS; i++)
 		g_bCanCraft[client][i] = false;
+	g_bInCraft[client] = false;
 	
 	char szSteamID[65], query[1024];
 	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
@@ -200,7 +202,7 @@ public Action fwdFrozen(int client, float& speed, float& gravity) {
 	return Plugin_Stop;
 }
 public Action fwdUse(int client) {
-	if( isNearTable(client) ) {
+	if( isNearTable(client) && !g_bInCraft[client] ) {
 		displayArtisanMenu(client);
 		return Plugin_Handled;
 	}
@@ -471,23 +473,23 @@ void displayStatsMenu(int client) {
 	char tmp[64];
 	
 	if( g_flClientBook[client][book_xp] > GetTickedTime() ) {
-		Format(tmp, sizeof(tmp), "Bonus: +%50% d'expérience: %.1f minute(s).", (g_flClientBook[client][book_xp] - GetTickedTime()) / 60.0);
+		Format(tmp, sizeof(tmp), "Bonus: +50%% d'expérience: %.1f minute(s).", (g_flClientBook[client][book_xp] - GetTickedTime())/60.0);
 		AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
 	}
 	if( g_flClientBook[client][book_sleep] > GetTickedTime() ) {
-		Format(tmp, sizeof(tmp), "Bonus: -%50% de fatigue: %.1f minute(s).", (g_flClientBook[client][book_sleep] - GetTickedTime()) / 60.0);
+		Format(tmp, sizeof(tmp), "Bonus: -50%% de fatigue: %.1f minute(s).", (g_flClientBook[client][book_sleep] - GetTickedTime()) / 60.0);
 		AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
 	}
 	if( g_flClientBook[client][book_focus] > GetTickedTime() ) {
-		Format(tmp, sizeof(tmp), "Bonus: +%50% de concentration: %.1f minute(s).", (g_flClientBook[client][book_focus] - GetTickedTime()) / 60.0);
+		Format(tmp, sizeof(tmp), "Bonus: +50%% de concentration: %.1f minute(s).", (g_flClientBook[client][book_focus] - GetTickedTime()) / 60.0);
 		AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
 	}
 	if( g_flClientBook[client][book_speed] > GetTickedTime() ) {
-		Format(tmp, sizeof(tmp), "Bonus: +%100% de vitesse: %.1f minute(s).", (g_flClientBook[client][book_speed] - GetTickedTime()) / 60.0);
+		Format(tmp, sizeof(tmp), "Bonus: +100%% de vitesse: %.1f minute(s).", (g_flClientBook[client][book_speed] - GetTickedTime()) / 60.0);
 		AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
 	}
 	if( g_flClientBook[client][book_luck] > GetTickedTime() ) {
-		Format(tmp, sizeof(tmp), "Bonus: +%5% de chance: %.1f minute(s).", (g_flClientBook[client][book_luck] - GetTickedTime()) / 60.0);
+		Format(tmp, sizeof(tmp), "Bonus: +5%% de chance: %.1f minute(s).", (g_flClientBook[client][book_luck] - GetTickedTime()) / 60.0);
 		AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
 	}
 	if( g_flClientBook[client][book_steal] > GetTickedTime() ) {
@@ -509,7 +511,6 @@ public int eventArtisanMenu(Handle menu, MenuAction action, int client, int para
 		
 		GetMenuItem(menu, param2, options, sizeof(options));
 		ExplodeString(options, " ", buffer, sizeof(buffer), sizeof(buffer[]));
-		PrintToChat(client, "%s-->%s,%s,%s,%s", options, buffer[0], buffer[1], buffer[2], buffer[3]);
 		
 		if( StrContains(options, "build", false) == 0 ) {
 			if( StringToInt(buffer[3]) == 0 )
@@ -557,8 +558,8 @@ public int eventArtisanMenu(Handle menu, MenuAction action, int client, int para
 void startBuilding(int client, int itemID, int total, int amount, int positive) {
 	
 	float duration = getDuration(client, itemID);
-	
-	ServerCommand("sm_effect_particles %d dust_embers %f facemask", client, duration);
+	g_bInCraft[client] = true;
+//	ServerCommand("sm_effect_particles %d dust_embers %f facemask", client, duration);
 	
 	MENU_ShowCraftin(client, total, amount, positive, 0);
 	
@@ -588,6 +589,7 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	}
 	if( !isNearTable(client) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes plus a coté d'une table de craft.");
+		g_bInCraft[client] = false;
 		return Plugin_Stop;
 	}
 	if( float(Math_GetRandomInt(5, 1000)) <= (rp_GetClientFloat(client, fl_ArtisanFatigue)*1000.0) ) {
@@ -606,20 +608,26 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	char tmp[64];
 	Format(tmp, sizeof(tmp), "%d", itemID);
 	
-	if( !g_hReceipe.GetValue(tmp, magic) )
+	if( !g_hReceipe.GetValue(tmp, magic) ) {
+		g_bInCraft[client] = false;
 		return Plugin_Stop;
+	}
 		
 	if( positive > 0 ) {
 		for (int j = 0; j < magic.Length; j++) { // Pour chaque items de la recette:
 			magic.GetArray(j, data);
 			
-			if( data[craft_amount] > rp_GetClientItem(client,data[craft_raw]) )
+			if( data[craft_amount] > rp_GetClientItem(client,data[craft_raw]) ) {
+				g_bInCraft[client] = false;
 				return Plugin_Stop;
+			}
 		}
 	}
 	else {
-		if( rp_GetClientItem(client, itemID) <= 0 )
+		if( rp_GetClientItem(client, itemID) <= 0 ) {
+			g_bInCraft[client] = false;
 			return Plugin_Stop;
+		}
 	}
 	
 	int level = rp_GetClientInt(client, i_ArtisanLevel);
@@ -681,10 +689,11 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	
 	MENU_ShowCraftin(client, total, amount, positive, fatigue);
 	
-	if( amount <= 0 )
+	if( amount <= 0 ) {
+		g_bInCraft[client] = false;
 		return Plugin_Stop;
-	
-	ServerCommand("sm_effect_particles %d dust_embers %f facemask", client, getDuration(client, itemID));
+	}
+//	ServerCommand("sm_effect_particles %d dust_embers %f facemask", client, getDuration(client, itemID));
 	
 	return Plugin_Continue;
 }
