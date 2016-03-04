@@ -22,6 +22,9 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
+// TODO: tp au changement de att/def le spawnkill
+// TODO: bloquer à 10 drapeau (gdm_flag)
+
 //#define DEBUG
 #define MAX_GROUPS		150
 #define MAX_ZONES		310
@@ -366,8 +369,6 @@ void CAPTURE_Start() {
 			AcceptEntityInput(g_iClientFlag[i], "KillHierarchy");
 			g_iClientFlag[i] = 0;
 		}
-		
-		
 	}
 	
 	g_iCapture_POINT[rp_GetCaptureInt(cap_bunker)] += 1250;
@@ -511,8 +512,8 @@ void CAPTURE_Reward(int totalPoints) {
 		g_hGlobalDamage.GetArray(szSteamID, array, sizeof(array));
 		amount = RoundFloat( float(array[gdm_elo]) / 1500.0 * float(amount) );
 		
-		rp_ClientGiveItem(client, 309, amount + 3 + bonus, true);
-		rp_GetItemData(309, item_type_name, tmp, sizeof(tmp));
+		rp_ClientGiveItem(client, 215, amount + 3 + bonus, true);
+		rp_GetItemData(215, item_type_name, tmp, sizeof(tmp));
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu %d %s, en récompense de la capture.", amount+3+bonus, tmp);
 	}	
 }
@@ -530,7 +531,7 @@ public Action CAPTURE_Tick(Handle timer, any none) {
 	maxs[1] = rp_GetZoneFloat(ZONE_BUNKER, zone_type_max_y);
 	maxs[2] = rp_GetZoneFloat(ZONE_BUNKER, zone_type_max_z);
 	
-	for(int i=1; i<MAX_GROUPS; i++) {
+	for(int i=1; i<MAX_GROUPS; i+=10) {
 		if( maxPoint > g_iCapture_POINT[i] )
 			continue;
 
@@ -538,7 +539,7 @@ public Action CAPTURE_Tick(Handle timer, any none) {
 		maxPoint = g_iCapture_POINT[i];
 	}
 
-	if( maxPoint-500 >= g_iCapture_POINT[defense] && winner != defense ) {
+	if( maxPoint-250 >= g_iCapture_POINT[defense] && winner != defense ) {
 		rp_GetGroupData(winner, group_type_name, tmp, sizeof(tmp));
 		ExplodeString(tmp, " - ", strBuffer, sizeof(strBuffer), sizeof(strBuffer[]));
 		CPrintToChatAll("{lightblue} ================================== {default}");
@@ -676,7 +677,7 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 		else
 			Format(szHUD, size, "%s Attaque du Bunker\n", szHUD);
 			
-		for(int i=1; i<MAX_GROUPS; i++) {
+		for(int i=1; i<MAX_GROUPS; i+=10) {
 			if( g_iCapture_POINT[i] == 0 && gID != i )
 				continue;
 			
@@ -1104,6 +1105,11 @@ void Client_SetSpawnProtect(int client, bool status) {
 		g_hGodTimer[client] = INVALID_HANDLE; 
 		SetEntProp(client, Prop_Data, "m_takedamage", 2);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre spawn-protection a expirée.");
+		
+		if( rp_GetCaptureInt(cap_bunker) == rp_GetClientGroupID(client) )
+			rp_ClientColorize(client, { 64, 64, 255, 255 } );
+		else
+			rp_ClientColorize(client, { 255, 64, 64, 255 } );
 	}
 }
 public Action fwdGodThink(int client) {
