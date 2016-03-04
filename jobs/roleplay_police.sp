@@ -3048,12 +3048,12 @@ void explainJail(int client, int jailReason, int cop) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il est possible aussi qu'un haut gradé de la police vous est fait plusieurs sommations vous demandant d'arrêter vos bétises.");
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Meurtre") == 0 ) {
-		if( IsValidClient(rp_GetClientInt(client, i_LastKilled)) )
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez tué %N en présence du policier %N. Que ce soit légitime défense, ou non un meurtre reste illégal.", rp_GetClientInt(client, i_LastKilled), cop);
+		if( IsValidClient(rp_GetClientInt(client, i_LastKilled_Reverse)) )
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez tué {red}%N{default} en présence du policier %N. Que ce soit légitime défense, ou non {red}un meurtre reste illégal{default}.", rp_GetClientInt(client, i_LastKilled_Reverse), cop);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Agression ") == 0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez agressé un autre citoyen en présence du policier %N. Que ce soit légitime défense ou non; que vous avez fait des dégâts ou non: une agression reste une agression.", cop); 
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Sachez que cette peine vous libère automatiquement si aucune agression n'a été détectée dans les 30 dernières secondes");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Sachez que {red}cette peine vous libère automatiquement si aucune agression n'a été détectée{default} dans les 30 dernières secondes");
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Intrusion ") == 0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas entrer dans certains endroits sans autorisation.");
