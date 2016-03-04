@@ -406,8 +406,8 @@ void displayLearngMenu(char[] type, int client, int jobID, int itemID) {
 		for(int i = 0; i < MAX_ITEMS; i++) {
 			if( g_bCanCraft[client][i]  && !skip )
 				continue;
-			if( !g_bCanCraft[client][i]  && skip )
-				continue;
+//			if( !g_bCanCraft[client][i]  && skip )
+//				continue;
 			if( rp_GetItemInt(i, item_type_job_id) != jobID )
 				continue;
 			Format(tmp, sizeof(tmp), "%d", i);
@@ -772,7 +772,7 @@ void addStatsToMenu(int client, Handle menu) {
 	Format(tmp, sizeof(tmp), "Fatigue: %s %.1f%%", tmp2, pc*100.0 );
 	AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
 	
-	Format(tmp, sizeof(tmp), "Points de compétance: %d", rp_GetClientInt(client, i_ArtisanPoints));
+	Format(tmp, sizeof(tmp), "Points de compétence: %d", rp_GetClientInt(client, i_ArtisanPoints));
 	AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
 }
 // ----------------------------------------------------------------------------
