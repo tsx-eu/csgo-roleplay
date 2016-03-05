@@ -434,7 +434,7 @@ public Action Cmd_Vis(int client) {
 		ACCESS_DENIED(client);
 	}
 	if (rp_IsInPVP(client) & GetClientTeam(client) != CS_TEAM_CT) { // Pas de vis si t'es en terro PVP
-		ACCESS_DENIED(client)
+		ACCESS_DENIED(client);
 	}
 	
 	if( !rp_GetClientBool(client, b_Invisible)) {
