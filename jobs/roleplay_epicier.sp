@@ -75,6 +75,21 @@ public Action fwdUse(int client) {
 	if( StrEqual(tmp, "metro") ) {
 		DisplayMetroMenu(client);
 	}
+	
+	int app = rp_GetPlayerZoneAppart(client);
+	if( app == 50 ) {
+		if( rp_GetClientKeyAppartement(client, app) ) {
+			float min[3] = { -1752.0, -9212.0, -1819.0 };
+			float max[3] =  { -1522.0, -8982.0, -1679.0 };
+			float origin[3];
+			GetClientAbsOrigin(client, origin);
+			if( origin[0] > min[0] && origin[0] < max[0] &&
+				origin[1] > min[1] && origin[1] < max[1] &&
+				origin[2] > min[2] && origin[2] < max[2] ) {
+				DisplayMetroMenu(client);
+			}
+		}
+	}
 }
 
 void DisplayMetroMenu(int client) {
