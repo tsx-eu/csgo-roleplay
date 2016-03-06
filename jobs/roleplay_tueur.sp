@@ -70,7 +70,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_camera",		Cmd_ItemCamera,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_cryptage",	Cmd_ItemCryptage,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	
-	g_vConfigTueur = CreateConVar("rp_config_kidnapping", "228,229,230,231,239,240-241");
+	g_vConfigTueur = CreateConVar("rp_config_kidnapping", "171,172,173,174,182,183-184");
 	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
@@ -505,6 +505,7 @@ public int AddCompetanceToAssassin(Handle menu, MenuAction action, int client, i
 			g_iKillerPoint[client][competance_invis] = 1;
 			SetEntPropFloat(client, Prop_Send, "m_fadeMinDist", 0.0);
 			SetEntPropFloat(client, Prop_Send, "m_fadeMaxDist", 300.0);
+			SDKHook(client, SDKHook_PostThinkPost, OnPostThinkPost);
 			
 		}
 		else if( StrEqual(options, "vie", false) ) {
@@ -524,6 +525,9 @@ public int AddCompetanceToAssassin(Handle menu, MenuAction action, int client, i
 		CloseHandle(menu);
 	}
 }
+public void OnPostThinkPost(int client) {
+	SetEntProp(client, Prop_Send, "m_iAddonBits", 0);
+}
 // ----------------------------------------------------------------------------
 void RestoreAssassinNormal(int client) {
 	#if defined DEBUG
@@ -541,6 +545,7 @@ void RestoreAssassinNormal(int client) {
 	if( g_iKillerPoint[client][competance_invis] ) {
 		SetEntPropFloat(client, Prop_Send, "m_fadeMinDist", 0.0);
 		SetEntPropFloat(client, Prop_Send, "m_fadeMaxDist", -1.0);
+		SDKUnhook(client, SDKHook_PostThinkPost, OnPostThinkPost);
 	}
 	if( g_iKillerPoint[client][competance_usp] || g_iKillerPoint[client][competance_awp] || g_iKillerPoint[client][competance_pompe] ) {
 		
@@ -703,11 +708,11 @@ public Action fwdZoneChange(int client, int newZone, int oldZone) {
 	int oldType = rp_GetZoneInt(oldZone, zone_type_type);
 	
 	if( oldType == 41 && newType != 41 ) {
-		float vecDest[3] =  { -4150.0, -2572.0, -2007.9 };
+		float vecDest[3] =  { -3876.0, -2550.7, -2007.9 };
 		float vecOrigin[3];
 		GetClientAbsOrigin(client, vecOrigin);
 		
-		//if( GetVectorDistance(vecDest, vecOrigin) < 128.0 ) {
+		if( GetVectorDistance(vecDest, vecOrigin) < 128.0 ) {
 			int target = rp_GetClientInt(client, i_KidnappedBy);
 			clearKidnapping(client);
 			
@@ -716,13 +721,13 @@ public Action fwdZoneChange(int client, int newZone, int oldZone) {
 			
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez pris la fuite, vous êtes libre !");
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N s'est échappé.", client);
-		//}
-		/*else {
-			TeleportEntity(client,  view_as<float>({-5879.0, -2815.0, -1950.0}), NULL_VECTOR, NULL_VECTOR);
+		}
+		else {
+			TeleportEntity(client,  view_as<float>({-5553.9, -2838.9, -1959.9}), NULL_VECTOR, NULL_VECTOR);
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Une tentative de triche a été détectée.");
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Etes-vous sorti correctement, sans triche, sans téléportation ?");
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Si c'est le cas, contactez KoSSoLaX.");			
-		}*/
+		}
 	}
 }
 public Action fwdDead(int client, int attacker, float& respawn) {
@@ -791,7 +796,6 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 			
 			GivePlayerItem(client, "weapon_deagle");
 			
-			// TODO: Utiliser une CVAR ? 
 			char door[128], doors[12][12];
 			GetConVarString(g_vConfigTueur, door, sizeof(door));
 			int amount = ExplodeString(door, ",", doors, sizeof(doors), sizeof(doors[]) );
