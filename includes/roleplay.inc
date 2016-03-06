@@ -554,9 +554,8 @@ enum rp_item_type {
 	item_type_prix,
 	item_type_auto,
 	item_type_dead,
-	
 	item_type_ordered_id,
-	
+	item_type_taxes,
 	item_type_max
 };
 enum rp_job_type {
