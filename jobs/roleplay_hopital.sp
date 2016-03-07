@@ -393,7 +393,7 @@ public Action Cmd_ItemCureDesintox(int args) { //Permet de devenir sobre si on e
 
 	if( rp_GetClientFloat(client, fl_Alcool) ) { //Si le taux d'alcool n'est pas nul
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes maintenant sobre.");
-		rp_SetClientFloat(client, fl_Alcool, 0.0);
+		rp_SetClientFloat(client, fl_Alcool, 0.0001);
 	}
 	else {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes pas saoul.");
