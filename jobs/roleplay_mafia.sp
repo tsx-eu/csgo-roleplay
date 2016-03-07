@@ -174,6 +174,11 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 			cooldown *= 2.0;
 		}
 		
+		if( amount < 50 )
+			cooldown *= 0.5;
+		if( amount < 5 )
+			cooldown *= 0.5;
+		
 		float vecTarget[3];
 		GetClientAbsOrigin(client, vecTarget);
 
