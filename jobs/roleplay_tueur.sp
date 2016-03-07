@@ -794,7 +794,7 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 			float delay = 20.0;
 			float time = 0.0;
 			
-			GivePlayerItem(client, "weapon_deagle");
+			GivePlayerItem(client, "weapon_revolver");
 			
 			char door[128], doors[12][12];
 			GetConVarString(g_vConfigTueur, door, sizeof(door));
@@ -809,6 +809,10 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 				
 				rp_ScheduleEntityInput(entity, time, "Unlock");
 				rp_ScheduleEntityInput(entity, time+0.1, "Open");
+				rp_ScheduleEntityInput(entity, time+5.0, "Unlock");
+				rp_ScheduleEntityInput(entity, time+5.1, "Open");
+				rp_ScheduleEntityInput(entity, time+10.0, "Unlock");
+				rp_ScheduleEntityInput(entity, time+10.1, "Open");
 				rp_ScheduleEntityInput(entity, time+30.0, "Close");
 				rp_ScheduleEntityInput(entity, time+30.1, "Lock");
 				
