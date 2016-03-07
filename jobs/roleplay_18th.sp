@@ -415,7 +415,7 @@ public Action Cmd_ItemPickLock(int args) {
 	char wepname[64];
 	GetEdictClassname(wepid, wepname, sizeof(wepname));
 	ReplaceString(wepname, sizeof(wepname), "weapon_", "");	
-	int price = CS_GetWeaponPrice(client, CS_AliasToWeaponID(wepname)); 
+	int price = rp_GetWeaponPrice(wepid); 
 	
 	float StealTime = (Logarithm(float(price), 2.0) * 0.5) - 2.0;
 	
@@ -504,7 +504,7 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 	char wepname[64];
 	GetEdictClassname(wepid, wepname, sizeof(wepname));
 	ReplaceString(wepname, sizeof(wepname), "weapon_", "");	
-	int price = CS_GetWeaponPrice(client, CS_AliasToWeaponID(wepname)); 
+	int price = rp_GetWeaponPrice(wepid);
 	
 	if( IsValidEdict(wepid) && IsValidEntity(wepid) &&
 		IsValidClient(target) && rp_IsEntitiesNear(client, target, false, -1.0) &&
