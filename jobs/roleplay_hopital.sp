@@ -145,25 +145,11 @@ public Action Cmd_ItemChirurgie(int args) {
 	if( StrEqual(arg1, "regen") || StrEqual(arg1, "full") ) {
 		if( !g_bChirurgie[client][ch_Regen])
 			rp_HookEvent(client, RP_OnFrameSeconde, fwdChiruHealing);
-		
-		if( GetClientTeam(client) == CS_TEAM_T )
-			Entity_SetMaxHealth(client, 200);
-		else
-			Entity_SetMaxHealth(client, 500);
-		
 		g_bChirurgie[client][ch_Regen] = true;
 	}
 	if( StrEqual(arg1, "heal") || StrEqual(arg1, "full") ) {
 		
-		if( GetClientTeam(client) == CS_TEAM_T ) {
-			Entity_SetMaxHealth(client, 200);
-			if( GetClientHealth(client) < 200 )
-				SetEntityHealth(client, 200);
-		}
-		else {
-			Entity_SetMaxHealth(client, 500);
-			SetEntityHealth(client, 500);
-		}
+		SetEntityHealth(client, 500);
 		if( !g_bChirurgie[client][ch_Heal])
 			rp_HookEvent(client, RP_OnPlayerSpawn, fwdSpawn);
 		
@@ -235,8 +221,8 @@ public Action fwdAssurance(int client, int& amount) {
 }
 public Action fwdSpawn(int client) {
 	if( GetClientTeam(client) == CS_TEAM_T ) {
-		Entity_SetMaxHealth(client, 200);
-		SetEntityHealth(client, 200);
+		if( GetClientHealth(client) < 200 )
+			SetEntityHealth(client, 200);
 	}
 }
 // ----------------------------------------------------------------------------
