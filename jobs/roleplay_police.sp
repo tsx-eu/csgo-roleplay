@@ -2899,9 +2899,10 @@ void addBuyMenu(int weaponID) {
 	owner = g_iOriginOwner[weaponID];
 	if( IsValidClient(owner) && (rp_GetClientJobID(owner) == 1 || rp_GetClientJobID(owner) == 101) )
 		return;
-
+	
 	char weapon[65];
-	GetEdictClassname(weaponID, weapon, sizeof(weapon));
+	int index = GetEntProp(weaponID, Prop_Send, "m_iItemDefinitionIndex");
+	CSGO_GetItemDefinitionNameByIndex(index, weapon, sizeof(weapon));
 	ReplaceString(weapon, sizeof(weapon), "weapon_", "");
 	
 	int data[BM_Max];
