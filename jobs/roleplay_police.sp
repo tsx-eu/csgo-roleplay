@@ -519,7 +519,7 @@ public Action Cmd_Tazer(int client) {
 		rp_HookEvent(target, RP_PreHUDColorize, fwdTazerBlue, 9.0);
 		rp_HookEvent(target, RP_PrePlayerPhysic, fwdFrozen, 7.5);
 		
-		rp_SetClientFloat(target, fl_TazerTime, GetGameTime()+9.0);
+		rp_SetClientFloat(target, fl_TazerTime, GetTickedTime()+9.0);
 		rp_SetClientFloat(target, fl_FrozenTime, GetGameTime()+7.5);
 		
 		FakeClientCommand(target, "use weapon_knife");
