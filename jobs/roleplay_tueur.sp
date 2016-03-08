@@ -796,30 +796,26 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 			
 			GivePlayerItem(client, "weapon_revolver");
 			
-			char door[128], doors[12][12];
+			char door[128], doors[12][12], tmp[2][12];
 			GetConVarString(g_vConfigTueur, door, sizeof(door));
 			int amount = ExplodeString(door, ",", doors, sizeof(doors), sizeof(doors[]) );
 			
 			for (int i = 0; i <= amount; i++) {
 				
-				char tmp[2][12];
 				int dble = ExplodeString(doors[i], "-", tmp, sizeof(tmp), sizeof(tmp[]));
-				
 				int entity = StringToInt(tmp[0]) + MaxClients;
 				
-				rp_ScheduleEntityInput(entity, time, "Unlock");
-				rp_ScheduleEntityInput(entity, time+0.1, "Open");
-				rp_ScheduleEntityInput(entity, time+5.0, "Unlock");
-				rp_ScheduleEntityInput(entity, time+5.1, "Open");
-				rp_ScheduleEntityInput(entity, time+10.0, "Unlock");
-				rp_ScheduleEntityInput(entity, time+10.1, "Open");
-				rp_ScheduleEntityInput(entity, time+30.0, "Close");
-				rp_ScheduleEntityInput(entity, time+30.1, "Lock");
+				for (float delta = 0.1; delta <= 1.0; delta+=0.1) {
+					rp_ScheduleEntityInput(entity, time+delta, "Unlock");
+					rp_ScheduleEntityInput(entity, time+delta+0.1, "Open");
+				}
 				
 				if( dble == 2 ) {
 					entity = StringToInt(tmp[1]) + MaxClients;
-					rp_ScheduleEntityInput(entity, time, "Unlock");
-					rp_ScheduleEntityInput(entity, time+0.1, "Open");
+					for (float delta = 0.1; delta <= 1.0; delta+=0.1) {
+						rp_ScheduleEntityInput(entity, time+delta, "Unlock");
+						rp_ScheduleEntityInput(entity, time+delta+0.1, "Open");
+					}
 					rp_ScheduleEntityInput(entity, time+30.0, "Close");
 					rp_ScheduleEntityInput(entity, time+30.1, "Lock");
 				}
