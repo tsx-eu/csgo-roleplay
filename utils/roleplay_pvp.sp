@@ -22,9 +22,6 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-// TODO: tp au changement de att/def le spawnkill
-// TODO: bloquer à 10 drapeau (gdm_flag)
-
 //#define DEBUG
 #define MAX_GROUPS		150
 #define MAX_ZONES		310
@@ -33,6 +30,7 @@
 #define ZONE_RESPAWN	231
 #define	FLAG_SPEED		280.0
 #define	FLAG_POINT_MAX	150
+#define FLAG_MAX		10
 #define FLAG_POINT_MIN	50
 #define ELO_FACTEUR_K	40.0
 
@@ -186,6 +184,12 @@ public Action Cmd_ItemFlag(int args) {
 	if( g_iClientFlag[client] > 0 && IsValidEdict(g_iClientFlag[client]) && IsValidEntity(g_iClientFlag[client]) ) {
 		ITEM_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà un drapeau.");
+		return;
+	}
+	
+	if( GDM_GetFlagCount(client) >= FLAG_MAX ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà planter %d drapeaux.", FLAG_MAX);
 		return;
 	}
 	
@@ -545,6 +549,14 @@ public Action CAPTURE_Tick(Handle timer, any none) {
 		CPrintToChatAll("{lightblue} ================================== {default}");
 		CPrintToChatAll("{lightblue} Le bunker est maintenant défendu par les %s! {default}", strBuffer[1]);
 		CPrintToChatAll("{lightblue} ================================== {default}");
+		
+		for (int i = 1; i <= MaxClients; i++) {
+			if( !IsValidClient(i) )
+				continue;
+			if( rp_GetClientGroupID(i) != defense )
+				continue;
+			rp_ClientSendToSpawn(i);
+		}
 		defense = winner;
 		rp_SetCaptureInt(cap_bunker, defense);
 		CAPTURE_UpdateLight();
@@ -901,6 +913,10 @@ void CTF_FlagTouched(int client, int flag) {
 	if( (g_fLastDrop[client]+3.0) >= GetGameTime() ) {
 		return;
 	}
+	if( GDM_GetFlagCount(client) >= FLAG_MAX ) {
+		g_fLastDrop[client] = GetGameTime() + 10.0;
+		return;
+	}
 	
 	g_iFlagData[flag][data_owner] = client;
 	g_iClientFlag[client] = flag;
@@ -974,6 +990,14 @@ void GDM_RegisterFlag(int client) {
 	g_hGlobalDamage.GetArray(szSteamID, array, sizeof(array));
 	array[gdm_flag]++;
 	g_hGlobalDamage.SetArray(szSteamID, array, sizeof(array));
+}
+int GDM_GetFlagCount(int client) {
+	char szSteamID[32];
+	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
+	
+	int array[gdm_max];
+	g_hGlobalDamage.GetArray(szSteamID, array, sizeof(array));
+	return array[gdm_flag];
 }
 void GDM_RegisterShoot(int client) {
 	char szSteamID[32];
