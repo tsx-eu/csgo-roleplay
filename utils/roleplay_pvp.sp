@@ -555,7 +555,9 @@ public Action CAPTURE_Tick(Handle timer, any none) {
 				continue;
 			if( rp_GetClientGroupID(i) != defense )
 				continue;
-			rp_ClientSendToSpawn(i);
+			if( rp_GetPlayerZone(i) != ZONE_RESPAWN )
+				continue;
+			rp_ClientSendToSpawn(i, true);
 		}
 		defense = winner;
 		rp_SetCaptureInt(cap_bunker, defense);
