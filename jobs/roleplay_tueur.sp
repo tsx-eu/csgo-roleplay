@@ -149,6 +149,8 @@ public Action Cmd_ItemContrat(int args) {
 	}
 	
 	rp_SetClientInt(target, i_ContratTotal, rp_GetClientInt(target, i_ContratTotal) + 1);
+	if( rp_GetClientJobID(client) == 41 && rp_GetClientJobID(vendeur) )
+		rp_SetClientInt(target, i_ContratTotal, rp_GetClientInt(target, i_ContratTotal) + 1);
 	
 	switch( rp_GetClientInt(vendeur, i_Job) ) {
 		case 41: g_iKillerPoint[vendeur][competance_left] = 6;
