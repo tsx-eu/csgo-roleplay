@@ -776,20 +776,18 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 			int target = rp_GetClientInt(client, i_KidnappedBy);
 			
 			rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) - 2500);
-			rp_SetClientInt(from, i_Bank, rp_GetClientInt(from, i_Bank) + 2500);
-			rp_SetClientInt(client, i_KidnappedBy, 0);
-			
+			rp_SetClientInt(from, i_Bank, rp_GetClientInt(from, i_Bank) + 2500);			
 			
 			CPrintToChat(from, "{lightblue}[TSX-RP]{default} %N a payé la rançon de 2500$.", client);
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N a payé la rançon de 2500$.", client);
 			
 			rp_IncrementSuccess(from, success_list_kidnapping);
 			
-			TeleportEntity(client,  view_as<float>({2911.0, 868.0, -1853.0}), NULL_VECTOR, NULL_VECTOR);
-			rp_ClientSendToSpawn(client, true);
-			
 			clearKidnapping(client);
 			RestoreAssassinNormal(target);
+			
+			TeleportEntity(client,  view_as<float>({2911.0, 868.0, -1853.0}), NULL_VECTOR, NULL_VECTOR);
+			rp_ClientSendToSpawn(client, true);
 		}
 		else if( StrEqual( options, "free", false) ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Les portes s'ouvriront toute les 20 secondes, vous n'avez qu'une seule chance de vous en sortir.");
