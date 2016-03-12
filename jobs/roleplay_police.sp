@@ -1923,6 +1923,21 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			amende = rp_GetClientInt(target, i_KillingSpread) * 200;
 		
 		if( String_StartsWith(g_szJailRaison[type][jail_raison], "Vol") ) {
+			if(rp_GetClientInt(target, i_LastVolTarget)+30 < GetTime()){
+				rp_SetClientInt(target, i_JailTime, 0);
+				rp_SetClientInt(target, i_jailTime_Last, 0);
+				rp_SetClientInt(target, i_JailledBy, 0);
+				
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N{default} à été libéré car il n'a pas commis de vol.", target);
+				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été libéré car vous n'avez pas commis de vol.", client);
+				
+				LogToGame("[TSX-RP] [JAIL] %L à été libéré car il n'avait pas commis de vol", target);
+				
+				rp_ClientResetSkin(target);
+				rp_ClientSendToSpawn(target, true);
+				return;
+			}
+			
 			if( IsValidClient( rp_GetClientInt(target, i_LastVolTarget) ) ) {
 				int tg = rp_GetClientInt(target, i_LastVolTarget);
 				rp_SetClientInt(tg, i_Money, rp_GetClientInt(tg, i_Money) + rp_GetClientInt(target, i_LastVolAmount));
