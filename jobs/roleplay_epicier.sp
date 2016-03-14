@@ -69,26 +69,9 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);
 }
 public Action fwdUse(int client) {
-	char tmp[32];
-	rp_GetZoneData(rp_GetPlayerZone(client), zone_type_type, tmp, sizeof(tmp));
 	
-	if( StrEqual(tmp, "metro") ) {
+	if( IsInMetro(client) ) {
 		DisplayMetroMenu(client);
-	}
-	
-	int app = rp_GetPlayerZoneAppart(client);
-	if( app == 50 ) {
-		if( rp_GetClientKeyAppartement(client, app) ) {
-			float min[3] = { -1752.0, -9212.0, -1819.0 };
-			float max[3] =  { -1522.0, -8982.0, -1679.0 };
-			float origin[3];
-			GetClientAbsOrigin(client, origin);
-			if( origin[0] > min[0] && origin[0] < max[0] &&
-				origin[1] > min[1] && origin[1] < max[1] &&
-				origin[2] > min[2] && origin[2] < max[2] ) {
-				DisplayMetroMenu(client);
-			}
-		}
 	}
 }
 
@@ -110,6 +93,9 @@ void DisplayMetroMenu(int client) {
 	AddMenuItem(menu, "metro_zoning", 	"Métro: Station Place Station");
 	AddMenuItem(menu, "metro_inno", 	"Métro: Station de l'innovation");
 	AddMenuItem(menu, "metro_pvp", 		"Métro: Station Belmont");
+	if( rp_GetClientKeyAppartement(client, 50) ) {
+		AddMenuItem(menu, "metro_villa", 	"Métro: Villa");
+	}
 	
 	SetMenuPagination(menu, MENU_NO_PAGINATION);
 	SetMenuExitBackButton(menu, false);
@@ -124,11 +110,10 @@ public int eventMetroMenu(Handle menu, MenuAction action, int client, int param2
 	if( action == MenuAction_Select ) {
 		char options[64], tmp[64];
 		GetMenuItem(menu, param2, options, sizeof(options));
-		rp_GetZoneData(rp_GetPlayerZone(client), zone_type_type, tmp, sizeof(tmp));
 		
-		if( !StrEqual(tmp, "metro", false) ) {
+		if( !IsInMetro(client) )
 			return;
-		}
+		
 		if( StrEqual(options, "metro_event") && GetConVarInt(g_hEVENT) == 0 ) {
 			return;
 		}
@@ -170,8 +155,8 @@ public Action metroTeleport(Handle timer, any client) {
 	
 	if( tp == 0 )
 		return Plugin_Handled;
-	if( !StrEqual(tmp, "metro", false) )
-		return Plugin_Handled;
+	if( !IsInMetro(client) )
+			return Plugin_Handled;
 	
 	bool paid = false;
 	
@@ -608,4 +593,28 @@ void UningiteEntity(int entity) {
 	int ent = GetEntPropEnt(entity, Prop_Data, "m_hEffectEntity");
 	if( IsValidEdict(ent) )
 		SetEntPropFloat(ent, Prop_Data, "m_flLifetime", 0.0); 
+}
+bool IsInMetro(int client) {
+	char tmp[32];
+	rp_GetZoneData(rp_GetPlayerZone(client), zone_type_type, tmp, sizeof(tmp));
+	
+	if( StrEqual(tmp, "metro") ) {
+		return true;
+	}
+	
+	int app = rp_GetPlayerZoneAppart(client);
+	if( app == 50 ) {
+		if( rp_GetClientKeyAppartement(client, app) ) {
+			float min[3] = { -1752.0, -9212.0, -1819.0 };
+			float max[3] =  { -1522.0, -8982.0, -1679.0 };
+			float origin[3];
+			GetClientAbsOrigin(client, origin);
+			if( origin[0] > min[0] && origin[0] < max[0] &&
+				origin[1] > min[1] && origin[1] < max[1] &&
+				origin[2] > min[2] && origin[2] < max[2] ) {
+				return true;
+			}
+		}
+	}
+	return false;
 }

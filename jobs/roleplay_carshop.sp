@@ -150,26 +150,9 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	return Plugin_Continue;
 }
 public Action fwdUse(int client) {
-	int app = rp_GetPlayerZoneAppart(client);
 	
-	if( app > 100 && app <= 300 || app == 50 ) {
-		if( rp_GetClientKeyAppartement(client, app) ) {
-			
-			if( app == 50 ) {
-				float min[3] = { -2291.0, -8095.0, -1806.0};
-				float max[3] =  { -1801.0, -7465.0, -1656.0};
-				float origin[3];
-				GetClientAbsOrigin(client, origin);
-				if( origin[0] > min[0] && origin[0] < max[0] &&
-					origin[1] > min[1] && origin[1] < max[1] &&
-					origin[2] > min[2] && origin[2] < max[2] ) {
-					DisplayGarageMenu(client);
-				}
-			}
-			else {
-				DisplayGarageMenu(client);
-			}
-		}
+	if( IsInGarage(client) ) { 
+		DisplayGarageMenu(client);
 	}
 	
 	int target = GetClientTarget(client);
@@ -1024,9 +1007,8 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 		
 		if( GetMenuItem(menu, param, arg1, sizeof(arg1)) ) {
 			
-			if( rp_GetPlayerZoneAppart(client) <= 100 || rp_GetPlayerZoneAppart(client) >= 300 ) {
+			if( !IsInGarage(client) )
 				return;
-			}
 			
 			int zone = rp_GetPlayerZone(client);
 			
@@ -1334,3 +1316,27 @@ public Action Timer_VehicleRemove(Handle timer, any ent) {
 	return Plugin_Handled;
 }
 // ----------------------------------------------------------------------------
+bool IsInGarage(int client) {
+	int app = rp_GetPlayerZoneAppart(client);
+	
+	if( app > 100 && app <= 300 || app == 50 ) {
+		if( rp_GetClientKeyAppartement(client, app) ) {
+			
+			if( app == 50 ) {
+				float min[3] = { -2291.0, -8095.0, -1816.0};
+				float max[3] =  { -1801.0, -7465.0, -1656.0};
+				float origin[3];
+				GetClientAbsOrigin(client, origin);
+				if( origin[0] > min[0] && origin[0] < max[0] &&
+					origin[1] > min[1] && origin[1] < max[1] &&
+					origin[2] > min[2] && origin[2] < max[2] ) {
+					return true;
+				}
+			}
+			else {
+				return true;
+			}
+		}
+	}
+	return false;
+}
