@@ -319,6 +319,7 @@ enum bool_user_data {
 	b_SpawnToTribunal,
 	b_SpawnToTueur,	
 	b_HasVilla,
+	b_CanSort,
 	
 	b_udata_max
 };

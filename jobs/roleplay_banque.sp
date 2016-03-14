@@ -51,6 +51,8 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_packdebutant",Cmd_ItemPackDebutant, 	"RP-ITEM", 	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_permi",		Cmd_ItemPermi,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_distrib",		Cmd_ItemDistrib,		"RP-ITEM", 	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_banksort",	Cmd_ItemBankSort,		"RP-ITEM", 	FCVAR_UNREGISTERED);
+	
 	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
@@ -149,8 +151,17 @@ public Action Cmd_ItemBankCard(int args) {
 	int client = GetCmdArgInt(1);
 	rp_SetClientBool(client, b_HaveCard, true);
 	
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre carte bancaire est maintenant active.");
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre carte bancaire est maintenant activé.");
 	rp_ClientSave(client);
+}
+public Action Cmd_ItemBankSort(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemBankSort");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+	rp_SetClientBool(client, b_CanSort, true);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez maintenant trier votre inventaire jusqu'à votre déconnexion.");
 }
 public Action Cmd_ItemBankKey(int args) {
 	#if defined DEBUG
