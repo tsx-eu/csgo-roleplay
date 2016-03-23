@@ -21,6 +21,7 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
+#define MAX_GROUPS				150
 
 public Plugin myinfo = {
 	name = "Jobs: Armurerier", author = "KoSSoLaX",
@@ -254,7 +255,7 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 				Handle menupvp = CreateMenu(ModifyWeaponPVP);
 				char tmp[64], tmp2[64];
 				SetMenuTitle(menupvp, "A quel groupe attribuer l'arme?");
-				for(int i=1; i<112; i+=10){
+				for(int i=1; i<MAX_GROUPS; i+=10){
 					for(int j=1;j< MAXPLAYERS+1;j++){
 						if( !IsValidClient(j) )
 							continue;
