@@ -124,8 +124,8 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 	Handle menu = CreateMenu(SpawnVehicle);
 	SetMenuTitle(menu, "Une voiture pour 6 minutes");
 
-	AddMenuItem(menu, "mustang",	"Mustang (500$)");
-	AddMenuItem(menu, "moto", 		"Moto (250$)");
+	AddMenuItem(menu, "mustang",	"Mustang");
+	AddMenuItem(menu, "moto", 		"Moto");
 
 	DisplayMenu(menu, client, 60);
 	cooldown = 5.0;
@@ -178,7 +178,7 @@ public Action fwdUse(int client) {
 			if( rp_GetVehicleInt(target, car_owner) == client && driver != client ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez éjecter le conducteur avec la commande /out.");
 			}
-			//AskToJoinCar(client, target);			
+			AskToJoinCar(client, target);			
 		}
 		else {
 			rp_SetClientVehicle(client, target, true);
@@ -209,7 +209,11 @@ public Action Cmd_ItemVehicle(int args) {
 	int skinid = GetCmdArgInt(2);
 	int client = GetCmdArgInt(3);
 	int item_id = GetCmdArgInt(args);
-	int max = 1;
+	int max = 0;
+	
+	if( StrEqual(arg1, "models/natalya/vehicles/natalya_mustang_csgo_2016.mdl") ) {
+		max = 1;
+	}
 	
 	if( rp_GetZoneBit( rp_GetPlayerZone(client) ) & BITZONE_PEACEFULL ) {
 		CAR_CANCEL(client, item_id);
@@ -1262,11 +1266,9 @@ public int SpawnVehicle(Handle menu, MenuAction action, int client, int param) {
 			
 			if( StrEqual(arg1, "mustang") ) {
 				Format(model, sizeof(model), "models/natalya/vehicles/natalya_mustang_csgo_2016.mdl");
-				prix = 500;
 			}
 			else if( StrEqual(arg1, "moto") ) {
 				Format(model, sizeof(model), "models/natalya/vehicles/dirtbike.mdl");
-				prix = 250;
 			}
 			
 			int skinid = 1;
@@ -1297,8 +1299,7 @@ public int SpawnVehicle(Handle menu, MenuAction action, int client, int param) {
 			
 			rp_SetVehicleInt(car, car_owner, client);
 			rp_SetVehicleInt(car, car_item_id, -1);
-			rp_SetVehicleInt(car, car_maxPassager, 1);
-			rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - prix);
+			rp_SetVehicleInt(car, car_maxPassager, 0);
 			rp_SetClientKeyVehicle(client, car, true);
 			
 			SDKHook(car, SDKHook_Touch, VehicleTouch);
