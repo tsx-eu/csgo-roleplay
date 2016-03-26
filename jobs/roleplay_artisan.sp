@@ -726,11 +726,11 @@ float getDuration(int client, int itemID) {
 }
 int getNextLevel(int level) {
 	if( level >= 75 )
-		return RoundToFloor(Pow(float(level), 2.2) * 750.0);
-	else if( level >= 50 )
 		return level * level * 750;
-	else
+	else if( level >= 50 )
 		return RoundToFloor(Pow(float(level), 1.8) * 750.0);
+	else
+		return RoundToFloor(Pow(float(level), 1.6) * 750.0);
 }
 int ClientGiveXP(int client, int xp) {
 	if( g_flClientBook[client][book_xp] > GetTickedTime() )
