@@ -353,19 +353,21 @@ void CAPTURE_Start() {
 		
 		gID = rp_GetClientGroupID(i);
 		g_iCapture_POINT[gID] += 50;
-		if( rp_GetClientInt(i, i_Group) == gID ) 
+		if( gID == rp_GetCaptureInt(cap_bunker) )
 			g_iCapture_POINT[gID] += 100;
 		
 		ClientCommand(i, "play *tsx/roleplay/bombing.mp3");
 		
 		if( !(rp_GetZoneBit(rp_GetPlayerZone(i)) & BITZONE_PVP) )
 			continue;
-		if( rp_GetClientInt(i, i_Group) == gID ) 
+		if( gID == rp_GetCaptureInt(cap_bunker) )
 			continue;
 		
 		int v = Client_GetVehicle(i);
 		if( v > 0 )
 			rp_ClientVehicleExit(i, v, true);
+		
+		g_iCapture_POINT[gID] += 100;
 		
 		rp_ClientDamage(i, 10000,  i);
 		ForcePlayerSuicide(i);
@@ -374,8 +376,6 @@ void CAPTURE_Start() {
 			g_iClientFlag[i] = 0;
 		}
 	}
-	
-	g_iCapture_POINT[rp_GetCaptureInt(cap_bunker)] += 1250;
 			
 	for(int i=1; i<MAX_ZONES; i++) {
 		if( rp_GetZoneBit(i) & BITZONE_PVP ) {
