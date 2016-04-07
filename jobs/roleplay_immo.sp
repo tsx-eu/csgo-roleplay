@@ -839,15 +839,6 @@ public Action Cmd_BedVilla(int client){
 	#if defined DEBUG
 	PrintToServer("Cmd_BedVilla");
 	#endif
-	char szDayOfWeek[12], szHours[12];
-	
-	FormatTime(szDayOfWeek, 11, "%w");
-	FormatTime(szHours, 11, "%H");
-	
-	if( StringToInt(szDayOfWeek) == 0 && StringToInt(szHours) < 21 ) {	// Dimanche avant 21h
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'est possible d'enchérir que le dimanche.");
-		return Plugin_Handled;
-	}
 	
 	if( rp_GetClientBool(client, b_MaySteal) == false ) {
 		ACCESS_DENIED(client);
@@ -884,7 +875,15 @@ public void SQL_BedVillaMenu(Handle owner, Handle hQuery, const char[] error, an
 		AddMenuItem(menu, nick, nick, ITEMDRAW_DISABLED);
 	}
 	
-	AddMenuItem(menu, "miser", "Miser");
+	char szDayOfWeek[12], szHours[12];
+	
+	FormatTime(szDayOfWeek, 11, "%w");
+	FormatTime(szHours, 11, "%H");
+	
+	if( StringToInt(szDayOfWeek) == 0 && StringToInt(szHours) < 21 ) {	// Dimanche avant 21h
+		AddMenuItem(menu, "miser", "Miser");
+	}
+	
 	if( StrEqual(steamid, steamid2) )
 		AddMenuItem(menu, "key", "Gestion des clés");
 	
