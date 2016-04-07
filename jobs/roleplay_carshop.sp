@@ -212,7 +212,7 @@ public Action Cmd_ItemVehicle(int args) {
 	int max = 0;
 	
 	if( StrEqual(arg1, "models/natalya/vehicles/natalya_mustang_csgo_2016.mdl") ) {
-		max = 1;
+		max = 3;
 	}
 	
 	if( rp_GetZoneBit( rp_GetPlayerZone(client) ) & BITZONE_PEACEFULL ) {
@@ -836,8 +836,8 @@ public int AskToJoinCar_Menu(Handle p_hItemMenu, MenuAction p_oAction, int clien
 					return;
 				}
 				
-				rp_SetClientVehiclePassager(request, vehicle);
-				ClientCommand(request, "firstperson");
+				if( rp_SetClientVehiclePassager(request, vehicle) )
+					ClientCommand(request, "firstperson");
 			}
 			else if( type == 2 ) {
 				CPrintToChat(request, "{lightblue}[TSX-RP]{default} Le conducteur a refusé votre demande.");
@@ -1297,9 +1297,14 @@ public int SpawnVehicle(Handle menu, MenuAction action, int client, int param) {
 				return;
 			}
 			
+			int max = 0;
+			if( StrEqual(model, "models/natalya/vehicles/natalya_mustang_csgo_2016.mdl") ) {
+				max = 3;
+			}
+			
 			rp_SetVehicleInt(car, car_owner, client);
 			rp_SetVehicleInt(car, car_item_id, -1);
-			rp_SetVehicleInt(car, car_maxPassager, 0);
+			rp_SetVehicleInt(car, car_maxPassager, max);
 			rp_SetClientKeyVehicle(client, car, true);
 			
 			SDKHook(car, SDKHook_Touch, VehicleTouch);
