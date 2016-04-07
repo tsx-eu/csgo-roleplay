@@ -100,8 +100,7 @@ public void OnClientPostAdminCheck(int client) {
 		rp_HookEvent(client, RP_OnPlayerSpawn, fwdSpawn);
 		rp_HookEvent(client, RP_OnFrameSeconde, fwdFrame);
 		rp_HookEvent(client, RP_PostPlayerPhysic, fwdPhysics);
-		rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdTakeDamage);
-		rp_HookEvent(client, RP_PostTakeDamageKnife, fwdTakeDamage);
+		rp_HookEvent(client, RP_PreTakeDamage, fwdTakeDamage);
 		rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
 	}
 }
@@ -347,8 +346,7 @@ void CAPTURE_Start() {
 		rp_HookEvent(i, RP_OnPlayerSpawn, fwdSpawn);
 		rp_HookEvent(i, RP_PostPlayerPhysic, fwdPhysics);
 		rp_HookEvent(i, RP_OnFrameSeconde, fwdFrame);
-		rp_HookEvent(i, RP_PostTakeDamageWeapon, fwdTakeDamage);
-		rp_HookEvent(i, RP_PostTakeDamageKnife, fwdTakeDamage);
+		rp_HookEvent(i, RP_PreTakeDamage, fwdTakeDamage);
 		rp_HookEvent(i, RP_OnPlayerZoneChange, fwdZoneChange);
 		
 		gID = rp_GetClientGroupID(i);
@@ -424,8 +422,7 @@ void CAPTURE_Stop() {
 		rp_UnhookEvent(i, RP_OnPlayerSpawn, fwdSpawn);
 		rp_UnhookEvent(i, RP_PostPlayerPhysic, fwdPhysics);
 		rp_UnhookEvent(i, RP_OnFrameSeconde, fwdFrame);
-		rp_UnhookEvent(i, RP_PostTakeDamageWeapon, fwdTakeDamage);
-		rp_UnhookEvent(i, RP_PostTakeDamageKnife, fwdTakeDamage);
+		rp_UnhookEvent(i, RP_PreTakeDamage, fwdTakeDamage);
 		rp_UnhookEvent(i, RP_OnPlayerZoneChange, fwdZoneChange);
 
 		if( IsPlayerAlive(i) )
