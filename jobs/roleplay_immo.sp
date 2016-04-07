@@ -845,7 +845,8 @@ public Action Cmd_BedVilla(int client){
 	FormatTime(szHours, 11, "%H");
 	
 	if( StringToInt(szDayOfWeek) == 0 && StringToInt(szHours) < 21 ) {	// Dimanche avant 21h
-		ServerCommand("rp_force_appart");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'est possible d'enchérir que le dimanche.");
+		return Plugin_Handled;
 	}
 	
 	if( rp_GetClientBool(client, b_MaySteal) == false ) {
