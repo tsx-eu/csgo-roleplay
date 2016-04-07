@@ -839,6 +839,14 @@ public Action Cmd_BedVilla(int client){
 	#if defined DEBUG
 	PrintToServer("Cmd_BedVilla");
 	#endif
+	char szDayOfWeek[12], szHours[12];
+	
+	FormatTime(szDayOfWeek, 11, "%w");
+	FormatTime(szHours, 11, "%H");
+	
+	if( StringToInt(szDayOfWeek) == 0 && StringToInt(szHours) < 21 ) {	// Dimanche avant 21h
+		ServerCommand("rp_force_appart");
+	}
 	
 	if( rp_GetClientBool(client, b_MaySteal) == false ) {
 		ACCESS_DENIED(client);
