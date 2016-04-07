@@ -615,7 +615,7 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	}
 	int level = rp_GetClientInt(client, i_ArtisanLevel);
 	float flFatigue = rp_GetClientFloat(client, fl_ArtisanFatigue);
-	float f = float(rp_GetItemInt(itemID, item_type_prix)) / 75000.0 / Logarithm(float(level+1), 2.0);
+	float f = float(rp_GetItemInt(itemID, item_type_prix)) / 41100.0 / Logarithm(float(level+1), 1.33);
 	if( g_flClientBook[client][book_sleep] > GetTickedTime() )
 		f -= (f / 2.0);
 	
