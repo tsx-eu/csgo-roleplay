@@ -561,7 +561,7 @@ void VehicleRemove(int vehicle, bool explode = false) {
 	
 	for(int i=1; i<=MaxClients; i++) {
 		rp_SetClientKeyVehicle(i, vehicle, false);
-		int j = rp_GetClientVehiclePassager(client);
+		int j = rp_GetClientVehiclePassager(i);
 		if( j == vehicle )
 			rp_ClientVehiclePassagerExit(i, vehicle);
 	}
