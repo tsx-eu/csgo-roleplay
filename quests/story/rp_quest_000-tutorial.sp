@@ -134,7 +134,7 @@ public void Q1_Frame(int objectiveID, int client) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else {
-		rp_Effect_BeamBox(client, 0, target);
+		ServerCommand("sm_effect_gps %d %f %f %f", client, target[0], target[1], target[2]);
 	}
 }
 public void Q2_Frame(int objectiveID, int client) {
@@ -166,7 +166,7 @@ public void Q2_Frame(int objectiveID, int client) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else {
-		rp_Effect_BeamBox(client, 0, target);
+		ServerCommand("sm_effect_gps %d %f %f %f", client, target[0], target[1], target[2]);
 	}
 }
 public void Q3_Frame(int objectiveID, int client) {
@@ -204,7 +204,7 @@ public void Q3_Frame(int objectiveID, int client) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else {
-		rp_Effect_BeamBox(client, 0, target);
+		ServerCommand("sm_effect_gps %d %f %f %f", client, target[0], target[1], target[2]);
 	}
 }
 public void Q4_Frame(int objectiveID, int client) {
@@ -235,11 +235,11 @@ public void Q4_Frame(int objectiveID, int client) {
 		CreateTimer(1.1, PostKillHandle, panel);
 	}
 	
-	if( GetVectorDistance(target, origin) < 64.0 && rp_GetClientInt(client, i_Money) <= 0 ) {
+	if( rp_GetClientInt(client, i_Money) <= 0 ) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else {
-		rp_Effect_BeamBox(client, 0, target);
+		ServerCommand("sm_effect_gps %d %f %f %f", client, target[0], target[1], target[2]);
 	}
 }
 public void Q5_Frame(int objectiveID, int client) {
@@ -276,7 +276,7 @@ public void Q5_Frame(int objectiveID, int client) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else {
-		rp_Effect_BeamBox(client, 0, target);
+		ServerCommand("sm_effect_gps %d %f %f %f", client, target[0], target[1], target[2]);
 	}
 }
 public void Q6_Frame(int objectiveID, int client) {
@@ -309,7 +309,7 @@ public void Q6_Frame(int objectiveID, int client) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else {
-		rp_Effect_BeamBox(client, 0, target);
+		ServerCommand("sm_effect_gps %d %f %f %f", client, target[0], target[1], target[2]);
 	}
 }
 public void Q7_Frame(int objectiveID, int client) {
@@ -348,7 +348,7 @@ public void Q7_Frame(int objectiveID, int client) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else {
-		rp_Effect_BeamBox(client, 0, target);
+		ServerCommand("sm_effect_gps %d %f %f %f", client, target[0], target[1], target[2]);
 	}
 }
 public void Q8_Frame(int objectiveID, int client) {
@@ -382,7 +382,7 @@ public void Q8_Frame(int objectiveID, int client) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else {
-		rp_Effect_BeamBox(client, 0, target);
+		ServerCommand("sm_effect_gps %d %f %f %f", client, target[0], target[1], target[2]);
 	}
 }
 public void Q9_Frame(int objectiveID, int client) {
@@ -456,7 +456,7 @@ public void Q10_Frame(int objectiveID, int client) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else {
-		rp_Effect_BeamBox(client, 0, target);
+		ServerCommand("sm_effect_gps %d %f %f %f", client, target[0], target[1], target[2]);
 	}
 }
 // ----------------------------------------------------------------------------
@@ -506,13 +506,12 @@ public void Q12_Frame(int objectiveID, int client) {
 		DrawPanelItem(panel, "", ITEMDRAW_SPACER);
 		DrawPanelText(panel, " Derniers conseils avant de vous laisser");
 		DrawPanelText(panel, "partir sur de bonnes bases.");
+		DrawPanelText(panel, "- Nous sommes sur CSGO, pas sur ARMA ni GMOD.");
+		DrawPanelText(panel, "Il y a donc beaucoup de meurtre en ville, armé vous.");
 		DrawPanelText(panel, "- Trouvez vous un job");
-		DrawPanelText(panel, "- Attention aux arnaques (/give, reductions forcée)");
-		DrawPanelText(panel, "- Ne tuez pas tout les passants");
+		DrawPanelText(panel, "- Attention aux arnaques");
 		DrawPanelText(panel, "- Décrochez le rang no-pyj");
 		DrawPanelText(panel, "- Faites un tour sur notre TeamSpeak");
-		DrawPanelText(panel, "- Pensez à vous abonner à la map sur workshop afin de");
-		DrawPanelText(panel, "maintenir à jour la map 'Princeton' automatiquement");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " Bon jeu!");
 		DrawPanelText(panel, " ");
@@ -527,7 +526,7 @@ public void Q12_Frame(int objectiveID, int client) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else {
-		rp_Effect_BeamBox(client, 0, target);
+		ServerCommand("sm_effect_gps %d %f %f %f", client, target[0], target[1], target[2]);
 	}
 }
 public void Q13_Frame(int objectiveID, int client) {
@@ -577,9 +576,8 @@ public int MenuSelectParrain(Handle menu, MenuAction action, int client, int par
 			SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
 		}
 		
-		//rp_ClientGiveItem(client, 286);
 		rp_QuestStepComplete(client, g_iQ12);
-		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank)+ 7500);
+		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) + 7500);
 		
 		
 	}
@@ -630,6 +628,7 @@ public int MenuSelectJob(Handle menu, MenuAction action, int client, int param2)
 		rp_SetClientInt(client, i_Tutorial, 20);
 		rp_ClientGiveItem(client, 223);
 		rp_QuestStepComplete(client, g_iQ14);
+		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) + 15000);
 		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez terminé le tutorial, une voiture vous a été offerte. (Faites /item !)");
 		
