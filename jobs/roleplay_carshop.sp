@@ -559,8 +559,12 @@ void VehicleRemove(int vehicle, bool explode = false) {
 
 	CreateTimer(0.1, BatchLeave, vehicle);
 	
-	for(int i=1; i<=MaxClients; i++)
+	for(int i=1; i<=MaxClients; i++) {
 		rp_SetClientKeyVehicle(i, vehicle, false);
+		int j = rp_GetClientVehiclePassager(client);
+		if( j == vehicle )
+			rp_ClientVehiclePassagerExit(i, vehicle);
+	}
 	
 	rp_SetVehicleInt(vehicle, car_owner, -1);
 	
@@ -1260,12 +1264,12 @@ public int SpawnVehicle(Handle menu, MenuAction action, int client, int param) {
 		char arg1[64];
 		
 		if( GetMenuItem(menu, param, arg1, sizeof(arg1)) ) {
-			
 			char model[128];
-			int prix;
+			int max = 0;
 			
 			if( StrEqual(arg1, "mustang") ) {
 				Format(model, sizeof(model), "models/natalya/vehicles/natalya_mustang_csgo_2016.mdl");
+				max = 3;
 			}
 			else if( StrEqual(arg1, "moto") ) {
 				Format(model, sizeof(model), "models/natalya/vehicles/dirtbike.mdl");
@@ -1295,11 +1299,6 @@ public int SpawnVehicle(Handle menu, MenuAction action, int client, int param) {
 			if( !car ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a pas assez de place ici.");
 				return;
-			}
-			
-			int max = 0;
-			if( StrEqual(model, "models/natalya/vehicles/natalya_mustang_csgo_2016.mdl") ) {
-				max = 3;
 			}
 			
 			rp_SetVehicleInt(car, car_owner, client);
