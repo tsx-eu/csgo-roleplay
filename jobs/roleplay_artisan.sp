@@ -64,6 +64,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);	
 	RegServerCmd("rp_item_crafttable",		Cmd_ItemCraftTable,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_craftbook",		Cmd_ItemCraftBook,		"RP-ITEM", 	FCVAR_UNREGISTERED);
+	RegAdminCmd("rp_fatigue", CmdSetFatigue, ADMFLAG_ROOT);
 	
 	
 	SQL_TQuery(rp_GetDatabase(), SQL_LoadReceipe, "SELECT `itemid`, `raw`, `amount`, REPLACE(`extra_cmd`, 'rp_item_primal ', '') `rate` FROM `rp_csgo`.`rp_craft` C INNER JOIN `rp_items` I ON C.`raw`=I.`id` ORDER BY `itemid`, `raw`", 0, DBPrio_Low);
@@ -71,6 +72,9 @@ public void OnPluginStart() {
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
+}
+public Action CmdSetFatigue(int client, int args) {
+	rp_SetClientFloat(GetCmdArgInt(1), fl_ArtisanFatigue, GetCmdArgFloat(2) / 100.0);
 }
 public void OnMapStart() {
 	PrecacheModel(MODEL_TABLE1);
@@ -576,7 +580,9 @@ public Action stopBuilding(Handle timer, Handle dp) {
 		g_bInCraft[client] = false;
 		return Plugin_Stop;
 	}
-	if( float(Math_GetRandomInt(5, 1000)) <= (rp_GetClientFloat(client, fl_ArtisanFatigue)*1000.0) ) {
+	
+	int pc = RoundFloat(rp_GetClientFloat(client, fl_ArtisanFatigue) * 100.0) * RoundFloat(rp_GetClientFloat(client, fl_ArtisanFatigue) * 100.0);
+	if( Math_GetRandomInt(1, 100*100) <= pc ) {
 		
 		fatigue++;
 		failed = true;
@@ -620,8 +626,6 @@ public Action stopBuilding(Handle timer, Handle dp) {
 		f -= (f / 2.0);
 	
 	flFatigue += f;
-	if( failed )
-		flFatigue += f;
 	
 	if( flFatigue > 1.0 )
 		flFatigue = 1.0;
