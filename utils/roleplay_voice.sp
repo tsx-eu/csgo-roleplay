@@ -425,10 +425,10 @@ public int MenuJobs3(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 			ClientCommand(target, "play buttons/blip1.wav");
 			rp_Effect_BeamBox(target, client, NULL_VECTOR, 122, 122, 0);
 			Handle dp;
-			CreateDataTimer(1.0, ClientTargetTracer, dp);
+			CreateDataTimer(1.0, ClientTargetTracer, dp, TIMER_DATA_HNDL_CLOSE|TIMER_REPEAT);
+			WritePackCell(dp, 0);
 			WritePackCell(dp, client);
 			WritePackCell(dp, target);
-			WritePackCell(dp, GetTime());
 		}
 	}
 	else if (p_oAction == MenuAction_End) {
@@ -438,21 +438,23 @@ public int MenuJobs3(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 
 public Action ClientTargetTracer(Handle timer, Handle dp) {
 	ResetPack(dp);
-	int client = ReadPackCell(dp);
-	int target = ReadPackCell(dp);
-	int starttime = ReadPackCell(dp);
-	if(!IsValidClient(client) || !IsValidClient(target)){
-		CloseHandle(dp);
-		return Plugin_Handled;
+	int count = view_as<int>(ReadPackCell(dp));
+	int client = view_as<int>(ReadPackCell(dp));
+	int target = view_as<int>(ReadPackCell(dp));
+	
+	
+	if(!IsValidClient(client) || !IsValidClient(target)) {
+		return Plugin_Stop;
 	}
 	
 	rp_Effect_BeamBox(target, client, NULL_VECTOR, 122, 122, 0);
-
-	if(starttime + 5 < GetTime()){
-		CloseHandle(dp);
-		return Plugin_Handled;
+	
+	if( count >= 5 ){
+		return Plugin_Stop;
 	}
 	
-	CreateDataTimer(1.0, ClientTargetTracer, dp);
-	return Plugin_Handled;
+	ResetPack(dp);
+	WritePackCell(dp, count + 1);
+	
+	return Plugin_Continue;
 }
