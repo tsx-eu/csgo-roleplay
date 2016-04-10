@@ -128,6 +128,7 @@ native bool rp_IsTargetSeen(int client, int target);								/* Est-ce que client
 native bool rp_IsTargetHear(int client, int target);								/* Est-ce que client peut entendre target ? */
 native bool rp_IsValidDoor(int ent);										/* La porte est-elle valide ? */
 native bool rp_IsNight();												/* Entre 18h30 et 6h30 du matin */
+native bool rp_IsGrabbed(int entity);
 // ----------------------------------------------------------------------------
 native bool rp_IsValidVehicle(int entity);
 native void rp_SetClientKeyVehicle(int client, int vehicleID, bool status=false);			/* Définir les clés d'une voiture à un joueur. Status=true -> Il a la clé */
@@ -226,14 +227,16 @@ native bool rp_ClientCanDrawPanel(int client);
 native void rp_SendPanelToClient(Handle& panel, int client, float duration);
 typedef QuestFctInit = function bool (int client);
 typedef QuestFct = function void (int objectiveID, int client);
-public void QUEST_NULL(int objectiveID, int client) {
-}
+public void QUEST_NULL(int objectiveID, int client) { }
 native void rp_QuestStepComplete(int client, int objectiveID);
 native void rp_QuestStepFail(int client, int objectiveID);
 native int rp_RegisterQuest(char uniqID[32], char name[64], quest_type_type type, QuestFctInit CanStart);
 native void rp_QuestAddStep(int questID, int stepID, QuestFct start, QuestFct frame, QuestFct abort, QuestFct done);
 native int rp_QuestCreateInstance(int client, char model[PLATFORM_MAX_PATH], float vecPos[3]);
-native bool rp_IsGrabbed(int entity);
+native void rp_QuestSetGroupCreationFct(int questID, QuestFctInit fwd);
+native void rp_QuestSetGroup(int questID, int groupID, int[] players, int pCount);
+native void rp_QuestStart(int clientID, int questID);
+native void rp_QuestCancel(int clientID, int questID);
 // ----------------------------------------------------------------------------
 
 #define ACCESS_DENIED(%1)	CPrintToChat(%1, "{lightblue}[TSX-RP]{default} Vous n'avez pas accès à cette commande.");	return Plugin_Handled
@@ -657,7 +660,7 @@ enum type_appart_bonus {
 enum quest_type_type {
 	quest_story,
 	quest_daily,
-	quest_weekly
+	quest_group
 }
 enum int_stat_data {
 	i_nostat = 0,
