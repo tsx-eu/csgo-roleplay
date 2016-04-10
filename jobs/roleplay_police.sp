@@ -64,6 +64,7 @@ char g_szJailRaison[][][128] = {
 	{ "Fuite, refus d'obtempérer",			"0", 	"6",	"200"},
 	{ "Insultes, Irrespect",				"1", 	"6",	"250"},
 	{ "Trafique illégal",					"0", 	"6",	"100"},
+	{ "Vol de voiture",				"0", 	"6",	"200"},
 	{ "Nuisance sonore",					"0", 	"6",	"100"},
 	{ "Tir dans la rue",					"0", 	"6",	"50"},
 	{ "Conduite dangeureuse",				"0", 	"6",	"150"},
@@ -3089,5 +3090,8 @@ void explainJail(int client, int jailReason, int cop) {
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Mutinerie, ") == 0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes sorti de votre cellule sans autorisation.");
+	}
+	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Vol de voiture") == 0 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Après enquête, %N vous a mis en prison pour le vol de la voiture que vous conduisiez.");
 	}
 }
