@@ -32,7 +32,7 @@ enum rp_event {
 	RP_OnPlayerSpawn,			     /* Lorsqu'un joueur respawn. Appelé après l'avoir TP Au bon endroit */
 	RP_OnPlayerDead,           /* Un joueur meurt. Return Plugin_Handled pour cacher la mort des logs*/
 	RP_OnPlayerBuild,          /* Un joueur utilise la commande /build */
-	RP_OnPlayerUse             /* Un joueur utilise la commande utiliser (touche E). */
+	RP_OnPlayerUse,             /* Un joueur utilise la commande utiliser (touche E). */
 	RP_OnPlayerCommand,        /* Un joueur execute une commande, /vol, /truc, /bidule. command ne contient ni de !, ni de /. */
 	RP_OnPlayerSteal,          /* Un joueur execute le /vol */
 	RP_OnPlayerZoneChange,     /* Un joueur change de zone */
@@ -299,7 +299,7 @@ native void rp_SetClientVehicle(int client, int vehicleID, bool force=false);
  * @param  {[type]} int client        Le joueur
  * @return int     vehicleID>0 Le véhicule, sinon pas de véhicule.
  */
-native int rp_GetClientVehicle(int client) {
+stock int rp_GetClientVehicle(int client) {
   return GetEntPropEnt(client, Prop_Send, "m_hVehicle");
 }
 /**
