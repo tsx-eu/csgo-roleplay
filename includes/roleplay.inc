@@ -1,11 +1,11 @@
 /*
  * Cette oeuvre, création, site ou texte est sous licence Creative Commons Attribution
- * - Pas d’Utilisation Commerciale 
- * - Partage dans les Mêmes Conditions 4.0 International. 
+ * - Pas d’Utilisation Commerciale
+ * - Partage dans les Mêmes Conditions 4.0 International.
  * Pour accéder à une copie de cette licence, merci de vous rendre à l'adresse suivante
  * http://creativecommons.org/licenses/by-nc-sa/4.0/ .
  *
- * Merci de respecter le travail fourni par le ou les auteurs 
+ * Merci de respecter le travail fourni par le ou les auteurs
  * https://www.ts-x.eu/ - kossolax@ts-x.eu
  */
 #if defined _tsxrp_included_
@@ -13,133 +13,328 @@
 #endif
 #define _tsxrp_included_
 
-// TODO: Corriger la doc en mettant les commentaires avant la fonction...
-
 // ----------------------------------------------------------------------------
 enum rp_event {
-	RP_PreTakeDamage,			/* Le joueur recoit des dégats, quelques soit l'arme. Attention, n'est jamais appelé en zone EVENT, ni pendant une capture */				
-	RP_PostTakeDamageWeapon,	/* Les 2 suivants sont appelé lors d'une capture, mais pas en zone event. La détection d'arme a aussi été faites. */
-	RP_PostTakeDamageKnife,
-	
-	RP_PreGiveDamage,			/* Le joueur inflige des dégats, quelques soit l'arme. Attention, n'est jamais appelé en zone EVENT, ni pendant une capture */										
-	RP_PostGiveDamageWeapon,	/* Les 2 suivants sont appelé lors d'une capture, mais pas en zone event. La détection d'arme a aussi été faites. */
-	RP_PostGiveDamageKnife,
-	
-	RP_PrePlayerPhysic,		/* Permet de modifier la physique d'un joueur. Utiliser return Plugin_Stop pour forcer les valeurs et ignorer toutes les autres. */
-	RP_PostPlayerPhysic,		/* Idem, mais accepté en PvP */
-	
-	RP_PreHUDColorize,		/* Modifie la couleur de l'écran */
-	RP_OnFrameSeconde,		/* Appelé chaque seconde */
-	RP_OnAssurance,			/* Modifie l'assurance, est appelé à chaques fois que le serveur la recalcul */
-	RP_OnPlayerSpawn,			/* Lorsqu'un joueur respawn. Appelé après l'avoir TP Au bon endroit */
-	RP_OnPlayerDead,			/* Un joueur meurt. Return Plugin_Handled pour cacher la mort des logs*/
-	RP_OnPlayerBuild,			/* Un joueur utilise la commande /build */
-	RP_OnPlayerUse,			/* Un joueur utilise la commande utiliser, soit la touche E. */
-	RP_OnPlayerCommand,		/* Un joueur execute une commande, /vol, /truc, /bidule. command ne contient ni de !, ni de /. */
-	RP_OnPlayerSteal,			/* Un joueur execute le /vol */
-	RP_OnPlayerZoneChange,		/* Un joueur change de zone */
-	
-	RP_OnPlayerHear,			/* Peut-il entendre un autre joueur ? */
-	RP_PrePlayerTalk,			/* J'écris un message dans le chat  */
-	RP_OnPlayerDataLoaded,		/* Quand le joueur a chargé */
-	RP_OnPlayerSell,			/* Quand un joueur fait une vente */
-	RP_OnPlayerHUD,			/* A chaque fois que le HUD à gauche se refresh */
-	
+	RP_PreTakeDamage,			     /* Le joueur recoit des dégats, quelques soit l'arme. Attention, n'est jamais appelé en zone EVENT */
+	RP_PostTakeDamageWeapon,	 /* La détection d'arme a été faites. */
+	RP_PostTakeDamageKnife,    /* La détection du couteau été faites. */
+
+	RP_PreGiveDamage,          /* Le joueur inflige des dégats, quelques soit l'arme. Attention, n'est jamais appelé en zone EVENT */
+	RP_PostGiveDamageWeapon,   /* La détection d'arme a été faites. */
+	RP_PostGiveDamageKnife,    /* La détection du couteau été faites. */
+
+	RP_PrePlayerPhysic,        /* Permet de modifier la physique d'un joueur. Utiliser return Plugin_Stop pour forcer les valeurs et ignorer toutes les autres. */
+	RP_PostPlayerPhysic,       /* By-pass les zones en BITZONE_BLOCKCHIRU */
+
+	RP_PreHUDColorize,		     /* Modifie la couleur de l'écran */
+	RP_OnFrameSeconde,		     /* Appelé chaque seconde */
+	RP_OnAssurance,			       /* Modifie l'assurance, est appelé à chaques fois que le serveur la recalcule */
+	RP_OnPlayerSpawn,			     /* Lorsqu'un joueur respawn. Appelé après l'avoir TP Au bon endroit */
+	RP_OnPlayerDead,           /* Un joueur meurt. Return Plugin_Handled pour cacher la mort des logs*/
+	RP_OnPlayerBuild,          /* Un joueur utilise la commande /build */
+	RP_OnPlayerUse             /* Un joueur utilise la commande utiliser (touche E). */
+	RP_OnPlayerCommand,        /* Un joueur execute une commande, /vol, /truc, /bidule. command ne contient ni de !, ni de /. */
+	RP_OnPlayerSteal,          /* Un joueur execute le /vol */
+	RP_OnPlayerZoneChange,     /* Un joueur change de zone */
+
+	RP_OnPlayerHear,           /* Peut-il entendre un autre joueur ? */
+	RP_PrePlayerTalk,          /* J'écris un message dans le chat  */
+	RP_OnPlayerDataLoaded,     /* Quand le joueur a chargé */
+	RP_OnPlayerSell,           /* Quand un joueur fait une vente */
+	RP_OnPlayerHUD,            /* A chaque fois que le HUD à gauche se refresh */
+
 	RP_EventMax
 }
 typeset rp_event_enum {
-	
-	function Action(int victim, int attacker, float& damage); 			/* RP_PreTakeDamage  == return Plugin_Handled = aucun dégat */
-	
-	function Action(int victim, int attacker, float& damage, int wepID, float pos[3]);	/* RP_PostTakeDamageWeapon */
-	function Action(int victim, int attacker, float& damage); 			/* RP_PostTakeDamageKnife */
-	function Action(int attacker, int victim, float& damage); 			/* RP_PreGiveDamage  == return Plugin_Handled = aucun dégat */
-	function Action(int attacker, int victim, float& damage, int wepID, float pos[3]);	/* RP_PostGiveDamageWeapon */
-	function Action(int attacker, int victim, float& damage); 			/* RP_PostGiveDamageKnife */
-	
-	
-	function Action(int client, float& speed, float& gravity); 			/* RP_PrePlayerPhysic == return Plugin_Stop pour forcer les valeurs et ignorer les autres plugins/hook*/
-	function Action(int client, float& speed, float& gravity); 			/* RP_PostPlayerPhysic */
-	
-	
-	function Action(int client, int color[4]); 					/* RP_PreHUDColorize == idem */
-	function Action(int client);								/* RP_OnFrameSeconde */
-	function Action(int client, int& amount);						/* RP_OnAssurance */
-	function Action(int client);								/* RP_OnPlayerSpawn */
-	function Action(int victim, int attacker, float& respawn);			/* RP_OnPlayerDead == return Plugin_Handled = cacher des logs */
-	function Action(int client, float& cooldown);					/* RP_OnPlayerBuild */
-	function Action(int client);								/* RP_OnPlayerUse */
-	function Action(int client, char[] command, char[] arg);			/* RP_OnPlayerCommand */
-	function Action(int client, int target, float& cooldown);			/* RP_OnPlayerSteal */
-	function Action(int client, int newZoneID, int oldZoneID);			/* RP_OnPlayerZoneChange */
-	
-	function Action(int client, int target, float& dist);				/* RP_OnPlayerHear Est-ce que client peut entendre target ? */
-	function Action(int client, char[] message, int length, bool local);	/* RP_PrePlayerTalk */
-	function Action(int client);								/* RP_OnPlayerDataLoaded */
-	function Action(int client, int money);						/* RP_OnPlayerSell */
-	function Action(int client, char[] szHUD, const int maxSize);			/* RP_OnPlayerHUD */
+	function Action(int victim, int attacker, float& damage); 			                   /* RP_PreTakeDamage  == return Plugin_Handled = aucun dégat */
+	function Action(int victim, int attacker, float& damage, int wepID, float pos[3]); /* RP_PostTakeDamageWeapon */
+	function Action(int victim, int attacker, float& damage);                          /* RP_PostTakeDamageKnife */
+
+	function Action(int attacker, int victim, float& damage);                          /* RP_PreGiveDamage  == return Plugin_Handled = aucun dégat */
+	function Action(int attacker, int victim, float& damage, int wepID, float pos[3]); /* RP_PostGiveDamageWeapon */
+	function Action(int attacker, int victim, float& damage); 	                    	 /* RP_PostGiveDamageKnife */
+
+	function Action(int client, float& speed, float& gravity); 	                       /* RP_PrePlayerPhysic == return Plugin_Stop pour forcer les valeurs et ignorer les autres plugins/hook*/
+	function Action(int client, float& speed, float& gravity); 	                       /* RP_PostPlayerPhysic */
+	function Action(int client, int color[4]); 					                               /* RP_PreHUDColorize == idem */
+	function Action(int client);								                                       /* RP_OnFrameSeconde */
+	function Action(int client, int& amount);						                               /* RP_OnAssurance */
+	function Action(int client);							        	                               /* RP_OnPlayerSpawn */
+	function Action(int victim, int attacker, float& respawn);	                       /* RP_OnPlayerDead == return Plugin_Handled = cacher des logs */
+	function Action(int client, float& cooldown);					                             /* RP_OnPlayerBuild */
+	function Action(int client);								                                       /* RP_OnPlayerUse */
+	function Action(int client, char[] command, char[] arg);		                       /* RP_OnPlayerCommand */
+	function Action(int client, int target, float& cooldown);		                       /* RP_OnPlayerSteal */
+	function Action(int client, int newZoneID, int oldZoneID);	                       /* RP_OnPlayerZoneChange */
+	function Action(int client, int target, float& dist);				                       /* RP_OnPlayerHear Est-ce que client peut entendre target ? */
+	function Action(int client, char[] message, int length, bool local);	             /* RP_PrePlayerTalk */
+	function Action(int client);								                                       /* RP_OnPlayerDataLoaded */
+	function Action(int client, int money);					                         	         /* RP_OnPlayerSell */
+	function Action(int client, char[] szHUD, const int maxSize);			                 /* RP_OnPlayerHUD */
 };
-/*
- * @brief Hook sur un joueur. 
- * @note Attention, penser à unhook lorsque le joueur déco!
- * @param	client	un joueur
- * @param 	eventID	Un évenement produit par un joueur. Cf: enum rp_event
- * @param 	hook	Function a appeler lorsque le hook est appelé
-*/
+/**
+ * Hook un évenement d'un joueur
+ * @param  int           client        le joueur
+ * @param  rp_event      eventID       l'id de l'evenement
+ * @param  rp_event_enum hook          la fonction
+ * @param  float         duration=-1.0 la durée. -1 = infini
+ */
 native bool rp_HookEvent(int client, rp_event eventID, rp_event_enum hook, float duration=-1.0);
+/**
+ * Retire un hook créer par rp_HookEvent
+ * @param  int           client        le joueur
+ * @param  rp_event      eventID       l'id de l'evenement
+ * @param  rp_event_enum hook          la fonction à ne plus utiliser
+ */
 native bool rp_UnhookEvent(int client, rp_event eventID, rp_event_enum hook);
 // ----------------------------------------------------------------------------
-/*
- * @brief Récupère un attribu d'un joueur
- * @param 	client	un joueur
- * @param	prop	Une propriétée comprise dans l'enum Entier: int_user_data, Booléen: bool_user_data, Flotant: float_user_data, String: sz_udata_max
- * @return valeur
-*/
+//                                                 Getter et Setter sur joueur
+// ----------------------------------------------------------------------------
+/**
+ * Récupère la propriétée entier d'un joueur
+ * @param  int           client        le joueur
+ * @param  int_user_data prop          la variable
+ * @return int      La valeur
+ */
 native int rp_GetClientInt(int client, int_user_data prop);
+/**
+ * Récupère la propriétée booléen d'un joueur
+ * @param  int           client        le joueur
+ * @param  bool_user_data prop         la variable
+ * @return bool     La valeur
+ */
 native bool rp_GetClientBool(int client, bool_user_data prop);
+/**
+ * Récupère la propriétée flotant d'un joueur
+ * @param  int           client        le joueur
+ * @param  float_user_data prop         la variable
+ * @return float     La valeur
+ */
 native float rp_GetClientFloat(int client, float_user_data prop);
+/**
+ * Récupérer un attribu chaine de caractère d'un joueur
+ * @param  int          client        Le joueur
+ * @param  sz_user_data prop          La variable
+ * @param  char[]       value         La valeur
+ * @param  int          length        La longueur max
+ */
 native void rp_GetClientString(int client, sz_user_data prop, char[] value, int length);
-/*
- * @brief Altère un attribu d'un joueur
- * @param 	client	un joueur
- * @param	prop	Une propriétée comprise dans l'enum Entier: int_user_data, Booléen: bool_user_data, Flotant: float_user_data, String: sz_udata_max
- * @param	valeur
-*/
-native void rp_SetClientInt(int client, int_user_data prop, int value);
-native void rp_SetClientBool(int client, bool_user_data prop, bool value);
-native void rp_SetClientFloat(int client, float_user_data prop, float value);
-native void rp_SetClientString(int client, sz_user_data prop, char[] value, int length);
-// ----------------------------------------------------------------------------
-native void rp_SetClientStat(int client, int_stat_data prop, int value);
+/**
+ * Récupère la propriétée "stat" d'un joueur
+ * @param  int           client        Le joueur
+ * @param  int_stat_data prop          La variable
+ * @return int               La valeur
+ */
 native int rp_GetClientStat(int client, int_stat_data prop);
+/**
+ * Modifie la propriétée entier d'un joueur
+ * @param  int           client        Le joueur
+ * @param  int_user_data prop          La variable
+ * @param  int           value         La valeur
+ */
+native void rp_SetClientInt(int client, int_user_data prop, int value);
+/**
+ * Modifie la propriétée boléan d'un joueur
+ * @param  int            client        Le joueur
+ * @param  bool_user_data prop          La variable
+ * @param  bool           value         La valeur
+ * @return                [description]
+ */
+native void rp_SetClientBool(int client, bool_user_data prop, bool value);
+/**
+ * Modifie la propriétée flotant d'un joueur
+ * @param  int             client        Le joueur
+ * @param  float_user_data prop          La variable
+ * @param  float           value         La valeur
+ */
+native void rp_SetClientFloat(int client, float_user_data prop, float value);
+/**
+ * Modifie la propriétée chaine de caractère d'un joueur
+ * @param  int          client        Le joueur
+ * @param  sz_user_data prop          La variable
+ * @param  char[]       value         La valeur
+ * @param  int          length        La taille maximum du string
+ */
+native void rp_SetClientString(int client, sz_user_data prop, char[] value, int length);
+/**
+ * Modifie la propriétée "stat" d'un joueur
+ * @param  int           client        Le joueur
+ * @param  int_stat_data prop          La variable
+ * @param  int           value         La valeur
+ */
+native void rp_SetClientStat(int client, int_stat_data prop, int value);
 // ----------------------------------------------------------------------------
-native int rp_GetClientJobID(int client);										/* return le numéro du job auquel il appartient. 1==police, 11==hosto, 21==mcdo, etc --> http://www.ts-x.eu/index.php?page=roleplay&game=csgo&sub=job&id=1 */
-native int rp_GetClientGroupID(int client);									/* return le numéro du groupe auquel il appartient. 1==SPQR, 11==SMURF, etc --> https://www.ts-x.eu/index.php?page=roleplay&game=csgo&sub=group&id=1 */
-native int rp_GetClientPvPBonus(int client, rp_capture_zone typeID);					/* Est-ce qu'un joueur à le droit à un bonus de type PVP ? typeID==> cap_nuclear, cap_tower, cap_villa */
+//                                                          JobID + GroupID
 // ----------------------------------------------------------------------------
-native bool rp_IsInPVP(int entity);											/* L'entité est-elles en PvP ? Attention cache de 0.5 seconde */
-native bool rp_IsEntitiesNear(int client, int ent2, bool tresProche = false, float cache = 0.25); /* L'entité est-elle proche d'un joueur ? */
-native bool rp_IsTutorialOver(int client);									/* Le tutorial n'est pas terminé */
-native bool rp_IsBuildingAllowed(int client, bool silent = false);					/* Peut-on construire quelques chose à cet endroit ? */
-native bool rp_IsClientLucky(int client);										/* Le joueur à t-il de la chance ? */
-native bool rp_IsClientNew(int client);										/* Moins de 20 heures de jeu */
-native bool rp_IncrementLuck(int client);										/* Augmente la chance d'un joueur... */
-native bool rp_IsTargetSeen(int client, int target);								/* Est-ce que client peut voir target ? TODO: A confirmer que ce n'est pas l'inverse */
-native bool rp_IsTargetHear(int client, int target);								/* Est-ce que client peut entendre target ? */
-native bool rp_IsValidDoor(int ent);										/* La porte est-elle valide ? */
-native bool rp_IsNight();												/* Entre 18h30 et 6h30 du matin */
+/**
+ * Récupérer le numéro du job auquel le joueur appartient. cf: https://www.ts-x.eu/node/apidoc/#api-Jobs-GetJobs
+ * @param  int client        Le joueur
+ * @return int  JobID
+ */
+native int rp_GetClientJobID(int client);
+/**
+ * Récupérer le numéro du groupe auquel le joueur appartient. cf: https://www.ts-x.eu/node/apidoc/#api-Groups-GetGroups
+ * @param  {[type]} int client        Le joueur
+ * @return int     GroupID
+ */
+native int rp_GetClientGroupID(int client);
+/**
+ * Augmenter la chance d'un joueur
+ * @param  {[type]} int client        Le joueur
+ */
+native void rp_IncrementLuck(int client);
+// ----------------------------------------------------------------------------
+//                                                           rp_Is
+// ----------------------------------------------------------------------------
+/**
+ * L'entité est-elle en zone PvP?
+ * @param  {[type]} int entity        L'entité
+ * @return bool   Vrai si elle est en zone pvp
+ */
+native bool rp_IsInPVP(int entity);
+/**
+ * Le joueur est-il proche de l'entité
+ * @param  {[type]} int   client        Le joueur
+ * @param  {[type]} int   entity        L'entité
+ * @param  {[type]} bool  tresProche    =             false à vrai, signifie que le joueur doit coller  et viser cette entité
+ * @param  {[type]} float cache         =             0.25  Durée de mise en cache
+ * @return bool       Vrai si le joueur est proche
+ */
+native bool rp_IsEntitiesNear(int client, int entity, bool tresProche = false, float cache = 0.25);
+/**
+ * Le joueur a-t-il terminé le tutorial?
+ * @param  {[type]} int client        Le joueur
+ * @return bool     Vrai s'il a terminé le tutorial, faux s'il est dedans
+ */
+native bool rp_IsTutorialOver(int client);
+/**
+ * Le joueur peut-il construire là ou il est?
+ * @param  {[type]} int  client        Le joueur
+ * @param  {[type]} bool silent        =             false Afficher un message d'erreur
+ * @return bool     Vrai s'il peut construire
+ */
+native bool rp_IsBuildingAllowed(int client, bool silent = false);
+/**
+ * Le joueur est-il chanceux
+ * @param  {[type]} int client        Le joueur
+ * @return bool     Vrai s'il est chanceux
+ */
+native bool rp_IsClientLucky(int client);
+/**
+ * Le joueur est-il nouveau?
+ * @param  {[type]} int client        Le joueur
+ * @return bool     Vrai si le joueur à jouer moins de 20 heures sur le serveur
+ */
+native bool rp_IsClientNew(int client);
+/**
+ * Le joueur peut-il voir la cible?
+ * @param  {[type]} int client        Le joueur
+ * @param  {[type]} int target        La cible
+ * @return bool     Vrai s'il peut la voir
+ */
+native bool rp_IsTargetSeen(int client, int target);
+/**
+ * Le joueur peut-il entendre la cible?
+ * @param  {[type]} int client        Le joueur
+ * @param  {[type]} int target        La cible
+ * @return bool     Vrai s'il peut l'entendre
+ */
+native bool rp_IsTargetHear(int client, int target);
+/**
+ * Est-ce que l'entité est une porte "rp"?
+ * @param  {[type]} int ent           L'entité
+ * @return bool    Vrai si c'est une porte connue du serveur
+ */
+native bool rp_IsValidDoor(int ent);
+/**
+ * Est-ce que l'entité est prise en +force?
+ * @param  {[type]} int entity        L'entité
+ * @return  bool Vrai si elle est prise en +force
+ */
 native bool rp_IsGrabbed(int entity);
+/**
+ * Est-ce qu'il fait nuit?
+ * @return bool Vrai s'il fait nuit
+ */
+native bool rp_IsNight();
 // ----------------------------------------------------------------------------
+//                                                           Véhicule
+// ----------------------------------------------------------------------------
+/**
+ * Est-ce que l'entité est un véhicule "rp"?
+ * @param  {[type]} int entity        L'entité
+ * @return bool     Vrai si c'est un véhicule
+ */
 native bool rp_IsValidVehicle(int entity);
-native void rp_SetClientKeyVehicle(int client, int vehicleID, bool status=false);			/* Définir les clés d'une voiture à un joueur. Status=true -> Il a la clé */
-native bool rp_GetClientKeyVehicle(int client, int vehicleID);						/* Le joueur à t-il la clé d'une voiture ? */
-native void rp_ClientVehicleExit(int client, int vehicleID, bool forced=false);			/* Sort un conducteur d'une voiture */
-native void rp_ClientVehiclePassagerExit(int client, int vehicleID);					/* Sort un passager d'une voiture */
-native int rp_GetClientVehiclePassager(int client);								/* Sommes-nous passager d'une voiture ? */
-native void rp_SetClientVehiclePassager(int client, int vehicleID);					/* Mettons nous passager d'une voiture ! */
-native void rp_SetVehicleInt(int vehicleID, car_data typeID, int value);				/* Définir propriétée d'une voiture */
-native int rp_GetVehicleInt(int vehicleID, car_data typeID);						/* Récupérer propriétée d'une voiture */
-native void rp_SetClientVehicle(int client, int vehicleID, bool force=false);				/* Mettre un joueur conducteur d'une voiture */
+/**
+ * Définir les clés d'un joueur d'un véhicules
+ * @param  {[type]} int  client        Le joueur
+ * @param  {[type]} int  vehicleID     Le véhicule
+ * @param  {[type]} bool status=false  S'il a la clé
+ */
+native void rp_SetClientKeyVehicle(int client, int vehicleID, bool status=false);
+/**
+ * Le joueur a-t-il la clé d'un véhicule?
+ * @param  {[type]} int client        Le joueur
+ * @param  {[type]} int vehicleID     Le véhicules
+ * @return bool     Vrai s'il a la clé
+ */
+native bool rp_GetClientKeyVehicle(int client, int vehicleID);
+/**
+ * Sortir un joueur du véhicule. Peut échouer s'il y a pas de place
+ * @param  {[type]} int  client        Le joueur
+ * @param  {[type]} int  vehicleID     Le véhicule
+ * @param  {[type]} bool forced=false  Force le joueur à sortir, même s'il est bloqué
+ */
+native void rp_ClientVehicleExit(int client, int vehicleID, bool forced=false);
+/**
+ * Place le joueur en tant que conducteur d'un véhicule
+ * @param  {[type]} int  client        Le joueur
+ * @param  {[type]} int  vehicleID     L'ID du véhicule
+ * @param  {[type]} bool force=false   Doit-on TP le joueur vers la voiture
+ */
+native void rp_SetClientVehicle(int client, int vehicleID, bool force=false);
+/**
+ * Le joueur est-il conducteur d'une voiture?
+ * @param  {[type]} int client        Le joueur
+ * @return int     vehicleID>0 Le véhicule, sinon pas de véhicule.
+ */
+native int rp_GetClientVehicle(int client) {
+  return GetEntPropEnt(client, Prop_Send, "m_hVehicle");
+}
+/**
+ * Sortir le passager du véhicule.
+ * @param  {[type]} int  client        Le joueur
+ * @param  {[type]} int  vehicleID     Le véhicule
+ */
+native void rp_ClientVehiclePassagerExit(int client, int vehicleID);
+/**
+ * Le joueur est-il passagé d'une voiture?
+ * @param  {[type]} int client        Le joueur
+ * @return int     vehicleID>0 Le véhicule, sinon pas de véhicule.
+ */
+native int rp_GetClientVehiclePassager(int client);
+/**
+ * Place le joueur en tant que passager d'un véhicule
+ * @param  {[type]} int client        Le joueur
+ * @param  {[type]} int vehicleID     Le véhicule
+ * @return  bool    Vrai si le joueur a été correctement placé.
+ */
+native bool rp_SetClientVehiclePassager(int client, int vehicleID);
+/**
+ * Définir une propriétée d'un véhicule
+ * @param  {[type]} int      vehicleID     le véhicule
+ * @param  {[type]} car_data typeID        la propriétée
+ * @param  {[type]} int      value         la valeur
+ */
+native void rp_SetVehicleInt(int vehicleID, car_data typeID, int value);
+/**
+ * Récupère la propriétée d'un véhicule
+ * @param  {[type]} int      vehicleID     Le véhicule
+ * @param  {[type]} car_data typeID        La propriétée
+ * @return int      La valeur
+ */
+native int rp_GetVehicleInt(int vehicleID, car_data typeID);
 // ----------------------------------------------------------------------------
 native void rp_SetAppartementInt(int appartID, type_appart_bonus typeID, int value);		/* Définir une propriétée d'un appartement */
 native int rp_GetAppartementInt(int appartID, type_appart_bonus typeID);				/* Récupérer une propriétée d'un appartement */
@@ -220,8 +415,10 @@ native void rp_GetDate(char[] str, int length);
 native void rp_GetTime(int& hour, int& minutes);
 native void rp_GetServerString(rp_serv typeID, char[] str, int length);
 native void rp_SetServerString(rp_serv typeID, char[] str, int length);
+// ----------------------------------------------------------------------------
 native int rp_SetCaptureInt(rp_capture_zone zoneID, int value);
 native int rp_GetCaptureInt(rp_capture_zone zoneID);
+native int rp_GetClientPvPBonus(int client, rp_capture_zone typeID);					/* Est-ce qu'un joueur à le droit à un bonus de type PVP ? typeID==> cap_nuclear, cap_tower, cap_villa */
 // ----------------------------------------------------------------------------
 native bool rp_ClientCanDrawPanel(int client);
 native void rp_SendPanelToClient(Handle& panel, int client, float duration);
@@ -320,10 +517,10 @@ enum bool_user_data {
 	b_IsSearchByTribunal,
 	b_SpawnToMetro,
 	b_SpawnToTribunal,
-	b_SpawnToTueur,	
+	b_SpawnToTueur,
 	b_HasVilla,
 	b_CanSort,
-	
+
 	b_udata_max
 };
 enum int_user_data {
@@ -386,7 +583,7 @@ enum int_user_data {
 	i_TimeAFK_today,
 	i_TimeAFK_total,
 	i_MarriedTo,
-	
+
 	i_ItemCount,
 	i_ItemBankCount,
 	i_ItemCountSaved,
@@ -397,12 +594,12 @@ enum int_user_data {
 	i_LastAmendeBy,
 
 	i_Avocat,
-	
+
 	i_ArtisanXP,
 	i_ArtisanLevel,
 	i_ArtisanPoints,
-	
-	
+
+
 	i_udata_max
 };
 enum float_user_data {
@@ -429,27 +626,27 @@ enum float_user_data {
 	Float:fl_LowDamage,
 	Float:fl_HallucinationTime,
 	Float:fl_RespawnTime,
-	
+
 	Float:fl_ArtisanFatigue,
-	
+
 	fl_udata_max
 };
 enum sz_user_data {
 	String:sz_Skin,
-	
+
 	sz_udata_max
 };
 enum sick_type {
 	sick_type_none,
-	
+
 	sick_type_fievre,
 	sick_type_grippe,
 	sick_type_tourista,
 	sick_type_hemoragie,
-	
+
 	sick_type_max
 };
-enum rp_success_list {	
+enum rp_success_list {
 	success_list_police,
 	success_list_hopital,
 	success_list_mcdo,
@@ -525,7 +722,7 @@ enum building_prop_data {
 	BD_owner,
 	BD_Trapped,
 	BD_item_id,
-	
+
 	building_prop_data_max
 };
 enum rp_capture_zone {
@@ -573,46 +770,46 @@ enum rp_job_type {
 	job_type_current,
 	job_type_tag,
 	job_type_cochef,
-	
+
 	job_type_max
 };
 enum rp_serv {
 	villaOwnerID = 0,
 	villaOwnerName,
 	lotoCagnotte,
-	
+
 	rp_serv_max
 };
 
 enum rp_group_type {
 	group_type_name = 0,
-	
+
 	group_type_chef,
 	group_type_own_chef,
-	
-	group_type_capital, 
+
+	group_type_capital,
 	group_type_color,
 	group_type_buy,
 	group_type_skin,
 	group_type_tag,
-	
+
 	group_type_max
 };
 enum zone_type {
 	zone_type_name = 0,
-	
+
 	zone_type_min_x,
 	zone_type_min_y,
 	zone_type_min_z,
-	
+
 	zone_type_max_x,
 	zone_type_max_y,
 	zone_type_max_z,
-	
-	zone_type_type,	
+
+	zone_type_type,
 	zone_type_bit,
-	zone_type_private,	
-	
+	zone_type_private,
+
 	zone_type_max
 };
 enum location_type {
@@ -621,7 +818,7 @@ enum location_type {
 	location_type_origin_x,
 	location_type_origin_y,
 	location_type_origin_z,
-	
+
 	location_type_map,
 	location_type_max
 };
@@ -641,7 +838,7 @@ enum car_data {
 	car_maxPassager,
 	car_battery,
 	car_particle,
-	
+
 	car_data_max,
 };
 enum type_appart_bonus {
@@ -652,10 +849,10 @@ enum type_appart_bonus {
 	appart_bonus_vitality,
 	appart_bonus_coffre,
 	appart_bonus_paye,
-	
+
 	appart_proprio,
-	
-	appart_bonus_max	
+
+	appart_bonus_max
 };
 enum quest_type_type {
 	quest_story,
@@ -698,7 +895,7 @@ enum int_stat_data {
 
 	i_RunDistance,
 
-	i_JobSucess, // Mafia 18th Tueur 
+	i_JobSucess, // Mafia 18th Tueur
 	i_JobFails,
 
 
@@ -726,7 +923,7 @@ enum int_stat_data {
 	i_S_LotoWon,
 
 	i_S_DrugPickedUp,
-	
+
 	i_S_Kills,
 	i_S_Deaths,
 
