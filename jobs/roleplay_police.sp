@@ -1918,8 +1918,8 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			}
 		}
 		if( String_StartsWith(g_szJailRaison[type][jail_raison], "Vol de voiture") ) {
-			if( IsValidClient( rp_GetClientInt(target, i_LastVolTarget) ) ) {
-				int tg = rp_GetClientInt(target, i_LastVolTarget);
+			if( IsValidClient( rp_GetClientInt(target, i_LastVolVehicle) ) ) {
+				int tg = rp_GetClientInt(target, i_LastVolVehicle);
 				rp_SetClientInt(tg, i_Money, rp_GetClientInt(tg, i_Money) + rp_GetClientInt(target, i_LastVolAmount));
 				rp_SetClientInt(target, i_AddToPay, rp_GetClientInt(target, i_AddToPay) - rp_GetClientInt(target, i_LastVolAmount));
 				
