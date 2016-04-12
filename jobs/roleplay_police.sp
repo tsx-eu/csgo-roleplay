@@ -1917,7 +1917,17 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				return;
 			}
 		}
-		
+		if( String_StartsWith(g_szJailRaison[type][jail_raison], "Vol de voiture") ) {
+			if( IsValidClient( rp_GetClientInt(target, i_LastVolTarget) ) ) {
+				int tg = rp_GetClientInt(target, i_LastVolTarget);
+				rp_SetClientInt(tg, i_Money, rp_GetClientInt(tg, i_Money) + rp_GetClientInt(target, i_LastVolAmount));
+				rp_SetClientInt(target, i_AddToPay, rp_GetClientInt(target, i_AddToPay) - rp_GetClientInt(target, i_LastVolAmount));
+				
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N{default} à été libéré pour manque de preuve.", target);
+				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été libéré car nous avons trouvé aucune preuve vous reliant au vol de voiture.", client);
+				LogToGame("[TSX-RP] [JAIL] %L à été libéré car il n'avait pas commis de vol de voiture", target);
+			}
+		}
 		int amende = StringToInt(g_szJailRaison[type][jail_amende]);
 		
 		if( amende == -1 )
