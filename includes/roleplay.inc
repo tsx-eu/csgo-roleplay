@@ -551,6 +551,7 @@ enum int_user_data {
 	i_LastVol,
 	i_LastVolAmount,
 	i_LastVolTarget,
+	i_LastVolVehicle,
 	i_BurnedBy,
 	i_JailledBy,
 	i_Cryptage,
