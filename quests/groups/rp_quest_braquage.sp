@@ -140,7 +140,8 @@ public bool fwdCanStart(int client) {
 		if( rp_GetClientJobID(i) == 1 || rp_GetClientJobID(i) == 101 )
 			ct++;
 	}
-	if( ct <= 3 )
+	
+	if( ct <= 3 && GetConVarInt(FindConVar("hostport")) != 27025 )
 		return false;
 	
 	return true;
@@ -158,7 +159,7 @@ public void Q1_Start(int objectiveID, int client) {
 public void Q1_Frame(int objectiveID, int client) {
 	
 	if( rp_ClientCanDrawPanel(client) ) {
-		char tmp[64];
+		char tmp[64], tmp2[64];
 		
 		int countB = 0, countP = 0;
 		int stkBraqueur[MAXPLAYERS + 1], stkPolice[MAXPLAYERS + 1];
@@ -209,11 +210,12 @@ public void Q1_Frame(int objectiveID, int client) {
 				g_iPlayerTeam[i] = TEAM_POLICE;
 				continue;
 			}
-			if( g_iPlayerTeam[i] == 0 )
+			if( g_iPlayerTeam[i] != TEAM_NONE )
 				continue;
 			
-			Format(tmp, sizeof(tmp), "%N", i);
-			menu.AddItem("", tmp);
+			Format(tmp, sizeof(tmp), "%d", i);
+			Format(tmp2, sizeof(tmp2), "%N", i);
+			menu.AddItem(tmp2, tmp);
 		}
 		
 		menu.ExitButton = false;
