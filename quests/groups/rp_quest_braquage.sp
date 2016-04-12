@@ -31,9 +31,10 @@
 #define		TEAM_INVITATION		1
 #define		TEAM_BRAQUEUR		2
 #define		TEAM_POLICE			3
-#define		QUEST_TEAM1		"Braqueur"
-#define		QUEST_TEAM2		"Police"
-
+#define		TEAM_NAME1		"Braqueur"
+#define		TEAM_NAME2		"Police"
+#define 	REQUIRED_T			2
+#define 	REQUIRED_CT			0
 
 // TODO: Retirer du stack en cas de déconnexion de quelqu'un dans une équipe.
 
@@ -49,20 +50,20 @@ bool g_bDoingQuest = false;
 int g_iVehicle = 0;
 int g_iPlayerTeam[MAXPLAYERS + 1], g_stkTeam[QUEST_TEAMS + 1][MAXPLAYERS+1], g_stkTeamCount[QUEST_TEAMS + 1];
 float g_flStartPos[][3] = {
-	{672.069213, -4349.562011, -2015.968750},
-	{822.723144, -4342.318359, -2015.968750},
-	{977.277099, -4335.911132, -2015.968750},
-	{1166.882812, -4342.825683, -2015.968750},
-	{1861.286865, -4362.259277, -2015.968750},
-	{1994.302856, -4354.254882, -2015.968750},
-	{-2440.774658, 1009.366882, -2447.968750},
-	{-2439.078613, 1216.398925, -2447.968750},
-	{-2439.977783, 1399.208740, -2447.968750},
-	{-2441.483154, 1630.000366, -2447.968750},
-	{-2945.136962, 1639.538940, -2447.968750},
-	{-2947.626708, 1423.449951, -2447.968750},
-	{-2923.718750, 1205.253051, -2447.968750},
-	{-2911.954345, 1015.363891, -2447.968750}
+	{672.0, -4340.0, -2010.0},
+	{822.0, -4340.0, -2010.0},
+	{977.0, -4340.0, -2010.0},
+	{1160.0, -4340.0, -2010.0},
+	{1860.0, -4340.0, -2010.0},
+	{1990.0, -4340.0, -2010.0},
+	{-2440.0, 1000.0, -2440.0},
+	{-2440.0, 1200.0, -2440.0},
+	{-2440.0, 1400.0, -2440.0},
+	{-2440.0, 1600.0, -2440.0},
+	{-2945.0, 1600.0, -2440.0},
+	{-2945.0, 1400.0, -2440.0},
+	{-2945.0, 1200.0, -2440.0},
+	{-2945.0, 1000.0, -2440.0}
 };
 
 int spawnVehicle(int client) {
@@ -73,20 +74,19 @@ int spawnVehicle(int client) {
 	SortIntegers(rnd, sizeof(g_flStartPos), Sort_Random);
 	
 	for (int i = 0; i < sizeof(g_flStartPos); i++) {
-		ent = rp_CreateVehicle(g_flStartPos[rnd[i]], view_as<float>({0.0, 0.0, 0.0}), "models/natalya/vehicles/natalya_mustang_csgo_2016.md", 1, 0);
+		ent = rp_CreateVehicle(g_flStartPos[rnd[i]], view_as<float>({0.0, 0.0, 0.0}), "models/natalya/vehicles/natalya_mustang_csgo_2016.mdl", 1, 0);
 		if( ent > 0 && rp_IsValidVehicle(ent) ) {
 			break;
 		}
 	}
 	if( ent > 0 && rp_IsValidVehicle(ent) ) {
 		rp_SetVehicleInt(ent, car_owner, client);
-		rp_SetClientKeyVehicle(ent, client, true);
+		rp_SetVehicleInt(ent, car_maxPassager, 3);
+		rp_SetClientKeyVehicle(client, ent, true);
 		ServerCommand("sm_effect_colorize %d 0 0 0 255", ent);
 		
-		for (int i = 1; i <= MaxClients; i++) {
-			if( g_iPlayerTeam[i] == TEAM_BRAQUEUR ) {
-				rp_SetClientKeyVehicle(ent, client, true);
-			}
+		for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
+			rp_SetClientKeyVehicle(g_stkTeam[TEAM_BRAQUEUR][i], ent, true);
 		}
 		
 		return ent;
@@ -141,7 +141,7 @@ public bool fwdCanStart(int client) {
 			ct++;
 	}
 	
-	if( ct <= 3 && GetConVarInt(FindConVar("hostport")) != 27025 )
+	if( ct < REQUIRED_CT )
 		return false;
 	
 	return true;
@@ -183,11 +183,12 @@ public void Q1_Frame(int objectiveID, int client) {
 			}
 		}
 		
-		if( countB >= 4 && countP >= 4 ) {
+		if( countB >= REQUIRED_T && countP >= 0 ) {
 			delete menu;
 			//rp_QuestSetGroup(g_iQuest, TEAM_BRAQUEUR, stkBraqueur, countB - 1);
 			//rp_QuestSetGroup(g_iQuest, TEAM_POLICE, stkPolice, countP - 1);
 			rp_QuestStepComplete(client, objectiveID);
+			return;
 		}
 		
 		menu.AddItem("", "------------\nBraqueur en attente:", ITEMDRAW_DISABLED);
@@ -212,6 +213,8 @@ public void Q1_Frame(int objectiveID, int client) {
 			}
 			if( g_iPlayerTeam[i] != TEAM_NONE )
 				continue;
+			if( i == client )
+				continue;
 			
 			Format(tmp, sizeof(tmp), "%d", i);
 			Format(tmp2, sizeof(tmp2), "%N", i);
@@ -223,23 +226,28 @@ public void Q1_Frame(int objectiveID, int client) {
 	}
 }
 public void Q2_Start(int objectiveID, int client) {
-	
+	PrintToChatAll("hello");
 	for (int i = 1; i <= MaxClients; i++) {
 		g_stkTeam[ g_iPlayerTeam[i] ][ g_stkTeamCount[ g_iPlayerTeam[i] ]++ ] = i;
 	}
 	
 	g_iVehicle = spawnVehicle(client);
+	PrintToChatAll("%d", g_iVehicle);
 }
 public void Q2_Frame(int objectiveID, int client) {
 	ServerCommand("sm_effect_gps %d %d", client, g_iVehicle);
+	
+	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
+		ServerCommand("sm_effect_gps %d %d", g_stkTeam[TEAM_BRAQUEUR][i], g_iVehicle);
+	}
 }
 // ----------------------------------------------------------------------------
 
 void DrawMenu_Invitation(int client, int target) {
 	Menu menu = new Menu(MenuInviterBraqueur);
-	menu.SetTitle("%N souhaite participer\nà la quète %s\n avec vous dans l'équipe: %s.\n \n Acceptez-vous son invitation?", client, QUEST_NAME);
+	menu.SetTitle("%N souhaite participer\nà la quète %s\n avec vous dans l'équipe: %s.\n \n Acceptez-vous son invitation?", client, QUEST_NAME, TEAM_NAME1);
 	menu.AddItem("oui", "Oui");
-	menu.AddItem("oui", "Non");
+	menu.AddItem("non", "Non");
 	menu.ExitButton = false;
 	
 	menu.Display(target, 10);
@@ -250,15 +258,17 @@ public int MenuInviterBraqueur(Handle menu, MenuAction action, int client, int p
 		GetMenuItem(menu, param2, options, sizeof(options));
 		
 		if( StrEqual(options, "oui") ) {
-			g_iPlayerTeam[client] = TEAM_INVITATION;
+			g_iPlayerTeam[client] = TEAM_BRAQUEUR;
 		}
 		else if( StrEqual(options, "non") ) {
 			g_iPlayerTeam[client] = TEAM_NONE;
 		}
 		else {
 			int target = StringToInt(options);
-			if( IsValidClient(target) )
+			if( IsValidClient(target) ) {
 				g_iPlayerTeam[target] = TEAM_INVITATION;
+				DrawMenu_Invitation(client, target);
+			}
 		}
 		
 	}
