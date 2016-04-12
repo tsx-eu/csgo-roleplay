@@ -215,7 +215,7 @@ public void Q1_Frame(int objectiveID, int client) {
 			
 			Format(tmp, sizeof(tmp), "%d", i);
 			Format(tmp2, sizeof(tmp2), "%N", i);
-			menu.AddItem(tmp2, tmp);
+			menu.AddItem(tmp, tmp2);
 		}
 		
 		menu.ExitButton = false;
