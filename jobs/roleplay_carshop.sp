@@ -459,14 +459,14 @@ public Action Cmd_ItemVehicleStuff(int args) {
 // ----------------------------------------------------------------------------
 public int Native_rp_CreateVehicle(Handle plugin, int numParams) {
 	float origin[3], angle[3];
-	int skin = GetNativeCell(3);
-	int client = GetNativeCell(4);
+	int skin = GetNativeCell(4);
+	int client = GetNativeCell(5);
 	int l_model;
-	GetNativeArray(0, origin, sizeof(origin));
-	GetNativeArray(1, angle, sizeof(angle));
-	GetNativeStringLength(2, l_model);
-	char[] model = new char[l_model];
-	GetNativeString(2, model, l_model);
+	GetNativeArray(1, origin, sizeof(origin));
+	GetNativeArray(2, angle, sizeof(angle));
+	GetNativeStringLength(3, l_model);
+	char[] model = new char[ l_model + 2];
+	GetNativeString(3, model, l_model + 1);
 	
 	// Thanks blodia: https://forums.alliedmods.net/showthread.php?p=1268368#post1268368
 	
