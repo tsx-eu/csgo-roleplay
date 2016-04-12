@@ -335,6 +335,7 @@ native void rp_SetVehicleInt(int vehicleID, car_data typeID, int value);
  * @return int      La valeur
  */
 native int rp_GetVehicleInt(int vehicleID, car_data typeID);
+native int rp_CreateVehicle(float origin[3], float angle[3], char[] model, int skin, int client = 0);
 // ----------------------------------------------------------------------------
 native void rp_SetAppartementInt(int appartID, type_appart_bonus typeID, int value);		/* Définir une propriétée d'un appartement */
 native int rp_GetAppartementInt(int appartID, type_appart_bonus typeID);				/* Récupérer une propriétée d'un appartement */
@@ -431,7 +432,6 @@ native int rp_RegisterQuest(char uniqID[32], char name[64], quest_type_type type
 native void rp_QuestAddStep(int questID, int stepID, QuestFct start, QuestFct frame, QuestFct abort, QuestFct done);
 native int rp_QuestCreateInstance(int client, char model[PLATFORM_MAX_PATH], float vecPos[3]);
 native void rp_QuestSetGroupCreationFct(int questID, QuestFctInit fwd);
-native void rp_QuestSetGroup(int questID, int groupID, int[] players, int pCount);
 native void rp_QuestStart(int clientID, int questID);
 native void rp_QuestCancel(int clientID, int questID);
 // ----------------------------------------------------------------------------

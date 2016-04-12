@@ -75,6 +75,13 @@ public Action Cmd_Reload(int args) {
 	ServerCommand("sm plugins reload %s", name);
 	return Plugin_Continue;
 }
+
+public APLRes AskPluginLoad2(Handle hPlugin, bool isAfterMapLoaded, char[] error, int err_max) {
+	
+	CreateNative("rp_CreateVehicle", 		Native_rp_CreateVehicle);
+	
+	return APLRes_Success;
+}
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", 	Cmd_Reload);
 	RegServerCmd("rp_item_vehicle", 	Cmd_ItemVehicle,		"RP-ITEM",	FCVAR_UNREGISTERED);
@@ -450,9 +457,18 @@ public Action Cmd_ItemVehicleStuff(int args) {
 	return Plugin_Handled;
 }
 // ----------------------------------------------------------------------------
-int rp_CreateVehicle(float origin[3], float angle[3], char[] model, int skin, int client=0) {
+public int Native_rp_CreateVehicle(Handle plugin, int numParams) {
+	float origin[3], angle[3];
+	int skin = GetNativeCell(3);
+	int client = GetNativeCell(4);
+	int l_model;
+	GetNativeArray(0, origin, sizeof(origin));
+	GetNativeArray(1, angle, sizeof(angle));
+	GetNativeStringLength(2, l_model);
+	char[] model = new char[l_model];
+	GetNativeString(2, model, l_model);
+	
 	// Thanks blodia: https://forums.alliedmods.net/showthread.php?p=1268368#post1268368
-	LogToGame("[PRE] Vehicle Spawning from %N", client);
 	
 	int ent = CreateEntityByName("prop_vehicle_driveable");
 	if( ent == -1) { return 0; } // Tout le monde sait que ça n'arrive jamais...
@@ -539,7 +555,6 @@ int rp_CreateVehicle(float origin[3], float angle[3], char[] model, int skin, in
 		WritePackCell(dp, ent);
 	}
 	
-	LogToGame("[POST] Vehicle Spawning from %N", client);
 	return ent;
 }
 public void OnThink(int ent) {
