@@ -33,7 +33,7 @@
 #define		TEAM_POLICE			3
 #define		TEAM_NAME1		"Braqueur"
 #define		TEAM_NAME2		"Police"
-#define 	REQUIRED_T			0
+#define 	REQUIRED_T			2
 #define 	REQUIRED_CT			0
 #define		MAX_ZONES			310
 
@@ -61,7 +61,9 @@ public void OnPluginStart() {
 	rp_QuestAddStep(g_iQuest, i++, Q2_Start,	Q2_Frame,	Q_Abort, QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q3_Frame,	Q_Abort, QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++, Q4_Start,	Q4_Frame,	Q_Abort, QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, i++, Q5_Start,	QUEST_NULL,	Q_Abort, QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, Q5_Start,	Q5_Frame,	Q_Abort, QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, Q6_Start,	Q6_Frame,	Q_Abort, QUEST_NULL);
+	
 }
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -113,9 +115,11 @@ public void OnClientDisconnect(int client) {
 public void Q_Abort(int objectiveID, int client) {
 	if( g_bByPassDoor ) {
 		for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++)
-			rp_UnhookEvent(g_stkTeam[TEAM_BRAQUEUR][i], RP_OnPlayerDead, fwdGotKey);
+			rp_UnhookEvent(g_stkTeam[TEAM_BRAQUEUR][i], RP_OnPlayerCheckKey, fwdGotKey);
 		g_bByPassDoor = false;
 	}
+	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++)
+		SetEntProp(g_stkTeam[TEAM_BRAQUEUR][i], Prop_Send, "m_bHasHelmet", 0);
 }
 
 public void Q1_Start(int objectiveID, int client) {
@@ -130,6 +134,7 @@ public void Q1_Frame(int objectiveID, int client) {
 	for (int i = 0; i < g_stkTeamCount[TEAM_INVITATION]; i++) {
 		DrawMenu_Invitation(client, g_stkTeam[TEAM_INVITATION][i]);
 	}
+	PrintHintText(client, "<b>Quête</b>: %s\n<b>Objectif</b>: Inviter des collègues.", QUEST_NAME);
 	
 	if( rp_ClientCanDrawPanel(client) ) {
 		char tmp[64], tmp2[64];
@@ -153,15 +158,14 @@ public void Q1_Frame(int objectiveID, int client) {
 		for (int i = 1; i <= MaxClients; i++) {
 			if( !IsValidClient(i) )
 				continue;
-			if( g_iPlayerTeam[client] != TEAM_POLICE && (rp_GetClientJobID(i) == 1 || rp_GetClientJobID(i) == 101) ) {
-				addClientToTeam(client, TEAM_POLICE);
+			if( g_iPlayerTeam[i] != TEAM_POLICE && (rp_GetClientJobID(i) == 1 || rp_GetClientJobID(i) == 101) ) {
+				addClientToTeam(i, TEAM_POLICE);
+				continue;
 			}
-			if( g_iPlayerTeam[client] == TEAM_POLICE && rp_GetClientJobID(i) != 1 && rp_GetClientJobID(i) != 101 ) {
-				removeClientTeam(client);
+			if( g_iPlayerTeam[i] == TEAM_POLICE && rp_GetClientJobID(i) != 1 && rp_GetClientJobID(i) != 101 ) {
+				removeClientTeam(i);
 			}
 			if( g_iPlayerTeam[i] != TEAM_NONE )
-				continue;
-			if( i == client )
 				continue;
 			
 			Format(tmp, sizeof(tmp), "%d", i);
@@ -185,15 +189,18 @@ public void Q2_Frame(int objectiveID, int client) {
 	
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
 		if( allIn ) allIn = isInVehicle(g_stkTeam[TEAM_BRAQUEUR][i]);
-		
 		ServerCommand("sm_effect_gps %d %d", g_stkTeam[TEAM_BRAQUEUR][i], g_iVehicle);
+		PrintHintText(g_stkTeam[TEAM_BRAQUEUR][i], "<b>Quête</b>: %s\n<b>Objectif</b>: Récupérer la voiture blindée.", QUEST_NAME);
 	}
 	
 	if( allIn )
 		rp_QuestStepComplete(client, objectiveID);
 }
 int g_iQ3 = -1;
-public void Q3_Frame(int objectiveID, int client) {	
+public void Q3_Frame(int objectiveID, int client) {
+	
+	PrintHintText(client, "<b>Quête</b>: %s\n<b>Objectif</b>: Choisir le lieux du braquage.", QUEST_NAME);
+	
 	if( rp_ClientCanDrawPanel(client) ) {
 		char tmp[64], tmp2[2][64];
 		Menu menu = new Menu(MenuSelectPlanque);
@@ -228,41 +235,91 @@ public void Q3_Frame(int objectiveID, int client) {
 }
 public void Q4_Start(int objectiveID, int client) {
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++)
-		rp_HookEvent(g_stkTeam[TEAM_BRAQUEUR][i], RP_OnPlayerDead, fwdGotKey);
+		rp_HookEvent(g_stkTeam[TEAM_BRAQUEUR][i], RP_OnPlayerCheckKey, fwdGotKey);
 	g_bByPassDoor = true;
 }
 
 public Action fwdGotKey(int client, int doorID) {
 	float pos[3];
 	Entity_GetAbsOrigin(doorID, pos);
-	if( rp_GetZoneInt(rp_GetZoneFromPoint(pos), zone_type_type) == g_iPlanque )
+	
+	int zone = rp_GetZoneInt(rp_GetZoneFromPoint(pos), zone_type_type);
+	if( zone == g_iPlanque )
 		return Plugin_Changed;
+	if( zone == 0 && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == g_iPlanque && rp_IsEntitiesNear(client, doorID) )
+		return Plugin_Changed;
+	
 	return Plugin_Continue;
 }
 public void Q4_Frame(int objectiveID, int client) {
 	bool allIn = true;
 	float min[3], max[3], pos[3];
+	char tmp[64], tmp2[2][64];
 	min[0] = rp_GetZoneFloat(g_iPlanqueZone, zone_type_min_x);
 	min[1] = rp_GetZoneFloat(g_iPlanqueZone, zone_type_min_y);
 	min[2] = rp_GetZoneFloat(g_iPlanqueZone, zone_type_min_z);
 	max[0] = rp_GetZoneFloat(g_iPlanqueZone, zone_type_max_x);
 	max[1] = rp_GetZoneFloat(g_iPlanqueZone, zone_type_max_y);
 	max[2] = rp_GetZoneFloat(g_iPlanqueZone, zone_type_max_z);
+	rp_GetZoneData(g_iPlanqueZone, zone_type_name, tmp, sizeof(tmp));
+	ExplodeString(tmp, ": ", tmp2, sizeof(tmp2), sizeof(tmp2[]));
+	
 	for (int i = 0; i <= 2; i++)
 		pos[i] = (min[i] + max[i]) / 2.0;
 		
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
 		bool inside = (rp_GetZoneInt(rp_GetPlayerZone(g_stkTeam[TEAM_BRAQUEUR][i]), zone_type_type) == g_iPlanque);
 		if (allIn) allIn = inside;
-		if( !inside )
-			ServerCommand("sm_effect_gps %d %f %f %f", g_stkTeam[TEAM_BRAQUEUR][i], pos[0], pos[1], pos[2]);
+		if( !inside ) ServerCommand("sm_effect_gps %d %f %f %f", g_stkTeam[TEAM_BRAQUEUR][i], pos[0], pos[1], pos[2]);
+		
+		PrintHintText(g_stkTeam[TEAM_BRAQUEUR][i], "<b>Quête</b>: %s\n<b>Objectif</b>: Entrez tous dans: %s.", QUEST_NAME, tmp2[0]);
 	}
 	
 	if( allIn )
 		rp_QuestStepComplete(client, objectiveID);
 }
 public void Q5_Start(int objectiveID, int client) {
-	PrintToChatAll("hello");
+	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
+		if( Client_GetWeaponBySlot(g_stkTeam[TEAM_BRAQUEUR][i], CS_SLOT_PRIMARY) < 0 )
+			Client_GiveWeapon(client, "weapon_ak47", true);
+		if( Client_GetWeaponBySlot(g_stkTeam[TEAM_BRAQUEUR][i], CS_SLOT_SECONDARY) < 0 )
+			Client_GiveWeapon(client, "weapon_revolver", false);
+		SetEntProp(g_stkTeam[TEAM_BRAQUEUR][i], Prop_Send, "m_bHasHelmet", 1);
+	}
+}
+public void Q5_Frame(int objectiveID, int client) {
+	char tmp[64], tmp2[2][64];
+	rp_GetZoneData(g_iPlanqueZone, zone_type_name, tmp, sizeof(tmp));
+	ExplodeString(tmp, ": ", tmp2, sizeof(tmp2), sizeof(tmp2[]));
+	
+	int cpt = countPlayerInZone(g_iPlanque);
+	if( cpt == 0 ) {
+		rp_QuestStepComplete(client, objectiveID);
+	}
+	else {
+		for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
+			PrintHintText(g_stkTeam[TEAM_BRAQUEUR][i], "<b>Quête</b>: %s\n<b>Objectif</b>: Soyez seul dans %s.\n Il reste %d personne%s.", QUEST_NAME, tmp2[0], cpt, (cpt>1?"s":""));
+		}
+	}
+}
+public void Q6_Start(int objectiveID, int client) {
+	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++)
+		SetEntProp(g_stkTeam[TEAM_BRAQUEUR][i], Prop_Send, "m_bHasHelmet", 1);
+}
+public void Q6_Frame(int objectiveID, int client) {
+	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
+		int heal = GetClientHealth(g_stkTeam[TEAM_BRAQUEUR][i]) + Math_GetRandomInt(0, 5);
+		int kevlar = rp_GetClientInt(client, i_Kevlar) + 1;
+		if( heal > 500 )
+			heal = 500;
+		if( kevlar > 250 )
+			kevlar = 250;
+		SetEntityHealth(g_stkTeam[TEAM_BRAQUEUR][i], heal);
+		rp_SetClientInt(g_stkTeam[TEAM_BRAQUEUR][i], i_Kevlar, kevlar);
+		
+		
+		PrintHintText(g_stkTeam[TEAM_BRAQUEUR][i], "<b>Quête</b>: %s\n<b>Objectif</b>: Restez vivant le plus longtemps possible.", QUEST_NAME);
+	}
 }
 // ----------------------------------------------------------------------------
 void DrawMenu_Invitation(int client, int target) {
@@ -288,8 +345,7 @@ public int MenuInviterBraqueur(Handle menu, MenuAction action, int client, int p
 		else {
 			int target = StringToInt(options);
 			if( IsValidClient(target) ) {
-				addClientToTeam(client, TEAM_INVITATION);
-				DrawMenu_Invitation(client, target);
+				addClientToTeam(target, TEAM_INVITATION);
 			}
 		}
 		
@@ -317,12 +373,19 @@ public int MenuSelectPlanque(Handle menu, MenuAction action, int client, int par
 }
 // ----------------------------------------------------------------------------
 void addClientToTeam(int client, int team) {
+	
+	if( g_iPlayerTeam[client] != TEAM_NONE )
+		removeClientTeam(client);
+	
 	if( team != TEAM_NONE && g_iPlayerTeam[client] != team )
 		g_stkTeam[team][ g_stkTeamCount[team]++ ] = client;
 	
 	g_iPlayerTeam[client] = team;
+	PrintToChatAll("%N est maintenant dans l'équipe %d.", client, team);
+	
 }
 void removeClientTeam(int client) {
+	
 	if( g_iPlayerTeam[client] != TEAM_NONE ) {
 		for (int i = 0; i < g_stkTeamCount[g_iPlayerTeam[client]]; i++) {
 			if( g_stkTeam[ g_iPlayerTeam[client] ][ i ] == client ) {
@@ -336,6 +399,21 @@ void removeClientTeam(int client) {
 		
 		g_iPlayerTeam[client] = TEAM_NONE;
 	}
+	PrintToChatAll("%N a quitté son équipe", client);
+}
+int countPlayerInZone(int jobID) {
+	int ret;
+	for (int i = 1; i <= MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		if( g_iPlayerTeam[i] == TEAM_BRAQUEUR )
+			continue;
+		if( !IsPlayerAlive(i) )
+			continue;
+		if( rp_GetZoneInt(rp_GetPlayerZone(i), zone_type_type) == jobID )
+			ret++;
+	}
+	return ret;
 }
 int spawnVehicle(int client) {
 	static float g_flStartPos[][3] = {
@@ -369,6 +447,7 @@ int spawnVehicle(int client) {
 	if( ent > 0 && rp_IsValidVehicle(ent) ) {
 		rp_SetVehicleInt(ent, car_owner, client);
 		rp_SetVehicleInt(ent, car_maxPassager, 3);
+		rp_SetVehicleInt(ent, car_health, 10000);
 		rp_SetClientKeyVehicle(client, ent, true);
 		ServerCommand("sm_effect_colorize %d 0 0 0 255", ent);
 		
