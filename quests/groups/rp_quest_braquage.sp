@@ -45,8 +45,8 @@ public Plugin myinfo =  {
 };
 
 int g_iQuest;
-bool g_bDoingQuest, g_bByPassDoor;
-int g_iVehicle, g_iPlanque, g_iPlanqueZone; 
+bool g_bDoingQuest, g_bByPassDoor, g_bHasHelmet;
+int g_iVehicle, g_iPlanque, g_iPlanqueZone, g_iQuestGain;
 int g_iPlayerTeam[MAXPLAYERS + 1], g_stkTeam[QUEST_TEAMS + 1][MAXPLAYERS+1], g_stkTeamCount[QUEST_TEAMS + 1], g_iJobs[MAX_JOBS];
 
 public void OnPluginStart() {
@@ -64,6 +64,9 @@ public void OnPluginStart() {
 	rp_QuestAddStep(g_iQuest, i++, Q5_Start,	Q5_Frame,	Q_Abort, QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++, Q6_Start,	Q6_Frame,	Q_Abort, QUEST_NULL);
 	
+}
+public void OnMapStart() {
+	PrecacheSoundAny("ui/beep22.wav");
 }
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -107,19 +110,32 @@ public bool fwdCanStart(int client) {
 }
 public void OnClientPostAdminCheck(int client) {
 	g_iPlayerTeam[client] = TEAM_NONE;
+	if( g_bHasHelmet ) {
+		rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
+	}
 }
 public void OnClientDisconnect(int client) {
 	removeClientTeam(client);
 }
 // ----------------------------------------------------------------------------
 public void Q_Abort(int objectiveID, int client) {
-	if( g_bByPassDoor ) {
-		for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++)
+	
+	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
+		if( g_bByPassDoor )
 			rp_UnhookEvent(g_stkTeam[TEAM_BRAQUEUR][i], RP_OnPlayerCheckKey, fwdGotKey);
-		g_bByPassDoor = false;
+		if( g_bHasHelmet )
+			SetEntProp(g_stkTeam[TEAM_BRAQUEUR][i], Prop_Send, "m_bHasHelmet", 0);
 	}
-	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++)
-		SetEntProp(g_stkTeam[TEAM_BRAQUEUR][i], Prop_Send, "m_bHasHelmet", 0);
+	
+	if( g_bHasHelmet ) {
+		for (int i = 1; i <= MaxClients; i++) {
+			if( !IsValidClient(i) )
+				continue;
+			rp_UnhookEvent(i, RP_OnPlayerDead, fwdDead);
+		}
+	}
+	g_bByPassDoor = false;
+	g_bHasHelmet = false;
 }
 
 public void Q1_Start(int objectiveID, int client) {
@@ -279,12 +295,21 @@ public void Q4_Frame(int objectiveID, int client) {
 		rp_QuestStepComplete(client, objectiveID);
 }
 public void Q5_Start(int objectiveID, int client) {
+	
+	g_bHasHelmet = true;
+	
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
 		if( Client_GetWeaponBySlot(g_stkTeam[TEAM_BRAQUEUR][i], CS_SLOT_PRIMARY) < 0 )
 			Client_GiveWeapon(client, "weapon_ak47", true);
 		if( Client_GetWeaponBySlot(g_stkTeam[TEAM_BRAQUEUR][i], CS_SLOT_SECONDARY) < 0 )
 			Client_GiveWeapon(client, "weapon_revolver", false);
 		SetEntProp(g_stkTeam[TEAM_BRAQUEUR][i], Prop_Send, "m_bHasHelmet", 1);
+	}
+	
+	for (int i = 1; i <= MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		rp_HookEvent(i, RP_OnPlayerDead, fwdDead);
 	}
 }
 public void Q5_Frame(int objectiveID, int client) {
@@ -303,10 +328,33 @@ public void Q5_Frame(int objectiveID, int client) {
 	}
 }
 public void Q6_Start(int objectiveID, int client) {
-	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++)
-		SetEntProp(g_stkTeam[TEAM_BRAQUEUR][i], Prop_Send, "m_bHasHelmet", 1);
+	g_iQuestGain = 1000;
+	
+	for (float i = 0.0; i <= 20.0; i += 1.5)
+		CreateTimer(i, alarm);
+}
+public Action alarm(Handle timer, any client) {
+	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
+		EmitSoundToAllAny("ui/beep22.wav", g_stkTeam[TEAM_BRAQUEUR][i]);
+	}
+}
+public Action fwdDead(int client, int attacker) {	
+	if( g_iPlayerTeam[attacker] == TEAM_BRAQUEUR && g_bHasHelmet ) {
+		PrintToChatAll("Meurtre de la part d'un braqueur");
+		return Plugin_Handled;
+	}
+	if( g_iPlayerTeam[client] == TEAM_BRAQUEUR ) {
+		PrintToChatAll("Un braqueur a été tué.");
+		return Plugin_Handled;
+	}
+	return Plugin_Continue;
 }
 public void Q6_Frame(int objectiveID, int client) {
+	int GainMax = (rp_GetJobCapital(g_iPlanque) / 1000);
+	char tmp[64], tmp2[2][64];
+	rp_GetZoneData(g_iPlanqueZone, zone_type_name, tmp, sizeof(tmp));
+	ExplodeString(tmp, ": ", tmp2, sizeof(tmp2), sizeof(tmp2[]));
+	
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
 		int heal = GetClientHealth(g_stkTeam[TEAM_BRAQUEUR][i]) + Math_GetRandomInt(0, 5);
 		int kevlar = rp_GetClientInt(client, i_Kevlar) + 1;
@@ -317,8 +365,19 @@ public void Q6_Frame(int objectiveID, int client) {
 		SetEntityHealth(g_stkTeam[TEAM_BRAQUEUR][i], heal);
 		rp_SetClientInt(g_stkTeam[TEAM_BRAQUEUR][i], i_Kevlar, kevlar);
 		
+		g_iQuestGain += Math_GetRandomInt(0, 50);
+		if( g_iQuestGain >= GainMax )
+			g_iQuestGain = GainMax;
 		
-		PrintHintText(g_stkTeam[TEAM_BRAQUEUR][i], "<b>Quête</b>: %s\n<b>Objectif</b>: Restez vivant le plus longtemps possible.", QUEST_NAME);
+		PrintHintText(g_stkTeam[TEAM_BRAQUEUR][i], "<b>Objectif</b>: Restez vivant. Prennez la fuite avec votre voiture quand vous le souhaiter. <b>Gain</b>: %d$", g_iQuestGain);
+	}
+	
+	for (int j = 0; j < g_stkTeamCount[TEAM_POLICE]; j++) {
+		PrintHintText(g_stkTeam[TEAM_POLICE][j], "<b>Alerte</b>: Un braquage est en cours dans %s, tuer les braqueurs. <b>Gain</b>: %d$, <b>Amende</b>: %d$.", tmp2[0], (GainMax - g_iQuestGain)/4, g_iQuestGain/4);
+		
+		for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
+			rp_Effect_BeamBox(g_stkTeam[TEAM_POLICE][j], g_stkTeam[TEAM_BRAQUEUR][i], NULL_VECTOR, 255, 0, 0);
+		}
 	}
 }
 // ----------------------------------------------------------------------------
@@ -373,19 +432,14 @@ public int MenuSelectPlanque(Handle menu, MenuAction action, int client, int par
 }
 // ----------------------------------------------------------------------------
 void addClientToTeam(int client, int team) {
+	removeClientTeam(client);
 	
-	if( g_iPlayerTeam[client] != TEAM_NONE )
-		removeClientTeam(client);
-	
-	if( team != TEAM_NONE && g_iPlayerTeam[client] != team )
+	if( team != TEAM_NONE )
 		g_stkTeam[team][ g_stkTeamCount[team]++ ] = client;
 	
 	g_iPlayerTeam[client] = team;
-	PrintToChatAll("%N est maintenant dans l'équipe %d.", client, team);
-	
 }
 void removeClientTeam(int client) {
-	
 	if( g_iPlayerTeam[client] != TEAM_NONE ) {
 		for (int i = 0; i < g_stkTeamCount[g_iPlayerTeam[client]]; i++) {
 			if( g_stkTeam[ g_iPlayerTeam[client] ][ i ] == client ) {
@@ -399,7 +453,6 @@ void removeClientTeam(int client) {
 		
 		g_iPlayerTeam[client] = TEAM_NONE;
 	}
-	PrintToChatAll("%N a quitté son équipe", client);
 }
 int countPlayerInZone(int jobID) {
 	int ret;
