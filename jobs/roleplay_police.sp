@@ -64,7 +64,6 @@ char g_szJailRaison[][][128] = {
 	{ "Fuite, refus d'obtempérer",			"0", 	"6",	"200"},
 	{ "Insultes, Irrespect",				"1", 	"6",	"250"},
 	{ "Trafique illégal",					"0", 	"6",	"100"},
-	{ "Vol de voiture",				"0", 	"6",	"200"},
 	{ "Nuisance sonore",					"0", 	"6",	"100"},
 	{ "Tir dans la rue",					"0", 	"6",	"50"},
 	{ "Conduite dangeureuse",				"0", 	"6",	"150"},
@@ -1917,23 +1916,33 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				return;
 			}
 		}
-		if( String_StartsWith(g_szJailRaison[type][jail_raison], "Vol de voiture") ) {
-			if( IsValidClient( rp_GetClientInt(target, i_LastVolVehicle) ) ) {
-				int tg = rp_GetClientInt(target, i_LastVolVehicle);
-				rp_SetClientInt(tg, i_Money, rp_GetClientInt(tg, i_Money) + rp_GetClientInt(target, i_LastVolAmount));
-				rp_SetClientInt(target, i_AddToPay, rp_GetClientInt(target, i_AddToPay) - rp_GetClientInt(target, i_LastVolAmount));
-				
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N{default} à été libéré pour manque de preuve.", target);
-				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été libéré car nous avons trouvé aucune preuve vous reliant au vol de voiture.", client);
-				LogToGame("[TSX-RP] [JAIL] %L à été libéré car il n'avait pas commis de vol de voiture", target);
-			}
-		}
 		int amende = StringToInt(g_szJailRaison[type][jail_amende]);
 		
 		if( amende == -1 )
 			amende = rp_GetClientInt(target, i_KillingSpread) * 200;
 		
 		if( String_StartsWith(g_szJailRaison[type][jail_raison], "Vol") ) {
+			if(rp_GetClientInt(target, i_LastVolVehicleTime)+300 > GetTime()){
+				if(rp_IsValidVehicle(rp_GetClientInt(target, i_LastVolVehicle))){
+					rp_SetClientKeyVehicle(target, rp_GetClientInt(target, i_LastVolVehicle), false);
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N{default} à perdu les clés de la voiture qu'il a volé.", target);
+					CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez perdu les clés de la voiture que vous avez volé.", client);
+				}
+			}
+			else if(rp_GetClientInt(target, i_LastVolTime)+30 < GetTime()){
+				rp_SetClientInt(target, i_JailTime, 0);
+				rp_SetClientInt(target, i_jailTime_Last, 0);
+				rp_SetClientInt(target, i_JailledBy, 0);
+				
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N{default} à été libéré car il n'a pas commis de vol.", target);
+				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été libéré car vous n'avez pas commis de vol.", client);
+				
+				LogToGame("[TSX-RP] [JAIL] %L à été libéré car il n'avait pas commis de vol", target);
+				
+				rp_ClientResetSkin(target);
+				rp_ClientSendToSpawn(target, true);
+				return;
+			}
 			if( IsValidClient( rp_GetClientInt(target, i_LastVolTarget) ) ) {
 				int tg = rp_GetClientInt(target, i_LastVolTarget);
 				rp_SetClientInt(tg, i_Money, rp_GetClientInt(tg, i_Money) + rp_GetClientInt(target, i_LastVolAmount));
@@ -1941,6 +1950,9 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				
 				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez remboursé votre victime de %d$.", rp_GetClientInt(target, i_LastVolAmount));
 				CPrintToChat(tg, "{lightblue}[TSX-RP]{default} Le voleur a été mis en prison. Vous avez été remboursé de %d$.", rp_GetClientInt(target, i_LastVolAmount));
+			}
+			else{
+				amende += rp_GetClientInt(target, i_LastVolAmount); // Cas tentative de vol ou distrib...
 			}
 		}
 		else {
