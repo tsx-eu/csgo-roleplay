@@ -351,7 +351,7 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	rp_SetClientInt(client, i_LastVolAmount, 150);
 	rp_SetClientInt(client, i_LastVolTarget, -1);
 	rp_SetClientInt(client, i_LastVolVehicle, target);
-	CreateTimer(300.0, RemoveVehicleSteal, target);
+	rp_SetClientInt(client, i_LastVolVehicleTime, GetTime());
 	
 	return Plugin_Continue;
 }
@@ -667,9 +667,6 @@ public Action AllowStealing(Handle timer, any client) {
 }
 public Action RemoveStealAmount(Handle time, any client) {
 	g_iStolenAmountTime[client]--;
-}
-public Action RemoveVehicleSteal(Handle time, any client) {
-	rp_SetClientInt(client, i_LastVolVehicle, 0);
 }
 int GetMaxKit(int client, int itemID) {
 	
