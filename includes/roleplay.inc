@@ -42,6 +42,7 @@ enum rp_event {
 	RP_OnPlayerDataLoaded,     /* Quand le joueur a chargé */
 	RP_OnPlayerSell,           /* Quand un joueur fait une vente */
 	RP_OnPlayerHUD,            /* A chaque fois que le HUD à gauche se refresh */
+	RP_OnPlayerCheckKey,	   /* A chaque vérification s'il a la clé */
 
 	RP_EventMax
 }
@@ -71,6 +72,7 @@ typeset rp_event_enum {
 	function Action(int client);								                                       /* RP_OnPlayerDataLoaded */
 	function Action(int client, int money);					                         	         /* RP_OnPlayerSell */
 	function Action(int client, char[] szHUD, const int maxSize);			                 /* RP_OnPlayerHUD */
+	function Action(int client, int doorID);											/* RP_OnPlayerCheckKey */
 };
 /**
  * Hook un évenement d'un joueur
