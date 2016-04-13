@@ -45,8 +45,8 @@ public Plugin myinfo =  {
 };
 
 int g_iQuest;
-bool g_bDoingQuest = false;
-int g_iVehicle, g_iPlanque, g_iPlanqueZone;
+bool g_bDoingQuest, g_bByPassDoor;
+int g_iVehicle, g_iPlanque, g_iPlanqueZone; 
 int g_iPlayerTeam[MAXPLAYERS + 1], g_stkTeam[QUEST_TEAMS + 1][MAXPLAYERS+1], g_stkTeamCount[QUEST_TEAMS + 1], g_iJobs[MAX_JOBS];
 
 public void OnPluginStart() {
@@ -57,11 +57,11 @@ public void OnPluginStart() {
 		SetFailState("Erreur lors de la création de la quête %s %s", QUEST_UNIQID, QUEST_NAME);
 		
 	int i;
-	rp_QuestAddStep(g_iQuest, i++, Q1_Start, Q1_Frame, QUEST_NULL, QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, i++, Q2_Start, Q2_Frame, QUEST_NULL, QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL, Q3_Frame, QUEST_NULL, QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, i++, Q4_Start, Q4_Frame, Q4_Abort, QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, i++, Q5_Start, QUEST_NULL, Q4_Abort, QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, Q1_Start,	Q1_Frame,	Q_Abort, QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, Q2_Start,	Q2_Frame,	Q_Abort, QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q3_Frame,	Q_Abort, QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, Q4_Start,	Q4_Frame,	Q_Abort, QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, Q5_Start,	QUEST_NULL,	Q_Abort, QUEST_NULL);
 }
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -110,6 +110,14 @@ public void OnClientDisconnect(int client) {
 	removeClientTeam(client);
 }
 // ----------------------------------------------------------------------------
+public void Q_Abort(int objectiveID, int client) {
+	if( g_bByPassDoor ) {
+		for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++)
+			rp_UnhookEvent(g_stkTeam[TEAM_BRAQUEUR][i], RP_OnPlayerDead, fwdGotKey);
+		g_bByPassDoor = false;
+	}
+}
+
 public void Q1_Start(int objectiveID, int client) {
 	g_bDoingQuest = true;
 	addClientToTeam(client, TEAM_BRAQUEUR);
@@ -221,11 +229,9 @@ public void Q3_Frame(int objectiveID, int client) {
 public void Q4_Start(int objectiveID, int client) {
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++)
 		rp_HookEvent(g_stkTeam[TEAM_BRAQUEUR][i], RP_OnPlayerDead, fwdGotKey);
+	g_bByPassDoor = true;
 }
-public void Q4_Abort(int objectiveID, int client) {
-	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++)
-		rp_UnhookEvent(g_stkTeam[TEAM_BRAQUEUR][i], RP_OnPlayerDead, fwdGotKey);
-}
+
 public Action fwdGotKey(int client, int doorID) {
 	float pos[3];
 	Entity_GetAbsOrigin(doorID, pos);
