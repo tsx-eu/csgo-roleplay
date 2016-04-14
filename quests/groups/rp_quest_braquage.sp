@@ -30,7 +30,8 @@
 #define		TEAM_NONE			0
 #define		TEAM_INVITATION		1
 #define		TEAM_BRAQUEUR		2
-#define		TEAM_POLICE			3
+#define		TEAM_BRAQUEUR_DEAD	3
+#define		TEAM_POLICE			4
 #define		TEAM_NAME1		"Braqueur"
 #define		TEAM_NAME2		"Police"
 #define 	REQUIRED_T			2
@@ -345,10 +346,16 @@ public Action fwdDead(int client, int attacker) {
 	}
 	if( g_iPlayerTeam[client] == TEAM_BRAQUEUR ) {
 		PrintToChatAll("Un braqueur a été tué.");
+		addClientToTeam(client, TEAM_BRAQUEUR_DEAD);
+		if( g_bByPassDoor )
+			rp_UnhookEvent(client, RP_OnPlayerCheckKey, fwdGotKey);
+		if( g_bHasHelmet )
+			SetEntProp(client, Prop_Send, "m_bHasHelmet", 0);
 		return Plugin_Handled;
 	}
 	return Plugin_Continue;
 }
+
 public void Q6_Frame(int objectiveID, int client) {
 	int GainMax = (rp_GetJobCapital(g_iPlanque) / 1000);
 	char tmp[64], tmp2[2][64];
@@ -365,9 +372,11 @@ public void Q6_Frame(int objectiveID, int client) {
 		SetEntityHealth(g_stkTeam[TEAM_BRAQUEUR][i], heal);
 		rp_SetClientInt(g_stkTeam[TEAM_BRAQUEUR][i], i_Kevlar, kevlar);
 		
-		g_iQuestGain += Math_GetRandomInt(0, 50);
-		if( g_iQuestGain >= GainMax )
-			g_iQuestGain = GainMax;
+		if(rp_GetZoneInt(rp_GetPlayerZone(g_stkTeam[TEAM_BRAQUEUR][i]), zone_type_type) == g_iPlanque) {
+			g_iQuestGain += Math_GetRandomInt(0, 50);
+			if( g_iQuestGain >= GainMax )
+				g_iQuestGain = GainMax;
+		}
 		
 		PrintHintText(g_stkTeam[TEAM_BRAQUEUR][i], "<b>Objectif</b>: Restez vivant. Prennez la fuite avec votre voiture quand vous le souhaiter. <b>Gain</b>: %d$", g_iQuestGain);
 	}
