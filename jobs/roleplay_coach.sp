@@ -565,7 +565,7 @@ public Action fwdNoFallDamage(int victim, int &attacker, int &inflictor, float &
 	PrintToServer("fwdNoFallDamage");
 	#endif
 	
-	if( damagetype & DMG_FALL ) {
+	if( damagetype & DMG_FALL && !(rp_GetZoneBit(rp_GetPlayerZone(victim)) & BITZONE_EVENT)) {
 		damage = 0.0;
 		return Plugin_Changed;
 	}
