@@ -26,15 +26,15 @@
 #define		QUEST_UNIQID   	"braquage"
 #define		QUEST_NAME      "Braquage"
 #define		QUEST_TYPE     	quest_group
-#define		QUEST_TEAMS			3
+#define		QUEST_TEAMS			5
 #define		TEAM_NONE			0
 #define		TEAM_INVITATION		1
 #define		TEAM_BRAQUEUR		2
 #define		TEAM_BRAQUEUR_DEAD	3
 #define		TEAM_POLICE			4
-#define		TEAM_NAME1		"Braqueur"
-#define		TEAM_NAME2		"Police"
-#define 	REQUIRED_T			2
+#define		TEAM_HOSTAGE		5
+#define		TEAM_NAME1			"Braqueur"
+#define 	REQUIRED_T			1
 #define 	REQUIRED_CT			0
 #define		MAX_ZONES			310
 
@@ -48,7 +48,7 @@ public Plugin myinfo =  {
 int g_iQuest;
 bool g_bDoingQuest, g_bByPassDoor, g_bHasHelmet;
 int g_iVehicle, g_iPlanque, g_iPlanqueZone, g_iQuestGain;
-int g_iPlayerTeam[MAXPLAYERS + 1], g_stkTeam[QUEST_TEAMS + 1][MAXPLAYERS+1], g_stkTeamCount[QUEST_TEAMS + 1], g_iJobs[MAX_JOBS];
+int g_iPlayerTeam[2049], g_stkTeam[QUEST_TEAMS + 1][MAXPLAYERS+1], g_stkTeamCount[QUEST_TEAMS + 1], g_iJobs[MAX_JOBS];
 
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
@@ -65,9 +65,48 @@ public void OnPluginStart() {
 	rp_QuestAddStep(g_iQuest, i++, Q5_Start,	Q5_Frame,	Q_Abort, QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++, Q6_Start,	Q6_Frame,	Q_Abort, QUEST_NULL);
 	
+	HookEvent("hostage_follows", EV_PickupHostage, EventHookMode_Post);
+	HookEvent("hostage_rescued", EV_RescuseHostage, EventHookMode_Post);
+	
+}
+public Action EV_PickupHostage(Handle ev, const char[] name, bool broadcast) {
+	int client = GetClientOfUserId(GetEventInt(ev, "userid"));
+	int hostage = GetEventInt(ev, "hostage");
+	
+	if( g_iPlayerTeam[hostage] == TEAM_HOSTAGE ) {
+		CreateTimer(2.0, DetachHostage, client);	
+	}
+}
+public Action EV_RescuseHostage(Handle ev, const char[] name, bool broadcast) {
+	int client = GetClientOfUserId(GetEventInt(ev, "userid"));
+	int hostage = GetEventInt(ev, "hostage");
+	rp_ScheduleEntityInput(hostage, 5.0, "Kill");
+	
+	if( g_iPlayerTeam[hostage] == TEAM_HOSTAGE ) {
+		PrintToChatAll("%N a libéré un hotage!!", client);
+		removeClientTeam(hostage);
+	}
+}
+public Action DetachHostage(Handle timer, any client) {
+	
+	int ent = CreateEntityByName("func_hostage_rescue");
+	DispatchKeyValue(ent, "spawnflags", "4097");
+	DispatchSpawn(ent);
+	ActivateEntity(ent);
+	SetEntPropVector(ent, Prop_Send, "m_vecMins", view_as<float>({-4.0, -4.0, -4.0}));
+	SetEntPropVector(ent, Prop_Send, "m_vecMaxs", view_as<float>({4.0, 4.0, 4.0}));
+	SetEntProp(ent, Prop_Send, "m_nSolidType", 2);
+	
+	float pos[3];
+	Entity_GetAbsOrigin(client, pos);
+	pos[2] += 8.0;
+	
+	TeleportEntity(ent, pos, NULL_VECTOR, NULL_VECTOR);
+	rp_ScheduleEntityInput(ent, 0.001, "Kill");
 }
 public void OnMapStart() {
 	PrecacheSoundAny("ui/beep22.wav");
+	PrecacheModel("models/props/cs_office/vending_machine.mdl");
 }
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -303,7 +342,7 @@ public void Q5_Start(int objectiveID, int client) {
 		if( Client_GetWeaponBySlot(g_stkTeam[TEAM_BRAQUEUR][i], CS_SLOT_PRIMARY) < 0 )
 			Client_GiveWeapon(client, "weapon_ak47", true);
 		if( Client_GetWeaponBySlot(g_stkTeam[TEAM_BRAQUEUR][i], CS_SLOT_SECONDARY) < 0 )
-			Client_GiveWeapon(client, "weapon_revolver", false);
+			GivePlayerItem(client, "weapon_revolver");
 		SetEntProp(g_stkTeam[TEAM_BRAQUEUR][i], Prop_Send, "m_bHasHelmet", 1);
 	}
 	
@@ -330,13 +369,23 @@ public void Q5_Frame(int objectiveID, int client) {
 }
 public void Q6_Start(int objectiveID, int client) {
 	g_iQuestGain = 1000;
+	g_stkTeamCount[TEAM_HOSTAGE] = 0;
 	
-	for (float i = 0.0; i <= 20.0; i += 1.5)
+	for (float i = 0.0; i <= 20.0; i += 1.5) {
 		CreateTimer(i, alarm);
+	}
 }
 public Action alarm(Handle timer, any client) {
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
 		EmitSoundToAllAny("ui/beep22.wav", g_stkTeam[TEAM_BRAQUEUR][i]);
+	}
+	
+	float pos[3];
+	if( g_stkTeamCount[TEAM_HOSTAGE] < REQUIRED_T && findAreaInRoom(g_iPlanque, pos) ) {
+		int ent = CreateEntityByName("hostage_entity");
+		DispatchSpawn(ent);
+		TeleportEntity(ent, pos, NULL_VECTOR, NULL_VECTOR);
+		addClientToTeam(ent, TEAM_HOSTAGE);
 	}
 }
 public Action fwdDead(int client, int attacker) {	
@@ -378,14 +427,24 @@ public void Q6_Frame(int objectiveID, int client) {
 				g_iQuestGain = GainMax;
 		}
 		
+		
 		PrintHintText(g_stkTeam[TEAM_BRAQUEUR][i], "<b>Objectif</b>: Restez vivant. Prennez la fuite avec votre voiture quand vous le souhaiter. <b>Gain</b>: %d$", g_iQuestGain);
+		
+		
+		for (int j = 0; j < g_stkTeamCount[TEAM_HOSTAGE]; j++) {
+			if( Math_GetRandomInt(0, 4)  == 0 ) {
+				
+				rp_Effect_BeamBox(g_stkTeam[TEAM_BRAQUEUR][i], g_stkTeam[TEAM_HOSTAGE][j], NULL_VECTOR, 0, 255, 0);
+			}
+		}
 	}
 	
 	for (int j = 0; j < g_stkTeamCount[TEAM_POLICE]; j++) {
 		PrintHintText(g_stkTeam[TEAM_POLICE][j], "<b>Alerte</b>: Un braquage est en cours dans %s, tuer les braqueurs. <b>Gain</b>: %d$, <b>Amende</b>: %d$.", tmp2[0], (GainMax - g_iQuestGain)/4, g_iQuestGain/4);
 		
 		for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
-			rp_Effect_BeamBox(g_stkTeam[TEAM_POLICE][j], g_stkTeam[TEAM_BRAQUEUR][i], NULL_VECTOR, 255, 0, 0);
+			if( Math_GetRandomInt(0, 4)  == 0 )
+				rp_Effect_BeamBox(g_stkTeam[TEAM_POLICE][j], g_stkTeam[TEAM_BRAQUEUR][i], NULL_VECTOR, 255, 0, 0);
 		}
 	}
 }
@@ -524,4 +583,54 @@ int spawnVehicle(int client) {
 }
 bool isInVehicle(int client) {
 	return (rp_GetClientVehicle(client) == g_iVehicle || rp_GetClientVehiclePassager(client) == g_iVehicle);
+}
+bool findAreaInRoom(int jobID, float pos[3]) {
+	static int stkZones[MAX_JOBS][MAX_ZONES];
+	static float zoneMin[MAX_ZONES][3], zoneMax[MAX_ZONES][3];
+	static int iZonesCount[MAX_JOBS];
+	static bool loaded = false;
+	
+	if( !loaded ) {
+		for (int i = 1; i < MAX_ZONES; i++) {
+			int job = rp_GetZoneInt(i, zone_type_type);
+			if( job <= 0 || job >= MAX_JOBS || job == 14 || job == 101 )
+				continue;
+			
+			zoneMin[i][0] = rp_GetZoneFloat(i, zone_type_min_x);
+			zoneMin[i][1] = rp_GetZoneFloat(i, zone_type_min_y);
+			zoneMin[i][2] = rp_GetZoneFloat(i, zone_type_min_z);
+			zoneMax[i][0] = rp_GetZoneFloat(i, zone_type_max_x);
+			zoneMax[i][1] = rp_GetZoneFloat(i, zone_type_max_y);
+			zoneMax[i][2] = rp_GetZoneFloat(i, zone_type_max_z);
+			stkZones[job][ iZonesCount[job]++ ] = i;
+			
+		}
+		loaded = true;
+	}
+	
+	if( iZonesCount[jobID] == 0 )
+		return false;
+	
+	int p;
+	for (int i = 0; i < 16; i++) {
+		p = stkZones[jobID][Math_GetRandomInt(0, iZonesCount[jobID] - 1)];
+		pos[0] = Math_GetRandomFloat(zoneMin[p][0] + 32.0, zoneMax[p][0] - 32.0);
+		pos[1] = Math_GetRandomFloat(zoneMin[p][1] + 32.0, zoneMax[p][1] - 32.0);
+		pos[2] = Math_GetRandomFloat(zoneMin[p][2] + 32.0, zoneMax[p][2] - 32.0);
+		
+		if( rp_GetZoneFromPoint(pos) != p ) 
+			continue;
+		float pos2[3]; pos2 = pos;
+		Handle tr = TR_TraceRayEx(pos, view_as<float>({ 90.0, 0.0, 0.0 }), MASK_PLAYERSOLID, RayType_Infinite);
+		TR_GetEndPosition(pos, tr);
+		pos[2] += 4.0;
+		delete tr;
+		
+		tr = TR_TraceHullEx(pos, pos, view_as<float>({-32.0, -32.0, 0.0}), view_as<float>({32.0, 32.0, 64.0}), MASK_PLAYERSOLID);
+		if( !TR_DidHit(tr) ) {
+			return true;
+		}
+		delete tr;
+	}
+	return false;
 }
