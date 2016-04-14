@@ -102,6 +102,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + amount);
 		rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amount);
 		
+		rp_SetClientInt(client, i_LastVolTime, GetTime());
 		rp_SetClientInt(client, i_LastVolAmount, amount);
 		rp_SetClientInt(client, i_LastVolTarget, target);
 		rp_SetClientInt(target, i_LastVol, client);
@@ -263,6 +264,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 	
 	rp_ClientGiveItem(client, item_id, -rp_GetClientItem(client, item_id));
 	rp_SetClientBool(client, b_MaySteal, false);
+	rp_SetClientInt(client, i_LastVolTime, GetTime());
 	rp_SetClientInt(client, i_LastVolAmount, 100);
 	rp_SetClientInt(client, i_LastVolTarget, -1);
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 15.0);
@@ -346,8 +348,10 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	rp_SetClientBool(client, b_MaySteal, true);
 	rp_SetClientKeyVehicle(client, target, true);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez maintenant les clés de cette voiture.");
-	rp_SetClientInt(client, i_LastVolAmount, 200);
-	rp_SetClientInt(client, i_LastVolTarget, rp_GetVehicleInt(target, car_owner));
+	rp_SetClientInt(client, i_LastVolAmount, 150);
+	rp_SetClientInt(client, i_LastVolTarget, -1);
+	rp_SetClientInt(client, i_LastVolVehicle, target);
+	rp_SetClientInt(client, i_LastVolVehicleTime, GetTime());
 	
 	return Plugin_Continue;
 }
@@ -435,6 +439,7 @@ public Action Cmd_ItemPickLock(int args) {
 	}
 	
 	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) + 1);
+	rp_SetClientInt(client, i_LastVolVehicleTime, GetTime());
 	rp_SetClientInt(client, i_LastVolAmount, 100);
 	rp_SetClientInt(client, i_LastVolTarget, target);
 	ServerCommand("sm_effect_particles %d Aura1 %d", client, RoundToCeil(StealTime));
@@ -560,6 +565,7 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 		time += 5.0 * 60.0;
 	
 	rp_SetClientFloat(target, fl_LastStolen, time);
+	rp_SetClientInt(client, i_LastVolTime, GetTime());
 	rp_SetClientInt(client, i_LastVolAmount, price/4);
 	rp_SetClientInt(client, i_LastVolTarget, target);
 	rp_SetClientInt(target, i_LastVol, client);

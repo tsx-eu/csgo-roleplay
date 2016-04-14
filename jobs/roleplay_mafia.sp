@@ -144,6 +144,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		rp_ClientGiveItem(target, i, -1);
 		rp_ClientGiveItem(client, i, 1);
 		
+		rp_SetClientInt(client, i_LastVolTime, GetTime());
 		rp_SetClientInt(client, i_LastVolAmount, prix);
 		rp_SetClientInt(client, i_LastVolTarget, target);
 		rp_SetClientInt(target, i_LastVol, client);		
@@ -198,6 +199,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		rp_SetClientStat(target, i_MoneySpent_Stolen, rp_GetClientStat(target, i_MoneySpent_Stolen) + amount);
 		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + amount);
 		rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amount);
+		rp_SetClientInt(client, i_LastVolTime, GetTime());
 		rp_SetClientInt(client, i_LastVolAmount, amount);
 		rp_SetClientInt(client, i_LastVolTarget, target);
 		rp_SetClientInt(target, i_LastVol, client);
@@ -392,6 +394,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 	
 	rp_ClientGiveItem(client, item_id, -rp_GetClientItem(client, item_id));
 	rp_SetClientBool(client, b_MaySteal, false);
+	rp_SetClientInt(client, i_LastVolTime, GetTime());
 	rp_SetClientInt(client, i_LastVolAmount, 100);
 	rp_SetClientInt(client, i_LastVolTarget, -1);
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 15.0);
@@ -480,6 +483,7 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 		rp_SetJobCapital(job, rp_GetJobCapital(job) - rnd);
 	}
 	rp_SetJobCapital(91, rp_GetJobCapital(91) + amount);
+	rp_SetClientInt(client, i_LastVolTime, GetTime());
 	rp_SetClientInt(client, i_LastVolAmount, amount);
 	rp_SetClientInt(client, i_LastVolTarget, -1);
 	
@@ -564,6 +568,7 @@ public Action Cmd_ItemPickLock(int args) {
 		time = 1.5;
 	
 	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) + 1);
+	rp_SetClientInt(client, i_LastVolTime, GetTime());
 	rp_SetClientInt(client, i_LastVolAmount, 100);
 	rp_SetClientInt(client, i_LastVolTarget, -1);
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, time);
