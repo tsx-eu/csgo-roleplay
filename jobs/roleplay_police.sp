@@ -851,7 +851,7 @@ public Action Cmd_Jail(int client) {
 	if( rp_IsValidVehicle(target) ) {
 		int client2 = GetEntPropEnt(target, Prop_Send, "m_hPlayer");
 		
-		if( doRP_OnClientSendJail(client, client2) ) {
+		if( !doRP_OnClientSendJail(client, client2) ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N ne pas peut être mis en prison pour le moment à cause d'une quête.", client2);
 			return Plugin_Handled;
 		}
@@ -867,7 +867,7 @@ public Action Cmd_Jail(int client) {
 
 	if ( Client_GetVehicle(target) > 0 ) {
 		if( IsValidClient(target) ) {
-			if( doRP_OnClientSendJail(client, target) ) {
+			if( !doRP_OnClientSendJail(client, target) ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N ne pas peut être mis en prison pour le moment à cause d'une quête.", target);
 				return Plugin_Handled;
 			}
@@ -881,7 +881,7 @@ public Action Cmd_Jail(int client) {
 		ACCESS_DENIED(client);
 	}
 	
-	if( doRP_OnClientSendJail(client, target) ) {
+	if( !doRP_OnClientSendJail(client, target) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N ne pas peut être mis en prison pour le moment à cause d'une quête.", target);
 		return Plugin_Handled;
 	}

@@ -34,8 +34,8 @@
 #define		TEAM_POLICE			4
 #define		TEAM_HOSTAGE		5
 #define		TEAM_NAME1			"Braqueur"
-#define 	REQUIRED_T			1
-#define 	REQUIRED_CT			0
+#define 	REQUIRED_T			2
+#define 	REQUIRED_CT			1
 #define		MAX_ZONES			310
 
 
@@ -51,7 +51,6 @@ int g_iVehicle, g_iPlanque, g_iPlanqueZone, g_iQuestGain;
 int g_iPlayerTeam[2049], g_stkTeam[QUEST_TEAMS + 1][MAXPLAYERS + 1], g_stkTeamCount[QUEST_TEAMS + 1], g_iJobs[MAX_JOBS], g_iMaskEntity[MAXPLAYERS + 1];
 
 // TODO: Bugfix alarme pas assez forte :(
-// TODO: Bloquer /jail des flics
 
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
@@ -473,7 +472,7 @@ public Action fwdHostageCarryDead(int client, int attacker) {
 	rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
 }
 public Action fwdZoneChange(int client, int newZone, int oldZone) {
-	if( rp_GetZoneInt(newZone, zone_type_type) == g_iPlanque ) {
+	if( rp_GetZoneInt(newZone, zone_type_type) != g_iPlanque ) {
 		detachHostage(client);
 	}
 }
@@ -523,7 +522,12 @@ public Action fwdDead(int client, int attacker) {
 	return Plugin_Continue;
 }
 public Action RP_OnClientSendJail(int client, int target) {
-	PrintToChatAll("%N a tenté de jail %N", client, target);
+	if( IsValidClient(target) && g_iPlayerTeam[target] == TEAM_BRAQUEUR ) {
+		if( isInVehicle(target) )
+			return Plugin_Handled;
+		if( rp_GetZoneInt(rp_GetPlayerZone(target), zone_type_type) == g_iPlanque )
+			return Plugin_Handled;
+	}
 	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------
