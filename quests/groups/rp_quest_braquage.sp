@@ -50,6 +50,11 @@ bool g_bDoingQuest, g_bByPassDoor, g_bHasHelmet;
 int g_iVehicle, g_iPlanque, g_iPlanqueZone, g_iQuestGain;
 int g_iPlayerTeam[2049], g_stkTeam[QUEST_TEAMS + 1][MAXPLAYERS + 1], g_stkTeamCount[QUEST_TEAMS + 1], g_iJobs[MAX_JOBS], g_iMaskEntity[MAXPLAYERS + 1];
 
+// TODO: Fin Q6 Quand tout les braqueurs sont mort
+// TODO: FIN Q6 Quand tout les braqueurs sont dans la voiture
+// TODO: Q7 --> Déplacer la voiture jusqu'à un endroit sur
+// TODO: Bugfix alarme pas assez forte :(
+
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	
@@ -273,7 +278,7 @@ public void Q4_Frame(int objectiveID, int client) {
 		rp_QuestStepComplete(client, objectiveID);
 }
 public void Q5_Start(int objectiveID, int client) {
-	
+	updateTeamPolice();
 	g_bHasHelmet = true;
 	
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
@@ -309,6 +314,7 @@ public void Q5_Frame(int objectiveID, int client) {
 	}
 }
 public void Q6_Start(int objectiveID, int client) {
+	updateTeamPolice();
 	g_iQuestGain = 1000;
 	g_stkTeamCount[TEAM_HOSTAGE] = 0;
 	
@@ -321,6 +327,9 @@ public void Q6_Frame(int objectiveID, int client) {
 	char tmp[64], tmp2[2][64];
 	rp_GetZoneData(g_iPlanqueZone, zone_type_name, tmp, sizeof(tmp));
 	ExplodeString(tmp, ": ", tmp2, sizeof(tmp2), sizeof(tmp2[]));
+	
+	if( Math_GetRandomInt(0, 4) == 0 )
+		updateTeamPolice();
 	
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
 		int heal = GetClientHealth(g_stkTeam[TEAM_BRAQUEUR][i]) + Math_GetRandomInt(0, 5);
@@ -349,7 +358,6 @@ public void Q6_Frame(int objectiveID, int client) {
 			}
 		}
 	}
-	
 	for (int j = 0; j < g_stkTeamCount[TEAM_POLICE]; j++) {
 		PrintHintText(g_stkTeam[TEAM_POLICE][j], "<b>Alerte</b>: Un braquage est en cours dans %s, tuer les braqueurs. <b>Gain</b>: %d$, <b>Amende</b>: %d$.", tmp2[0], (GainMax - g_iQuestGain)/4, g_iQuestGain/4);
 		
@@ -429,7 +437,7 @@ public Action fwdPressUse(int client) {
 				}
 				menu.ExitButton = true;
 				
-				menu.Display(target, 10);
+				menu.Display(client, 10);
 			}
 		}
 	}
@@ -468,14 +476,16 @@ public int MenuRespawnBraqueur(Handle menu, MenuAction action, int client, int p
 		
 		if( IsValidClient(target) && IsValidEdict(hostage) && IsValidEntity(hostage) ) {			
 			float pos[3];
-			GetClientAbsOrigin(hostage, pos);
-			TeleportEntity(target, pos, NULL_VECTOR, NULL_VECTOR);
-			FakeClientCommand(target, "sm_stuck");
-			
-			OnBraqueurRespawn(target);
-			
+			Entity_GetAbsOrigin(hostage, pos);
 			removeClientTeam(hostage);
 			AcceptEntityInput(hostage, "Kill");
+			
+			if( !IsPlayerAlive(target) )
+				CS_RespawnPlayer(target);
+			
+			OnBraqueurRespawn(target);
+			TeleportEntity(target, pos, NULL_VECTOR, NULL_VECTOR);
+			FakeClientCommand(target, "sm_stuck");
 			
 		}
 	}
@@ -743,5 +753,17 @@ public Action tskAlarm(Handle timer, any client) {
 		DispatchSpawn(ent);
 		TeleportEntity(ent, pos, NULL_VECTOR, NULL_VECTOR);
 		addClientToTeam(ent, TEAM_HOSTAGE);
+	}
+}
+void updateTeamPolice() {
+	for (int i = 1; i <= MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		if( g_iPlayerTeam[i] != TEAM_POLICE && (rp_GetClientJobID(i) == 1 || rp_GetClientJobID(i) == 101) ) {
+			addClientToTeam(i, TEAM_POLICE);
+		}
+		if( g_iPlayerTeam[i] == TEAM_POLICE && rp_GetClientJobID(i) != 1 && rp_GetClientJobID(i) != 101 ) {
+			removeClientTeam(i);
+		}
 	}
 }
