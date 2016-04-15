@@ -105,7 +105,17 @@ enum BM_Int {
 
 //forward RP_OnClientTazedItem(int attacker, int reward);
 Handle g_hForward_RP_OnClientTazedItem;
-
+Handle g_hForward_RP_OnClientSendJail;
+bool doRP_OnClientSendJail(int client, int target) {
+	Action a;
+	Call_StartForward(g_hForward_RP_OnClientSendJail);
+	Call_PushCell(client);
+	Call_PushCell(target);
+	Call_Finish(a);
+	if( a == Plugin_Handled || a == Plugin_Stop )
+		return false;
+	return true;
+}
 void doRP_OnClientTazedItem(int client, int reward) {
 	Call_StartForward(g_hForward_RP_OnClientTazedItem);
 	Call_PushCell(client);
@@ -123,11 +133,15 @@ public Action Cmd_Reload(int args) {
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	g_hForward_RP_OnClientTazedItem = CreateGlobalForward("RP_OnClientTazedItem", ET_Event, Param_Cell, Param_Cell);
+	g_hForward_RP_OnClientSendJail = CreateGlobalForward("RP_OnClientSendJail", ET_Event, Param_Cell, Param_Cell);
+	
 	g_hBuyMenu = new DataPack();
 	g_hBuyMenu.WriteCell(0);
 	int pos = g_hBuyMenu.Position;
 	g_hBuyMenu.Reset();
 	g_hBuyMenu.WriteCell(pos);
+	
+	
 	
 	RegConsoleCmd("sm_jugement",	Cmd_Jugement);
 	
@@ -836,6 +850,11 @@ public Action Cmd_Jail(int client) {
 
 	if( rp_IsValidVehicle(target) ) {
 		int client2 = GetEntPropEnt(target, Prop_Send, "m_hPlayer");
+		
+		if( doRP_OnClientSendJail(client, client2) ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N ne pas peut être mis en prison pour le moment à cause d'une quête.", client2);
+			return Plugin_Handled;
+		}
 		if( IsValidClient(client2) ) {
 			rp_ClientVehicleExit(client2, target, true);
 			CPrintToChat(client2, "{lightblue}[TSX-RP]{default} %N vous a sorti de votre voiture.", client);
@@ -848,6 +867,10 @@ public Action Cmd_Jail(int client) {
 
 	if ( Client_GetVehicle(target) > 0 ) {
 		if( IsValidClient(target) ) {
+			if( doRP_OnClientSendJail(client, target) ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N ne pas peut être mis en prison pour le moment à cause d'une quête.", target);
+				return Plugin_Handled;
+			}
 			rp_ClientVehicleExit(target, Client_GetVehicle(target), true);
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N vous a sorti de votre voiture.", client);
 		}
@@ -856,6 +879,11 @@ public Action Cmd_Jail(int client) {
 	
 	if( GetClientTeam(target) == CS_TEAM_CT && !(job == 101 || job == 102 || job == 103 ) ) {
 		ACCESS_DENIED(client);
+	}
+	
+	if( doRP_OnClientSendJail(client, target) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N ne pas peut être mis en prison pour le moment à cause d'une quête.", target);
+		return Plugin_Handled;
 	}
 	
 	if( rp_GetClientInt(target, i_JailTime) <= 60 )
