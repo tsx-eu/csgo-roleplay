@@ -48,7 +48,7 @@ public Plugin myinfo =  {
 int g_iQuest;
 bool g_bDoingQuest, g_bByPassDoor, g_bHasHelmet;
 int g_iVehicle, g_iPlanque, g_iPlanqueZone, g_iQuestGain;
-int g_iPlayerTeam[2049], g_stkTeam[QUEST_TEAMS + 1][MAXPLAYERS+1], g_stkTeamCount[QUEST_TEAMS + 1], g_iJobs[MAX_JOBS];
+int g_iPlayerTeam[2049], g_stkTeam[QUEST_TEAMS + 1][MAXPLAYERS + 1], g_stkTeamCount[QUEST_TEAMS + 1], g_iJobs[MAX_JOBS], g_iMaskEntity[MAXPLAYERS + 1];
 
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
@@ -67,42 +67,6 @@ public void OnPluginStart() {
 	
 	HookEvent("hostage_follows", EV_PickupHostage, EventHookMode_Post);
 	HookEvent("hostage_rescued", EV_RescuseHostage, EventHookMode_Post);
-	
-}
-public Action EV_PickupHostage(Handle ev, const char[] name, bool broadcast) {
-	int client = GetClientOfUserId(GetEventInt(ev, "userid"));
-	int hostage = GetEventInt(ev, "hostage");
-	
-	if( g_iPlayerTeam[hostage] == TEAM_HOSTAGE ) {
-		CreateTimer(2.0, DetachHostage, client);	
-	}
-}
-public Action EV_RescuseHostage(Handle ev, const char[] name, bool broadcast) {
-	int client = GetClientOfUserId(GetEventInt(ev, "userid"));
-	int hostage = GetEventInt(ev, "hostage");
-	rp_ScheduleEntityInput(hostage, 5.0, "Kill");
-	
-	if( g_iPlayerTeam[hostage] == TEAM_HOSTAGE ) {
-		PrintToChatAll("%N a libéré un hotage!!", client);
-		removeClientTeam(hostage);
-	}
-}
-public Action DetachHostage(Handle timer, any client) {
-	
-	int ent = CreateEntityByName("func_hostage_rescue");
-	DispatchKeyValue(ent, "spawnflags", "4097");
-	DispatchSpawn(ent);
-	ActivateEntity(ent);
-	SetEntPropVector(ent, Prop_Send, "m_vecMins", view_as<float>({-4.0, -4.0, -4.0}));
-	SetEntPropVector(ent, Prop_Send, "m_vecMaxs", view_as<float>({4.0, 4.0, 4.0}));
-	SetEntProp(ent, Prop_Send, "m_nSolidType", 2);
-	
-	float pos[3];
-	Entity_GetAbsOrigin(client, pos);
-	pos[2] += 8.0;
-	
-	TeleportEntity(ent, pos, NULL_VECTOR, NULL_VECTOR);
-	rp_ScheduleEntityInput(ent, 0.001, "Kill");
 }
 public void OnMapStart() {
 	PrecacheSoundAny("ui/beep22.wav");
@@ -148,23 +112,11 @@ public bool fwdCanStart(int client) {
 	
 	return true;
 }
-public void OnClientPostAdminCheck(int client) {
-	g_iPlayerTeam[client] = TEAM_NONE;
-	if( g_bHasHelmet ) {
-		rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
-	}
-}
-public void OnClientDisconnect(int client) {
-	removeClientTeam(client);
-}
 // ----------------------------------------------------------------------------
 public void Q_Abort(int objectiveID, int client) {
 	
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
-		if( g_bByPassDoor )
-			rp_UnhookEvent(g_stkTeam[TEAM_BRAQUEUR][i], RP_OnPlayerCheckKey, fwdGotKey);
-		if( g_bHasHelmet )
-			SetEntProp(g_stkTeam[TEAM_BRAQUEUR][i], Prop_Send, "m_bHasHelmet", 0);
+		OnBraqueurKilled(g_stkTeam[TEAM_BRAQUEUR][i]);
 	}
 	
 	if( g_bHasHelmet ) {
@@ -177,7 +129,6 @@ public void Q_Abort(int objectiveID, int client) {
 	g_bByPassDoor = false;
 	g_bHasHelmet = false;
 }
-
 public void Q1_Start(int objectiveID, int client) {
 	g_bDoingQuest = true;
 	addClientToTeam(client, TEAM_BRAQUEUR);
@@ -294,19 +245,6 @@ public void Q4_Start(int objectiveID, int client) {
 		rp_HookEvent(g_stkTeam[TEAM_BRAQUEUR][i], RP_OnPlayerCheckKey, fwdGotKey);
 	g_bByPassDoor = true;
 }
-
-public Action fwdGotKey(int client, int doorID) {
-	float pos[3];
-	Entity_GetAbsOrigin(doorID, pos);
-	
-	int zone = rp_GetZoneInt(rp_GetZoneFromPoint(pos), zone_type_type);
-	if( zone == g_iPlanque )
-		return Plugin_Changed;
-	if( zone == 0 && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == g_iPlanque && rp_IsEntitiesNear(client, doorID) )
-		return Plugin_Changed;
-	
-	return Plugin_Continue;
-}
 public void Q4_Frame(int objectiveID, int client) {
 	bool allIn = true;
 	float min[3], max[3], pos[3];
@@ -340,10 +278,13 @@ public void Q5_Start(int objectiveID, int client) {
 	
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
 		if( Client_GetWeaponBySlot(g_stkTeam[TEAM_BRAQUEUR][i], CS_SLOT_PRIMARY) < 0 )
-			Client_GiveWeapon(client, "weapon_ak47", true);
+			Client_GiveWeapon(g_stkTeam[TEAM_BRAQUEUR][i], "weapon_ak47", true);
 		if( Client_GetWeaponBySlot(g_stkTeam[TEAM_BRAQUEUR][i], CS_SLOT_SECONDARY) < 0 )
-			GivePlayerItem(client, "weapon_revolver");
+			GivePlayerItem(g_stkTeam[TEAM_BRAQUEUR][i], "weapon_revolver");
+		
 		SetEntProp(g_stkTeam[TEAM_BRAQUEUR][i], Prop_Send, "m_bHasHelmet", 1);
+		rp_HookEvent(g_stkTeam[TEAM_BRAQUEUR][i], RP_OnPlayerUse, fwdPressUse);
+		attachMask(g_stkTeam[TEAM_BRAQUEUR][i]);
 	}
 	
 	for (int i = 1; i <= MaxClients; i++) {
@@ -372,39 +313,9 @@ public void Q6_Start(int objectiveID, int client) {
 	g_stkTeamCount[TEAM_HOSTAGE] = 0;
 	
 	for (float i = 0.0; i <= 20.0; i += 1.5) {
-		CreateTimer(i, alarm);
+		CreateTimer(i, tskAlarm);
 	}
 }
-public Action alarm(Handle timer, any client) {
-	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
-		EmitSoundToAllAny("ui/beep22.wav", g_stkTeam[TEAM_BRAQUEUR][i]);
-	}
-	
-	float pos[3];
-	if( g_stkTeamCount[TEAM_HOSTAGE] < REQUIRED_T && findAreaInRoom(g_iPlanque, pos) ) {
-		int ent = CreateEntityByName("hostage_entity");
-		DispatchSpawn(ent);
-		TeleportEntity(ent, pos, NULL_VECTOR, NULL_VECTOR);
-		addClientToTeam(ent, TEAM_HOSTAGE);
-	}
-}
-public Action fwdDead(int client, int attacker) {	
-	if( g_iPlayerTeam[attacker] == TEAM_BRAQUEUR && g_bHasHelmet ) {
-		PrintToChatAll("Meurtre de la part d'un braqueur");
-		return Plugin_Handled;
-	}
-	if( g_iPlayerTeam[client] == TEAM_BRAQUEUR ) {
-		PrintToChatAll("Un braqueur a été tué.");
-		addClientToTeam(client, TEAM_BRAQUEUR_DEAD);
-		if( g_bByPassDoor )
-			rp_UnhookEvent(client, RP_OnPlayerCheckKey, fwdGotKey);
-		if( g_bHasHelmet )
-			SetEntProp(client, Prop_Send, "m_bHasHelmet", 0);
-		return Plugin_Handled;
-	}
-	return Plugin_Continue;
-}
-
 public void Q6_Frame(int objectiveID, int client) {
 	int GainMax = (rp_GetJobCapital(g_iPlanque) / 1000);
 	char tmp[64], tmp2[2][64];
@@ -449,6 +360,93 @@ public void Q6_Frame(int objectiveID, int client) {
 	}
 }
 // ----------------------------------------------------------------------------
+public Action EV_PickupHostage(Handle ev, const char[] name, bool broadcast) {
+	int client = GetClientOfUserId(GetEventInt(ev, "userid"));
+	int hostage = GetEventInt(ev, "hostage");
+	
+	if( g_iPlayerTeam[client] == TEAM_POLICE && g_iPlayerTeam[hostage] == TEAM_HOSTAGE) {
+		rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
+	}
+}
+public Action EV_RescuseHostage(Handle ev, const char[] name, bool broadcast) {
+	int client = GetClientOfUserId(GetEventInt(ev, "userid"));
+	int hostage = GetEventInt(ev, "hostage");
+	rp_ScheduleEntityInput(hostage, 5.0, "Kill");
+	
+	if( g_iPlayerTeam[client] == TEAM_POLICE && g_iPlayerTeam[hostage] == TEAM_HOSTAGE) {
+		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 1000);
+		removeClientTeam(hostage);
+	}
+}
+// ----------------------------------------------------------------------------
+public void OnClientPostAdminCheck(int client) {
+	g_iPlayerTeam[client] = TEAM_NONE;
+	if( g_bDoingQuest )
+		rp_HookEvent(client, RP_OnPlayerDataLoaded, fwdLoaded);
+	if( g_bHasHelmet )
+		rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
+}
+public Action fwdLoaded(int client) {
+	if( g_iPlayerTeam[client] != TEAM_POLICE && (rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101) ) {
+		addClientToTeam(client, TEAM_POLICE);
+	}
+}
+public void OnClientDisconnect(int client) {
+	if( g_iPlayerTeam[client] == TEAM_BRAQUEUR )
+		OnBraqueurKilled(client);
+	
+	removeClientTeam(client);
+}
+public Action fwdZoneChange(int client, int newZone, int oldZone) {
+	PrintToChatAll("%N %d %d", client, newZone, oldZone);
+}
+public Action fwdGotKey(int client, int doorID) {
+	float pos[3];
+	Entity_GetAbsOrigin(doorID, pos);
+	
+	int zone = rp_GetZoneInt(rp_GetZoneFromPoint(pos), zone_type_type);
+	if( zone == g_iPlanque )
+		return Plugin_Changed;
+	if( zone == 0 && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == g_iPlanque && rp_IsEntitiesNear(client, doorID) )
+		return Plugin_Changed;
+	
+	return Plugin_Continue;
+}
+public Action fwdPressUse(int client) {
+	if( g_stkTeamCount[TEAM_BRAQUEUR_DEAD] > 0 ) {
+		int target = GetClientTarget(client);
+		if( target > 0 && IsValidEdict(target) && IsValidEntity(target) ) {
+			char classname[64], tmp2[64];
+			GetEdictClassname(target, classname, sizeof(classname));
+			if( StrEqual(classname, "hostage_entity") ) {
+				Menu menu = new Menu(MenuRespawnBraqueur);
+				menu.SetTitle("Relacher l'hotage pour récupérer un co-équipier?");
+				
+				for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR_DEAD]; i++) {
+					Format(classname, sizeof(classname), "%d %d", target, g_stkTeam[TEAM_BRAQUEUR_DEAD][i]);
+					Format(tmp2, sizeof(tmp2), "%N", g_stkTeam[TEAM_BRAQUEUR_DEAD][i]);
+					menu.AddItem(classname, tmp2);
+				}
+				menu.ExitButton = true;
+				
+				menu.Display(target, 10);
+			}
+		}
+	}
+}
+public Action fwdDead(int client, int attacker) {	
+	if( g_iPlayerTeam[attacker] == TEAM_BRAQUEUR && g_bHasHelmet ) {
+		PrintToChatAll("Meurtre de la part d'un braqueur");
+		return Plugin_Handled;
+	}
+	if( g_iPlayerTeam[client] == TEAM_BRAQUEUR ) {
+		PrintToChatAll("Un braqueur a été tué.");
+		OnBraqueurKilled(client);
+		return Plugin_Handled;
+	}
+	return Plugin_Continue;
+}
+// ----------------------------------------------------------------------------
 void DrawMenu_Invitation(int client, int target) {
 	Menu menu = new Menu(MenuInviterBraqueur);
 	menu.SetTitle("%N souhaite participer\nà la quète %s\n avec vous dans l'équipe: %s.\n \n Acceptez-vous son invitation?", client, QUEST_NAME, TEAM_NAME1);
@@ -457,6 +455,33 @@ void DrawMenu_Invitation(int client, int target) {
 	menu.ExitButton = false;
 	
 	menu.Display(target, 10);
+}
+public int MenuRespawnBraqueur(Handle menu, MenuAction action, int client, int param2) {
+	if( action == MenuAction_Select ) {
+		char options[64], tmp[2][12];
+		GetMenuItem(menu, param2, options, sizeof(options));
+		ExplodeString(options, " ", tmp, sizeof(tmp), sizeof(tmp[]));
+		
+		
+		int hostage = StringToInt(tmp[0]);
+		int target = StringToInt(tmp[1]);
+		
+		if( IsValidClient(target) && IsValidEdict(hostage) && IsValidEntity(hostage) ) {			
+			float pos[3];
+			GetClientAbsOrigin(hostage, pos);
+			TeleportEntity(target, pos, NULL_VECTOR, NULL_VECTOR);
+			FakeClientCommand(target, "sm_stuck");
+			
+			OnBraqueurRespawn(target);
+			
+			removeClientTeam(hostage);
+			AcceptEntityInput(hostage, "Kill");
+			
+		}
+	}
+	else if( action == MenuAction_End ) {
+		CloseHandle(menu);
+	}
 }
 public int MenuInviterBraqueur(Handle menu, MenuAction action, int client, int param2) {
 	if( action == MenuAction_Select ) {
@@ -475,7 +500,6 @@ public int MenuInviterBraqueur(Handle menu, MenuAction action, int client, int p
 				addClientToTeam(target, TEAM_INVITATION);
 			}
 		}
-		
 	}
 	else if( action == MenuAction_End ) {
 		CloseHandle(menu);
@@ -522,6 +546,7 @@ void removeClientTeam(int client) {
 		g_iPlayerTeam[client] = TEAM_NONE;
 	}
 }
+// ----------------------------------------------------------------------------
 int countPlayerInZone(int jobID) {
 	int ret;
 	for (int i = 1; i <= MaxClients; i++) {
@@ -633,4 +658,90 @@ bool findAreaInRoom(int jobID, float pos[3]) {
 		delete tr;
 	}
 	return false;
+}
+void OnBraqueurKilled(int client) {
+	addClientToTeam(client, TEAM_BRAQUEUR_DEAD);
+	if( g_bByPassDoor )
+		rp_UnhookEvent(client, RP_OnPlayerCheckKey, fwdGotKey);
+	if( g_bHasHelmet ) {
+		SetEntProp(client, Prop_Send, "m_bHasHelmet", 0);
+		rp_UnhookEvent(client, RP_OnPlayerUse, fwdPressUse);
+		
+		if( g_iMaskEntity[client] > 0 && IsValidEdict(g_iMaskEntity[client]) && IsValidEntity(g_iMaskEntity[client]) )
+			AcceptEntityInput(g_iMaskEntity[client], "Kill");
+		g_iMaskEntity[client] = 0;
+	}
+}
+void OnBraqueurRespawn(int client) {
+	addClientToTeam(client, TEAM_BRAQUEUR);
+	if( g_bByPassDoor )
+		rp_HookEvent(client, RP_OnPlayerCheckKey, fwdGotKey);
+	if( g_bHasHelmet ) {
+		SetEntProp(client, Prop_Send, "m_bHasHelmet", 1);
+		rp_HookEvent(client, RP_OnPlayerUse, fwdPressUse);
+		attachMask(client);
+	}
+}
+void attachMask(int client) {
+	int rand = Math_GetRandomInt(1, 7);
+	char model[128];
+	switch (rand) {
+		case 1: Format(model, sizeof(model), "models/player/holiday/facemasks/facemask_skull.mdl");
+		case 2: Format(model, sizeof(model), "models/player/holiday/facemasks/facemask_wolf.mdl");
+		case 3: Format(model, sizeof(model), "models/player/holiday/facemasks/facemask_tiki.mdl");
+		case 4: Format(model, sizeof(model), "models/player/holiday/facemasks/facemask_samurai.mdl");
+		case 5: Format(model, sizeof(model), "models/player/holiday/facemasks/facemask_hoxton.mdl");
+		case 6: Format(model, sizeof(model), "models/player/holiday/facemasks/facemask_dallas.mdl");
+		case 7: Format(model, sizeof(model), "models/player/holiday/facemasks/facemask_chains.mdl");
+	}
+	
+	int ent = CreateEntityByName("prop_dynamic");
+	DispatchKeyValue(ent, "classname", "rp_braquage_mask");
+	DispatchKeyValue(ent, "model", model);
+	DispatchSpawn(ent);
+	
+	Entity_SetOwner(ent, client);
+	
+	SetVariantString("!activator");
+	AcceptEntityInput(ent, "SetParent", client, client);
+	
+	SetVariantString("facemask");
+	AcceptEntityInput(ent, "SetParentAttachment");
+	
+	SDKHook(ent, SDKHook_SetTransmit, Hook_SetTransmit);
+	g_iMaskEntity[client] = ent;
+}
+public Action Hook_SetTransmit(int entity, int client) {
+	if (Entity_GetOwner(entity) == client && rp_GetClientInt(client, i_ThirdPerson) == 0)
+		return Plugin_Handled;
+	return Plugin_Continue;
+}
+void detachHostage(int client) {
+	int ent = CreateEntityByName("func_hostage_rescue");
+	DispatchKeyValue(ent, "spawnflags", "4097");
+	DispatchSpawn(ent);
+	ActivateEntity(ent);
+	SetEntPropVector(ent, Prop_Send, "m_vecMins", view_as<float>({-4.0, -4.0, -4.0}));
+	SetEntPropVector(ent, Prop_Send, "m_vecMaxs", view_as<float>({4.0, 4.0, 4.0}));
+	SetEntProp(ent, Prop_Send, "m_nSolidType", 2);
+	
+	float pos[3];
+	Entity_GetAbsOrigin(client, pos);
+	pos[2] += 8.0;
+	
+	TeleportEntity(ent, pos, NULL_VECTOR, NULL_VECTOR);
+	rp_ScheduleEntityInput(ent, 0.001, "Kill");
+}
+public Action tskAlarm(Handle timer, any client) {
+	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
+		EmitSoundToAllAny("ui/beep22.wav", g_stkTeam[TEAM_BRAQUEUR][i]);
+	}
+	
+	float pos[3];
+	if( g_stkTeamCount[TEAM_HOSTAGE] < REQUIRED_T && findAreaInRoom(g_iPlanque, pos) ) {
+		int ent = CreateEntityByName("hostage_entity");
+		DispatchSpawn(ent);
+		TeleportEntity(ent, pos, NULL_VECTOR, NULL_VECTOR);
+		addClientToTeam(ent, TEAM_HOSTAGE);
+	}
 }
