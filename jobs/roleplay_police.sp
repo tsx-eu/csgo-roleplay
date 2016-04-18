@@ -528,6 +528,11 @@ public Action Cmd_Tazer(int client) {
 			return Plugin_Handled;
 		}
 		
+		if( !doRP_OnClientSendJail(client, target) ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N vous glisse entre les mains.", target);
+			return Plugin_Handled;
+		}
+		
 		float time;
 		rp_Effect_Tazer(client, target);
 		rp_HookEvent(target, RP_PreHUDColorize, fwdTazerBlue, 9.0);
