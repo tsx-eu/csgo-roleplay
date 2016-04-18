@@ -34,8 +34,8 @@
 #define		TEAM_POLICE			4
 #define		TEAM_HOSTAGE		5
 #define		TEAM_NAME1			"Braqueur"
-#define 	REQUIRED_T			2
-#define 	REQUIRED_CT			1
+#define 	REQUIRED_T			4
+#define 	REQUIRED_CT			3
 #define		MAX_ZONES			310
 
 
@@ -49,8 +49,6 @@ int g_iQuest;
 bool g_bDoingQuest, g_bByPassDoor, g_bHasHelmet, g_bCanMakeQuest;
 int g_iVehicle, g_iPlanque, g_iPlanqueZone, g_iQuestGain;
 int g_iPlayerTeam[2049], g_stkTeam[QUEST_TEAMS + 1][MAXPLAYERS + 1], g_stkTeamCount[QUEST_TEAMS + 1], g_iJobs[MAX_JOBS], g_iMaskEntity[MAXPLAYERS + 1];
-
-// TODO: Bugfix alarme pas assez forte :(
 
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
@@ -75,7 +73,6 @@ public void OnPluginStart() {
 }
 public void OnMapStart() {
 	PrecacheSoundAny("ui/beep22.wav");
-	PrecacheModel("models/props/cs_office/vending_machine.mdl");
 }
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -99,12 +96,12 @@ public bool fwdCanStart(int client) {
 	FormatTime(szHours, 11, "%H");
 	
 	if( StringToInt(szDayOfWeek) == 3 ) { // Mercredi
-		if( StringToInt(szHours) >= 17 && StringToInt(szHours) <= 19  ) {	// 18h00m00s
+		if( StringToInt(szHours) >= 17 && StringToInt(szHours) < 19  ) {	// 18h00m00s
 			return false;
 		}
 	}
 	if( StringToInt(szDayOfWeek) == 5 ) { // Vendredi
-		if( StringToInt(szHours) >= 20 && StringToInt(szHours) <= 22) {	// 21h00m00s
+		if( StringToInt(szHours) >= 20 && StringToInt(szHours) < 22) {	// 21h00m00s
 			return false;
 		}
 	}
@@ -141,7 +138,11 @@ public void Q_Abort(int objectiveID, int client) {
 	g_bHasHelmet = false;
 	g_bDoingQuest = false;
 	g_stkTeamCount[TEAM_HOSTAGE] = 0;
-	CreateTimer(1.0 * 60.0, braquageNewAttempt);
+	for (int i = 1; i <= MaxClients; i++) {
+		if( IsValidClient(i) )
+			removeClientTeam(i);
+	}
+	CreateTimer(60.0 * 60.0, braquageNewAttempt);
 }
 public Action braquageNewAttempt(Handle timer, any attempt) {
 	g_bCanMakeQuest = true;
@@ -293,11 +294,16 @@ public void Q5_Start(int objectiveID, int client) {
 	g_bHasHelmet = true;
 	
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
-		if( Client_GetWeaponBySlot(g_stkTeam[TEAM_BRAQUEUR][i], CS_SLOT_PRIMARY) < 0 )
-			Client_GiveWeapon(g_stkTeam[TEAM_BRAQUEUR][i], "weapon_ak47", true);
+		if( Client_GetWeaponBySlot(g_stkTeam[TEAM_BRAQUEUR][i], CS_SLOT_PRIMARY) < 0 ) {
+			int wepid = Client_GiveWeapon(g_stkTeam[TEAM_BRAQUEUR][i], "weapon_ak47", true);
+			Weapon_SetPrimaryClip(wepid, 5000);
+		}
 		if( Client_GetWeaponBySlot(g_stkTeam[TEAM_BRAQUEUR][i], CS_SLOT_SECONDARY) < 0 )
 			GivePlayerItem(g_stkTeam[TEAM_BRAQUEUR][i], "weapon_revolver");
 		
+		
+		SetEntityHealth(g_stkTeam[TEAM_BRAQUEUR][i], 500);
+		rp_SetClientInt(g_stkTeam[TEAM_BRAQUEUR][i], i_Kevlar, 250);
 		SetEntProp(g_stkTeam[TEAM_BRAQUEUR][i], Prop_Send, "m_bHasHelmet", 1);
 		rp_HookEvent(g_stkTeam[TEAM_BRAQUEUR][i], RP_OnPlayerUse, fwdPressUse);
 		attachMask(g_stkTeam[TEAM_BRAQUEUR][i]);
@@ -355,8 +361,8 @@ public void Q6_Frame(int objectiveID, int client) {
 	
 	bool allIn = true;
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
-		int heal = GetClientHealth(g_stkTeam[TEAM_BRAQUEUR][i]) + Math_GetRandomInt(0, 5);
-		int kevlar = rp_GetClientInt(client, i_Kevlar) + 1;
+		int heal = GetClientHealth(g_stkTeam[TEAM_BRAQUEUR][i]) + Math_GetRandomInt(5, 10);
+		int kevlar = rp_GetClientInt(client, i_Kevlar) + Math_GetRandomInt(2, 5);
 		if( allIn ) allIn = isInVehicle(g_stkTeam[TEAM_BRAQUEUR][i]);
 		if( heal > 500 )
 			heal = 500;
@@ -415,6 +421,9 @@ public void Q_Complete(int objectiveID, int client) {
 		CPrintToChat(g_stkTeam[TEAM_BRAQUEUR][i], "{lightblue}[TSX-RP]{default} Vous avez gagné %d$ pour votre braquage de %s.", gain, tmp2[0]);
 		rp_SetClientInt(g_stkTeam[TEAM_BRAQUEUR][i], i_AddToPay, rp_GetClientInt(g_stkTeam[TEAM_BRAQUEUR][i], i_AddToPay) + gain);
 	}
+	
+	rp_SetJobCapital(g_iPlanque, rp_GetJobCapital(g_iPlanque) - gain*3/4);
+	rp_SetJobCapital(1, rp_GetJobCapital(1) - gain/4);	
 	
 	gain = (g_iQuestGain / 4) / g_stkTeamCount[TEAM_POLICE];
 	for (int i = 0; i < g_stkTeamCount[TEAM_POLICE]; i++) {
@@ -510,8 +519,7 @@ public Action fwdPressUse(int client) {
 		}
 	}
 }
-public Action fwdDead(int client, int attacker) {	
-	
+public Action fwdDead(int client, int attacker) {
 	if( g_iPlayerTeam[client] == TEAM_BRAQUEUR ) {
 		OnBraqueurKilled(client);
 		return Plugin_Handled;
@@ -562,6 +570,16 @@ public int MenuRespawnBraqueur(Handle menu, MenuAction action, int client, int p
 			OnBraqueurRespawn(target);
 			TeleportEntity(target, pos, NULL_VECTOR, NULL_VECTOR);
 			FakeClientCommand(target, "sm_stuck");
+			
+			SetEntityHealth(target, 500);
+			rp_SetClientInt(target, i_Kevlar, 250);
+			
+			if( Client_GetWeaponBySlot(target, CS_SLOT_PRIMARY) < 0 ) {
+				int wepid = Client_GiveWeapon(target, "weapon_ak47", true);
+				Weapon_SetPrimaryClip(wepid, 5000);
+			}
+			if( Client_GetWeaponBySlot(target, CS_SLOT_SECONDARY) < 0 )
+				GivePlayerItem(target, "weapon_revolver");
 			
 		}
 	}
@@ -824,11 +842,15 @@ void detachHostage(int client) {
 	rp_ScheduleEntityInput(ent, 0.001, "Kill");
 }
 public Action tskAlarm(Handle timer, any client) {
+	float pos[3], cur[3];
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
-		EmitSoundToAllAny("ui/beep22.wav", g_stkTeam[TEAM_BRAQUEUR][i]);
+		GetClientEyePosition(g_stkTeam[TEAM_BRAQUEUR][i], cur);
+		for (int j = 0; j < 3; j++)
+			pos[j] = (pos[j] * i + cur[j]) / (i+1);
 	}
 	
-	float pos[3];
+	EmitSoundToAllRangedAny("ui/beep22.wav", pos);
+	
 	if( g_stkTeamCount[TEAM_HOSTAGE] < REQUIRED_T && findAreaInRoom(g_iPlanque, pos) ) {
 		int ent = CreateEntityByName("hostage_entity");
 		DispatchSpawn(ent);
@@ -845,6 +867,23 @@ void updateTeamPolice() {
 		}
 		if( g_iPlayerTeam[i] == TEAM_POLICE && rp_GetClientJobID(i) != 1 && rp_GetClientJobID(i) != 101 ) {
 			removeClientTeam(i);
+		}
+	}
+}
+void EmitSoundToAllRangedAny(const char[] sound, float origin[3]) {
+	float pos[3], angle;
+	int maxI = 3, maxJ = 4, distJ = 400;
+	
+	pos[2] = origin[2];
+	
+	for (int i = 0; i < maxI; i++) {
+		angle = DegToRad(360.0 / maxI * i);
+		
+		for (int j = 1; j <= maxJ; j++) {
+			pos[0] = origin[0] + Sine(angle) * distJ * j;
+			pos[1] = origin[1] + Cosine(angle) * distJ * j;
+		
+			EmitSoundToAllAny(sound, SOUND_FROM_WORLD, 6, _, _, _, _, _, pos);
 		}
 	}
 }
