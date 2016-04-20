@@ -193,29 +193,15 @@ public Action WeaponEquip(int client, int weapon) {
 	}
 }
 public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
-	int job = rp_GetClientInt(client, i_Job);
-	if( job == 103 || job == 104 || job == 105 || job == 106 ) {
-		int oldType = rp_GetZoneInt(oldZone, zone_type_type);
-		int newType = rp_GetZoneInt(newZone, zone_type_type);
-		
+	
+	if( rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101 ) {
 		int oldBIT = rp_GetZoneBit(oldZone);
 		int newBIT = rp_GetZoneBit(newZone);
-		
-		
-		if( newType == 101 && oldType != 101 ) {
-			CS_SwitchTeam(client, CS_TEAM_CT);
-			rp_ClientResetSkin(client);
-		}
-		else if( newType != 101 && oldType == 101 ) {
-			CS_SwitchTeam(client, CS_TEAM_T);
-			rp_ClientResetSkin(client);
-		}
 		
 		if( GetClientTeam(client) == CS_TEAM_CT ) {
 			if( (newBIT & BITZONE_PVP) && !(oldBIT & BITZONE_PVP) ) {
 				EmitSoundToClientAny(client, "UI/arm_bomb.wav", client);
 			}
-			
 			if( newBIT & BITZONE_EVENT ) {
 				SetEntProp(client, Prop_Send, "m_bHasHelmet", 0);
 			}
@@ -378,7 +364,7 @@ public Action Cmd_Cop(int client) {
 	#endif
 	int job = rp_GetClientInt(client, i_Job);
 		
-	if( rp_GetClientJobID(client) != 1 && job != 101 && job != 102 && job != 107 && job != 108 && job != 109 ) {
+	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
 		ACCESS_DENIED(client);
 	}
 	int zone = rp_GetPlayerZone(client);
@@ -393,7 +379,7 @@ public Action Cmd_Cop(int client) {
 	if( (job == 8 || job == 9) && rp_GetZoneInt(zone, zone_type_type) != 1 ) { // Gardien, policier dans le PDP
 		ACCESS_DENIED(client);
 	}
-	if( (job == 107 || job == 108 || job == 109 ) && rp_GetZoneInt(zone, zone_type_type) != 1 && rp_GetZoneInt(zone, zone_type_type) != 101 ) { // GOS, Marshall, ONU dans Tribunal
+	if( (job == 108 || job == 109) && rp_GetZoneInt(zone, zone_type_type) != 1 && rp_GetZoneInt(zone, zone_type_type) != 101 ) { // GOS, Marshall, ONU dans Tribunal
 		ACCESS_DENIED(client);
 	}
 	if( !rp_GetClientBool(client, b_MaySteal) || rp_GetClientBool(client, b_Stealing) ) { // Pendant un vol
@@ -432,7 +418,7 @@ public Action Cmd_Vis(int client) {
 	#endif
 	int job = rp_GetClientInt(client, i_Job);
 		
-	if( job != 1 && job != 2 && job != 5 && job != 6 ) { // Chef, co chef, gti, cia
+	if( job != 1 && job != 2 && job != 4 && job != 5 && job != 6 ) { // Chef, co chef, gti, cia
 		ACCESS_DENIED(client);
 	}
 	int zone = rp_GetPlayerZone(client);
@@ -451,9 +437,7 @@ public Action Cmd_Vis(int client) {
 		ACCESS_DENIED(client);
 	}
 	
-	if( !rp_GetClientBool(client, b_Invisible)) {
-
-		
+	if( !rp_GetClientBool(client, b_Invisible) ) {
 		rp_ClientColorize(client, { 255, 255, 255, 0 } );
 		rp_SetClientBool(client, b_Invisible, true);
 		rp_SetClientBool(client, b_MaySteal, false);
@@ -466,7 +450,11 @@ public Action Cmd_Vis(int client) {
 		}
 		else if ( job == 5 ) {
 			rp_SetClientFloat(client, fl_invisibleTime, GetGameTime() + 60.0);
-			CreateTimer(150.0, AllowStealing, client);
+			CreateTimer(120.0, AllowStealing, client);
+		}
+		else if ( job == 4 ) {
+			rp_SetClientFloat(client, fl_invisibleTime, GetGameTime() + 60.0);
+			rp_SetClientBool(client, b_MaySteal, true);
 		}
 		else if (job == 1 ||  job== 2 ) {
 			rp_SetClientFloat(client, fl_invisibleTime, GetGameTime() + 90.0);
@@ -512,7 +500,7 @@ public Action Cmd_Tazer(int client) {
 	
 	if( IsValidClient(target) ) {
 		// Joueur:
-		if( GetClientTeam(client) == CS_TEAM_T && job != 1 && job != 2 && job != 5 ) {
+		if( GetClientTeam(client) == CS_TEAM_T && job != 1 && job != 2 && job != 4 && job != 5 ) {
 			ACCESS_DENIED(client);
 		}
 		if( GetClientTeam(target) == CS_TEAM_CT ) {
@@ -555,6 +543,7 @@ public Action Cmd_Tazer(int client) {
 				case 101:	time = 0.001;
 				case 2:		time = 0.5;
 				case 102:	time = 0.5;
+				case 4:		time = 4.0;
 				case 5:		time = 6.0;
 				case 6:		time = 7.0;
 				case 7:		time = 8.0;
@@ -573,7 +562,7 @@ public Action Cmd_Tazer(int client) {
 		if( (job == 103 || job == 104 || job == 105 || job == 106) && !(rp_GetZoneBit(Czone) & BITZONE_PERQUIZ) ) {
 			ACCESS_DENIED(client);
 		}
-		if( GetClientTeam(client) == CS_TEAM_T && job != 1 && job != 2 && job != 5 && job != 6 && job != 7 ) {
+		if( GetClientTeam(client) == CS_TEAM_T && job != 1 && job != 2 && job != 4 &&  job != 5 && job != 6 && job != 7 ) {
 			ACCESS_DENIED(client);
 		}
 		int reward = -1;
