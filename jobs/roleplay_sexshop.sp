@@ -162,13 +162,6 @@ public Action Cmd_ItemMenottes(int args){
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
-	
-	if( rp_GetZoneBit( rp_GetPlayerZone(client) ) & BITZONE_PEACEFULL ) {
-		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit où vous êtes.");
-		return;
-	}
-	
 	if( GetClientTeam(client) == CS_TEAM_CT ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit aux forces de l'ordre.");
 		ITEM_CANCEL(client, item_id);
@@ -180,7 +173,8 @@ public Action Cmd_ItemMenottes(int args){
 		ITEM_CANCEL(client, item_id);
 		return;
 	}
-	if( rp_GetZoneBit( rp_GetPlayerZone(target) ) & BITZONE_PEACEFULL ) {
+	if( rp_GetZoneBit( rp_GetPlayerZone(target) ) & BITZONE_PEACEFULL || rp_GetZoneBit( rp_GetPlayerZone(client) ) & BITZONE_PEACEFULL) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit où vous êtes.");
 		ITEM_CANCEL(client, item_id);
 		return;
 	}
@@ -194,6 +188,13 @@ public Action Cmd_ItemMenottes(int args){
 		return;
 	}
 	
+	if( rp_ClientFloodTriggered(client, target, fd_menotte) ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N vous glisse entre les mains.", target);
+		return;
+	}
+	rp_ClientFloodIncrement(client, target, fd_menotte, 5.0);
+					
 	rp_SetClientInt(client, i_LastAgression, GetTime());
 	rp_IncrementSuccess(client, success_list_menotte);
 	rp_Effect_Tazer(client, target);
@@ -331,6 +332,13 @@ public Action Cmd_ItemFouet(int args) {
 		ITEM_CANCEL(client, item_id);
 		return Plugin_Handled;
 	}
+	
+	if( rp_ClientFloodTriggered(client, target, fd_fouet) ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N vous glisse entre les mains.", target);
+		return;
+	}
+	rp_ClientFloodIncrement(client, target, fd_fouet, 5.0);
 	
 	rp_SetClientInt(client, i_LastAgression, GetTime());
 	rp_Effect_Tazer(client, target);
