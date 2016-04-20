@@ -273,6 +273,8 @@ public Action fwdTueurKill(int client, int attacker, float& respawn) {
 				rp_HookEvent(client, RP_OnPlayerSpawn, fwdOnRespawn);
 				respawn = 0.05;				
 				kidnapping = true;
+				
+				rp_ClientFloodIncrement(0, client, fd_kidnapping, 6.0*60.0);
 			}
 			else if( g_iKillerPoint[attacker][competance_type] == 1006 ) {
 				if((rp_GetClientInt(client, i_Money)+rp_GetClientInt(client, i_Bank)) > 1000){
