@@ -437,6 +437,8 @@ native void rp_QuestSetGroupCreationFct(int questID, QuestFctInit fwd);
 native void rp_QuestStart(int clientID, int questID);
 native void rp_QuestCancel(int clientID, int questID);
 // ----------------------------------------------------------------------------
+native int rp_GetClientTarget(int client, float dst[3] = {0.0, 0.0, 0.0});
+// ----------------------------------------------------------------------------
 
 #define ACCESS_DENIED(%1)	CPrintToChat(%1, "{lightblue}[TSX-RP]{default} Vous n'avez pas accès à cette commande.");	return Plugin_Handled
 #define ITEM_CANCEL(%1,%2)	rp_ClientGiveItem(%1,%2); rp_SetClientFloat(%1, fl_CoolDown, 0.05)

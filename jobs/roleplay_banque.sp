@@ -71,7 +71,7 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 		if( rp_GetClientJobID(client) != 1 &&  rp_GetClientJobID(client) != 41 && rp_GetClientJobID(client) != 211 && rp_GetClientJobID(client) != 101 ) { // Police, mercenaire, banquier, tribunal
 			ACCESS_DENIED(client);
 		}
-		int target = GetClientTarget(client);
+		int target = rp_GetClientTarget(client);
 		
 		if( !IsValidClient(target) )
 			return Plugin_Handled;

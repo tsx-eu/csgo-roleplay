@@ -127,7 +127,7 @@ public Action Cmd_ItemDrugs(int args) {
 	float dur = DRUG_DURATION;
 	
 	if( StrEqual(arg0, "lsd2") || StrEqual(arg0, "pcp2") ){
-		int target = GetClientTarget(client);
+		int target = rp_GetClientTarget(client);
 	
 		if( rp_GetZoneBit( rp_GetPlayerZone(client) ) & BITZONE_PEACEFULL ) {
 			ITEM_CANCEL(client, item_id);
@@ -355,7 +355,7 @@ public Action Cmd_ItemEngrais(int args) {
 	PrintToServer("Cmd_ItemEngrais");
 	#endif
 	int client = GetCmdArgInt(1);
-	int target = GetClientTarget(client);
+	int target = rp_GetClientTarget(client);
 	int item_id = GetCmdArgInt(args);
 	
 	if( target == 0 || !IsValidEdict(target) || !IsValidEntity(target) ) {
