@@ -437,6 +437,9 @@ native void rp_QuestSetGroupCreationFct(int questID, QuestFctInit fwd);
 native void rp_QuestStart(int clientID, int questID);
 native void rp_QuestCancel(int clientID, int questID);
 // ----------------------------------------------------------------------------
+native void rp_ClientFloodIncrement(int client, int target, fd_user_data type, float cooldown);
+native bool rp_ClientFloodTriggered(int client, int target, fd_user_data type);
+// ----------------------------------------------------------------------------
 
 #define ACCESS_DENIED(%1)	CPrintToChat(%1, "{lightblue}[TSX-RP]{default} Vous n'avez pas accès à cette commande.");	return Plugin_Handled
 #define ITEM_CANCEL(%1,%2)	rp_ClientGiveItem(%1,%2); rp_SetClientFloat(%1, fl_CoolDown, 0.05)
@@ -640,6 +643,16 @@ enum sz_user_data {
 	String:sz_Skin,
 
 	sz_udata_max
+};
+enum fd_user_data {
+	fd_flash,
+	fd_menotte,
+	fd_fouet,
+	fd_vol,
+	fd_job,
+	fd_kidnapping,
+	
+	fd_udata_max
 };
 enum sick_type {
 	sick_type_none,
