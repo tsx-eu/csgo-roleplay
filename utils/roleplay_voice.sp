@@ -401,12 +401,20 @@ public int MenuJobs3(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez attendre encore quelques instants avant d'envoyer une demande");
 				return;
 			}
-			rp_SetClientBool(client, b_MaySteal, false);
-			CreateTimer(10.0, AllowStealing, client);
+						
 			char data[2][32], tmp[128];
 			ExplodeString(szMenuItem, "_", data, sizeof(data), sizeof(data[]));
 			int target = StringToInt(data[0]);
 			int item_id = StringToInt(data[1]);
+			
+			if( rp_ClientFloodTriggered(client, target, fd_job) ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez appeler %N, pour le moment.", target);
+				return;
+			}
+			rp_ClientFloodIncrement(client, target, fd_job, 10.0);
+			rp_SetClientBool(client, b_MaySteal, false);
+			CreateTimer(10.0, AllowStealing, client);
+			
 			char zoneName[64];
 			rp_GetZoneData(rp_GetPlayerZone(client), zone_type_name, zoneName, sizeof(zoneName));
 			switch(item_id){
