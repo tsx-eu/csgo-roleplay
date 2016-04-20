@@ -288,7 +288,7 @@ public Action Cmd_Amende(int client, const char[] arg) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible pour le moment.");
 		return Plugin_Handled;
 	}
-	int target = GetClientTarget(client);
+	int target = rp_GetClientTarget(client);
 
 	if( !IsValidClient(target) )
 		return Plugin_Handled;
@@ -489,7 +489,7 @@ public Action Cmd_Tazer(int client) {
 		ACCESS_DENIED(client);
 	}
 	
-	int target = GetClientTarget(client);
+	int target = rp_GetClientTarget(client);
 	if( target <= 0 || !IsValidEdict(target) || !IsValidEntity(target) )
 		return Plugin_Handled;
 
@@ -754,7 +754,7 @@ public Action Cmd_Jail(int client) {
 		}
 	}
 	
-	int target = GetClientTarget(client);
+	int target = rp_GetClientTarget(client);
 
 	if( IsValidClient(target) && rp_GetClientFloat(target, fl_Invincible) > GetGameTime() ) { //le target utilise une poupée gonflable
 		ACCESS_DENIED(client);
@@ -912,7 +912,7 @@ public Action Cmd_Perquiz(int client) {
 	rp_SetClientFloat(client, fl_CoolDown, GetGameTime() + 5.0);
 	
 	int job_id = 0;
-	int zone = rp_GetPlayerZone( GetClientTarget(client) );
+	int zone = rp_GetPlayerZone( rp_GetClientTarget(client) );
 	if( zone > 0 ) {
 		job_id = rp_GetZoneInt(zone, zone_type_type);
 	}
@@ -968,7 +968,7 @@ public Action Cmd_Mandat(int client) {
 	if( job != 101 && job != 102 && job != 103 && job != 104 && job != 105 && job != 106 ) {
 		ACCESS_DENIED(client);
 	}
-	int target = GetClientTarget(client);
+	int target = rp_GetClientTarget(client);
 	if( target <= 0 || !IsValidEdict(target) || !IsValidEntity(target) )
 		return Plugin_Handled;
 	
@@ -1006,7 +1006,7 @@ public Action Cmd_Push(int client) {
 		ACCESS_DENIED(client);
 	}
 	
-	int target = GetClientTarget(client);
+	int target = rp_GetClientTarget(client);
 	if( target <= 0 || !IsValidEdict(target) || !IsValidEntity(target) )
 		return Plugin_Handled;
 	
@@ -2225,7 +2225,7 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 		GetMenuItem(menu, param2, options, 63);
 		
 		
-		int job_id = rp_GetZoneInt(rp_GetPlayerZone(GetClientTarget(client)), zone_type_type);
+		int job_id = rp_GetZoneInt(rp_GetPlayerZone(rp_GetClientTarget(client)), zone_type_type);
 		
 		if( job_id <= 0 || job_id > 250 ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cette porte ne peut pas être perquisitionnée.");

@@ -545,7 +545,7 @@ public Action fwdTalkCrayon(int client, char[] szSayText, int length, bool local
 	ReplaceString(szSayText, length, "{date}", tmp);
 	GetClientName(client, tmp, sizeof(tmp));							ReplaceString(szSayText, length, "{me}", tmp);
 	
-	int target = GetClientTarget(client);
+	int target = rp_GetClientTarget(client);
 	if( IsValidClient(target) ) {
 		GetClientName(target, tmp, sizeof(tmp));
 		ReplaceString(szSayText, length, "{target}", tmp);

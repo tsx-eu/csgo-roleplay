@@ -162,7 +162,7 @@ public Action fwdUse(int client) {
 		DisplayGarageMenu(client);
 	}
 	
-	int target = GetClientTarget(client);
+	int target = rp_GetClientTarget(client);
 	int vehicle = GetEntPropEnt(client, Prop_Send, "m_hVehicle");
 	int passager = rp_GetClientVehiclePassager(client);
 	

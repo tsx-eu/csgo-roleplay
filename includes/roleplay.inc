@@ -437,6 +437,8 @@ native void rp_QuestSetGroupCreationFct(int questID, QuestFctInit fwd);
 native void rp_QuestStart(int clientID, int questID);
 native void rp_QuestCancel(int clientID, int questID);
 // ----------------------------------------------------------------------------
+native int rp_GetClientTarget(int client, float dst[3] = {0.0, 0.0, 0.0});
+// ----------------------------------------------------------------------------
 native void rp_ClientFloodIncrement(int client, int target, fd_user_data type, float cooldown);
 native bool rp_ClientFloodTriggered(int client, int target, fd_user_data type);
 // ----------------------------------------------------------------------------
