@@ -180,8 +180,9 @@ public void Q1_Frame(int objectiveID, int client) {
 		
 		menu.AddItem("", "Braqueur en attente:", ITEMDRAW_DISABLED);
 		for (int i = 0; i < g_stkTeamCount[TEAM_INVITATION]; i++) {
-			Format(tmp, sizeof(tmp), "%N", g_stkTeam[TEAM_INVITATION][i]);
-			menu.AddItem("", tmp, ITEMDRAW_DISABLED);
+			Format(tmp, sizeof(tmp), "%d", g_stkTeam[TEAM_INVITATION][i]);
+			Format(tmp2, sizeof(tmp2), "%N", g_stkTeam[TEAM_INVITATION][i]);
+			menu.AddItem(tmp, tmp2);
 		}
 		
 		if( g_stkTeamCount[TEAM_BRAQUEUR]+g_stkTeamCount[TEAM_INVITATION] < REQUIRED_T ) {
@@ -606,7 +607,7 @@ public int MenuInviterBraqueur(Handle menu, MenuAction action, int client, int p
 		if( StrEqual(options, "refresh") )
 			return;
 		else if( StrEqual(options, "oui") ) {
-			if( g_stkTeamCount[TEAM_BRAQUEUR] < REQUIRED_T )
+			if( g_stkTeamCount[TEAM_BRAQUEUR] < REQUIRED_T && g_iPlayerTeam[client] == TEAM_INVITATION )
 				addClientToTeam(client, TEAM_BRAQUEUR);
 			else
 				removeClientTeam(client);
@@ -617,7 +618,10 @@ public int MenuInviterBraqueur(Handle menu, MenuAction action, int client, int p
 		else {
 			int target = StringToInt(options);
 			if( IsValidClient(target) ) {
-				addClientToTeam(target, TEAM_INVITATION);
+				if( g_iPlayerTeam[target] == TEAM_INVITATION )
+					removeClientTeam(target);
+				else
+					addClientToTeam(target, TEAM_INVITATION);
 			}
 		}
 	}
@@ -683,12 +687,12 @@ int countPlayerInZone(int jobID) {
 }
 int spawnVehicle(int client) {
 	static float g_flStartPos[][3] = {
-		{672.0, -4340.0, -2010.0},
-		{822.0, -4340.0, -2010.0},
-		{977.0, -4340.0, -2010.0},
-		{1160.0, -4340.0, -2010.0},
-		{1860.0, -4340.0, -2010.0},
-		{1990.0, -4340.0, -2010.0},
+		{672.0, -4410.0, -2000.0},
+		{822.0, -4410.0, -2000.0},
+		{977.0, -4410.0, -2000.0},
+		{1160.0, -4410.0, -2000.0},
+		{1860.0, -4410.0, -2000.0},
+		{1990.0, -4410.0, -2000.0},
 		{-2440.0, 1000.0, -2440.0},
 		{-2440.0, 1200.0, -2440.0},
 		{-2440.0, 1400.0, -2440.0},
@@ -705,7 +709,12 @@ int spawnVehicle(int client) {
 	SortIntegers(rnd, sizeof(g_flStartPos), Sort_Random);
 	
 	for (int i = 0; i < sizeof(g_flStartPos); i++) {
-		ent = rp_CreateVehicle(g_flStartPos[rnd[i]], view_as<float>({0.0, 0.0, 0.0}), "models/natalya/vehicles/natalya_mustang_csgo_2016.mdl", 1, 0);
+		
+		float ang[3] = { 0.0, 0.0, 0.0 };
+		if( g_flStartPos[rnd[i]][2] < -2200.0 ) 
+			ang[1] = 90.0;
+		
+		ent = rp_CreateVehicle(g_flStartPos[rnd[i]], ang, "models/natalya/vehicles/natalya_mustang_csgo_2016.mdl", 1, 0);
 		if( ent > 0 && rp_IsValidVehicle(ent) ) {
 			break;
 		}
