@@ -336,7 +336,7 @@ public Action Cmd_ItemFouet(int args) {
 	if( rp_ClientFloodTriggered(client, target, fd_fouet) ) {
 		ITEM_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N vous glisse entre les mains.", target);
-		return;
+		return Plugin_Handled;
 	}
 	rp_ClientFloodIncrement(client, target, fd_fouet, 5.0);
 	
