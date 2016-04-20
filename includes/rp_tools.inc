@@ -69,34 +69,6 @@ public bool IsValidClient(int client) {
 	
 	return true;
 }
-stock int GetClientTarget(int client, float dst[3] = {0.0, 0.0, 0.0}) {
-	static float cacheTime[65];
-	static float cacheDataDst[65][3];
-	static int cacheDataTarget[65];
-	
-	if( cacheTime[client] > GetGameTime() ) {
-		dst = cacheDataDst[client];
-		return cacheDataTarget[client];
-	}
-	
-	float vecStart[3], vecAngles[3];
-	GetClientEyePosition(client, vecStart);
-	GetClientEyeAngles(client, vecAngles);
-	
-	Handle trace = TR_TraceRayFilterEx(vecStart, vecAngles, MASK_SOLID, RayType_Infinite, FilterToOne, client);
-	if( !TR_DidHit(trace) ) {
-		CloseHandle(trace);
-		return 0;
-	}
-	
-	cacheDataTarget[client] = TR_GetEntityIndex(trace);
-	TR_GetEndPosition(cacheDataDst[client], trace);
-	cacheTime[client] = GetGameTime() + 0.025;
-	dst = cacheDataDst[client];
-	CloseHandle(trace);
-	
-	return cacheDataTarget[client];
-}
 public bool FilterToOne(int entity, int mask, any data) {
 	static char classname[64];
 	if( entity == data )

@@ -757,7 +757,7 @@ int ClientGiveXP(int client, int xp) {
 }
 bool isNearTable(int client) {
 	char classname[65];
-	int target = GetClientTarget(client);
+	int target = rp_GetClientTarget(client);
 	if( IsValidEdict(target) && IsValidEntity(target) ) {
 		GetEdictClassname(target, classname, sizeof(classname));
 		if( StrContains(classname, "rp_table__") == 0 && rp_IsEntitiesNear(client, target, true) )

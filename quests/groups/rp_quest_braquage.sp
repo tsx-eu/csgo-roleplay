@@ -499,7 +499,7 @@ public Action fwdGotKey(int client, int doorID) {
 }
 public Action fwdPressUse(int client) {
 	if( g_stkTeamCount[TEAM_BRAQUEUR_DEAD] > 0 ) {
-		int target = GetClientTarget(client);
+		int target = rp_GetClientTarget(client);
 		if( target > 0 && IsValidEdict(target) && IsValidEntity(target) ) {
 			char classname[64], tmp2[64];
 			GetEdictClassname(target, classname, sizeof(classname));

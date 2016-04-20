@@ -273,7 +273,7 @@ public Action Cmd_ItemPoison(int args) {
 	#endif
 	
 	int client = GetCmdArgInt(1);
-	int target = GetClientTarget(client);
+	int target = rp_GetClientTarget(client);
 	int item_id = GetCmdArgInt(args);
 	
 	if( rp_GetZoneBit( rp_GetPlayerZone(client) ) & BITZONE_PEACEFULL ) {

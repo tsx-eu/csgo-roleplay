@@ -301,7 +301,7 @@ public Action Cmd_ItemDoorDefine(int args) {
 	int client = GetCmdArgInt(2);
 	int item_id = GetCmdArgInt(args);
 	
-	int door = GetClientTarget(client);
+	int door = rp_GetClientTarget(client);
 	if( !rp_IsValidDoor(door) && IsValidEdict(door) && rp_IsValidDoor(Entity_GetParent(door)) )
 		door = Entity_GetParent(door);
 	
@@ -357,7 +357,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 		return Plugin_Handled;
 	}
 		
-	int target = GetClientTarget(client);
+	int target = rp_GetClientTarget(client);
 	
 	if( target <= MaxClients ) {
 		ITEM_CANCEL(client, item_id);

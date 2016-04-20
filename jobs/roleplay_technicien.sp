@@ -317,7 +317,7 @@ public Action Cmd_ItemNano(int args) {
 	}
 	else if( StrEqual(arg1, "unprop") ) {
 		
-		int target = GetClientTarget(client);
+		int target = rp_GetClientTarget(client);
 		// TODO: Move this fonction to here
 		rp_ClientRemoveProp(client, target, item_id);
 	}

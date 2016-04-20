@@ -214,7 +214,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 		return Plugin_Handled;
 	}
 	
-	int target = GetClientTarget(client);
+	int target = rp_GetClientTarget(client);
 	if( !rp_IsValidVehicle(target) ) {
 		ITEM_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser une voiture.");
@@ -368,7 +368,7 @@ public Action Cmd_ItemPickLock(int args) {
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
-	int target = GetClientTarget(client);
+	int target = rp_GetClientTarget(client);
 	float vecEnd[3], vecStart[3];
 	
 	if( rp_GetClientJobID(client) != 181 ) {

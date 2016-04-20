@@ -175,7 +175,7 @@ public Action Cmd_ItemMenottes(int args){
 		return;
 	}
 	
-	int target = GetClientTarget(client);
+	int target = rp_GetClientTarget(client);
 	if( !IsValidClient(target) || !rp_IsTutorialOver(target) ) {
 		ITEM_CANCEL(client, item_id);
 		return;
@@ -313,7 +313,7 @@ public Action Cmd_ItemFouet(int args) {
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
-	int target = GetClientTarget(client);
+	int target = rp_GetClientTarget(client);
 	
 	if( !IsValidClient(target) ) {
 		ITEM_CANCEL(client, item_id);
@@ -359,7 +359,7 @@ public Action Cmd_ItemAlcool(int args) {
 		target = client;
 	}
 	else if (StrEqual(arg,"aim")){
-		target = GetClientTarget(client);
+		target = rp_GetClientTarget(client);
 		if(target == -1 || !rp_IsEntitiesNear(client, target, true)){
 			ITEM_CANCEL(client,item_id);
 			return Plugin_Handled;
