@@ -134,6 +134,11 @@ public void Q_Abort(int objectiveID, int client) {
 			rp_UnhookEvent(i, RP_OnPlayerDead, fwdDead);
 		}
 	}
+	if( g_bByPassDoor ) {
+		for (int i = 1; i <= MaxClients; i++)
+			if( IsValidClient(i) )
+				rp_UnhookEvent(i, RP_OnPlayerCheckKey, fwdGotKey);
+	}
 	g_bByPassDoor = false;
 	g_bHasHelmet = false;
 	g_bDoingQuest = false;
@@ -258,8 +263,10 @@ public void Q3_Frame(int objectiveID, int client) {
 	}
 }
 public void Q4_Start(int objectiveID, int client) {
-	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++)
-		rp_HookEvent(g_stkTeam[TEAM_BRAQUEUR][i], RP_OnPlayerCheckKey, fwdGotKey);
+	for (int i = 1; i<=MaxClients; i++)
+		if( IsValidClient(i) )
+			rp_HookEvent(i, RP_OnPlayerCheckKey, fwdGotKey);
+	
 	g_bByPassDoor = true;
 }
 public void Q4_Frame(int objectiveID, int client) {
@@ -464,6 +471,8 @@ public void OnClientPostAdminCheck(int client) {
 		rp_HookEvent(client, RP_OnPlayerDataLoaded, fwdLoaded);
 	if( g_bHasHelmet )
 		rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
+	if( g_bByPassDoor )
+		rp_HookEvent(client, RP_OnPlayerCheckKey, fwdGotKey);
 }
 public Action fwdLoaded(int client) {
 	if( g_iPlayerTeam[client] != TEAM_POLICE && (rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101) ) {
@@ -486,14 +495,16 @@ public Action fwdZoneChange(int client, int newZone, int oldZone) {
 	}
 }
 public Action fwdGotKey(int client, int doorID) {
-	float pos[3];
-	Entity_GetAbsOrigin(doorID, pos);
-	
-	int zone = rp_GetZoneInt(rp_GetZoneFromPoint(pos), zone_type_type);
-	if( zone == g_iPlanque )
-		return Plugin_Changed;
-	if( zone == 0 && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == g_iPlanque && rp_IsEntitiesNear(client, doorID) )
-		return Plugin_Changed;
+	if( g_iPlayerTeam[client] == TEAM_POLICE || g_iPlayerTeam[client] == TEAM_BRAQUEUR ) {
+		float pos[3];
+		Entity_GetAbsOrigin(doorID, pos);
+		
+		int zone = rp_GetZoneInt(rp_GetZoneFromPoint(pos), zone_type_type);
+		if( zone == g_iPlanque )
+			return Plugin_Changed;
+		if( zone == 0 && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == g_iPlanque && rp_IsEntitiesNear(client, doorID) )
+			return Plugin_Changed;
+	}
 	
 	return Plugin_Continue;
 }
@@ -770,8 +781,7 @@ bool findAreaInRoom(int jobID, float pos[3]) {
 }
 void OnBraqueurKilled(int client) {
 	addClientToTeam(client, TEAM_BRAQUEUR_DEAD);
-	if( g_bByPassDoor )
-		rp_UnhookEvent(client, RP_OnPlayerCheckKey, fwdGotKey);
+	
 	if( g_bHasHelmet ) {
 		SetEntProp(client, Prop_Send, "m_bHasHelmet", 0);
 		rp_UnhookEvent(client, RP_OnPlayerUse, fwdPressUse);
@@ -783,8 +793,6 @@ void OnBraqueurKilled(int client) {
 }
 void OnBraqueurRespawn(int client) {
 	addClientToTeam(client, TEAM_BRAQUEUR);
-	if( g_bByPassDoor )
-		rp_HookEvent(client, RP_OnPlayerCheckKey, fwdGotKey);
 	if( g_bHasHelmet ) {
 		SetEntProp(client, Prop_Send, "m_bHasHelmet", 1);
 		rp_HookEvent(client, RP_OnPlayerUse, fwdPressUse);
