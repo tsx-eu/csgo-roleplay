@@ -304,10 +304,20 @@ bool wpnCutDamage(int victim, int attacker, float &damage) {
 		}
 		case ball_type_caoutchouc: {
 			damage *= 0.0;
-
-			rp_SetClientFloat(victim, fl_FrozenTime, GetGameTime() + 1.5);
-			if(!rp_GetClientBool(victim, b_ChiruYeux))
-				ServerCommand("sm_effect_flash %d 1.5 180", victim);
+			
+			if( rp_IsInPVP(victim) ) {
+				rp_SetClientFloat(victim, fl_FrozenTime, GetGameTime() + 1.5);
+				if( !rp_GetClientBool(victim, b_ChiruYeux) )
+					ServerCommand("sm_effect_flash %d 1.5 180", victim);
+			}
+			else {
+				if( !rp_ClientFloodTriggered(attacker, victim, fd_flash) ) {
+					rp_ClientFloodIncrement(attacker, victim, fd_flash, 1.0);
+					rp_SetClientFloat(victim, fl_FrozenTime, GetGameTime() + 1.5);
+					if( !rp_GetClientBool(victim, b_ChiruYeux) )
+						ServerCommand("sm_effect_flash %d 1.5 180", victim);
+				}
+			}
 		}
 		case ball_type_antikevlar: {
 			int kevlar = rp_GetClientInt(victim, i_Kevlar);
