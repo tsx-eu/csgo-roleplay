@@ -104,9 +104,12 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		ACCESS_DENIED(client);
 	}
 	
+	if( rp_ClientFloodTriggered(client, target, fd_vol) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler %N, pour le moment.", target);
+		return Plugin_Handled;
+	}
+	
 	int VOL_MAX, amount, money, job, prix;
-	
-	
 	money = rp_GetClientInt(target, i_Money);
 	VOL_MAX = (money+rp_GetClientInt(target, i_Bank)) / 200;
 	
@@ -180,6 +183,8 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		if( amount < 5 )
 			cooldown *= 0.5;
 		
+		rp_ClientFloodIncrement(client, target, fd_vol, cooldown);
+		
 		float vecTarget[3];
 		GetClientAbsOrigin(client, vecTarget);
 
@@ -228,6 +233,8 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 			rp_SetClientFloat(client, fl_LastVente, GetGameTime() + 10.0);
 		if( amount > 2000 )
 			rp_SetClientFloat(client, fl_LastVente, GetGameTime() + 30.0);
+		
+		rp_ClientFloodIncrement(client, target, fd_vol, cooldown);
 		
 		ServerCommand("sm_effect_particles %d Aura2 2", client);
 		
