@@ -18,7 +18,7 @@
 #include <smlib>		// https://github.com/bcserv/smlib
 #include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
 #include <csgo_items>   // https://forums.alliedmods.net/showthread.php?t=243009
-
+#include <advanced_motd>// https://forums.alliedmods.net/showthread.php?t=232476
 #define __LAST_REV__ 		"v:0.1.0"
 
 #pragma newdecls required
@@ -1055,7 +1055,7 @@ public Action Cmd_Audience(int client) {
 		
 		
 	QueryClientConVar(client, "cl_disablehtmlmotd", view_as<ConVarQueryFinished>(ClientConVar), client);
-	ShowMOTDPanel(client, "Role-Play: Audience", tmp, MOTDPANEL_TYPE_URL);
+	AdvMOTD_ShowMOTDPanel(client, "Role-Play: Audience", tmp, MOTDPANEL_TYPE_URL);
 	return Plugin_Handled;
 }
 public void ClientConVar(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue) {
@@ -1597,9 +1597,9 @@ public int MenuTribunal_selectplayer(Handle p_hItemMenu, MenuAction p_oAction, i
 		Format(szURL, sizeof(szURL), "https://www.ts-x.eu/popup.php?url=/index.php?page=roleplay2&sharp=/tribunal/case/%s", options[2]);
 		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Si la page ne s'ouvre pas, un lien est disponible dans votre console.");
-		PrintToConsole(client, "--> https://www.ts-x.eu/index.php?page=roleplay2#/tribunal/case/%s", options[2]);
+		PrintToConsole(client, "https://www.ts-x.eu/index.php?page=roleplay2#/tribunal/case/%s", options[2]);
 		
-		ShowMOTDPanel(client, szTitle, szURL, MOTDPANEL_TYPE_URL);
+		AdvMOTD_ShowMOTDPanel(client, szTitle, szURL, MOTDPANEL_TYPE_URL);
 		
 		if( !StrEqual(options[0], "stats") ) {
 			
@@ -1681,9 +1681,9 @@ public int MenuTribunal(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 			PrintToServer("UNLOCK-4");
 			char szTitle[128], szURL[512];
 			Format(szTitle, sizeof(szTitle), "Tribunal: %N", target);
-			Format(szURL, sizeof(szURL), "http://www.ts-x.eu/popup.php?url=/index.php?page=tribunal&action=case&steamid=%s&tokken=%s", szSteamID, uniqID);
+			Format(szURL, sizeof(szURL), "https://www.ts-x.eu/popup.php?url=/index.php?page=tribunal&action=case&steamid=%s&tokken=%s", szSteamID, uniqID);
 			
-			ShowMOTDPanel(client, szTitle, szURL, MOTDPANEL_TYPE_URL);
+			AdvMOTD_ShowMOTDPanel(client, szTitle, szURL, MOTDPANEL_TYPE_URL);
 			return;
 		}		
 	}
@@ -2734,12 +2734,10 @@ void displayTribunal(int client, const char szSteamID[64]) {
 	#if defined DEBUG
 	PrintToServer("displayTribunal");
 	#endif
-	char uniqID[64], szIP[64], szTitle[128], szURL[512], szQuery[1024];
+	char szTitle[128], szURL[512], szQuery[1024], steamid[64], sso[256];
+	GetClientAuthId(client, AuthId_Engine, steamid, sizeof(steamid), false);
 	
-	String_GetRandom(uniqID, sizeof(uniqID));
-	GetClientIP(client, szIP, sizeof(szIP));
-	
-	Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_tribunal` (`uniqID`, `timestamp`, `steamid`, `IP`) VALUES ('%s', '%i', '%s', '%s');", uniqID, GetTime(), szSteamID, szIP);
+	Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_tribunal` (`uniqID`, `timestamp`, `steamid`) VALUES ('%s', '%i', '%s');", steamid, GetTime(), szSteamID);
 	
 	Handle DB = rp_GetDatabase();
 	
@@ -2747,11 +2745,14 @@ void displayTribunal(int client, const char szSteamID[64]) {
 	SQL_Query(DB, szQuery);
 	SQL_UnlockDatabase(DB);
 	
-	
+	rp_GetClientSSO(client, sso, sizeof(sso));
 	Format(szTitle, sizeof(szTitle), "Tribunal: %s", szSteamID);
-	Format(szURL, sizeof(szURL), "http://www.ts-x.eu/popup.php?url=/index.php?page=tribunal&action=case&steamid=%s&tokken=%s", szSteamID, uniqID);
+	Format(szURL, sizeof(szURL), "https://www.ts-x.eu/popup.php?&url=/index.php?page=roleplay2%s&hashh=/tribunal/case/%s", sso, szSteamID);
+	PrintToConsole(client, "https://www.ts-x.eu/index.php?page=roleplay2#/tribunal/case/%s", szSteamID);
 	
-	ShowMOTDPanel(client, szTitle, szURL, MOTDPANEL_TYPE_URL);
+
+	
+	AdvMOTD_ShowMOTDPanel(client, szTitle, szURL, MOTDPANEL_TYPE_URL);
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemPickLock(int args) {
