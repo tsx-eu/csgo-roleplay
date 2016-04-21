@@ -28,6 +28,7 @@
 #define	MAX_ENTITIES	2048
 #define	ZONE_BUNKER		235
 #define ZONE_RESPAWN	231
+#define ZONE_VILLA		286
 #define	FLAG_SPEED		280.0
 #define	FLAG_POINT_MAX	150
 #define FLAG_MAX		10
@@ -367,17 +368,10 @@ void CAPTURE_Start() {
 		
 		g_iCapture_POINT[gID] += 100;
 		
-		rp_ClientDamage(i, 10000,  i);
-		ForcePlayerSuicide(i);
+		rp_ClientSendToSpawn(i, true);
 		if( g_iClientFlag[i] > 0 ) {
 			AcceptEntityInput(g_iClientFlag[i], "KillHierarchy");
 			g_iClientFlag[i] = 0;
-		}
-	}
-			
-	for(int i=1; i<MAX_ZONES; i++) {
-		if( rp_GetZoneBit(i) & BITZONE_PVP ) {
-			ServerCommand("rp_force_clean %d full", i);
 		}
 	}
 	
@@ -386,7 +380,8 @@ void CAPTURE_Start() {
 	HookEvent("player_hurt", Event_PlayerHurt, EventHookMode_Post);
 	HookEvent("weapon_fire", Event_PlayerShoot, EventHookMode_Post);
 	HookEvent("player_hurt", fwdGod_PlayerHurt, EventHookMode_Pre);
-	HookEvent("weapon_fire", fwdGod_PlayerShoot, EventHookMode_Pre);	
+	HookEvent("weapon_fire", fwdGod_PlayerShoot, EventHookMode_Pre);
+	ServerCommand("mp_logdetail 3");
 }
 public Action fwdCommand(int client, char[] command, char[] arg) {
 	if( StrEqual(command, "pvp") ) {
@@ -662,7 +657,7 @@ public Action fwdDead(int victim, int attacker, float& respawn) {
 			points += (points / 4);
 			
 		if( rp_GetCaptureInt(cap_bunker) == rp_GetClientGroupID(attacker) ) {
-			g_iCapture_POINT[rp_GetClientGroupID(attacker)] += (points/2);
+			g_iCapture_POINT[rp_GetClientGroupID(attacker)] += RoundFloat(float(points)*0.4);
 			PrintHintText(attacker, "<b>Kill !</b>\n <font color='#33ff33'>+%d</span> points !", points+(points/2));
 		}
 		else {
@@ -678,15 +673,22 @@ public Action fwdDead(int victim, int attacker, float& respawn) {
 public Action fwdHUD(int client, char[] szHUD, const int size) {
 	int gID = rp_GetClientGroupID(client);
 	int defTeam = rp_GetCaptureInt(cap_bunker);
-	char optionsBuff[4][32], tmp[128];
+	char optionsBuff[4][32], tmp[128], loading[64];
+	
+	float timeLeft = g_flCaptureStart + (30.0 * 60.0) - GetTickedTime();
+	
+	if( timeLeft > 10.0 )
+		rp_Effect_LoadingBar(loading, sizeof(loading), (GetTickedTime() - g_flCaptureStart) / (30.0 * 60.0));
+	else
+		Format(loading, sizeof(loading), "Il reste %.0f seconde%s", timeLeft, timeLeft >= 2 ? "s": "");
 	
 	if( g_bIsInCaptureMode && gID > 0 ) {
 		
 		Format(szHUD, size, "PvP: ");
 		if( gID == defTeam )
-			Format(szHUD, size, "%s Défense du Bunker\n", szHUD);
+			Format(szHUD, size, "%s Défense du Bunker\n%s\n", szHUD, loading);
 		else
-			Format(szHUD, size, "%s Attaque du Bunker\n", szHUD);
+			Format(szHUD, size, "%s Attaque du Bunker\n%s\n", szHUD, loading);
 			
 		for(int i=1; i<MAX_GROUPS; i+=10) {
 			if( g_iCapture_POINT[i] == 0 && gID != i )
@@ -771,12 +773,18 @@ public Action fwdTakeDamage(int victim, int attacker, float& damage, int wepID, 
 		return Plugin_Handled;
 	if( rp_GetClientGroupID(victim) == 0 || rp_GetClientGroupID(attacker) == 0  )
 		return Plugin_Handled;
+	if( !(rp_GetZoneBit(rp_GetPlayerZone(victim)) & BITZONE_PVP || rp_GetZoneBit(rp_GetPlayerZone(attacker)) & BITZONE_PVP) )
+		return Plugin_Handled;
+	
 	return Plugin_Continue;
 }
 public Action fwdZoneChange(int client, int newZone, int oldZone) {
 	if( newZone == ZONE_RESPAWN &&  rp_GetCaptureInt(cap_bunker) != rp_GetClientGroupID(client) ) {
 		rp_ClientDamage(client, 10000, client);
 		ForcePlayerSuicide(client);
+	}
+	if( newZone == ZONE_VILLA && !rp_GetClientKeyAppartement(client, 50) ) {
+		rp_ClientSendToSpawn(client, true);
 	}
 	return Plugin_Continue;
 }
@@ -905,7 +913,6 @@ void CTF_DropFlag(int client, int thrown) {
 	
 	vecPush[2] += 50.0;
 	TeleportEntity(flag, vecOrigin, vecAngles, vecPush);
-	
 }
 void CTF_FlagTouched(int client, int flag) {	
 	
@@ -916,6 +923,8 @@ void CTF_FlagTouched(int client, int flag) {
 		g_fLastDrop[client] = GetTickedTime() + 10.0;
 		return;
 	}
+	
+	SDKUnhook(flag, SDKHook_Touch, SDKTouch);
 	
 	g_iFlagData[flag][data_owner] = client;
 	g_iClientFlag[client] = flag;
