@@ -509,7 +509,7 @@ public Action gasShot(Handle timer, any ent) {
 		return Plugin_Handled;
 	
 	int attacker = GetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity");
-	float vecCenter[3], vecOrigin[3], time = GetGameTime() + 20.0;
+	float vecCenter[3], vecOrigin[3], time = GetTickedTime() + 20.0;
 	Entity_GetAbsOrigin(ent, vecCenter);
 	
 	for(int i=1; i<=MaxClients; i++) {
@@ -592,7 +592,7 @@ public Action EMPExplode_Task(Handle timer, any ent) {
 					
 					rp_SetClientInt(i, i_Kevlar, kev);
 					FakeClientCommand(i, "use weapon_knife; use weapon_knifegg"); 
-					rp_SetClientFloat(i, fl_TazerTime, GetGameTime() + 0.5);
+					rp_SetClientFloat(i, fl_TazerTime, GetTickedTime() + 0.5);
 				}
 				else {
 					rp_ClientDamage(i, 50, client, "ctf_nade_emp");
@@ -640,8 +640,8 @@ public void C4Explode(int client, int ent) {
 public Action fwdCommand(int client, char[] command, char[] arg) {	
 	if( StrEqual(command, "c4") ) { // C'est pour nous !
 	
-		if( rp_GetClientFloat(client, fl_CoolDown) > GetGameTime() ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez rien utiliser pour encore %.2f seconde(s).", (rp_GetClientFloat(client, fl_CoolDown)-GetGameTime()) );
+		if( rp_GetClientFloat(client, fl_CoolDown) > GetTickedTime() ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez rien utiliser pour encore %.2f seconde(s).", (rp_GetClientFloat(client, fl_CoolDown)-GetTickedTime()) );
 			return Plugin_Handled;
 		}
 		
@@ -667,7 +667,7 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 			}
 		}
 		
-		rp_SetClientFloat(client, fl_CoolDown, GetGameTime() + 2.5);
+		rp_SetClientFloat(client, fl_CoolDown, GetTickedTime() + 2.5);
 		return Plugin_Stop;
 	}
 	return Plugin_Continue;

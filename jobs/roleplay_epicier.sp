@@ -437,9 +437,9 @@ public Action OnWeaponReload(int wepid) {
 	if( ammo >= 150 ) {
 		int client = Weapon_GetOwner(wepid);
 		
-		if( cache[client] < GetGameTime() ) {
+		if( cache[client] < GetTickedTime() ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme a un San Andreas, il vous reste %d balles dans votre chargeur.", ammo);
-			cache[client] = GetGameTime() + 1.0;
+			cache[client] = GetTickedTime() + 1.0;
 		}
 		
 		return Plugin_Handled;

@@ -151,7 +151,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		rp_SetClientInt(client, i_LastVolAmount, prix);
 		rp_SetClientInt(client, i_LastVolTarget, target);
 		rp_SetClientInt(target, i_LastVol, client);		
-		rp_SetClientFloat(target, fl_LastVente, GetGameTime() + 10.0);
+		rp_SetClientFloat(target, fl_LastVente, GetTickedTime() + 10.0);
 		
 		rp_GetItemData(i, item_type_name, tmp, sizeof(tmp));
 		
@@ -230,9 +230,9 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 			cooldown *= 0.5;
 			
 		if( amount > 500 )
-			rp_SetClientFloat(client, fl_LastVente, GetGameTime() + 10.0);
+			rp_SetClientFloat(client, fl_LastVente, GetTickedTime() + 10.0);
 		if( amount > 2000 )
-			rp_SetClientFloat(client, fl_LastVente, GetGameTime() + 30.0);
+			rp_SetClientFloat(client, fl_LastVente, GetTickedTime() + 30.0);
 		
 		rp_ClientFloodIncrement(client, target, fd_vol, cooldown);
 		

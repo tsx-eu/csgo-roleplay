@@ -179,7 +179,7 @@ public Action Cmd_ItemDrugs(int args) {
 		rp_Effect_ShakingVision(client);
 	}
 	else if( StrEqual(arg0, "cannabis2") ) {
-		rp_SetClientFloat(client, fl_invisibleTime, GetGameTime() + dur);
+		rp_SetClientFloat(client, fl_invisibleTime, GetTickedTime() + dur);
 	}
 	else if( StrEqual(arg0, "heroine") ) {
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdHeroine, dur);
@@ -191,7 +191,7 @@ public Action Cmd_ItemDrugs(int args) {
 	else if( StrEqual(arg0, "champigions") ) {
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdChampi, dur);
 		
-		rp_SetClientFloat(client, fl_HallucinationTime, GetGameTime() + dur);
+		rp_SetClientFloat(client, fl_HallucinationTime, GetTickedTime() + dur);
 	}
 	else if( StrEqual(arg0, "crystal") ) {
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdCrystal, dur);

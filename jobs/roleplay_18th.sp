@@ -131,9 +131,9 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 			cooldown *= 0.5;
 			
 		if( amount > 500 )
-			rp_SetClientFloat(client, fl_LastVente, GetGameTime() + 10.0);
+			rp_SetClientFloat(client, fl_LastVente, GetTickedTime() + 10.0);
 		if( amount > 2000 )
-			rp_SetClientFloat(client, fl_LastVente, GetGameTime() + 30.0);
+			rp_SetClientFloat(client, fl_LastVente, GetTickedTime() + 30.0);
 		
 		rp_ClientFloodIncrement(client, target, fd_vol, cooldown);
 		
@@ -493,7 +493,7 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 		return Plugin_Handled;
 	}
 	
-	if ( rp_GetClientFloat(target, fl_Invincible) >= GetGameTime() ) {
+	if ( rp_GetClientFloat(target, fl_Invincible) >= GetTickedTime() ) {
 		rp_SetClientBool(target, b_Stealing, false);
 		SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 		return Plugin_Handled;
@@ -519,7 +519,7 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 		Entity_GetOwner(wepid) == target
 	) {
 		
-		if( rp_GetClientFloat(target, fl_LastStolen)+(60.0) < GetGameTime() && g_iWeaponStolen[wepid]+(120) < GetTime() ) {
+		if( rp_GetClientFloat(target, fl_LastStolen)+(60.0) < GetTickedTime() && g_iWeaponStolen[wepid]+(120) < GetTime() ) {
 			
 			if( !rp_GetClientBool(target, b_IsAFK) && (rp_GetClientJobID(target) == 1 || rp_GetClientJobID(target) == 101) ) {
 			
@@ -563,7 +563,7 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 		return Plugin_Handled;
 	}
 	
-	float time = GetGameTime();
+	float time = GetTickedTime();
 	if( rp_GetClientBool(target, b_IsAFK) )
 		time += 5.0 * 60.0;
 	
@@ -607,11 +607,11 @@ int findPlayerWeapon(int client, int target) {
 		return -1;
 	}
 	
-	if( (g_iStolenAmountTime[target] >= 3 && rp_GetClientFloat(target, fl_LastStolen)+(STEAL_TIME) > GetGameTime()) || (g_iStolenAmountTime[target] >= 5) ) {
+	if( (g_iStolenAmountTime[target] >= 3 && rp_GetClientFloat(target, fl_LastStolen)+(STEAL_TIME) > GetTickedTime()) || (g_iStolenAmountTime[target] >= 5) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur s'est déjà fait volé récemment.");
 		return -1;
 	}
-	if( rp_GetClientFloat(target, fl_Invincible) >= GetGameTime() ) {
+	if( rp_GetClientFloat(target, fl_Invincible) >= GetTickedTime() ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur est invincible.");
 		return -1;
 	}

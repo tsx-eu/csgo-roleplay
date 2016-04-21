@@ -113,7 +113,7 @@ public Action Cmd_ItemPoupee(int args) {
 	
 	rp_HookEvent(client, RP_PreTakeDamage, fwdInvincible, 5.0);
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 5.0);
-	rp_SetClientFloat(client, fl_Invincible, GetGameTime() + 5.0);
+	rp_SetClientFloat(client, fl_Invincible, GetTickedTime() + 5.0);
 	
 	int heal = GetClientHealth(client) + 100;
 	int kevlar = rp_GetClientInt(client, i_Kevlar) + 25;
