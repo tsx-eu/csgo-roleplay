@@ -675,10 +675,10 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 	int defTeam = rp_GetCaptureInt(cap_bunker);
 	char optionsBuff[4][32], tmp[128], loading[64];
 	
-	float timeLeft = g_flCaptureStart + (30.0 * 60.0) - GetTickedTime();
+	float timeLeft = g_flCaptureStart + (30.0 * 60.0) - GetGameTime();
 	
 	if( timeLeft > 10.0 )
-		rp_Effect_LoadingBar(loading, sizeof(loading), (GetTickedTime() - g_flCaptureStart) / (30.0 * 60.0));
+		rp_Effect_LoadingBar(loading, sizeof(loading), (GetGameTime() - g_flCaptureStart) / (30.0 * 60.0));
 	else
 		Format(loading, sizeof(loading), "Il reste %.0f seconde%s", timeLeft, timeLeft >= 2 ? "s": "");
 	
