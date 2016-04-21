@@ -108,8 +108,8 @@ public Action Cmd_ItemChirurgie(int args) {
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 5.0);
 	rp_HookEvent(vendeur, RP_PrePlayerPhysic, fwdFrozen, 5.0);
 	
-	rp_SetClientFloat(client, fl_TazerTime, GetTickedTime() + 5.0);
-	rp_SetClientFloat(vendeur, fl_TazerTime, GetTickedTime() + 5.0);
+	rp_SetClientFloat(client, fl_TazerTime, GetGameTime() + 5.0);
+	rp_SetClientFloat(vendeur, fl_TazerTime, GetGameTime() + 5.0);
 	
 	g_iSuccess_last_faster_dead[client] = GetTime() - 5;
 	

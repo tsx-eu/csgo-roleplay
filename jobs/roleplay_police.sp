@@ -445,19 +445,19 @@ public Action Cmd_Vis(int client) {
 		ClientCommand(client, "r_screenoverlay effects/hsv.vmt");
 		
 		if( job  == 6 ) {
-			rp_SetClientFloat(client, fl_invisibleTime, GetTickedTime() + 30.0);
+			rp_SetClientFloat(client, fl_invisibleTime, GetGameTime() + 30.0);
 			CreateTimer(120.0, AllowStealing, client);
 		}
 		else if ( job == 5 ) {
-			rp_SetClientFloat(client, fl_invisibleTime, GetTickedTime() + 60.0);
+			rp_SetClientFloat(client, fl_invisibleTime, GetGameTime() + 60.0);
 			CreateTimer(120.0, AllowStealing, client);
 		}
 		else if ( job == 4 ) {
-			rp_SetClientFloat(client, fl_invisibleTime, GetTickedTime() + 60.0);
+			rp_SetClientFloat(client, fl_invisibleTime, GetGameTime() + 60.0);
 			rp_SetClientBool(client, b_MaySteal, true);
 		}
 		else if (job == 1 ||  job== 2 ) {
-			rp_SetClientFloat(client, fl_invisibleTime, GetTickedTime() + 90.0);
+			rp_SetClientFloat(client, fl_invisibleTime, GetGameTime() + 90.0);
 			rp_SetClientBool(client, b_MaySteal, true);
 		}
 		
@@ -527,7 +527,7 @@ public Action Cmd_Tazer(int client) {
 		rp_HookEvent(target, RP_PrePlayerPhysic, fwdFrozen, 7.5);
 		
 		rp_SetClientFloat(target, fl_TazerTime, GetTickedTime()+9.0);
-		rp_SetClientFloat(target, fl_FrozenTime, GetTickedTime()+7.5);
+		rp_SetClientFloat(target, fl_FrozenTime, GetGameTime()+7.5);
 		
 		FakeClientCommand(target, "use weapon_knife");
 		FakeClientCommand(target, "use weapon_knifegg");
@@ -737,7 +737,7 @@ public Action Cmd_Jail(int client) {
 		ACCESS_DENIED(client);
 	}
 	
-	float time = GetTickedTime();
+	float time = GetGameTime();
 		
 	for(int i=1; i<=MaxClients; i++) {
 		if( !IsValidClient(i) || IsPlayerAlive(i) )
@@ -756,10 +756,10 @@ public Action Cmd_Jail(int client) {
 	
 	int target = rp_GetClientTarget(client);
 
-	if( IsValidClient(target) && rp_GetClientFloat(target, fl_Invincible) > GetTickedTime() ) { //le target utilise une poupée gonflable
+	if( IsValidClient(target) && rp_GetClientFloat(target, fl_Invincible) > GetGameTime() ) { //le target utilise une poupée gonflable
 		ACCESS_DENIED(client);
 	}
-	if( rp_GetClientFloat(client, fl_Invincible) > GetTickedTime() ) { //le flic utilise une poupée gonflable
+	if( rp_GetClientFloat(client, fl_Invincible) > GetGameTime() ) { //le flic utilise une poupée gonflable
 		ACCESS_DENIED(client);
 	}
 
@@ -904,12 +904,12 @@ public Action Cmd_Perquiz(int client) {
 		ACCESS_DENIED(client);
 	}
 	
-	if( rp_GetClientFloat(client, fl_CoolDown) > GetTickedTime() ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez rien utiliser pour encore %.2f seconde(s).", (rp_GetClientFloat(client, fl_CoolDown)-GetTickedTime()) );
+	if( rp_GetClientFloat(client, fl_CoolDown) > GetGameTime() ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez rien utiliser pour encore %.2f seconde(s).", (rp_GetClientFloat(client, fl_CoolDown)-GetGameTime()) );
 		return Plugin_Handled;
 	}
 
-	rp_SetClientFloat(client, fl_CoolDown, GetTickedTime() + 5.0);
+	rp_SetClientFloat(client, fl_CoolDown, GetGameTime() + 5.0);
 	
 	int job_id = 0;
 	int zone = rp_GetPlayerZone( rp_GetClientTarget(client) );

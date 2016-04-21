@@ -271,7 +271,7 @@ public Action FlagThink(Handle timer, any data) {
 		if( rp_GetPlayerZone(entity) == ZONE_BUNKER ) {
 			
 			if( rp_GetCaptureInt(cap_bunker) != g_iFlagData[entity][data_group] ) {
-				int point = RoundFloat(FLAG_POINT_MAX - ((FLAG_POINT_MAX - FLAG_POINT_MIN) * (GetTickedTime() - g_flCaptureStart) / (30.0 * 60.0)));
+				int point = RoundFloat(FLAG_POINT_MAX - ((FLAG_POINT_MAX - FLAG_POINT_MIN) * (GetGameTime() - g_flCaptureStart) / (30.0 * 60.0)));
 				
 				g_iCapture_POINT[g_iFlagData[entity][data_group]] += point;
 				g_iCapture_POINT[rp_GetCaptureInt(cap_bunker)] -= point;
@@ -279,7 +279,7 @@ public Action FlagThink(Handle timer, any data) {
 				GDM_RegisterFlag(g_iFlagData[entity][data_lastOwner]);
 				
 				PrintHintText(g_iFlagData[entity][data_lastOwner], "<b>Drapeau posé !</b>\n <font color='#33ff33'>+%d</span> points !", point);
-				g_flClientLastScore[g_iFlagData[entity][data_lastOwner]] = GetTickedTime();
+				g_flClientLastScore[g_iFlagData[entity][data_lastOwner]] = GetGameTime();
 			}
 			
 			Entity_GetAbsOrigin(entity, vecOrigin);
@@ -322,7 +322,7 @@ void CAPTURE_Start() {
 	CPrintToChatAll("{lightblue} Le bunker peut maintenant être capturé! {default}");
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	
-	g_flCaptureStart = GetTickedTime();
+	g_flCaptureStart = GetGameTime();
 	CAPTURE_UpdateLight();
 	
 	int wall = Entity_FindByName("job=201__-pvp_wall", "func_brush");
@@ -663,7 +663,7 @@ public Action fwdDead(int victim, int attacker, float& respawn) {
 		else {
 			PrintHintText(attacker, "<b>Kill !</b>\n <font color='#33ff33'>+%d</span> points !", points);
 		}
-		g_flClientLastScore[attacker] = GetTickedTime();
+		g_flClientLastScore[attacker] = GetGameTime();
 		rp_IncrementSuccess(attacker, success_list_killpvp2);
 	}
 	if( rp_GetClientGroupID(victim) == rp_GetCaptureInt(cap_bunker) )
@@ -712,7 +712,7 @@ public Action fwdFrame(int client) {
 	
 	if( rp_GetClientGroupID(client) ) {
 		
-		if( g_flClientLastScore[client]+3.0 > GetTickedTime() ) {
+		if( g_flClientLastScore[client]+3.0 > GetGameTime() ) {
 			//
 		}
 		else if( g_hGodTimer[client] != INVALID_HANDLE ) {
@@ -880,7 +880,7 @@ void CTF_DropFlag(int client, int thrown) {
 	
 	flag = g_iClientFlag[client];
 	g_iClientFlag[client] = 0;
-	g_fLastDrop[client] = GetTickedTime();
+	g_fLastDrop[client] = GetGameTime();
 	skin = g_iFlagData[flag][data_skin];
 	color[0] = g_iFlagData[flag][data_red];
 	color[1] = g_iFlagData[flag][data_green];
@@ -916,11 +916,11 @@ void CTF_DropFlag(int client, int thrown) {
 }
 void CTF_FlagTouched(int client, int flag) {	
 	
-	if( (g_fLastDrop[client]+3.0) >= GetTickedTime() ) {
+	if( (g_fLastDrop[client]+3.0) >= GetGameTime() ) {
 		return;
 	}
 	if( GDM_GetFlagCount(client) >= FLAG_MAX ) {
-		g_fLastDrop[client] = GetTickedTime() + 10.0;
+		g_fLastDrop[client] = GetGameTime() + 10.0;
 		return;
 	}
 	
@@ -1147,8 +1147,8 @@ void Client_SetSpawnProtect(int client, bool status) {
 public Action fwdGodThink(int client) {
 	int wep = Client_GetWeapon(client, "weapon_knife");
 	if( wep > 0 && IsValidEdict(wep) && IsValidEntity(wep) ) {
-		SetEntPropFloat(wep, Prop_Send, "m_flNextPrimaryAttack", GetTickedTime() + 0.25);
-		SetEntPropFloat(wep, Prop_Send, "m_flNextSecondaryAttack", GetTickedTime() + 0.25);
+		SetEntPropFloat(wep, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + 0.25);
+		SetEntPropFloat(wep, Prop_Send, "m_flNextSecondaryAttack", GetGameTime() + 0.25);
 	}
 }
 public Action fwdGodHideMe(int client, int target) {

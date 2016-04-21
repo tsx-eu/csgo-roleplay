@@ -354,9 +354,9 @@ public Action OnWeaponReload(int wepid) {
 	if( ammo >= 150 ) {
 		int client = Weapon_GetOwner(wepid);
 		
-		if( cache[client] < GetTickedTime() ) {
+		if( cache[client] < GetGameTime() ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme a un San Andreas, il vous reste %d balles dans votre chargeur.", ammo);
-			cache[client] = GetTickedTime() + 1.0;
+			cache[client] = GetGameTime() + 1.0;
 		}
 		
 		return Plugin_Handled;
@@ -419,7 +419,7 @@ public Action fwdWeapon(int victim, int attacker, float &damage, int wepID, floa
 				TeleportEntity(victim, NULL_VECTOR, NULL_VECTOR, vecNull);
 				damage *= 0.5;
 				
-				rp_SetClientFloat(victim, fl_FrozenTime, GetTickedTime() + 1.5);
+				rp_SetClientFloat(victim, fl_FrozenTime, GetGameTime() + 1.5);
 				if(!rp_GetClientBool(victim, b_ChiruYeux))
 					ServerCommand("sm_effect_flash %d 1.5 180", victim);
 			}
@@ -427,7 +427,7 @@ public Action fwdWeapon(int victim, int attacker, float &damage, int wepID, floa
 				if( !rp_ClientFloodTriggered(attacker, victim, fd_flash) ) {
 					rp_ClientFloodIncrement(attacker, victim, fd_flash, 1.0);
 					
-					rp_SetClientFloat(victim, fl_FrozenTime, GetTickedTime() + 1.5);
+					rp_SetClientFloat(victim, fl_FrozenTime, GetGameTime() + 1.5);
 					if(!rp_GetClientBool(victim, b_ChiruYeux))
 						ServerCommand("sm_effect_flash %d 1.5 180", victim);
 				}

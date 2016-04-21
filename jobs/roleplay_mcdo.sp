@@ -313,7 +313,7 @@ public Action Cmd_ItemHamburger(int args) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet item pour le moment.");
 			return Plugin_Handled;
 		}
-		rp_SetClientFloat(client, fl_Reflect, GetTickedTime() + 5.0);
+		rp_SetClientFloat(client, fl_Reflect, GetGameTime() + 5.0);
 		
 		float vecTarget[3];
 		GetClientAbsOrigin(client, vecTarget);

@@ -1139,8 +1139,8 @@ public Action fwdWeapon(int victim, int attacker, float &damage, int wepID, floa
 			
 			if( victim != him && victim != from ) {
 				
-				rp_SetClientFloat(victim, fl_FrozenTime, GetTickedTime() + 1.5);
-				rp_SetClientFloat(victim, fl_TazerTime, GetTickedTime() + 7.5);
+				rp_SetClientFloat(victim, fl_FrozenTime, GetGameTime() + 1.5);
+				rp_SetClientFloat(victim, fl_TazerTime, GetGameTime() + 7.5);
 				
 				if(!rp_GetClientBool(victim, b_ChiruYeux))
 					ServerCommand("sm_effect_flash %d 1.5 180", victim);
