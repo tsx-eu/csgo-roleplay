@@ -48,9 +48,9 @@ float g_flCaptureStart;
 bool g_bIsInCaptureMode = false;
 int g_cBeam;
 StringMap g_hGlobalDamage, g_hGlobalSteamID;
-enum damage_data { gdm_shot, gdm_touch, gdm_damage, gdm_hitbox, gdm_elo, gdm_flag, gdm_max };
+enum damage_data { gdm_shot, gdm_touch, gdm_damage, gdm_hitbox, gdm_elo, gdm_flag, gdm_kill, gdm_max };
 TopMenu g_hStatsMenu;
-TopMenuObject g_hStatsMenu_Shoot, g_hStatsMenu_Head, g_hStatsMenu_Damage, g_hStatsMenu_Flag, g_hStatsMenu_ELO;
+TopMenuObject g_hStatsMenu_Shoot, g_hStatsMenu_Head, g_hStatsMenu_Damage, g_hStatsMenu_Flag, g_hStatsMenu_ELO, g_hStatsMenu_KILL;
 // -----------------------------------------------------------------------------------------------------------------
 public Plugin myinfo = {
 	name = "Utils: PvP", author = "KoSSoLaX",
@@ -100,7 +100,6 @@ public void OnClientPostAdminCheck(int client) {
 		rp_HookEvent(client, RP_OnPlayerHUD, fwdHUD);
 		rp_HookEvent(client, RP_OnPlayerSpawn, fwdSpawn);
 		rp_HookEvent(client, RP_OnFrameSeconde, fwdFrame);
-		rp_HookEvent(client, RP_PostPlayerPhysic, fwdPhysics);
 		rp_HookEvent(client, RP_PreTakeDamage, fwdTakeDamage);
 		rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
 	}
@@ -345,7 +344,6 @@ void CAPTURE_Start() {
 		rp_HookEvent(i, RP_OnPlayerDead, fwdDead);
 		rp_HookEvent(i, RP_OnPlayerHUD, fwdHUD);
 		rp_HookEvent(i, RP_OnPlayerSpawn, fwdSpawn);
-		rp_HookEvent(i, RP_PostPlayerPhysic, fwdPhysics);
 		rp_HookEvent(i, RP_OnFrameSeconde, fwdFrame);
 		rp_HookEvent(i, RP_PreTakeDamage, fwdTakeDamage);
 		rp_HookEvent(i, RP_OnPlayerZoneChange, fwdZoneChange);
@@ -411,11 +409,9 @@ void CAPTURE_Stop() {
 	for(int i=1; i<=MaxClients; i++) {
 		if( !IsValidClient(i) )
 			continue;
-		
 		rp_UnhookEvent(i, RP_OnPlayerDead, fwdDead);
 		rp_UnhookEvent(i, RP_OnPlayerHUD, fwdHUD);
 		rp_UnhookEvent(i, RP_OnPlayerSpawn, fwdSpawn);
-		rp_UnhookEvent(i, RP_PostPlayerPhysic, fwdPhysics);
 		rp_UnhookEvent(i, RP_OnFrameSeconde, fwdFrame);
 		rp_UnhookEvent(i, RP_PreTakeDamage, fwdTakeDamage);
 		rp_UnhookEvent(i, RP_OnPlayerZoneChange, fwdZoneChange);
@@ -508,9 +504,11 @@ void CAPTURE_Reward(int totalPoints) {
 		g_hGlobalDamage.GetArray(szSteamID, array, sizeof(array));
 		amount = RoundFloat( float(array[gdm_elo]) / 1500.0 * float(amount) );
 		
-		rp_ClientGiveItem(client, 215, amount + 3 + bonus, true);
-		rp_GetItemData(215, item_type_name, tmp, sizeof(tmp));
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu %d %s, en récompense de la capture.", amount+3+bonus, tmp);
+		if( array[gdm_damage] >= 500 || array[gdm_flag] >= 1 || array[gdm_kill] >= 3 ) {
+			rp_ClientGiveItem(client, 215, amount + 3 + bonus, true);
+			rp_GetItemData(215, item_type_name, tmp, sizeof(tmp));
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu %d %s, en récompense de la capture.", amount+3+bonus, tmp);
+		}
 	}	
 }
 public Action CAPTURE_Tick(Handle timer, any none) {
@@ -652,9 +650,11 @@ public Action fwdDead(int victim, int attacker, float& respawn) {
 		dropped = true;
 	}
 	if( victim != attacker ) {
+		GDM_RegisterKill(attacker);
+		
 		int points = GDM_ELOKill(attacker, victim);
 		if( dropped )
-			points += (points / 4);
+			points += RoundFloat(float(points)*0.25);
 			
 		if( rp_GetCaptureInt(cap_bunker) == rp_GetClientGroupID(attacker) ) {
 			g_iCapture_POINT[rp_GetClientGroupID(attacker)] += RoundFloat(float(points)*0.4);
@@ -739,11 +739,6 @@ public Action fwdFrame(int client) {
 	}
 		
 	return Plugin_Continue;
-}
-public Action fwdPhysics(int client, float& speed, float& gravity) {
-	speed = (speed > 1.5 ? 1.5:speed);
-	gravity = (gravity < 0.66 ? 0.66:gravity);
-	return Plugin_Stop;
 }
 public Action Event_PlayerShoot(Handle event, char[] name, bool dontBroadcast) {
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
@@ -999,6 +994,15 @@ void GDM_RegisterFlag(int client) {
 	array[gdm_flag]++;
 	g_hGlobalDamage.SetArray(szSteamID, array, sizeof(array));
 }
+void GDM_RegisterKill(int client) {
+	char szSteamID[32];
+	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
+	
+	int array[gdm_max];
+	g_hGlobalDamage.GetArray(szSteamID, array, sizeof(array));
+	array[gdm_kill]++;
+	g_hGlobalDamage.SetArray(szSteamID, array, sizeof(array));
+}
 int GDM_GetFlagCount(int client) {
 	char szSteamID[32];
 	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
@@ -1069,6 +1073,8 @@ void GDM_Resume() {
 	g_hStatsMenu_Damage = g_hStatsMenu.AddCategory("damage", MenuPvPResume);
 	g_hStatsMenu_Flag = g_hStatsMenu.AddCategory("flag", MenuPvPResume);
 	g_hStatsMenu_ELO = g_hStatsMenu.AddCategory("elo", MenuPvPResume);
+	g_hStatsMenu_KILL = g_hStatsMenu.AddCategory("kill", MenuPvPResume);
+	
 	
 	for (int i = 0; i < nbrParticipant; i++) {
 		KeyList.GetKey(i, szSteamID, sizeof(szSteamID));
@@ -1104,7 +1110,12 @@ void GDM_Resume() {
 			Format(tmp, sizeof(tmp), "%6d - %s", delta, name);
 			g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_Flag, "", 0, tmp);
 		}
-		
+		if( array[gdm_kill] != 0 ) {
+			delta = array[gdm_kill];
+			Format(key, sizeof(key), "f%06d_%s", 1000000 - delta, szSteamID); 
+			Format(tmp, sizeof(tmp), "%6d - %s", delta, name);
+			g_hStatsMenu.AddItem(key, MenuPvPResume, g_hStatsMenu_KILL, "", 0, tmp);
+		}
 		
 	}
 	
@@ -1187,6 +1198,8 @@ public void MenuPvPResume(Handle topmenu, TopMenuAction action, TopMenuObject to
 			Format(buffer, maxlength, "Le plus de tir dans la tête");
 		else if( topobj_id == g_hStatsMenu_Damage )
 			Format(buffer, maxlength, "Le plus de dégâts");
+		else if( topobj_id == g_hStatsMenu_KILL )
+			Format(buffer, maxlength, "Le plus de meurtre");
 		else if( topobj_id == g_hStatsMenu_Flag )
 			Format(buffer, maxlength, "Le plus de drapeaux posés");
 		else if( topobj_id == g_hStatsMenu_ELO )
