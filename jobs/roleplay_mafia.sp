@@ -446,12 +446,6 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 		return Plugin_Handled;
 	}
 	
-	
-	float vecOrigin[3];
-	GetClientEyePosition(client, vecOrigin);
-	vecOrigin[2] += 25.0;
-	
-	
 	char classname[128];
 	GetEdictClassname(target, classname, sizeof(classname));
 	if( StrContains(classname, "rp_weaponbox_") == 0 ) {
@@ -459,7 +453,7 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 		CreateTimer(STEAL_TIME*0.5, AllowStealing, client);
 		return Plugin_Handled;
 	}
-	int rand = 4 + Math_GetRandomPow(0, 4), count = 0, job, rnd;
+	int rand = 4 + Math_GetRandomPow(0, 4), count = 0, job;
 	for(int i=1; i<MaxClients; i++) {
 		if( !IsValidClient(i) )
 			continue;
@@ -478,20 +472,13 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	rp_SetClientStat(client, i_JobSucess, rp_GetClientStat(client, i_JobSucess) + 1);
 	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} %d billets ont été sorti du distributeur.", rand);
-	int amount = 0;
-	while(rand >= 1 ) {
-		rand--;
-		
-		rnd = Math_GetRandomInt(2, 5) * 10;
-		job = rp_GetRandomCapital(91);
-		
-		rp_Effect_SpawnMoney(vecOrigin, true);
-		amount += rnd;
-		rp_SetJobCapital(job, rp_GetJobCapital(job) - rnd);
+	
+	for (int i = 1; i <= rand; i++) {
+		CreateTimer(i / 5.0, SpawnMoney, target);
 	}
-	rp_SetJobCapital(91, rp_GetJobCapital(91) + amount);
+	
 	rp_SetClientInt(client, i_LastVolTime, GetTime());
-	rp_SetClientInt(client, i_LastVolAmount, amount);
+	rp_SetClientInt(client, i_LastVolAmount, 25*rand);
 	rp_SetClientInt(client, i_LastVolTarget, -1);
 	
 	float time;
@@ -500,10 +487,29 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 		time = (STEAL_TIME * 1.0);
 	else
 		time = (STEAL_TIME * 2.0);
-	
 	CreateTimer(time, AllowStealing, client);
 	
 	return Plugin_Continue;
+}
+public Action SpawnMoney(Handle timer, any target) {
+	float vecOrigin[3], vecAngle[3], vecPos[3];
+	Entity_GetAbsOrigin(target, vecOrigin);
+	Entity_GetAbsAngles(target, vecAngle);
+	Math_RotateVector( view_as<float>({ 7.0, 16.0, 40.0 }), vecAngle, vecPos);
+	vecOrigin[0] += vecPos[0];
+	vecOrigin[1] += vecPos[1];
+	vecOrigin[2] += vecPos[2];
+	
+	Math_RotateVector( view_as<float>({ 0.0, 250.0, 40.0 }), vecAngle, vecPos);
+	
+	
+	int rnd = Math_GetRandomInt(2, 5) * 10;
+	int job = rp_GetRandomCapital(91);
+	rp_SetJobCapital(job, rp_GetJobCapital(job) - rnd);
+	rp_SetJobCapital(91, rp_GetJobCapital(91) + rnd);
+	
+	int m = rp_Effect_SpawnMoney(vecOrigin);
+	TeleportEntity(m, NULL_VECTOR, NULL_VECTOR, vecPos);
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemPickLock(int args) {

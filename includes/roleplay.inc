@@ -351,7 +351,7 @@ native void rp_Effect_ShakingVision(int client, float duration = 30.0);					/* F
 native int rp_Effect_Particle(int entity, char[] effect, float duration=0.0001);		/* Affiche une particule */
 native int rp_Effect_ParticlePath(int entity, char[] effect, const float src[3], const float angle[3], const float dest[3]); /* Affiche une particule à un endroit précis */
 native void rp_Effect_Tazer(int client, int target);								/* Affiche un trait du tazer entre un joueur et une cible */
-native void rp_Effect_SpawnMoney(float origin[3], bool high = false);						/* Spawn des billets 20-50$. High = true -> 200-500$. Penser à retirer la thune d'un capital */
+native int rp_Effect_SpawnMoney(float origin[3], bool away = false, bool high = false);						/* Spawn des billets 20-50$. High = true -> 200-500$. Penser à retirer la thune d'un capital */
 native void rp_Effect_BeamBox(int client, int target = -1, float origin[3] = NULL_VECTOR, int red = 0, int green = 255, int blue = 0); /* Affiche un lazer tracant entre un joueur et une cible */
 native void rp_Effect_LoadingBar(char[] str, int length, float percent);
 // ----------------------------------------------------------------------------
