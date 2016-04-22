@@ -500,6 +500,8 @@ public Action SpawnMoney(Handle timer, any target) {
 	vecOrigin[1] += vecPos[1];
 	vecOrigin[2] += vecPos[2];
 	
+	vecAngle[0] += Math_GetRandomFloat(-5.0, 5.0);
+	vecAngle[1] += Math_GetRandomFloat(-5.0, 5.0);	
 	Math_RotateVector( view_as<float>({ 0.0, 250.0, 40.0 }), vecAngle, vecPos);
 	
 	
