@@ -639,6 +639,7 @@ enum float_user_data {
 	Float:fl_RespawnTime,	
 	Float:fl_ArtisanFatigue,
 	Float:fl_LastPoison,
+	Float:fl_LastCrochettage,
 	
 	fl_udata_max
 };

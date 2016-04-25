@@ -703,8 +703,7 @@ public Action ItemPickLockOver_maffia(Handle timer, Handle dp) {
 	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} La porte a été ouverte.");
 	
-	// TODO:
-	//g_iSuccess_last_mafia[client][0] = GetTime();
+	rp_SetClientFloat(client, fl_LastCrochettage, GetGameTime());
 	
 	int zone = rp_GetZoneInt(rp_GetPlayerZone(door), zone_type_type);
 	if( zone == 1 || zone == -1 || Math_GetRandomInt(1, 4) == 4 || last_door[client] != doorID ) {
