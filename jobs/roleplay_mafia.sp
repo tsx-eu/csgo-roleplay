@@ -80,7 +80,7 @@ public void OnMapStart() {
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse,	fwdOnPlayerUse);
 	rp_HookEvent(client, RP_OnPlayerSteal,	fwdOnPlayerSteal);
-	
+	rp_SetClientBool(client, b_MaySteal, true);
 }
 public void OnClientDisconnect(int client) {
 	for(int i=0; i<2049; i++){
@@ -495,7 +495,7 @@ public Action SpawnMoney(Handle timer, any target) {
 	float vecOrigin[3], vecAngle[3], vecPos[3];
 	Entity_GetAbsOrigin(target, vecOrigin);
 	Entity_GetAbsAngles(target, vecAngle);
-	Math_RotateVector( view_as<float>({ 7.0, 16.0, 40.0 }), vecAngle, vecPos);
+	Math_RotateVector( view_as<float>({ 7.0, 0.0, 40.0 }), vecAngle, vecPos);
 	vecOrigin[0] += vecPos[0];
 	vecOrigin[1] += vecPos[1];
 	vecOrigin[2] += vecPos[2];
