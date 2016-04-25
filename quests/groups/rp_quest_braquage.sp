@@ -46,7 +46,7 @@ public Plugin myinfo =  {
 };
 
 int g_iQuest;
-bool g_bDoingQuest, g_bByPassDoor, g_bHasHelmet, g_bCanMakeQuest;
+bool g_bDoingQuest, g_bByPassDoor, g_bHasHelmet, g_bCanMakeQuest, g_bCanKill;
 int g_iVehicle, g_iPlanque, g_iPlanqueZone, g_iQuestGain;
 int g_iPlayerTeam[2049], g_stkTeam[QUEST_TEAMS + 1][MAXPLAYERS + 1], g_stkTeamCount[QUEST_TEAMS + 1], g_iJobs[MAX_JOBS], g_iMaskEntity[MAXPLAYERS + 1];
 
@@ -139,6 +139,13 @@ public void Q_Abort(int objectiveID, int client) {
 			if( IsValidClient(i) )
 				rp_UnhookEvent(i, RP_OnPlayerCheckKey, fwdGotKey);
 	}
+	if( g_bCanKill ) {
+		for (int i = 1; i <= MaxClients; i++)
+			if( IsValidClient(i) )
+				rp_UnhookEvent(i, RP_PreGiveDamage, fwdDamage);
+	}
+	
+	g_bCanKill = false;
 	g_bByPassDoor = false;
 	g_bHasHelmet = false;
 	g_bDoingQuest = false;
@@ -339,6 +346,12 @@ public void Q5_Frame(int objectiveID, int client) {
 	}
 }
 public void Q6_Start(int objectiveID, int client) {
+	for (int i = 1; i <= MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		rp_HookEvent(i, RP_PreGiveDamage, fwdDamage);
+	}
+	g_bCanKill = true;
 	updateTeamPolice();
 	g_iQuestGain = 1000;
 	g_stkTeamCount[TEAM_HOSTAGE] = 0;
@@ -474,6 +487,8 @@ public void OnClientPostAdminCheck(int client) {
 		rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
 	if( g_bByPassDoor )
 		rp_HookEvent(client, RP_OnPlayerCheckKey, fwdGotKey);
+	if( g_bCanKill ) 
+		rp_HookEvent(client, RP_PreGiveDamage, fwdDamage);
 }
 public Action fwdLoaded(int client) {
 	if( g_iPlayerTeam[client] != TEAM_POLICE && (rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101) ) {
@@ -541,12 +556,26 @@ public Action fwdDead(int client, int attacker) {
 	}
 	return Plugin_Continue;
 }
+public Action fwdDamage(int victim, int attacker, float& damage, int wepID, float pos[3]) {
+	if( g_iPlayerTeam[attacker] == TEAM_BRAQUEUR && g_iPlayerTeam[victim] != TEAM_POLICE ) 
+		return Plugin_Handled;
+	if( g_iPlayerTeam[attacker] != TEAM_POLICE && g_iPlayerTeam[victim] == TEAM_BRAQUEUR ) 
+		return Plugin_Handled;
+	
+	return Plugin_Continue;
+}
 public Action RP_OnClientSendJail(int client, int target) {
 	if( IsValidClient(target) && g_iPlayerTeam[target] == TEAM_BRAQUEUR ) {
 		if( isInVehicle(target) )
 			return Plugin_Handled;
 		if( rp_GetZoneInt(rp_GetPlayerZone(target), zone_type_type) == g_iPlanque )
 			return Plugin_Handled;
+	}
+	return Plugin_Continue;
+}
+public Action RP_ClientCanTP(int client) {
+	if( IsValidClient(client) && g_iPlayerTeam[client] == TEAM_BRAQUEUR ) {
+		return Plugin_Handled;
 	}
 	return Plugin_Continue;
 }

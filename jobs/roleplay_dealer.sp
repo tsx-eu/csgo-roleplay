@@ -42,7 +42,7 @@ Handle g_hDrugTimer[65];
 //forward RP_OnClientMaxPlantCount(int client, int& max);
 //forward RP_OnClientPiedBiche(int client);
 //forward RP_OnClientBuildingPrice(int client, int& price);
-Handle g_hForward_RP_OnClientMaxPlantCount, g_hForward_RP_OnClientPiedBiche, g_hForward_RP_OnClientBuildingPrice;
+Handle g_hForward_RP_OnClientMaxPlantCount, g_hForward_RP_OnClientPiedBiche, g_hForward_RP_OnClientBuildingPrice, g_hForward_RP_ClientCanTP;
 void doRP_OnClientMaxPlantCount(int client, int& max) {
 	Call_StartForward(g_hForward_RP_OnClientMaxPlantCount);
 	Call_PushCell(client);
@@ -60,7 +60,15 @@ void doRP_OnClientBuildingPrice(int client, int& price) {
 	Call_PushCellRef(price);
 	Call_Finish();
 }
-
+bool doRP_ClientCanTP(int client) {
+	Action a;
+	Call_StartForward(g_hForward_RP_ClientCanTP);
+	Call_PushCell(client);
+	Call_Finish(a);
+	if( a == Plugin_Handled || a == Plugin_Stop )
+		return false;
+	return true;
+}
 // ----------------------------------------------------------------------------
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -79,6 +87,7 @@ public void OnPluginStart() {
 	
 	g_hForward_RP_OnClientMaxPlantCount = CreateGlobalForward("RP_OnClientMaxPlantCount", ET_Event, Param_Cell, Param_CellByRef);
 	g_hForward_RP_OnClientPiedBiche = CreateGlobalForward("RP_OnClientPiedBiche", ET_Event, Param_Cell);
+	g_hForward_RP_ClientCanTP = CreateGlobalForward("RP_ClientCanTP", ET_Event, Param_Cell);
 	g_hForward_RP_OnClientBuildingPrice = CreateGlobalForward("RP_OnClientBuildingPrice", ET_Event, Param_Cell, Param_CellByRef);
 	
 	for (int j = 1; j <= MaxClients; j++)
@@ -175,6 +184,7 @@ public Action Cmd_ItemDrugs(int args) {
 		client = target;
 	}
 	else if( StrEqual(arg0, "crack2") ) {
+		dur = 30.0;
 		rp_HookEvent(client, RP_PreTakeDamage, fwdCrack, dur);
 		rp_Effect_ShakingVision(client);
 	}
@@ -939,6 +949,12 @@ public Action Cmd_ItemPilule(int args){
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet item pour le moment.");
 		return Plugin_Handled;
 	}
+	if( !doRP_ClientCanTP(client) ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet item pour le moment.");
+		return Plugin_Handled;
+	}
+	
 
 	if(type == 1) { // Appart
 		int appartcount = rp_GetClientInt(client, i_AppartCount);
