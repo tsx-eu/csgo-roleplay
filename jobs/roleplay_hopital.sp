@@ -309,10 +309,9 @@ public Action Cmd_ItemAntiPoison(int args) {
 	if( rp_GetClientInt(client, i_Sickness) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes maintenant guéris.");
 		
-		// TODO:
-		//if( g_iSuccess_last_poison[client] > 0 && (g_iSuccess_last_poison[client]+(1)) >= GetTime() ) {
-		//	WonSuccess(client, success_list_immune);
-		//}
+		if( rp_GetClientFloat(client, fl_LastPoison) > 0 && rp_GetClientFloat(client, fl_LastPoison)+1.0 >= GetGameTime() ) {
+			rp_IncrementSuccess(client, success_list_immune);
+		}
 	}
 	else {
 		ITEM_CANCEL(client, GetCmdArgInt(args));

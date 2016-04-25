@@ -636,10 +636,10 @@ enum float_user_data {
 	Float:fl_Alcool,
 	Float:fl_LowDamage,
 	Float:fl_HallucinationTime,
-	Float:fl_RespawnTime,
-
+	Float:fl_RespawnTime,	
 	Float:fl_ArtisanFatigue,
-
+	Float:fl_LastPoison,
+	
 	fl_udata_max
 };
 enum sz_user_data {
