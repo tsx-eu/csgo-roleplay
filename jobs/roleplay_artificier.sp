@@ -144,6 +144,7 @@ public void concExplode(int client, int ent) {
 	char sound[128];
 	
 	Entity_GetAbsOrigin(ent, vecCenter);
+	rp_Effect_Push(vecCenter, 280.0, 1000.0);
 	
 	for (int i=1; i<=MaxClients; i++) {
 		if( !IsValidClient(i) )
@@ -156,7 +157,13 @@ public void concExplode(int client, int ent) {
 		if( GetVectorDistance(vecOrigin, vecCenter) > 280.0 )
 			continue;
 		
-		ConcPlayer(i, vecCenter, client, false);
+		float vecAngles[3];
+		vecAngles[0] = 50.0;
+		vecAngles[1] = 50.0;
+		vecAngles[2] = 50.0;
+		
+		SetEntPropVector(i, Prop_Send, "m_viewPunchAngle", vecAngles);
+		ServerCommand("sm_effect_flash %d 2.5 50", i);
 	}
 	
 	vecCenter[2] += 25.0;
@@ -171,135 +178,6 @@ public void concExplode(int client, int ent) {
 	EmitSoundToAllAny(sound, ent);
 	
 	rp_ScheduleEntityInput(ent, 0.25, "KillHierarchy");
-}
-// Source: http://forums.fortress-forever.com/showpost.php?p=335934&postcount=8
-// https://github.com/fortressforever/fortressforever/blob/beta/game_shared/ff/ff_grenade_concussion.cpp#L320
-// A l'origine, ce code provient du serveur CTF. Les grenades pouvaient être tenue en main lors de l'explosion (hh) ou relachée à temps.
-void ConcPlayer(int victim, float center[3], int attacker, bool hh) {
-	
-	if( victim != attacker ) {
-		float pSpd[3], cPush[3], pPos[3], distance, pointDist, calcSpd, baseSpd;
-		
-		GetClientAbsOrigin(victim, pPos);
-		pPos[2] += 48.0;
-		
-		GetEntPropVector(victim, Prop_Data, "m_vecVelocity", pSpd);
-		distance = GetVectorDistance(pPos, center);
-		
-		SubtractVectors(pPos, center, cPush);
-		NormalizeVector(cPush, cPush);
-		pointDist = FloatDiv(distance, 280.0);
-		
-		baseSpd = 1000.0; // 650
-		
-		if( 0.25 > pointDist ) {
-			pointDist = 0.25;
-		}
-		
-		calcSpd = baseSpd * pointDist;
-		calcSpd = -1.0*Cosine( (calcSpd / baseSpd) * 3.141592 ) * ( baseSpd - (800.0 / 3.0) ) + ( baseSpd + (800.0 / 3.0) );
-		
-		ScaleVector(cPush, (calcSpd*0.8));
-		
-		bool OnGround;
-		if(GetEntityFlags(victim) & FL_ONGROUND) {
-			OnGround = true;
-		}
-		else {
-			OnGround = false;
-		}
-		if( (hh && victim != attacker) || !hh) {
-			if( pSpd[2] < 0.0 && cPush[2] > 0.0 ) {
-				pSpd[2] = 0.0;
-			}
-		}
-		
-		AddVectors(pSpd, cPush, pSpd);
-		
-		if( OnGround ) {
-			if(pSpd[2] < 800.0/3.0) {
-				pSpd[2] = 800.0/3.0;
-			}
-		}
-		
-		float vecPlayerOrigin[3];
-		GetClientAbsOrigin(victim, vecPlayerOrigin);
-		
-		if( OnGround ) {
-			int flags = GetEntityFlags(victim);
-			SetEntityFlags(victim, (flags&~FL_ONGROUND) );
-			SetEntPropEnt(victim, Prop_Send, "m_hGroundEntity", -1);
-			
-			vecPlayerOrigin[2] += 1.0;
-			TeleportEntity(victim, vecPlayerOrigin, NULL_VECTOR, NULL_VECTOR);
-		}
-		
-		TeleportEntity(victim, NULL_VECTOR, NULL_VECTOR, pSpd);
-	}
-	else {
-		float vecPlayerOrigin[3], vecResult[3];
-		GetClientAbsOrigin(victim, vecPlayerOrigin);
-		
-		float vecDisplacement[3];
-		vecDisplacement[0] = vecPlayerOrigin[0] - center[0];
-		vecDisplacement[1] = vecPlayerOrigin[1] - center[1];
-		vecDisplacement[2] = vecPlayerOrigin[2] - center[2];
-		
-		float flDistance = GetVectorLength(vecDisplacement);
-		
-		if( hh && attacker == victim) {
-			float fLateral = 2.74;
-			float fVertical = 4.10;
-			
-			float vecVelocity[3];
-			GetEntPropVector(victim, Prop_Data, "m_vecVelocity", vecVelocity);
-			
-			vecResult[0] = vecVelocity[0] * fLateral;
-			vecResult[1] = vecVelocity[1] * fLateral;
-			vecResult[2] = vecVelocity[2] * fVertical;
-			
-		}
-		else {
-			
-			float verticalDistance = vecDisplacement[2];
-			vecDisplacement[2] = 0.0;
-			float horizontalDistance = Math_Min(1.0, GetVectorLength(vecDisplacement));
-			
-			vecDisplacement[0] /= horizontalDistance;
-			vecDisplacement[1] /= horizontalDistance;
-			vecDisplacement[2] /= horizontalDistance;
-			
-			vecDisplacement[0] *= (horizontalDistance * (8.4 - 0.015 * flDistance) );
-			vecDisplacement[1] *= (horizontalDistance * (8.4 - 0.015 * flDistance) );
-			vecDisplacement[2] = (verticalDistance * (12.6 - 0.0225 * flDistance) );
-			
-			vecResult[0] = vecDisplacement[0];
-			vecResult[1] = vecDisplacement[1];
-			vecResult[2] = vecDisplacement[2];		
-		}
-		
-		
-		int flags = GetEntityFlags(victim);
-		if( flags & FL_ONGROUND ) {
-			
-			SetEntityFlags(victim, (flags&~FL_ONGROUND) );
-			SetEntPropEnt(victim, Prop_Send, "m_hGroundEntity", -1);
-			
-			vecPlayerOrigin[2] += 1.0;
-			TeleportEntity(victim, vecPlayerOrigin, NULL_VECTOR, NULL_VECTOR);
-		}
-		
-		TeleportEntity(victim, NULL_VECTOR, NULL_VECTOR, vecResult);
-		
-	}
-	
-	float vecAngles[3];
-	vecAngles[0] = 50.0;
-	vecAngles[1] = 50.0;
-	vecAngles[2] = 50.0;
-	
-	SetEntPropVector(victim, Prop_Send, "m_viewPunchAngle", vecAngles);
-	ServerCommand("sm_effect_flash %d 2.5 50", victim);
 }
 // ------------------------------------------------------------------------------
 public void caltropExplode(int client, int ent) {
