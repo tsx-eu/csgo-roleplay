@@ -555,6 +555,9 @@ public int Native_rp_CreateVehicle(Handle plugin, int numParams) {
 		WritePackCell(dp, ent);
 	}
 	
+	SDKHook(ent, SDKHook_Touch, VehicleTouch);
+	CreateTimer(3.5, Timer_VehicleRemoveCheck, EntIndexToEntRef(ent));
+	CreateTimer(360.0, Timer_VehicleRemove, EntIndexToEntRef(ent));
 	return ent;
 }
 public void OnThink(int ent) {
@@ -1320,10 +1323,6 @@ public int SpawnVehicle(Handle menu, MenuAction action, int client, int param) {
 			rp_SetVehicleInt(car, car_item_id, -1);
 			rp_SetVehicleInt(car, car_maxPassager, max);
 			rp_SetClientKeyVehicle(client, car, true);
-			
-			SDKHook(car, SDKHook_Touch, VehicleTouch);
-			CreateTimer(3.5, Timer_VehicleRemoveCheck, EntIndexToEntRef(car));
-			CreateTimer(360.0, Timer_VehicleRemove, EntIndexToEntRef(car));
 		}
 	}
 }

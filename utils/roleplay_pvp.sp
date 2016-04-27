@@ -372,6 +372,9 @@ void CAPTURE_Start() {
 			g_iClientFlag[i] = 0;
 		}
 	}
+	for(int i=MaxClients; i<=2048; i++)
+		if( rp_IsValidVehicle(i) && rp_GetVehicleInt(i, car_health) >= 2500 )
+			rp_SetVehicleInt(i, car_health, 2500);
 	
 	CreateTimer(1.0, CAPTURE_Tick);
 	
