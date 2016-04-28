@@ -95,7 +95,7 @@ public Action Cmd_ItemNade(int args) {
 	}
 	else if( StrEqual(arg1, "c4") ) {
 		int ent = rp_CreateGrenade(client, "ctf_nade_c4", "models/weapons/w_c4_planted.mdl", throwCaltrop, C4Explode, 30.0);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre C4 explosera dans 30 secondes. Entrez /C4 pour le faire exploser.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre C4 explosera automatiquement dans 30 secondes. Entrez /C4 pour le faire exploser avant.");
 		g_bC4Expl[ent] = true;
 		
 	}
