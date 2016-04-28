@@ -412,6 +412,8 @@ public void Q6_Frame(int objectiveID, int client) {
 		rp_QuestStepComplete(client, objectiveID);
 	
 	for (int j = 0; j < g_stkTeamCount[TEAM_POLICE]; j++) {
+		rp_SetClientInt(g_stkTeam[TEAM_POLICE][j], i_Perquiz, GetTime());
+		
 		PrintHintText(g_stkTeam[TEAM_POLICE][j], "<b>Alerte</b>: Un braquage est en cours dans %s, tuer les braqueurs. <b>Gain</b>: %d$, <b>Amende</b>: %d$.", tmp2[0], (GainMax - g_iQuestGain)/4, g_iQuestGain/4);
 		
 		for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
