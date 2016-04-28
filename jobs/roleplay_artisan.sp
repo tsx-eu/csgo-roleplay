@@ -227,7 +227,7 @@ void displayArtisanMenu(int client) {
 	Handle menu = CreateMenu(eventArtisanMenu);
 	SetMenuTitle(menu, "== Artisanat ==");
 	
-	AddMenuItem(menu, "build", 	"Constuire");
+	AddMenuItem(menu, "build", 	"Construire");
 	AddMenuItem(menu, "recycl", "Recycler");
 	AddMenuItem(menu, "learn", 	"Apprendre");
 	AddMenuItem(menu, "book", 	"Livre des recettes");
@@ -251,7 +251,7 @@ void displayBuildMenu(int client, int jobID, int itemID) {
 	
 	Handle menu = CreateMenu(eventArtisanMenu);
 	if( jobID == 0 ) {
-		SetMenuTitle(menu, "== Artisanat: Constuire");
+		SetMenuTitle(menu, "== Artisanat: Construire");
 		AddMenuItem(menu, "build -1", "Tous les jobs");
 		
 		for (int i = 0; i < sizeof(lstJOB); i++) {
@@ -263,7 +263,7 @@ void displayBuildMenu(int client, int jobID, int itemID) {
 		}
 	}
 	else if( itemID == 0 ) {
-		SetMenuTitle(menu, "== Artisanat: Constuire");
+		SetMenuTitle(menu, "== Artisanat: Construire");
 		
 		for(int i = 0; i < MAX_ITEMS; i++) {
 			if( !g_bCanCraft[client][i] )
@@ -325,7 +325,7 @@ void displayBuildMenu(int client, int jobID, int itemID) {
 			
 		for (int i = 1; i <= min; i++) {
 			Format(tmp, sizeof(tmp), "build %d %d %d", jobID, itemID, i);
-			Format(tmp2, sizeof(tmp2), "Constuire %d (%.1fsec)", i, duration*i + (i*GetTickInterval()));
+			Format(tmp2, sizeof(tmp2), "Construire %d (%.1fsec)", i, duration*i + (i*GetTickInterval()));
 			AddMenuItem(menu, tmp, tmp2);
 		}
 	}
