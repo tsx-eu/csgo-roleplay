@@ -669,6 +669,9 @@ public Action fwdDead(int victim, int attacker, float& respawn) {
 		g_flClientLastScore[attacker] = GetGameTime();
 		rp_IncrementSuccess(attacker, success_list_killpvp2);
 	}
+	if( victim == attacker ) {
+		GDM_ELOSuicide(victim);
+	}
 	if( rp_GetClientGroupID(victim) == rp_GetCaptureInt(cap_bunker) )
 		respawn = 0.25;
 	return Plugin_Handled;
@@ -714,6 +717,11 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 public Action fwdFrame(int client) {
 	
 	if( rp_GetClientGroupID(client) ) {
+		
+		if( rp_GetClientVehicle(client) <= 0 ) {
+			ClientCommand(client, "firstperson");
+			rp_SetClientInt(client, i_ThirdPerson, 0);
+		}
 		
 		if( g_flClientLastScore[client]+3.0 > GetGameTime() ) {
 			//
@@ -1058,6 +1066,33 @@ int GDM_ELOKill(int client, int target) {
 	
 	g_hGlobalDamage.SetArray(szSteamID, attacker, sizeof(attacker));
 	g_hGlobalDamage.SetArray(szSteamID2, victim, sizeof(victim));
+	
+	return tmp;
+}
+int GDM_ELOSuicide(int client) {
+	#if defined DEBUG
+	PrintToServer("GDM_ELOSuicide");
+	#endif
+	
+	char szSteamID[32];
+	int attacker[gdm_max], cgID, cElo;
+	float cDelta;
+	
+	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
+	g_hGlobalDamage.GetArray(szSteamID, attacker, sizeof(attacker));
+	
+	cDelta = 1.0/((Pow(10.0, - (1500 - attacker[gdm_elo]) / 400.0)) + 1.0);
+	cElo = RoundFloat(float(attacker[gdm_elo]) + ELO_FACTEUR_K * (0.0 - cDelta));
+	cgID = rp_GetClientGroupID(client);
+	
+	int tmp = cElo - attacker[gdm_elo];
+	g_iCapture_POINT[ cgID ] += cElo - attacker[gdm_elo];
+	if( g_iCapture_POINT[ cgID ] < 0 ) {
+		g_iCapture_POINT[ cgID ] = 0;
+	}
+	
+	attacker[gdm_elo] = cElo;
+	g_hGlobalDamage.SetArray(szSteamID, attacker, sizeof(attacker));
 	
 	return tmp;
 }
