@@ -62,12 +62,16 @@ void openMenu(int client) {
 	Menu menu = CreateMenu(menuOpenMenu);
 	menu.SetTitle("RolePlay");
 	
+	menu.AddItem("item", "Ouvrir l'inventaire");
+	
 	if( IsValidClient(target) ) {
 		
 		if( rp_GetClientBool(client, b_MaySteal) && (jobID == 91 || jobID == 181) )
 			menu.AddItem("vol", "Voler le joueur");
 		if( jobID == 1 || jobID == 101 )
 			menu.AddItem("search", "Vérifier les permis");
+		if( (jobID >= 11 && jobID <= 81) || jobID >= 111 )
+			menu.AddItem("vendre", "Vendre");
 		
 	}
 	else if( rp_IsValidDoor(target) ) {
@@ -78,6 +82,9 @@ void openMenu(int client) {
 			else
 				menu.AddItem("lock", "Verouiller la porte");
 		}
+	}
+	else if( jobID == 11 || jobID == 21 || jobID == 31 || jobID == 51 || jobID == 71 || jobID == 81 || jobID == 111 || jobID == 171 || jobID == 191 || jobID == 211 || jobID == 221 ) {
+		menu.AddItem("build", "Construire");
 	}
 	
 	menu.Display(client, 10);
