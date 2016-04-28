@@ -264,7 +264,7 @@ public Action Cmd_ItemSick(int args) {
 		g_iSuccess_last_faster_dead[client] = GetTime();
 	}
 	else {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ça n'a eu aucun effets.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ça n'a eu aucun effet.");
 	}
 }
 public Action Cmd_ItemPoison(int args) {
@@ -307,7 +307,7 @@ public Action Cmd_ItemAntiPoison(int args) {
 	int client = GetCmdArgInt(1);
 	
 	if( rp_GetClientInt(client, i_Sickness) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes maintenant guéris.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes maintenant guéri.");
 		
 		if( rp_GetClientFloat(client, fl_LastPoison) > 0 && rp_GetClientFloat(client, fl_LastPoison)+1.0 >= GetGameTime() ) {
 			rp_IncrementSuccess(client, success_list_immune);
@@ -343,7 +343,7 @@ public Action Cmd_ItemProtImmu(int args) {
 	int client = GetCmdArgInt(1);
 	
 	rp_SetClientBool(client, b_HasProtImmu, true);
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous bénéfifiez maintenant d'une protection immunitaire.");
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous bénéficiez maintenant d'une protection immunitaire.");
 	rp_HookEvent(client, RP_OnAssurance,	fwdAssurance2);
 	return Plugin_Handled;
 }
@@ -410,7 +410,7 @@ public Action Cmd_ItemAdrenaline(int args) {
 	
 	if( !rp_GetClientBool(client, b_MaySteal) ) {
 		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet item pour le moment.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet objet pour le moment.");
 		return Plugin_Handled;
 	}
 	
