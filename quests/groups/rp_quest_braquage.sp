@@ -35,7 +35,7 @@
 #define		TEAM_HOSTAGE		5
 #define		TEAM_NAME1			"Braqueur"
 #define 	REQUIRED_T			4
-#define 	REQUIRED_CT			3
+#define 	REQUIRED_CT			4
 #define		MAX_ZONES			310
 
 
@@ -86,7 +86,7 @@ public bool fwdCanStart(int client) {
 		return false;
 	if( g_bCanMakeQuest == false )
 		return false;
-	if( GetClientCount() <= 32 && GetConVarInt(FindConVar("hostport")) != 27025 )
+	if( GetClientCount() <= 28 && GetConVarInt(FindConVar("hostport")) != 27025 )
 		return false;
 	if( rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101 )
 		return false;
@@ -468,7 +468,7 @@ public Action EV_RescuseHostage(Handle ev, const char[] name, bool broadcast) {
 	int hostage = GetEventInt(ev, "hostage");
 	rp_ScheduleEntityInput(hostage, 5.0, "Kill");
 	
-	if( g_iPlayerTeam[client] == TEAM_POLICE && g_iPlayerTeam[hostage] == TEAM_HOSTAGE) {
+	if( g_iPlayerTeam[hostage] == TEAM_HOSTAGE) {
 		char tmp[64], tmp2[2][64];
 		rp_GetZoneData(g_iPlanqueZone, zone_type_name, tmp, sizeof(tmp));
 		ExplodeString(tmp, ": ", tmp2, sizeof(tmp2), sizeof(tmp2[]));
@@ -557,7 +557,7 @@ public Action fwdDead(int client, int attacker) {
 	return Plugin_Continue;
 }
 public Action fwdDamage(int victim, int attacker, float& damage, int wepID, float pos[3]) {
-	if( g_iPlayerTeam[attacker] == TEAM_BRAQUEUR && g_iPlayerTeam[victim] != TEAM_POLICE ) 
+	if( g_iPlayerTeam[attacker] == TEAM_BRAQUEUR && g_iPlayerTeam[victim] != TEAM_POLICE && rp_GetZoneInt(rp_GetPlayerZone(victim), zone_type_type) != g_iPlanque )
 		return Plugin_Handled;
 	if( g_iPlayerTeam[attacker] != TEAM_POLICE && g_iPlayerTeam[victim] == TEAM_BRAQUEUR ) 
 		return Plugin_Handled;

@@ -21,7 +21,7 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-//#define DEBUG
+#define DEBUG
 #define MENU_TIME_DURATION 	30
 #define CONTACT_DIST		500
 #define	ITEM_REPAIR			176
@@ -253,9 +253,6 @@ public Action Cmd_ItemVehicle(int args) {
 	rp_SetVehicleInt(car, car_maxPassager, max);
 	
 	rp_SetClientKeyVehicle(client, car, true);
-	
-	SDKHook(car, SDKHook_Touch, VehicleTouch);
-	CreateTimer(3.5, Timer_VehicleRemoveCheck, EntIndexToEntRef(car));
 	
 	// Voiture donateur, on la thune wesh
 	char arg0[128];
@@ -557,7 +554,6 @@ public int Native_rp_CreateVehicle(Handle plugin, int numParams) {
 	
 	SDKHook(ent, SDKHook_Touch, VehicleTouch);
 	CreateTimer(3.5, Timer_VehicleRemoveCheck, EntIndexToEntRef(ent));
-	CreateTimer(360.0, Timer_VehicleRemove, EntIndexToEntRef(ent));
 	return ent;
 }
 public void OnThink(int ent) {
@@ -568,7 +564,7 @@ void VehicleRemove(int vehicle, bool explode = false) {
 	#if defined DEBUG
 	PrintToServer("VehicleRemove");
 	#endif
-	if( vehicle <= 0 )
+	if( vehicle <= 0 || !rp_IsValidVehicle(vehicle) )
 		return;
 	
 	int client = GetEntPropEnt(vehicle, Prop_Send, "m_hPlayer");
@@ -1322,7 +1318,8 @@ public int SpawnVehicle(Handle menu, MenuAction action, int client, int param) {
 			rp_SetVehicleInt(car, car_owner, client);
 			rp_SetVehicleInt(car, car_item_id, -1);
 			rp_SetVehicleInt(car, car_maxPassager, max);
-			rp_SetClientKeyVehicle(client, car, true);
+			rp_SetClientKeyVehicle(client, car, true);	
+			CreateTimer(360.0, Timer_VehicleRemove, EntIndexToEntRef(car));
 		}
 	}
 }
