@@ -26,8 +26,8 @@
 #define QUEST_UNIQID   "vending-001"
 #define   QUEST_NAME      "Collecte des matières premières"
 #define   QUEST_TYPE      quest_daily
-#define   QUEST_RESUME1   "Récupérer le colis"
-#define   QUEST_RESUME2   "Apporter les colis à votre planque"
+#define   QUEST_RESUME1   "Récupérez le colis"
+#define   QUEST_RESUME2   "Apportez les colis à votre planque"
 #define QUEST_ITEM      236
 
 public Plugin myinfo =  {
@@ -210,7 +210,7 @@ public void Q3_End(int objectiveID, int client) {
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Votre chef vous remercie pour votre rapidité d'action", ITEMDRAW_DISABLED);
-	menu.AddItem("", "et t'offre : [PvP] AK-47.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "et vous offre : [PvP] AK-47.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 30);
