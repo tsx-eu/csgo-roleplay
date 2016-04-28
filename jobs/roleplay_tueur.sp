@@ -231,7 +231,6 @@ public Action fwdTueurKill(int client, int attacker, float& respawn) {
 		rp_SetClientStat(attacker, i_JobSucess, rp_GetClientStat(client, i_JobSucess) + 1);
 		rp_SetClientStat(attacker, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
 		CPrintToChat(attacker, "{lightblue}[TSX-RP]{default} Vous avez rempli votre contrat pour avoir tué %N.", client);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Un mercenaire a rempli son contrat sur vous.");
 		rp_SetClientInt(attacker, i_AddToPay, rp_GetClientInt(attacker, i_AddToPay) + 100);
 		
 		int from = rp_GetClientInt(attacker, i_ContratFor);
