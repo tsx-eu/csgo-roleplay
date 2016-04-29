@@ -628,7 +628,7 @@ public Action Cmd_Tazer(int client) {
 		else if ( StrContains(tmp2, "rp_bigcashmachine_") == 0 ) {
 			
 			rp_GetZoneData(Tzone, zone_type_name, tmp, sizeof(tmp));
-			LogToGame("[TSX-RP] [TAZER] %L a supprimé une grosse machine de %L dans %s", client, owner, tmp);
+			LogToGame("[TSX-RP] [TAZER] %L a supprimé une photocopieuse de %L dans %s", client, owner, tmp);
 			
 			reward = 25;
 			if( rp_GetBuildingData(target, BD_started)+120 < GetTime() ) {
@@ -638,8 +638,8 @@ public Action Cmd_Tazer(int client) {
 			}
 			
 			if( owner > 0 ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez détruit la grosse machine de %N", owner);
-				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre grosse machine à faux billet a été détruite par un policier.");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez détruit la photocopieuse de %N", owner);
+				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre photocopieuse a été détruite par un policier.");
 			}
 		}
 		else if ( StrContains(tmp2, "rp_plant_") == 0 ) {
@@ -656,7 +656,7 @@ public Action Cmd_Tazer(int client) {
 			
 			if( owner > 0 ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez détruit le plant de drogue de %N", owner);
-				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Un de vos plant de drogue a été détruit par un policier.");
+				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Un de vos plants de drogue a été détruit par un policier.");
 			}
 			
 			if(owner == client)
@@ -673,7 +673,7 @@ public Action Cmd_Tazer(int client) {
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez retiré votre propre barrière");
 				else{
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez retiré la barrière de %N", owner);
-					CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos barrière a été retirée par un policier.");
+					CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos barrières a été retirée par un policier.");
 				}
 			}
 		}
@@ -791,7 +791,7 @@ public Action Cmd_Jail(int client) {
 			ACCESS_DENIED(client);
 		}
 		if( !IsValidClient(target) ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un joueur");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un joueur.");
 			return Plugin_Handled;
 		}
 
@@ -977,7 +977,7 @@ public Action Cmd_Mandat(int client) {
 	}
 	
 	if(!IsValidClient(target)){	
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un joueur");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un joueur.");
 		return Plugin_Handled;
 	}
 	
@@ -1064,7 +1064,7 @@ public void ClientConVar(QueryCookie cookie, int client, ConVarQueryResult resul
 	#endif
 	if( StrEqual(cvarName, "cl_disablehtmlmotd", false) ) {
 		if( StrEqual(cvarValue, "0") == false ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Des problemes d'affichage ? Entrer cl_disablehtmlmotd 0 dans votre console puis relancer CS:GO.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Des problèmes d'affichage ? Entrez cl_disablehtmlmotd 0 dans votre console puis relancez CS:GO.");
 		}
 	}
 }
@@ -1344,7 +1344,7 @@ public int eventConvocation_2(Handle menu, MenuAction action, int client, int pa
 			CPrintToChatAll("{lightblue} ================================== {default}");
 			g_TribunalSearch[target][tribunal_search_status] = -1;
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} La recherche sur le joueur %N à durée %.1f minutes.", target, (GetTime()-g_TribunalSearch[target][tribunal_search_starttime])/60.0);
-			LogToGame("[TSX-RP] [RECHERCHE] %L à mis fin à la convocation de %L.", client, target);
+			LogToGame("[TSX-RP] [RECHERCHE] %L a mis fin à la convocation de %L.", client, target);
 			rp_SetClientBool(target, b_IsSearchByTribunal, false);
 
 		}
@@ -1366,7 +1366,7 @@ public int eventConvocation_2(Handle menu, MenuAction action, int client, int pa
 			CPrintToChatAll("{lightblue} ================================== {default}");
 			CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est recherché par le Tribunal.", target);
 			CPrintToChatAll("{lightblue} ================================== {default}");
-			LogToGame("[TSX-RP] [RECHERCHE] %L à lancé une recherche sur %L", client, target);
+			LogToGame("[TSX-RP] [RECHERCHE] %L a lancé une recherche sur %L", client, target);
 			CreateTimer(60.0, Timer_ConvTribu, target, TIMER_REPEAT);
 			rp_SetClientBool(target, b_IsSearchByTribunal, true);
 		}
@@ -1386,8 +1386,8 @@ public Action Timer_ConvTribu(Handle timer, any target) {
 		CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}n'est plus recherché par le Tribunal.", target);
 		CPrintToChatAll("{lightblue} ================================== {default}");
 		g_TribunalSearch[target][tribunal_search_status] = -1;
-		LogToGame("[TSX-RP] [RECHERCHE] %L à été détecté comme présent au tribunal.", target);
-		PrintToChatZone(rp_GetPlayerZone(target), "{lightblue}[TSX-RP]{default} La recherche sur le joueur %N à durée %.1f minutes.", target, (GetTime()-g_TribunalSearch[target][tribunal_search_starttime])/60.0);
+		LogToGame("[TSX-RP] [RECHERCHE] %L a été détecté comme présent au tribunal.", target);
+		PrintToChatZone(rp_GetPlayerZone(target), "{lightblue}[TSX-RP]{default} La recherche sur le joueur %N a durée %.1f minutes.", target, (GetTime()-g_TribunalSearch[target][tribunal_search_starttime])/60.0);
 		rp_SetClientBool(target, b_IsSearchByTribunal, false);
 		return Plugin_Stop;
 	}
@@ -1437,7 +1437,7 @@ public Action Cmd_Tribunal(int client) {
 			AddMenuItem(menu, "forum", "Juger les cas du forum", ITEMDRAW_DISABLED);
 			
 		AddMenuItem(menu, "connected",	"Juger un joueur présent");
-		AddMenuItem(menu, "disconnect",	"Juger un joueur récement déconnecté");
+		AddMenuItem(menu, "disconnect",	"Juger un joueur récemment déconnecté");
 	}
 	if( GetConVarInt(FindConVar("hostport")) == 27015 )
 		AddMenuItem(menu, "stats",		"Voir les stats d'un joueur");
@@ -1911,10 +1911,10 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				rp_SetClientInt(target, i_jailTime_Last, 0);
 				rp_SetClientInt(target, i_JailledBy, 0);
 				
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N{default} à été libéré car il n'a pas commis d'agression.", target);
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N{default} a été libéré car il n'a pas commis d'agression.", target);
 				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été libéré car vous n'avez pas commis d'agression.", client);
 				
-				LogToGame("[TSX-RP] [JAIL] %L à été libéré car il n'avait pas commis d'agression", target);
+				LogToGame("[TSX-RP] [JAIL] %L a été libéré car il n'avait pas commis d'agression", target);
 				
 				rp_ClientResetSkin(target);
 				rp_ClientSendToSpawn(target, true);
@@ -1928,10 +1928,10 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				rp_SetClientInt(target, i_jailTime_Last, 0);
 				rp_SetClientInt(target, i_JailledBy, 0);
 				
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N{default} à été libéré car il n'a pas effectué de tir.", target);
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N{default} a été libéré car il n'a pas effectué de tir.", target);
 				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été libéré car vous n'avez pas effectué de tir.", client);
 				
-				LogToGame("[TSX-RP] [JAIL] %L à été libéré car il n'avait pas effectué de tir", target);
+				LogToGame("[TSX-RP] [JAIL] %L a été libéré car il n'avait pas effectué de tir", target);
 				
 				rp_ClientResetSkin(target);
 				rp_ClientSendToSpawn(target, true);
@@ -1947,7 +1947,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			if(rp_GetClientInt(target, i_LastVolVehicleTime)+300 > GetTime()){
 				if(rp_IsValidVehicle(rp_GetClientInt(target, i_LastVolVehicle))){
 					rp_SetClientKeyVehicle(target, rp_GetClientInt(target, i_LastVolVehicle), false);
-					CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N{default} à perdu les clés de la voiture qu'il a volé.", target);
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N{default} a perdu les clés de la voiture qu'il a volé.", target);
 					CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez perdu les clés de la voiture que vous avez volé.", client);
 				}
 			}
@@ -1956,10 +1956,10 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				rp_SetClientInt(target, i_jailTime_Last, 0);
 				rp_SetClientInt(target, i_JailledBy, 0);
 				
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N{default} à été libéré car il n'a pas commis de vol.", target);
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N{default} a été libéré car il n'a pas commis de vol.", target);
 				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été libéré car vous n'avez pas commis de vol.", client);
 				
-				LogToGame("[TSX-RP] [JAIL] %L à été libéré car il n'avait pas commis de vol", target);
+				LogToGame("[TSX-RP] [JAIL] %L a été libéré car il n'avait pas commis de vol", target);
 				
 				rp_ClientResetSkin(target);
 				rp_ClientSendToSpawn(target, true);
@@ -2010,7 +2010,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 						continue;
 					if(rp_GetClientInt(i, i_LastKilled_Reverse) != target)
 						continue;
-					CPrintToChat(i, "{lightblue}[TSX-RP]{default} Votre assasin a été mis en prison.");
+					CPrintToChat(i, "{lightblue}[TSX-RP]{default} Votre assassin a été mis en prison.");
 				}
 				time_to_spend /= 2;
 			}
@@ -2039,7 +2039,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 						continue;
 					if(rp_GetClientInt(i, i_LastKilled_Reverse) != target)
 						continue;
-					CPrintToChat(i, "{lightblue}[TSX-RP]{default} Votre assasin a été mis en prison.");
+					CPrintToChat(i, "{lightblue}[TSX-RP]{default} Votre assassin a été mis en prison.");
 				}
 			}
 			
@@ -3095,15 +3095,15 @@ void explainJail(int client, int jailReason, int cop) {
 	if( StrContains(g_szJailRaison[jailReason][jail_raison], "Garde ") == 0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} La raison de votre garde à vue est que vous avez fait des actions interdites lors d'une perquisition; ou que vous étiez convoqué au Tribunal.");
 		if( rp_GetClientInt(cop, i_Job) <= 7 )
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il est possible aussi qu'un haut gradé de la police vous est fait plusieurs sommations vous demandant d'arrêter vos bétises.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il est possible aussi qu'un haut gradé de la police vous ait fait plusieurs sommations vous demandant d'arrêter vos bétises.");
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Meurtre") == 0 ) {
 		if( IsValidClient(rp_GetClientInt(client, i_LastKilled_Reverse)) )
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez tué {red}%N{default} en présence du policier %N. Que ce soit légitime défense, ou non {red}un meurtre reste illégal{default}.", rp_GetClientInt(client, i_LastKilled_Reverse), cop);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez tué {red}%N{default} en présence du policier %N. Que ce soit de la légitime défense, ou non {red}un meurtre reste illégal{default}.", rp_GetClientInt(client, i_LastKilled_Reverse), cop);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Agression ") == 0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez agressé un autre citoyen en présence du policier %N.", cop);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Que ce soit légitime défense ou non; que vous avez fait des dégâts ou non: une agression reste une agression."); 
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Que ce soit légitime défense ou non; que vous ayez fait des dégâts ou non: une agression reste une agression."); 
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Sachez que {red}cette peine vous libère automatiquement si aucune agression n'a été détectée{default} dans les 30 dernières secondes.");
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Intrusion ") == 0 ) {
@@ -3116,19 +3116,19 @@ void explainJail(int client, int jailReason, int cop) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas le droit de voler ou même essayer de voler que ce soit citoyen, distributeur, voiture en présence d'un policier.");
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Fuite, ") == 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous vous êtes enfuit, ou vous avez désobéis à un ordre directe de %N. Cela est interdit.", cop);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous vous êtes enfuit, ou vous avez désobéi à un ordre directe de %N. Cela est interdit.", cop);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Insultes, ") == 0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez insulté un citoyen ou un agent des forces de l'ordre.");
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Trafique ") == 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez posé des plants de drogue, imprimante(s) à faux billet, ou demandé à quelqu'un de vous aidez pour une mission. Cela est interdit.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez posé des plants de drogue, imprimante(s) à faux billet, ou demandé à quelqu'un de vous aider pour une mission. Cela est interdit.");
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Nuisance ") == 0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez fait trop de bruit sur un lieu publique.");
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Tir dans ") == 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez tiré dans la rue un autre citoyen en présence du policier %N. Que vous avez touché ou non votre cible, il est interdit de tirer dans la rue.", cop); 
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez tiré dans la rue ou sur un autre citoyen en présence du policier %N. Que vous ayez touché ou non votre cible, il est interdit de tirer dans la rue.", cop); 
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Conduite ") == 0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez roulé sur le trottoire en présence du policier %N.", cop);
