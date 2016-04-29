@@ -576,7 +576,7 @@ public Action stopBuilding(Handle timer, Handle dp) {
 		return Plugin_Stop;
 	}
 	if( !isNearTable(client) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes plus a coté d'une table de craft.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes plus à coté d'une table de craft.");
 		g_bInCraft[client] = false;
 		return Plugin_Stop;
 	}
@@ -809,7 +809,7 @@ int BuidlingTABLE(int client) {
 		if( StrEqual(classname, tmp) ) {
 			count++;
 			if( count >= 1 ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà une table de placées.");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà une table de placée.");
 				return 0;
 			}
 		}
