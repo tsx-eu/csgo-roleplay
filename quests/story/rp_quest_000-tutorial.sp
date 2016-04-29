@@ -151,7 +151,7 @@ public void Q2_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "justice y fait souvent défaut. De nombreux");
 		DrawPanelText(panel, "meurtres y sont commis, et parfois impunis.");
 		DrawPanelText(panel, " ");
-		DrawPanelText(panel, " Bien que de nombreux cityoyens s'entretuent");
+		DrawPanelText(panel, " Bien que de nombreux citoyens s'entretuent");
 		DrawPanelText(panel, "sachez, avant tout, que vous risquez de rester");
 		DrawPanelText(panel, "de longues minutes en prison pour de telles actions.");
 		DrawPanelText(panel, " ");
@@ -189,7 +189,7 @@ public void Q3_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " Votre futur emploi définira votre");
 		DrawPanelText(panel, "camp. Par exemple, un mafieux vole de l'argent,");
-		DrawPanelText(panel, "un tueur à gage exécute des contrats, un");
+		DrawPanelText(panel, "un mercenaire exécute des contrats, un");
 		DrawPanelText(panel, "policier tentera de les en empêcher.");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, "→ Rendez-vous devant la banque.");
@@ -221,7 +221,7 @@ public void Q4_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "en banque.");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " Pour cela, positionnez-vous devant un");
-		DrawPanelText(panel, "distributeur, utiliser votre touche action (E).");
+		DrawPanelText(panel, "distributeur, utilisez votre touche action (E).");
 		DrawPanelText(panel, "Selectionnez l'action déposer argent.");
 		DrawPanelText(panel, "Déposez-y le montant que vous souhaitez");
 		DrawPanelText(panel, " ");
@@ -253,11 +253,11 @@ public void Q5_Frame(int objectiveID, int client) {
 		
 		SetPanelTitle(panel, "== Objectif 4: Le Tribunal");
 		DrawPanelText(panel, " Sachez qu'un policier n'a pas le droit de mettre");
-		DrawPanelText(panel, "en prison pour des faits qui ne sont pas dérouler devant");
+		DrawPanelText(panel, "en prison pour des faits qui ne sont pas déroulés devant");
 		DrawPanelText(panel, "ses yeux.");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " Si vous connaissez le nom de la personne qui vous a tué");
-		DrawPanelText(panel, "et qu'un juge est présent, addressez-vous à lui.");
+		DrawPanelText(panel, "et qu'un juge est présent, adressez-vous à lui.");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " En vérifiant l'historique du serveur, le juge ");
 		DrawPanelText(panel, "appliquera une condamnation adaptée aux faits");
@@ -288,9 +288,9 @@ public void Q6_Frame(int objectiveID, int client) {
 		Handle panel = CreatePanel();
 		
 		SetPanelTitle(panel, "== Objectif 5: L'armurerie");
-		DrawPanelText(panel, " Le lazer suivant vous indique l'armurerie ou ");
+		DrawPanelText(panel, " Le laser suivant vous indique l'armurerie où ");
 		DrawPanelText(panel, "vous pouvez vous procurer des armes.");
-		DrawPanelText(panel, "N'oubliez pas que de vous procurer un permis");
+		DrawPanelText(panel, "N'oubliez pas de vous procurer un permis");
 		DrawPanelText(panel, "de port d'arme à un banquier. Dans le cas contraire");
 		DrawPanelText(panel, "un policier est en droit de vous arrêter.");
 		DrawPanelText(panel, " Restez discret, garez la dans votre dos!");
@@ -298,7 +298,7 @@ public void Q6_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "→ Entrez la commande /item dans le chat général,");
 		DrawPanelText(panel, "Appuyez sur la touche 1 afin de l'utiliser");
 		DrawPanelText(panel, " ");
-		DrawPanelText(panel, " Notez que votre inventaire disparait en cas");
+		DrawPanelText(panel, " Notez que votre inventaire disparaît en cas");
 		DrawPanelText(panel, "de déconnexion.");
 		
 		rp_SendPanelToClient(panel, client, 1.1);
@@ -328,8 +328,8 @@ public void Q7_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "conseillé de louer un appart. Celui-ci");
 		DrawPanelText(panel, "augmentera votre paie et vous rend votre vie.");
 		DrawPanelText(panel, "Vous pouvez aussi y cacher différents objets");
-		DrawPanelText(panel, "du jeu, tel que les machines à faux billet");
-		DrawPanelText(panel, "plant de drogue, armes, etc.");
+		DrawPanelText(panel, "du jeu, tel que les machines à faux billets");
+		DrawPanelText(panel, "plants de drogue, armes, etc.");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, "→ Rendez-vous devant les appartements afin");
 		DrawPanelText(panel, "de continuer votre apprentissage.");
@@ -343,7 +343,7 @@ public void Q7_Frame(int objectiveID, int client) {
 		rp_ClientGiveItem(client, 81);
 		rp_ClientGiveItem(client, 103);
 		
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu en récompense 1 Plant de drogue et 1 Machine à faux-billet.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu en récompense 1 Plant de drogue et 1 Machine à faux-billets.");
 		
 		rp_QuestStepComplete(client, objectiveID);
 	}
@@ -441,10 +441,10 @@ public void Q10_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, " - /give montant permet de donner votre argent");
 		DrawPanelText(panel, " - /vendre pour vendre un objet");
 		DrawPanelText(panel, " - /job Permet de voir les différents jobs connectés");
-		DrawPanelText(panel, " Afin de trouver un emploi, jettez un oeil à cette");
+		DrawPanelText(panel, " Afin de trouver un emploi, jetez un oeil à cette");
 		DrawPanelText(panel, "commande. Elle permet de voir qui est chef,");
-		DrawPanelText(panel, "vous saurez donc à qui vous addresser pour trouver");
-		DrawPanelText(panel, "emploi.");
+		DrawPanelText(panel, "vous saurez donc à qui vous adresser pour trouver");
+		DrawPanelText(panel, "un emploi.");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, "→ Rendez-vous maintenant sur la place Station");
 		
@@ -507,7 +507,7 @@ public void Q12_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, " Derniers conseils avant de vous laisser");
 		DrawPanelText(panel, "partir sur de bonnes bases.");
 		DrawPanelText(panel, "- Nous sommes sur CSGO, pas sur ARMA ni GMOD.");
-		DrawPanelText(panel, "Il y a donc beaucoup de meurtre en ville, armé vous.");
+		DrawPanelText(panel, "Il y a donc beaucoup de meurtre en ville, armez vous.");
 		DrawPanelText(panel, "- Trouvez vous un job");
 		DrawPanelText(panel, "- Attention aux arnaques");
 		DrawPanelText(panel, "- Décrochez le rang no-pyj");
@@ -621,7 +621,7 @@ public int MenuSelectJob(Handle menu, MenuAction action, int client, int param2)
 			rp_SetClientInt(client, i_Job, job);
 			
 			rp_GetJobData(job, job_type_name, options, sizeof(options));
-			LogToGame("[TSX-RP] [TUTORIAL] %L a terminé son tutorial. Il a choisis %s comme job.", client, options);
+			LogToGame("[TSX-RP] [TUTORIAL] %L a terminé son tutorial. Il a choisi %s comme job.", client, options);
 			FakeClientCommand(client, "say /shownotes");
 		}
 		
