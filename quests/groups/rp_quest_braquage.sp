@@ -247,7 +247,7 @@ public void Q3_Frame(int objectiveID, int client) {
 			g_iQ3 = objectiveID;
 			for (int i = 1; i < MAX_ZONES; i++) {
 				int job = rp_GetZoneInt(i, zone_type_type);
-				if( job <= 0 || job >= MAX_JOBS || job == 14 || job == 101 )
+				if( job <= 0 || job >= MAX_JOBS || job == 1 || job == 14 || job == 101 )
 					continue;
 				if( g_iJobs[job] > 0 )
 					continue;
