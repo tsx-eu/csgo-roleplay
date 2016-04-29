@@ -44,10 +44,10 @@ char g_szParticles[][][32] =  {
 	{ "Trail",		"Propulseur" },
 	{ "Trail2",		"Fusée n°1" },
 	{ "Trail3",		"Petit cube bleu" },
-	{ "Trail4",		"Fumé verte" },
+	{ "Trail4",		"Fumée verte" },
 	{ "Trail5",		"Seringue" },
-	{ "Trail7",		"Petite fumé verte" },
-	{ "Trail8",		"Fumé blanche et bleu" },
+	{ "Trail7",		"Petite fumée verte" },
+	{ "Trail8",		"Fumée blanche et bleu" },
 	{ "Trail9",		"Drogue n°1" },
 	{ "Trail10",	"Bulle bleu n°1" },
 	{ "Trail11",	"Fumée Or" },
@@ -56,9 +56,9 @@ char g_szParticles[][][32] =  {
 	{ "Trail14",	"Drogue °2" },
 	{ "Trail15",	"Trait jaune et vert" },
 	{ "Trail_01",	"Fusée n°2" },
-	{ "Trail_02",	"Fumé bleu n°2" },
-	{ "Trail_03",	"Fumé verte" },
-	{ "Trail_04",	"Fumé bleu et rose" },
+	{ "Trail_02",	"Fumée bleu n°2" },
+	{ "Trail_03",	"Fumée verte" },
+	{ "Trail_04",	"Fumée bleu et rose" },
 };
 char g_szColor[][][32] = {
 	{ "128 0 0", 	"Rubis" },  	{ "255 0 0", 	"Rouge" }, 		{ "255 128 0", 	"Orange" },  	{ "255 255 0", 	"Jaune" }, 
@@ -147,7 +147,7 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 			ACCESS_DENIED(client);
 		}
 		if( !rp_IsValidVehicle(vehicle) ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être dans une voiture pour utiliser cette commande");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être dans une voiture pour utiliser cette commande.");
 			return Plugin_Handled;
 		}
 		
@@ -230,7 +230,7 @@ public Action Cmd_ItemVehicle(int args) {
 	
 	if( countVehicle(client) >= GetConVarInt(g_hMAX_CAR) ) {
 		CAR_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il y a trop de voiture sur le serveur pour l'instant.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il y a trop de voiture en circulation pour l'instant.");
 		return;			
 	}
 	
@@ -328,7 +328,7 @@ public Action Cmd_ItemVehicleStuff(int args) {
 	if( StrEqual(arg1, "key") ) {
 		
 		if( Vehicle_GetDriver(target) != client) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez utiliser cet item dans votre voiture.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez utiliser cet objet dans votre voiture.");
 			ITEM_CANCEL(client, item_id);
 			return Plugin_Handled;
 		}
@@ -373,7 +373,7 @@ public Action Cmd_ItemVehicleStuff(int args) {
 			return Plugin_Handled;
 		}
 		if( Vehicle_GetDriver(target) != client) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez utiliser cet item dans votre voiture.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez utiliser cet objet dans votre voiture.");
 			ITEM_CANCEL(client, item_id);
 			return Plugin_Handled;
 		}
@@ -400,7 +400,7 @@ public Action Cmd_ItemVehicleStuff(int args) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N{default} a maintenant la clé de votre voiture.", i);
 		}
 		if( amount == 0 ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez personne a qui donner la clé.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez personne à qui donner la clé.");
 			ITEM_CANCEL(client, item_id);
 			return Plugin_Handled;
 		}
@@ -443,7 +443,7 @@ public Action Cmd_ItemVehicleStuff(int args) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre voiture est maintenant équipée d'un boost.");
 			}
 			else {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible d'installer un boost dans votre voiture.");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible d'installer un boost sur votre voiture.");
 				ITEM_CANCEL(client, item_id);
 			}
 		}
@@ -900,7 +900,7 @@ void DisplayGarageMenu(int client) {
 	AddMenuItem(menu, "neons", 		"Ajouter un néon");
 	AddMenuItem(menu, "klaxon", 		"Changer de klaxon");
 	
-	AddMenuItem(menu, "repair", 	"Reparer la voiture");
+	AddMenuItem(menu, "repair", 	"Réparer la voiture");
 	AddMenuItem(menu, "battery", 	"Vendre la batterie");
 	
 	SetMenuExitButton(menu, true);
@@ -911,7 +911,7 @@ void displayRadioMenu(int client) {
 	SetMenuTitle(menu, "Menu de la radio");
 		
 	AddMenuItem(menu, "start", "Allumer la radio");
-	AddMenuItem(menu, "stop", "Eteindre la radio");
+	AddMenuItem(menu, "stop", "Éteindre la radio");
 	
 	AddMenuItem(menu, "prev", "Radio suivante");
 	AddMenuItem(menu, "next", "Radio précédente");
@@ -1297,7 +1297,7 @@ public int SpawnVehicle(Handle menu, MenuAction action, int client, int param) {
 			}
 			
 			if( countVehicle(client) >= GetConVarInt(g_hMAX_CAR) ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il y a trop de voiture sur le serveur pour l'instant.");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il y a trop de voiture en circulation pour l'instant.");
 				return;			
 			}
 			
