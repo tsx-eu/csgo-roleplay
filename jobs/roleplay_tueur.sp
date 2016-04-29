@@ -599,18 +599,18 @@ void SetContratFail(int client, bool time = false) { // time = retro-compatibili
 	int jobClient = rp_GetClientJobID(client);
 	
 	if( time )
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas remplis votre contrat à temps.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas rempli votre contrat à temps.");
 	else if( jobClient != 41 ) // si le tueur a démissionné entre temps
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes plus mercenaire, vous ne pouvez plus remplir votre contrat.");
 	else
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes mort et n'avez pas remplis votre contrat.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes mort et n'avez pas rempli votre contrat.");
 	
 	int target = rp_GetClientInt(client, i_ContratFor);
 	if(target != client){
 		if( IsValidClient(target) ) {		
 			
 			if( time )
-				CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N n'a pas remplis son contrat à temps.", client);
+				CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N n'a pas rempli son contrat à temps.", client);
 			else if( jobClient != 41 ) // si le tueur a démissionné entre temps
 				CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N n'est plus mercenaire et ne peut plus remplir votre contrat.", client);
 			else
@@ -626,7 +626,7 @@ void SetContratFail(int client, bool time = false) { // time = retro-compatibili
 			rp_SetJobCapital(41, rp_GetJobCapital(41) - (prix / 2));
 		}
 		else {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre employeur est déconnecté, vous ne le remboursez pas.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre employeur s'est déconnecté, vous ne le remboursez pas.");
 		}
 	}
 	
@@ -684,7 +684,7 @@ public Action SendToTueur(Handle timer, any client) {
 		}
 	}
 	
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vos ravisseurs vont vous libérer dans 6h. Mais vous pouvez tenter autre chose...");
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vos ravisseurs comptent vous libérer dans 6h. Mais vous pouvez tenter autre chose...");
 	
 	g_hTimer[client] = CreateTimer(6*60.0, FreeKidnapping, client);
 	rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
@@ -791,7 +791,7 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 			rp_ClientSendToSpawn(client, true);
 		}
 		else if( StrEqual( options, "free", false) ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Les portes s'ouvriront toute les 20 secondes, vous n'avez qu'une seule chance de vous en sortir.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Les portes s'ouvriront toutes les 20 secondes, vous n'avez qu'une seule chance de vous en sortir.");
 			float delay = 20.0;
 			float time = 0.0;
 			
@@ -1048,7 +1048,7 @@ public Action Cmd_ItemEnquete(int args) {
 		}
 	}
 	else{
-		LogToGame("[TSX-RP] [ENQUETE] Une enquête effectuée sur %L a révélée qu'il n'a été tué par personne.", target, killed);
+		LogToGame("[TSX-RP] [ENQUETE] Une enquête effectuée sur %L a révélé qu'il n'a été tué par personne.", target, killed);
 	}
 	
 	if( IsValidClient(rp_GetClientInt(target, i_LastVol)) ) 
