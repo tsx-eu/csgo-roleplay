@@ -32,19 +32,19 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-enum compétence {
-	compétance_left = 0,
-	compétence_cut,
-	compétence_tir,
-	compétence_usp,
-	compétence_awp,
-	compétence_pompe,
-	compétence_invis,
-	compétence_hp,
-	compétence_vitesse,
-	compétence_type,
+enum competance {
+	competance_left = 0,
+	competance_cut,
+	competance_tir,
+	competance_usp,
+	competance_awp,
+	competance_pompe,
+	competance_invis,
+	competance_hp,
+	competance_vitesse,
+	competance_type,
 	
-	compétence_max
+	competance_max
 };
 
 int g_iKillerPoint[65][competance_max];
