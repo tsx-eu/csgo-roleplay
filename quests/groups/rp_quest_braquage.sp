@@ -476,7 +476,7 @@ public Action EV_RescuseHostage(Handle ev, const char[] name, bool broadcast) {
 		rp_GetZoneData(g_iPlanqueZone, zone_type_name, tmp, sizeof(tmp));
 		ExplodeString(tmp, ": ", tmp2, sizeof(tmp2), sizeof(tmp2[]));
 		
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez gagné %d$ pour avoir libéré un hotage de %s.", 1000, tmp2[0]);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez gagné %d$ pour avoir libéré un otage de %s.", 1000, tmp2[0]);
 		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 1000);
 		removeClientTeam(hostage);
 	}
