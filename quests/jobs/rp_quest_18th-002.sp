@@ -28,12 +28,12 @@
 #define   QUEST_TYPE      quest_daily
 #define   QUEST_JOBID      181
 #define   QUEST_RESUME1   "Voler une voiture de police"
-#define   QUEST_RESUME2   "Raporter la voiture au garage"
+#define   QUEST_RESUME2   "Rapporter la voiture au garage"
 #define   QUEST_RESUME3   "Déposer l'argent à la banque"
 #define QUEST_ITEM      236
 
 public Plugin myinfo =  {
-	name = "Quête: Trafficant de voiture", author = "KoSSoLaX", 
+	name = "Quête: Trafiquant de voiture", author = "KoSSoLaX", 
 	description = "RolePlay - Quête 18th: Trafficant de voiture", 
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
@@ -71,7 +71,7 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Yo man, on a de nouveaux projets pour toi.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Vol une voiture de police, puis ramène", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Voles une voiture de police, puis ramène", ITEMDRAW_DISABLED);
 	menu.AddItem("", "la nous.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	
@@ -114,7 +114,7 @@ public void Q2_Start(int objectiveID, int client) {
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Bien joué, tu l'as ! Rapporte là nous !", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Bien joué, tu l'as ! Rapporte la nous !", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 30);
@@ -149,7 +149,7 @@ public void Q3_Start(int objectiveID, int client) {
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Bien joué !", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Va déposer cet argent en banque,", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Vas déposer cet argent en banque,", ITEMDRAW_DISABLED);
 	menu.AddItem("", "tu pourras garder la moitié.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
