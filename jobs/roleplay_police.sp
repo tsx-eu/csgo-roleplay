@@ -59,14 +59,14 @@ char g_szJailRaison[][][128] = {
 	{ "Garde à vue",						"12", 	"12",	"0"},
 	{ "Meurtre",							"-1", 	"-1",	"-1"},
 	{ "Agression physique",					"1", 	"6",	"250"},
-	{ "Intrusion propriétée privée",		"0", 	"3",	"100"},
+	{ "Intrusion propriété privée",		"0", 	"3",	"100"},
 	{ "Vol, tentative de vol",				"0", 	"3",	"50"},
 	{ "Fuite, refus d'obtempérer",			"0", 	"6",	"200"},
 	{ "Insultes, Irrespect",				"1", 	"6",	"250"},
 	{ "Trafique illégal",					"0", 	"6",	"100"},
 	{ "Nuisance sonore",					"0", 	"6",	"100"},
 	{ "Tir dans la rue",					"0", 	"6",	"50"},
-	{ "Conduite dangeureuse",				"0", 	"6",	"150"},
+	{ "Conduite dangereuse",				"0", 	"6",	"150"},
 	{ "Mutinerie, évasion",					"-2", 	"-2",	"50"}	
 };
 int g_iCancel[65];
