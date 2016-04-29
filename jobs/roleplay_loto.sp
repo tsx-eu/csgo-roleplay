@@ -261,7 +261,7 @@ public void SQL_GetLoteryWiner(Handle owner, Handle hQuery, const char[] error, 
 		}
 		else if( place == 2 ) {
 			gain = (g_iLOTO/100*20);
-			CPrintToChatAll("{lightblue}[TSX-RP]{default} suivit de.... %s et remporte %d$!", szName, gain);
+			CPrintToChatAll("{lightblue}[TSX-RP]{default} suivi de.... %s et remporte %d$!", szName, gain);
 		}
 		else if( place == 3 ) {
 			gain = (g_iLOTO/100*10);
