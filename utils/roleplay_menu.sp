@@ -25,6 +25,8 @@
 #define	MAX_ENTITIES	2048
 float g_flPressUse[MAXPLAYERS + 1];
 bool g_bPressedUse[MAXPLAYERS + 1];
+bool g_bClosed[MAXPLAYERS + 1];
+bool g_bInsideMenu[MAXPLAYERS + 1];
 
 public Plugin myinfo = {
 	name = "Utils: Menu", author = "KoSSoLaX",
@@ -39,6 +41,7 @@ public void OnPluginStart() {
 public void OnClientPostAdminCheck(int client) {
 	g_flPressUse[client] = -1.0;
 	g_bPressedUse[client] = false;
+	g_bClosed[client] = false;
 }
 public Action OnPlayerRunCmd(int client, int &button) {
 	if( button & IN_USE && g_bPressedUse[client] == false ) {
@@ -47,8 +50,9 @@ public Action OnPlayerRunCmd(int client, int &button) {
 	}
 	if( !(button & IN_USE) && g_bPressedUse[client] == true ) {
 		g_bPressedUse[client] = false;
-		if( (GetGameTime() - g_flPressUse[client]) <= 0.175 && rp_ClientCanDrawPanel(client) ) {
-			 openMenu(client);
+		if( (GetGameTime() - g_flPressUse[client]) < 0.2 && !g_bClosed[client] && rp_GetClientVehicle(client) <= 0 ) {
+			if( rp_ClientCanDrawPanel(client) || g_bInsideMenu[client] )
+				 openMenu(client);
 		}
 	}
 }
@@ -65,13 +69,14 @@ void openMenu(int client) {
 	menu.AddItem("item", "Ouvrir l'inventaire");
 	
 	if( IsValidClient(target) ) {
-		
 		if( rp_GetClientBool(client, b_MaySteal) && (jobID == 91 || jobID == 181) )
 			menu.AddItem("vol", "Voler le joueur");
 		if( jobID == 1 || jobID == 101 )
 			menu.AddItem("search", "Vérifier les permis");
 		if( (jobID >= 11 && jobID <= 81) || jobID >= 111 )
 			menu.AddItem("vendre", "Vendre");
+		if( rp_GetClientInt(client, i_Money) > 0 && !rp_IsClientNew(client) )
+			menu.AddItem("give", "Donner de l'argent");
 		
 	}
 	else if( rp_IsValidDoor(target) ) {
@@ -87,7 +92,10 @@ void openMenu(int client) {
 		menu.AddItem("build", "Construire");
 	}
 	
-	menu.Display(client, 10);
+	menu.AddItem("exit", "Ne plus ouvrir ce menu");
+	menu.Display(client, 5);
+	
+	g_bInsideMenu[client] = true;
 }
 public int menuOpenMenu(Handle hItem, MenuAction oAction, int client, int param) {
 	#if defined DEBUG
@@ -97,13 +105,34 @@ public int menuOpenMenu(Handle hItem, MenuAction oAction, int client, int param)
 		char options[64];
 		if( GetMenuItem(hItem, param, options, sizeof(options)) ) {
 			if( StrEqual(options, "give") ) {
-				// TODO
+				if( rp_GetClientInt(client, i_Money) < 1 )
+					return;
+				
+				Menu menu = CreateMenu(menuOpenMenu);
+				menu.SetTitle("RolePlay: Donner de l'argent");
+				if( rp_GetClientInt(client, i_Money) >= 1 ) menu.AddItem("give 1", "1$");
+				if( rp_GetClientInt(client, i_Money) >= 10 ) menu.AddItem("give 10", "10$");
+				if( rp_GetClientInt(client, i_Money) >= 100 ) menu.AddItem("give 100", "100$");
+				if( rp_GetClientInt(client, i_Money) >= 1000 ) menu.AddItem("give 1000", "1.000$");
+				if( rp_GetClientInt(client, i_Money) >= 10000 ) menu.AddItem("give 10000", "10.000$");
+				if( rp_GetClientInt(client, i_Money) >= 100000 ) menu.AddItem("give 100000", "100.000$");
+				
+				menu.Display(client, 10);
+				return;
+			}
+			if( StrEqual(options, "exit") ) {
+				g_bClosed[client] = true;
 				return;
 			}
 			FakeClientCommand(client, "say /%s", options);
 		}		
 	}
-	else if (oAction == MenuAction_End) {
+	else if (oAction == MenuAction_End ) {
 		CloseHandle(hItem);
+		if( IsValidClient(client) )
+			g_bInsideMenu[client] = false;
+	}
+	else if (oAction == MenuAction_Cancel ) {
+		g_bInsideMenu[client] = false;
 	}
 }
