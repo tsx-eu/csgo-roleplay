@@ -918,7 +918,7 @@ public Action tskAlarm(Handle timer, any client) {
 	
 	EmitSoundToAllRangedAny("ui/beep22.wav", pos);
 	
-	if( g_stkTeamCount[TEAM_HOSTAGE] < 6 && findAreaInRoom(g_iPlanque, pos) ) {
+	if( g_stkTeamCount[TEAM_HOSTAGE] < 2+(g_stkTeamCount[TEAM_POLICE]/2) && findAreaInRoom(g_iPlanque, pos) ) {
 		int ent = CreateEntityByName("hostage_entity");
 		DispatchSpawn(ent);
 		TeleportEntity(ent, pos, NULL_VECTOR, NULL_VECTOR);
