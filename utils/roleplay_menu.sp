@@ -34,9 +34,16 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 public void OnPluginStart() {
+	RegConsoleCmd("sm_rpmenu", Cmd_RPMenu);
+	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
+}
+public Action Cmd_RPMenu(int client, int args) {
+	g_bClosed[client] = false;
+	openMenu(client);
+	return Plugin_Handled;
 }
 public void OnClientPostAdminCheck(int client) {
 	g_flPressUse[client] = -1.0;
@@ -58,26 +65,39 @@ public Action OnPlayerRunCmd(int client, int &button) {
 }
 void openMenu(int client) {
 	int target = rp_GetClientTarget(client);
-	if( !rp_IsEntitiesNear(client, target, true) )
-		target = 0;
-	
+	bool near = rp_IsEntitiesNear(client, target, true);
 	int jobID = rp_GetClientJobID(client);
 	
 	Menu menu = CreateMenu(menuOpenMenu);
 	menu.SetTitle("RolePlay");
-	
 	menu.AddItem("item", "Ouvrir l'inventaire");
 	
 	if( IsValidClient(target) ) {
-		if( rp_GetClientBool(client, b_MaySteal) && (jobID == 91 || jobID == 181) )
-			menu.AddItem("vol", "Voler le joueur");
-		if( jobID == 1 || jobID == 101 )
-			menu.AddItem("search", "Vérifier les permis");
-		if( (jobID >= 11 && jobID <= 81) || jobID >= 111 )
-			menu.AddItem("vendre", "Vendre");
-		if( rp_GetClientInt(client, i_Money) > 0 && !rp_IsClientNew(client) )
-			menu.AddItem("give", "Donner de l'argent");
 		
+		if( near && ((jobID >= 11 && jobID <= 81) || jobID >= 111) )
+			menu.AddItem("vendre", "Vendre");
+		
+		
+		if( near && rp_GetClientBool(client, b_MaySteal) && (jobID == 91 || jobID == 181) )
+			menu.AddItem("vol", "Voler le joueur");
+		
+		if( near && jobID == 71 )
+			menu.AddItem("cutinfo", "Informations entrainnement");
+		
+		if( near && jobID == 11 )
+			menu.AddItem("heal", "Soigner le joueur");
+		
+		
+		if( near && (jobID == 1 || jobID == 101) )
+			menu.AddItem("search", "Vérifier les permis");
+		if( true && (jobID == 1 || jobID == 101) )
+			menu.AddItem("jail", "Mettre en prison");
+		if( true && (jobID == 1 || jobID == 101) )
+			menu.AddItem("tazer", "Coup de tazer");
+		
+		
+		if( near && rp_GetClientInt(client, i_Money) > 0 && !rp_IsClientNew(client) )
+			menu.AddItem("give", "Donner de l'argent");
 	}
 	else if( rp_IsValidDoor(target) ) {
 		int doorID = rp_GetDoorID(target);
@@ -88,12 +108,16 @@ void openMenu(int client) {
 				menu.AddItem("lock", "Verouiller la porte");
 		}
 	}
-	else if( jobID == 11 || jobID == 21 || jobID == 31 || jobID == 51 || jobID == 71 || jobID == 81 || jobID == 111 || jobID == 171 || jobID == 191 || jobID == 211 || jobID == 221 ) {
+	if( jobID == 11 ) {
+		menu.AddItem("mort", "Faire revivre les morts");
+	}
+	if( jobID == 11 || jobID == 21 || jobID == 31 || jobID == 51 || jobID == 71 || jobID == 81 || jobID == 111 || jobID == 171 || jobID == 191 || jobID == 211 || jobID == 221 ) {
 		menu.AddItem("build", "Construire");
 	}
-	
+	menu.AddItem("job", "Appeler un joueur");
+	menu.AddItem("stats", "Statistiques");
 	menu.AddItem("exit", "Ne plus ouvrir ce menu");
-	menu.Display(client, 5);
+	menu.Display(client, 10);
 	
 	g_bInsideMenu[client] = true;
 }
