@@ -461,7 +461,6 @@ public void Q_Complete(int objectiveID, int client) {
 	}
 	
 	rp_SetJobCapital(g_iPlanque, rp_GetJobCapital(g_iPlanque) - gain*3/4);
-	rp_SetJobCapital(1, rp_GetJobCapital(1) - gain/4);	
 	
 	gain = (g_iQuestGain / 4) / g_stkTeamCount[TEAM_POLICE];
 	for (int i = 0; i < g_stkTeamCount[TEAM_POLICE]; i++) {
