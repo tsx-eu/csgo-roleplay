@@ -72,6 +72,12 @@ public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 	PrecacheModel("models/pg_props/pg_hospital/pg_ekg.mdl", true);
 }
+public void OnConfigsExecuted() {
+	CreateTimer(1.0, PostConfigExecuted);
+}
+public Action PostConfigExecuted(Handle timer, any none) {
+	ServerCommand("healthshot_health 250");
+}
 // ----------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnAssurance,	fwdAssurance);
