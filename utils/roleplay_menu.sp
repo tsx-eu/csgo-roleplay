@@ -33,22 +33,24 @@ public Plugin myinfo = {
 	description = "RolePlay - Utils: Menu",
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
-public void OnPluginStart() {
-	RegConsoleCmd("sm_rpmenu", Cmd_RPMenu);
-	
+public void OnPluginStart() {	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
-}
-public Action Cmd_RPMenu(int client, int args) {
-	g_bClosed[client] = false;
-	openMenu(client);
-	return Plugin_Handled;
 }
 public void OnClientPostAdminCheck(int client) {
 	g_flPressUse[client] = -1.0;
 	g_bPressedUse[client] = false;
 	g_bClosed[client] = false;
+	
+	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
+}
+public Action fwdCommand(int client, char[] command, char[] arg) {
+	if( StrEqual(command, "rpmenu") || StrEqual(command, "menu") ) {
+		openMenu(client);
+		return Plugin_Handled;
+	}
+	return Plugin_Continue;
 }
 public Action OnPlayerRunCmd(int client, int &button) {
 	if( button & IN_USE && g_bPressedUse[client] == false ) {
@@ -116,8 +118,12 @@ void openMenu(int client) {
 	}
 	menu.AddItem("job", "Appeler un joueur");
 	menu.AddItem("stats", "Statistiques");
-	menu.AddItem("exit", "Ne plus ouvrir ce menu");
-	menu.Display(client, 10);
+	if( g_bClosed[client] )
+		menu.AddItem("exit", "Ouvrir ce menu automatiquement");
+	else
+		menu.AddItem("exit", "Ne plus ouvrir ce menu automatiquement");
+		
+	menu.Display(client, 5);
 	
 	g_bInsideMenu[client] = true;
 }
@@ -145,7 +151,8 @@ public int menuOpenMenu(Handle hItem, MenuAction oAction, int client, int param)
 				return;
 			}
 			if( StrEqual(options, "exit") ) {
-				g_bClosed[client] = true;
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez réouvrir ce menu avec /menu.");
+				g_bClosed[client] = !g_bClosed[client];
 				return;
 			}
 			FakeClientCommand(client, "say /%s", options);
@@ -153,8 +160,6 @@ public int menuOpenMenu(Handle hItem, MenuAction oAction, int client, int param)
 	}
 	else if (oAction == MenuAction_End ) {
 		CloseHandle(hItem);
-		if( IsValidClient(client) )
-			g_bInsideMenu[client] = false;
 	}
 	else if (oAction == MenuAction_Cancel ) {
 		g_bInsideMenu[client] = false;
