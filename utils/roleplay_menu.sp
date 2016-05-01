@@ -118,6 +118,9 @@ void openMenu(int client) {
 	}
 	menu.AddItem("job", "Appeler un joueur");
 	menu.AddItem("stats", "Statistiques");
+	if( rp_IsClientNew(client) )
+		menu.AddItem("report", "Rappporter un mauvais comportement");
+	
 	if( g_bClosed[client] )
 		menu.AddItem("exit", "Ouvrir ce menu automatiquement");
 	else
