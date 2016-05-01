@@ -260,11 +260,7 @@ public void Q3_Frame(int objectiveID, int client) {
 		for (int i = 1; i < MAX_JOBS; i+=10) {
 			if( g_iJobs[i] == 0 )
 				continue;
-			if( g_iJobs[i] == g_iLastPlanque[0] )
-				continue;
-			if( g_iJobs[i] == g_iLastPlanque[1] )
-				continue;
-			if( g_iJobs[i] == g_iLastPlanque[2] )
+			if( i == g_iLastPlanque[0] || i == g_iLastPlanque[1] || i == g_iLastPlanque[2] )
 				continue;
 			
 			rp_GetZoneData(g_iJobs[i], zone_type_name, tmp, sizeof(tmp));
