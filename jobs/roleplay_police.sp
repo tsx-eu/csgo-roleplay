@@ -89,19 +89,7 @@ enum tribunal_search_data {
 
 int g_TribunalSearch[MAXPLAYERS+1][tribunal_search_max];
 char g_szTribunal_DATA[65][tribunal_max][64];
-int g_iOriginOwner[2049];
-
-
 DataPack g_hBuyMenu;
-enum BM_Int {
-	BM_Owner,
-	BM_Prix,
-	BM_Munition,
-	BM_Chargeur,
-	BM_PvP,
-	BM_Type,
-	BM_Max
-}
 
 //forward RP_OnClientTazedItem(int attacker, int reward);
 Handle g_hForward_RP_OnClientTazedItem;
@@ -166,10 +154,6 @@ public void OnMapStart() {
 	PrecacheModel(MODEL_PRISONNIER, true);
 	PrecacheModel(MODEL_BARRIERE, true);
 }
-public void OnEntityCreated(int id, const char[] classname) {
-	if( id > 0 )
-		g_iOriginOwner[id] = -1;
-}
 // ----------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
 	#if defined DEBUG
@@ -185,12 +169,6 @@ public void OnClientPostAdminCheck(int client) {
 	g_TribunalSearch[client][tribunal_search_status] = -1;
 	
 	CreateTimer(0.01, AllowStealing, client);
-	SDKHook(client, SDKHook_WeaponEquip, WeaponEquip);
-}
-public Action WeaponEquip(int client, int weapon) {
-	if( g_iOriginOwner[weapon] <= 0 ) {
-		g_iOriginOwner[weapon]  = client;
-	}
 }
 public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 	
@@ -598,7 +576,7 @@ public Action Cmd_Tazer(int client) {
 			rp_GetZoneData(Tzone, zone_type_name, tmp, sizeof(tmp));
 			LogToGame("[TSX-RP] [TAZER] %L a supprimé une arme %s dans %s", client, tmp2, tmp);
 			
-			addBuyMenu(g_hBuyMenu, target);
+			rp_WeaponMenu_Add(g_hBuyMenu, target, true);
 			int prix = rp_GetWeaponPrice(target); 
 			
 			reward = prix / 10;
@@ -2871,7 +2849,7 @@ void StripWeapons(int client ) {
 		
 		while( ( wepIdx = GetPlayerWeaponSlot( client, i ) ) != -1 ) {
 			
-			addBuyMenu(g_hBuyMenu, wepIdx);
+			rp_WeaponMenu_Add(g_hBuyMenu, wepIdx, true);
 			RemovePlayerItem( client, wepIdx );
 			RemoveEdict( wepIdx );
 		}
@@ -2893,104 +2871,6 @@ public Action fwdOnPlayerUse(int client) {
 	}
 	return Plugin_Continue;
 }
-void deleteBuyMenu(DataPack& hBuyMenu, int pos) {
-	hBuyMenu.Reset();
-	int max = hBuyMenu.ReadCell();
-	int position = hBuyMenu.Position;
-	
-	DataPack clone = new DataPack();
-	clone.WriteCell(0);
-	
-	char weapon[65];
-	int data[BM_Max];
-	 
-	while( position < max ) {
-		
-	
-		hBuyMenu.ReadString(weapon, sizeof(weapon));
-		for (int i = 0; i < view_as<int>(BM_Max); i++) {
-			data[i] = hBuyMenu.ReadCell();
-		}
-		
-		if( position != pos) {
-			clone.WriteString(weapon);
-			for (int i = 0; i < view_as<int>(BM_Max); i++) {
-				 clone.WriteCell(data[i]);
-			}
-		}
-		
-		position = hBuyMenu.Position;
-	}
-	position = clone.Position;
-	clone.Reset();
-	clone.WriteCell(position);
-	delete hBuyMenu;
-	hBuyMenu = clone;
-}
-void getBuyMenu(DataPack hBuyMenu, int pos, char weapon[65], int data[BM_Max]) {
-	hBuyMenu.Position = pos;
-	
-	hBuyMenu.ReadString(weapon, sizeof(weapon));
-	for (int i = 0; i < view_as<int>(BM_Max); i++) {
-		data[i] = hBuyMenu.ReadCell();
-	}
-}
-void addBuyMenu(DataPack hBuyMenu, int weaponID) {
-	if( rp_GetWeaponStorage(weaponID) == true )
-		return;
-	
-	int owner = GetEntPropEnt(weaponID, Prop_Send, "m_hPrevOwner");
-	if( IsValidClient(owner) && (rp_GetClientJobID(owner) == 1 || rp_GetClientJobID(owner) == 101) )
-		return;
-	owner = g_iOriginOwner[weaponID];
-	if( IsValidClient(owner) && (rp_GetClientJobID(owner) == 1 || rp_GetClientJobID(owner) == 101) )
-		return;
-	
-	char weapon[65];
-	int index = GetEntProp(weaponID, Prop_Send, "m_iItemDefinitionIndex");
-	CSGO_GetItemDefinitionNameByIndex(index, weapon, sizeof(weapon));
-	if( StrEqual(weapon, "weapon_default") ) {
-		GetEntityClassname(weaponID, weapon, sizeof(weapon));
-	}
-	ReplaceString(weapon, sizeof(weapon), "weapon_", "");
-	
-	int data[BM_Max];
-	
-	data[BM_PvP] = rp_GetWeaponGroupID(weaponID);
-	data[BM_Munition] = Weapon_GetPrimaryClip(weaponID);
-	data[BM_Chargeur] = GetEntProp(weaponID, Prop_Send, "m_iPrimaryReserveAmmoCount");
-	data[BM_Type] = view_as<int>(rp_GetWeaponBallType(weaponID));
-	data[BM_Prix] = 50 + rp_GetWeaponPrice(weaponID) / 4;
-
-	if(data[BM_PvP] > 0)
-		data[BM_Prix] += 250;
-
-	switch(view_as<enum_ball_type>(data[BM_Type])){
-		case ball_type_fire          : data[BM_Prix]+= 250;
-		case ball_type_caoutchouc    : data[BM_Prix]+= 200;
-		case ball_type_poison        : data[BM_Prix]+= 200;
-		case ball_type_vampire       : data[BM_Prix]+= 200;
-		case ball_type_paintball     : data[BM_Prix]+= 50;
-		case ball_type_reflexive     : data[BM_Prix]+= 200;
-		case ball_type_explode       : data[BM_Prix]+= 300;
-		case ball_type_revitalisante : data[BM_Prix]+= 200;
-		case ball_type_nosteal       : data[BM_Prix]+= 50;
-		case ball_type_notk          : data[BM_Prix]+= 50;
-	}
-
-	data[BM_Owner] = GetEntProp(weaponID, Prop_Send, "m_OriginalOwnerXuidHigh");
-	
-	hBuyMenu.Reset();
-	int pos = hBuyMenu.ReadCell();
-	hBuyMenu.Position = pos;
-	hBuyMenu.WriteString(weapon);
-	for (int i = 0; i < view_as<int>(BM_Max); i++) {
-		hBuyMenu.WriteCell(data[i]);
-	}
-	pos = hBuyMenu.Position;
-	hBuyMenu.Reset();
-	hBuyMenu.WriteCell(pos);
-}
 void Cmd_BuyWeapon(int client) {
 	g_hBuyMenu.Reset();
 	int max = g_hBuyMenu.ReadCell();
@@ -3008,7 +2888,7 @@ void Cmd_BuyWeapon(int client) {
 	
 	while( position < max ) {
 		
-		getBuyMenu(g_hBuyMenu, position, name, data);
+		rp_WeaponMenu_Get(g_hBuyMenu, position, name, data);
 		Format(tmp, sizeof(tmp), "%d", position);
 
 		if(data[BM_PvP] > 0)
@@ -3053,7 +2933,7 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			char name[65];
 			int data[BM_Max];
 			int position = StringToInt(szMenu);
-			getBuyMenu(g_hBuyMenu, position, name, data);
+			rp_WeaponMenu_Get(g_hBuyMenu, position, name, data);
 			
 			if( rp_GetClientInt(client, i_Bank) < data[BM_Prix] )
 				return 0;
@@ -3076,7 +2956,7 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 				Client_SetWeaponPlayerAmmoEx(client, wepid, data[BM_Chargeur]);
 			}
 			
-			deleteBuyMenu(g_hBuyMenu, position);
+			rp_WeaponMenu_Delete(g_hBuyMenu, position);
 			rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) - data[BM_Prix]);
 			
 			int rnd = rp_GetRandomCapital(1);			

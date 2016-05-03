@@ -358,3 +358,105 @@ stock int rp_GetWeaponPrice(int target) {
 	// fallback:
 	return 500; 
 }
+
+stock bool rp_WeaponMenu_Add(DataPack hBuyMenu, int weaponID, bool policeCheck = false) {
+	if( rp_GetWeaponStorage(weaponID) == true )
+		return false;
+	
+	if( policeCheck ) {
+		int owner = GetEntPropEnt(weaponID, Prop_Send, "m_hPrevOwner");
+		if( IsValidClient(owner) && (rp_GetClientJobID(owner) == 1 || rp_GetClientJobID(owner) == 101) )
+			return false;
+		owner = rp_WeaponMenu_GetOwner(weaponID);
+		if( IsValidClient(owner) && (rp_GetClientJobID(owner) == 1 || rp_GetClientJobID(owner) == 101) )
+			return false;
+	}
+	
+	char weapon[65];
+	int index = GetEntProp(weaponID, Prop_Send, "m_iItemDefinitionIndex");
+	CSGO_GetItemDefinitionNameByIndex(index, weapon, sizeof(weapon));
+	if( StrEqual(weapon, "weapon_default") ) {
+		GetEntityClassname(weaponID, weapon, sizeof(weapon));
+	}
+	ReplaceString(weapon, sizeof(weapon), "weapon_", "");
+	
+	int data[BM_Max];
+	
+	data[BM_PvP] = rp_GetWeaponGroupID(weaponID);
+	data[BM_Munition] = Weapon_GetPrimaryClip(weaponID);
+	data[BM_Chargeur] = GetEntProp(weaponID, Prop_Send, "m_iPrimaryReserveAmmoCount");
+	data[BM_Type] = view_as<int>(rp_GetWeaponBallType(weaponID));
+	data[BM_Prix] = 50 + rp_GetWeaponPrice(weaponID) / 4;
+
+	if(data[BM_PvP] > 0)
+		data[BM_Prix] += 250;
+
+	switch(view_as<enum_ball_type>(data[BM_Type])){
+		case ball_type_fire          : data[BM_Prix]+= 250;
+		case ball_type_caoutchouc    : data[BM_Prix]+= 200;
+		case ball_type_poison        : data[BM_Prix]+= 200;
+		case ball_type_vampire       : data[BM_Prix]+= 200;
+		case ball_type_paintball     : data[BM_Prix]+= 50;
+		case ball_type_reflexive     : data[BM_Prix]+= 200;
+		case ball_type_explode       : data[BM_Prix]+= 300;
+		case ball_type_revitalisante : data[BM_Prix]+= 200;
+		case ball_type_nosteal       : data[BM_Prix]+= 50;
+		case ball_type_notk          : data[BM_Prix]+= 50;
+	}
+
+	data[BM_Owner] = GetEntProp(weaponID, Prop_Send, "m_OriginalOwnerXuidHigh");
+	
+	hBuyMenu.Reset();
+	int pos = hBuyMenu.ReadCell();
+	hBuyMenu.Position = pos;
+	hBuyMenu.WriteString(weapon);
+	for (int i = 0; i < view_as<int>(BM_Max); i++) {
+		hBuyMenu.WriteCell(data[i]);
+	}
+	pos = hBuyMenu.Position;
+	hBuyMenu.Reset();
+	hBuyMenu.WriteCell(pos);
+	return true;
+}
+stock void rp_WeaponMenu_Delete(DataPack& hBuyMenu, int pos) {
+	hBuyMenu.Reset();
+	int max = hBuyMenu.ReadCell();
+	int position = hBuyMenu.Position;
+	
+	DataPack clone = new DataPack();
+	clone.WriteCell(0);
+	
+	char weapon[65];
+	int data[BM_Max];
+	 
+	while( position < max ) {
+		
+	
+		hBuyMenu.ReadString(weapon, sizeof(weapon));
+		for (int i = 0; i < view_as<int>(BM_Max); i++) {
+			data[i] = hBuyMenu.ReadCell();
+		}
+		
+		if( position != pos) {
+			clone.WriteString(weapon);
+			for (int i = 0; i < view_as<int>(BM_Max); i++) {
+				 clone.WriteCell(data[i]);
+			}
+		}
+		
+		position = hBuyMenu.Position;
+	}
+	position = clone.Position;
+	clone.Reset();
+	clone.WriteCell(position);
+	delete hBuyMenu;
+	hBuyMenu = clone;
+}
+stock void rp_WeaponMenu_Get(DataPack hBuyMenu, int pos, char weapon[65], int data[BM_Max]) {
+	hBuyMenu.Position = pos;
+	hBuyMenu.ReadString(weapon, sizeof(weapon));
+	
+	for (int i = 0; i < view_as<int>(BM_Max); i++) {
+		data[i] = hBuyMenu.ReadCell();
+	}
+}

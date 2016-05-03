@@ -443,7 +443,8 @@ native int rp_GetClientSSO(int client, char[] sso, int length);
 native void rp_ClientFloodIncrement(int client, int target, fd_user_data type, float cooldown);
 native bool rp_ClientFloodTriggered(int client, int target, fd_user_data type);
 // ----------------------------------------------------------------------------
-
+native int rp_WeaponMenu_GetOwner(int wepID);
+// ----------------------------------------------------------------------------
 #define ACCESS_DENIED(%1)	CPrintToChat(%1, "{lightblue}[TSX-RP]{default} Vous n'avez pas accès à cette commande.");	return Plugin_Handled
 #define ITEM_CANCEL(%1,%2)	rp_ClientGiveItem(%1,%2); rp_SetClientFloat(%1, fl_CoolDown, 0.05)
 
@@ -961,4 +962,13 @@ enum int_stat_data {
 
 	i_uStat_max
 };
+enum BM_Int {
+	BM_Owner = 0,
+	BM_Prix,
+	BM_Munition,
+	BM_Chargeur,
+	BM_PvP,
+	BM_Type,
+	BM_Max
+}
 #include <rp_tools.inc>
