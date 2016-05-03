@@ -123,11 +123,8 @@ public void OnPluginStart() {
 	g_hForward_RP_OnClientTazedItem = CreateGlobalForward("RP_OnClientTazedItem", ET_Event, Param_Cell, Param_Cell);
 	g_hForward_RP_OnClientSendJail = CreateGlobalForward("RP_OnClientSendJail", ET_Event, Param_Cell, Param_Cell);
 	
-	g_hBuyMenu = new DataPack();
-	g_hBuyMenu.WriteCell(0);
-	int pos = g_hBuyMenu.Position;
-	g_hBuyMenu.Reset();
-	g_hBuyMenu.WriteCell(pos);
+	
+	g_hBuyMenu = rp_WeaponMenu_Create();
 	
 	
 	
@@ -2872,9 +2869,8 @@ public Action fwdOnPlayerUse(int client) {
 	return Plugin_Continue;
 }
 void Cmd_BuyWeapon(int client) {
-	g_hBuyMenu.Reset();
-	int max = g_hBuyMenu.ReadCell();
-	int position = g_hBuyMenu.Position;
+	int max = rp_WeaponMenu_GetMax(g_hBuyMenu);
+	int position = rp_WeaponMenu_GetPosition(g_hBuyMenu);
 	char name[65], tmp[8], tmp2[129];
 	int data[BM_Max];
 	
@@ -2916,7 +2912,7 @@ void Cmd_BuyWeapon(int client) {
 		Format(tmp2, sizeof(tmp2), "%s pour %d$", tmp2, data[BM_Prix]);
 		menu.AddItem(tmp, tmp2);
 		
-		position = g_hBuyMenu.Position;
+		position = rp_WeaponMenu_GetPosition(g_hBuyMenu);
 	}
 
 	menu.Display(client, 60);
