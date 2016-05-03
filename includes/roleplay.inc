@@ -454,6 +454,7 @@ enum BM_Int {
 }
 native int rp_WeaponMenu_GetOwner(int wepID);
 native DataPack rp_WeaponMenu_Create();
+native void rp_WeaponMenu_Clear(DataPack& hBuyMenu);
 native void rp_WeaponMenu_Reset(DataPack hBuyMenu);
 native void rp_WeaponMenu_SetPosition(DataPack hBuyMenu, int position);
 native int rp_WeaponMenu_GetPosition(DataPack hBuyMenu);

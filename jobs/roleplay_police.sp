@@ -141,6 +141,9 @@ public void OnPluginStart() {
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
 }
+public void OnPluginEnd() {
+	rp_WeaponMenu_Clear(g_hBuyMenu);
+}
 public Action Cmd_SendToJail(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_SendToJail");
