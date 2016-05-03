@@ -59,7 +59,7 @@ public Action OnPlayerRunCmd(int client, int &button) {
 	}
 	if( !(button & IN_USE) && g_bPressedUse[client] == true ) {
 		g_bPressedUse[client] = false;
-		if( (GetGameTime() - g_flPressUse[client]) < 0.2 && !g_bClosed[client] && rp_GetClientVehicle(client) <= 0 ) {
+		if( (GetGameTime() - g_flPressUse[client]) < 0.2 && !g_bClosed[client] && rp_GetClientVehicle(client) <= 0 && rp_IsTutorialOver(client) ) {
 			if( rp_ClientCanDrawPanel(client) || g_bInsideMenu[client] )
 				 openMenu(client);
 		}
