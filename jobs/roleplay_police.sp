@@ -2949,6 +2949,9 @@ void addBuyMenu(int weaponID) {
 	char weapon[65];
 	int index = GetEntProp(weaponID, Prop_Send, "m_iItemDefinitionIndex");
 	CSGO_GetItemDefinitionNameByIndex(index, weapon, sizeof(weapon));
+	if( StrEqual(weapon, "weapon_default") ) {
+		GetEntityClassname(weaponID, weapon, sizeof(weapon));
+	}
 	ReplaceString(weapon, sizeof(weapon), "weapon_", "");
 	
 	int data[BM_Max];
