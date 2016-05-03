@@ -598,7 +598,7 @@ public Action Cmd_Tazer(int client) {
 			rp_GetZoneData(Tzone, zone_type_name, tmp, sizeof(tmp));
 			LogToGame("[TSX-RP] [TAZER] %L a supprimé une arme %s dans %s", client, tmp2, tmp);
 			
-			addBuyMenu(target);
+			addBuyMenu(g_hBuyMenu, target);
 			int prix = rp_GetWeaponPrice(target); 
 			
 			reward = prix / 10;
@@ -2871,7 +2871,7 @@ void StripWeapons(int client ) {
 		
 		while( ( wepIdx = GetPlayerWeaponSlot( client, i ) ) != -1 ) {
 			
-			addBuyMenu(wepIdx);
+			addBuyMenu(g_hBuyMenu, wepIdx);
 			RemovePlayerItem( client, wepIdx );
 			RemoveEdict( wepIdx );
 		}
@@ -2893,10 +2893,10 @@ public Action fwdOnPlayerUse(int client) {
 	}
 	return Plugin_Continue;
 }
-void deleteBuyMenu(int pos) {
-	g_hBuyMenu.Reset();
-	int max = g_hBuyMenu.ReadCell();
-	int position = g_hBuyMenu.Position;
+void deleteBuyMenu(DataPack& hBuyMenu, int pos) {
+	hBuyMenu.Reset();
+	int max = hBuyMenu.ReadCell();
+	int position = hBuyMenu.Position;
 	
 	DataPack clone = new DataPack();
 	clone.WriteCell(0);
@@ -2907,9 +2907,9 @@ void deleteBuyMenu(int pos) {
 	while( position < max ) {
 		
 	
-		g_hBuyMenu.ReadString(weapon, sizeof(weapon));
+		hBuyMenu.ReadString(weapon, sizeof(weapon));
 		for (int i = 0; i < view_as<int>(BM_Max); i++) {
-			data[i] = g_hBuyMenu.ReadCell();
+			data[i] = hBuyMenu.ReadCell();
 		}
 		
 		if( position != pos) {
@@ -2919,23 +2919,23 @@ void deleteBuyMenu(int pos) {
 			}
 		}
 		
-		position = g_hBuyMenu.Position;
+		position = hBuyMenu.Position;
 	}
 	position = clone.Position;
 	clone.Reset();
 	clone.WriteCell(position);
-	delete g_hBuyMenu;
-	g_hBuyMenu = clone;
+	delete hBuyMenu;
+	hBuyMenu = clone;
 }
-void getBuyMenu(int pos, char weapon[65], int data[BM_Max]) {
-	g_hBuyMenu.Position = pos;
+void getBuyMenu(DataPack hBuyMenu, int pos, char weapon[65], int data[BM_Max]) {
+	hBuyMenu.Position = pos;
 	
-	g_hBuyMenu.ReadString(weapon, sizeof(weapon));
+	hBuyMenu.ReadString(weapon, sizeof(weapon));
 	for (int i = 0; i < view_as<int>(BM_Max); i++) {
-		data[i] = g_hBuyMenu.ReadCell();
+		data[i] = hBuyMenu.ReadCell();
 	}
 }
-void addBuyMenu(int weaponID) {
+void addBuyMenu(DataPack hBuyMenu, int weaponID) {
 	if( rp_GetWeaponStorage(weaponID) == true )
 		return;
 	
@@ -2980,16 +2980,16 @@ void addBuyMenu(int weaponID) {
 
 	data[BM_Owner] = GetEntProp(weaponID, Prop_Send, "m_OriginalOwnerXuidHigh");
 	
-	g_hBuyMenu.Reset();
-	int pos = g_hBuyMenu.ReadCell();
-	g_hBuyMenu.Position = pos;
-	g_hBuyMenu.WriteString(weapon);
+	hBuyMenu.Reset();
+	int pos = hBuyMenu.ReadCell();
+	hBuyMenu.Position = pos;
+	hBuyMenu.WriteString(weapon);
 	for (int i = 0; i < view_as<int>(BM_Max); i++) {
-		g_hBuyMenu.WriteCell(data[i]);
+		hBuyMenu.WriteCell(data[i]);
 	}
-	pos = g_hBuyMenu.Position;
-	g_hBuyMenu.Reset();
-	g_hBuyMenu.WriteCell(pos);
+	pos = hBuyMenu.Position;
+	hBuyMenu.Reset();
+	hBuyMenu.WriteCell(pos);
 }
 void Cmd_BuyWeapon(int client) {
 	g_hBuyMenu.Reset();
@@ -3008,7 +3008,7 @@ void Cmd_BuyWeapon(int client) {
 	
 	while( position < max ) {
 		
-		getBuyMenu(position, name, data);
+		getBuyMenu(g_hBuyMenu, position, name, data);
 		Format(tmp, sizeof(tmp), "%d", position);
 
 		if(data[BM_PvP] > 0)
@@ -3053,7 +3053,7 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			char name[65];
 			int data[BM_Max];
 			int position = StringToInt(szMenu);
-			getBuyMenu(position, name, data);
+			getBuyMenu(g_hBuyMenu, position, name, data);
 			
 			if( rp_GetClientInt(client, i_Bank) < data[BM_Prix] )
 				return 0;
@@ -3076,7 +3076,7 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 				Client_SetWeaponPlayerAmmoEx(client, wepid, data[BM_Chargeur]);
 			}
 			
-			deleteBuyMenu(position);
+			deleteBuyMenu(g_hBuyMenu, position);
 			rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) - data[BM_Prix]);
 			
 			int rnd = rp_GetRandomCapital(1);			
