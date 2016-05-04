@@ -720,7 +720,7 @@ float getDuration(int client, int itemID) {
 	float duration = 0.0;
 	for (int i = 0; i < magic.Length; i++) {
 		magic.GetArray(i, data);
-		duration += 0.01 * data[craft_amount];
+		duration += 0.02 * data[craft_amount];
 	}
 	
 	if( g_flClientBook[client][book_speed] > GetTickedTime() )
