@@ -66,12 +66,12 @@ public Action fwdOnZoneChange(int client, int oldZone, int newZone) {
 		Format(name, sizeof(name), "pvp_%s_%d-%d", today, client, GetGameTickCount());
 		BotMimic_StartRecording(client, name);
 		
-		PrintToConsole(client, "[TSX-RP] [PVP] Vos mouvements sont maintenant enregistré.");
+		PrintToConsole(client, "[TSX-RP] [PVP] Vos mouvements sont maintenant enregistrés.");
 		LogToGame("[PVP] [RECORD-%d] %L<%d> is recoding as %s ", GetTime(), client, client, name);
 	}
 	else if( newPVP && !oldPVP && BotMimic_IsPlayerRecording(client) ) {
 		BotMimic_StopRecording(client, true);
-		PrintToConsole(client, "[TSX-RP] [PVP] Vos mouvements ne sont plus enregistré.");
+		PrintToConsole(client, "[TSX-RP] [PVP] Vos mouvements ne sont plus enregistrés.");
 	}
 	
 	return Plugin_Continue;
