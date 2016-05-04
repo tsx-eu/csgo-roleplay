@@ -478,7 +478,7 @@ public Action Cmd_Tazer(int client) {
 	
 	if( IsValidClient(target) ) {
 		// Joueur:
-		if( GetClienTeam(client) == CS_TEAM_T && job != 101 || job != 102 && rp_GetZoneInt(Tzone, zone_type_type) != 101) ) {
+		if( GetClientTeam(client) == CS_TEAM_T && job != 101 || job != 102 && rp_GetZoneInt(Tzone, zone_type_type) != 101) ) {
 			ACCESS_DENIED(client);
 		}
 		if( GetClientTeam(client) == CS_TEAM_T && job != 1 && job != 2 && job != 4 && job != 5 ) {
