@@ -453,7 +453,7 @@ public Action Cmd_Tazer(int client) {
 	char tmp[128], tmp2[128], szQuery[1024];
 	int job = rp_GetClientInt(client, i_Job);
 	int Czone = rp_GetPlayerZone(client);
-		
+	
 	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
 		ACCESS_DENIED(client);
 	}
@@ -478,7 +478,7 @@ public Action Cmd_Tazer(int client) {
 	
 	if( IsValidClient(target) ) {
 		// Joueur:
-		if( GetClientTeam(client) == CS_TEAM_T && job != 1 && job != 2 && job != 4 && job != 5 ) {
+		if( GetClientTeam(client) == CS_TEAM_T && job != 1 && job != 2 && job != 4 && job != 5 && job != 101 && job != 102 ) {
 			ACCESS_DENIED(client);
 		}
 		if( GetClientTeam(target) == CS_TEAM_CT ) {
