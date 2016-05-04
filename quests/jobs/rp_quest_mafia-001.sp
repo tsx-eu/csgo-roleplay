@@ -160,6 +160,8 @@ public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 		
 		if( target == client )
 			continue;
+		if (rp_GetClientInt(client, i_JailTime) <0)
+			continue;
 		
 		for (int j = 0; j < sizeof(zoneID); j++) {
 			if( z == zoneID[j] ) {
