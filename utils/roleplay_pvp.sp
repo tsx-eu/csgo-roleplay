@@ -789,7 +789,7 @@ public Action fwdZoneChange(int client, int newZone, int oldZone) {
 		rp_ClientDamage(client, 10000, client);
 		ForcePlayerSuicide(client);
 	}
-	if (rp_IsTutorialOver(client) == false && rp_IsInPVP(client) == true) {
+	if (rp_IsTutorialOver(client) == false && (rp_GetZoneBit(newZone) & BITZONE_PVP) ) {
 		ForcePlayerSuicide(client);
 	}
 	if( newZone == ZONE_VILLA && !rp_GetClientKeyAppartement(client, 50) ) {
