@@ -459,7 +459,7 @@ native void rp_WeaponMenu_Reset(DataPack hBuyMenu);
 native void rp_WeaponMenu_SetPosition(DataPack hBuyMenu, int position);
 native int rp_WeaponMenu_GetPosition(DataPack hBuyMenu);
 native int rp_WeaponMenu_GetMax(DataPack hBuyMenu);
-native bool rp_WeaponMenu_Add(DataPack hBuyMenu, int weaponID, bool policeCheck = false);
+native bool rp_WeaponMenu_Add(DataPack hBuyMenu, int weaponID, int owner);
 native void rp_WeaponMenu_Delete(DataPack& hBuyMenu, int pos);
 native void rp_WeaponMenu_Get(DataPack hBuyMenu, int pos, char weapon[65], int data[BM_Max]);
 // ----------------------------------------------------------------------------

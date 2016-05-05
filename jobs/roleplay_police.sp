@@ -576,7 +576,8 @@ public Action Cmd_Tazer(int client) {
 			rp_GetZoneData(Tzone, zone_type_name, tmp, sizeof(tmp));
 			LogToGame("[TSX-RP] [TAZER] %L a supprimé une arme %s dans %s", client, tmp2, tmp);
 			
-			rp_WeaponMenu_Add(g_hBuyMenu, target, true);
+			if( canWeaponBeAddedInPoliceStore(target) )
+				rp_WeaponMenu_Add(g_hBuyMenu, target, GetEntProp(target, Prop_Send, "m_OriginalOwnerXuidHigh"));
 			int prix = rp_GetWeaponPrice(target); 
 			
 			reward = prix / 10;
@@ -2849,7 +2850,9 @@ void StripWeapons(int client ) {
 		
 		while( ( wepIdx = GetPlayerWeaponSlot( client, i ) ) != -1 ) {
 			
-			rp_WeaponMenu_Add(g_hBuyMenu, wepIdx, true);
+			if( canWeaponBeAddedInPoliceStore(wepIdx) )
+				rp_WeaponMenu_Add(g_hBuyMenu, wepIdx, GetEntProp(wepIdx, Prop_Send, "m_OriginalOwnerXuidHigh"));
+			
 			RemovePlayerItem( client, wepIdx );
 			RemoveEdict( wepIdx );
 		}
@@ -3021,4 +3024,14 @@ void explainJail(int client, int jailReason, int cop) {
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Vol de voiture") == 0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Après enquête, %N vous a mis en prison pour le vol de la voiture que vous conduisiez.");
 	}
+}
+bool canWeaponBeAddedInPoliceStore(int weaponID) {
+	int owner = GetEntPropEnt(weaponID, Prop_Send, "m_hPrevOwner");
+	if( IsValidClient(owner) && (rp_GetClientJobID(owner) == 1 || rp_GetClientJobID(owner) == 101) )
+		return false;
+	owner = rp_WeaponMenu_GetOwner(weaponID);
+	if( IsValidClient(owner) && (rp_GetClientJobID(owner) == 1 || rp_GetClientJobID(owner) == 101) )
+		return false;
+		
+	return true;
 }
