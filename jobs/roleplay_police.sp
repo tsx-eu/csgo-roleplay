@@ -985,6 +985,10 @@ public Action Cmd_Push(int client) {
 		ACCESS_DENIED(client);
 	}
 	
+	if(!IsValidClient(client)) {
+		ACCESS_DENIED(client);
+	}
+		
 	int target = rp_GetClientTarget(client);
 	if( target <= 0 || !IsValidEdict(target) || !IsValidEntity(target) )
 		return Plugin_Handled;
