@@ -985,7 +985,7 @@ public Action Cmd_Push(int client) {
 		ACCESS_DENIED(client);
 	}
 	
-	if(!IsValidClient(client)) {
+	if(!IsValidClient(target)) {
 		ACCESS_DENIED(client);
 	}
 		
