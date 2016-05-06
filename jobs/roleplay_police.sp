@@ -984,10 +984,13 @@ public Action Cmd_Push(int client) {
 	if( GetClientTeam(client) == CS_TEAM_T && (job == 8 || job == 9 || job == 103 || job == 104 || job == 105 || job == 106 || job == 107 || job == 108 || job == 109 ) ) {
 		ACCESS_DENIED(client);
 	}
-	
+		
 	int target = rp_GetClientTarget(client);
 	if( target <= 0 || !IsValidEdict(target) || !IsValidEntity(target) )
 		return Plugin_Handled;
+	if(!IsValidClient(target)) {
+		ACCESS_DENIED(client);
+	}
 	
 	if( Entity_GetDistance(client, target) > MAX_AREA_DIST*3 ) {
 		ACCESS_DENIED(client);
