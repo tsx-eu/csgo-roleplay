@@ -146,12 +146,15 @@ public void Q1_Abort(int objectiveID, int client) {
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 }
 public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
-	static zoneID[3] =  { 13, 198, 221 };
-	static lastFree[65];
+	static int zoneID[3] =  { 13, 198, 221 };
+	static float lastFree[65];
 	
-	if( lastFree[client] > GetTime() )
+	if( lastFree[client] > GetGameTime() )
 		return Plugin_Continue;
-	
+	if( rp_GetClientInt(client, i_JailTime) <=0 )
+		return Plugin_Continue;
+	if( rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101 )
+		return Plugin_Continue;
 	
 	int length = GetArraySize(g_hDoing);
 	for (int i = 0; i < length; i++) {
@@ -159,8 +162,6 @@ public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 		int z = rp_GetPlayerZone(target);
 		
 		if( target == client )
-			continue;
-		if (rp_GetClientInt(client, i_JailTime) <=0)
 			continue;
 		
 		for (int j = 0; j < sizeof(zoneID); j++) {
@@ -177,8 +178,9 @@ public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 						CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N vous a libéré.", target);
 						PrintHintText(client,"{lightblue}[TSX-RP]{red} Vous avez été libéré de prison par %N . Vous avez donc été teleporté sur la map ! Ne vous faites pas prendre par les forces de l'ordre. ", target);
 						CPrintToChat(target, "{lightblue}[TSX-RP]{default} vous avez libéré %N et reçu une récompense de 1000$.", client);
+						LogToGame("[QUETE] [MAFIA] %L a libéré %L", target, client);
 						
-						lastFree[client] = GetTime() + g_iDuration[client] + 1;
+						lastFree[client] = GetGameTime() + 180.0;
 					}
 				}
 			}
