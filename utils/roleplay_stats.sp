@@ -155,7 +155,7 @@ public void DisplayStats(int client, bool full){
 		SetMenuTitle(menu, "Vos stats totales:");
 		Format(tmp, sizeof(tmp), "Argent gagné par la paye: %d", rp_GetClientStat(client, i_S_MoneyEarned_Pay));
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
-		Format(tmp, sizeof(tmp), "Argent gagné par les missions telephone: %d", rp_GetClientStat(client, i_S_MoneyEarned_Phone));
+		Format(tmp, sizeof(tmp), "Argent gagné par les missions téléphones: %d", rp_GetClientStat(client, i_S_MoneyEarned_Phone));
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
 		Format(tmp, sizeof(tmp), "Argent gagné via metier: %d", rp_GetClientStat(client, i_S_MoneyEarned_Sales));
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
@@ -205,7 +205,7 @@ public void DisplayStats(int client, bool full){
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
 		Format(tmp, sizeof(tmp), "Argent gagné par la paye: %d", rp_GetClientStat(client, i_MoneyEarned_Pay));
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
-		Format(tmp, sizeof(tmp), "Argent gagné par les missions telephone: %d", rp_GetClientStat(client, i_MoneyEarned_Phone));
+		Format(tmp, sizeof(tmp), "Argent gagné par les missions téléphones: %d", rp_GetClientStat(client, i_MoneyEarned_Phone));
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
 		Format(tmp, sizeof(tmp), "Argent gagné via metier: %d", rp_GetClientStat(client, i_MoneyEarned_Sales));
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
