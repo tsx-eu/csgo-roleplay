@@ -343,7 +343,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 	WritePackCell(dp, client);
 	WritePackCell(dp, target);
 	WritePackCell(dp, 0.0);
-	WritePackCell(dp, (StrContains(classname, "rp_bank_") == 0 ? false : true));
+	WritePackCell(dp, (StrContains(classname, "rp_bank_") == 0 ? 0 : 1));
 	
 	return Plugin_Handled;
 }
@@ -352,13 +352,14 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 	int client = ReadPackCell(dp);
 	int target = ReadPackCell(dp);
 	float percent = ReadPackCell(dp);
-	bool type = ReadPackCell(dp);
+	int type = ReadPackCell(dp);
+	
 	
 	if( !IsValidClient(client ) ) {
 		return Plugin_Stop;
 	}
 	if( getDistrib(client) != target ) {
-		MENU_ShowPickLock(client, percent, -1, 2);
+		MENU_ShowPickLock(client, percent, -1, 2+type);
 		rp_ClientColorize(client);
 		CreateTimer(0.1, AllowStealing, client);
 		return Plugin_Stop;
@@ -369,11 +370,8 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 		rp_SetClientStat(client, i_JobSucess, rp_GetClientStat(client, i_JobSucess) + 1);
 		rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
 		
-		char classname[128];
-		GetEdictClassname(target, classname, sizeof(classname));
-		if( StrContains(classname, "rp_weaponbox_") == 0 ) {
+		if( type == 1 ) {
 			rp_ClientDrawWeaponMenu(client, target, true);
-			
 			rp_SetClientInt(client, i_LastVolAmount, 100);
 		}
 		else {
@@ -391,7 +389,8 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 		rp_SetClientInt(client, i_LastVolTime, GetTime());
 		rp_SetClientInt(client, i_LastVolTarget, -1);
 		
-		CreateTimer((rp_IsNight()?STEAL_TIME:STEAL_TIME*2.0), AllowStealing, client);
+		
+		CreateTimer((rp_IsNight()?STEAL_TIME*2.0:STEAL_TIME*4.0), AllowStealing, client);
 		return Plugin_Stop;
 	}
 	
@@ -412,7 +411,7 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 	WritePackCell(dp, target);
 	WritePackCell(dp, percent + ratio);
 	WritePackCell(dp, type);
-	MENU_ShowPickLock(client, percent, 0, 2);
+	MENU_ShowPickLock(client, percent, 0, 2+type);
 	return Plugin_Continue;
 }
 public Action SpawnMoney(Handle timer, any target) {
@@ -586,8 +585,8 @@ int GetMaxKit(int client, int itemID) {
 		case 92:	max = 6;
 		case 93:	max = 5; // parrain
 		case 94:	max = 5; // pro
-		case 95:	max = 5; // mafieux
-		case 96:	max = 5; // apprenti
+		case 95:	max = 4; // mafieux
+		case 96:	max = 3; // apprenti
 		default:	max = 0;
 	}
 	
@@ -681,6 +680,7 @@ void MENU_ShowPickLock(int client, float percent, int difficulte, int type) {
 	switch( type ) {
 		case 1: SetMenuTitle(menu, "== Mafia: Ouverture d'une porte");
 		case 2: SetMenuTitle(menu, "== Mafia: Crochetage d'un distributeur");
+		case 3: SetMenuTitle(menu, "== Mafia: Crochetage d'une armurerie");
 	}
 	
 	char tmp[64];
