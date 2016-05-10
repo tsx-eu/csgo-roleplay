@@ -521,200 +521,105 @@ public Action Cmd_ItemPickLock(int args) {
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
-	bool fast = false; char arg[64];
+	bool fast = false;
+	char arg[64];
 	GetCmdArg(0, arg, sizeof(arg));
 	if( StrEqual(arg, "rp_item_picklock2") )
 		fast = true;
-	
-	rp_ClientReveal(client);
-	
+		
 	if( rp_GetClientJobID(client) != 91 ) {
-		return Plugin_Continue;
+		return Plugin_Handled;
 	}
 	
-	int door = GetClientAimTarget(client, false);
-	
-	if( !rp_IsValidDoor(door) && IsValidEdict(door) && rp_IsValidDoor(Entity_GetParent(door)) )
-		door = Entity_GetParent(door);
-		
-
-		
-	if( !rp_IsValidDoor(door) || !rp_IsEntitiesNear(client, door, true) ) {
+	int door = getDoor(client);
+	if( door == 0 ) {
 		ITEM_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser une porte.");
 		return Plugin_Handled;
 	}
-		
-	float vecTarget[3];
-	GetClientAbsOrigin(client, vecTarget);
-	TE_SetupBeamRingPoint(vecTarget, 10.0, 500.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, {255, 0, 0, 50}, 10, 0);
-	TE_SendToAll();
 	
 	// Anti-cheat:
 	if( rp_GetClientItem(client, item_id) >= GetMaxKit(client, item_id)-1 ) {
 		rp_ClientGiveItem(client, item_id, -rp_GetClientItem(client, item_id) + GetMaxKit(client, item_id) - 1);
 	}
 	
-	
-	int doorID = rp_GetDoorID(door);
-	int alarm = g_iDoorDefine_ALARM[doorID];
-	if( alarm ) {
-		
-		if( IsValidClient(alarm) ) {
-			char zone[128];
-			rp_GetZoneData(rp_GetPlayerZone(door), zone_type_name, zone, sizeof(zone));
-			
-			CPrintToChat(alarm, "{lightblue}[TSX-RP]{default} Quelqu'un crochette votre porte (%s).", zone );
-			rp_Effect_BeamBox(alarm, client);
-		}
-		
-		if( Math_GetRandomInt(1, 5) == 5 ) { // boum
-			g_iDoorDefine_ALARM[doorID] = 0;
-		}
-		
-		EmitSoundToAllAny("UI/arm_bomb.wav", door);
-		CreateTimer(10.0, timerAlarm, door); 
-			
-	}
-	
-	float time = 7.5;
-	
-	if( fast )
-		time = 1.5;
+	ServerCommand("sm_effect_particles %d weapon_sensorgren_detonate 1 facemask", client);
+	ServerCommand("sm_effect_particles %d Trail2 2 legacy_weapon_bone", client);
 	
 	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) + 1);
 	rp_SetClientInt(client, i_LastVolTime, GetTime());
 	rp_SetClientInt(client, i_LastVolAmount, 100);
 	rp_SetClientInt(client, i_LastVolTarget, -1);
-	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, time);
-	ServerCommand("sm_effect_panel %d %f \"Tentative de crochetage de la porte...\"", client, time);
 	
-	rp_ClientColorize(client, { 255, 0, 0, 190} );
 	rp_ClientReveal(client);
+	runAlarm(client, door);
+	if( fast ) {
+		
+	}
+	
 	
 	Handle dp;
-	CreateDataTimer(time-0.25, ItemPickLockOver_maffia, dp, TIMER_DATA_HNDL_CLOSE); 
+	CreateDataTimer(0.1, ItemPickLockOver_frame, dp, TIMER_DATA_HNDL_CLOSE|TIMER_REPEAT); 
 	WritePackCell(dp, client);
 	WritePackCell(dp, door);
-	WritePackCell(dp, fast);
+	WritePackCell(dp, rp_GetDoorID(door));
+	WritePackCell(dp, (fast?0.75:0.0));
 	
 	return Plugin_Handled;
 }
-public Action ItemPickLockOver_maffia(Handle timer, Handle dp) {
+public Action ItemPickLockOver_frame(Handle timer, Handle dp) {
 	#if defined DEBUG
-	PrintToServer("ItemPickLockOver_maffia");
-	#endif
-	static int last_door[65] = 0;
-	
-	if( dp == INVALID_HANDLE ) {
-		return Plugin_Handled;
-	}
-	
+	PrintToServer("ItemPickLockOver_frame");
+	#endif	
 	ResetPack(dp);
 	int client 	 = ReadPackCell(dp);
 	int door = ReadPackCell(dp);
-	int doorID = rp_GetDoorID(door);
-	bool fast = ReadPackCell(dp);
+	int doorID = ReadPackCell(dp);
+	float percent = ReadPackCell(dp);
+	int target = getDoor(client);
 	
-	rp_ClientColorize(client);
-	
-	if( !rp_IsEntitiesNear(client, door, true) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez raté votre tentative de crochetage, vous étiez trop loin de la porte...");
-		return Plugin_Handled;
+	if( target <= 0 || rp_GetDoorID(target) != doorID ) {
+		MENU_ShowPickLock(client, percent, -1);
+		rp_ClientColorize(client);
+		return Plugin_Stop;
+	}
+	if( percent >= 1.0 ) {
+		rp_ClientColorize(client);
+		
+		rp_SetDoorLock(doorID, false); 
+		rp_ClientOpenDoor(client, doorID, true);
+		
+		rp_SetClientStat(client, i_JobSucess, rp_GetClientStat(client, i_JobSucess) + 1);
+		rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
+		
+		rp_SetClientFloat(client, fl_LastCrochettage, GetGameTime());
+		
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} La porte a été ouverte.");
+		
+		return Plugin_Stop;
 	}
 	
-	int ratio = 0, job = rp_GetClientInt(client, i_Job);
-	int alarm = g_iDoorDefine_LOCKER[doorID];
-	
-	switch( job ) {
-		case 91: ratio = 80;
-		case 92: ratio = 75;
-		case 93: ratio = 70; 	// Parrain
-		case 94: ratio = 65;	// Pro
-		case 95: ratio = 60;	// Mafieu
-		case 96: ratio = 55;	// Apprenti
-		
-		default: ratio = 0;
-		
-	}
+	rp_SetClientFloat(client, fl_CoolDown, GetGameTime() + 0.15);
+	float ratio = getKitDuration(client) / 5000.0;
+	int difficulte = 1;
 	
 	if( rp_IsInPVP(client) )
-		ratio /= 2;
+		difficulte += 1;
 	if( rp_GetZoneBit( rp_GetPlayerZone(door)) & BITZONE_HAUTESECU )
-		ratio /= 2;
-	if( alarm )
-		ratio /= 4;
-		
-	if( !fast || (fast && rp_IsInPVP(client)) ) {
-		if( Math_GetRandomInt(0, 100) > ratio ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez raté votre tentative de crochetage.");
-			return Plugin_Handled;
-		}
-		
-		if( rp_IsInPVP(client) || alarm ) {
-			rp_SetJobCapital(91, rp_GetJobCapital(91) + 250);
-			int cap = rp_GetRandomCapital(91);
-			rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 250);
-		}
-	}
-	else {
-		if( Math_GetRandomInt(0, 150) > (ratio*2) ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez raté votre tentative de crochetage.");
-			return Plugin_Handled;
-		}
-	}
+		difficulte += 1;
+	if( g_iDoorDefine_LOCKER[doorID] )
+		difficulte += 2;
 	
-	if( alarm ) {	
-		if( IsValidClient(alarm) ) {
-			char zone[128];
-			rp_GetZoneData(rp_GetPlayerZone(door), zone_type_name, zone, sizeof(zone));
-			
-			CPrintToChat(alarm, "{lightblue}[TSX-RP]{default} Quelqu'un a ouvert votre porte cadnacée (%s).", zone );
-			rp_Effect_BeamBox(alarm, client);
-		}
-		
-		if( Math_GetRandomInt(1, 5) == 5 ) { // boum
-			g_iDoorDefine_LOCKER[doorID] = 0;
-			
-			rp_SetJobCapital(91, rp_GetJobCapital(91) + 250);
-			int cap = rp_GetRandomCapital(91);
-			rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 250);
-		}
-		
-		EmitSoundToAllAny("UI/arm_bomb.wav", door);
-		CreateTimer(10.0, timerAlarm, door); 
-			
-	}
+	if( Math_GetRandomInt(1, 10) == 8 )
+		ServerCommand("sm_effect_particles %d Trail2 2 legacy_weapon_bone", client);
 	
-
-	rp_SetDoorLock(doorID, false); 
-	rp_ClientOpenDoor(client, doorID, true);
-
-	if( fast ) {
-		float vecOrigin[3];
-		Entity_GetAbsOrigin(door, vecOrigin);
-		
-		TE_SetupExplosion(vecOrigin, g_cExplode, 0.5, 2, 1, 25, 25);
-		TE_SendToAll();
-		CreateTimer(30.0, TaskResetDoor, doorID);
-	}
-
-	rp_SetClientStat(client, i_JobSucess, rp_GetClientStat(client, i_JobSucess) + 1);
-	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} La porte a été ouverte.");
-	
-	rp_SetClientFloat(client, fl_LastCrochettage, GetGameTime());
-	
-	int zone = rp_GetZoneInt(rp_GetPlayerZone(door), zone_type_type);
-	if( zone == 1 || zone == -1 || Math_GetRandomInt(1, 4) == 4 || last_door[client] != doorID ) {
-		
-		rp_SetJobCapital(91, rp_GetJobCapital(91) + 250);
-		int cap = rp_GetRandomCapital(91);
-		rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 250);
-		
-		last_door[client] = doorID;
-	}
-	
+	ratio = ratio / float(difficulte);
+	ResetPack(dp);
+	WritePackCell(dp, client);
+	WritePackCell(dp, door);
+	WritePackCell(dp, doorID);
+	WritePackCell(dp, percent + ratio);
+	MENU_ShowPickLock(client, percent, difficulte);
 	return Plugin_Continue;
 }
 public Action TaskResetDoor(Handle timer, any doorID) {
@@ -765,4 +670,78 @@ int GetMaxKit(int client, int itemID) {
 		max = RoundToCeil(max / 3.0);
 	
 	return max;
+}
+
+int getDoor(int client) {
+	int door = rp_GetClientTarget(client);
+	if( !rp_IsValidDoor(door) && IsValidEdict(door) && rp_IsValidDoor(Entity_GetParent(door)) )
+		door = Entity_GetParent(door);
+	
+	if( !rp_IsValidDoor(door) || !rp_IsEntitiesNear(client, door, true) )
+		door = 0;
+	return door;
+}
+void runAlarm(int client, int door) {
+	int doorID = rp_GetDoorID(door);
+	int alarm = g_iDoorDefine_ALARM[doorID];
+	if( alarm ) {
+		
+		if( IsValidClient(alarm) ) {
+			char zone[128];
+			rp_GetZoneData(rp_GetPlayerZone(door), zone_type_name, zone, sizeof(zone));
+			
+			CPrintToChat(alarm, "{lightblue}[TSX-RP]{default} Quelqu'un crochette votre porte (%s).", zone );
+			rp_Effect_BeamBox(alarm, client);
+		}
+		
+		if( Math_GetRandomInt(1, 5) == 5 ) { // boum
+			g_iDoorDefine_ALARM[doorID] = 0;
+		}
+		
+		EmitSoundToAllAny("UI/arm_bomb.wav", door);
+		CreateTimer(10.0, timerAlarm, door); 
+			
+	}
+}
+int getKitDuration(int client) {
+	int job = rp_GetClientInt(client, i_Job);
+	int ratio = 0;
+	switch( job ) {
+		case 91: ratio = 75;	// Chef
+		case 92: ratio = 80;	// Co-chef
+		case 93: ratio = 85; 	// Parrain
+		case 94: ratio = 90;	// Pro
+		case 95: ratio = 95;	// Mafieu
+		case 96: ratio = 100;	// Apprenti
+	}
+	return ratio;
+}
+// ----------------------------------------------------------------------------
+void MENU_ShowPickLock(int client, float percent, int difficulte) {
+
+	Handle menu = CreateMenu(eventMenuNone);
+	SetMenuTitle(menu, "== Mafia: Ouverture d'une porte");
+	
+	char tmp[64];
+	rp_Effect_LoadingBar(tmp, sizeof(tmp), percent );
+	AddMenuItem(menu, tmp, tmp, ITEMDRAW_DISABLED);
+	
+	switch( difficulte ) {
+		case -1: AddMenuItem(menu, ".", "Difficulté: Échec", ITEMDRAW_DISABLED);
+		case 1: AddMenuItem(menu, ".", "Difficulté: Facile", ITEMDRAW_DISABLED);
+		case 2: AddMenuItem(menu, ".", "Difficulté: Moyenne", ITEMDRAW_DISABLED);
+		case 3: AddMenuItem(menu, ".", "Difficulté: Difficile", ITEMDRAW_DISABLED);
+		case 4: AddMenuItem(menu, ".", "Difficulté: Très difficile", ITEMDRAW_DISABLED);
+		default: AddMenuItem(menu, ".", "Difficulté: Impossible", ITEMDRAW_DISABLED);
+	}
+	
+	SetMenuExitBackButton(menu, false);
+	DisplayMenu(menu, client, 1);
+}
+
+
+public int eventMenuNone(Handle menu, MenuAction action, int client, int param2) {	
+	if( action == MenuAction_End ) {
+		CloseHandle(menu);
+	}
 }
