@@ -259,7 +259,7 @@ public Action fwdOnPlayerUse(int client) {
 	if( rp_GetClientJobID(client) == 91 && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == 91 ) {
 		bool changed = false;
 		
-		for(int itemID=0; itemID<=3; itemID++) {
+		for(int itemID=1; itemID<=3; itemID++) {
 		
 			int mnt = rp_GetClientItem(client, itemID);
 			int max = GetMaxKit(client, itemID);
