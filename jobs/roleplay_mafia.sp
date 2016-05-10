@@ -38,8 +38,8 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-int g_cBeam, g_cGlow, g_cExplode;
-int g_iDoorDefine_ALARM[2049], g_iDoorDefine_LOCKER[2049];
+int g_cBeam, g_cGlow;
+int g_iDoorDefine_LOCKER[2049];
 Handle g_hForward_RP_OnClientStealItem;
 bool doRP_CanClientStealItem(int client, int target) {
 	Action a;
@@ -75,7 +75,6 @@ public void OnPluginStart() {
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt", true);
-	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt", true);
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse,	fwdOnPlayerUse);
@@ -84,9 +83,6 @@ public void OnClientPostAdminCheck(int client) {
 }
 public void OnClientDisconnect(int client) {
 	for(int i=0; i<2049; i++){
-		if(g_iDoorDefine_ALARM[i] == client)
-			g_iDoorDefine_ALARM[i] = 0;
-
 		if(g_iDoorDefine_LOCKER[i] == client)
 			g_iDoorDefine_LOCKER[i] = 0;
 	}
@@ -294,11 +290,9 @@ public Action Cmd_ItemDoorDefine(int args) {
 	int client = GetCmdArgInt(2);
 	int item_id = GetCmdArgInt(args);
 	
-	int door = rp_GetClientTarget(client);
-	if( !rp_IsValidDoor(door) && IsValidEdict(door) && rp_IsValidDoor(Entity_GetParent(door)) )
-		door = Entity_GetParent(door);
+	int door = getDoor(client);
 	
-	if( !rp_IsValidDoor(door) || !rp_IsEntitiesNear(client, door) ) {
+	if( door == 0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser une porte.");
 		ITEM_CANCEL(client, item_id);
 		return Plugin_Handled;
@@ -306,22 +300,13 @@ public Action Cmd_ItemDoorDefine(int args) {
 	
 	int doorID = rp_GetDoorID(door);
 	if( StrEqual(Arg1, "locker") ) {
-		if(g_iDoorDefine_LOCKER[doorID] != 0){
+		if(g_iDoorDefine_LOCKER[doorID] != 0 ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Un cadenas est déja présent sur cette porte.");
 			ITEM_CANCEL(client, item_id);
 			return Plugin_Handled;
 		}
 		g_iDoorDefine_LOCKER[doorID] = client;
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le cadenas a été placé avec succès.");
-	}
-	else if( StrEqual(Arg1, "alarm") ) {
-		if(g_iDoorDefine_ALARM[doorID] != 0){
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Une alarme est déja présente sur cette porte.");
-			ITEM_CANCEL(client, item_id);
-			return Plugin_Handled;
-		}
-		g_iDoorDefine_ALARM[doorID] = client;
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} L'alarme a été installée.");
 	}
 	
 	return Plugin_Handled;
@@ -564,12 +549,28 @@ public Action ItemPickLockOver_frame(Handle timer, Handle dp) {
 	float percent = ReadPackCell(dp);
 	int target = getDoor(client);
 	
+	if( !IsValidClient(client ) ) {
+		return Plugin_Stop;
+	}
 	if( target <= 0 || rp_GetDoorID(target) != doorID ) {
 		MENU_ShowPickLock(client, percent, -1);
 		rp_ClientColorize(client);
 		return Plugin_Stop;
 	}
 	if( percent >= 1.0 ) {
+		
+		if( IsValidClient(g_iDoorDefine_LOCKER[doorID]) ) {
+			char zone[128];
+ 			rp_GetZoneData(rp_GetPlayerZone(door), zone_type_name, zone, sizeof(zone));
+ 			
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Quelqu'un a ouvert votre porte cadnacée (%s).", zone);
+			
+			if( Math_GetRandomInt(1, 10) == 5 ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre cadenas a été détruit.");
+				g_iDoorDefine_LOCKER[doorID] = 0;
+			}
+		}
+		
 		rp_ClientColorize(client);
 		
 		rp_SetDoorLock(doorID, false); 
@@ -669,7 +670,7 @@ int getDoor(int client) {
 }
 void runAlarm(int client, int door) {
 	int doorID = rp_GetDoorID(door);
-	int alarm = g_iDoorDefine_ALARM[doorID];
+	int alarm = g_iDoorDefine_LOCKER[doorID];
 	if( alarm ) {
 		
 		if( IsValidClient(alarm) ) {
@@ -680,13 +681,8 @@ void runAlarm(int client, int door) {
 			rp_Effect_BeamBox(alarm, client);
 		}
 		
-		if( Math_GetRandomInt(1, 5) == 5 ) { // boum
-			g_iDoorDefine_ALARM[doorID] = 0;
-		}
-		
 		EmitSoundToAllAny("UI/arm_bomb.wav", door);
 		CreateTimer(10.0, timerAlarm, door); 
-			
 	}
 }
 int getKitDuration(int client) {
