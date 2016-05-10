@@ -257,6 +257,7 @@ public Action fwdOnPlayerUse(int client) {
 	static char tmp[128];
 	
 	if( rp_GetClientJobID(client) == 91 && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == 91 ) {
+		bool changed = false;
 		
 		for(int itemID=0; itemID<=3; itemID++) {
 		
@@ -266,10 +267,15 @@ public Action fwdOnPlayerUse(int client) {
 				rp_ClientGiveItem(client, itemID, max - mnt);
 				rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez récupéré %i %s.", max - mnt, tmp);
+				
+				changed = true;
 			}
 			
 		}
-		FakeClientCommand(client, "say /item");
+		
+		if(changer == true) {
+			FakeClientCommand(client, "say /item");
+		}
 		
 	}
 }
