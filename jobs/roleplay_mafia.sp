@@ -258,37 +258,18 @@ public Action fwdOnPlayerUse(int client) {
 	
 	if( rp_GetClientJobID(client) == 91 && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == 91 ) {
 		
-		int itemID = ITEM_KITCROCHTAGE;
-		int mnt = rp_GetClientItem(client, itemID);
-		int max = GetMaxKit(client, itemID);
-		if( mnt <  max ) {
-			rp_ClientGiveItem(client, itemID, max - mnt);
-			rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez récupéré %i %s.", max - mnt, tmp);
-			
-			FakeClientCommand(client, "say /item");
-		}
+		for(int itemID=0; itemID<=3; itemID++) {
 		
-		itemID = ITEM_KITEXPLOSIF;
-		mnt = rp_GetClientItem(client, itemID);
-		max = GetMaxKit(client, itemID);
-		if( mnt <  max ) {
-			rp_ClientGiveItem(client, itemID, max - mnt);
-			rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez récupéré %i %s.", max - mnt, tmp);
+			int mnt = rp_GetClientItem(client, itemID);
+			int max = GetMaxKit(client, itemID);
+			if( mnt <  max ) {
+				rp_ClientGiveItem(client, itemID, max - mnt);
+				rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez récupéré %i %s.", max - mnt, tmp);
+				
+				FakeClientCommand(client, "say /item");
+			}
 			
-			FakeClientCommand(client, "say /item");
-		}
-		
-		itemID = ITEM_PIEDBICHE;
-		mnt = rp_GetClientItem(client, itemID);
-		max = GetMaxKit(client, itemID);
-		if( mnt <  max ) {
-			rp_ClientGiveItem(client, itemID, max - mnt);
-			rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez récupéré %i %s.", max - mnt, tmp);
-			
-			FakeClientCommand(client, "say /item");
 		}
 		
 	}
