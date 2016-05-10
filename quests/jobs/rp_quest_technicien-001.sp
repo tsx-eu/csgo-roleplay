@@ -27,7 +27,7 @@
 #define	QUEST_NAME		"Sous écoute"
 #define	QUEST_TYPE		quest_daily
 #define	QUEST_JOBID		221
-#define	QUEST_RESUME	"Retirer les mouchard"
+#define	QUEST_RESUME	"Retirer les mouchards"
 
 public Plugin myinfo = {
 	name = "Quête: Sous écoute", author = "KoSSoLaX",
@@ -66,11 +66,11 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :-", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Mec! On a besoin de toi au plus vite!", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Notre contacte nous informe que la police", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Notre contact nous informe que la police", ITEMDRAW_DISABLED);
 	menu.AddItem("", "a dissimulé des mouchards sur tous les", ITEMDRAW_DISABLED);
 	menu.AddItem("", "téléphones de la ville.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Tu as 12 heures pour tous les aracher", ITEMDRAW_DISABLED);	
+	menu.AddItem("", "Tu as 12 heures pour tous les arracher", ITEMDRAW_DISABLED);	
 	
 	menu.ExitButton = false;
 	menu.Display(client, 60);

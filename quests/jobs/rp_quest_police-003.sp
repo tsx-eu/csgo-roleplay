@@ -73,7 +73,7 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.AddItem("", "Collègue, nous avons besoin que vous ", ITEMDRAW_DISABLED);
 	menu.AddItem("", "tasiez un maximum d'objets illégaux en ville.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Pendant les 24 prochaines heures, nous doublons tes gains", ITEMDRAW_DISABLED);
-	menu.AddItem("", "de chaque plants de drogue et machines détruite.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "de chaque plants de drogue et machines détruites.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 60);

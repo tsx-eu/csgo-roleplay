@@ -82,7 +82,7 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.AddItem("", "un meurtre. Ensuite, arrête le.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Il est important de ne pas te faire répérer,", ITEMDRAW_DISABLED);
-	menu.AddItem("", "si l'assassin te voit, il ne commetera pas de crime.", ITEMDRAW_DISABLED); 
+	menu.AddItem("", "si l'assassin te voit, il ne commettra pas de crime.", ITEMDRAW_DISABLED); 
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Tu as 12 heures pour le prendre en flagrant délit.", ITEMDRAW_DISABLED);
 	
@@ -121,7 +121,7 @@ public void Q2_Start(int objectiveID, int client) {
 		menu.SetTitle("Quète: %s", QUEST_NAME);
 		menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 		menu.AddItem("", "Il a tué ! Arrêtez le !", ITEMDRAW_DISABLED);
-		menu.AddItem("", "Quoi qu'il en coute !", ITEMDRAW_DISABLED);
+		menu.AddItem("", "Quoi qu'il en coûte !", ITEMDRAW_DISABLED);
 		
 		
 		menu.ExitButton = false;

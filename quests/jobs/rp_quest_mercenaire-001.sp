@@ -27,7 +27,7 @@
 #define	QUEST_NAME		"Le justicier masqué"
 #define	QUEST_TYPE		quest_daily
 #define	QUEST_JOBID		41
-#define	QUEST_RESUME1	"Tue le plus grand freekilleur"
+#define	QUEST_RESUME1	"Tue le plus grand freekiller"
 
 
 public Plugin myinfo = {
@@ -81,7 +81,7 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Les forces de la police ont besoin de vous.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Un serial killer est actuellement en ville.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Votre mission si vous l'acceptez est de l'eliminer", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Votre mission si vous l'acceptez est de l'éliminer", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Vous avez 12 heures pour éliminer le plus grand", ITEMDRAW_DISABLED);
 	menu.AddItem("", "serial killer du serveur.", ITEMDRAW_DISABLED);

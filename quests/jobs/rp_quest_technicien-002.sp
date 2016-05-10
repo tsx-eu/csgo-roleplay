@@ -72,7 +72,7 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Hey gros, on a un nouveau prototype d'imprimante et nous", ITEMDRAW_DISABLED);
-	menu.AddItem("", "avons besoin de toi pour les essayer !", ITEMDRAW_DISABLED);
+	menu.AddItem("", "avons besoin de toi pour l'essayer !", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Tu as 12 heures pour poser 10 imprimantes", ITEMDRAW_DISABLED);
 	menu.AddItem("", "dans ta planque.", ITEMDRAW_DISABLED);
@@ -108,7 +108,7 @@ public void Q2_Start(int objectiveID, int client) {
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Parfait, assure toi que ces machines produisent", ITEMDRAW_DISABLED);
-	menu.AddItem("", "suffisamment longtemps.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "des faux-billets suffisamment longtemps.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Protège tes machines durant 24 heures.", ITEMDRAW_DISABLED);
 	
