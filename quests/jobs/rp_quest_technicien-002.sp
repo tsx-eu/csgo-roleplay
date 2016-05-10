@@ -108,7 +108,7 @@ public void Q2_Start(int objectiveID, int client) {
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Parfait, assure toi que ces machines produisent", ITEMDRAW_DISABLED);
-	menu.AddItem("", "des faux bilettes suffisamment longtemps.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "des faux-biletts suffisamment longtemps.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Protège tes machines durant 24 heures.", ITEMDRAW_DISABLED);
 	
