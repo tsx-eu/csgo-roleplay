@@ -273,7 +273,7 @@ public Action fwdOnPlayerUse(int client) {
 			
 		}
 		
-		if(changer == true) {
+		if(changed == true) {
 			FakeClientCommand(client, "say /item");
 		}
 		
