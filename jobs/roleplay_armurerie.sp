@@ -241,7 +241,6 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 			char type[32];
 			strcopy(type, 31, data[0]);
 			int price = StringToInt(data[1]);
-			int sellerjob;
 			int wep_id = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 			char wep_name[32];
 			GetEdictClassname(wep_id, wep_name, 31);
@@ -282,47 +281,36 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 
 				if(StrEqual(type, "fire")){
 					rp_SetWeaponBallType(wep_id, ball_type_fire);
-					sellerjob = 131;
 				}
 				else if(StrEqual(type, "caoutchouc")){
 					rp_SetWeaponBallType(wep_id, ball_type_caoutchouc);
-					sellerjob = 31;
 				}
 				else if(StrEqual(type, "poison")){
 					rp_SetWeaponBallType(wep_id, ball_type_poison);
-					sellerjob = 31;
 				}
 				else if(StrEqual(type, "vampire")){
 					rp_SetWeaponBallType(wep_id, ball_type_vampire);
-					sellerjob = 31;
 				}
 				else if(StrEqual(type, "reflexive")){
 					rp_SetWeaponBallType(wep_id, ball_type_reflexive);
-					sellerjob = 31;
 				}
 				else if(StrEqual(type, "explode")){
 					rp_SetWeaponBallType(wep_id, ball_type_explode);
-					sellerjob = 131;
 				}
 				else if(StrEqual(type, "revitalisante")){
 					rp_SetWeaponBallType(wep_id, ball_type_revitalisante);
-					sellerjob = 31;
 				}
 				else if(StrEqual(type, "paintball")){
 					rp_SetWeaponBallType(wep_id, ball_type_paintball);
-					sellerjob = 71;
 				}
 				else if(StrEqual(type, "nosteal")){
 					rp_SetWeaponBallType(wep_id, ball_type_nosteal);
-					sellerjob = 31;
 				}
 				else if(StrEqual(type, "notk")){
 					rp_SetWeaponBallType(wep_id, ball_type_notk);
-					sellerjob = 31;
 				}
 				else if(StrEqual(type, "reload")){
 					ServerCommand("rp_item_redraw %i 74", client);
-					sellerjob = 111;
 				}
 				else if(StrEqual(type, "sanandreas")){
 					int ammo = Weapon_GetPrimaryClip(wep_id);
@@ -334,9 +322,8 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 					Weapon_SetPrimaryClip(wep_id, ammo);
 					SDKHook(wep_id, SDKHook_Reload, OnWeaponReload);
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme à maintenant %i balles", ammo);
-					sellerjob = 31;
 				}
-				rp_SetJobCapital( sellerjob, rp_GetJobCapital(sellerjob)+price );
+				rp_SetJobCapital( 111, rp_GetJobCapital(111)+price );
 				FakeClientCommand(client, "say /build");
 
 			}
