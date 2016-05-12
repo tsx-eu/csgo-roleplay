@@ -583,6 +583,8 @@ void CashMachine_Destroy(int entity) {
 	float vecOrigin[3];
 	Entity_GetAbsOrigin(entity, vecOrigin);
 	
+	char name[64];
+	GetEdictClassname(entity, name, sizeof(name));
 	
 	if( rp_GetBuildingData(entity, BD_started)+120 < GetTime() ) {
 		rp_Effect_SpawnMoney(vecOrigin, true);
@@ -598,8 +600,6 @@ void CashMachine_Destroy(int entity) {
 	
 	int owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
 	if( IsValidClient(owner) ) {
-		char name[64];
-		GetEdictClassname(entity, name, sizeof(name));
 		if( StrContains(name, "big") >= 0 )
 			CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre photocopieuse à faux billet a été détruite.");
 		else
