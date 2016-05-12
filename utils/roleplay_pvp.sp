@@ -47,6 +47,7 @@ int g_iCapture_POINT[MAX_GROUPS];
 float g_flCaptureStart;
 bool g_bIsInCaptureMode = false;
 int g_cBeam;
+int g_iLastGroup;
 StringMap g_hGlobalDamage, g_hGlobalSteamID;
 enum damage_data { gdm_shot, gdm_touch, gdm_damage, gdm_hitbox, gdm_elo, gdm_flag, gdm_kill, gdm_max };
 TopMenu g_hStatsMenu;
@@ -335,6 +336,12 @@ void CAPTURE_Start() {
 	for(int i=1; i<MAX_GROUPS; i++) {
 		g_iCapture_POINT[i] = 0;
 	}
+	
+	int rowPoint = 100 - ((rp_GetCaptureInt(cap_pvpRow) - 1) * 5);
+	if( rowPoint < 0 )
+		rowPoint = 0;
+	
+	g_iLastGroup = rp_GetCaptureInt(cap_bunker);
 
 	for(int i=1; i<=MaxClients; i++) {
 		if( !IsValidClient(i) )
@@ -351,7 +358,7 @@ void CAPTURE_Start() {
 		gID = rp_GetClientGroupID(i);
 		g_iCapture_POINT[gID] += 50;
 		if( gID == rp_GetCaptureInt(cap_bunker) )
-			g_iCapture_POINT[gID] += 100;
+			g_iCapture_POINT[gID] += rowPoint;
 		
 		ClientCommand(i, "play *tsx/roleplay/bombing.mp3");
 		
@@ -435,9 +442,16 @@ void CAPTURE_Stop() {
 			
 	rp_GetGroupData(winner, group_type_name, tmp, sizeof(tmp));
 	ExplodeString(tmp, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
-			
+	
+	if( g_iLastGroup != winner ) {
+		rp_SetCaptureInt(cap_pvpRow, 1);
+	}
+	else {
+		rp_SetCaptureInt(cap_pvpRow, rp_GetCaptureInt(cap_pvpRow)+1);
+	}
+	
 	char fmt[1024];
-	Format(fmt, sizeof(fmt), "UPDATE `rp_servers` SET `bunkerCap`='%i', `capVilla`='%i';", winner, winner);
+	Format(fmt, sizeof(fmt), "UPDATE `rp_servers` SET `bunkerCap`='%i', `capVilla`='%i', `pvpRow`='%i';", winner, winner, rp_GetCaptureInt(cap_pvpRow));
 	SQL_TQuery( rp_GetDatabase(), SQL_QueryCallBack, fmt);
 	rp_SetCaptureInt(cap_bunker, winner);
 	rp_SetCaptureInt(cap_villa, winner);
@@ -672,8 +686,10 @@ public Action fwdDead(int victim, int attacker, float& respawn) {
 	if( victim == attacker ) {
 		GDM_ELOSuicide(victim);
 	}
-	if( rp_GetClientGroupID(victim) == rp_GetCaptureInt(cap_bunker) )
-		respawn = 0.25;
+	
+	if( rp_GetClientGroupID(victim) == rp_GetCaptureInt(cap_bunker) && rp_GetClientGroupID(victim) == g_iLastGroup ) {
+		respawn = 1.0 + (rp_GetCaptureInt(cap_pvpRow)-1);
+	}
 	return Plugin_Handled;
 }
 public Action fwdHUD(int client, char[] szHUD, const int size) {

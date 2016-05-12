@@ -770,6 +770,7 @@ enum rp_capture_zone {
 	cap_bunker =  0,
 	cap_villa,
 	cap_disableItem,
+	cap_pvpRow,
 	capture_max
 };
 enum enum_ball_type {
