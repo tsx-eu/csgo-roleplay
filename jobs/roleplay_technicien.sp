@@ -586,6 +586,11 @@ void CashMachine_Destroy(int entity) {
 	
 	if( rp_GetBuildingData(entity, BD_started)+120 < GetTime() ) {
 		rp_Effect_SpawnMoney(vecOrigin, true);
+		if( StrContains(name, "big") >= 0 ){
+			for(int i = 0; i<14; i++){
+			  rp_Effect_SpawnMoney(vecOrigin, true);
+			}
+		}
 	}
 	
 	TE_SetupExplosion(vecOrigin, g_cExplode, 0.5, 2, 1, 25, 25);
