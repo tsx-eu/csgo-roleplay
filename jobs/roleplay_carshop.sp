@@ -599,6 +599,7 @@ void VehicleRemove(int vehicle, bool explode = false) {
 	}
 	
 	rp_SetVehicleInt(vehicle, car_owner, -1);
+	rp_SetVehicleInt(vehicle, car_particle, -1);
 	
 	if( explode ) {
 		IgniteEntity(vehicle, 1.75);
