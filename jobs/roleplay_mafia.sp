@@ -127,7 +127,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		}
 		
 		if( amount == 0  ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur n'a pas d'argent, ni d'item sur lui.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'a pas d'argent, ni d'item sur lui.", target);
 			cooldown = 1.0;
 			return Plugin_Stop;
 		}
@@ -146,7 +146,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		
 		rp_GetItemData(i, item_type_name, tmp, sizeof(tmp));
 		
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez volé: %s.", tmp);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez volé %s à %N.", tmp, target);
 		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Quelqu'un vous a volé: %s.", tmp);
 					
 		LogToGame("[TSX-RP] [VOL] %L a vole %L 1 %s", client, target, tmp);
@@ -200,7 +200,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		rp_SetClientInt(client, i_LastVolTarget, target);
 		rp_SetClientInt(target, i_LastVol, client);
 		
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez volé %d$.", amount);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez volé %d$ à %N.", amount, target);
 		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Quelqu'un vous a volé %d$.", amount);
 
 		//g_iSuccess_last_mafia[client][1] = GetTime();
