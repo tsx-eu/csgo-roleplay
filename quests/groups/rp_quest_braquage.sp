@@ -165,6 +165,7 @@ public void Q1_Start(int objectiveID, int client) {
 	g_bDoingQuest = true;
 	g_bCanMakeQuest = false;
 	addClientToTeam(client, TEAM_BRAQUEUR);
+	LogToGame("[BRAQUAGE] %N a lancé un braquage", client);
 }
 public void Q1_Frame(int objectiveID, int client) {
 	if( g_stkTeamCount[TEAM_BRAQUEUR] >= REQUIRED_T && g_stkTeamCount[TEAM_BRAQUEUR] >= REQUIRED_CT ) {
@@ -379,6 +380,7 @@ public void Q6_Frame(int objectiveID, int client) {
 			rp_SetClientInt(g_stkTeam[TEAM_POLICE][j], i_AddToPay, rp_GetClientInt(g_stkTeam[TEAM_POLICE][j], i_AddToPay) + gain);
 		}
 		rp_QuestStepFail(client, objectiveID);
+		LogToGame("[BRAQUAGE] Le braquage est terminé, perdu: %d$", gain);
 		return;
 	}
 	
@@ -459,6 +461,8 @@ public void Q_Complete(int objectiveID, int client) {
 	}
 	
 	rp_SetJobCapital(g_iPlanque, rp_GetJobCapital(g_iPlanque) - gain*3/4);
+	
+	LogToGame("[BRAQUAGE] Le braquage est terminé, gagné: %d$", gain);
 	
 	gain = (g_iQuestGain / 4) / g_stkTeamCount[TEAM_POLICE];
 	for (int i = 0; i < g_stkTeamCount[TEAM_POLICE]; i++) {

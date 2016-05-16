@@ -743,7 +743,7 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 			}
 			attachVehicleLight(ent);
 			
-			if( batterie != -1 && !rp_GetClientBool(client, b_IsAFK) ) {
+			if( batterie != -1 && !rp_GetClientBool(driver, b_IsAFK) ) {
 				if( rp_GetVehicleInt(ent, car_battery) < 420 ) {
 					rp_SetVehicleInt(ent, car_battery, rp_GetVehicleInt(ent, car_battery)+1);
 					
