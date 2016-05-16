@@ -208,6 +208,8 @@ public void Q1_Frame(int objectiveID, int client) {
 				}
 				if( g_iPlayerTeam[i] != TEAM_NONE )
 					continue;
+				if( rp_GetClientBool(i, b_IsMuteEvent) == true )
+					continue;
 				
 				Format(tmp, sizeof(tmp), "%d", i);
 				Format(tmp2, sizeof(tmp2), "%N", i);
