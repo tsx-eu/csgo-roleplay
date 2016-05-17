@@ -437,7 +437,15 @@ public Action Cmd_ItemAdrenaline(int args) {
 	rp_SetClientBool(client, b_Drugged, true);	
 	CreateTimer(10.5, ItemDrugStop, client);
 	rp_SetClientBool(client, b_MayUseUltimate, false);
-	CreateTimer(30.0, AllowUltimate, client);
+	
+	
+	if( rp_IsInPVP(client) || GetClientTeam(client) == CS_TEAM_CT) {
+		CreateTimer(45.0, AllowUltimate, client);
+		duration += 0.66;
+	}
+	else{
+		CreateTimer(30.0, AllowUltimate, client);
+	}
 	
 	return Plugin_Handled;
 }
