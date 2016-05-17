@@ -547,6 +547,7 @@ enum bool_user_data {
 	b_SpawnToTueur,
 	b_HasVilla,
 	b_CanSort,
+	b_MayUseUltimate,
 
 	b_udata_max
 };
