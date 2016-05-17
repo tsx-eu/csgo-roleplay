@@ -316,12 +316,19 @@ public Action Cmd_ItemPiedBiche(int args) {
 		return Plugin_Handled;
 	}
 	
-	int target = getDistrib(client);
+	int type;
+	int target = getDistrib(client, type);
 	if( target <= 0 ) {
 		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un distributeur de billet.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un distributeur, un téléphone, ou une imprimante.");
 		return Plugin_Handled;
 	}
+	
+	float start = 0.0;
+	
+	if( type == 3 || type == 4 || type == 6 )
+		start = Math_GetRandomFloat(0.5, 0.66);
+		
 	
 	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) + 1);
 
@@ -342,8 +349,8 @@ public Action Cmd_ItemPiedBiche(int args) {
 	CreateDataTimer(0.1, ItemPiedBiche_frame, dp, TIMER_DATA_HNDL_CLOSE|TIMER_REPEAT);
 	WritePackCell(dp, client);
 	WritePackCell(dp, target);
-	WritePackCell(dp, 0.0);
-	WritePackCell(dp, (StrContains(classname, "rp_bank_") == 0 ? 0 : 1));
+	WritePackCell(dp, start);
+	WritePackCell(dp, type);
 	
 	return Plugin_Handled;
 }
@@ -353,15 +360,17 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 	int target = ReadPackCell(dp);
 	float percent = ReadPackCell(dp);
 	int type = ReadPackCell(dp);
+	int type2;
 	
 	
 	if( !IsValidClient(client ) ) {
 		return Plugin_Stop;
 	}
-	if( getDistrib(client) != target ) {
+	if( getDistrib(client, type2) != target ) {
 		MENU_ShowPickLock(client, percent, -1, 2+type);
 		rp_ClientColorize(client);
 		CreateTimer(0.1, AllowStealing, client);
+		rp_ClientGiveItem(client, ITEM_PIEDBICHE, 1);
 		return Plugin_Stop;
 	}
 	if( percent >= 1.0 ) {
@@ -370,27 +379,74 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 		rp_SetClientStat(client, i_JobSucess, rp_GetClientStat(client, i_JobSucess) + 1);
 		rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
 		
-		if( type == 1 ) {
-			rp_ClientDrawWeaponMenu(client, target, true);
-			rp_SetClientInt(client, i_LastVolAmount, 100);
-		}
-		else {
-			int count = countPolice(client), rand = 4 + Math_GetRandomPow(0, 4), i;
-			
-			for (i = 0; i < count; i++)
-				rand += (4 + Math_GetRandomPow(0, 12));
-			for (i = 0; i < rand; i++)
-				CreateTimer(i / 5.0, SpawnMoney, target);
-			
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %d billets ont été sorti du distributeur.", rand);
-			rp_SetClientInt(client, i_LastVolAmount, 25*rand);
+		float time = (rp_IsNight() ? STEAL_TIME:STEAL_TIME*2.0);
+		int stealAMount;
+		
+		switch(type) {
+			case 2: { // Banque
+				time *= 2.0;
+				int count = countPolice(client), rand = 4 + Math_GetRandomPow(0, 4), i;
+				
+				for (i = 0; i < count; i++)
+					rand += (4 + Math_GetRandomPow(0, 12));
+				for (i = 0; i < rand; i++)
+					CreateTimer(i / 5.0, SpawnMoney, EntIndexToEntRef(target));
+				
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %d billets ont été sorti du distributeur.", rand);
+				stealAMount = 25*rand;
+			}
+			case 3: { // Armu
+				time /= 2.0;
+				rp_ClientDrawWeaponMenu(client, target, true);
+				stealAMount = 100; 
+				
+			}
+			case 4: { // Imprimante
+				time /= 4.0;
+				CreateTimer(0.1, SpawnMoney, EntIndexToEntRef(target));
+				stealAMount = 25;
+				rp_ClientDamage(target, 25, client);
+				
+				int owner = rp_GetBuildingData(target, BD_owner);
+				if( IsValidClient(owner) ) {
+					rp_SetClientInt(owner, i_Bank, rp_GetClientInt(owner, i_Bank) - 25);
+					CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Quelqu'un vol vos faux billets.");
+				}
+			}
+			case 5: { // Photocopieuse
+				time *= 4.0;
+				
+				for (int i = 0; i < 15; i++)
+					CreateTimer(i / 5.0, SpawnMoney, EntIndexToEntRef(target));
+				
+				int owner = rp_GetBuildingData(target, BD_owner);
+				if( IsValidClient(owner) ) {
+					rp_SetClientInt(owner, i_Bank, rp_GetClientInt(owner, i_Bank) - (25 * 15));
+					CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Quelqu'un vol vos faux billets.");
+				}
+				
+				
+				stealAMount = 25 * 15;
+				rp_ClientDamage(target, 250, client);
+				
+			}
+			case 6: { // Téléphone
+				time /= 4.0;
+				CreateTimer(0.1, SpawnMoney, EntIndexToEntRef(target));
+				stealAMount = 25;
+				rp_ClientDamage(target, 25, client);
+				
+				int rnd = Math_GetRandomInt(2, 5) * 10;
+				int job = rp_GetRandomCapital(91);
+				rp_SetJobCapital(job, rp_GetJobCapital(job) - rnd);
+			}
 		}
 		
 		rp_SetClientInt(client, i_LastVolTime, GetTime());
 		rp_SetClientInt(client, i_LastVolTarget, -1);
+		rp_SetClientInt(client, i_LastVolAmount, stealAMount); 
 		
-		
-		CreateTimer((rp_IsNight()?STEAL_TIME*2.0:STEAL_TIME*4.0), AllowStealing, client);
+		CreateTimer(time, AllowStealing, client);
 		return Plugin_Stop;
 	}
 	
@@ -416,30 +472,52 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 	WritePackCell(dp, target);
 	WritePackCell(dp, percent + ratio);
 	WritePackCell(dp, type);
-	MENU_ShowPickLock(client, percent, 0, 2+type);
+	MENU_ShowPickLock(client, percent, 0, type);
 	return Plugin_Continue;
 }
 public Action SpawnMoney(Handle timer, any target) {
-	float vecOrigin[3], vecAngle[3], vecPos[3];
+	
+	target = EntRefToEntIndex(target);
+	if( !IsValidEdict(target) )
+		return Plugin_Handled;
+	
+	char classname[64];
+	GetEdictClassname(target, classname, sizeof(classname));
+	
+	float vecOrigin[3], vecAngle[3], vecPos[3], min[3], max[3];
 	Entity_GetAbsOrigin(target, vecOrigin);
 	Entity_GetAbsAngles(target, vecAngle);
-	Math_RotateVector( view_as<float>({ 7.0, 0.0, 40.0 }), vecAngle, vecPos);
-	vecOrigin[0] += vecPos[0];
-	vecOrigin[1] += vecPos[1];
-	vecOrigin[2] += vecPos[2];
 	
-	vecAngle[0] += Math_GetRandomFloat(-5.0, 5.0);
-	vecAngle[1] += Math_GetRandomFloat(-5.0, 5.0);	
-	Math_RotateVector( view_as<float>({ 0.0, 250.0, 40.0 }), vecAngle, vecPos);
-	
-	
-	int rnd = Math_GetRandomInt(2, 5) * 10;
-	int job = rp_GetRandomCapital(91);
-	rp_SetJobCapital(job, rp_GetJobCapital(job) - rnd);
-	rp_SetJobCapital(91, rp_GetJobCapital(91) + rnd);
+	if( StrContains(classname, "rp_bank") == 0 ) {
+		
+		Math_RotateVector( view_as<float>({ 7.0, 0.0, 40.0 }), vecAngle, vecPos);
+		vecOrigin[0] += vecPos[0];
+		vecOrigin[1] += vecPos[1];
+		vecOrigin[2] += vecPos[2];
+		
+		vecAngle[0] += Math_GetRandomFloat(-5.0, 5.0);
+		vecAngle[1] += Math_GetRandomFloat(-5.0, 5.0);	
+		Math_RotateVector( view_as<float>({ 0.0, 250.0, 40.0 }), vecAngle, vecPos);
+		
+		int rnd = Math_GetRandomInt(2, 5) * 10;
+		int job = rp_GetRandomCapital(91);
+		rp_SetJobCapital(job, rp_GetJobCapital(job) - rnd);
+	}
+	else {
+		Entity_GetMinSize(target, min);
+		Entity_GetMaxSize(target, max);
+		
+		vecOrigin[2] += max[2] - min[2];
+		
+		vecPos[0] += Math_GetRandomFloat(-100.0, 100.0);
+		vecPos[1] += Math_GetRandomFloat(-100.0, 100.0);
+		vecPos[2] += Math_GetRandomFloat(200.0, 300.0);
+	}
 	
 	int m = rp_Effect_SpawnMoney(vecOrigin);
 	TeleportEntity(m, NULL_VECTOR, NULL_VECTOR, vecPos);
+	ServerCommand("sm_effect_particles %d Trail9 3", m);
+	return Plugin_Handled;
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemPickLock(int args) {
@@ -613,24 +691,32 @@ int getDoor(int client) {
 		door = 0;
 	return door;
 }
-int getDistrib(int client) {
+int getDistrib(int client, int& type) {
 	if( !IsPlayerAlive(client) )
 		return 0;
 	int target = rp_GetClientTarget(client);
 	
-	if( target <= MaxClients ) {
-		return 0;
-	}
-	
-	char classname[128];
-	GetEdictClassname(target, classname, sizeof(classname));
-	if( (StrContains(classname, "rp_weaponbox_") != 0 && StrContains(classname, "rp_bank_") != 0) || StrContains(classname, "rp_bank__") == 0 )
+	if( target <= MaxClients )
 		return 0;
 	if( !rp_IsEntitiesNear(client, target, true) )
 		return 0;
-		
-	return target;
 	
+	char classname[128];
+	GetEdictClassname(target, classname, sizeof(classname));
+	
+	
+	if( StrContains(classname, "rp_bank_") == 0 && StrContains(classname, "rp_bank__") != 0 )
+		type = 2;
+	if( StrContains(classname, "rp_weaponbox_") == 0 )
+		type = 3;
+	if( (StrContains(classname, "rp_cashmachine_") == 0) && rp_GetClientJobID(rp_GetBuildingData(target, BD_owner)) != 91 )
+		type = 4;
+	if( (StrContains(classname, "rp_bigcashmachine_") == 0) && rp_GetClientJobID(rp_GetBuildingData(target, BD_owner)) != 91 )
+		type = 5;
+	if( StrContains(classname, "rp_phone_") == 0 )
+		type = 6;
+		
+	return (type > 0 ? target : 0);
 }
 void runAlarm(int client, int door) {
 	int doorID = rp_GetDoorID(door);
@@ -686,6 +772,9 @@ void MENU_ShowPickLock(int client, float percent, int difficulte, int type) {
 		case 1: SetMenuTitle(menu, "== Mafia: Ouverture d'une porte");
 		case 2: SetMenuTitle(menu, "== Mafia: Crochetage d'un distributeur");
 		case 3: SetMenuTitle(menu, "== Mafia: Crochetage d'une armurerie");
+		case 4: SetMenuTitle(menu, "== Mafia: Crochetage d'une imprimante");
+		case 5: SetMenuTitle(menu, "== Mafia: Crochetage d'une photocopieuse");
+		case 6: SetMenuTitle(menu, "== Mafia: Crochetage d'un téléphone");
 	}
 	
 	char tmp[64];
