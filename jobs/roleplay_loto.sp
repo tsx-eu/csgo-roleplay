@@ -163,7 +163,7 @@ public Action Cmd_ItemLoto(int args) {
 		//CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre ticket a été validé. Un tirage exceptionnel pour la brocante de Noël aura lieu mercredi vers 21h30.");
 		Format(query, sizeof(query), "INSERT INTO `rp_loto` (`id`, `steamid`) VALUES (NULL, '%s');", szSteamID);
 		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query, 0, DBPrio_High);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre ticket a été validé. Le tirage a lieu le mardi et le samedi à 21h00.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre ticket a été validé. Les tirages ont lieu le mardi et le samedi à 21h00.");
 		
 		return Plugin_Handled;
 	}
