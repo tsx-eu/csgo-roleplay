@@ -546,6 +546,10 @@ public Action Frame_CashMachine(Handle timer, any ent) {
 		return Plugin_Handled;
 	}
 	
+	int heal = Entity_GetHealth(ent) + Math_GetRandomInt(1, 2);
+	if (heal > 100) heal = 100;
+	Entity_SetHealth(ent, heal, true);
+	
 	if( !rp_GetClientBool(client, b_IsAFK) && rp_GetClientInt(client, i_TimeAFK) <= 60 && g_bProps_trapped[ent] == false ) {
 		EmitSoundToAllAny("ambient/tones/equip3.wav", ent, _, _, _, 0.66);
 		
@@ -779,6 +783,10 @@ public Action Frame_BigCashMachine(Handle timer, any ent) {
 		rp_ScheduleEntityInput(ent, 60.0, "Kill");
 		return Plugin_Handled;
 	}
+	
+	int heal = Entity_GetHealth(ent) + Math_GetRandomInt(1, 2);
+	if (heal > 1000) heal = 1000;
+	Entity_SetHealth(ent, heal, true);
 	
 	if( !rp_GetClientBool(client, b_IsAFK) && rp_GetClientInt(client, i_TimeAFK) <= 60 && g_bProps_trapped[ent] == false ) {
 		EmitSoundToAllAny("ambient/tones/equip3.wav", ent, _, _, _, 1.0);
