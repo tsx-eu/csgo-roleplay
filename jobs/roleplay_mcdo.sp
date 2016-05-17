@@ -308,11 +308,13 @@ public Action Cmd_ItemHamburger(int args) {
 	}
 	else if( StrEqual(arg1, "mac") ) {
 		
-		if( !rp_GetClientBool(client, b_MaySteal) ) {
+		if( !rp_GetClientBool(client, b_MayUseUltimate) ) {
 			ITEM_CANCEL(client, item_id);
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet item pour le moment.");
 			return Plugin_Handled;
 		}
+		rp_SetClientBool(client, b_MayUseUltimate, false);
+		
 		rp_SetClientFloat(client, fl_Reflect, GetGameTime() + 5.0);
 		
 		float vecTarget[3];
@@ -323,13 +325,14 @@ public Action Cmd_ItemHamburger(int args) {
 		
 		ServerCommand("sm_effect_particles %d Trail11 5 facemask", client);
 		
-		if( rp_IsInPVP(client) ) {
-			rp_SetClientBool(client, b_MaySteal, false);
-			
+		if( rp_IsInPVP(client) ) {			
 			if( rp_GetClientGroupID(client) == rp_GetCaptureInt(cap_bunker) )
-				CreateTimer(10.0, AllowStealing, client);
+				CreateTimer(10.0, AllowUltimate, client);
 			else
-				CreateTimer(60.0, AllowStealing, client);
+				CreateTimer(60.0, AllowUltimate, client);
+		}
+		else{
+			CreateTimer(20.0, AllowUltimate, client);
 		}
 	}
 	else if( StrEqual(arg1, "chicken") ) {
@@ -451,12 +454,12 @@ public Action Cmd_ItemHamburger(int args) {
 	}
 	return Plugin_Handled;
 }
-public Action AllowStealing(Handle timer, any client) {
+public Action AllowUltimate(Handle timer, any client) {
 	#if defined DEBUG
-	PrintToServer("AllowStealing");
+	PrintToServer("AllowUltimate");
 	#endif
 
-	rp_SetClientBool(client, b_MaySteal, true);
+	rp_SetClientBool(client, b_MayUseUltimate, true);
 }
 public Action Cmd_ItemBanane(int args) {
 	#if defined DEBUG

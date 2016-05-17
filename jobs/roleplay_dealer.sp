@@ -184,7 +184,14 @@ public Action Cmd_ItemDrugs(int args) {
 		client = target;
 	}
 	else if( StrEqual(arg0, "crack2") ) {
-		dur = 30.0;
+		if( !rp_GetClientBool(client, b_MayUseUltimate) ) {
+			ITEM_CANCEL(client, item_id);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet item pour le moment.");
+			return Plugin_Handled;
+		}
+		dur = 60.0;
+		rp_SetClientBool(client, b_MayUseUltimate, false);
+		CreateTimer(35.0, AllowUltimate, client);
 		rp_HookEvent(client, RP_PreTakeDamage, fwdCrack, dur);
 		rp_Effect_ShakingVision(client);
 	}
@@ -924,13 +931,12 @@ public Action ItemPiedBicheOver(Handle timer, any client) {
 	return Plugin_Handled;
 }
 
-public Action AllowStealing2(Handle timer, any client) {
+public Action AllowUltimate(Handle timer, any client) {
 	#if defined DEBUG
-	PrintToServer("AllowStealing");
+	PrintToServer("AllowUltimate");
 	#endif
 
-	rp_SetClientBool(client, b_MaySteal, true);
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez à nouveau vous téléporter.");
+	rp_SetClientBool(client, b_MayUseUltimate, true);
 }
 
 
@@ -944,7 +950,7 @@ public Action Cmd_ItemPilule(int args){
 	int item_id = GetCmdArgInt(args);
 	int tptozone = -1;
 
-	if( !rp_GetClientBool(client, b_MaySteal) ) {
+	if( !rp_GetClientBool(client, b_MayUseUltimate) ) {
 		ITEM_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet item pour le moment.");
 		return Plugin_Handled;
@@ -1073,14 +1079,14 @@ public Action ItemPiluleOver(Handle timer, Handle dp) {
 		
 		rp_ClientColorize(client, { 255, 255, 255, 255} );
 		TeleportEntity(client, tppos, NULL_VECTOR, NULL_VECTOR);
-		rp_SetClientBool(client, b_MaySteal, false);
-		CreateTimer( TP_CD_DURATION, AllowStealing2, client);
+		rp_SetClientBool(client, b_MayUseUltimate, false);
+		CreateTimer( TP_CD_DURATION, AllowUltimate, client);
 		return Plugin_Handled;
 	}
 	ITEM_CANCEL(client, item_id);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Nous n'avons pas trouvé d'endroit où vous teleporter.");
 	rp_ClientColorize(client, { 255, 255, 255, 255} );
-	rp_SetClientBool(client, b_MaySteal, true);
+	rp_SetClientBool(client, b_MayUseUltimate, true);
 	return Plugin_Handled;
 }
 

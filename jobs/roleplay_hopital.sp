@@ -414,7 +414,7 @@ public Action Cmd_ItemAdrenaline(int args) {
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
 	
-	if( !rp_GetClientBool(client, b_MaySteal) ) {
+	if( !rp_GetClientBool(client, b_MayUseUltimate) ) {
 		ITEM_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet objet pour le moment.");
 		return Plugin_Handled;
@@ -435,18 +435,18 @@ public Action Cmd_ItemAdrenaline(int args) {
 	ServerCommand("sm_effect_particles %d Trail8 11 weapon_hand_R", client);
 	
 	rp_SetClientBool(client, b_Drugged, true);	
-	CreateTimer( 10.5, ItemDrugStop, client);
-	rp_SetClientBool(client, b_MaySteal, false);
-	CreateTimer(30.0, AllowStealing, client);
+	CreateTimer(10.5, ItemDrugStop, client);
+	rp_SetClientBool(client, b_MayUseUltimate, false);
+	CreateTimer(30.0, AllowUltimate, client);
 	
 	return Plugin_Handled;
 }
-public Action AllowStealing(Handle timer, any client) {
+public Action AllowUltimate(Handle timer, any client) {
 	#if defined DEBUG
-	PrintToServer("AllowStealing");
+	PrintToServer("AllowUltimate");
 	#endif
 
-	rp_SetClientBool(client, b_MaySteal, true);
+	rp_SetClientBool(client, b_MayUseUltimate, true);
 }
 public Action fwdAdrenalineSpeed(int client, float& speed, float& gravity) {
 	#if defined DEBUG
