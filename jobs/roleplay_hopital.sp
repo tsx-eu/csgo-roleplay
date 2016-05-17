@@ -441,7 +441,6 @@ public Action Cmd_ItemAdrenaline(int args) {
 	
 	if( rp_IsInPVP(client) || GetClientTeam(client) == CS_TEAM_CT) {
 		CreateTimer(45.0, AllowUltimate, client);
-		duration += 0.66;
 	}
 	else{
 		CreateTimer(30.0, AllowUltimate, client);
