@@ -729,7 +729,7 @@ int getDistrib(int client, int& type) {
 		type = 2;
 	if( StrContains(classname, "rp_weaponbox_") == 0 )
 		type = 3;
-	if( (StrContains(classname, "rp_cashmachine_") == 0) && rp_GetClientJobID(rp_GetBuildingData(target, BD_owner)) != 91 && !rp_GetClientBool(rp_GetBuildingData(target, BD_owner), b_IsAFK))
+	if( (StrContains(classname, "rp_cashmachine_") == 0) && rp_GetClientJobID(rp_GetBuildingData(target, BD_owner)) != 91 && !rp_GetClientBool(rp_GetBuildingData(target, BD_owner), b_IsAFK) && !rp_IsClientNew(rp_GetBuildingData(target, BD_owner)))
 		type = 4;
 	if( (StrContains(classname, "rp_bigcashmachine_") == 0) && rp_GetClientJobID(rp_GetBuildingData(target, BD_owner)) != 91 && !rp_GetClientBool(rp_GetBuildingData(target, BD_owner), b_IsAFK))
 		type = 5;
