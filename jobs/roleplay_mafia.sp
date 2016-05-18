@@ -40,6 +40,7 @@ public Plugin myinfo = {
 
 int g_iDoorDefine_LOCKER[2049];
 Handle g_hForward_RP_OnClientStealItem;
+int g_cBeam;
 bool doRP_CanClientStealItem(int client, int target) {
 	Action a;
 	Call_StartForward(g_hForward_RP_OnClientStealItem);
@@ -70,6 +71,9 @@ public void OnPluginStart() {
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
+}
+public void OnMapStart() {
+	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse,	fwdOnPlayerUse);
@@ -326,7 +330,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 	
 	float start = 0.0;
 	
-	if( type == 3 || type == 4 || type == 6 )
+	if( type == 3 || type == 4  )
 		start = Math_GetRandomFloat(0.5, 0.66);
 		
 	
@@ -431,14 +435,30 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 				
 			}
 			case 6: { // Téléphone
-				time /= 4.0;
-				CreateTimer(0.1, SpawnMoney, EntIndexToEntRef(target));
-				stealAMount = 25;
-				rp_ClientDamage(target, 25, client);
+				time *= 3.0;
+				stealAMount = 250;
+				missionTelephone(client);
+			}
+			case 7: { // Plant de drogue
 				
-				int rnd = Math_GetRandomInt(2, 5) * 10;
-				int job = rp_GetRandomCapital(91);
-				rp_SetJobCapital(job, rp_GetJobCapital(job) - rnd);
+				int count = rp_GetBuildingData(target, BD_count);
+				if( count > 0  ) {
+					char classname[64], tmp[4][12];
+					GetEdictClassname(target, classname, sizeof(classname));
+					ExplodeString(classname, "_", tmp, sizeof(tmp), sizeof(tmp[]));
+					int sub = StringToInt(tmp[3]);
+					
+					rp_GetItemData(sub, item_type_name, classname, sizeof(classname));
+					rp_ClientGiveItem(client, sub, count);
+					rp_SetBuildingData(target, BD_count, 0);
+					stealAMount = 75 * count;
+					
+					int owner = rp_GetBuildingData(target, BD_owner);
+					if( IsValidClient(owner) ) {
+						CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Quelqu'un vol votre drogue.");
+					}
+					CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Vous avez ramassé %d %s.", count, classname);
+				}
 			}
 		}
 		
@@ -715,6 +735,8 @@ int getDistrib(int client, int& type) {
 		type = 5;
 	if( StrContains(classname, "rp_phone_") == 0 )
 		type = 6;
+	if( (StrContains(classname, "rp_plant_") == 0) && rp_GetClientJobID(rp_GetBuildingData(target, BD_owner)) != 91 && !rp_GetClientBool(rp_GetBuildingData(target, BD_owner), b_IsAFK) && rp_GetBuildingData(target, BD_count) > 0 )
+		type = 7;
 		
 	return (type > 0 ? target : 0);
 }
@@ -799,4 +821,46 @@ public int eventMenuNone(Handle menu, MenuAction action, int client, int param2)
 	if( action == MenuAction_End ) {
 		CloseHandle(menu);
 	}
+}
+void missionTelephone(int client) {
+	float vecDir[3];
+	vecDir[0] = Math_GetRandomFloat(-3250.0, 2000.0);
+	vecDir[1] = Math_GetRandomFloat(-5000.0, 900.0);
+	
+	float tmp[3];
+	GetClientAbsOrigin(client, tmp);
+	TE_SetupBeamPoints(vecDir, tmp, g_cBeam, 0, 0, 0, 17.5, 1.0, 10.0, 0, 0.0, {255, 255, 255, 100}, 20);
+	TE_SendToClient(client);
+	
+	TE_SetupBeamRingPoint(vecDir, 50.0, 250.0, g_cBeam, 0, 0, 30, 17.5, 20.0, 0.0, { 255, 255, 255, 100 }, 10, 0);
+	TE_SendToClient(client);
+	
+	vecDir[2] -= 2000.0;
+	
+	Handle dp;
+	CreateDataTimer(7.5, Copter_Post, dp);
+	WritePackFloat(dp, vecDir[0]);
+	WritePackFloat(dp, vecDir[1]);
+	
+	char msg[256];
+	rp_GetZoneData(rp_GetZoneFromPoint(vecDir), zone_type_name, msg, sizeof(msg));
+	Handle menu = CreateMenu(eventMenuNone);
+	SetMenuTitle(menu, "== MISSION TELEPHONE == ");
+	AddMenuItem(menu, "_", "Un hélicoptère vous envois un colis.", ITEMDRAW_DISABLED);
+	AddMenuItem(menu, "_", "Il sera envoyé près de:", ITEMDRAW_DISABLED);
+	AddMenuItem(menu, "_", msg, ITEMDRAW_DISABLED);
+	
+	SetMenuExitButton(menu, true);
+	DisplayMenu(menu, client, 30);	
+}
+public Action Copter_Post(Handle timer, Handle dp ) {
+	float vecDest[2];
+	
+	ResetPack(dp);
+	vecDest[0] = ReadPackFloat(dp);
+	vecDest[1] = ReadPackFloat(dp);
+	
+	ServerCommand("sm_effect_copter %f %f", vecDest[0], vecDest[1]);
+	
+	return Plugin_Stop;
 }
