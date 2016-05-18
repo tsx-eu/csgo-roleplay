@@ -371,7 +371,7 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 		return Plugin_Stop;
 	}
 	if( getDistrib(client, type2) != target ) {
-		MENU_ShowPickLock(client, percent, -1, 2+type);
+		MENU_ShowPickLock(client, percent, -1, type);
 		rp_ClientColorize(client);
 		CreateTimer(0.1, AllowStealing, client);
 		rp_ClientGiveItem(client, ITEM_PIEDBICHE, 1);
@@ -435,7 +435,7 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 				
 			}
 			case 6: { // Téléphone
-				time *= 3.0;
+				time *= 6.0;
 				stealAMount = 250;
 				missionTelephone(client);
 			}
@@ -457,7 +457,7 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 					if( IsValidClient(owner) ) {
 						CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Quelqu'un vol votre drogue.");
 					}
-					CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Vous avez ramassé %d %s.", count, classname);
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez ramassé %d %s.", count, classname);
 				}
 			}
 		}
@@ -797,6 +797,7 @@ void MENU_ShowPickLock(int client, float percent, int difficulte, int type) {
 		case 4: SetMenuTitle(menu, "== Mafia: Crochetage d'une imprimante");
 		case 5: SetMenuTitle(menu, "== Mafia: Crochetage d'une photocopieuse");
 		case 6: SetMenuTitle(menu, "== Mafia: Crochetage d'un téléphone");
+		case 7: SetMenuTitle(menu, "== Mafia: Crochetage d'un plant de drogue");
 	}
 	
 	char tmp[64];
