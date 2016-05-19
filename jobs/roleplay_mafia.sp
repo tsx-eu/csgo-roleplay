@@ -1085,6 +1085,7 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 				rp_SetJobCapital(91, rp_GetJobCapital(91) + RoundToCeil(float(data[IM_Prix]) * 0.5));
 				rp_SetClientInt(data[IM_Owner], i_AddToPay, rp_GetClientInt(data[IM_Owner], i_AddToPay) + RoundToFloor(float(data[IM_Prix]) * 0.5));
 				
+				CPrintToChat(data[IM_Owner], "{lightblue}[TSX-RP]{default} Vous avez vendu 1 %s à %N au marché noir pour %d$", tmp, client, data[IM_Prix]);
 			}
 			else {
 				rp_SetJobCapital(91, rp_GetJobCapital(91) + data[IM_Prix]);
