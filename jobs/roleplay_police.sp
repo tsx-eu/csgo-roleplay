@@ -1321,11 +1321,11 @@ public int eventConvocation_2(Handle menu, MenuAction action, int client, int pa
 		rp_GetZoneData(rp_GetPlayerZone(client), zone_type_name, options, sizeof(options));
 		
 		if( etat == -1 ) {
-			CPrintToChatAll("{lightblue} ================================== {default}");
-			CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}n'est plus recherché par le Tribunal.", target);
-			CPrintToChatAll("{lightblue} ================================== {default}");
+			PrintToChatPoliceSearch(target, "{lightblue} ================================== {default}");
+			PrintToChatPoliceSearch(target, "{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}n'est plus recherché par le Tribunal.", target);
+			PrintToChatPoliceSearch(target, "{lightblue} ================================== {default}");
 			g_TribunalSearch[target][tribunal_search_status] = -1;
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} La recherche sur le joueur %N à durée %.1f minutes.", target, (GetTime()-g_TribunalSearch[target][tribunal_search_starttime])/60.0);
+			PrintToChatPoliceSearch(target, "{lightblue}[TSX-RP]{default} La recherche sur le joueur %N à durée %.1f minutes.", target, (GetTime()-g_TribunalSearch[target][tribunal_search_starttime])/60.0);
 			LogToGame("[TSX-RP] [RECHERCHE] %L a mis fin à la convocation de %L.", client, target);
 			rp_SetClientBool(target, b_IsSearchByTribunal, false);
 
@@ -1334,9 +1334,9 @@ public int eventConvocation_2(Handle menu, MenuAction action, int client, int pa
 			g_TribunalSearch[target][tribunal_search_status] = 1;
 			g_TribunalSearch[target][tribunal_search_starttime] = GetTime();
 			g_TribunalSearch[target][tribunal_search_where] = FindCharInString(options,'1') != -1 ? 1 : 2;
-			CPrintToChatAll("{lightblue} ================================== {default}");
-			CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est convoqué dans le Tribunal N°%i. [%i/3]", target, g_TribunalSearch[target][tribunal_search_where], etat);
-			CPrintToChatAll("{lightblue} ================================== {default}");
+			PrintToChatPoliceSearch(target, "{lightblue} ================================== {default}");
+			PrintToChatPoliceSearch(target, "{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est convoqué dans le Tribunal N°%i. [%i/3]", target, g_TribunalSearch[target][tribunal_search_where], etat);
+			PrintToChatPoliceSearch(target, "{lightblue} ================================== {default}");
 			LogToGame("[TSX-RP] [RECHERCHE] %L convoqué %L au tribunal n°%i.", client, target, g_TribunalSearch[target][tribunal_search_where]);
 			CreateTimer(30.0, Timer_ConvTribu, target, TIMER_REPEAT);
 			rp_SetClientBool(target, b_IsSearchByTribunal, true);
@@ -1345,9 +1345,9 @@ public int eventConvocation_2(Handle menu, MenuAction action, int client, int pa
 			g_TribunalSearch[target][tribunal_search_status] = 4;
 			g_TribunalSearch[target][tribunal_search_starttime] = GetTime();
 			g_TribunalSearch[target][tribunal_search_where] = FindCharInString(options,'1') != -1 ? 1 : 2;
-			CPrintToChatAll("{lightblue} ================================== {default}");
-			CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est recherché par le Tribunal.", target);
-			CPrintToChatAll("{lightblue} ================================== {default}");
+			PrintToChatPoliceSearch(target, "{lightblue} ================================== {default}");
+			PrintToChatPoliceSearch(target, "{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est recherché par le Tribunal.", target);
+			PrintToChatPoliceSearch(target, "{lightblue} ================================== {default}");
 			LogToGame("[TSX-RP] [RECHERCHE] %L a lancé une recherche sur %L", client, target);
 			CreateTimer(60.0, Timer_ConvTribu, target, TIMER_REPEAT);
 			rp_SetClientBool(target, b_IsSearchByTribunal, true);
@@ -1364,9 +1364,9 @@ public Action Timer_ConvTribu(Handle timer, any target) {
 	float vecOrigin[3];
 	Entity_GetAbsOrigin(target, vecOrigin);
 	if( GetVectorDistance(vecOrigin, view_as<float>({496.0, -1787.0, -1997.0})) < 64.0 || GetVectorDistance(vecOrigin, view_as<float>({-782.0, -476.0, -2000.0})) < 64.0 ){
-		CPrintToChatAll("{lightblue} ================================== {default}");
-		CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}n'est plus recherché par le Tribunal.", target);
-		CPrintToChatAll("{lightblue} ================================== {default}");
+		PrintToChatPoliceSearch(target, "{lightblue} ================================== {default}");
+		PrintToChatPoliceSearch(target, "{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}n'est plus recherché par le Tribunal.", target);
+		PrintToChatPoliceSearch(target, "{lightblue} ================================== {default}");
 		g_TribunalSearch[target][tribunal_search_status] = -1;
 		LogToGame("[TSX-RP] [RECHERCHE] %L a été détecté comme présent au tribunal.", target);
 		PrintToChatZone(rp_GetPlayerZone(target), "{lightblue}[TSX-RP]{default} La recherche sur le joueur %N a durée %.1f minutes.", target, (GetTime()-g_TribunalSearch[target][tribunal_search_starttime])/60.0);
@@ -1375,21 +1375,21 @@ public Action Timer_ConvTribu(Handle timer, any target) {
 	}
 	g_TribunalSearch[target][tribunal_search_status]++;
 	if(g_TribunalSearch[target][tribunal_search_status] > 3){
-		CPrintToChatAll("{lightblue} ================================== {default}");
-		CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est recherché par le Tribunal.", target);
-		CPrintToChatAll("{lightblue} ================================== {default}");
+		PrintToChatPoliceSearch(target, "{lightblue} ================================== {default}");
+		PrintToChatPoliceSearch(target, "{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est recherché par le Tribunal.", target);
+		PrintToChatPoliceSearch(target, "{lightblue} ================================== {default}");
 	}
 	else if(g_TribunalSearch[target][tribunal_search_status] == 4){
-		CPrintToChatAll("{lightblue} ================================== {default}");
-		CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est convoqué dans le Tribunal N°%i. [%i/3]", target, g_TribunalSearch[target][tribunal_search_where], g_TribunalSearch[target][tribunal_search_status]);
-		CPrintToChatAll("{lightblue} ================================== {default}");
+		PrintToChatPoliceSearch(target, "{lightblue} ================================== {default}");
+		PrintToChatPoliceSearch(target, "{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est convoqué dans le Tribunal N°%i. [%i/3]", target, g_TribunalSearch[target][tribunal_search_where], g_TribunalSearch[target][tribunal_search_status]);
+		PrintToChatPoliceSearch(target, "{lightblue} ================================== {default}");
 		CreateTimer(60.0, Timer_ConvTribu, target, TIMER_REPEAT);
 		return Plugin_Stop;
 	}
 	else{
-		CPrintToChatAll("{lightblue} ================================== {default}");
-		CPrintToChatAll("{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est convoqué dans le Tribunal N°%i. [%i/3]", target, g_TribunalSearch[target][tribunal_search_where], g_TribunalSearch[target][tribunal_search_status]);
-		CPrintToChatAll("{lightblue} ================================== {default}");
+		PrintToChatPoliceSearch(target, "{lightblue} ================================== {default}");
+		PrintToChatPoliceSearch(target, "{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}est convoqué dans le Tribunal N°%i. [%i/3]", target, g_TribunalSearch[target][tribunal_search_where], g_TribunalSearch[target][tribunal_search_status]);
+		PrintToChatPoliceSearch(target, "{lightblue} ================================== {default}");
 	}
 	return Plugin_Continue;
 }
@@ -2246,13 +2246,13 @@ void start_perquiz(int client, int job) {
 	char tmp[255];
 	rp_GetZoneData(JobToZoneID(job), zone_type_name, tmp, sizeof(tmp));
 	
-	CPrintToChatAll("{lightblue} ================================== {default}");
-	CPrintToChatAll("{lightblue}[TSX-RP] [POLICE]{default} Début d'une perquisition dans: %s.", tmp);
+	PrintToChatPoliceJob(job, "{lightblue} ================================== {default}");
+	PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [POLICE]{default} Début d'une perquisition dans: %s.", tmp);
 	LogToGame("[TSX-RP] [POLICE] %N débute une perquisition dans %s.",client, tmp);
 	
 	if( REP > 0 )
-		CPrintToChatAll("{lightblue}[TSX-RP] [POLICE]{default} %N {default}est prié de se présenter sur les lieux.", REP);
-	CPrintToChatAll("{lightblue} ================================== {default}");
+		PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [POLICE]{default} %N {default}est prié de se présenter sur les lieux.", REP);
+	PrintToChatPoliceJob(job, "{lightblue} ================================== {default}");
 	
 	rp_SetJobCapital(1, rp_GetJobCapital(1) + 250);
 }
@@ -2263,11 +2263,10 @@ void begin_perquiz(int client, int job) {
 	char tmp[255];
 	rp_GetZoneData(JobToZoneID(job), zone_type_name, tmp, sizeof(tmp));
 	
-	CPrintToChatAll("{lightblue} ================================== {default}");
-	CPrintToChatAll("{lightblue}[TSX-RP] [POLICE]{default} Début d'une perquisition dans %s.", tmp);
+	PrintToChatPoliceJob(job, "{lightblue} ================================== {default}");
+	PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [POLICE]{default} Début d'une perquisition dans %s.", tmp);
 	LogToGame("[TSX-RP] [POLICE] La perquisition commence dans %s.", tmp);
-	
-	CPrintToChatAll("{lightblue} ================================== {default}");
+	PrintToChatPoliceJob(job, "{lightblue} ================================== {default}");
 	
 	
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 500);
@@ -2281,11 +2280,11 @@ void end_perquiz(int client, int job) {
 	char tmp[255];
 	rp_GetZoneData(JobToZoneID(job), zone_type_name, tmp, sizeof(tmp));
 	
-	CPrintToChatAll("{lightblue} ================================== {default}");
-	CPrintToChatAll("{lightblue}[TSX-RP] [POLICE]{default} Fin de la perquisition dans %s.", tmp);
+	PrintToChatPoliceJob(job, "{lightblue} ================================== {default}");
+	PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [POLICE]{default} Fin de la perquisition dans %s.", tmp);
 	LogToGame("[TSX-RP] [POLICE] %N a mis fin à la perquisition dans %s.",client, tmp);
 	
-	CPrintToChatAll("{lightblue} ================================== {default}");
+	PrintToChatPoliceJob(job, "{lightblue} ================================== {default}");
 	
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 500);
 	rp_SetJobCapital(1, rp_GetJobCapital(1) + 500);
@@ -2304,11 +2303,11 @@ void cancel_perquiz(int client, int job) {
 	char tmp[255];
 	rp_GetZoneData(JobToZoneID(job), zone_type_name, tmp, sizeof(tmp));
 	
-	CPrintToChatAll("{lightblue} ================================== {default}");
-	CPrintToChatAll("{lightblue}[TSX-RP] [POLICE]{default} Annulation de la perquisition dans %s.", tmp);
+	PrintToChatPoliceJob(job, "{lightblue} ================================== {default}");
+	PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [POLICE]{default} Annulation de la perquisition dans %s.", tmp);
 	LogToGame("[TSX-RP] [POLICE] %N a annulé la perquisition dans %s.",client, tmp);
 	
-	CPrintToChatAll("{lightblue} ================================== {default}");
+	PrintToChatPoliceJob(job, "{lightblue} ================================== {default}");
 	
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) - 500);
 	rp_SetJobCapital(1, rp_GetJobCapital(1) - 250);

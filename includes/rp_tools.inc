@@ -49,6 +49,36 @@ public void PrintToChatZone(int zoneID, const char[] message, any ...) {
 		}
 	}
 }
+public void PrintToChatPoliceSearch(int target, const char[] message, any ...) {
+	char buffer[MAX_MESSAGE_LENGTH];
+	VFormat(buffer, sizeof(buffer), message, 3);
+	
+	for(int i=1; i<=MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		if( !IsPlayerAlive(i) )
+			continue;
+		
+		if( rp_GetPlayerZone(i) == target || rp_GetClientJobID(i) == 1 || rp_GetClientJobID(i) == 101 ) {
+			CPrintToChat(i, buffer);
+		}
+	}
+}
+public void PrintToChatPoliceJob(int target, const char[] message, any ...) {
+	char buffer[MAX_MESSAGE_LENGTH];
+	VFormat(buffer, sizeof(buffer), message, 3);
+	
+	for(int i=1; i<=MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		if( !IsPlayerAlive(i) )
+			continue;
+		
+		if( rp_GetClientJobID(i) == 1 || rp_GetClientJobID(i) == 101 || rp_GetClientJobID(i) == target) {
+			CPrintToChat(i, buffer);
+		}
+	}
+}
 // ----------------------------------------------------------------------------
 public float GetCmdArgFloat(int index) {
 	char arg[32];
