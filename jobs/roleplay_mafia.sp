@@ -29,6 +29,8 @@
 #define ITEM_PIEDBICHE		1
 #define ITEM_KITCROCHTAGE	2
 #define ITEM_KITEXPLOSIF	3
+#define MARCHE_NOIR			view_as<float>({-144.55,520.1,-2119.96})
+
 
 // TODO: Repensé le /vol pour fusionner doublon.
 
@@ -41,6 +43,13 @@ public Plugin myinfo = {
 int g_iDoorDefine_LOCKER[2049];
 Handle g_hForward_RP_OnClientStealItem, g_vCapture;
 int g_cBeam;
+DataPack g_hBuyMenu;
+enum IM_Int {
+	IM_Owner,
+	IM_ItemID,
+	IM_Prix,
+	IM_Max
+}
 bool doRP_CanClientStealItem(int client, int target) {
 	Action a;
 	Call_StartForward(g_hForward_RP_OnClientStealItem);
@@ -67,6 +76,12 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_doorDefine",	Cmd_ItemDoorDefine,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	
 	g_hForward_RP_OnClientStealItem = CreateGlobalForward("RP_CanClientStealItem", ET_Event, Param_Cell, Param_Cell);
+	
+	g_hBuyMenu = new DataPack();
+	g_hBuyMenu.WriteCell(0);
+	int pos = g_hBuyMenu.Position;
+	g_hBuyMenu.Reset();
+	g_hBuyMenu.WriteCell(pos);
 	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
@@ -95,7 +110,7 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 		return Plugin_Continue;
 	
 	if( disapear(client) ) {
-		cooldown = 60.0;
+		cooldown = 120.0;
 	}
 	else {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible de se déguiser pour le moment.");
@@ -157,17 +172,18 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		prix = rp_GetItemInt(i, item_type_prix) / 2;
 		
 		rp_ClientGiveItem(target, i, -1);
-		rp_ClientGiveItem(client, i, 1);
 		
 		rp_SetClientInt(client, i_LastVolTime, GetTime());
-		rp_SetClientInt(client, i_LastVolAmount, prix);
+		rp_SetClientInt(client, i_LastVolAmount, prix/4);
 		rp_SetClientInt(client, i_LastVolTarget, target);
 		rp_SetClientInt(target, i_LastVol, client);		
 		rp_SetClientFloat(target, fl_LastVente, GetGameTime() + 10.0);
 		
 		rp_GetItemData(i, item_type_name, tmp, sizeof(tmp));
 		
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez volé %s à %N.", tmp, target);
+		addBuyMenu(client, i);
+		
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez volé %s à %N, il a été envoyé au marché noir.", tmp, target);
 		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Quelqu'un vous a volé: %s.", tmp);
 					
 		LogToGame("[TSX-RP] [VOL] %L a vole %L 1 %s", client, target, tmp);
@@ -202,12 +218,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 
 		ServerCommand("sm_effect_particles %d Aura2 3", client);
 		
-		//g_iSuccess_last_pas_vu_pas_pris[target] = GetTime();
-
-		int cpt = rp_GetRandomCapital(91);
-		rp_SetJobCapital(91, rp_GetJobCapital(91) + prix);
-		rp_SetJobCapital(cpt, rp_GetJobCapital(cpt) - prix);
-		
+		//g_iSuccess_last_pas_vu_pas_pris[target] = GetTime();		
 	}
 	else if( VOL_MAX > 0 && money >= 1 ) {
 		if( amount > money )
@@ -288,7 +299,12 @@ public Action fwdOnPlayerUse(int client) {
 		if(changed == true) {
 			FakeClientCommand(client, "say /item");
 		}
-		
+	}
+	
+	float vecOrigin[3];
+	GetClientAbsOrigin(client, vecOrigin);
+	if( GetVectorDistance(vecOrigin, MARCHE_NOIR) < 40.0 ) {
+		Cmd_BuyItemMenu(client);
 	}
 }
 // ----------------------------------------------------------------------------
@@ -746,9 +762,11 @@ int getDistrib(int client, int& type) {
 		type = 2;
 	if( StrContains(classname, "rp_weaponbox_") == 0 )
 		type = 3;
-	if( (StrContains(classname, "rp_cashmachine_") == 0) && rp_GetClientJobID(rp_GetBuildingData(target, BD_owner)) != 91 && !rp_GetClientBool(rp_GetBuildingData(target, BD_owner), b_IsAFK) && !rp_IsClientNew(rp_GetBuildingData(target, BD_owner)))
+	if( (StrContains(classname, "rp_cashmachine_") == 0) && rp_GetClientJobID(rp_GetBuildingData(target, BD_owner)) != 91 &&
+		!rp_GetClientBool(rp_GetBuildingData(target, BD_owner), b_IsAFK) && Entity_GetHealth(target) == 100)
 		type = 4;
-	if( (StrContains(classname, "rp_bigcashmachine_") == 0) && rp_GetClientJobID(rp_GetBuildingData(target, BD_owner)) != 91 && !rp_GetClientBool(rp_GetBuildingData(target, BD_owner), b_IsAFK))
+	if( (StrContains(classname, "rp_bigcashmachine_") == 0) && rp_GetClientJobID(rp_GetBuildingData(target, BD_owner)) != 91 &&
+		!rp_GetClientBool(rp_GetBuildingData(target, BD_owner), b_IsAFK) && Entity_GetHealth(target) == 1000)
 		type = 5;
 	if( StrContains(classname, "rp_phone_") == 0 )
 		type = 6;
@@ -901,7 +919,7 @@ bool disapear(int client) {
 	}
 	else {
 		for (int i = 1; i <= MaxClients; i++) {
-			if( IsValidClient(i) && rp_GetClientJobID(i) != 1 && i != client ) {
+			if( IsValidClient(i) && GetClientTeam(i) != CS_TEAM_CT && rp_GetClientJobID(i) != 91 && i != client ) {
 				rndClient[rndCount++] = i;
 			}
 		}
@@ -948,4 +966,138 @@ public Action fwdZoneChange(int client, int newZone, int oldZone) {
 }
 public Action fwdDead(int client, int attacker) {
 	CreateTimer(0.1, appear, client);
+}
+
+void deleteBuyMenu(int pos) {
+	g_hBuyMenu.Reset();
+	int max = g_hBuyMenu.ReadCell();
+	int position = g_hBuyMenu.Position;
+	
+	DataPack clone = new DataPack();
+	clone.WriteCell(0);
+	
+	int data[IM_Max];
+	 
+	while( position < max ) {
+		
+		for (int i = 0; i < view_as<int>(IM_Max); i++) {
+			data[i] = g_hBuyMenu.ReadCell();
+		}
+		
+		if( position != pos) {
+			for (int i = 0; i < view_as<int>(IM_Max); i++) {
+				 clone.WriteCell(data[i]);
+			}
+		}
+		
+		position = g_hBuyMenu.Position;
+	}
+	position = clone.Position;
+	clone.Reset();
+	clone.WriteCell(position);
+	delete g_hBuyMenu;
+	g_hBuyMenu = clone;
+}
+void getBuyMenu(int pos, int data[IM_Max]) {
+	g_hBuyMenu.Position = pos;
+	
+	for (int i = 0; i < view_as<int>(IM_Max); i++) {
+		data[i] = g_hBuyMenu.ReadCell();
+	}
+}
+void addBuyMenu(int client, int itemID) {
+	
+	int data[IM_Max];
+	
+	data[IM_Owner] = client;
+	data[IM_ItemID] = itemID;
+	data[IM_Prix] = rp_GetItemInt(itemID, item_type_prix) / 4;
+	
+	g_hBuyMenu.Reset();
+	int pos = g_hBuyMenu.ReadCell();
+	g_hBuyMenu.Position = pos;
+	for (int i = 0; i < view_as<int>(IM_Max); i++) {
+		g_hBuyMenu.WriteCell(data[i]);
+	}
+	pos = g_hBuyMenu.Position;
+	g_hBuyMenu.Reset();
+	g_hBuyMenu.WriteCell(pos);
+}
+void Cmd_BuyItemMenu(int client) {
+	g_hBuyMenu.Reset();
+	int max = g_hBuyMenu.ReadCell();
+	int position = g_hBuyMenu.Position;
+	char tmp[8], tmp2[129];
+	int data[IM_Max];
+	
+	if( position >= max ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Désolé il n'y a pas d'objet disponibles pour le moment.");
+		return;
+	}
+	
+	Menu menu = new Menu(Menu_BuyWeapon);
+	menu.SetTitle("Marché noir:");
+	
+	while( position < max ) {
+		
+		getBuyMenu(position, data);
+		
+		rp_GetItemData(data[IM_ItemID], item_type_name, tmp2, sizeof(tmp2));
+		Format(tmp, sizeof(tmp), "%d", position);
+		Format(tmp2, sizeof(tmp2), "%s pour %d$", tmp2, data[IM_Prix]);
+		menu.AddItem(tmp, tmp2);
+		
+		position = g_hBuyMenu.Position;
+	}
+
+	menu.Display(client, 60);
+	return;
+}
+public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int p_iParam2) {
+	#if defined DEBUG
+	PrintToServer("Menu_BuyWeapon");
+	#endif
+	if (p_oAction == MenuAction_Select) {
+		
+		char szMenu[64], tmp[64];
+		if( GetMenuItem(p_hMenu, p_iParam2, szMenu, sizeof(szMenu)) ) {
+			int data[IM_Max];
+			int position = StringToInt(szMenu);
+			getBuyMenu(position, data);
+			
+			if( rp_GetClientInt(client, i_Bank) < data[IM_Prix] )
+				return 0;
+			float vecOrigin[3];
+			GetClientAbsOrigin(client, vecOrigin);
+			
+			if( GetVectorDistance(vecOrigin, MARCHE_NOIR) > 40.0 )
+				return 0;
+			
+			
+			deleteBuyMenu(position);
+			rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) - data[IM_Prix]);
+			rp_ClientGiveItem(client, data[IM_ItemID]);
+			
+			if( IsValidClient(data[IM_Owner]) && rp_GetClientJobID(data[IM_Owner]) == 91 ) {
+				rp_SetJobCapital(91, rp_GetJobCapital(91) + RoundToCeil(float(data[IM_Prix]) * 0.5));
+				rp_SetClientInt(data[IM_Owner], i_AddToPay, rp_GetClientInt(data[IM_Owner], i_AddToPay) + RoundToFloor(float(data[IM_Prix]) * 0.5));
+			}
+			else {
+				rp_SetJobCapital(91, rp_GetJobCapital(91) + data[IM_Prix]);
+			}
+			
+			rp_GetItemData(data[IM_ItemID], item_type_name, tmp, sizeof(tmp));
+			
+			LogToGame("[TSX-RP] [ITEM-VENDRE] %L a vendu 1 %s a %L", client, tmp, client);
+			
+			for (int i = 1; i <= MaxClients; i++) {
+				if( rp_GetClientJobID(i) == 91 )
+					rp_ClientFloodIncrement(i, client, fd_vol, STEAL_TIME);
+			}
+		}
+	}
+	else if (p_oAction == MenuAction_End) {
+		CloseHandle(p_hMenu);
+	}
+	return 0;
 }
