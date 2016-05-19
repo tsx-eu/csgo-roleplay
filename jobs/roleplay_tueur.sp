@@ -827,7 +827,6 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 			g_bShouldOpen[client] = false;
 		}
 		else if( StrEqual( options, "cops", false) ) {
-			
 			char dest[128];
 			rp_GetZoneData(rp_GetPlayerZone(client), zone_type_name, dest, sizeof(dest));
 			
@@ -835,6 +834,23 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 				if( !IsValidClient(i) )
 					continue;
 				if( rp_GetClientJobID(i) != 1 && rp_GetClientJobID(i) != 101 )
+					continue;
+				
+				CPrintToChat(i, "{lightblue}[TSX-RP]{default} Un enlèvement a eu lieu. Vous devez libérer %N dans %s.", client, dest);
+				rp_Effect_BeamBox(i, client);
+				ClientCommand(i, "play buttons/blip1.wav");
+			}
+			
+		}
+		else if( StrEqual( options, "mafia", false) ) {
+			
+			char dest[128];
+			rp_GetZoneData(rp_GetPlayerZone(client), zone_type_name, dest, sizeof(dest));
+			
+			for(int i=1; i<=MaxClients; i++) {
+				if( !IsValidClient(i) )
+					continue;
+				if( rp_GetClientJobID(i) != 91 )
 					continue;
 				
 				CPrintToChat(i, "{lightblue}[TSX-RP]{default} Un enlèvement a eu lieu. Vous devez libérer %N dans %s.", client, dest);
@@ -862,7 +878,8 @@ void OpenKidnappingMenu(int client) {
 			
 		AddMenuItem(menu, "pay", "Payer la rançon de 2500$");
 		AddMenuItem(menu, "free", "Tenter l'évasion");
-		AddMenuItem(menu, "cops", "Appeler la police");		
+		AddMenuItem(menu, "cops", "Appeler la police");
+		AddMenuItem(menu, "mafia", "Appeler la mafia");
 		AddMenuItem(menu, "crier", "Crier");		
 		
 		SetMenuExitButton(menu, false);
