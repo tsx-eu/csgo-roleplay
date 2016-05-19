@@ -78,6 +78,7 @@ public void OnMapStart() {
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse,	fwdOnPlayerUse);
 	rp_HookEvent(client, RP_OnPlayerSteal,	fwdOnPlayerSteal);
+	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
 	rp_SetClientBool(client, b_MaySteal, true);
 }
 public void OnClientDisconnect(int client) {
@@ -85,6 +86,18 @@ public void OnClientDisconnect(int client) {
 		if(g_iDoorDefine_LOCKER[i] == client)
 			g_iDoorDefine_LOCKER[i] = 0;
 	}
+}
+public Action fwdOnPlayerBuild(int client, float& cooldown){
+	if( rp_GetClientJobID(client) != 91 )
+		return Plugin_Continue;
+	
+	if( disapear(client) ) {
+		cooldown = 60.0;
+	}
+	else {
+		cooldown = 0.1;
+	}
+	return Plugin_Stop;
 }
 public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	if( rp_GetClientJobID(client) != 91 )
@@ -864,4 +877,56 @@ public Action Copter_Post(Handle timer, Handle dp ) {
 	ServerCommand("sm_effect_copter %f %f", vecDest[0], vecDest[1]);
 	
 	return Plugin_Stop;
+}
+
+bool disapear(int client) {
+	int zoneJob = rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type);
+	
+	int rndClient[65], rndCount;
+	if( zoneJob == 1 ) {
+		for (int i = 1; i <= MaxClients; i++) {
+			if( IsValidClient(i) && rp_GetClientJobID(i) == 1 ) {
+				rndClient[rndCount++] = i;
+			}
+		}
+	}
+	else {
+		for (int i = 1; i <= MaxClients; i++) {
+			if( IsValidClient(i) && rp_GetClientJobID(i) != 1 ) {
+				rndClient[rndCount++] = i;
+			}
+		}
+	}
+	if( rndCount == 0 )
+		return false;
+	int rnd = Math_GetRandomInt(0, rndCount - 1);
+	char model[128];
+	Entity_GetModel(rndClient[rnd], model, sizeof(model));
+	Entity_SetModel(client, model);
+	rp_SetClientInt(client, i_FakeClient, rndClient[rnd]);
+	
+	rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
+	rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
+	CreateTimer(10.0, appear, client);
+	
+	float vecCenter[3];
+	Entity_GetAbsOrigin(client, vecCenter);
+	TE_SetupBeamRingPoint(vecCenter, 1.0, 200.0, g_cBeam, g_cBeam, 0, 10, 0.25, 80.0, 0.0, {255, 255, 255, 255}, 1, 0);
+	TE_SendToAll();
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous vous êtes déguisé en tant que %N.", rndClient[rnd]);
+	return true;
+}
+public Action appear(Handle timer, any client) {
+	if( rp_GetClientInt(client, i_FakeClient) != 0 ) {
+		rp_SetClientInt(client, i_FakeClient, 0);
+		rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
+		rp_UnhookEvent(client, RP_OnPlayerDead, fwdDead);
+	}
+}
+public Action fwdZoneChange(int client, int oldZone, int newZone) {
+	PrintToChatAll("%d %d %d", client, oldZone, newZone);
+}
+public Action fwdDead(int client, int attacker) {
+	PrintToChatAll("%d %d", client, attacker);
+	CreateTimer(0.1, appear, client);
 }

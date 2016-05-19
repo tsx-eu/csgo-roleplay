@@ -629,7 +629,7 @@ enum int_user_data {
 	i_ArtisanXP,
 	i_ArtisanLevel,
 	i_ArtisanPoints,
-
+	i_FakeClient,
 
 	i_udata_max
 };
