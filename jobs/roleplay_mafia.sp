@@ -1077,18 +1077,20 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			deleteBuyMenu(position);
 			rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) - data[IM_Prix]);
 			rp_ClientGiveItem(client, data[IM_ItemID]);
+			rp_GetItemData(data[IM_ItemID], item_type_name, tmp, sizeof(tmp));
+			
+			LogToGame("[TSX-RP] [ITEM-VENDRE] %L a vendu 1 %s a %L", client, tmp, client);
 			
 			if( IsValidClient(data[IM_Owner]) && rp_GetClientJobID(data[IM_Owner]) == 91 ) {
 				rp_SetJobCapital(91, rp_GetJobCapital(91) + RoundToCeil(float(data[IM_Prix]) * 0.5));
 				rp_SetClientInt(data[IM_Owner], i_AddToPay, rp_GetClientInt(data[IM_Owner], i_AddToPay) + RoundToFloor(float(data[IM_Prix]) * 0.5));
+				
 			}
 			else {
 				rp_SetJobCapital(91, rp_GetJobCapital(91) + data[IM_Prix]);
 			}
 			
-			rp_GetItemData(data[IM_ItemID], item_type_name, tmp, sizeof(tmp));
 			
-			LogToGame("[TSX-RP] [ITEM-VENDRE] %L a vendu 1 %s a %L", client, tmp, client);
 			
 			for (int i = 1; i <= MaxClients; i++) {
 				if( rp_GetClientJobID(i) == 91 )
