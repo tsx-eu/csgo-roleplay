@@ -56,10 +56,8 @@ public void PrintToChatPoliceSearch(int target, const char[] message, any ...) {
 	for(int i=1; i<=MaxClients; i++) {
 		if( !IsValidClient(i) )
 			continue;
-		if( !IsPlayerAlive(i) )
-			continue;
 		
-		if( rp_GetPlayerZone(i) == target || rp_GetClientJobID(i) == 1 || rp_GetClientJobID(i) == 101 ) {
+		if( i == target || rp_GetClientJobID(i) == 1 || rp_GetClientJobID(i) == 101 ) {
 			CPrintToChat(i, buffer);
 		}
 	}
