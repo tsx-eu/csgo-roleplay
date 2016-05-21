@@ -1065,8 +1065,11 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			int position = StringToInt(szMenu);
 			getBuyMenu(position, data);
 			
+			if( data[IM_ItemID] == 0 )
+				return 0;
 			if( rp_GetClientInt(client, i_Bank) < data[IM_Prix] )
 				return 0;
+			
 			float vecOrigin[3];
 			GetClientAbsOrigin(client, vecOrigin);
 			
