@@ -174,7 +174,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		rp_ClientGiveItem(target, i, -1);
 		
 		rp_SetClientInt(client, i_LastVolTime, GetTime());
-		rp_SetClientInt(client, i_LastVolAmount, prix/4);
+		rp_SetClientInt(client, i_LastVolAmount, (prix * 30) / 100);
 		rp_SetClientInt(client, i_LastVolTarget, target);
 		rp_SetClientInt(target, i_LastVol, client);		
 		rp_SetClientFloat(target, fl_LastVente, GetGameTime() + 10.0);
@@ -1012,7 +1012,7 @@ void addBuyMenu(int client, int itemID) {
 	
 	data[IM_Owner] = client;
 	data[IM_ItemID] = itemID;
-	data[IM_Prix] = rp_GetItemInt(itemID, item_type_prix) / 4;
+	data[IM_Prix] = (rp_GetItemInt(itemID, item_type_prix) * 30) / 100;
 	
 	g_hBuyMenu.Reset();
 	int pos = g_hBuyMenu.ReadCell();
