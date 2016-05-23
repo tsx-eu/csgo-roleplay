@@ -449,7 +449,7 @@ int BuildingKevlarBox(int client) {
 	}
 	
 	char classname[64], tmp[64];
-	Format(classname, sizeof(classname), "rp_kevlarbox", client);
+	Format(classname, sizeof(classname), "rp_kevlarbox");
 	
 	float vecOrigin[3], vecOrigin2[3];
 	GetClientAbsOrigin(client, vecOrigin);
@@ -466,7 +466,7 @@ int BuildingKevlarBox(int client) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà une valise remplie de préservatifs.");
 			return 0;
 		}
-		if( StrContains(tmp, "rp_kevlarbox") == 0 ) {
+		if( StrEqual(tmp, "rp_kevlarbox") ) {
 			Entity_GetAbsOrigin(i, vecOrigin2);
 			if( GetVectorDistance(vecOrigin, vecOrigin2) < 600 ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il existe une autre valise remplie de préservatifs à proximité.");
