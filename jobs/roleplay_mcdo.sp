@@ -92,7 +92,7 @@ int BuildingMicrowave(int client) {
 		return 0;
 	
 	char classname[64], tmp[64];
-	Format(classname, sizeof(classname), "rp_microwave_%i", client);
+	Format(classname, sizeof(classname), "rp_microwave");
 	
 	for(int i=1; i<=2048; i++) {
 		if( !IsValidEdict(i) )
@@ -102,7 +102,7 @@ int BuildingMicrowave(int client) {
 			
 		GetEdictClassname(i, tmp, 63);
 		
-		if( StrEqual(classname, tmp) ) {
+		if( StrEqual(classname, tmp) && rp_GetBuildingData(i, BD_owner) == client ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà un micro-ondes de branché.");
 			return 0;
 		}
@@ -206,7 +206,7 @@ public Action fwdOnPlayerUse(int client) {
 	if( rp_GetClientJobID(client) != 21 )
 		return Plugin_Continue;
 
-	Format(tmp2, sizeof(tmp2), "rp_microwave_%i", client);
+	Format(tmp2, sizeof(tmp2), "rp_microwave");
 
 	for(int i=1; i<=2048; i++) {
 		if( !IsValidEdict(i) )
@@ -218,7 +218,7 @@ public Action fwdOnPlayerUse(int client) {
 		if(g_eMwAct[i])
 			continue;
 		
-		if( StrContains(tmp, tmp2) == 0 ) {
+		if( StrEqual(tmp, tmp2) && rp_GetBuildingData(i, BD_owner) == client ) {
 			Entity_GetAbsOrigin(i, vecOrigin2);
 			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 50 ) {
 				int time = rp_GetBuildingData(i, BD_count);
