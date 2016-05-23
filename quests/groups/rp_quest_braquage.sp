@@ -45,6 +45,7 @@ public Plugin myinfo =  {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
+Handle g_hActive;
 int g_iQuest;
 bool g_bDoingQuest, g_bByPassDoor, g_bHasHelmet, g_bCanMakeQuest;
 int g_iVehicle, g_iPlanque, g_iPlanqueZone, g_iQuestGain, g_iLastPlanque[3];
@@ -68,6 +69,8 @@ public void OnPluginStart() {
 	
 	HookEvent("hostage_follows", EV_PickupHostage, EventHookMode_Post);
 	HookEvent("hostage_rescued", EV_RescuseHostage, EventHookMode_Post);
+	
+	g_hActive 		= CreateConVar("rp_braquage", "0");
 	
 	g_bCanMakeQuest = true;
 }
@@ -152,6 +155,7 @@ public void Q_Abort(int objectiveID, int client) {
 			removeClientTeam(i);
 	}
 	CreateTimer(60.0 * 60.0, braquageNewAttempt);
+	SetConVarInt(g_hActive, 0);
 	
 	g_iLastPlanque[0] = g_iLastPlanque[1];
 	g_iLastPlanque[1] = g_iLastPlanque[2];
@@ -162,6 +166,7 @@ public Action braquageNewAttempt(Handle timer, any attempt) {
 	g_bCanMakeQuest = true;
 }
 public void Q1_Start(int objectiveID, int client) {
+	SetConVarInt(g_hActive, 1);
 	g_bDoingQuest = true;
 	g_bCanMakeQuest = false;
 	addClientToTeam(client, TEAM_BRAQUEUR);
