@@ -431,7 +431,7 @@ public Action EMPExplode_Task(Handle timer, any ent) {
 		GetEdictClassname(i, classname, sizeof(classname));
 		
 		if( StrContains(classname, "player") == 0 || StrContains(classname, "weapon_") == 0 ||
-			StrContains(classname, "rp_cashmachine_") == 0 || StrContains(classname, "rp_bigcashmachine_") == 0 || StrContains(classname, "rp_mine_") == 0 ) {
+			StrContains(classname, "rp_cashmachine") == 0 || StrContains(classname, "rp_bigcashmachine") == 0 || StrContains(classname, "rp_mine") == 0 ) {
 			
 			if( StrContains(classname, "weapon_knife") == 0 )
 				continue;

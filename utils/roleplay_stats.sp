@@ -342,8 +342,8 @@ public void SaveClient(int client){
 int CountMachine(int client, bool big) {
 	int count = 0;
 	char classname[64], bigclassname[64], tmp[128];
-	Format(bigclassname, sizeof(bigclassname), "rp_bigcashmachine_%i", client);
-	Format(classname, sizeof(classname), "rp_cashmachine_%i", client);
+	Format(bigclassname, sizeof(bigclassname), "rp_bigcashmachine");
+	Format(classname, sizeof(classname), "rp_cashmachine");
 	
 	for(int i=MaxClients; i<=2048; i++) {
 		if( !IsValidEdict(i) )
@@ -354,12 +354,12 @@ int CountMachine(int client, bool big) {
 		GetEdictClassname(i, tmp, 63);
 		
 		if(big){
-			if(StrEqual(bigclassname, tmp)){
+			if(StrEqual(bigclassname, tmp) && rp_GetBuildingData(i, BD_owner) == client ){
 				return 1;
 			}
 		}
 		else{
-			if(StrEqual(classname, tmp)){
+			if(StrEqual(classname, tmp) && rp_GetBuildingData(i, BD_owner) == client ){
 				count++;
 			}
 		}

@@ -84,14 +84,14 @@ public void OnPluginStart() {
 			continue;
 		
 		GetEdictClassname(i, classname, sizeof(classname));
-		if( StrContains(classname, "rp_bigcashmachine_") == 0 ) {
+		if( StrEqual(classname, "rp_bigcashmachine") ) {
 			
 			rp_SetBuildingData(i, BD_started, GetTime());
 			rp_SetBuildingData(i, BD_owner, GetEntPropEnt(i, Prop_Send, "m_hOwnerEntity") );
 			
 			CreateTimer(Math_GetRandomFloat(0.0, 2.5), BuildingBigCashMachine_post, i);
 		}
-		else if( StrContains(classname, "rp_cashmachine_") == 0 ) {
+		else if( StrEqual(classname, "rp_cashmachine") ) {
 			rp_SetBuildingData(i, BD_started, GetTime());
 			rp_SetBuildingData(i, BD_owner, GetEntPropEnt(i, Prop_Send, "m_hOwnerEntity") );
 			
@@ -428,7 +428,7 @@ int BuildingCashMachine(int client, bool force=false) {
 		return 0;
 	
 	char classname[64];
-	Format(classname, sizeof(classname), "rp_cashmachine_%i", client);
+	Format(classname, sizeof(classname), "rp_cashmachine");
 	
 	float vecOrigin[3];
 	GetClientAbsOrigin(client, vecOrigin);
@@ -692,7 +692,7 @@ int BuildingBigCashMachine(int client) {
 		return 0;
 	
 	char bigclassname[64];
-	Format(bigclassname, sizeof(bigclassname), "rp_bigcashmachine_%i", client);
+	Format(bigclassname, sizeof(bigclassname), "rp_bigcashmachine");
 	
 	float vecOrigin[3];
 	GetClientAbsOrigin(client, vecOrigin);
@@ -831,8 +831,8 @@ int CountMachine(int client) {
 	char classname[64], bigclassname[64], tmp[64];
 	float vecOrigin[3], vecOrigin2[3];
 	GetClientAbsOrigin(client, vecOrigin);
-	Format(bigclassname, sizeof(bigclassname), "rp_bigcashmachine_%i", client);
-	Format(classname, sizeof(classname), "rp_cashmachine_%i", client);
+	Format(bigclassname, sizeof(bigclassname), "rp_bigcashmachine");
+	Format(classname, sizeof(classname), "rp_cashmachine");
 	
 	for(int i=MaxClients; i<=2048; i++) {
 		if( !IsValidEdict(i) )

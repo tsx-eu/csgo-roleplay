@@ -176,19 +176,19 @@ public bool rp_IsRemoveAble(int target) {
 	if( StrContains(classname, "item_") == 0 ) {
 		return true;
 	}
-	if( StrContains(classname, "rp_cashmachine_") == 0 ) {
+	if( StrEqual(classname, "rp_cashmachine") ) {
 		return true;
 	}
-	if( StrContains(classname, "rp_bigcashmachine_") == 0 ) {
+	if( StrEqual(classname, "rp_bigcashmachine") ) {
 		return true;
 	}
-	if( StrContains(classname, "rp_plant") == 0 ) {
+	if( StrEqual(classname, "rp_plant") ) {
 		return true;
 	}
 	if( StrContains(classname, "prop_physics") == 0 ) {
 		return true;
 	}
-	if( StrContains(classname, "rp_grave") == 0 ) {
+	if( StrEqual(classname, "rp_grave") ) {
 		return true;
 	}
 	
@@ -275,7 +275,7 @@ public Action rp_ClientRemoveProp(int client, int target, int item_id) {
 				
 			char name[128];
 			GetEdictClassname(target, name, sizeof(name));
-			if( StrContains(name, "rp_cashmachine_") == 0 ) {
+			if( StrEqual(name, "rp_cashmachine") ) {
 					
 				int owner = GetEntPropEnt(target, Prop_Send, "m_hOwnerEntity");
 				if( IsValidClient(owner) ) {
@@ -284,7 +284,7 @@ public Action rp_ClientRemoveProp(int client, int target, int item_id) {
 				}
 				
 			}
-			if( StrContains(name, "rp_bigcashmachine_") == 0 ) {
+			if( StrEqual(name, "rp_bigcashmachine") ) {
 					
 				int owner = GetEntPropEnt(target, Prop_Send, "m_hOwnerEntity");
 				if( IsValidClient(owner) ) {
@@ -292,7 +292,7 @@ public Action rp_ClientRemoveProp(int client, int target, int item_id) {
 					CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre grosse machine a faux billet a été detruite.");
 				}
 			}
-			else if( StrContains(name, "rp_plant") == 0 ) {
+			else if( StrEqual(name, "rp_plant") ) {
 				int owner = GetEntPropEnt(target, Prop_Send, "m_hOwnerEntity");
 				if( IsValidClient(owner) && owner != client ) {
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez detruit un plant de drogue de %N", owner);

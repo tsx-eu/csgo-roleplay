@@ -586,7 +586,7 @@ public Action Cmd_Tazer(int client) {
 				reward += 150;
 			}
 		}
-		else if ( StrContains(tmp2, "rp_cashmachine_") == 0 ) {
+		else if ( StrEqual(tmp2, "rp_cashmachine") ) {
 			
 			rp_GetZoneData(Tzone, zone_type_name, tmp, sizeof(tmp));
 			LogToGame("[TSX-RP] [TAZER] %L a supprimé une machine de %L dans %s", client, owner, tmp);
@@ -604,7 +604,7 @@ public Action Cmd_Tazer(int client) {
 			}
 			SDKHooks_TakeDamage(target, client, client, 1000.0);
 		}
-		else if ( StrContains(tmp2, "rp_bigcashmachine_") == 0 ) {
+		else if ( StrEqual(tmp2, "rp_bigcashmachine") ) {
 			
 			rp_GetZoneData(Tzone, zone_type_name, tmp, sizeof(tmp));
 			LogToGame("[TSX-RP] [TAZER] %L a supprimé une photocopieuse de %L dans %s", client, owner, tmp);
