@@ -621,7 +621,7 @@ public Action Cmd_Tazer(int client) {
 				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre photocopieuse a été détruite par un policier.");
 			}
 		}
-		else if ( StrContains(tmp2, "rp_plant_") == 0 ) {
+		else if ( StrEqual(tmp2, "rp_plant") == 0 ) {
 			
 			rp_GetZoneData(Tzone, zone_type_name, tmp, sizeof(tmp));
 			LogToGame("[TSX-RP] [TAZER] %L a supprimé un plant de %L dans %s", client, owner, tmp);

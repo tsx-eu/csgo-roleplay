@@ -770,7 +770,7 @@ int getDistrib(int client, int& type) {
 		type = 5;
 	if( StrContains(classname, "rp_phone_") == 0 )
 		type = 6;
-	if( (StrContains(classname, "rp_plant_") == 0) && rp_GetClientJobID(rp_GetBuildingData(target, BD_owner)) != 91 && !rp_GetClientBool(rp_GetBuildingData(target, BD_owner), b_IsAFK) && rp_GetBuildingData(target, BD_count) > 0 )
+	if( (StrContains(classname, "rp_plant") == 0) && rp_GetClientJobID(rp_GetBuildingData(target, BD_owner)) != 91 && !rp_GetClientBool(rp_GetBuildingData(target, BD_owner), b_IsAFK) && rp_GetBuildingData(target, BD_count) > 0 )
 		type = 7;
 		
 	return (type > 0 ? target : 0);

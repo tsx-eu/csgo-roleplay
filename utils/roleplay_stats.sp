@@ -369,7 +369,7 @@ int CountMachine(int client, bool big) {
 int CountPlants(int client){
 	int count;
 	char tmp2[64];
-	Format(tmp2, sizeof(tmp2), "rp_plant_%i_", client);
+	Format(tmp2, sizeof(tmp2), "rp_plant");
 	for(int i=1; i<=2048; i++) {
 		if( !IsValidEdict(i) )
 			continue;
@@ -380,7 +380,7 @@ int CountPlants(int client){
 		GetEdictClassname(i, tmp, 63);
 		
 		
-		if( StrContains(tmp, tmp2) == 0 ) {
+		if( StrEqual(tmp, tmp2) && rp_GetBuildingData(i, BD_owner) == client ) {
 			count++;
 		}
 	}
