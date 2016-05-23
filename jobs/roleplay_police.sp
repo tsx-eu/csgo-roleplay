@@ -621,7 +621,7 @@ public Action Cmd_Tazer(int client) {
 				CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre photocopieuse a été détruite par un policier.");
 			}
 		}
-		else if ( StrEqual(tmp2, "rp_plant") == 0 ) {
+		else if ( StrEqual(tmp2, "rp_plant") ) {
 			
 			rp_GetZoneData(Tzone, zone_type_name, tmp, sizeof(tmp));
 			LogToGame("[TSX-RP] [TAZER] %L a supprimé un plant de %L dans %s", client, owner, tmp);
@@ -641,7 +641,7 @@ public Action Cmd_Tazer(int client) {
 			if(owner == client)
 				reward = 0;
 		}
-		else if( StrContains(tmp2, "rp_barriere_") == 0){
+		else if( StrContains(tmp2, "rp_barriere") == 0){
 			rp_GetZoneData(Tzone, zone_type_name, tmp, sizeof(tmp));
 			LogToGame("[TSX-RP] [TAZER] %L a retiré une barrière de %L dans %s", client, owner, tmp);
 			
@@ -2472,7 +2472,7 @@ int BuildingBarriere(int client) {
 	
 	char classname[64], tmp[64];
 	
-	Format(classname, sizeof(classname), "rp_barriere_%i", client);	
+	Format(classname, sizeof(classname), "rp_barriere");	
 	
 	int count, job = rp_GetClientInt(client, i_Job), max = 0;
 	
