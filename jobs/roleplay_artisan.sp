@@ -760,7 +760,7 @@ bool isNearTable(int client) {
 	int target = rp_GetClientTarget(client);
 	if( IsValidEdict(target) && IsValidEntity(target) ) {
 		GetEdictClassname(target, classname, sizeof(classname));
-		if( StrContains(classname, "rp_table__") == 0 && rp_IsEntitiesNear(client, target, true) )
+		if( StrContains(classname, "rp_table") == 0 && rp_IsEntitiesNear(client, target, true) )
 			return true;
 	}
 	return false;
@@ -794,7 +794,7 @@ int BuidlingTABLE(int client) {
 	
 	char classname[64], tmp[64];
 	
-	Format(classname, sizeof(classname), "rp_table__%i", client);	
+	Format(classname, sizeof(classname), "rp_table", client);	
 	float vecOrigin[3];
 	GetClientAbsOrigin(client, vecOrigin);
 	int count;
@@ -806,7 +806,7 @@ int BuidlingTABLE(int client) {
 		
 		GetEdictClassname(i, tmp, sizeof(tmp));
 		
-		if( StrEqual(classname, tmp) ) {
+		if( StrEqual(classname, tmp) && rp_GetBuildingData(i, BD_owner) == client ) {
 			count++;
 			if( count >= 1 ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà une table de placée.");
