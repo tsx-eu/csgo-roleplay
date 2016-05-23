@@ -463,7 +463,7 @@ int BuidlingATM(int client) {
 	
 	char classname[64], tmp[64];
 	
-	Format(classname, sizeof(classname), "rp_bank__%i", client);	
+	Format(classname, sizeof(classname), "rp_bank");	
 	
 	float vecOrigin[3];
 	GetClientAbsOrigin(client, vecOrigin);
