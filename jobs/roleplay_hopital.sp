@@ -544,7 +544,7 @@ int BuildingHealBox(int client) {
 		return 0;
 	
 	char classname[64], tmp[64];
-	Format(classname, sizeof(classname), "rp_healbox_%i", client);
+	Format(classname, sizeof(classname), "rp_healbox", client);
 	
 	float vecOrigin[3], vecOrigin2[3];
 	GetClientAbsOrigin(client, vecOrigin);
@@ -557,11 +557,11 @@ int BuildingHealBox(int client) {
 			
 		GetEdictClassname(i, tmp, 63);
 		
-		if( StrEqual(classname, tmp) ) {
+		if( StrEqual(classname, tmp) && rp_GetBuildingData(i, BD_owner) == client ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà une healbox.");
 			return 0;
 		}
-		if( StrContains(tmp, "rp_healbox_") == 0 ) {
+		if( StrContains(tmp, "rp_healbox") == 0 ) {
 			Entity_GetAbsOrigin(i, vecOrigin2);
 			if( GetVectorDistance(vecOrigin, vecOrigin2) < 600 ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il existe une autre healbox à proximité.");
