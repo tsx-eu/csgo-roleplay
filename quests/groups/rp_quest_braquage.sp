@@ -833,11 +833,17 @@ bool findAreaInRoom(int jobID, float pos[3]) {
 		float pos2[3]; pos2 = pos;
 		Handle tr = TR_TraceRayEx(pos, view_as<float>({ 90.0, 0.0, 0.0 }), MASK_PLAYERSOLID, RayType_Infinite);
 		TR_GetEndPosition(pos, tr);
+		if( TR_GetEntityIndex(tr) >= 1) {
+			delete tr;
+			continue;
+		}
+			
 		pos[2] += 4.0;
 		delete tr;
 		
 		tr = TR_TraceHullEx(pos, pos, view_as<float>({-32.0, -32.0, 0.0}), view_as<float>({32.0, 32.0, 64.0}), MASK_PLAYERSOLID);
 		if( !TR_DidHit(tr) ) {
+			delete tr;
 			return true;
 		}
 		delete tr;
