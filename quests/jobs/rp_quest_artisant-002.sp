@@ -46,7 +46,7 @@ public void OnPluginStart() {
 	SQL_TQuery(rp_GetDatabase(), SQL_LoadReceipe, "SELECT `itemid`, `prix` FROM rp_craft C INNER JOIN rp_items I ON C.`itemid`=I.`id` GROUP BY `itemid`;", 0, DBPrio_Low);
 	
 	int i;
-	rp_QuestAddStep(g_iQuest, i++, Q1_Start, QUEST_NULL, QUEST_NULL, QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, Q1_Start, Q1_Frame, QUEST_NULL, QUEST_NULL);
 }
 public void Q1_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
@@ -75,10 +75,15 @@ public void Q1_Start(int objectiveID, int client) {
 	g_iCraftItem[client] = itemID;
 	g_bDoingQuest[client] = true;
 }
-public Action RP_CanClientCraftForFree(int client, int itemID) {
+public void Q1_Frame(int objectiveID, int client) {
+	if( g_iCraftLeft[client] == 0 ) {
+		rp_QuestStepComplete(client, objectiveID);
+	}
+}	
+public int RP_CanClientCraftForFree(int client, int itemID) {
 	if( g_bDoingQuest[client] && g_iCraftItem[client] == itemID && g_iCraftLeft[client] > 0 )
-		return Plugin_Handled;
-	return Plugin_Continue;
+		return g_iCraftLeft[client];
+	return 0;
 }
 public Action RP_ClientCraftOver(int client, int itemID) {
 	if( g_bDoingQuest[client] && g_iCraftItem[client] == itemID && g_iCraftLeft[client] > 0 ) {

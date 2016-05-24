@@ -57,15 +57,13 @@ public Plugin myinfo = {
 //forward RP_CanClientCraftForFree(int client, int itemID);
 //forward RP_ClientCraftOver(int client, int itemID);
 Handle g_hForward_RP_CanClientCraftForFree, g_hForward_RP_CanClientCraftOver;
-bool doRP_CanClientCraftForFree(int client, int itemID) {
-	Action a;
+int doRP_CanClientCraftForFree(int client, int itemID) {
+	int a;
 	Call_StartForward(g_hForward_RP_CanClientCraftForFree);
 	Call_PushCell(client);
 	Call_PushCell(itemID);
 	Call_Finish(a);
-	if( a == Plugin_Stop || a == Plugin_Handled )
-		return true;
-	return false;
+	return a;
 }
 bool doRP_ClientCraftOver(int client, int itemID) {
 	Call_StartForward(g_hForward_RP_CanClientCraftOver);
@@ -306,8 +304,8 @@ void displayBuildMenu(int client, int jobID, int itemID) {
 				}
 			}
 			
-			rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2));
-			if( can ) {
+			rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2)); 
+			if( can || doRP_CanClientCraftForFree(client, i) ) {
 				Format(tmp, sizeof(tmp), "build %d %d", jobID, i);
 				Format(tmp2, sizeof(tmp2), "[> %s <]", tmp2);
 			}
@@ -339,6 +337,8 @@ void displayBuildMenu(int client, int jobID, int itemID) {
 			if( delta < min )
 				min = delta;
 		}
+		
+		min += doRP_CanClientCraftForFree(client, itemID);
 		
 		Format(tmp, sizeof(tmp), "build %d %d %d", jobID, itemID, min);
 		Format(tmp2, sizeof(tmp2), "Tout Construire (%d) (%.1fsec)", min, duration*min + (min*GetTickInterval()));
