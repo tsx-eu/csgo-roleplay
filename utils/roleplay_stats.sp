@@ -163,7 +163,7 @@ public void DisplayStats(int client, bool full){
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
 		Format(tmp, sizeof(tmp), "Argent gagné par les machines: %d", rp_GetClientStat(client, i_S_MoneyEarned_CashMachine));
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
-		Format(tmp, sizeof(tmp), "Argent recu: %d", rp_GetClientStat(client, i_S_MoneyEarned_Give));
+		Format(tmp, sizeof(tmp), "Argent reçu: %d", rp_GetClientStat(client, i_S_MoneyEarned_Give));
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
 
 		AddMenuItem(menu, "", "------------------------------------------", ITEMDRAW_DISABLED);
@@ -213,7 +213,7 @@ public void DisplayStats(int client, bool full){
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
 		Format(tmp, sizeof(tmp), "Argent gagné par les machines: %d", rp_GetClientStat(client, i_MoneyEarned_CashMachine));
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
-		Format(tmp, sizeof(tmp), "Argent recu: %d", rp_GetClientStat(client, i_MoneyEarned_Give));
+		Format(tmp, sizeof(tmp), "Argent reçu: %d", rp_GetClientStat(client, i_MoneyEarned_Give));
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
 
 		AddMenuItem(menu, "", "------------------------------------------", ITEMDRAW_DISABLED);

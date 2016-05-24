@@ -350,7 +350,7 @@ public Action Cmd_ItemPropAppart(int args){
 	int appart = rp_GetPlayerZoneAppart(client);
 	if(appart == -1){
 		if(rp_GetZoneInt(zone, zone_type_type) != rp_GetClientJobID(client)){
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être dans votre planque ou dans votre appartment.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être dans votre planque ou dans votre appartement.");
 			return Plugin_Handled;
 		}
 	}
@@ -375,7 +375,7 @@ public int MenuPropAppart(Handle menu, MenuAction action, int client, int param2
 		int appart = rp_GetPlayerZoneAppart(client);
 		if(appart == -1){
 			if(rp_GetZoneInt(zone, zone_type_type) != rp_GetClientJobID(client)){
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être dans votre planque ou dans votre appartment.");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être dans votre planque ou dans votre appartement.");
 				return;
 			}
 		}

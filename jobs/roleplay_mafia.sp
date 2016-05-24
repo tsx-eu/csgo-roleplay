@@ -1032,7 +1032,7 @@ void Cmd_BuyItemMenu(int client) {
 	int data[IM_Max];
 	
 	if( position >= max ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Désolé il n'y a pas d'objet disponibles pour le moment.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Désolé il n'y a pas d'objet disponible pour le moment.");
 		return;
 	}
 	
