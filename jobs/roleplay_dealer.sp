@@ -382,7 +382,7 @@ public Action Cmd_ItemEngrais(int args) {
 	
 	char classname[64];
 	GetEdictClassname(target, classname, sizeof(classname));
-	if( StrEqual(classname, "rp_plant") ) {
+	if( !StrEqual(classname, "rp_plant") ) {
 		ITEM_CANCEL(client, item_id);
 		return Plugin_Handled;
 	}
