@@ -61,9 +61,13 @@ public Action OnPlayerRunCmd(int client, int &button) {
 		g_bPressedUse[client] = false;
 		if( (GetGameTime() - g_flPressUse[client]) < 0.2 && !g_bClosed[client] && rp_GetClientVehicle(client) <= 0 && rp_IsTutorialOver(client) ) {
 			if( rp_ClientCanDrawPanel(client) || g_bInsideMenu[client] )
-				 openMenu(client);
+				CreateTimer(0.1, taskOpenMenu, client);
 		}
 	}
+}
+public Action taskOpenMenu(Handle timer, any client) {
+	if( rp_ClientCanDrawPanel(client) || g_bInsideMenu[client] )
+		 openMenu(client);
 }
 void openMenu(int client) {
 	int target = rp_GetClientTarget(client);
