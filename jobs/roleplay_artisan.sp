@@ -68,7 +68,7 @@ bool doRP_CanClientCraftForFree(int client, int itemID) {
 	return false;
 }
 bool doRP_ClientCraftOver(int client, int itemID) {
-	Call_StartForward(g_hForward_RP_ClientCraftOver);
+	Call_StartForward(g_hForward_RP_CanClientCraftOver);
 	Call_PushCell(client);
 	Call_PushCell(itemID);
 	Call_Finish();
