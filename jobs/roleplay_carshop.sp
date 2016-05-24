@@ -181,7 +181,7 @@ public Action taskGarageMenu(Handle timer, any client) {
 public Action fwdUse(int client) {
 	
 	if( IsInGarage(client) && rp_ClientCanDrawPanel(client) ) { 
-		CreateTimer(0.1, taskGarageMenu);
+		CreateTimer(0.1, taskGarageMenu, client);
 	}
 	
 	int target = rp_GetClientTarget(client);
