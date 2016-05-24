@@ -757,21 +757,23 @@ int getDistrib(int client, int& type) {
 	char classname[128];
 	GetEdictClassname(target, classname, sizeof(classname));
 	
+	int owner = rp_GetBuildingData(target, BD_owner);
 	
-	if( StrEqual(classname, "rp_bank") && rp_GetBuildingData(target, BD_owner) == 0 )
+	
+	if( StrEqual(classname, "rp_bank") && owner == 0 )
 		type = 2;
 	if( StrEqual(classname, "rp_weaponbox") )
 		type = 3;
-	if( (StrEqual(classname, "rp_cashmachine") ) && rp_GetClientJobID(rp_GetBuildingData(target, BD_owner)) != 91 &&
-		!rp_IsClientNew(target) && !rp_GetClientBool(rp_GetBuildingData(target, BD_owner), b_IsAFK) && Entity_GetHealth(target) == 100)
+	if( (StrEqual(classname, "rp_cashmachine") ) && rp_GetClientJobID(owner) != 91 &&
+		!rp_IsClientNew(owner) && !rp_GetClientBool(owner, b_IsAFK) && Entity_GetHealth(target) == 100)
 		type = 4;
-	if( (StrEqual(classname, "rp_bigcashmachine") ) && rp_GetClientJobID(rp_GetBuildingData(target, BD_owner)) != 91 &&
-		!rp_IsClientNew(target) && !rp_GetClientBool(rp_GetBuildingData(target, BD_owner), b_IsAFK) && Entity_GetHealth(target) == 1000)
+	if( (StrEqual(classname, "rp_bigcashmachine") ) && rp_GetClientJobID(owner) != 91 &&
+		!rp_IsClientNew(owner) && !rp_GetClientBool(owner, b_IsAFK) && Entity_GetHealth(target) == 1000)
 		type = 5;
 	if( StrEqual(classname, "rp_phone") )
 		type = 6;
-	if( (StrEqual(classname, "rp_plant") ) && rp_GetClientJobID(rp_GetBuildingData(target, BD_owner)) != 91 &&
-		!rp_IsClientNew(target) && !rp_GetClientBool(rp_GetBuildingData(target, BD_owner), b_IsAFK) && rp_GetBuildingData(target, BD_count) > 0 )
+	if( (StrEqual(classname, "rp_plant") ) && rp_GetClientJobID(owner) != 91 &&
+		!rp_IsClientNew(owner) && !rp_GetClientBool(owner, b_IsAFK) && rp_GetBuildingData(target, BD_count) > 0 )
 		type = 7;
 		
 	return (type > 0 ? target : 0);
