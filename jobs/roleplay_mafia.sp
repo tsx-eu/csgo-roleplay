@@ -758,19 +758,19 @@ int getDistrib(int client, int& type) {
 	GetEdictClassname(target, classname, sizeof(classname));
 	
 	
-	if( StrContains(classname, "rp_bank") == 0 && rp_GetBuildingData(target, BD_owner) == 0 )
+	if( StrEqual(classname, "rp_bank") && rp_GetBuildingData(target, BD_owner) == 0 )
 		type = 2;
-	if( StrContains(classname, "rp_weaponbox_") == 0 )
+	if( StrEqual(classname, "rp_weaponbox") )
 		type = 3;
-	if( (StrContains(classname, "rp_cashmachine") == 0) && rp_GetClientJobID(rp_GetBuildingData(target, BD_owner)) != 91 &&
+	if( (StrEqual(classname, "rp_cashmachine") ) && rp_GetClientJobID(rp_GetBuildingData(target, BD_owner)) != 91 &&
 		!rp_IsClientNew(target) && !rp_GetClientBool(rp_GetBuildingData(target, BD_owner), b_IsAFK) && Entity_GetHealth(target) == 100)
 		type = 4;
-	if( (StrContains(classname, "rp_bigcashmachine") == 0) && rp_GetClientJobID(rp_GetBuildingData(target, BD_owner)) != 91 &&
+	if( (StrEqual(classname, "rp_bigcashmachine") ) && rp_GetClientJobID(rp_GetBuildingData(target, BD_owner)) != 91 &&
 		!rp_IsClientNew(target) && !rp_GetClientBool(rp_GetBuildingData(target, BD_owner), b_IsAFK) && Entity_GetHealth(target) == 1000)
 		type = 5;
-	if( StrContains(classname, "rp_phone") == 0 )
+	if( StrEqual(classname, "rp_phone") )
 		type = 6;
-	if( (StrContains(classname, "rp_plant") == 0) && rp_GetClientJobID(rp_GetBuildingData(target, BD_owner)) != 91 &&
+	if( (StrEqual(classname, "rp_plant") ) && rp_GetClientJobID(rp_GetBuildingData(target, BD_owner)) != 91 &&
 		!rp_IsClientNew(target) && !rp_GetClientBool(rp_GetBuildingData(target, BD_owner), b_IsAFK) && rp_GetBuildingData(target, BD_count) > 0 )
 		type = 7;
 		
