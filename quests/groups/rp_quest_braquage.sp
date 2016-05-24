@@ -549,7 +549,7 @@ public Action fwdGotKey(int client, int doorID) {
 	return Plugin_Continue;
 }
 public Action fwdPressUse(int client) {
-	if( g_stkTeamCount[TEAM_BRAQUEUR_DEAD] > 0 ) {
+	if( g_stkTeamCount[TEAM_BRAQUEUR_DEAD] > 0 && g_iPlayerTeam[client] == TEAM_BRAQUEUR ) {
 		int target = rp_GetClientTarget(client);
 		if( target > 0 && IsValidEdict(target) && IsValidEntity(target) ) {
 			char classname[64], tmp2[64];
