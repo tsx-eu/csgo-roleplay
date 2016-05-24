@@ -139,10 +139,14 @@ public Action Cmd_ItemBioKev(int args) {
 	#endif
 	
 	int client = GetCmdArgInt(1);
+	int item_id = GetCmdArgInt(args);
 	
-	if( !g_bBionique[client][ch_Kevlar] )
-		rp_HookEvent(client, RP_OnFrameSeconde, fwdRegenKevlar);
+	if( g_bBionique[client][ch_Kevlar] ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà une regénération bionique.");
+		ITEM_CANCEL(client, item_id);
+	}
 	
+	rp_HookEvent(client, RP_OnFrameSeconde, fwdRegenKevlar);
 	g_bBionique[client][ch_Kevlar] = true;
 }
 // ------------------------------------------------------------------------------
@@ -152,10 +156,14 @@ public Action Cmd_ItemBioYeux(int args) {
 	#endif
 	
 	int client = GetCmdArgInt(1);
+	int item_id = GetCmdArgInt(args);
 	
-	if( !g_bBionique[client][ch_Yeux] )
-		rp_HookEvent(client, RP_PreHUDColorize, fwfBioYeux);
+	if( g_bBionique[client][ch_Yeux] ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà des yeux bioniques.");
+		ITEM_CANCEL(client, item_id);
+	}
 	
+	rp_HookEvent(client, RP_PreHUDColorize, fwfBioYeux);
 	g_bBionique[client][ch_Yeux] = true;
 	rp_SetClientBool(client, b_ChiruYeux, true);
 }
