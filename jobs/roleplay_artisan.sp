@@ -54,6 +54,25 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 // ----------------------------------------------------------------------------
+//forward RP_CanClientCraftForFree(int client, int itemID);
+//forward RP_ClientCraftOver(int client, int itemID);
+Handle g_hForward_RP_CanClientCraftForFree, g_hForward_RP_CanClientCraftOver;
+bool doRP_CanClientCraftForFree(int client, int itemID) {
+	Action a;
+	Call_StartForward(g_hForward_RP_CanClientCraftForFree);
+	Call_PushCell(client);
+	Call_PushCell(itemID);
+	Call_Finish(a);
+	if( a == Plugin_Stop || a == Plugin_Handled )
+		return true;
+	return false;
+}
+bool doRP_ClientCraftOver(int client, int itemID) {
+	Call_StartForward(g_hForward_RP_ClientCraftOver);
+	Call_PushCell(client);
+	Call_PushCell(itemID);
+	Call_Finish();
+}
 public Action Cmd_Reload(int args) {
 	char name[64];
 	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
@@ -66,6 +85,8 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_craftbook",		Cmd_ItemCraftBook,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 	RegAdminCmd("rp_fatigue", CmdSetFatigue, ADMFLAG_ROOT);
 	
+	g_hForward_RP_CanClientCraftForFree = CreateGlobalForward("RP_CanClientCraftForFree", ET_Event, Param_Cell, Param_Cell);
+	g_hForward_RP_CanClientCraftOver = CreateGlobalForward("RP_ClientCraftOver", ET_Event, Param_Cell, Param_Cell);
 	
 	SQL_TQuery(rp_GetDatabase(), SQL_LoadReceipe, "SELECT `itemid`, `raw`, `amount`, REPLACE(`extra_cmd`, 'rp_item_primal ', '') `rate` FROM `rp_csgo`.`rp_craft` C INNER JOIN `rp_items` I ON C.`raw`=I.`id` ORDER BY `itemid`, `raw`", 0, DBPrio_Low);
 	
@@ -603,7 +624,7 @@ public Action stopBuilding(Handle timer, Handle dp) {
 		return Plugin_Stop;
 	}
 		
-	if( positive > 0 ) {
+	if( positive > 0 && !doRP_CanClientCraftForFree(client, itemID) ) {
 		for (int j = 0; j < magic.Length; j++) { // Pour chaque items de la recette:
 			magic.GetArray(j, data);
 			
@@ -632,17 +653,21 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	rp_SetClientFloat(client, fl_ArtisanFatigue, flFatigue);
 	
 	if( positive > 0 ) { // Craft
-		if( !failed )  // Si on échoue pas on give l'item
+		if( !failed ) { // Si on échoue pas on give l'item
 			rp_ClientGiveItem(client, itemID, positive);
+			doRP_ClientCraftOver(client, itemID);
+		}
 		
 		if( g_flClientBook[client][book_luck] > GetTickedTime() && Math_GetRandomInt(0, 1000) < 50 )
 			rp_ClientGiveItem(client, itemID, positive);
+		
 		
 		for (int i = 0; i < magic.Length; i++) {  // Pour chaque items de la recette:
 			magic.GetArray(i, data);
 				
 			ClientGiveXP(client, rp_GetItemInt(data[craft_raw], item_type_prix));
-			rp_ClientGiveItem(client, data[craft_raw], -data[craft_amount]);		
+			if( !doRP_CanClientCraftForFree(client, itemID) )
+				rp_ClientGiveItem(client, data[craft_raw], -data[craft_amount]);		
 		}
 	}
 	else if( !failed ) { // Recyclage, si on le rate pas on prend l'item.

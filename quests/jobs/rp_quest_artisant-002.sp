@@ -34,6 +34,7 @@ public Plugin myinfo =  {
 };
 
 int g_iQuest, g_iItemsPrice[MAX_ITEMS], g_iCraftItem[65], g_iCraftLeft[65];
+bool g_bDoingQuest[65];
 
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
@@ -63,13 +64,29 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.AddItem("", "Monsieur, nous avons une commande de", ITEMDRAW_DISABLED);
 	menu.AddItem("", tmp, ITEMDRAW_DISABLED);
 	menu.AddItem("", "Pouvez vous nous les crafter au plus vite?", ITEMDRAW_DISABLED);
+	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Nous vous fournirons tout les matériaux", ITEMDRAW_DISABLED);
+	menu.AddItem("", "nécessaire pendant votre travail.", ITEMDRAW_CONTROL);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 60);
 	
 	g_iCraftLeft[client] = count;
 	g_iCraftItem[client] = itemID;
+	g_bDoingQuest[client] = true;
 }
+public Action RP_CanClientCraftForFree(int client, int itemID) {
+	if( g_bDoingQuest[client] && g_iCraftItem[client] == itemID && g_iCraftLeft[client] > 0 )
+		return Plugin_Handled;
+	return Plugin_Continue;
+}
+public Action RP_ClientCraftOver(int client, int itemID) {
+	if( g_bDoingQuest[client] && g_iCraftItem[client] == itemID && g_iCraftLeft[client] > 0 ) {
+		g_iCraftLeft[client]--;
+		rp_ClientGiveItem(client, itemID, -1);
+	}
+}
+
 public void SQL_LoadReceipe(Handle owner, Handle hQuery, const char[] error, any client) {
 	while( SQL_FetchRow(hQuery) ) {
 		g_iItemsPrice[SQL_FetchInt(hQuery, 0)] = SQL_FetchInt(hQuery, 1);
