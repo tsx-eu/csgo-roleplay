@@ -721,11 +721,8 @@ public Action fwdOnPlayerUse(int client) {
 			Entity_GetAbsOrigin(i, vecOrigin2);
 			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 50 && rp_GetBuildingData(i, BD_count) > 0.0 ) {
 				
-				ReplaceString(tmp, sizeof(tmp), tmp2, "");
-				ReplaceString(tmp, sizeof(tmp), "_", "");
-				
-				int sub = StringToInt(tmp);
-				if( sub <= 0 && sub > MAX_ITEMS )
+				int sub = rp_GetBuildingData(i, BD_item_id);
+				if( sub < 0 && sub > MAX_ITEMS )
 					continue;
 					
 				rp_IncrementSuccess(client, success_list_trafiquant, rp_GetBuildingData(i, BD_count) );
