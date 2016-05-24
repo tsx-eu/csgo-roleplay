@@ -167,6 +167,10 @@ public Action metroTeleport(Handle timer, any client) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} En raison de votre mauvais comportement, il vous est temporairement interdit de participer à un event.");
 			return Plugin_Handled;
 		}
+		if( rp_GetClientBool(client, b_IsSearchByTribunal) == true ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes recherché par le Tribunal, impossible de participer à un event.");
+			return Plugin_Handled;
+		}
 		paid = true;
 	}
 	if( !paid && rp_GetClientJobID(client) == 31 ) {
