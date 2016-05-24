@@ -842,7 +842,7 @@ int CountMachine(int client) {
 		
 		GetEdictClassname(i, tmp, 63);
 		
-		if( StrEqual(bigclassname, tmp) ){
+		if( StrEqual(bigclassname, tmp) && rp_GetBuildingData(i, BD_owner) == client ){
 			count += 15;
 			Entity_GetAbsOrigin(i, vecOrigin2);
 			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 50 ) {
@@ -850,7 +850,7 @@ int CountMachine(int client) {
 				return -1;
 			}
 		}
-		if( StrEqual(classname, tmp) ) {
+		if( StrEqual(classname, tmp) && rp_GetBuildingData(i, BD_owner) == client ) {
 			count++;
 			Entity_GetAbsOrigin(i, vecOrigin2);
 			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 24 ) {
