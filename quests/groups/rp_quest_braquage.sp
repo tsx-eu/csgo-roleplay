@@ -932,13 +932,17 @@ public Action tskAlarm(Handle timer, any client) {
 	}
 }
 void updateTeamPolice() {
+	bool isAfk;
 	for (int i = 1; i <= MaxClients; i++) {
 		if( !IsValidClient(i) )
 			continue;
-		if( g_iPlayerTeam[i] != TEAM_POLICE && (rp_GetClientJobID(i) == 1 || rp_GetClientJobID(i) == 101) ) {
+			
+		isAfk = rp_GetClientBool(i, b_IsAFK);
+		
+		if( g_iPlayerTeam[i] != TEAM_POLICE && (rp_GetClientJobID(i) == 1 || rp_GetClientJobID(i) == 101) && !isAfk) {
 			addClientToTeam(i, TEAM_POLICE);
 		}
-		if( g_iPlayerTeam[i] == TEAM_POLICE && rp_GetClientJobID(i) != 1 && rp_GetClientJobID(i) != 101 ) {
+		if( g_iPlayerTeam[i] == TEAM_POLICE && ((rp_GetClientJobID(i) != 1 && rp_GetClientJobID(i) != 101) || isAfk) ) {
 			removeClientTeam(i);
 		}
 	}
