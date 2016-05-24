@@ -513,6 +513,33 @@ public void OnClientPostAdminCheck(int client) {
 		rp_HookEvent(client, RP_OnPlayerCheckKey, fwdGotKey);
 		rp_HookEvent(client, RP_PreGiveDamage, fwdDamage);
 	}
+	
+	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
+}
+public Action fwdCommand(int client, char[] command, char[] arg) {
+	#if defined DEBUG
+	PrintToServer("fwdCommand");
+	#endif
+	if( StrEqual(command, "q") || StrEqual(command, "quest") ) {
+		
+		if( g_iPlayerTeam[client] != TEAM_BRAQUEUR )
+			return Plugin_Continue;
+		
+		if( !rp_GetClientBool(client, b_Crayon)) {
+			CRemoveTags(arg, strlen(arg)+1);
+		}
+		
+		for (int i = 1; i <= MaxClients; i++) {
+			if( !IsValidClient(i) )
+				continue;
+			if( g_iPlayerTeam[i] != TEAM_BRAQUEUR )
+				continue;
+			
+			CPrintToChat(i, "{lightblue}%N{default} ({lime}QUÊTES{default}): %s", client, arg);
+		}
+		return Plugin_Handled;
+	}
+	return Plugin_Continue;
 }
 public Action fwdLoaded(int client) {
 	if( g_iPlayerTeam[client] != TEAM_POLICE && (rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101) ) {
