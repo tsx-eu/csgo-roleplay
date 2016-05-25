@@ -476,10 +476,8 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 				
 				int count = rp_GetBuildingData(target, BD_count);
 				if( count > 0  ) {
-					char classname[64], tmp[4][12];
-					GetEdictClassname(target, classname, sizeof(classname));
-					ExplodeString(classname, "_", tmp, sizeof(tmp), sizeof(tmp[]));
-					int sub = StringToInt(tmp[3]);
+					char classname[64];
+					int sub = rp_GetBuildingData(target, BD_item_id);
 					
 					rp_GetItemData(sub, item_type_name, classname, sizeof(classname));
 					rp_ClientGiveItem(client, sub, count);
