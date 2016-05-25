@@ -46,8 +46,27 @@ public void OnPluginStart() {
 	SQL_TQuery(rp_GetDatabase(), SQL_LoadReceipe, "SELECT `itemid`, `prix` FROM rp_craft C INNER JOIN rp_items I ON C.`itemid`=I.`id` GROUP BY `itemid`;", 0, DBPrio_Low);
 	
 	int i;
-	rp_QuestAddStep(g_iQuest, i++, Q1_Start, Q1_Frame, QUEST_NULL, QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, Q1_Start, Q1_Frame, Q_Abort, QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL, Q2_Frame, Q_Abort, Q_Done);
 }
+public void Q1_Frame(int objectiveID, int client) {
+	float maxDist;
+	
+	int table1 = findMyTable(client);
+	int table2 = findNearestTable(client, maxDist);
+	if( table1 > 0 ) {
+		rp_Effect_BeamBox(client, table1);
+	}
+	else {
+		PrintHintText(client, "<b>Quête</b>: %s\nPlacer une table de craft", QUEST_NAME);
+	}
+	if( table2 > 0 && maxDist < 128.0 ) {
+		rp_QuestStepComplete(client, objectiveID);
+	}
+	
+	
+	rp_QuestStepComplete(client, objectiveID);
+}	
 public void Q1_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
@@ -75,11 +94,27 @@ public void Q1_Start(int objectiveID, int client) {
 	g_iCraftItem[client] = itemID;
 	g_bDoingQuest[client] = true;
 }
-public void Q1_Frame(int objectiveID, int client) {
+public void Q2_Frame(int objectiveID, int client) {
 	if( g_iCraftLeft[client] == 0 ) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
-}	
+	else {
+		char tmp[64];
+		rp_GetItemData(g_iCraftItem[client], item_type_name, tmp, sizeof(tmp));
+		PrintHintText(client, "<b>Quête</b>: %s\nIl reste à construire\n %d %s", QUEST_NAME, g_iCraftLeft[client], tmp);
+	}
+}
+public void Q_Abort(int objectiveID, int client) {
+	g_iCraftLeft[client] = 0;
+	g_iCraftItem[client] = 0;
+	g_bDoingQuest[client] = false;
+}
+public void Q_Done(int objectiveID, int client) {
+	Q_Abort(objectiveID, client);
+	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Merci pour votre aide, voici 5000$ !");
+	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 5000);
+}
 public int RP_CanClientCraftForFree(int client, int itemID) {
 	if( g_bDoingQuest[client] && g_iCraftItem[client] == itemID && g_iCraftLeft[client] > 0 )
 		return g_iCraftLeft[client];
@@ -127,4 +162,40 @@ public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
 		if (menu != INVALID_HANDLE)
 			CloseHandle(menu);
 	}
+}
+int findMyTable(int client) {
+	char classname[65];
+	for (int i = MaxClients; i <= 2048; i++) {
+		if( !IsValidEdict(i) || !IsValidEntity(i) )
+			continue;
+		GetEdictClassname(i, classname, sizeof(classname));
+		
+		if( StrEqual(classname, "rp_table") && rp_GetBuildingData(i, BD_owner) == client )
+			return i;
+	}
+	return -1;
+}
+int findNearestTable(int client, float& maxDist) {
+	maxDist = 9999999.9;
+	float tmp;
+	int entity = -1;
+	float vecStart[3], vecEnd[3];
+	GetClientAbsOrigin(client, vecStart);
+	
+	char classname[65];
+	for (int i = MaxClients; i <= 2048; i++) {
+		if( !IsValidEdict(i) || !IsValidEntity(i) )
+			continue;
+		GetEdictClassname(i, classname, sizeof(classname));
+		
+		if( StrEqual(classname, "rp_table") ) {
+			Entity_GetAbsOrigin(i, vecEnd);
+			tmp = GetVectorDistance(vecStart, vecEnd);
+			if( tmp < maxDist ) {
+				entity = i;
+				maxDist = tmp;
+			}
+		}
+	}
+	return entity;
 }
