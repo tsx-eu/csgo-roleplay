@@ -285,7 +285,7 @@ void displayBuildMenu(int client, int jobID, int itemID) {
 		SetMenuTitle(menu, "== Artisanat: Construire");
 		
 		for(int i = 0; i < MAX_ITEMS; i++) {
-			if( !g_bCanCraft[client][i] )
+			if( !g_bCanCraft[client][i] && !doRP_CanClientCraftForFree(client, i) )
 				continue;
 			if( rp_GetItemInt(i, item_type_job_id) != jobID && jobID != -1 )
 				continue;
@@ -592,6 +592,7 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	int positive = ReadPackCell(dp);
 	int fatigue = ReadPackCell(dp);
 	bool failed = false;
+	bool free = (doRP_CanClientCraftForFree(client, itemID) > 0);
 	
 	if( !IsValidClient(client) ) {
 		return Plugin_Stop;
@@ -624,13 +625,15 @@ public Action stopBuilding(Handle timer, Handle dp) {
 		return Plugin_Stop;
 	}
 		
-	if( positive > 0 && !doRP_CanClientCraftForFree(client, itemID) ) {
-		for (int j = 0; j < magic.Length; j++) { // Pour chaque items de la recette:
-			magic.GetArray(j, data);
-			
-			if( data[craft_amount] > rp_GetClientItem(client,data[craft_raw]) ) {
-				g_bInCraft[client] = false;
-				return Plugin_Stop;
+	if( positive > 0 ) {
+		if( !free ) {
+			for (int j = 0; j < magic.Length; j++) { // Pour chaque items de la recette:
+				magic.GetArray(j, data);
+				
+				if( data[craft_amount] > rp_GetClientItem(client,data[craft_raw]) ) {
+					g_bInCraft[client] = false;
+					return Plugin_Stop;
+				}
 			}
 		}
 	}
@@ -661,12 +664,11 @@ public Action stopBuilding(Handle timer, Handle dp) {
 		if( g_flClientBook[client][book_luck] > GetTickedTime() && Math_GetRandomInt(0, 1000) < 50 )
 			rp_ClientGiveItem(client, itemID, positive);
 		
-		
 		for (int i = 0; i < magic.Length; i++) {  // Pour chaque items de la recette:
 			magic.GetArray(i, data);
 				
 			ClientGiveXP(client, rp_GetItemInt(data[craft_raw], item_type_prix));
-			if( !doRP_CanClientCraftForFree(client, itemID) )
+			if( !free )
 				rp_ClientGiveItem(client, data[craft_raw], -data[craft_amount]);		
 		}
 	}

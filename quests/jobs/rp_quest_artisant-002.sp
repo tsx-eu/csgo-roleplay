@@ -54,6 +54,7 @@ public void Q1_Frame(int objectiveID, int client) {
 	
 	int table1 = findMyTable(client);
 	int table2 = findNearestTable(client, maxDist);
+	
 	if( table1 > 0 ) {
 		rp_Effect_BeamBox(client, table1);
 	}
@@ -63,9 +64,6 @@ public void Q1_Frame(int objectiveID, int client) {
 	if( table2 > 0 && maxDist < 128.0 ) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
-	
-	
-	rp_QuestStepComplete(client, objectiveID);
 }	
 public void Q1_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
@@ -84,8 +82,8 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.AddItem("", tmp, ITEMDRAW_DISABLED);
 	menu.AddItem("", "Pouvez vous nous les crafter au plus vite?", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Nous vous fournirons tout les matériaux", ITEMDRAW_DISABLED);
-	menu.AddItem("", "nécessaire pendant votre travail.", ITEMDRAW_CONTROL);
+	menu.AddItem("", "Nous vous fournirons tous les matériaux", ITEMDRAW_DISABLED);
+	menu.AddItem("", "nécessaires pendant votre travail.", ITEMDRAW_CONTROL);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 60);
@@ -116,8 +114,9 @@ public void Q_Done(int objectiveID, int client) {
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 5000);
 }
 public int RP_CanClientCraftForFree(int client, int itemID) {
-	if( g_bDoingQuest[client] && g_iCraftItem[client] == itemID && g_iCraftLeft[client] > 0 )
+	if( g_bDoingQuest[client] && g_iCraftItem[client] == itemID && g_iCraftLeft[client] > 0 ) {
 		return g_iCraftLeft[client];
+	}
 	return 0;
 }
 public Action RP_ClientCraftOver(int client, int itemID) {
