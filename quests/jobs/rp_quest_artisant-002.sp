@@ -83,7 +83,7 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.AddItem("", "Pouvez vous nous les crafter au plus vite?", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Nous vous fournirons tous les matériaux", ITEMDRAW_DISABLED);
-	menu.AddItem("", "nécessaires pendant votre travail.", ITEMDRAW_CONTROL);
+	menu.AddItem("", "nécessaires pendant votre travail.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 60);

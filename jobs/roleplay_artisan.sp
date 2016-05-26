@@ -46,7 +46,7 @@ float g_flClientBook[65][book_max];
 #define MODEL_TABLE1 	"models/props/de_boathouse/table_drafting01.mdl"
 #define MODEL_TABLE2	"models/props/de_boathouse/table_drafting02.mdl"
 
-int lstJOB[] =  { 11, 21, 31, 41, 51, 61, 71, 81, 111, 121, 131, 171, 191, 211, 221 };
+int lstJOB[] =  { 11, 21, 31, 41, 51, 61, 71, 81, 111, 131, 171, 191, 211, 221 };
 
 public Plugin myinfo = {
 	name = "Jobs: ARTISAN", author = "KoSSoLaX",
@@ -255,10 +255,6 @@ void displayArtisanMenu(int client) {
 	DisplayMenu(menu, client, 30);
 }
 void displayBuildMenu(int client, int jobID, int itemID) {
-	if( rp_GetClientInt(client, i_ItemCount) == 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez aucune matière première.");
-		return;
-	}
 	
 	int clientItem[MAX_ITEMS], data[craft_type_max];
 	for(int i = 0; i < MAX_ITEMS; i++)
