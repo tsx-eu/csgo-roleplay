@@ -43,7 +43,7 @@ public void OnPluginStart() {
 	if (g_iQuest == -1)
 		SetFailState("Erreur lors de la création de la quête %s %s", QUEST_UNIQID, QUEST_NAME);
 	
-	SQL_TQuery(rp_GetDatabase(), SQL_LoadReceipe, "SELECT `itemid`, `prix` FROM rp_craft C INNER JOIN rp_items I ON C.`itemid`=I.`id` WHERE I.`job_id`>0 GROUP BY `itemid`;", 0, DBPrio_Low);
+	SQL_TQuery(rp_GetDatabase(), SQL_LoadReceipe, "SELECT `itemid`, `prix` FROM rp_craft C INNER JOIN rp_items I ON C.`itemid`=I.`id` WHERE I.`job_id`>0 AND I.`extra_cmd`<>'rp_item_spawnflag' GROUP BY `itemid`;", 0, DBPrio_Low);
 	
 	int i;
 	rp_QuestAddStep(g_iQuest, i++, Q1_Start, Q1_Frame, Q_Abort, QUEST_NULL);
