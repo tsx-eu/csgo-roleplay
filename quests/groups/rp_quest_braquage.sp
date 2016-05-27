@@ -35,7 +35,7 @@
 #define		TEAM_HOSTAGE		5
 #define		TEAM_NAME1			"Braqueur"
 #define 	REQUIRED_T			4
-#define 	REQUIRED_CT			4
+#define 	REQUIRED_CT			5
 #define		MAX_ZONES			310
 
 
@@ -379,13 +379,18 @@ public void Q6_Frame(int objectiveID, int client) {
 	if( !rp_IsValidVehicle(g_iVehicle) ) { g_iVehicle = spawnVehicle(client); }
 	
 	if( g_stkTeamCount[TEAM_BRAQUEUR] == 0 ) {
-		int gain = ((GainMax - g_iQuestGain) / 4) / g_stkTeamCount[TEAM_POLICE];
-		for (int j = 0; j < g_stkTeamCount[TEAM_POLICE]; j++) { 
-			CPrintToChat(g_stkTeam[TEAM_POLICE][j], "{lightblue}[TSX-RP]{default} Vous avez gagné %d$ pour avoir tué tous les braqueurs de %s", gain, tmp2[0]);
-			rp_SetClientInt(g_stkTeam[TEAM_POLICE][j], i_AddToPay, rp_GetClientInt(g_stkTeam[TEAM_POLICE][j], i_AddToPay) + gain);
+		if( g_stkTeamCount[TEAM_POLICE] > 0 ) {
+			int amendePolice = (g_iQuestGain / 4) / g_stkTeamCount[TEAM_POLICE];
+			amendePolice = amendePolice < 1000 ? amendePolice : 1000;
+			int gainPolice = ((GainMax-(g_iQuestGain / 4)) / g_stkTeamCount[TEAM_POLICE]) - amendePolice;
+			
+			for (int j = 0; j < g_stkTeamCount[TEAM_POLICE]; j++) { 
+				CPrintToChat(g_stkTeam[TEAM_POLICE][j], "{lightblue}[TSX-RP]{default} Vous avez gagné %d$ pour avoir tué tous les braqueurs de %s", gainPolice, tmp2[0]);
+				rp_SetClientInt(g_stkTeam[TEAM_POLICE][j], i_AddToPay, rp_GetClientInt(g_stkTeam[TEAM_POLICE][j], i_AddToPay) + gainPolice);
+			}
 		}
 		rp_QuestStepFail(client, objectiveID);
-		LogToGame("[BRAQUAGE] Le braquage est terminé, perdu: %d$", gain);
+		LogToGame("[BRAQUAGE] Le braquage est terminé, perdu: %d$", g_iQuestGain);
 		return;
 	}
 	
@@ -423,18 +428,25 @@ public void Q6_Frame(int objectiveID, int client) {
 	if( allInVehicle ) 
 		rp_QuestStepComplete(client, objectiveID);
 	
-	for (int j = 0; j < g_stkTeamCount[TEAM_POLICE]; j++) {
-		rp_SetClientInt(g_stkTeam[TEAM_POLICE][j], i_Perquiz, GetTime());
+	if( g_stkTeamCount[TEAM_POLICE] > 0 ) {
+		int amendePolice = (g_iQuestGain / 4) / g_stkTeamCount[TEAM_POLICE];
+		amendePolice = amendePolice < 1000 ? amendePolice : 1000;
 		
-		PrintHintText(g_stkTeam[TEAM_POLICE][j], "<b>Alerte</b>: Un braquage est en cours dans %s, tuer les braqueurs. <b>Gain</b>: %d$, <b>Amende</b>: %d$.", tmp2[0], (GainMax - g_iQuestGain)/4, g_iQuestGain/4);
+		int gainPolice = ((GainMax-(g_iQuestGain / 4)) / g_stkTeamCount[TEAM_POLICE]) - amendePolice;
 		
-		for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
-			if( Math_GetRandomInt(0, 4)  == 0 )
-				rp_Effect_BeamBox(g_stkTeam[TEAM_POLICE][j], g_stkTeam[TEAM_BRAQUEUR][i], NULL_VECTOR, 255, 0, 0);
-		}
-		for (int i = 0; i < g_stkTeamCount[TEAM_HOSTAGE]; i++) {
-			if( Math_GetRandomInt(0, 4)  == 0 )
-				rp_Effect_BeamBox(g_stkTeam[TEAM_POLICE][j], g_stkTeam[TEAM_HOSTAGE][i], NULL_VECTOR, 0, 255, 0);
+		for (int j = 0; j < g_stkTeamCount[TEAM_POLICE]; j++) {
+			rp_SetClientInt(g_stkTeam[TEAM_POLICE][j], i_Perquiz, GetTime());
+			
+			PrintHintText(g_stkTeam[TEAM_POLICE][j], "<b>Alerte</b>: Un braquage est en cours dans %s, tuer les braqueurs. <b>Gain</b>: %d$, <b>Amende</b>: %d$.", tmp2[0], gainPolice, amendePolice);
+			
+			for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
+				if( Math_GetRandomInt(0, 4)  == 0 )
+					rp_Effect_BeamBox(g_stkTeam[TEAM_POLICE][j], g_stkTeam[TEAM_BRAQUEUR][i], NULL_VECTOR, 255, 0, 0);
+			}
+			for (int i = 0; i < g_stkTeamCount[TEAM_HOSTAGE]; i++) {
+				if( Math_GetRandomInt(0, 4)  == 0 )
+					rp_Effect_BeamBox(g_stkTeam[TEAM_POLICE][j], g_stkTeam[TEAM_HOSTAGE][i], NULL_VECTOR, 0, 255, 0);
+			}
 		}
 	}
 }
@@ -467,12 +479,15 @@ public void Q_Complete(int objectiveID, int client) {
 	
 	rp_SetJobCapital(g_iPlanque, rp_GetJobCapital(g_iPlanque) - gain*3/4);
 	
-	LogToGame("[BRAQUAGE] Le braquage est terminé, gagné: %d$", gain);
+	LogToGame("[BRAQUAGE] Le braquage est terminé, gagné: %d$", g_iQuestGain);
 	
-	gain = (g_iQuestGain / 4) / g_stkTeamCount[TEAM_POLICE];
-	for (int i = 0; i < g_stkTeamCount[TEAM_POLICE]; i++) {
-		CPrintToChat(g_stkTeam[TEAM_POLICE][i], "{lightblue}[TSX-RP]{default} Vous avez payé une amende de %d$ à cause du braquage de %s.", gain, tmp2[0]);
-		rp_SetClientInt(g_stkTeam[TEAM_POLICE][i], i_Money, rp_GetClientInt(g_stkTeam[TEAM_POLICE][i], i_Money) - gain);
+	if( g_stkTeamCount[TEAM_POLICE] > 0 ) {
+		int amendePolice = (g_iQuestGain / 4) / g_stkTeamCount[TEAM_POLICE];
+		
+		for (int i = 0; i < g_stkTeamCount[TEAM_POLICE]; i++) {
+			CPrintToChat(g_stkTeam[TEAM_POLICE][i], "{lightblue}[TSX-RP]{default} Vous avez payé une amende de %d$ à cause du braquage de %s.", amendePolice, tmp2[0]);
+			rp_SetClientInt(g_stkTeam[TEAM_POLICE][i], i_Money, rp_GetClientInt(g_stkTeam[TEAM_POLICE][i], i_Money) - amendePolice);
+		}
 	}
 	Q_Abort(objectiveID, client);
 }
