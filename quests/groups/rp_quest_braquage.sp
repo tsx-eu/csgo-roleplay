@@ -173,7 +173,7 @@ public void Q1_Start(int objectiveID, int client) {
 	LogToGame("[BRAQUAGE] %N a lancé un braquage", client);
 }
 public void Q1_Frame(int objectiveID, int client) {
-	if( g_stkTeamCount[TEAM_BRAQUEUR] >= REQUIRED_T && g_stkTeamCount[TEAM_BRAQUEUR] >= REQUIRED_CT ) {
+	if( g_stkTeamCount[TEAM_BRAQUEUR] >= REQUIRED_T && g_stkTeamCount[TEAM_POLICE] >= REQUIRED_CT ) {
 		rp_QuestStepComplete(client, objectiveID);
 		return;
 	}
