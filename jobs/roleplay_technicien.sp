@@ -460,7 +460,7 @@ int BuildingCashMachine(int client, bool force=false) {
 	}
 	
 	if( count > (max-1) && !force) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez trop de machine active.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez trop de machines actives.");
 		return 0;
 	}
 	
@@ -596,9 +596,9 @@ void CashMachine_Destroy(int entity) {
 		char name[64];
 		GetEdictClassname(entity, name, sizeof(name));
 		if( StrContains(name, "big") >= 0 )
-			CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre photocopieuse à faux billet a été détruite.");
+			CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre photocopieuse à faux-billets a été détruite.");
 		else
-			CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos machines à faux billet a été détruite.");
+			CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos machines à faux-billets a été détruite.");
 		
 		if( rp_GetBuildingData(entity, BD_started)+120 < GetTime() ) {
 			rp_SetClientInt(owner, i_Bank, rp_GetClientInt(owner, i_Bank)-25);
@@ -710,7 +710,7 @@ int BuildingBigCashMachine(int client) {
 	}
 	
 	if( count > (max-15) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez trop de machine active.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez trop de machines actives.");
 		return 0;
 	}
 	
@@ -833,7 +833,7 @@ int CountMachine(int client) {
 			count += 15;
 			Entity_GetAbsOrigin(i, vecOrigin2);
 			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 50 ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas construire aussi proche d'une autre machine à vous.");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas construire aussi proche d'une autre machine vous appartenant.");
 				return -1;
 			}
 		}
@@ -841,7 +841,7 @@ int CountMachine(int client) {
 			count++;
 			Entity_GetAbsOrigin(i, vecOrigin2);
 			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 24 ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas construire aussi proche d'une autre machine à vous.");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas construire aussi proche d'une autre machine vous appartenant.");
 				return -1;
 			}
 		}

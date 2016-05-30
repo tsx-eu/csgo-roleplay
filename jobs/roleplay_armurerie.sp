@@ -156,7 +156,7 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 	char wep_name[32];
 	GetEdictClassname(wep_id, wep_name, 31);
 	if( StrContains(wep_name, "weapon_bayonet") == 0 || StrContains(wep_name, "weapon_knife") == 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez prendre une arme en main pour la modifier");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez prendre une arme en main pour la modifier.");
 		return Plugin_Handled;
 	}
 
@@ -272,7 +272,7 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 			else{
 				if((rp_GetClientInt(client, i_Bank)+rp_GetClientInt(client, i_Money)) >= price){
 					rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money)-price);
-					CPrintToChat(client, "{lightblue}[TSX-RP]{default} La modification a été appliqué à votre arme.");	
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} La modification a été appliquée à votre arme.");	
 					rp_SetClientStat(client, i_TotalBuild, rp_GetClientStat(client, i_TotalBuild)+1);
 				}
 				else{
@@ -327,13 +327,13 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 				else if(StrEqual(type, "sanandreas")){
 					int ammo = Weapon_GetPrimaryClip(wep_id);
 					if( ammo >= 150 ) {
-						CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme a déjà un San Andreas, il vous reste %d balles dans votre chargeur.", ammo);
+						CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme a déjà un San Andreas, il vous reste %d balles dans le chargeur.", ammo);
 						return;
 					}
 					ammo += 1000; if( ammo > 5000 ) ammo = 5000;
 					Weapon_SetPrimaryClip(wep_id, ammo);
 					SDKHook(wep_id, SDKHook_Reload, OnWeaponReload);
-					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme à maintenant %i balles", ammo);
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme possède maintenant %i balles", ammo);
 					sellerjob = 31;
 				}
 				rp_SetJobCapital( sellerjob, rp_GetJobCapital(sellerjob)+price );
@@ -355,7 +355,7 @@ public Action OnWeaponReload(int wepid) {
 		int client = Weapon_GetOwner(wepid);
 		
 		if( cache[client] < GetGameTime() ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme a un San Andreas, il vous reste %d balles dans votre chargeur.", ammo);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme a un San Andreas, il vous reste %d balles dans le chargeur.", ammo);
 			cache[client] = GetGameTime() + 1.0;
 		}
 		
@@ -382,14 +382,14 @@ public int ModifyWeaponPVP(Handle p_hItemMenu, MenuAction p_oAction, int client,
 			GetEdictClassname(wep_id, wep_name, 31);
 
 			if( StrContains(wep_name, "weapon_bayonet") == 0 || StrContains(wep_name, "weapon_knife") == 0 ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez prendre une arme en main pour la modifier");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez prendre une arme en main pour la modifier.");
 				return;
 			}
 
 			if((rp_GetClientInt(client, i_Bank)+rp_GetClientInt(client, i_Money)) >= price){
 				rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money)-price);
 				rp_SetJobCapital( 111, rp_GetJobCapital(111)+price );
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} La modification a été appliqué à votre arme.");	
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} La modification a été appliquée à votre arme.");	
 			}
 			else{
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas assez d'argent.");

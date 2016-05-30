@@ -70,7 +70,7 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Mon frère, Nous avons besoin de toi.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Des documents très important se trouvent", ITEMDRAW_DISABLED);
-	menu.AddItem("", "dans la villa PvP. Vol-les.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "dans la villa PvP. Vole-les.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Pendant toute la durée de ta mission, ", ITEMDRAW_DISABLED);
 	menu.AddItem("", "nous t'enverrons du matériel nécessaire à ta réussite.", ITEMDRAW_DISABLED);

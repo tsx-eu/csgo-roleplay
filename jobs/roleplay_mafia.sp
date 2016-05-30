@@ -335,7 +335,7 @@ public Action Cmd_ItemDoorDefine(int args) {
 			return Plugin_Handled;
 		}
 		g_iDoorDefine_ALARM[doorID] = client;
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} L'alarme a été installée.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} L'alarme a été installée avec succès.");
 	}
 	
 	return Plugin_Handled;
@@ -353,7 +353,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 	}
 	
 	if( rp_GetClientVehiclePassager(client) > 0 || Client_GetVehicle(client) > 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible d'utiliser cet item dans une voiture.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible d'utiliser cet objet dans une voiture.");
 		ITEM_CANCEL(client, item_id);
 		return Plugin_Handled;
 	}
@@ -368,7 +368,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 	
 	if( target <= MaxClients ) {
 		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un distributeur de billet.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un distributeur de billets.");
 		return Plugin_Handled;
 	}
 	
@@ -376,20 +376,20 @@ public Action Cmd_ItemPiedBiche(int args) {
 	GetEdictClassname(target, classname, sizeof(classname));
 	if( StrContains(classname, "rp_bank__") == 0 ) {
 		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un distributeur de billet.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un distributeur de billets.");
 		return Plugin_Handled;
 	}
 	
 	if( StrContains(classname, "rp_weaponbox_") != 0 && StrContains(classname, "rp_bank_") != 0 ) {
 		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un distributeur de billet.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un distributeur de billets.");
 		return Plugin_Handled;
 	}
 	
 	
 	if( rp_IsEntitiesNear(client, target, true) == false ) {
 		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un distributeur de billet.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un distributeur de billets.");
 		return Plugin_Handled;
 	}
 		
@@ -441,7 +441,7 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	rp_ClientColorize(client);
 	
 	if( rp_IsEntitiesNear(client, target, true) == false || !IsPlayerAlive(client) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un distributeur de billet.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un distributeur de billets.");
 		CreateTimer(0.5, AllowStealing, client);
 		return Plugin_Handled;
 	}
@@ -471,7 +471,7 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	}
 	rp_SetClientStat(client, i_JobSucess, rp_GetClientStat(client, i_JobSucess) + 1);
 	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} %d billets ont été sorti du distributeur.", rand);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} %d billets sont sortis du distributeur.", rand);
 	
 	for (int i = 1; i <= rand; i++) {
 		CreateTimer(i / 5.0, SpawnMoney, target);
@@ -669,7 +669,7 @@ public Action ItemPickLockOver_maffia(Handle timer, Handle dp) {
 			char zone[128];
 			rp_GetZoneData(rp_GetPlayerZone(door), zone_type_name, zone, sizeof(zone));
 			
-			CPrintToChat(alarm, "{lightblue}[TSX-RP]{default} Quelqu'un a ouvert votre porte cadnacée (%s).", zone );
+			CPrintToChat(alarm, "{lightblue}[TSX-RP]{default} Quelqu'un a ouvert votre porte cadenacée (%s).", zone );
 			rp_Effect_BeamBox(alarm, client);
 		}
 		

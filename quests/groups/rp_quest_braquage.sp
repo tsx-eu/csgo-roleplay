@@ -236,7 +236,7 @@ public void Q2_Frame(int objectiveID, int client) {
 int g_iQ3 = -1;
 public void Q3_Frame(int objectiveID, int client) {
 	
-	PrintHintText(client, "<b>Quête</b>: %s\n<b>Objectif</b>: Choisir le lieux du braquage.", QUEST_NAME);
+	PrintHintText(client, "<b>Quête</b>: %s\n<b>Objectif</b>: Choisir le lieu du braquage.", QUEST_NAME);
 	
 	if( rp_ClientCanDrawPanel(client) ) {
 		char tmp[64], tmp2[2][64];
@@ -414,7 +414,7 @@ public void Q6_Frame(int objectiveID, int client) {
 	for (int j = 0; j < g_stkTeamCount[TEAM_POLICE]; j++) {
 		rp_SetClientInt(g_stkTeam[TEAM_POLICE][j], i_Perquiz, GetTime());
 		
-		PrintHintText(g_stkTeam[TEAM_POLICE][j], "<b>Alerte</b>: Un braquage est en cours dans %s, tuer les braqueurs. <b>Gain</b>: %d$, <b>Amende</b>: %d$.", tmp2[0], (GainMax - g_iQuestGain)/4, g_iQuestGain/4);
+		PrintHintText(g_stkTeam[TEAM_POLICE][j], "<b>Alerte</b>: Un braquage est en cours dans %s, tuez les braqueurs. <b>Gain</b>: %d$, <b>Amende</b>: %d$.", tmp2[0], (GainMax - g_iQuestGain)/4, g_iQuestGain/4);
 		
 		for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
 			if( Math_GetRandomInt(0, 4)  == 0 )
@@ -432,7 +432,7 @@ public void Q7_Frame(int objectiveID, int client) {
 	
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
 		ServerCommand("sm_effect_gps %d %f %f %f", g_stkTeam[TEAM_BRAQUEUR][i], dst[0], dst[1], dst[2]);
-		PrintHintText(g_stkTeam[TEAM_BRAQUEUR][i], "<b>Quête</b>: %s\n<b>Objectif</b>: Prennez la fuite avec le véhicule.", QUEST_NAME);
+		PrintHintText(g_stkTeam[TEAM_BRAQUEUR][i], "<b>Quête</b>: %s\n<b>Objectif</b>: Prenez la fuite avec le véhicule.", QUEST_NAME);
 	}
 }
 public void Q_Complete(int objectiveID, int client) {
@@ -535,7 +535,7 @@ public Action fwdPressUse(int client) {
 			GetEdictClassname(target, classname, sizeof(classname));
 			if( StrEqual(classname, "hostage_entity") ) {
 				Menu menu = new Menu(MenuRespawnBraqueur);
-				menu.SetTitle("Relacher l'hotage pour récupérer un co-équipier?");
+				menu.SetTitle("Relâcher l'otage pour récupérer un co-équipier?");
 				
 				for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR_DEAD]; i++) {
 					Format(classname, sizeof(classname), "%d %d", target, g_stkTeam[TEAM_BRAQUEUR_DEAD][i]);

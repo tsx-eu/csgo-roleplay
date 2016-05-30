@@ -220,7 +220,7 @@ public Action Cmd_ItemSucette(int args) {
 	
 	int client = GetCmdArgInt(1);
 	if( Client_IsInVehicle(client) || rp_GetClientVehiclePassager(client) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible d'utiliser cet item dans une voiture.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible d'utiliser cet objet dans une voiture.");
 		int item_id = GetCmdArgInt(args);
 		ITEM_CANCEL(client, item_id);
 		return Plugin_Handled;
@@ -244,7 +244,7 @@ public Action Cmd_ItemSucette2(int args) {
 	int client = GetCmdArgInt(1);
 	
 	if( Client_IsInVehicle(client) || rp_GetClientVehiclePassager(client) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible d'utiliser cet item dans une voiture.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible d'utiliser cet objet dans une voiture.");
 		int item_id = GetCmdArgInt(args);
 		ITEM_CANCEL(client, item_id);
 		return Plugin_Handled;
@@ -523,7 +523,7 @@ public void BuildingKevlarBox_break(const char[] output, int caller, int activat
 	#endif
 	
 	int client = GetEntPropEnt(caller, Prop_Send, "m_hOwnerEntity");
-	CPrintToChat(client,"{lightblue}[TSX-RP]{default} Votre Valise remplie de préservatifs a été détruite");
+	CPrintToChat(client,"{lightblue}[TSX-RP]{default} Votre valise remplie de préservatifs a été détruite.");
 	
 	float vecOrigin[3];
 	Entity_GetAbsOrigin(caller,vecOrigin);

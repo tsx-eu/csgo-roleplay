@@ -328,7 +328,7 @@ public Action fwdTueurDead(int client, int attacker, float& respawn) {
 public Action OnWeaponDrop(int client, int weapon) {
 	
 	if( rp_GetClientJobID(client) == 41 && (g_iKillerPoint[client][competance_usp] || g_iKillerPoint[client][competance_awp] || g_iKillerPoint[client][competance_pompe]) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas lâcher vos armes en contrat.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas lâcher vos armes pendant un contrat.");
 		return Plugin_Handled;
 	}
 
@@ -382,7 +382,7 @@ public Action TimerEndProtect(Handle timer, any client) {
 	
 	int vendeur = rp_GetClientInt(client, i_Protect_From);
 	
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le contrat de protection est terminé.");
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le contrat de protection est terminé."); // Félicitations si réussi ? Votre client est mort,dommage. si raté ?
 	CPrintToChat(vendeur, "{lightblue}[TSX-RP]{default} Le contrat de protection est terminé.");
 	
 	rp_SetClientInt(client, i_Protect_From, 0);
@@ -405,7 +405,7 @@ void OpenSelectSkill(int client) {
 	#endif
 	
 	char tmp[255];
-	Format(tmp, 254, "Sélectionner les compétences a utiliser (%i)", g_iKillerPoint[client][competance_left]);
+	Format(tmp, 254, "Sélectionner les compétences à utiliser (%i)", g_iKillerPoint[client][competance_left]);
 	
 	Handle menu = CreateMenu(AddCompetanceToAssassin);
 	SetMenuTitle(menu, tmp);
@@ -684,7 +684,7 @@ public Action SendToTueur(Handle timer, any client) {
 		}
 	}
 	
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vos ravisseurs vont vous libérer dans 6h. Mais vous pouvez tenter autre chose...");
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez entendu dire que vos ravisseurs comptent vous libérer dans 6h. Vous pouvez tenter autre chose...");
 	
 	g_hTimer[client] = CreateTimer(6*60.0, FreeKidnapping, client);
 	rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
@@ -728,8 +728,8 @@ public Action fwdZoneChange(int client, int newZone, int oldZone) {
 		else {
 			TeleportEntity(client,  view_as<float>({-5553.9, -2838.9, -1959.9}), NULL_VECTOR, NULL_VECTOR);
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Une tentative de triche a été détectée.");
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Etes-vous sorti correctement, sans triche, sans téléportation ?");
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Si c'est le cas, contactez KoSSoLaX.");			
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Êtes-vous sorti correctement, sans triche, sans téléportation ?");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Si c'est le cas, contactez KoSSoLaX --> @Kossolax@ts-x.eu ");			
 		}
 	}
 }
@@ -791,7 +791,7 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 			rp_ClientSendToSpawn(client, true);
 		}
 		else if( StrEqual( options, "free", false) ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Les portes s'ouvriront toute les 20 secondes, vous n'avez qu'une seule chance de vous en sortir.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Les portes s'ouvriront toute les 20 secondes, vous n'avez qu'une seule chance de vous en sortir. Pas le droit à l'erreur, foncez !");
 			float delay = 20.0;
 			float time = 0.0;
 			
@@ -837,7 +837,7 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 				if( rp_GetClientJobID(i) != 1 && rp_GetClientJobID(i) != 101 )
 					continue;
 				
-				CPrintToChat(i, "{lightblue}[TSX-RP]{default} Un enlèvement a eu lieu. Vous devez libérer %N dans %s.", client, dest);
+				CPrintToChat(i, "{lightblue}[TSX-RP]{default} Un enlèvement a eut lieu. Vous devez libérer %N dans %s.", client, dest);
 				rp_Effect_BeamBox(i, client);
 				ClientCommand(i, "play buttons/blip1.wav");
 			}
@@ -887,7 +887,7 @@ public Action Cmd_ItemCamera(int args) {
 	int item_id = GetCmdArgInt(args);
 	
 	if( !IsValidClient(target) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez vous raprocher pour lui coller une caméra.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez vous rapprocher pour lui coller une caméra."); // Pas sûr pour les 2 p
 		ITEM_CANCEL(client, item_id);
 		return Plugin_Handled;
 	}
@@ -930,7 +930,7 @@ public Action Cmd_ItemCryptage(int args) {
 		level = 5;
 		
 	rp_SetClientInt(client, i_Cryptage, level);
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Les mercenaires vous couvrent, vous avez %i/100 de chance d'être caché.", level*20);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Les mercenaires vous couvrent, vous avez désormais %i/100 de chance d'être caché.", level*20);
 	return Plugin_Handled;
 }
 // ----------------------------------------------------------------------------
@@ -1048,7 +1048,7 @@ public Action Cmd_ItemEnquete(int args) {
 		}
 	}
 	else{
-		LogToGame("[TSX-RP] [ENQUETE] Une enquête effectuée sur %L a révélée qu'il n'a été tué par personne.", target, killed);
+		LogToGame("[TSX-RP] [ENQUETE] Une enquête effectuée sur %L a révélé qu'il n'a été tué par personne.", target, killed); // Pas sûr non plus pour l'accord avec "avoir"
 	}
 	
 	if( IsValidClient(rp_GetClientInt(target, i_LastVol)) ) 

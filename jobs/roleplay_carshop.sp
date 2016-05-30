@@ -47,18 +47,18 @@ char g_szParticles[][][32] =  {
 	{ "Trail4",		"Fumée verte" },
 	{ "Trail5",		"Seringue" },
 	{ "Trail7",		"Petite fumée verte" },
-	{ "Trail8",		"Fumée blanche et bleu" },
+	{ "Trail8",		"Fumée blanche et bleue" },
 	{ "Trail9",		"Drogue n°1" },
-	{ "Trail10",	"Bulle bleu n°1" },
+	{ "Trail10",	"Bulle bleue n°1" },
 	{ "Trail11",	"Fumée Or" },
-	{ "Trail12",	"Fumée bleu" },
-	{ "Trail13",	"Bulle bleu °2" },
+	{ "Trail12",	"Fumée bleue" },
+	{ "Trail13",	"Bulle bleue °2" },
 	{ "Trail14",	"Drogue °2" },
 	{ "Trail15",	"Trait jaune et vert" },
 	{ "Trail_01",	"Fusée n°2" },
-	{ "Trail_02",	"Fumée bleu n°2" },
+	{ "Trail_02",	"Fumée bleue n°2" },
 	{ "Trail_03",	"Fumée verte" },
-	{ "Trail_04",	"Fumée bleu et rose" },
+	{ "Trail_04",	"Fumée bleue et rose" },
 };
 char g_szColor[][][32] = {
 	{ "128 0 0", 	"Rubis" },  	{ "255 0 0", 	"Rouge" }, 		{ "255 128 0", 	"Orange" },  	{ "255 255 0", 	"Jaune" }, 
@@ -230,7 +230,7 @@ public Action Cmd_ItemVehicle(int args) {
 	
 	if( countVehicle(client) >= GetConVarInt(g_hMAX_CAR) ) {
 		CAR_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il y a trop de voiture en circulation pour l'instant.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il y a trop de voitures en circulation pour l'instant.");
 		return;			
 	}
 	
@@ -809,8 +809,8 @@ void AskToJoinCar(int client, int vehicle) {
 	Format(tmp, sizeof(tmp), "%N souhaite entrer dans votre voiture.\n L'acceptez-vous ?", client);
 	SetMenuTitle(menu, tmp);
 	
-	Format(tmp, sizeof(tmp), "%i_%i_1", client, vehicle);	AddMenuItem(menu, tmp, "J'accepte");
-	Format(tmp, sizeof(tmp), "%i_%i_2", client, vehicle);	AddMenuItem(menu, tmp, "Je refuse");
+	Format(tmp, sizeof(tmp), "%i_%i_1", client, vehicle);	AddMenuItem(menu, tmp, "Accepter la demande");
+	Format(tmp, sizeof(tmp), "%i_%i_2", client, vehicle);	AddMenuItem(menu, tmp, "Refuser la demande");
 	AddMenuItem(menu, "vide", "-----------------", ITEMDRAW_DISABLED);
 	Format(tmp, sizeof(tmp), "%i_%i_3", client, vehicle);	AddMenuItem(menu, tmp, "Ignorer ce joueur");
 	
@@ -1037,7 +1037,7 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 			if( StrEqual(arg1, "from_bank") ) {
 					
 				Handle menu2 = CreateMenu(eventGarageMenu2);
-				SetMenuTitle(menu2, "Selectionnez votre voiture:");
+				SetMenuTitle(menu2, "Sélectionnez votre voiture:");
 				
 				char tmp[12], tmp2[64];
 				
@@ -1237,7 +1237,7 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 						int capital_id = rp_GetRandomCapital( rp_GetClientJobID(client)  );
 						rp_SetJobCapital( capital_id, rp_GetJobCapital(capital_id)-2000 );
 						
-						CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez vendu votre batterie, 2000$ vous seront crédité à la fin de la journée.");
+						CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez vendu votre batterie. Le virement des 2000$ sera effectué en fin de journée.");
 						rp_SetVehicleInt(target, car_battery, -1);
 					}
 					
@@ -1297,7 +1297,7 @@ public int SpawnVehicle(Handle menu, MenuAction action, int client, int param) {
 			}
 			
 			if( countVehicle(client) >= GetConVarInt(g_hMAX_CAR) ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il y a trop de voiture en circulation pour l'instant.");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il y a trop de voitures en circulation pour l'instant.");
 				return;			
 			}
 			

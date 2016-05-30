@@ -477,7 +477,7 @@ public Action Cmd_ItemBanane(int args) {
 		if( StrEqual(classname, classname2) ) {
 			count++;
 			if( count >= 10 ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez posé trop de banane.");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez posé trop de bananes.");
 				ITEM_CANCEL(client, itemID);
 				return Plugin_Handled;
 			}

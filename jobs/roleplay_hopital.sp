@@ -240,7 +240,7 @@ public Action Cmd_ItemSick(int args) {
 		
 		switch(rp_GetClientInt(client, i_Sick)) {
 			case sick_type_fievre:
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes atteint de forte fièvre. Prenez des Cachets d'aspirine.");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes atteint d'une forte fièvre. Prenez des Cachets d'aspirine.");
 			case sick_type_grippe:
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes atteint de la Grippe. Prenez des Cachets d'amantadine.");
 			case sick_type_tourista:
@@ -264,7 +264,7 @@ public Action Cmd_ItemSick(int args) {
 		g_iSuccess_last_faster_dead[client] = GetTime();
 	}
 	else {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ça n'a eu aucun effet.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ça n'a eut aucun effet.");
 	}
 }
 public Action Cmd_ItemPoison(int args) {
