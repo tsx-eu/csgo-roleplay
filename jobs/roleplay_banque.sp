@@ -130,15 +130,15 @@ public Action Cmd_ItemPermi(int args) {
 	
 	if( StrEqual(Arg1, "lege") ) {
 		rp_SetClientBool(client, b_License1, true);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez maintenant le permis de port d'arme légère.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez maintenant un permis de port d'arme légère.");
 	}
 	else if( StrEqual(Arg1, "lourd") ) {
 		rp_SetClientBool(client, b_License2, true);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez maintenant le permis de port d'arme lourde.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez maintenant un permis de port d'arme lourde.");
 	}
 	else if( StrEqual(Arg1, "vente") ) {
 		rp_SetClientBool(client, b_LicenseSell, true);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez maintenant le permis de vente.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez maintenant un permis de vente.");
 	}
 	
 	rp_ClientSave(client);
@@ -151,7 +151,7 @@ public Action Cmd_ItemBankCard(int args) {
 	int client = GetCmdArgInt(1);
 	rp_SetClientBool(client, b_HaveCard, true);
 	
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre carte bancaire est maintenant activé.");
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre carte bancaire est maintenant activée.");
 	rp_ClientSave(client);
 }
 public Action Cmd_ItemBankSort(int args) {

@@ -212,7 +212,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 	}
 	
 	if( rp_GetClientVehiclePassager(client) > 0 || Client_GetVehicle(client) > 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible d'utiliser cet item dans une voiture.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible d'utiliser cet objet dans une voiture.");
 		ITEM_CANCEL(client, item_id);
 		return Plugin_Handled;
 	}
@@ -272,7 +272,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 	rp_SetClientInt(client, i_LastVolTarget, -1);
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 15.0);
 		
-	ServerCommand("sm_effect_panel %d 15.0 \"Crochetage de la voiture...\"", client);
+	ServerCommand("sm_effect_panel %d 15.0 \"Crochetage de la voiture en cours...\"", client);
 	
 	CreateTimer(5.0, timerAlarm, target);
 	CreateTimer(10.0, timerAlarm, target);
@@ -332,7 +332,7 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	
 	if( !rp_GetClientKeyVehicle(client, target) ) {
 			
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %d billets ont été sortis de la boîte à gants.", rand);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %d billets sont sortis de la boîte à gants.", rand);
 			
 		while(rand >= 1 ) {
 			rand--;
@@ -528,7 +528,7 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 				if( button & IN_FORWARD || button & IN_BACK || button & IN_LEFT || button & IN_RIGHT ||
 					button & IN_MOVELEFT || button & IN_MOVERIGHT || button & IN_ATTACK || button & IN_JUMP || button & IN_DUCK	) {
 					price *= 2;
-					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vol en action, argent doublé");
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vol en action, argent doublé.");
 				}
 			
 				int amount = RoundFloat( (float(price)/100.0) * (25.0) );
@@ -638,7 +638,7 @@ int findPlayerWeapon(int client, int target) {
 }
 public Action OnWeaponDrop(int client, int weapon) {
 	
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas lâcher vos armes pendant qu'un 18th vous vol, tirez lui dessus !");
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas lâcher votre arme pendant qu'un 18th vous vol, tirez lui dessus ou fuyez !");
 	return Plugin_Handled;
 }
 public Action fwdDamage(int client, int attacker, float& damage) {

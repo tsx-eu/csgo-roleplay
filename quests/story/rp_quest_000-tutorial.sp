@@ -122,7 +122,7 @@ public void Q1_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "→ Rendez-vous devant la statue de la");
 		DrawPanelText(panel, "place de l'indépendance afin de commencer");
 		DrawPanelText(panel, "votre apprentissage.");
-		DrawPanelText(panel, "Le signal lumineux vert vous aidera tout");
+		DrawPanelText(panel, "Les flèches vous guideront tout");
 		DrawPanelText(panel, "au long de ce tutoriel.");
 		
 		rp_SendPanelToClient(panel, client, 1.1);
@@ -253,7 +253,7 @@ public void Q5_Frame(int objectiveID, int client) {
 		
 		SetPanelTitle(panel, "== Objectif 4: Le Tribunal");
 		DrawPanelText(panel, " Sachez qu'un policier n'a pas le droit de mettre");
-		DrawPanelText(panel, "en prison pour des faits qui ne sont pas déroulés devant");
+		DrawPanelText(panel, "en prison pour des faits qui ne se sont pas déroulés devant");
 		DrawPanelText(panel, "ses yeux.");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " Si vous connaissez le nom de la personne qui vous a tué");
@@ -288,12 +288,12 @@ public void Q6_Frame(int objectiveID, int client) {
 		Handle panel = CreatePanel();
 		
 		SetPanelTitle(panel, "== Objectif 5: L'armurerie");
-		DrawPanelText(panel, " Le laser suivant vous indique l'armurerie où ");
-		DrawPanelText(panel, "vous pouvez vous procurer des armes.");
-		DrawPanelText(panel, "N'oubliez pas de vous procurer un permis");
+		DrawPanelText(panel, " Les flèches vous diriger vers l'armurerie où ");
+		DrawPanelText(panel, "vous pourrez vous procurer des armes.");
+		DrawPanelText(panel, "N'oubliez pas d'acheter un permis");
 		DrawPanelText(panel, "de port d'arme à un banquier. Dans le cas contraire");
 		DrawPanelText(panel, "un policier est en droit de vous arrêter.");
-		DrawPanelText(panel, " Restez discret, garez la dans votre dos!");
+		DrawPanelText(panel, " Restez discret, rangez la dans votre poche!");
 		DrawPanelText(panel, " Une arme a été ajoutée dans votre inventaire.");
 		DrawPanelText(panel, "→ Entrez la commande /item dans le chat général,");
 		DrawPanelText(panel, "Appuyez sur la touche 1 afin de l'utiliser");
@@ -361,14 +361,14 @@ public void Q8_Frame(int objectiveID, int client) {
 		
 		SetPanelTitle(panel, "== Objectif 7: Un trafic illégal");
 		DrawPanelItem(panel, "", ITEMDRAW_SPACER);
-		DrawPanelText(panel, " Une imprimante à faux-billet et un plant");
-		DrawPanelText(panel, "de drogue ont été ajoutés dans votre");
+		DrawPanelText(panel, " Une imprimante à faux-billets et un plant");
+		DrawPanelText(panel, "de drogue ont été ajoutés à votre");
 		DrawPanelText(panel, "inventaire.");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " Trouvez-vous une cachette, et utilisez");
 		DrawPanelText(panel, "ces objets (/item). Si vous êtes mal");
 		DrawPanelText(panel, "caché, un policier est en droit de vous");
-		DrawPanelText(panel, "arrêter!");
+		DrawPanelText(panel, "arrêter ! ");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, "→ Déposez une machine, et un plant de");
 		DrawPanelText(panel, "drogue afin de continuer votre");
@@ -398,10 +398,10 @@ public void Q9_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, " Le chat général, celui qui permet");
 		DrawPanelText(panel, "de communiquer avec tout citoyen");
 		DrawPanelText(panel, "présent en ville, mais aussi d'exécuter");
-		DrawPanelText(panel, "diverses commandes.");
+		DrawPanelText(panel, "diverses commandes (comme le /item qu'on vient de voir).");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " Le chat équipe, permet de communiquer");
-		DrawPanelText(panel, "avec les citoyens autour de vous.");
+		DrawPanelText(panel, "avec les citoyens à coté de vous.");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, "→ Faites un coucou dans le chat local");
 		DrawPanelText(panel, "(chat équipe) afin de continuer votre");
@@ -594,8 +594,8 @@ public void Q14_Frame(int objectiveID, int client) {
 		
 		Handle menu = CreateMenu(MenuSelectJob);
 		SetMenuTitle(menu, "== Votre premier job vous est offert");
-		AddMenuItem(menu, "", "Sachez que plus tard, vous devrez trouver", ITEMDRAW_DISABLED);
-		AddMenuItem(menu, "", "vous-même, le chef d'un job.", ITEMDRAW_DISABLED);
+		AddMenuItem(menu, "", "Sachez que plus tard, vous devrez le trouver", ITEMDRAW_DISABLED);
+		AddMenuItem(menu, "", "vous-même et être recruté par le chef d'un job.", ITEMDRAW_DISABLED);
 			
 		char tmp[128], tmp2[8];
 		SortIntegers(job, sizeof(job), Sort_Random);
