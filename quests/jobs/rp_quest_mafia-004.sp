@@ -23,21 +23,19 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
-#define QUEST_UNIQID	"mafia-003"
-#define	QUEST_NAME		"Documents secrets"
+#define QUEST_UNIQID	"mafia-004"
+#define	QUEST_NAME		"Trafic d'arme"
 #define	QUEST_TYPE		quest_daily
 #define	QUEST_JOBID		91
-#define	QUEST_RESUME	"Récupérer les documents"
-
-#define	MAX_ZONES		300
+#define	QUEST_RESUME	"Récupérer les armes"
 
 public Plugin myinfo = {
-	name = "Quête: Documents secrets", author = "KoSSoLaX",
-	description = "RolePlay - Quête Mafia: Documents secrets",
+	name = "Quête: Trafic d'arme", author = "KoSSoLaX",
+	description = "RolePlay - Quête Mafia: Trafic d'arme",
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-int g_iQuest, g_iDuration[MAXPLAYERS + 1], g_iGoing[MAXPLAYERS + 1];
+int g_iQuest, g_iDuration[MAXPLAYERS + 1], g_iStep[MAXPLAYERS + 1], g_iDoing[MAXPLAYERS + 1];
 
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
@@ -48,7 +46,9 @@ public void OnPluginStart() {
 	
 	int i;
 	rp_QuestAddStep(g_iQuest, i++,	Q1_Start,	Q1_Frame,	Q1_Abort,	QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, i++,	Q2_Start,	Q2_Frame,	Q1_Abort,	Q2_End);
+	rp_QuestAddStep(g_iQuest, i++,	Q2_Start,	Q1_Frame,	Q1_Abort,	QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++,	Q2_Start,	Q1_Frame,	Q1_Abort,	QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++,	Q3_Start,	Q3_Frame,	Q1_Abort,	Q3_End);
 }
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -63,63 +63,61 @@ public bool fwdCanStart(int client) {
 		
 	return true;
 }
+public void OnClientPostAdminCheck(int client) {
+	g_iStep[client] = 0;
+}
+public void doRP_OnClientWeaponPick(int client, int type) {
+	if( type == 3 && g_iDoing[client] > 0 ) {
+		rp_QuestStepComplete(client, g_iStep[client]);
+	}
+}
 public void Q1_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Mon frère, Nous avons besoin de toi.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Des documents très important se trouvent", ITEMDRAW_DISABLED);
-	menu.AddItem("", "dans la villa PvP. Vole-les.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Pendant toute la durée de ta mission, ", ITEMDRAW_DISABLED);
-	menu.AddItem("", "nous t'enverrons du matériel nécessaire à ta réussite.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Tu as 12 heures.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "La police a acheté des nouveaux", ITEMDRAW_DISABLED);
+	menu.AddItem("", "prototype d'arme.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Vol les.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 60);
 	
 	g_iDuration[client] = 12 * 60;
-	g_iGoing[client] = rp_QuestCreateInstance(client, "models/props/cs_office/box_office_indoor_32.mdl", view_as<float>({-6656.8, 4317.7, -2423.9}));
+	g_iStep[client] = 0;
+	g_iDoing[client] = objectiveID;
 }
 public void Q1_Frame(int objectiveID, int client) {
 	
 	g_iDuration[client]--;
-	if( Entity_GetDistance(client, g_iGoing[client]) < 32.0 ) {
-		AcceptEntityInput(g_iGoing[client], "Kill");
-		rp_QuestStepComplete(client, objectiveID);
-	}
-	else if( g_iDuration[client] <= 0 ) {
+	if( g_iDuration[client] <= 0 ) {
 		rp_QuestStepFail(client, objectiveID);
 	}
 	else {
-		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s", QUEST_NAME, g_iDuration[client], QUEST_RESUME);
-		rp_Effect_BeamBox(client, g_iGoing[client], NULL_VECTOR, 255, 0, 0);
-		
-		if( rp_GetPlayerZone(client) == 195 || rp_GetPlayerZone(client) == 196 ) {
-			if( rp_GetClientItem(client, 3) == 0 ) {
-				char item[64];
-				rp_GetItemData(3, item_type_name, item, sizeof(item));
-				rp_ClientGiveItem(client, 3);
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu: %s", item);
-			}
-		}
+		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s %d/3", QUEST_NAME, g_iDuration[client], QUEST_RESUME, g_iStep[client]);
 	}
 }
 public void Q2_Start(int objectiveID, int client) {
+	g_iDoing[client] = objectiveID;
+	g_iDuration[client] = 12 * 60;
+	g_iStep[client]++;
+}
+public void Q3_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Tu as les documents !", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Tu as les armes !", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Rapporte les nous au plus vite à la planque !", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 30);
 	
 	g_iDuration[client] = 6 * 60;
+	g_iStep[client] = 0;
 }
-public void Q2_Frame(int objectiveID, int client) {
+public void Q3_Frame(int objectiveID, int client) {
 	static float dst[3] =  { -316.2, 3204.1, -2119.9 };
 	float vec[3];
 	GetClientAbsOrigin(client, vec);
@@ -132,8 +130,8 @@ public void Q2_Frame(int objectiveID, int client) {
 		rp_QuestStepFail(client, objectiveID);
 	}
 	else {
-		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s", QUEST_NAME, g_iDuration[client], QUEST_RESUME);
-		rp_Effect_BeamBox(client, -1, dst, 255, 255, 255);
+		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: Retourner à la planque", QUEST_NAME, g_iDuration[client]);
+		ServerCommand("sm_effect_gps %d %f %f %f", client, dst[0], dst[1], dst[2]);
 		
 		if( rp_GetPlayerZone(client) == 195 || rp_GetPlayerZone(client) == 196 ) {
 			if( rp_GetClientItem(client, 3) == 0 ) {
@@ -145,17 +143,15 @@ public void Q2_Frame(int objectiveID, int client) {
 		}
 	}
 }
-public void Q2_End(int objectiveID, int client) {
-	
+public void Q3_End(int objectiveID, int client) {
 	Q1_Abort(objectiveID, client);
 	
 	int cap = rp_GetRandomCapital(91);
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 2500);
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 2500);
 }
-
-
 public void Q1_Abort(int objectiveID, int client) {
+	g_iDoing[client] = 0;
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 }
 // ----------------------------------------------------------------------------

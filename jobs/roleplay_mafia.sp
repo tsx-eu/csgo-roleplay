@@ -43,7 +43,7 @@ public Plugin myinfo = {
 
 int g_iDoorDefine_LOCKER[2049];
 float g_flAppartProtection[110];
-Handle g_hForward_RP_OnClientStealItem, g_vCapture;
+Handle g_hForward_RP_OnClientStealItem, g_hForward_RP_OnClientWeaponPick, g_vCapture;
 int g_cBeam;
 DataPack g_hBuyMenu;
 enum IM_Int {
@@ -62,6 +62,12 @@ bool doRP_CanClientStealItem(int client, int target) {
 		return false;
 	return true;
 }
+void doRP_OnClientWeaponPick(int client, int type) {
+	Call_StartForward(g_hForward_RP_OnClientWeaponPick);
+	Call_PushCell(client);
+	Call_PushCell(type);
+	Call_Finish();
+}
 // ----------------------------------------------------------------------------
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -79,6 +85,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_doorprotect", Cmd_ItemDoorProtect,	"RP-ITEM",	FCVAR_UNREGISTERED);
 	
 	g_hForward_RP_OnClientStealItem = CreateGlobalForward("RP_CanClientStealItem", ET_Event, Param_Cell, Param_Cell);
+	g_hForward_RP_OnClientWeaponPick = CreateGlobalForward("RP_OnClientWeaponPick", ET_Event, Param_Cell, Param_Cell);
 	
 	g_hBuyMenu = new DataPack();
 	g_hBuyMenu.WriteCell(0);
@@ -461,6 +468,8 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 		
 		float time = (rp_IsNight() ? STEAL_TIME:STEAL_TIME*2.0);
 		int stealAMount;
+		
+		doRP_OnClientWeaponPick(client, type);
 		
 		switch(type) {
 			case 2: { // Banque
