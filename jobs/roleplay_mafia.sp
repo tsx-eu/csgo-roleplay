@@ -74,6 +74,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_picklock2", 	Cmd_ItemPickLock,		"RP-ITEM",	FCVAR_UNREGISTERED);	
 	// Epicier
 	RegServerCmd("rp_item_doorDefine",	Cmd_ItemDoorDefine,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_doorprotect", Cmd_ItemDoorProtect,	"RP-ITEM",	FCVAR_UNREGISTERED);
 	
 	g_hForward_RP_OnClientStealItem = CreateGlobalForward("RP_CanClientStealItem", ET_Event, Param_Cell, Param_Cell);
 	
@@ -86,6 +87,16 @@ public void OnPluginStart() {
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
+}
+public Action Cmd_ItemDoorProtect(int args) {
+	int client = GetCmdArgInt(1);
+	int target = GetCmdArgInt(2);
+	int vendeur = GetCmdArgInt(3);
+	int item_id = GetCmdArgInt(args);
+	int prix = rp_GetItemInt(item_id, item_type_prix);
+	int reduction = rp_GetClientInt(client, i_Reduction);
+	
+	PrintToChatAll("%d %d %d %d %d %d", client, target, vendeur, item_id, prix, reduction);
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
@@ -942,6 +953,7 @@ bool disapear(int client) {
 	TE_SetupBeamRingPoint(vecCenter, 1.0, 200.0, g_cBeam, g_cBeam, 0, 10, 0.25, 80.0, 0.0, {100, 100, 255, 10}, 1, 0);
 	TE_SendToAll();
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous vous êtes déguisé en tant que %N.", rndClient[rnd]);
+	LogToGame("[BUILD] [MAFIA] %L est maintenant invisible", client);
 	return true;
 }
 public Action appear(Handle timer, any client) {
@@ -958,6 +970,8 @@ public Action appear(Handle timer, any client) {
 		TE_SetupBeamRingPoint(vecCenter, 1.0, 200.0, g_cBeam, g_cBeam, 0, 10, 0.25, 80.0, 0.0, {100, 100, 255, 10}, 1, 0);
 		TE_SendToAll();
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes plus déguisé.");
+		
+		LogToGame("[BUILD] [MAFIA] %L est maintenant visible", client);
 	}
 }
 public Action fwdZoneChange(int client, int newZone, int oldZone) {
