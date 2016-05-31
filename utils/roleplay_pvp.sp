@@ -496,7 +496,14 @@ void CAPTURE_Reward(int totalPoints) {
 	PrintToServer("CAPTURE_Reward");
 	#endif
 	int amount;
-	char tmp[128], szSteamID[32];
+	char tmp[128], szSteamID[32], optionsBuff[4][32];
+	
+	for(int i=1; i<MAX_GROUPS; i+=10) {
+		rp_GetGroupData(i, group_type_name, tmp, sizeof(tmp));
+		ExplodeString(tmp, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
+		
+		LogToGame("[CAPTURE] %s - %d", optionsBuff[1], g_iCapture_POINT[i]);
+	}
 	
 	for(int client=1; client<=GetMaxClients(); client++) {
 		if( !IsValidClient(client) || rp_GetClientGroupID(client) == 0 )

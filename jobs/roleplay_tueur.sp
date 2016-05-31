@@ -454,6 +454,7 @@ public int AddCompetanceToAssassin(Handle menu, MenuAction action, int client, i
 		}
 		
 		if( StrEqual(options, "annule", false) ) {
+			LogToGame("[CONTRAT] %L a annulé son contrat.", client);
 			SetContratFail(client);
 		}
 		else if( g_iKillerPoint[client][competance_left] <= 0 ) {
