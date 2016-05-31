@@ -118,6 +118,11 @@ public int rp_GetItemInt(int itemID, int typeID) {
 	rp_GetItemData(itemID, view_as<rp_item_type>(typeID), tmp, sizeof(tmp));
 	return StringToInt(tmp);
 }
+public float rp_GetItemFloat(int itemID, int typeID) {
+	char tmp[32];
+	rp_GetItemData(itemID, view_as<rp_item_type>(typeID), tmp, sizeof(tmp));
+	return StringToFloat(tmp);
+}
 public int rp_GetJobInt(int jobID, int typeID) {
 	char tmp[32];
 	rp_GetJobData(jobID, view_as<rp_job_type>(typeID), tmp, sizeof(tmp));

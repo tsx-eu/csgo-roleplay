@@ -90,13 +90,25 @@ public void OnPluginStart() {
 }
 public Action Cmd_ItemDoorProtect(int args) {
 	int client = GetCmdArgInt(1);
-	int target = GetCmdArgInt(2);
-	int vendeur = GetCmdArgInt(3);
+	int vendeur = GetCmdArgInt(2);
 	int item_id = GetCmdArgInt(args);
-	int prix = rp_GetItemInt(item_id, item_type_prix);
-	int reduction = rp_GetClientInt(client, i_Reduction);
 	
-	PrintToChatAll("%d %d %d %d %d %d", client, target, vendeur, item_id, prix, reduction);
+	int appartID = rp_GetPlayerZoneAppart(client);
+	if( appartID > 0 && rp_GetClientKeyAppartement(client, appartID) ) {
+		PrintToChatAll("succès.");
+	}
+	else {
+		float prix = float(rp_GetItemInt(item_id, item_type_prix));
+		float reduc = prix / 100.0 * float(rp_GetClientInt(vendeur, i_Reduction));
+		float taxe = rp_GetItemFloat(item_id, item_type_taxes);
+		
+		rp_SetClientInt(vendeur, i_AddToPay, rp_GetClientInt(vendeur, i_AddToPay) - RoundFloat((prix * taxe) - reduc));
+		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) + RoundFloat(prix - reduc));
+		rp_SetJobCapital(91, rp_GetJobCapital(91) - RoundFloat(prix * (1.0 - taxe)));
+		
+		rp_SetClientStat(vendeur, i_MoneyEarned_Sales, rp_GetClientStat(vendeur, i_MoneyEarned_Sales) - RoundFloat((prix * taxe) - reduc));
+		PrintToChatAll("echec.");
+	}
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
