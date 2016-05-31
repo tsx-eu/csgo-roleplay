@@ -30,6 +30,7 @@
 #define ITEM_KITCROCHTAGE	2
 #define ITEM_KITEXPLOSIF	3
 #define MARCHE_NOIR			view_as<float>({-144.55,520.1,-2119.96})
+#define MARCHE_PERCENT		40
 
 
 // TODO: Repensé le /vol pour fusionner doublon.
@@ -41,6 +42,7 @@ public Plugin myinfo = {
 };
 
 int g_iDoorDefine_LOCKER[2049];
+float g_flAppartProtection[110];
 Handle g_hForward_RP_OnClientStealItem, g_vCapture;
 int g_cBeam;
 DataPack g_hBuyMenu;
@@ -95,7 +97,16 @@ public Action Cmd_ItemDoorProtect(int args) {
 	
 	int appartID = rp_GetPlayerZoneAppart(client);
 	if( appartID > 0 && rp_GetClientKeyAppartement(client, appartID) ) {
-		PrintToChatAll("succès.");
+		float time = (appartID == 50 ? 12.0:24.0);
+		
+		if( g_flAppartProtection[appartID] <= GetGameTime() ) {
+			g_flAppartProtection[appartID] = GetGameTime() + time * 60.0;
+		}
+		else {
+			g_flAppartProtection[appartID] += (GetGameTime() + time * 60.0);
+		}
+		
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} La protection est activée pour %d minutes", RoundFloat((g_flAppartProtection[appartID] - GetGameTime()) / 60.0));
 	}
 	else {
 		float prix = float(rp_GetItemInt(item_id, item_type_prix));
@@ -107,7 +118,7 @@ public Action Cmd_ItemDoorProtect(int args) {
 		rp_SetJobCapital(91, rp_GetJobCapital(91) - RoundFloat(prix * (1.0 - taxe)));
 		
 		rp_SetClientStat(vendeur, i_MoneyEarned_Sales, rp_GetClientStat(vendeur, i_MoneyEarned_Sales) - RoundFloat((prix * taxe) - reduc));
-		PrintToChatAll("echec.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être dans votre appartement pour acheter cet objet.");
 	}
 }
 public void OnMapStart() {
@@ -133,7 +144,16 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 		return Plugin_Continue;
 	
 	if( disapear(client) ) {
-		cooldown = 120.0;
+		int job = rp_GetClientInt(client, i_Job);
+		switch( job ) {
+			case 91:	cooldown = 120.0;
+			case 92:	cooldown = 120.0;
+			case 93:	cooldown = 130.0; // parrain
+			case 94:	cooldown = 140.0; // pro
+			case 95:	cooldown = 150.0; // mafieux
+			case 96:	cooldown = 160.0; // apprenti
+			default:	cooldown = 160.0;
+		}
 	}
 	else {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible de se déguiser pour le moment.");
@@ -197,7 +217,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		rp_ClientGiveItem(target, i, -1);
 		
 		rp_SetClientInt(client, i_LastVolTime, GetTime());
-		rp_SetClientInt(client, i_LastVolAmount, (prix * 30) / 100);
+		rp_SetClientInt(client, i_LastVolAmount, (prix * MARCHE_PERCENT) / 100);
 		rp_SetClientInt(client, i_LastVolTarget, target);
 		rp_SetClientInt(target, i_LastVol, client);		
 		rp_SetClientFloat(target, fl_LastVente, GetGameTime() + 10.0);
@@ -617,6 +637,13 @@ public Action Cmd_ItemPickLock(int args) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser une porte.");
 		return Plugin_Handled;
 	}
+	
+	int appartID = zoneToAppartID(rp_GetPlayerZone(door));
+	if( appartID > 0 && g_flAppartProtection[appartID] > GetGameTime() ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible de crocheter cette porte pour encore %d minutes.", RoundFloat((g_flAppartProtection[appartID] - GetGameTime()) / 60.0));
+		return Plugin_Handled;
+	}
+	
 	
 	// Anti-cheat:
 	if( rp_GetClientItem(client, item_id) >= GetMaxKit(client, item_id)-1 ) {
@@ -1038,7 +1065,7 @@ void addBuyMenu(int client, int itemID) {
 	
 	data[IM_Owner] = client;
 	data[IM_ItemID] = itemID;
-	data[IM_Prix] = (rp_GetItemInt(itemID, item_type_prix) * 30) / 100;
+	data[IM_Prix] = (rp_GetItemInt(itemID, item_type_prix) * MARCHE_PERCENT) / 100;
 	
 	g_hBuyMenu.Reset();
 	int pos = g_hBuyMenu.ReadCell();
@@ -1133,4 +1160,17 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 		CloseHandle(p_hMenu);
 	}
 	return 0;
+}
+int zoneToAppartID(int zoneID) {
+	char tmp[64];
+	rp_GetZoneData(zoneID, zone_type_type, tmp, sizeof(tmp));
+	
+	int res = 0;
+	
+	if( StrContains(tmp, "appart_", false) == 0 ) {
+		ReplaceString(tmp, sizeof(tmp), "appart_", "");
+		res = StringToInt(tmp);
+	}
+	
+	return res;
 }
