@@ -71,7 +71,7 @@ public void Q1_Start(int objectiveID, int client) {
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Maitre, nos informations indiquent qu'un meurtrier", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Maître, nos informations indiquent qu'un meurtrier", ITEMDRAW_DISABLED);
 	menu.AddItem("", "en série fait rage en ville.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Nous avons besoin qu'il aille pourrir en taule.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Assurez-vous, qu'un joueur se fasse tuer par lui.", ITEMDRAW_DISABLED);
@@ -80,8 +80,8 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.AddItem("", "la justice.", ITEMDRAW_DISABLED); 
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Vous avez 24 heures pour faire condamner ce joueur.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Il doit avoir une amende d'au moins 100$.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "ainsi que 3heures de prison.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Il devra avoir une amende d'au moins 100$.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "ainsi que 3 heures de prison.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
@@ -116,11 +116,11 @@ public void Q2_Start(int objectiveID, int client) {
 	if( rp_ClientCanDrawPanel(client) ) {
 		Menu menu = new Menu(MenuNothing);
 		
-		menu.SetTitle("Quète: %s", QUEST_NAME);
+		menu.SetTitle("Quête: %s", QUEST_NAME);
 		menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 		menu.AddItem("", "Il est dans le Tribunal !", ITEMDRAW_DISABLED);
 		menu.AddItem("", "Condamnez le avec au moins 100$ d'amende", ITEMDRAW_DISABLED);
-		menu.AddItem("", "et de 3 heures de prison.", ITEMDRAW_DISABLED);
+		menu.AddItem("", "et 3 heures de prison.", ITEMDRAW_DISABLED);
 		
 		menu.ExitButton = false;
 		menu.Display(client, 10);

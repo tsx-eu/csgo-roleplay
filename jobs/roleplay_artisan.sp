@@ -405,7 +405,7 @@ void displayLearngMenu(char[] type, int client, int jobID, int itemID) {
 	int data[craft_type_max];
 	bool can, skip = StrEqual(type, "learn") ? false : true;
 	if( !skip && count == 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez aucun point d'apprentissage.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez aucun point d'apprentissage. Pour en avoir vous pouvez gagner un niveau d'artisanat ou acheter et lire un livre de sagesse.");
 		return;
 	}
 	

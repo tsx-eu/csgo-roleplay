@@ -79,7 +79,7 @@ public void Q1_Start(int objectiveID, int client) {
 	
 	menu.AddItem("", "Tu dois enquêter sur ses traces pour le retrouver.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Infiltres-toi dans les bâtiments que nous t'indiquons.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Nous t'offrons 1000$ par bâtiments infiltrés.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Nous t'offrons 1000$ par bâtiment infiltré.", ITEMDRAW_DISABLED);
 	
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Pendant toute la durée de ta mission,", ITEMDRAW_DISABLED);
@@ -100,8 +100,8 @@ public void Q2_Start(int objectiveID, int client) {
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Vous avez trouvé des traces de son passage ici.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Mais il n'y est pas. Infiltre toi dans", ITEMDRAW_DISABLED);
-	menu.AddItem("", "le batiment suivant.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Mais il n'y est pas. Infiltrez-vous dans", ITEMDRAW_DISABLED);
+	menu.AddItem("", "le bâtiment suivant.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 30);
@@ -157,10 +157,10 @@ public void Q5_Done(int objectiveID, int client) {
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
-	menu.AddItem("", "La trace s'arrête ici...", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Les traces s'arrêtent ici...", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Vous n'avez pas trouvé d'informations supplémentaires.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "La mafia te remercie pour ton enquête", ITEMDRAW_DISABLED);
-	menu.AddItem("", "et t'offre: [PvP] M4A1-S.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "La mafia vous remercie pour votre enquête", ITEMDRAW_DISABLED);
+	menu.AddItem("", "et vous offre: [PvP] M4A1-S.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 30);

@@ -153,7 +153,7 @@ public Action Cmd_ItemDrugs(int args) {
 			return Plugin_Handled;
 		}
 		if( !rp_IsTutorialOver(target) ) {
-			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N n'a pas terminé le tutorial.", target);
+			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N n'a pas terminé le tutoriel.", target);
 			ITEM_CANCEL(client, item_id);
 			return Plugin_Handled;
 		}
@@ -475,7 +475,7 @@ int BuildingPlant(int client, int type) {
 			Entity_GetAbsOrigin(i, vecOrigin2);
 			
 			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 24 ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas construire aussi proche d'une autre plante à vous.");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas construire aussi proche d'une autre plante vous appartenant.");
 				return 0;
 			}
 		}
@@ -817,7 +817,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 	
 	if( StrContains(tmp, "Place de l'ind") != 0 || !rp_IsBuildingAllowed(client, true) ) {
 		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être sur la place de l'indépendance pour utiliser utiliser ce pied de biche.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être sur la place de l'indépendance pour utiliser ce pied de biche.");
 		return Plugin_Handled;
 	}
 	int count = 0;
@@ -853,7 +853,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 10.0);
 	rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
 		
-	ServerCommand("sm_effect_panel %d 10.0 \"Déracinage d'un plant...\"", client);
+	ServerCommand("sm_effect_panel %d 10.0 \"Déracinage d'un plant en cours...\"", client);
 	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) + 1);
 	rp_SetClientInt(client, i_LastVolTime, GetTime());
 	rp_SetClientInt(client, i_LastVolAmount, 100);
@@ -885,7 +885,7 @@ public Action ItemPiedBicheOver(Handle timer, any client) {
 	rp_GetZoneData(rp_GetPlayerZone(client), zone_type_name, tmp, sizeof(tmp));
 	
 	if( StrContains(tmp, "Place de l'ind") != 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être sur la place de l'indépendance pour utiliser utiliser ce pied de biche.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être sur la place de l'indépendance pour utiliser ce pied de biche.");
 		return Plugin_Handled;
 	}
 		
@@ -995,7 +995,7 @@ public Action Cmd_ItemPilule(int args){
 
 	if(tptozone == -1){
 		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Nous n'avons pas trouvé d'endroit où vous teleporter.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Nous n'avons pas trouvé d'endroit où vous téléporter.");
 		return Plugin_Handled;
 	}
 
@@ -1069,7 +1069,7 @@ public Action ItemPiluleOver(Handle timer, Handle dp) {
 		return Plugin_Handled;
 	}
 	ITEM_CANCEL(client, item_id);
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Nous n'avons pas trouvé d'endroit où vous teleporter.");
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Nous n'avons pas trouvé d'endroit où vous téléporter.");
 	rp_ClientColorize(client, { 255, 255, 255, 255} );
 	rp_SetClientBool(client, b_MayUseUltimate, true);
 	return Plugin_Handled;

@@ -591,7 +591,7 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 	char wep_name[32];
 	GetEdictClassname(wep_id, wep_name, 31);
 	if( StrContains(wep_name, "weapon_bayonet") != 0 && StrContains(wep_name, "weapon_knife") != 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez prendre votre couteau en main pour le modifier");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez prendre votre couteau en main pour le modifier.");
 		return Plugin_Handled;
 	}
 
@@ -657,7 +657,7 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 			GetEdictClassname(wep_id, wep_name, 31);
 
 			if( StrContains(wep_name, "weapon_bayonet") != 0 && StrContains(wep_name, "weapon_knife") != 0 ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez prendre une arme en main pour la modifier");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez prendre une arme en main pour la modifier.");
 				return;
 			}
 
