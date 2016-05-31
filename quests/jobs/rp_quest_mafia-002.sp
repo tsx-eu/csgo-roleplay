@@ -132,7 +132,7 @@ public void Q1_Frame(int objectiveID, int client) {
 	
 	g_iDuration[client]--;
 	
-	if( rp_GetPlayerZone(client) == rp_GetZoneFromPoint(dst) ) {
+	if( rp_GetPlayerZone(client) == rp_GetZoneFromPoint(dst) || GetVectorDistance(min, dst) <= 128.0 ) {
 		rp_QuestStepComplete(client, objectiveID);
 		
 		int cap = rp_GetRandomCapital(91);
@@ -144,7 +144,7 @@ public void Q1_Frame(int objectiveID, int client) {
 	}
 	else {
 		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s %s", QUEST_NAME, g_iDuration[client], QUEST_RESUME, buffer);
-		rp_Effect_BeamBox(client, -1, dst, 255, 255, 255);
+		ServerCommand("sm_effect_gps %d %f %f %f", client, dst[0], dst[1], dst[2]);
 	}
 }
 public void Q1_Abort(int objectiveID, int client) {
