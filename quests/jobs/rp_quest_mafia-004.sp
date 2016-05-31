@@ -61,14 +61,23 @@ public bool fwdCanStart(int client) {
 	if( rp_GetClientJobID(client) != QUEST_JOBID )
 		return false;
 		
-	return true;
+	for(int i=1; i<MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		if( rp_GetClientBool(i, b_IsAFK) )
+			continue;
+		
+		if( GetClientTeam(i) == CS_TEAM_CT || (rp_GetClientInt(i, i_Job) >= 1 && rp_GetClientInt(i, i_Job) <= 7) )
+			return true;
+	}
+	return false;
 }
 public void OnClientPostAdminCheck(int client) {
 	g_iStep[client] = 0;
 }
-public void doRP_OnClientWeaponPick(int client, int type) {
+public void RP_OnClientWeaponPick(int client, int type) {
 	if( type == 3 && g_iDoing[client] > 0 ) {
-		rp_QuestStepComplete(client, g_iStep[client]);
+		rp_QuestStepComplete(client, g_iDoing[client]);
 	}
 }
 public void Q1_Start(int objectiveID, int client) {

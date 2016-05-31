@@ -101,7 +101,7 @@ public void Q1_Frame(int objectiveID, int client) {
 		rp_QuestStepFail(client, objectiveID);
 	}
 	else {
-		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s (%d%%)", QUEST_NAME, g_iDuration[client], QUEST_RESUME, RoundToCeil(g_iCurrent[client]/10000.0*100.0));
+		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s (%d%%)", QUEST_NAME, g_iDuration[client], QUEST_RESUME, RoundToFloor(g_iCurrent[client]/10000.0*100.0));
 	}
 }
 public void Q1_End(int objectiveID, int client) {

@@ -71,11 +71,11 @@ public bool fwdCanStart(int client) {
 public void OnClientPostAdminCheck(int client) {
 	g_iStep[client] = 0;
 }
-public void doRP_OnClientWeaponPick(int client, int type) {
+public void RP_OnClientWeaponPick(int client, int type) {
 	if( type == 2 && g_iDoing[client] > 0 && g_iDoneDistrib[client][rp_GetPlayerZone(client)] == 0) {
 		
 		g_iDoneDistrib[client][rp_GetPlayerZone(client)] = 1;
-		rp_QuestStepComplete(client, g_iStep[client]);
+		rp_QuestStepComplete(client, g_iDoing[client]);
 	}
 }
 public void Q1_Start(int objectiveID, int client) {
