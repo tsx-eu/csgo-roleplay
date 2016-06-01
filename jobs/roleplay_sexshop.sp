@@ -105,7 +105,7 @@ public Action Cmd_ItemPoupee(int args) {
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
 	
-	if( !rp_GetClientBool(client, b_MaySteal) ) {
+	if( !rp_GetClientBool(client, b_MayUseUltimate) ) {
 		ITEM_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet item pour le moment.");
 		return Plugin_Handled;
@@ -133,17 +133,18 @@ public Action Cmd_ItemPoupee(int args) {
 	TE_SetupBeamRingPoint(vecTarget, 30.0, 40.0, g_cBeam, g_cGlow, 0, 0, 5.0, 80.0, 0.0, {250, 250, 50, 250}, 0, 0);
 	TE_SendToAll();
 
-	rp_SetClientBool(client, b_MaySteal, false);
+	rp_SetClientBool(client, b_MayUseUltimate, false);
 
-	CreateTimer(30.0, AllowStealing, client);
+	CreateTimer(30.0, AllowUltimate, client);
 	return Plugin_Handled;
 }
-public Action AllowStealing(Handle timer, any client) {
+
+public Action AllowUltimate(Handle timer, any client) {
 	#if defined DEBUG
-	PrintToServer("AllowStealing");
+	PrintToServer("AllowUltimate");
 	#endif
 
-	rp_SetClientBool(client, b_MaySteal, true);
+	rp_SetClientBool(client, b_MayUseUltimate, true);
 }
 public Action fwdTazerRose(int client, int color[4]) {
 	#if defined DEBUG
@@ -219,14 +220,14 @@ public Action Cmd_ItemSucette(int args) {
 	#endif
 	
 	int client = GetCmdArgInt(1);
+		
 	if( Client_IsInVehicle(client) || rp_GetClientVehiclePassager(client) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible d'utiliser cet objet dans une voiture.");
 		int item_id = GetCmdArgInt(args);
 		ITEM_CANCEL(client, item_id);
 		return Plugin_Handled;
 	}
-	
-	
+
 	float Origin[3];	
 	GetClientAbsOrigin(client, Origin);
 	
@@ -242,19 +243,32 @@ public Action Cmd_ItemSucette2(int args) {
 	#endif
 	
 	int client = GetCmdArgInt(1);
+	int item_id = GetCmdArgInt(args);
+	
+	if( !rp_GetClientBool(client, b_MayUseUltimate) ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet item pour le moment.");
+		return Plugin_Handled;
+	}
 	
 	if( Client_IsInVehicle(client) || rp_GetClientVehiclePassager(client) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible d'utiliser cet objet dans une voiture.");
-		int item_id = GetCmdArgInt(args);
 		ITEM_CANCEL(client, item_id);
 		return Plugin_Handled;
 	}
 	
+	
+	rp_SetClientBool(client, b_MayUseUltimate, false);
+	
 	float duration = 1.0;
-	if( rp_IsInPVP(client) ) {
-		rp_SetClientFloat(client, fl_CoolDown, rp_GetClientFloat(client, fl_CoolDown) + 15.0);
+	if( rp_IsInPVP(client) || GetClientTeam(client) == CS_TEAM_CT) {
+		CreateTimer(45.0, AllowUltimate, client);
 		duration += 0.66;
 	}
+	else{
+		CreateTimer(30.0, AllowUltimate, client);
+	}
+
 	rp_SetClientInt(client, i_LastAgression, GetTime());
 	EmitSoundToAll("UI/arm_bomb.wav", client);
 	
@@ -435,7 +449,7 @@ int BuildingKevlarBox(int client) {
 	}
 	
 	char classname[64], tmp[64];
-	Format(classname, sizeof(classname), "rp_kevlarbox_%i", client);
+	Format(classname, sizeof(classname), "rp_kevlarbox");
 	
 	float vecOrigin[3], vecOrigin2[3];
 	GetClientAbsOrigin(client, vecOrigin);
@@ -448,11 +462,11 @@ int BuildingKevlarBox(int client) {
 			
 		GetEdictClassname(i, tmp, 63);
 		
-		if( StrEqual(classname, tmp) ) {
+		if( StrEqual(classname, tmp) && rp_GetBuildingData(i, BD_owner) == client ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà une valise remplie de préservatifs.");
 			return 0;
 		}
-		if( StrContains(tmp, "rp_kevlarbox_") == 0 ) {
+		if( StrEqual(tmp, "rp_kevlarbox") ) {
 			Entity_GetAbsOrigin(i, vecOrigin2);
 			if( GetVectorDistance(vecOrigin, vecOrigin2) < 600 ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il existe une autre valise remplie de préservatifs à proximité.");

@@ -454,6 +454,7 @@ public int AddCompetanceToAssassin(Handle menu, MenuAction action, int client, i
 		}
 		
 		if( StrEqual(options, "annule", false) ) {
+			LogToGame("[CONTRAT] %L a annulé son contrat.", client);
 			SetContratFail(client);
 		}
 		else if( g_iKillerPoint[client][competance_left] <= 0 ) {
@@ -599,18 +600,18 @@ void SetContratFail(int client, bool time = false) { // time = retro-compatibili
 	int jobClient = rp_GetClientJobID(client);
 	
 	if( time )
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas remplis votre contrat à temps.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas rempli votre contrat à temps.");
 	else if( jobClient != 41 ) // si le tueur a démissionné entre temps
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes plus mercenaire, vous ne pouvez plus remplir votre contrat.");
 	else
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes mort et n'avez pas remplis votre contrat.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes mort et n'avez pas rempli votre contrat.");
 	
 	int target = rp_GetClientInt(client, i_ContratFor);
 	if(target != client){
 		if( IsValidClient(target) ) {		
 			
 			if( time )
-				CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N n'a pas remplis son contrat à temps.", client);
+				CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N n'a pas rempli son contrat à temps.", client);
 			else if( jobClient != 41 ) // si le tueur a démissionné entre temps
 				CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N n'est plus mercenaire et ne peut plus remplir votre contrat.", client);
 			else
@@ -626,7 +627,7 @@ void SetContratFail(int client, bool time = false) { // time = retro-compatibili
 			rp_SetJobCapital(41, rp_GetJobCapital(41) - (prix / 2));
 		}
 		else {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre employeur est déconnecté, vous ne le remboursez pas.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre employeur s'est déconnecté, vous ne le remboursez pas.");
 		}
 	}
 	
@@ -827,7 +828,6 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 			g_bShouldOpen[client] = false;
 		}
 		else if( StrEqual( options, "cops", false) ) {
-			
 			char dest[128];
 			rp_GetZoneData(rp_GetPlayerZone(client), zone_type_name, dest, sizeof(dest));
 			
@@ -838,6 +838,23 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 					continue;
 				
 				CPrintToChat(i, "{lightblue}[TSX-RP]{default} Un enlèvement a eut lieu. Vous devez libérer %N dans %s.", client, dest);
+				rp_Effect_BeamBox(i, client);
+				ClientCommand(i, "play buttons/blip1.wav");
+			}
+			
+		}
+		else if( StrEqual( options, "mafia", false) ) {
+			
+			char dest[128];
+			rp_GetZoneData(rp_GetPlayerZone(client), zone_type_name, dest, sizeof(dest));
+			
+			for(int i=1; i<=MaxClients; i++) {
+				if( !IsValidClient(i) )
+					continue;
+				if( rp_GetClientJobID(i) != 91 )
+					continue;
+				
+				CPrintToChat(i, "{lightblue}[TSX-RP]{default} Un enlèvement a eu lieu. Vous devez libérer %N dans %s.", client, dest);
 				rp_Effect_BeamBox(i, client);
 				ClientCommand(i, "play buttons/blip1.wav");
 			}
@@ -862,7 +879,8 @@ void OpenKidnappingMenu(int client) {
 			
 		AddMenuItem(menu, "pay", "Payer la rançon de 2500$");
 		AddMenuItem(menu, "free", "Tenter l'évasion");
-		AddMenuItem(menu, "cops", "Appeler la police");		
+		AddMenuItem(menu, "cops", "Appeler la police");
+		AddMenuItem(menu, "mafia", "Appeler la mafia");
 		AddMenuItem(menu, "crier", "Crier");		
 		
 		SetMenuExitButton(menu, false);
@@ -1048,7 +1066,7 @@ public Action Cmd_ItemEnquete(int args) {
 		}
 	}
 	else{
-		LogToGame("[TSX-RP] [ENQUETE] Une enquête effectuée sur %L a révélé qu'il n'a été tué par personne.", target, killed); // Pas sûr non plus pour l'accord avec "avoir"
+		LogToGame("[TSX-RP] [ENQUETE] Une enquête effectuée sur %L a révélé qu'il n'a été tué par personne.", target, killed);
 	}
 	
 	if( IsValidClient(rp_GetClientInt(target, i_LastVol)) ) 

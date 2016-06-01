@@ -35,7 +35,7 @@
 #define		TEAM_HOSTAGE		5
 #define		TEAM_NAME1			"Braqueur"
 #define 	REQUIRED_T			4
-#define 	REQUIRED_CT			4
+#define 	REQUIRED_CT			5
 #define		MAX_ZONES			310
 
 
@@ -45,9 +45,10 @@ public Plugin myinfo =  {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
+Handle g_hActive;
 int g_iQuest;
-bool g_bDoingQuest, g_bByPassDoor, g_bHasHelmet, g_bCanMakeQuest, g_bCanKill;
-int g_iVehicle, g_iPlanque, g_iPlanqueZone, g_iQuestGain;
+bool g_bDoingQuest, g_bByPassDoor, g_bHasHelmet, g_bCanMakeQuest;
+int g_iVehicle, g_iPlanque, g_iPlanqueZone, g_iQuestGain, g_iLastPlanque[3];
 int g_iPlayerTeam[2049], g_stkTeam[QUEST_TEAMS + 1][MAXPLAYERS + 1], g_stkTeamCount[QUEST_TEAMS + 1], g_iJobs[MAX_JOBS], g_iMaskEntity[MAXPLAYERS + 1];
 
 public void OnPluginStart() {
@@ -68,6 +69,8 @@ public void OnPluginStart() {
 	
 	HookEvent("hostage_follows", EV_PickupHostage, EventHookMode_Post);
 	HookEvent("hostage_rescued", EV_RescuseHostage, EventHookMode_Post);
+	
+	g_hActive 		= CreateConVar("rp_braquage", "0");
 	
 	g_bCanMakeQuest = true;
 }
@@ -135,17 +138,14 @@ public void Q_Abort(int objectiveID, int client) {
 		}
 	}
 	if( g_bByPassDoor ) {
-		for (int i = 1; i <= MaxClients; i++)
-			if( IsValidClient(i) )
-				rp_UnhookEvent(i, RP_OnPlayerCheckKey, fwdGotKey);
-	}
-	if( g_bCanKill ) {
-		for (int i = 1; i <= MaxClients; i++)
-			if( IsValidClient(i) )
-				rp_UnhookEvent(i, RP_PreGiveDamage, fwdDamage);
+		for (int i = 1; i <= MaxClients; i++) {
+			if( !IsValidClient(i) )
+				continue;
+			rp_UnhookEvent(i, RP_OnPlayerCheckKey, fwdGotKey);
+			rp_UnhookEvent(i, RP_PreGiveDamage, fwdDamage);
+		}
 	}
 	
-	g_bCanKill = false;
 	g_bByPassDoor = false;
 	g_bHasHelmet = false;
 	g_bDoingQuest = false;
@@ -155,17 +155,25 @@ public void Q_Abort(int objectiveID, int client) {
 			removeClientTeam(i);
 	}
 	CreateTimer(60.0 * 60.0, braquageNewAttempt);
+	SetConVarInt(g_hActive, 0);
+	
+	g_iLastPlanque[0] = g_iLastPlanque[1];
+	g_iLastPlanque[1] = g_iLastPlanque[2];
+	g_iLastPlanque[2] = g_iPlanque;
+	g_iPlanque = 0;
 }
 public Action braquageNewAttempt(Handle timer, any attempt) {
 	g_bCanMakeQuest = true;
 }
 public void Q1_Start(int objectiveID, int client) {
+	SetConVarInt(g_hActive, 1);
 	g_bDoingQuest = true;
 	g_bCanMakeQuest = false;
 	addClientToTeam(client, TEAM_BRAQUEUR);
+	LogToGame("[BRAQUAGE] %N a lancé un braquage", client);
 }
 public void Q1_Frame(int objectiveID, int client) {
-	if( g_stkTeamCount[TEAM_BRAQUEUR] >= REQUIRED_T && g_stkTeamCount[TEAM_BRAQUEUR] >= REQUIRED_CT ) {
+	if( g_stkTeamCount[TEAM_BRAQUEUR] >= REQUIRED_T && g_stkTeamCount[TEAM_POLICE] >= REQUIRED_CT ) {
 		rp_QuestStepComplete(client, objectiveID);
 		return;
 	}
@@ -206,6 +214,8 @@ public void Q1_Frame(int objectiveID, int client) {
 				}
 				if( g_iPlayerTeam[i] != TEAM_NONE )
 					continue;
+				if( rp_GetClientBool(i, b_IsMuteEvent) == true )
+					continue;
 				
 				Format(tmp, sizeof(tmp), "%d", i);
 				Format(tmp2, sizeof(tmp2), "%N", i);
@@ -243,7 +253,7 @@ public void Q3_Frame(int objectiveID, int client) {
 		Menu menu = new Menu(MenuSelectPlanque);
 		menu.SetTitle("Quète: %s", QUEST_NAME);
 		
-		if( g_iJobs[1] == 0 ) {
+		if( g_iJobs[31] == 0 ) {
 			g_iQ3 = objectiveID;
 			for (int i = 1; i < MAX_ZONES; i++) {
 				int job = rp_GetZoneInt(i, zone_type_type);
@@ -257,6 +267,8 @@ public void Q3_Frame(int objectiveID, int client) {
 		
 		for (int i = 1; i < MAX_JOBS; i+=10) {
 			if( g_iJobs[i] == 0 )
+				continue;
+			if( i == g_iLastPlanque[0] || i == g_iLastPlanque[1] || i == g_iLastPlanque[2] )
 				continue;
 			
 			rp_GetZoneData(g_iJobs[i], zone_type_name, tmp, sizeof(tmp));
@@ -310,9 +322,8 @@ public void Q5_Start(int objectiveID, int client) {
 	
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
 		if( Client_GetWeaponBySlot(g_stkTeam[TEAM_BRAQUEUR][i], CS_SLOT_PRIMARY) < 0 ) {
-			int wepid = GivePlayerItem(g_stkTeam[TEAM_BRAQUEUR][i], "weapon_ak47");
+			int wepid = Client_GiveWeapon(g_stkTeam[TEAM_BRAQUEUR][i], "weapon_ak47", true);
 			Weapon_SetPrimaryClip(wepid, 5000);
-			FakeClientCommand(client, "use weapon_ak47");
 		}
 		if( Client_GetWeaponBySlot(g_stkTeam[TEAM_BRAQUEUR][i], CS_SLOT_SECONDARY) < 0 )
 			GivePlayerItem(g_stkTeam[TEAM_BRAQUEUR][i], "weapon_revolver");
@@ -329,6 +340,7 @@ public void Q5_Start(int objectiveID, int client) {
 		if( !IsValidClient(i) )
 			continue;
 		rp_HookEvent(i, RP_OnPlayerDead, fwdDead);
+		rp_HookEvent(i, RP_PreGiveDamage, fwdDamage);
 	}
 }
 public void Q5_Frame(int objectiveID, int client) {
@@ -347,12 +359,7 @@ public void Q5_Frame(int objectiveID, int client) {
 	}
 }
 public void Q6_Start(int objectiveID, int client) {
-	for (int i = 1; i <= MaxClients; i++) {
-		if( !IsValidClient(i) )
-			continue;
-		rp_HookEvent(i, RP_PreGiveDamage, fwdDamage);
-	}
-	g_bCanKill = true;
+	
 	updateTeamPolice();
 	g_iQuestGain = 1000;
 	g_stkTeamCount[TEAM_HOSTAGE] = 0;
@@ -372,32 +379,35 @@ public void Q6_Frame(int objectiveID, int client) {
 	if( !rp_IsValidVehicle(g_iVehicle) ) { g_iVehicle = spawnVehicle(client); }
 	
 	if( g_stkTeamCount[TEAM_BRAQUEUR] == 0 ) {
-		int gain = ((GainMax - g_iQuestGain) / 4) / g_stkTeamCount[TEAM_POLICE];
-		for (int j = 0; j < g_stkTeamCount[TEAM_POLICE]; j++) { 
-			CPrintToChat(g_stkTeam[TEAM_POLICE][j], "{lightblue}[TSX-RP]{default} Vous avez gagné %d$ pour avoir tué tous les braqueurs de %s", gain, tmp2[0]);
-			rp_SetClientInt(g_stkTeam[TEAM_POLICE][j], i_AddToPay, rp_GetClientInt(g_stkTeam[TEAM_POLICE][j], i_AddToPay) + gain);
+		if( g_stkTeamCount[TEAM_POLICE] > 0 ) {
+			int amendePolice = (g_iQuestGain / 4) / g_stkTeamCount[TEAM_POLICE];
+			amendePolice = amendePolice < 1000 ? amendePolice : 1000;
+			int gainPolice = ((GainMax-(g_iQuestGain / 4)) / g_stkTeamCount[TEAM_POLICE]) - amendePolice;
+			
+			for (int j = 0; j < g_stkTeamCount[TEAM_POLICE]; j++) { 
+				CPrintToChat(g_stkTeam[TEAM_POLICE][j], "{lightblue}[TSX-RP]{default} Vous avez gagné %d$ pour avoir tué tous les braqueurs de %s", gainPolice, tmp2[0]);
+				rp_SetClientInt(g_stkTeam[TEAM_POLICE][j], i_AddToPay, rp_GetClientInt(g_stkTeam[TEAM_POLICE][j], i_AddToPay) + gainPolice);
+			}
 		}
 		rp_QuestStepFail(client, objectiveID);
+		LogToGame("[BRAQUAGE] Le braquage est terminé, perdu: %d$", g_iQuestGain);
 		return;
 	}
 	
-	bool allIn = true;
+	bool allInVehicle = true;
+	bool allInPlanque = true;
+	
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
 		int heal = GetClientHealth(g_stkTeam[TEAM_BRAQUEUR][i]) + Math_GetRandomInt(5, 10);
 		int kevlar = rp_GetClientInt(client, i_Kevlar) + Math_GetRandomInt(2, 5);
-		if( allIn ) allIn = isInVehicle(g_stkTeam[TEAM_BRAQUEUR][i]);
-		if( heal > 500 )
-			heal = 500;
-		if( kevlar > 250 )
-			kevlar = 250;
+		if( allInVehicle ) allInVehicle = isInVehicle(g_stkTeam[TEAM_BRAQUEUR][i]);
+		if( heal > 500 ) heal = 500;
+		if( kevlar > 250 ) kevlar = 250;
+		if (rp_GetZoneInt(rp_GetPlayerZone(g_stkTeam[TEAM_BRAQUEUR][i]), zone_type_type) != g_iPlanque)allInPlanque = false;
+		if (rp_GetZoneBit(rp_GetPlayerZone(g_stkTeam[TEAM_BRAQUEUR][i])) & BITZONE_PEACEFULL) ForcePlayerSuicide(g_stkTeam[TEAM_BRAQUEUR][i]);
+		
 		SetEntityHealth(g_stkTeam[TEAM_BRAQUEUR][i], heal);
 		rp_SetClientInt(g_stkTeam[TEAM_BRAQUEUR][i], i_Kevlar, kevlar);
-		
-		if(rp_GetZoneInt(rp_GetPlayerZone(g_stkTeam[TEAM_BRAQUEUR][i]), zone_type_type) == g_iPlanque) {
-			g_iQuestGain += Math_GetRandomInt(0, 50);
-			if( g_iQuestGain >= GainMax )
-				g_iQuestGain = GainMax;
-		}
 		
 		PrintHintText(g_stkTeam[TEAM_BRAQUEUR][i], "<b>Objectif</b>: Restez vivant. Prennez la fuite avec votre voiture quand vous le souhaiter. <b>Gain</b>: %d$", g_iQuestGain);
 		
@@ -406,19 +416,37 @@ public void Q6_Frame(int objectiveID, int client) {
 				rp_Effect_BeamBox(g_stkTeam[TEAM_BRAQUEUR][i], g_stkTeam[TEAM_HOSTAGE][j], NULL_VECTOR, 0, 255, 0);
 			}
 		}
+		
+		if( Math_GetRandomInt(0, 4)  == 0 )
+			rp_Effect_BeamBox(g_stkTeam[TEAM_BRAQUEUR][i], g_iVehicle, NULL_VECTOR, 255, 255, 255);
 	}
 	
-	if( allIn ) 
+	if( allInPlanque ) {
+		g_iQuestGain += Math_GetRandomInt(0, 50) * g_stkTeamCount[TEAM_BRAQUEUR];
+		if( g_iQuestGain >= GainMax ) g_iQuestGain = GainMax;
+	}
+	if( allInVehicle ) 
 		rp_QuestStepComplete(client, objectiveID);
 	
-	for (int j = 0; j < g_stkTeamCount[TEAM_POLICE]; j++) {
-		rp_SetClientInt(g_stkTeam[TEAM_POLICE][j], i_Perquiz, GetTime());
+	if( g_stkTeamCount[TEAM_POLICE] > 0 ) {
+		int amendePolice = (g_iQuestGain / 4) / g_stkTeamCount[TEAM_POLICE];
+		amendePolice = amendePolice < 1000 ? amendePolice : 1000;
 		
-		PrintHintText(g_stkTeam[TEAM_POLICE][j], "<b>Alerte</b>: Un braquage est en cours dans %s, tuez les braqueurs. <b>Gain</b>: %d$, <b>Amende</b>: %d$.", tmp2[0], (GainMax - g_iQuestGain)/4, g_iQuestGain/4);
+		int gainPolice = ((GainMax-(g_iQuestGain / 4)) / g_stkTeamCount[TEAM_POLICE]) - amendePolice;
 		
-		for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
-			if( Math_GetRandomInt(0, 4)  == 0 )
-				rp_Effect_BeamBox(g_stkTeam[TEAM_POLICE][j], g_stkTeam[TEAM_BRAQUEUR][i], NULL_VECTOR, 255, 0, 0);
+		for (int j = 0; j < g_stkTeamCount[TEAM_POLICE]; j++) {
+			rp_SetClientInt(g_stkTeam[TEAM_POLICE][j], i_Perquiz, GetTime());
+			
+			PrintHintText(g_stkTeam[TEAM_POLICE][j], "<b>Alerte</b>: Un braquage est en cours dans %s, tuer les braqueurs. <b>Gain</b>: %d$, <b>Amende</b>: %d$.", tmp2[0], gainPolice, amendePolice);
+			
+			for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
+				if( Math_GetRandomInt(0, 4)  == 0 )
+					rp_Effect_BeamBox(g_stkTeam[TEAM_POLICE][j], g_stkTeam[TEAM_BRAQUEUR][i], NULL_VECTOR, 255, 0, 0);
+			}
+			for (int i = 0; i < g_stkTeamCount[TEAM_HOSTAGE]; i++) {
+				if( Math_GetRandomInt(0, 4)  == 0 )
+					rp_Effect_BeamBox(g_stkTeam[TEAM_POLICE][j], g_stkTeam[TEAM_HOSTAGE][i], NULL_VECTOR, 0, 255, 0);
+			}
 		}
 	}
 }
@@ -426,11 +454,14 @@ public void Q7_Frame(int objectiveID, int client) {
 	float pos[3], dst[3] = { -8956.0, -5483.0, -2350.0 };
 	Entity_GetAbsOrigin(g_iVehicle, pos);
 	
-	if( GetVectorDistance(pos, dst) <= 128.0 ) {
+	if( GetVectorDistance(pos, dst) <= 200.0 ) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
+		
+		if (rp_GetZoneBit(rp_GetPlayerZone(g_stkTeam[TEAM_BRAQUEUR][i])) & BITZONE_PEACEFULL) ForcePlayerSuicide(g_stkTeam[TEAM_BRAQUEUR][i]);
+		
 		ServerCommand("sm_effect_gps %d %f %f %f", g_stkTeam[TEAM_BRAQUEUR][i], dst[0], dst[1], dst[2]);
 		PrintHintText(g_stkTeam[TEAM_BRAQUEUR][i], "<b>Quête</b>: %s\n<b>Objectif</b>: Prenez la fuite avec le véhicule.", QUEST_NAME);
 	}
@@ -447,12 +478,16 @@ public void Q_Complete(int objectiveID, int client) {
 	}
 	
 	rp_SetJobCapital(g_iPlanque, rp_GetJobCapital(g_iPlanque) - gain*3/4);
-	rp_SetJobCapital(1, rp_GetJobCapital(1) - gain/4);	
 	
-	gain = (g_iQuestGain / 4) / g_stkTeamCount[TEAM_POLICE];
-	for (int i = 0; i < g_stkTeamCount[TEAM_POLICE]; i++) {
-		CPrintToChat(g_stkTeam[TEAM_POLICE][i], "{lightblue}[TSX-RP]{default} Vous avez payé une amende de %d$ à cause du braquage de %s.", gain, tmp2[0]);
-		rp_SetClientInt(g_stkTeam[TEAM_POLICE][i], i_Money, rp_GetClientInt(g_stkTeam[TEAM_POLICE][i], i_Money) - gain);
+	LogToGame("[BRAQUAGE] Le braquage est terminé, gagné: %d$", g_iQuestGain);
+	
+	if( g_stkTeamCount[TEAM_POLICE] > 0 ) {
+		int amendePolice = (g_iQuestGain / 4) / g_stkTeamCount[TEAM_POLICE];
+		
+		for (int i = 0; i < g_stkTeamCount[TEAM_POLICE]; i++) {
+			CPrintToChat(g_stkTeam[TEAM_POLICE][i], "{lightblue}[TSX-RP]{default} Vous avez payé une amende de %d$ à cause du braquage de %s.", amendePolice, tmp2[0]);
+			rp_SetClientInt(g_stkTeam[TEAM_POLICE][i], i_Money, rp_GetClientInt(g_stkTeam[TEAM_POLICE][i], i_Money) - amendePolice);
+		}
 	}
 	Q_Abort(objectiveID, client);
 }
@@ -488,10 +523,38 @@ public void OnClientPostAdminCheck(int client) {
 		rp_HookEvent(client, RP_OnPlayerDataLoaded, fwdLoaded);
 	if( g_bHasHelmet )
 		rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
-	if( g_bByPassDoor )
+		
+	if( g_bByPassDoor ) {
 		rp_HookEvent(client, RP_OnPlayerCheckKey, fwdGotKey);
-	if( g_bCanKill ) 
 		rp_HookEvent(client, RP_PreGiveDamage, fwdDamage);
+	}
+	
+	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
+}
+public Action fwdCommand(int client, char[] command, char[] arg) {
+	#if defined DEBUG
+	PrintToServer("fwdCommand");
+	#endif
+	if( StrEqual(command, "q") || StrEqual(command, "quest") ) {
+		
+		if( g_iPlayerTeam[client] != TEAM_BRAQUEUR )
+			return Plugin_Continue;
+		
+		if( !rp_GetClientBool(client, b_Crayon)) {
+			CRemoveTags(arg, strlen(arg)+1);
+		}
+		
+		for (int i = 1; i <= MaxClients; i++) {
+			if( !IsValidClient(i) )
+				continue;
+			if( g_iPlayerTeam[i] != TEAM_BRAQUEUR )
+				continue;
+			
+			CPrintToChat(i, "{lightblue}%N{default} ({lime}QUÊTES{default}): %s", client, arg);
+		}
+		return Plugin_Handled;
+	}
+	return Plugin_Continue;
 }
 public Action fwdLoaded(int client) {
 	if( g_iPlayerTeam[client] != TEAM_POLICE && (rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101) ) {
@@ -528,7 +591,7 @@ public Action fwdGotKey(int client, int doorID) {
 	return Plugin_Continue;
 }
 public Action fwdPressUse(int client) {
-	if( g_stkTeamCount[TEAM_BRAQUEUR_DEAD] > 0 ) {
+	if( g_stkTeamCount[TEAM_BRAQUEUR_DEAD] > 0 && g_iPlayerTeam[client] == TEAM_BRAQUEUR ) {
 		int target = rp_GetClientTarget(client);
 		if( target > 0 && IsValidEdict(target) && IsValidEntity(target) ) {
 			char classname[64], tmp2[64];
@@ -559,11 +622,14 @@ public Action fwdDead(int client, int attacker) {
 	}
 	return Plugin_Continue;
 }
-public Action fwdDamage(int victim, int attacker, float& damage, int wepID, float pos[3]) {
-	if( g_iPlayerTeam[attacker] == TEAM_BRAQUEUR && g_iPlayerTeam[victim] != TEAM_POLICE && rp_GetZoneInt(rp_GetPlayerZone(victim), zone_type_type) != g_iPlanque )
+public Action fwdDamage(int attacker, int victim, float& damage, int wepID, float pos[3]) {
+	
+	if( g_iPlayerTeam[attacker] == TEAM_BRAQUEUR && g_iPlayerTeam[victim] != TEAM_POLICE && rp_GetZoneInt(rp_GetPlayerZone(victim), zone_type_type) != g_iPlanque ) {
 		return Plugin_Handled;
-	if( g_iPlayerTeam[attacker] != TEAM_POLICE && g_iPlayerTeam[victim] == TEAM_BRAQUEUR ) 
+	}
+	if( g_iPlayerTeam[attacker] != TEAM_POLICE && g_iPlayerTeam[victim] == TEAM_BRAQUEUR ) {
 		return Plugin_Handled;
+	}
 	
 	return Plugin_Continue;
 }
@@ -809,11 +875,17 @@ bool findAreaInRoom(int jobID, float pos[3]) {
 		float pos2[3]; pos2 = pos;
 		Handle tr = TR_TraceRayEx(pos, view_as<float>({ 90.0, 0.0, 0.0 }), MASK_PLAYERSOLID, RayType_Infinite);
 		TR_GetEndPosition(pos, tr);
+		if( TR_GetEntityIndex(tr) >= 1) {
+			delete tr;
+			continue;
+		}
+			
 		pos[2] += 4.0;
 		delete tr;
 		
 		tr = TR_TraceHullEx(pos, pos, view_as<float>({-32.0, -32.0, 0.0}), view_as<float>({32.0, 32.0, 64.0}), MASK_PLAYERSOLID);
 		if( !TR_DidHit(tr) ) {
+			delete tr;
 			return true;
 		}
 		delete tr;
@@ -900,7 +972,7 @@ public Action tskAlarm(Handle timer, any client) {
 	
 	EmitSoundToAllRangedAny("ui/beep22.wav", pos);
 	
-	if( g_stkTeamCount[TEAM_HOSTAGE] < REQUIRED_T && findAreaInRoom(g_iPlanque, pos) ) {
+	if( g_stkTeamCount[TEAM_HOSTAGE] < 2+(g_stkTeamCount[TEAM_POLICE]/2) && findAreaInRoom(g_iPlanque, pos) ) {
 		int ent = CreateEntityByName("hostage_entity");
 		DispatchSpawn(ent);
 		TeleportEntity(ent, pos, NULL_VECTOR, NULL_VECTOR);
@@ -908,13 +980,17 @@ public Action tskAlarm(Handle timer, any client) {
 	}
 }
 void updateTeamPolice() {
+	bool isAfk;
 	for (int i = 1; i <= MaxClients; i++) {
 		if( !IsValidClient(i) )
 			continue;
-		if( g_iPlayerTeam[i] != TEAM_POLICE && (rp_GetClientJobID(i) == 1 || rp_GetClientJobID(i) == 101) ) {
+			
+		isAfk = rp_GetClientBool(i, b_IsAFK);
+		
+		if( g_iPlayerTeam[i] != TEAM_POLICE && (rp_GetClientJobID(i) == 1 || rp_GetClientJobID(i) == 101) && !isAfk) {
 			addClientToTeam(i, TEAM_POLICE);
 		}
-		if( g_iPlayerTeam[i] == TEAM_POLICE && rp_GetClientJobID(i) != 1 && rp_GetClientJobID(i) != 101 ) {
+		if( g_iPlayerTeam[i] == TEAM_POLICE && ((rp_GetClientJobID(i) != 1 && rp_GetClientJobID(i) != 101) || isAfk) ) {
 			removeClientTeam(i);
 		}
 	}

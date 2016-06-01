@@ -84,14 +84,14 @@ public void OnPluginStart() {
 			continue;
 		
 		GetEdictClassname(i, classname, sizeof(classname));
-		if( StrContains(classname, "rp_bigcashmachine_") == 0 ) {
+		if( StrEqual(classname, "rp_bigcashmachine") ) {
 			
 			rp_SetBuildingData(i, BD_started, GetTime());
 			rp_SetBuildingData(i, BD_owner, GetEntPropEnt(i, Prop_Send, "m_hOwnerEntity") );
 			
 			CreateTimer(Math_GetRandomFloat(0.0, 2.5), BuildingBigCashMachine_post, i);
 		}
-		else if( StrContains(classname, "rp_cashmachine_") == 0 ) {
+		else if( StrEqual(classname, "rp_cashmachine") ) {
 			rp_SetBuildingData(i, BD_started, GetTime());
 			rp_SetBuildingData(i, BD_owner, GetEntPropEnt(i, Prop_Send, "m_hOwnerEntity") );
 			
@@ -139,10 +139,14 @@ public Action Cmd_ItemBioKev(int args) {
 	#endif
 	
 	int client = GetCmdArgInt(1);
+	int item_id = GetCmdArgInt(args);
 	
-	if( !g_bBionique[client][ch_Kevlar] )
-		rp_HookEvent(client, RP_OnFrameSeconde, fwdRegenKevlar);
+	if( g_bBionique[client][ch_Kevlar] ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà une regénération bionique.");
+		ITEM_CANCEL(client, item_id);
+	}
 	
+	rp_HookEvent(client, RP_OnFrameSeconde, fwdRegenKevlar);
 	g_bBionique[client][ch_Kevlar] = true;
 }
 // ------------------------------------------------------------------------------
@@ -152,10 +156,14 @@ public Action Cmd_ItemBioYeux(int args) {
 	#endif
 	
 	int client = GetCmdArgInt(1);
+	int item_id = GetCmdArgInt(args);
 	
-	if( !g_bBionique[client][ch_Yeux] )
-		rp_HookEvent(client, RP_PreHUDColorize, fwfBioYeux);
+	if( g_bBionique[client][ch_Yeux] ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà des yeux bioniques.");
+		ITEM_CANCEL(client, item_id);
+	}
 	
+	rp_HookEvent(client, RP_PreHUDColorize, fwfBioYeux);
 	g_bBionique[client][ch_Yeux] = true;
 	rp_SetClientBool(client, b_ChiruYeux, true);
 }
@@ -428,7 +436,7 @@ int BuildingCashMachine(int client, bool force=false) {
 		return 0;
 	
 	char classname[64];
-	Format(classname, sizeof(classname), "rp_cashmachine_%i", client);
+	Format(classname, sizeof(classname), "rp_cashmachine");
 	
 	float vecOrigin[3];
 	GetClientAbsOrigin(client, vecOrigin);
@@ -546,6 +554,10 @@ public Action Frame_CashMachine(Handle timer, any ent) {
 		return Plugin_Handled;
 	}
 	
+	int heal = Entity_GetHealth(ent) + Math_GetRandomInt(1, 2);
+	if (heal > 100) heal = 100;
+	Entity_SetHealth(ent, heal, true);
+	
 	if( !rp_GetClientBool(client, b_IsAFK) && rp_GetClientInt(client, i_TimeAFK) <= 60 && g_bProps_trapped[ent] == false ) {
 		EmitSoundToAllAny("ambient/tones/equip3.wav", ent, _, _, _, 0.66);
 		
@@ -583,9 +595,16 @@ void CashMachine_Destroy(int entity) {
 	float vecOrigin[3];
 	Entity_GetAbsOrigin(entity, vecOrigin);
 	
+	char name[64];
+	GetEdictClassname(entity, name, sizeof(name));
 	
 	if( rp_GetBuildingData(entity, BD_started)+120 < GetTime() ) {
 		rp_Effect_SpawnMoney(vecOrigin, true);
+		if( StrContains(name, "big") >= 0 ){
+			for(int i = 0; i<14; i++){
+			  rp_Effect_SpawnMoney(vecOrigin, true);
+			}
+		}
 	}
 	
 	TE_SetupExplosion(vecOrigin, g_cExplode, 0.5, 2, 1, 25, 25);
@@ -593,8 +612,6 @@ void CashMachine_Destroy(int entity) {
 	
 	int owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
 	if( IsValidClient(owner) ) {
-		char name[64];
-		GetEdictClassname(entity, name, sizeof(name));
 		if( StrContains(name, "big") >= 0 )
 			CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre photocopieuse à faux-billets a été détruite.");
 		else
@@ -683,7 +700,7 @@ int BuildingBigCashMachine(int client) {
 		return 0;
 	
 	char bigclassname[64];
-	Format(bigclassname, sizeof(bigclassname), "rp_bigcashmachine_%i", client);
+	Format(bigclassname, sizeof(bigclassname), "rp_bigcashmachine");
 	
 	float vecOrigin[3];
 	GetClientAbsOrigin(client, vecOrigin);
@@ -775,6 +792,10 @@ public Action Frame_BigCashMachine(Handle timer, any ent) {
 		return Plugin_Handled;
 	}
 	
+	int heal = Entity_GetHealth(ent) + Math_GetRandomInt(1, 2);
+	if (heal > 1000) heal = 1000;
+	Entity_SetHealth(ent, heal, true);
+	
 	if( !rp_GetClientBool(client, b_IsAFK) && rp_GetClientInt(client, i_TimeAFK) <= 60 && g_bProps_trapped[ent] == false ) {
 		EmitSoundToAllAny("ambient/tones/equip3.wav", ent, _, _, _, 1.0);
 		
@@ -818,8 +839,8 @@ int CountMachine(int client) {
 	char classname[64], bigclassname[64], tmp[64];
 	float vecOrigin[3], vecOrigin2[3];
 	GetClientAbsOrigin(client, vecOrigin);
-	Format(bigclassname, sizeof(bigclassname), "rp_bigcashmachine_%i", client);
-	Format(classname, sizeof(classname), "rp_cashmachine_%i", client);
+	Format(bigclassname, sizeof(bigclassname), "rp_bigcashmachine");
+	Format(classname, sizeof(classname), "rp_cashmachine");
 	
 	for(int i=MaxClients; i<=2048; i++) {
 		if( !IsValidEdict(i) )
@@ -829,7 +850,7 @@ int CountMachine(int client) {
 		
 		GetEdictClassname(i, tmp, 63);
 		
-		if( StrEqual(bigclassname, tmp) ){
+		if( StrEqual(bigclassname, tmp) && rp_GetBuildingData(i, BD_owner) == client ){
 			count += 15;
 			Entity_GetAbsOrigin(i, vecOrigin2);
 			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 50 ) {
@@ -837,7 +858,7 @@ int CountMachine(int client) {
 				return -1;
 			}
 		}
-		if( StrEqual(classname, tmp) ) {
+		if( StrEqual(classname, tmp) && rp_GetBuildingData(i, BD_owner) == client ) {
 			count++;
 			Entity_GetAbsOrigin(i, vecOrigin2);
 			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 24 ) {

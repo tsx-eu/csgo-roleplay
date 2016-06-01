@@ -132,7 +132,7 @@ int countBlackMarket(int client) {
 			continue;
 		
 		GetEdictClassname(i, classname, sizeof(classname));
-		if( StrContains(classname, "rp_cashmachine_") == 0 || StrContains(classname, "rp_bigcashmachine_") == 0 ||  StrContains(classname, "rp_plant_") == 0 ) {
+		if( StrEqual(classname, "rp_cashmachine") || StrEqual(classname, "rp_bigcashmachine") || StrEqual(classname, "rp_plant") ) {
 			if( rp_GetBuildingData(i, BD_started)+120 < GetTime() && rp_GetBuildingData(i, BD_owner) != client )
 				amount++;
 		}
@@ -150,7 +150,7 @@ int nearestBlackMarket(int client) {
 			continue;
 		
 		GetEdictClassname(i, classname, sizeof(classname));
-		if( StrContains(classname, "rp_cashmachine_") == 0 || StrContains(classname, "rp_bigcashmachine_") == 0 ||  StrContains(classname, "rp_plant_") == 0 ) {
+		if( StrEqual(classname, "rp_cashmachine") || StrEqual(classname, "rp_bigcashmachine") || StrEqual(classname, "rp_plant") ) {
 			if( rp_GetBuildingData(i, BD_started)+120 < GetTime() && rp_GetBuildingData(i, BD_owner) != client ) {
 			
 				Entity_GetAbsOrigin(i, vecDestination);

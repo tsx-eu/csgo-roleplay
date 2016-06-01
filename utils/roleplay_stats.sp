@@ -163,7 +163,7 @@ public void DisplayStats(int client, bool full){
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
 		Format(tmp, sizeof(tmp), "Argent gagné par les machines: %d", rp_GetClientStat(client, i_S_MoneyEarned_CashMachine));
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
-		Format(tmp, sizeof(tmp), "Argent recu: %d", rp_GetClientStat(client, i_S_MoneyEarned_Give));
+		Format(tmp, sizeof(tmp), "Argent reçu: %d", rp_GetClientStat(client, i_S_MoneyEarned_Give));
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
 
 		AddMenuItem(menu, "", "------------------------------------------", ITEMDRAW_DISABLED);
@@ -213,7 +213,7 @@ public void DisplayStats(int client, bool full){
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
 		Format(tmp, sizeof(tmp), "Argent gagné par les machines: %d", rp_GetClientStat(client, i_MoneyEarned_CashMachine));
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
-		Format(tmp, sizeof(tmp), "Argent recu: %d", rp_GetClientStat(client, i_MoneyEarned_Give));
+		Format(tmp, sizeof(tmp), "Argent reçu: %d", rp_GetClientStat(client, i_MoneyEarned_Give));
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
 
 		AddMenuItem(menu, "", "------------------------------------------", ITEMDRAW_DISABLED);
@@ -342,8 +342,8 @@ public void SaveClient(int client){
 int CountMachine(int client, bool big) {
 	int count = 0;
 	char classname[64], bigclassname[64], tmp[128];
-	Format(bigclassname, sizeof(bigclassname), "rp_bigcashmachine_%i", client);
-	Format(classname, sizeof(classname), "rp_cashmachine_%i", client);
+	Format(bigclassname, sizeof(bigclassname), "rp_bigcashmachine");
+	Format(classname, sizeof(classname), "rp_cashmachine");
 	
 	for(int i=MaxClients; i<=2048; i++) {
 		if( !IsValidEdict(i) )
@@ -354,12 +354,12 @@ int CountMachine(int client, bool big) {
 		GetEdictClassname(i, tmp, 63);
 		
 		if(big){
-			if(StrEqual(bigclassname, tmp)){
+			if(StrEqual(bigclassname, tmp) && rp_GetBuildingData(i, BD_owner) == client ){
 				return 1;
 			}
 		}
 		else{
-			if(StrEqual(classname, tmp)){
+			if(StrEqual(classname, tmp) && rp_GetBuildingData(i, BD_owner) == client ){
 				count++;
 			}
 		}
@@ -369,7 +369,7 @@ int CountMachine(int client, bool big) {
 int CountPlants(int client){
 	int count;
 	char tmp2[64];
-	Format(tmp2, sizeof(tmp2), "rp_plant_%i_", client);
+	Format(tmp2, sizeof(tmp2), "rp_plant");
 	for(int i=1; i<=2048; i++) {
 		if( !IsValidEdict(i) )
 			continue;
@@ -380,7 +380,7 @@ int CountPlants(int client){
 		GetEdictClassname(i, tmp, 63);
 		
 		
-		if( StrContains(tmp, tmp2) == 0 ) {
+		if( StrEqual(tmp, tmp2) && rp_GetBuildingData(i, BD_owner) == client ) {
 			count++;
 		}
 	}

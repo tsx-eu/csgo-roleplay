@@ -350,7 +350,7 @@ public Action Cmd_ItemPropAppart(int args){
 	int appart = rp_GetPlayerZoneAppart(client);
 	if(appart == -1){
 		if(rp_GetZoneInt(zone, zone_type_type) != rp_GetClientJobID(client)){
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être dans votre planque ou dans votre appartment.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être dans votre planque ou dans votre appartement.");
 			return Plugin_Handled;
 		}
 	}
@@ -375,7 +375,7 @@ public int MenuPropAppart(Handle menu, MenuAction action, int client, int param2
 		int appart = rp_GetPlayerZoneAppart(client);
 		if(appart == -1){
 			if(rp_GetZoneInt(zone, zone_type_type) != rp_GetClientJobID(client)){
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être dans votre planque ou dans votre appartment.");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être dans votre planque ou dans votre appartement.");
 				return;
 			}
 		}
@@ -633,7 +633,7 @@ int BuildingTomb(int client) {
 		return 0;	
 	
 	char classname[64], tmp[64];
-	Format(classname, sizeof(classname), "rp_grave_%i", client);
+	Format(classname, sizeof(classname), "rp_grave");
 	
 	float vecOrigin[3], vecAngles[3];
 	GetClientAbsOrigin(client, vecOrigin);
@@ -647,7 +647,7 @@ int BuildingTomb(int client) {
 		
 		GetEdictClassname(i, tmp, sizeof(tmp));
 		
-		if( StrEqual(classname, tmp) ) {
+		if( StrEqual(classname, tmp) && rp_GetBuildingData(i, BD_owner) == client ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà une tombe de placée.");
 			return 0;
 		}

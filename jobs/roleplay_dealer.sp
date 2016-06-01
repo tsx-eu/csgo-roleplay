@@ -102,7 +102,7 @@ public void OnPluginStart() {
 			continue;
 		
 		GetEdictClassname(i, classname, sizeof(classname));
-		if( StrContains(classname, "rp_plant_") == 0 ) {
+		if( StrEqual(classname, "rp_plant") ) {
 			
 			rp_SetBuildingData(i, BD_started, GetTime());
 			rp_SetBuildingData(i, BD_owner, GetEntPropEnt(i, Prop_Send, "m_hOwnerEntity") );
@@ -184,7 +184,14 @@ public Action Cmd_ItemDrugs(int args) {
 		client = target;
 	}
 	else if( StrEqual(arg0, "crack2") ) {
-		dur = 30.0;
+		if( !rp_GetClientBool(client, b_MayUseUltimate) ) {
+			ITEM_CANCEL(client, item_id);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet item pour le moment.");
+			return Plugin_Handled;
+		}
+		dur = 60.0;
+		rp_SetClientBool(client, b_MayUseUltimate, false);
+		CreateTimer(35.0, AllowUltimate, client);
 		rp_HookEvent(client, RP_PreTakeDamage, fwdCrack, dur);
 		rp_Effect_ShakingVision(client);
 	}
@@ -375,7 +382,7 @@ public Action Cmd_ItemEngrais(int args) {
 	
 	char classname[64];
 	GetEdictClassname(target, classname, sizeof(classname));
-	if( StrContains(classname, "rp_plant_") != 0 ) {
+	if( !StrEqual(classname, "rp_plant") ) {
 		ITEM_CANCEL(client, item_id);
 		return Plugin_Handled;
 	}
@@ -436,10 +443,8 @@ int BuildingPlant(int client, int type) {
 	if( !rp_IsBuildingAllowed(client) )
 		return 0;
 	
-	char classname[64];
-	Format(classname, sizeof(classname), "rp_plant_%i_%i", client, type);
-	char tmp2[64];
-	Format(tmp2, sizeof(tmp2), "rp_plant_%i_", client);
+	char classname[64], tmp[64];
+	Format(classname, sizeof(classname), "rp_plant");
 	
 	float vecOrigin[3];
 	GetClientAbsOrigin(client, vecOrigin);
@@ -461,16 +466,13 @@ int BuildingPlant(int client, int type) {
 		if( !IsValidEntity(i) )
 			continue;
 		
-		char tmp[64];
 		GetEdictClassname(i, tmp, 63);
 		
-		
-		if( StrContains(tmp, tmp2) == 0 ) {
+		if( StrEqual(classname, tmp) && rp_GetBuildingData(i, BD_owner) == client ) {
 			count++;
 			
 			float vecOrigin2[3];
 			Entity_GetAbsOrigin(i, vecOrigin2);
-			
 			
 			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 24 ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas construire aussi proche d'une autre plante vous appartenant.");
@@ -530,6 +532,7 @@ int BuildingPlant(int client, int type) {
 	rp_SetBuildingData(ent, BD_max, 3);
 	rp_SetBuildingData(ent, BD_count, 0);
 	rp_SetBuildingData(ent, BD_owner, client);
+	rp_SetBuildingData(ent, BD_item_id, type);
 	
 	CreateTimer(3.0, BuildingPlant_post, ent);
 	
@@ -660,18 +663,10 @@ public Action Frame_BuildingPlant(Handle timer, any ent) {
 			cpt++;
 		
 		rp_SetBuildingData(ent, BD_count, cpt);
-		
 		rp_Effect_BeamBox(client, ent, NULL_VECTOR, 255, 255, 0);
 		
-		char tmp2[64];
-		Format(tmp2, sizeof(tmp2), "rp_plant_%i_", client);
+		int sub = rp_GetBuildingData(ent, BD_item_id);
 		char tmp[64];
-		GetEdictClassname(ent, tmp, sizeof(tmp));
-		
-		ReplaceString(tmp, sizeof(tmp), tmp2, "");
-		ReplaceString(tmp, sizeof(tmp), "_", "");
-		
-		int sub = StringToInt(tmp);
 		
 		rp_GetItemData(sub, item_type_name, tmp, sizeof(tmp));
 		
@@ -706,7 +701,7 @@ public Action fwdOnPlayerUse(int client) {
 	}
 	
 	
-	Format(tmp2, sizeof(tmp2), "rp_plant_%i_", client);
+	Format(tmp2, sizeof(tmp2), "rp_plant");
 	
 	float vecOrigin[3];
 	GetClientAbsOrigin(client, vecOrigin);
@@ -721,16 +716,13 @@ public Action fwdOnPlayerUse(int client) {
 		GetEdictClassname(i, tmp, 63);
 		
 		
-		if( StrContains(tmp, tmp2) == 0 ) {
+		if( StrEqual(tmp, tmp2) && rp_GetBuildingData(i, BD_owner) == client ) {
 			float vecOrigin2[3];
 			Entity_GetAbsOrigin(i, vecOrigin2);
 			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 50 && rp_GetBuildingData(i, BD_count) > 0.0 ) {
 				
-				ReplaceString(tmp, sizeof(tmp), tmp2, "");
-				ReplaceString(tmp, sizeof(tmp), "_", "");
-				
-				int sub = StringToInt(tmp);
-				if( sub <= 0 && sub > MAX_ITEMS )
+				int sub = rp_GetBuildingData(i, BD_item_id);
+				if( sub < 0 && sub > MAX_ITEMS )
 					continue;
 					
 				rp_IncrementSuccess(client, success_list_trafiquant, rp_GetBuildingData(i, BD_count) );
@@ -924,13 +916,12 @@ public Action ItemPiedBicheOver(Handle timer, any client) {
 	return Plugin_Handled;
 }
 
-public Action AllowStealing2(Handle timer, any client) {
+public Action AllowUltimate(Handle timer, any client) {
 	#if defined DEBUG
-	PrintToServer("AllowStealing");
+	PrintToServer("AllowUltimate");
 	#endif
 
-	rp_SetClientBool(client, b_MaySteal, true);
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez à nouveau vous téléporter.");
+	rp_SetClientBool(client, b_MayUseUltimate, true);
 }
 
 
@@ -944,7 +935,7 @@ public Action Cmd_ItemPilule(int args){
 	int item_id = GetCmdArgInt(args);
 	int tptozone = -1;
 
-	if( !rp_GetClientBool(client, b_MaySteal) ) {
+	if( !rp_GetClientBool(client, b_MayUseUltimate) ) {
 		ITEM_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet item pour le moment.");
 		return Plugin_Handled;
@@ -1073,14 +1064,14 @@ public Action ItemPiluleOver(Handle timer, Handle dp) {
 		
 		rp_ClientColorize(client, { 255, 255, 255, 255} );
 		TeleportEntity(client, tppos, NULL_VECTOR, NULL_VECTOR);
-		rp_SetClientBool(client, b_MaySteal, false);
-		CreateTimer( TP_CD_DURATION, AllowStealing2, client);
+		rp_SetClientBool(client, b_MayUseUltimate, false);
+		CreateTimer( TP_CD_DURATION, AllowUltimate, client);
 		return Plugin_Handled;
 	}
 	ITEM_CANCEL(client, item_id);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Nous n'avons pas trouvé d'endroit où vous téléporter.");
 	rp_ClientColorize(client, { 255, 255, 255, 255} );
-	rp_SetClientBool(client, b_MaySteal, true);
+	rp_SetClientBool(client, b_MayUseUltimate, true);
 	return Plugin_Handled;
 }
 

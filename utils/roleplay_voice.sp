@@ -24,6 +24,7 @@
 //#define DEBUG
 Handle g_vAllTalk;
 bool g_bAllTalk = false;
+bool g_bMayTalk[65];
 
 public Plugin myinfo = {
 	name = "Utils: VoiceProximity", author = "KoSSoLaX",
@@ -49,6 +50,7 @@ public void OnCvarChange(Handle cvar, const char[] oldVal, const char[] newVal) 
 	}
 }
 public void OnClientPostAdminCheck(int client) {
+	g_bMayTalk[client] = true;
 	rp_HookEvent(client, RP_OnPlayerHear, fwdHear);
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 }
@@ -66,13 +68,13 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 			return Plugin_Handled;
 		}
 		if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
-			if( !rp_GetClientBool(client, b_MaySteal) ) {
+			if( !g_bMayTalk[client] ) {
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez attendre encore quelques secondes, avant d'utiliser à nouveau le chat annonce.");
 					return Plugin_Handled;
 			}
 			
-			rp_SetClientBool(client, b_MaySteal, false);
-			CreateTimer(10.0, AllowStealing, client);
+			g_bMayTalk[client] = false;
+			CreateTimer(10.0, AllowTalking, client);
 		}
 		
 		if( !rp_GetClientBool(client, b_Crayon)) {
@@ -211,20 +213,20 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 			PrintToChat(client, "\x04[\x02MUTE\x01]\x01: Vous avez été interdit d'utiliser le chat.");
 			return Plugin_Stop;
 		}
-		if( !rp_GetClientBool(client, b_MaySteal) ) {
+		if( !g_bMayTalk[client] ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez attendre encore quelques secondes.");
 			return Plugin_Stop;
 		}
-		rp_SetClientBool(client, b_MaySteal, false);
-		CreateTimer(10.0, AllowStealing, client);
+		g_bMayTalk[client] = false;
+		CreateTimer(10.0, AllowTalking, client);
 	}
 	return Plugin_Continue;
 }
-public Action AllowStealing(Handle timer, any client) {
+public Action AllowTalking(Handle timer, any client) {
 	#if defined DEBUG
-	PrintToServer("AllowStealing");
+	PrintToServer("AllowTalking");
 	#endif
-	rp_SetClientBool(client, b_MaySteal, true);
+	g_bMayTalk[client] = true;
 }
 
 public Action Cmd_job(int client, int args){
@@ -397,10 +399,6 @@ public int MenuJobs3(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 	if (p_oAction == MenuAction_Select) {
 		char szMenuItem[16];
 		if (GetMenuItem(p_hItemMenu, p_iParam2, szMenuItem, sizeof(szMenuItem))){
-			if(!rp_GetClientBool(client, b_MaySteal)){
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez attendre encore quelques instants avant d'envoyer une demande");
-				return;
-			}
 						
 			char data[2][32], tmp[128];
 			ExplodeString(szMenuItem, "_", data, sizeof(data), sizeof(data[]));
@@ -412,8 +410,6 @@ public int MenuJobs3(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 				return;
 			}
 			rp_ClientFloodIncrement(client, target, fd_job, 10.0);
-			rp_SetClientBool(client, b_MaySteal, false);
-			CreateTimer(10.0, AllowStealing, client);
 			
 			char zoneName[64];
 			rp_GetZoneData(rp_GetPlayerZone(client), zone_type_name, zoneName, sizeof(zoneName));

@@ -167,6 +167,10 @@ public Action metroTeleport(Handle timer, any client) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} En raison de votre mauvais comportement, il vous est temporairement interdit de participer à un event.");
 			return Plugin_Handled;
 		}
+		if( rp_GetClientBool(client, b_IsSearchByTribunal) == true ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes recherché par le Tribunal, impossible de participer à un event.");
+			return Plugin_Handled;
+		}
 		paid = true;
 	}
 	if( !paid && rp_GetClientJobID(client) == 31 ) {
@@ -213,9 +217,17 @@ public Action Cmd_ItemCigarette(int args) {
 	char Arg1[32];
 	GetCmdArg(1, Arg1, 31);
 	int client = GetCmdArgInt(2);
+	int item_id = GetCmdArgInt(args);
 	
 	
-	if( StrEqual(Arg1, "deg") ) {		
+	if( StrEqual(Arg1, "deg") ) {
+		if( !rp_GetClientBool(client, b_MayUseUltimate) ) {
+			ITEM_CANCEL(client, item_id);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet item pour le moment.");
+			return Plugin_Handled;
+		}
+		rp_SetClientBool(client, b_MayUseUltimate, false);
+		CreateTimer(10.0, AllowUltimate, client);
 		rp_SetClientInt(client, i_LastAgression, GetTime());
 		float origin[3];
 		GetClientAbsOrigin(client, origin);
@@ -617,4 +629,12 @@ bool IsInMetro(int client) {
 		}
 	}
 	return false;
+}
+
+public Action AllowUltimate(Handle timer, any client) {
+	#if defined DEBUG
+	PrintToServer("AllowUltimate");
+	#endif
+
+	rp_SetClientBool(client, b_MayUseUltimate, true);
 }

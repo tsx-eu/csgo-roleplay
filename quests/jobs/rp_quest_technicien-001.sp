@@ -133,7 +133,7 @@ int getMaxPhone() {
 			continue;
 		
 		GetEdictClassname(i, classname, sizeof(classname));
-		if( StrContains(classname, "rp_phone_") == 0)
+		if( StrContains(classname, "rp_phone") == 0)
 			lastRes++;
 	}
 	
@@ -153,7 +153,7 @@ int getNearestPhone(int client, float& nearest) {
 			continue;
 		
 		GetEdictClassname(i, classname, sizeof(classname));
-		if( StrContains(classname, "rp_phone_") == 0) {
+		if( StrContains(classname, "rp_phone") == 0) {
 			skip = false;
 			for (int j = 0; j <= g_iCurrent[client]; j++) {
 				if( g_iMarked[client][j] == i )

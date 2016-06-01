@@ -46,7 +46,7 @@ float g_flClientBook[65][book_max];
 #define MODEL_TABLE1 	"models/props/de_boathouse/table_drafting01.mdl"
 #define MODEL_TABLE2	"models/props/de_boathouse/table_drafting02.mdl"
 
-int lstJOB[] =  { 11, 21, 31, 41, 51, 61, 71, 81, 111, 121, 131, 171, 191, 211, 221 };
+int lstJOB[] =  { 11, 21, 31, 41, 51, 61, 71, 81, 111, 131, 171, 191, 211, 221 };
 
 public Plugin myinfo = {
 	name = "Jobs: ARTISAN", author = "KoSSoLaX",
@@ -54,6 +54,23 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 // ----------------------------------------------------------------------------
+//forward RP_CanClientCraftForFree(int client, int itemID);
+//forward RP_ClientCraftOver(int client, int itemID);
+Handle g_hForward_RP_CanClientCraftForFree, g_hForward_RP_CanClientCraftOver;
+int doRP_CanClientCraftForFree(int client, int itemID) {
+	int a;
+	Call_StartForward(g_hForward_RP_CanClientCraftForFree);
+	Call_PushCell(client);
+	Call_PushCell(itemID);
+	Call_Finish(a);
+	return a;
+}
+bool doRP_ClientCraftOver(int client, int itemID) {
+	Call_StartForward(g_hForward_RP_CanClientCraftOver);
+	Call_PushCell(client);
+	Call_PushCell(itemID);
+	Call_Finish();
+}
 public Action Cmd_Reload(int args) {
 	char name[64];
 	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
@@ -66,6 +83,8 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_craftbook",		Cmd_ItemCraftBook,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 	RegAdminCmd("rp_fatigue", CmdSetFatigue, ADMFLAG_ROOT);
 	
+	g_hForward_RP_CanClientCraftForFree = CreateGlobalForward("RP_CanClientCraftForFree", ET_Event, Param_Cell, Param_Cell);
+	g_hForward_RP_CanClientCraftOver = CreateGlobalForward("RP_ClientCraftOver", ET_Event, Param_Cell, Param_Cell);
 	
 	SQL_TQuery(rp_GetDatabase(), SQL_LoadReceipe, "SELECT `itemid`, `raw`, `amount`, REPLACE(`extra_cmd`, 'rp_item_primal ', '') `rate` FROM `rp_csgo`.`rp_craft` C INNER JOIN `rp_items` I ON C.`raw`=I.`id` ORDER BY `itemid`, `raw`", 0, DBPrio_Low);
 	
@@ -236,10 +255,6 @@ void displayArtisanMenu(int client) {
 	DisplayMenu(menu, client, 30);
 }
 void displayBuildMenu(int client, int jobID, int itemID) {
-	if( rp_GetClientInt(client, i_ItemCount) == 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez aucune matière première.");
-		return;
-	}
 	
 	int clientItem[MAX_ITEMS], data[craft_type_max];
 	for(int i = 0; i < MAX_ITEMS; i++)
@@ -266,7 +281,7 @@ void displayBuildMenu(int client, int jobID, int itemID) {
 		SetMenuTitle(menu, "== Artisanat: Construire");
 		
 		for(int i = 0; i < MAX_ITEMS; i++) {
-			if( !g_bCanCraft[client][i] )
+			if( !g_bCanCraft[client][i] && !doRP_CanClientCraftForFree(client, i) )
 				continue;
 			if( rp_GetItemInt(i, item_type_job_id) != jobID && jobID != -1 )
 				continue;
@@ -285,8 +300,8 @@ void displayBuildMenu(int client, int jobID, int itemID) {
 				}
 			}
 			
-			rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2));
-			if( can ) {
+			rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2)); 
+			if( can || doRP_CanClientCraftForFree(client, i) ) {
 				Format(tmp, sizeof(tmp), "build %d %d", jobID, i);
 				Format(tmp2, sizeof(tmp2), "[> %s <]", tmp2);
 			}
@@ -318,6 +333,8 @@ void displayBuildMenu(int client, int jobID, int itemID) {
 			if( delta < min )
 				min = delta;
 		}
+		
+		min += doRP_CanClientCraftForFree(client, itemID);
 		
 		Format(tmp, sizeof(tmp), "build %d %d %d", jobID, itemID, min);
 		Format(tmp2, sizeof(tmp2), "Tout Construire (%d) (%.1fsec)", min, duration*min + (min*GetTickInterval()));
@@ -571,6 +588,7 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	int positive = ReadPackCell(dp);
 	int fatigue = ReadPackCell(dp);
 	bool failed = false;
+	bool free = (doRP_CanClientCraftForFree(client, itemID) > 0);
 	
 	if( !IsValidClient(client) ) {
 		return Plugin_Stop;
@@ -604,12 +622,14 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	}
 		
 	if( positive > 0 ) {
-		for (int j = 0; j < magic.Length; j++) { // Pour chaque items de la recette:
-			magic.GetArray(j, data);
-			
-			if( data[craft_amount] > rp_GetClientItem(client,data[craft_raw]) ) {
-				g_bInCraft[client] = false;
-				return Plugin_Stop;
+		if( !free ) {
+			for (int j = 0; j < magic.Length; j++) { // Pour chaque items de la recette:
+				magic.GetArray(j, data);
+				
+				if( data[craft_amount] > rp_GetClientItem(client,data[craft_raw]) ) {
+					g_bInCraft[client] = false;
+					return Plugin_Stop;
+				}
 			}
 		}
 	}
@@ -632,8 +652,10 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	rp_SetClientFloat(client, fl_ArtisanFatigue, flFatigue);
 	
 	if( positive > 0 ) { // Craft
-		if( !failed )  // Si on échoue pas on give l'item
+		if( !failed ) { // Si on échoue pas on give l'item
 			rp_ClientGiveItem(client, itemID, positive);
+			doRP_ClientCraftOver(client, itemID);
+		}
 		
 		if( g_flClientBook[client][book_luck] > GetTickedTime() && Math_GetRandomInt(0, 1000) < 50 )
 			rp_ClientGiveItem(client, itemID, positive);
@@ -642,7 +664,8 @@ public Action stopBuilding(Handle timer, Handle dp) {
 			magic.GetArray(i, data);
 				
 			ClientGiveXP(client, rp_GetItemInt(data[craft_raw], item_type_prix));
-			rp_ClientGiveItem(client, data[craft_raw], -data[craft_amount]);		
+			if( !free )
+				rp_ClientGiveItem(client, data[craft_raw], -data[craft_amount]);		
 		}
 	}
 	else if( !failed ) { // Recyclage, si on le rate pas on prend l'item.
@@ -720,7 +743,7 @@ float getDuration(int client, int itemID) {
 	float duration = 0.0;
 	for (int i = 0; i < magic.Length; i++) {
 		magic.GetArray(i, data);
-		duration += 0.01 * data[craft_amount];
+		duration += 0.02 * data[craft_amount];
 	}
 	
 	if( g_flClientBook[client][book_speed] > GetTickedTime() )
@@ -760,7 +783,7 @@ bool isNearTable(int client) {
 	int target = rp_GetClientTarget(client);
 	if( IsValidEdict(target) && IsValidEntity(target) ) {
 		GetEdictClassname(target, classname, sizeof(classname));
-		if( StrContains(classname, "rp_table__") == 0 && rp_IsEntitiesNear(client, target, true) )
+		if( StrContains(classname, "rp_table") == 0 && rp_IsEntitiesNear(client, target, true) )
 			return true;
 	}
 	return false;
@@ -794,7 +817,7 @@ int BuidlingTABLE(int client) {
 	
 	char classname[64], tmp[64];
 	
-	Format(classname, sizeof(classname), "rp_table__%i", client);	
+	Format(classname, sizeof(classname), "rp_table", client);	
 	float vecOrigin[3];
 	GetClientAbsOrigin(client, vecOrigin);
 	int count;
@@ -806,7 +829,7 @@ int BuidlingTABLE(int client) {
 		
 		GetEdictClassname(i, tmp, sizeof(tmp));
 		
-		if( StrEqual(classname, tmp) ) {
+		if( StrEqual(classname, tmp) && rp_GetBuildingData(i, BD_owner) == client ) {
 			count++;
 			if( count >= 1 ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà une table de placée.");

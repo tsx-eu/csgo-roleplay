@@ -49,6 +49,34 @@ public void PrintToChatZone(int zoneID, const char[] message, any ...) {
 		}
 	}
 }
+public void PrintToChatPoliceSearch(int target, const char[] message, any ...) {
+	char buffer[MAX_MESSAGE_LENGTH];
+	VFormat(buffer, sizeof(buffer), message, 3);
+	
+	for(int i=1; i<=MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		
+		if( i == target || rp_GetClientJobID(i) == 1 || rp_GetClientJobID(i) == 101 ) {
+			CPrintToChat(i, buffer);
+		}
+	}
+}
+public void PrintToChatPoliceJob(int target, const char[] message, any ...) {
+	char buffer[MAX_MESSAGE_LENGTH];
+	VFormat(buffer, sizeof(buffer), message, 3);
+	
+	for(int i=1; i<=MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		if( !IsPlayerAlive(i) )
+			continue;
+		
+		if( rp_GetClientJobID(i) == 1 || rp_GetClientJobID(i) == 101 || rp_GetClientJobID(i) == target) {
+			CPrintToChat(i, buffer);
+		}
+	}
+}
 // ----------------------------------------------------------------------------
 public float GetCmdArgFloat(int index) {
 	char arg[32];
@@ -89,6 +117,11 @@ public int rp_GetItemInt(int itemID, int typeID) {
 	char tmp[32];
 	rp_GetItemData(itemID, view_as<rp_item_type>(typeID), tmp, sizeof(tmp));
 	return StringToInt(tmp);
+}
+public float rp_GetItemFloat(int itemID, int typeID) {
+	char tmp[32];
+	rp_GetItemData(itemID, view_as<rp_item_type>(typeID), tmp, sizeof(tmp));
+	return StringToFloat(tmp);
 }
 public int rp_GetJobInt(int jobID, int typeID) {
 	char tmp[32];
@@ -148,19 +181,19 @@ public bool rp_IsRemoveAble(int target) {
 	if( StrContains(classname, "item_") == 0 ) {
 		return true;
 	}
-	if( StrContains(classname, "rp_cashmachine_") == 0 ) {
+	if( StrEqual(classname, "rp_cashmachine") ) {
 		return true;
 	}
-	if( StrContains(classname, "rp_bigcashmachine_") == 0 ) {
+	if( StrEqual(classname, "rp_bigcashmachine") ) {
 		return true;
 	}
-	if( StrContains(classname, "rp_plant_") == 0 ) {
+	if( StrEqual(classname, "rp_plant") ) {
 		return true;
 	}
 	if( StrContains(classname, "prop_physics") == 0 ) {
 		return true;
 	}
-	if( StrContains(classname, "rp_grave") == 0 ) {
+	if( StrEqual(classname, "rp_grave") ) {
 		return true;
 	}
 	
@@ -247,7 +280,7 @@ public Action rp_ClientRemoveProp(int client, int target, int item_id) {
 				
 			char name[128];
 			GetEdictClassname(target, name, sizeof(name));
-			if( StrContains(name, "rp_cashmachine_") == 0 ) {
+			if( StrEqual(name, "rp_cashmachine") ) {
 					
 				int owner = GetEntPropEnt(target, Prop_Send, "m_hOwnerEntity");
 				if( IsValidClient(owner) ) {
@@ -256,7 +289,7 @@ public Action rp_ClientRemoveProp(int client, int target, int item_id) {
 				}
 				
 			}
-			if( StrContains(name, "rp_bigcashmachine_") == 0 ) {
+			if( StrEqual(name, "rp_bigcashmachine") ) {
 					
 				int owner = GetEntPropEnt(target, Prop_Send, "m_hOwnerEntity");
 				if( IsValidClient(owner) ) {
@@ -264,20 +297,14 @@ public Action rp_ClientRemoveProp(int client, int target, int item_id) {
 					CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre grosse machine a faux billet a été detruite.");
 				}
 			}
-			else if( StrContains(name, "rp_plant_") == 0 ) {
+			else if( StrEqual(name, "rp_plant") ) {
 				int owner = GetEntPropEnt(target, Prop_Send, "m_hOwnerEntity");
 				if( IsValidClient(owner) && owner != client ) {
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez detruit un plant de drogue de %N", owner);
 					CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos plantations a été detruite.");
 				}
-				else if( owner == client ) {
-					char tmp2[64];
-					Format(tmp2, sizeof(tmp2), "rp_plant_%i_", client);
-						
-					ReplaceString(name, sizeof(name), tmp2, "");
-					ReplaceString(name, sizeof(name), "_", "");
-						
-					int sub = StringToInt(name);
+				else if( owner == client ) {				
+					int sub = rp_GetBuildingData(target, BD_item_id);
 					rp_ClientGiveItem(client, sub, rp_GetBuildingData(target, BD_count));
 					
 					if( rp_GetBuildingData(target, BD_started)+180 < GetTime() ) {
@@ -316,7 +343,7 @@ public Action rp_ClientRemoveProp(int client, int target, int item_id) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le props a été supprime.");
 			}
 		}
-		else if( rp_IsValidVehicle(target) && rp_IsInPVP(client) && rp_IsInPVP(target) ) {
+		else if( rp_IsValidVehicle(target) && rp_GetZoneBit( rp_GetPlayerZone(target) ) & BITZONE_PVP ) {
 			int heal = rp_GetVehicleInt(target, car_health) - 500;
 			int owner = rp_GetVehicleInt(target, car_owner);
 			rp_SetVehicleInt(target, car_health, heal);

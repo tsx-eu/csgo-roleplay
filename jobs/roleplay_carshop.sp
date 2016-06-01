@@ -87,6 +87,8 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_vehicle", 	Cmd_ItemVehicle,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_vehicle2", 	Cmd_ItemVehicle,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_carstuff", 	Cmd_ItemVehicleStuff,	"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegAdminCmd("rp_vehiclexit",		Cmd_VehicleExit,		ADMFLAG_KICK);
+	
 	g_hMAX_CAR = CreateConVar("rp_max_car",	"25", "Nombre de voiture maximum sur le serveur", 0, true, 0.0, true, 50.0);
 	
 	// Reload:
@@ -100,6 +102,22 @@ public void OnPluginStart() {
 			CreateTimer(3.5, Timer_VehicleRemoveCheck, EntIndexToEntRef(i));
 		}
 	}
+}
+public Action Cmd_VehicleExit(int client, int args) {
+	for (int i = 1; i <= MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		
+		int vehicle = GetEntPropEnt(i, Prop_Send, "m_hVehicle");
+		if( vehicle > 0 )
+			rp_ClientVehicleExit(i, vehicle);
+		
+		int passager = rp_GetClientVehiclePassager(i);
+		if( passager > 0 )
+			rp_ClientVehiclePassagerExit(i, passager);
+
+	}
+	return Plugin_Handled;
 }
 public void OnMapStart() {
 	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt", true);
@@ -156,10 +174,14 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	}
 	return Plugin_Continue;
 }
+public Action taskGarageMenu(Handle timer, any client) {
+	if( rp_ClientCanDrawPanel(client) )
+		DisplayGarageMenu(client);
+}
 public Action fwdUse(int client) {
 	
-	if( IsInGarage(client) ) { 
-		DisplayGarageMenu(client);
+	if( IsInGarage(client) && rp_ClientCanDrawPanel(client) ) { 
+		CreateTimer(0.1, taskGarageMenu, client);
 	}
 	
 	int target = rp_GetClientTarget(client);
@@ -581,6 +603,7 @@ void VehicleRemove(int vehicle, bool explode = false) {
 	}
 	
 	rp_SetVehicleInt(vehicle, car_owner, -1);
+	rp_SetVehicleInt(vehicle, car_particle, -1);
 	
 	if( explode ) {
 		IgniteEntity(vehicle, 1.75);
@@ -724,7 +747,7 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 			}
 			attachVehicleLight(ent);
 			
-			if( batterie != -1 ) {
+			if( batterie != -1 && !rp_GetClientBool(driver, b_IsAFK) ) {
 				if( rp_GetVehicleInt(ent, car_battery) < 420 ) {
 					rp_SetVehicleInt(ent, car_battery, rp_GetVehicleInt(ent, car_battery)+1);
 					
@@ -1236,7 +1259,6 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 						
 						int capital_id = rp_GetRandomCapital( rp_GetClientJobID(client)  );
 						rp_SetJobCapital( capital_id, rp_GetJobCapital(capital_id)-2000 );
-						
 						CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez vendu votre batterie. Le virement des 2000$ sera effectué en fin de journée.");
 						rp_SetVehicleInt(target, car_battery, -1);
 					}

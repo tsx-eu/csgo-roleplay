@@ -61,12 +61,14 @@ public Action Cmd_Reload(int args) {
 }
 // ----------------------------------------------------------------------------
 public bool fwdCanStart(int client) {
+	return false;/*
 	int job = rp_GetClientInt(client, i_Job);
 	
 	if( job >= 1 && job <= 9 || job == 107 || job == 108 || job == 109 ) // Police + marshall + gonu + gos
 		return (findNearestSerialKiller(client)>=1);
 	
 	return false;
+	*/
 }
 public void Q1_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);

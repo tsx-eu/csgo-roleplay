@@ -443,7 +443,26 @@ native int rp_GetClientSSO(int client, char[] sso, int length);
 native void rp_ClientFloodIncrement(int client, int target, fd_user_data type, float cooldown);
 native bool rp_ClientFloodTriggered(int client, int target, fd_user_data type);
 // ----------------------------------------------------------------------------
-
+enum BM_Int {
+	BM_Owner = 0,
+	BM_Prix,
+	BM_Munition,
+	BM_Chargeur,
+	BM_PvP,
+	BM_Type,
+	BM_Max
+}
+native int rp_WeaponMenu_GetOwner(int wepID);
+native DataPack rp_WeaponMenu_Create();
+native void rp_WeaponMenu_Clear(DataPack& hBuyMenu);
+native void rp_WeaponMenu_Reset(DataPack hBuyMenu);
+native void rp_WeaponMenu_SetPosition(DataPack hBuyMenu, int position);
+native int rp_WeaponMenu_GetPosition(DataPack hBuyMenu);
+native int rp_WeaponMenu_GetMax(DataPack hBuyMenu);
+native bool rp_WeaponMenu_Add(DataPack hBuyMenu, int weaponID, int owner);
+native void rp_WeaponMenu_Delete(DataPack& hBuyMenu, int pos);
+native void rp_WeaponMenu_Get(DataPack hBuyMenu, int pos, char weapon[65], int data[BM_Max]);
+// ----------------------------------------------------------------------------
 #define ACCESS_DENIED(%1)	CPrintToChat(%1, "{lightblue}[TSX-RP]{default} Vous n'avez pas accès à cette commande.");	return Plugin_Handled
 #define ITEM_CANCEL(%1,%2)	rp_ClientGiveItem(%1,%2); rp_SetClientFloat(%1, fl_CoolDown, 0.05)
 
@@ -528,6 +547,7 @@ enum bool_user_data {
 	b_SpawnToTueur,
 	b_HasVilla,
 	b_CanSort,
+	b_MayUseUltimate,
 
 	b_udata_max
 };
@@ -609,7 +629,7 @@ enum int_user_data {
 	i_ArtisanXP,
 	i_ArtisanLevel,
 	i_ArtisanPoints,
-
+	i_FakeClient,
 
 	i_udata_max
 };
@@ -640,6 +660,7 @@ enum float_user_data {
 	Float:fl_ArtisanFatigue,
 	Float:fl_LastPoison,
 	Float:fl_LastCrochettage,
+	Float:fl_Ratio,
 	
 	fl_udata_max
 };
@@ -751,6 +772,7 @@ enum rp_capture_zone {
 	cap_bunker =  0,
 	cap_villa,
 	cap_disableItem,
+	cap_pvpRow,
 	capture_max
 };
 enum enum_ball_type {
@@ -961,4 +983,5 @@ enum int_stat_data {
 
 	i_uStat_max
 };
+
 #include <rp_tools.inc>

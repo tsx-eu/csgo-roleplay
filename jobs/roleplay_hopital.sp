@@ -72,6 +72,12 @@ public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 	PrecacheModel("models/pg_props/pg_hospital/pg_ekg.mdl", true);
 }
+public void OnConfigsExecuted() {
+	CreateTimer(1.0, PostConfigExecuted);
+}
+public Action PostConfigExecuted(Handle timer, any none) {
+	ServerCommand("healthshot_health 250");
+}
 // ----------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnAssurance,	fwdAssurance);
@@ -408,7 +414,7 @@ public Action Cmd_ItemAdrenaline(int args) {
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
 	
-	if( !rp_GetClientBool(client, b_MaySteal) ) {
+	if( !rp_GetClientBool(client, b_MayUseUltimate) ) {
 		ITEM_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet objet pour le moment.");
 		return Plugin_Handled;
@@ -429,18 +435,25 @@ public Action Cmd_ItemAdrenaline(int args) {
 	ServerCommand("sm_effect_particles %d Trail8 11 weapon_hand_R", client);
 	
 	rp_SetClientBool(client, b_Drugged, true);	
-	CreateTimer( 10.5, ItemDrugStop, client);
-	rp_SetClientBool(client, b_MaySteal, false);
-	CreateTimer(30.0, AllowStealing, client);
+	CreateTimer(10.5, ItemDrugStop, client);
+	rp_SetClientBool(client, b_MayUseUltimate, false);
+	
+	
+	if( rp_IsInPVP(client) || GetClientTeam(client) == CS_TEAM_CT) {
+		CreateTimer(45.0, AllowUltimate, client);
+	}
+	else{
+		CreateTimer(30.0, AllowUltimate, client);
+	}
 	
 	return Plugin_Handled;
 }
-public Action AllowStealing(Handle timer, any client) {
+public Action AllowUltimate(Handle timer, any client) {
 	#if defined DEBUG
-	PrintToServer("AllowStealing");
+	PrintToServer("AllowUltimate");
 	#endif
 
-	rp_SetClientBool(client, b_MaySteal, true);
+	rp_SetClientBool(client, b_MayUseUltimate, true);
 }
 public Action fwdAdrenalineSpeed(int client, float& speed, float& gravity) {
 	#if defined DEBUG
@@ -531,7 +544,7 @@ int BuildingHealBox(int client) {
 		return 0;
 	
 	char classname[64], tmp[64];
-	Format(classname, sizeof(classname), "rp_healbox_%i", client);
+	Format(classname, sizeof(classname), "rp_healbox");
 	
 	float vecOrigin[3], vecOrigin2[3];
 	GetClientAbsOrigin(client, vecOrigin);
@@ -544,11 +557,11 @@ int BuildingHealBox(int client) {
 			
 		GetEdictClassname(i, tmp, 63);
 		
-		if( StrEqual(classname, tmp) ) {
+		if( StrEqual(classname, tmp) && rp_GetBuildingData(i, BD_owner) == client ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà une healbox.");
 			return 0;
 		}
-		if( StrContains(tmp, "rp_healbox_") == 0 ) {
+		if( StrEqual(tmp, "rp_healbox") ) {
 			Entity_GetAbsOrigin(i, vecOrigin2);
 			if( GetVectorDistance(vecOrigin, vecOrigin2) < 600 ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il existe une autre healbox à proximité.");

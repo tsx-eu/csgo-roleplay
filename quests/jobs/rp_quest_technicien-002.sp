@@ -170,7 +170,7 @@ int countMachine(int client) {
 			continue;
 		
 		GetEdictClassname(i, classname, sizeof(classname));
-		if( StrContains(classname, "rp_cashmachine_") == 0 && rp_GetBuildingData(i, BD_owner) == client ) {
+		if( StrEqual(classname, "rp_cashmachine") && rp_GetBuildingData(i, BD_owner) == client ) {
 			if( rp_GetZoneInt(rp_GetPlayerZone(i), zone_type_type) == QUEST_JOBID )
 				count++;
 		}
