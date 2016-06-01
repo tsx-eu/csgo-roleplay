@@ -88,7 +88,7 @@ void openMenu(int client) {
 			menu.AddItem("vol", "Voler le joueur");
 		
 		if( near && jobID == 71 )
-			menu.AddItem("cutinfo", "Informations entrainnement");
+			menu.AddItem("cutinfo", "Informations entraînement");
 		
 		if( near && jobID == 11 )
 			menu.AddItem("heal", "Soigner le joueur");
@@ -109,9 +109,9 @@ void openMenu(int client) {
 		int doorID = rp_GetDoorID(target);
 		if( doorID > 0 && rp_GetClientKeyDoor(client, doorID) ) {
 			if( GetEntProp(target, Prop_Data, "m_bLocked") ) 
-				menu.AddItem("unlock", "Déverouiller la porte");
+				menu.AddItem("unlock", "Déverrouiller la porte");
 			else
-				menu.AddItem("lock", "Verouiller la porte");
+				menu.AddItem("lock", "Verrouiller la porte");
 		}
 	}
 	if( jobID == 11 ) {

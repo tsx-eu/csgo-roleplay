@@ -129,7 +129,7 @@ public int eventMariage_1(Handle menu, MenuAction action, int client, int param2
 		
 		// Setup menu
 		Handle menu2 = CreateMenu(eventMariage_2);
-		Format(options, sizeof(options), "A qui voulez-vous vous marier %N ?", target); // On choisi la seconde personne
+		Format(options, sizeof(options), "À qui voulez-vous vous marier %N ?", target); // On choisi la seconde personne
 		SetMenuTitle(menu2, options);
 		char tmp[24], tmp2[64];
 		
