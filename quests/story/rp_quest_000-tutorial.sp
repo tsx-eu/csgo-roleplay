@@ -92,7 +92,7 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 public void ClientConVar(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue) {
 	if( StrEqual(cvarName, "cl_disablehtmlmotd", false) ) {
 		if( StrEqual(cvarValue, "0") == false ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Des problemes d'affichage? Entrer cl_disablehtmlmotd 0 dans votre console puis relancer CS:GO.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Des problèmes d'affichage? Entrez cl_disablehtmlmotd 0 dans votre console puis relancez CS:GO.");
 		}
 	}	
 }
@@ -288,7 +288,7 @@ public void Q6_Frame(int objectiveID, int client) {
 		Handle panel = CreatePanel();
 		
 		SetPanelTitle(panel, "== Objectif 5: L'armurerie");
-		DrawPanelText(panel, " Les flèches vous diriger vers l'armurerie où ");
+		DrawPanelText(panel, " Les flèches vous dirige vers l'armurerie où ");
 		DrawPanelText(panel, "vous pourrez vous procurer des armes.");
 		DrawPanelText(panel, "N'oubliez pas d'acheter un permis");
 		DrawPanelText(panel, "de port d'arme à un banquier. Dans le cas contraire");
@@ -328,7 +328,7 @@ public void Q7_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "conseillé de louer un appart. Celui-ci");
 		DrawPanelText(panel, "augmentera votre paie et vous rend votre vie.");
 		DrawPanelText(panel, "Vous pouvez aussi y cacher différents objets");
-		DrawPanelText(panel, "du jeu, tel que les machines à faux billets");
+		DrawPanelText(panel, "du jeu, tel que les machines à faux-billets");
 		DrawPanelText(panel, "plants de drogue, armes, etc.");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, "→ Rendez-vous devant les appartements afin");
@@ -390,17 +390,17 @@ public void Q9_Frame(int objectiveID, int client) {
 		
 		Handle panel = CreatePanel();
 		
-		SetPanelTitle(panel, "== Objectif 8: Le chat général");
+		SetPanelTitle(panel, "== Objectif 8: Le Tchat général");
 		DrawPanelItem(panel, "", ITEMDRAW_SPACER);
-		DrawPanelText(panel, " Le chat est divisé en plusieurs");
+		DrawPanelText(panel, " Le Tchat est divisé en plusieurs");
 		DrawPanelText(panel, "catégories.");
 		DrawPanelText(panel, " ");
-		DrawPanelText(panel, " Le chat général, celui qui permet");
+		DrawPanelText(panel, " Le Tchat général, celui qui permet");
 		DrawPanelText(panel, "de communiquer avec tout citoyen");
 		DrawPanelText(panel, "présent en ville, mais aussi d'exécuter");
 		DrawPanelText(panel, "diverses commandes (comme le /item qu'on vient de voir).");
 		DrawPanelText(panel, " ");
-		DrawPanelText(panel, " Le chat équipe, permet de communiquer");
+		DrawPanelText(panel, " Le Tchat équipe, permet de communiquer");
 		DrawPanelText(panel, "avec les citoyens à coté de vous.");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, "→ Faites un coucou dans le chat local");
@@ -621,7 +621,7 @@ public int MenuSelectJob(Handle menu, MenuAction action, int client, int param2)
 			rp_SetClientInt(client, i_Job, job);
 			
 			rp_GetJobData(job, job_type_name, options, sizeof(options));
-			LogToGame("[TSX-RP] [TUTORIAL] %L a terminé son tutorial. Il a choisi %s comme job.", client, options);
+			LogToGame("[TSX-RP] [TUTORIAL] %L a terminé son tutoriel. Il a choisi %s comme job.", client, options);
 			FakeClientCommand(client, "say /shownotes");
 		}
 		
@@ -630,7 +630,7 @@ public int MenuSelectJob(Handle menu, MenuAction action, int client, int param2)
 		rp_QuestStepComplete(client, g_iQ14);
 		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) + 15000);
 		
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez terminé le tutorial, une voiture vous a été offerte. (Faites /item !)");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez terminé le tutoriel, une voiture vous a été offerte. (Faites /item !)");
 		
 		
 	}

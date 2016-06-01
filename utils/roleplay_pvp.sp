@@ -177,7 +177,7 @@ public Action Cmd_ItemFlag(int args) {
 	}
 	if( rp_GetZoneBit(rp_GetPlayerZone(client)) & BITZONE_PVP ) {
 		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être hors du bunker.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être en dehors du bunker.");
 		return;
 	}
 	
@@ -189,7 +189,7 @@ public Action Cmd_ItemFlag(int args) {
 	
 	if( GDM_GetFlagCount(client) >= FLAG_MAX ) {
 		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà planter %d drapeaux.", FLAG_MAX);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà planté %d drapeaux.", FLAG_MAX);
 		return;
 	}
 	

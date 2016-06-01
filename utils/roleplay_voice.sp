@@ -332,7 +332,7 @@ public int MenuJobs2(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 		char szMenuItem[8];
 		if (GetMenuItem(p_hItemMenu, p_iParam2, szMenuItem, sizeof(szMenuItem))){
 			Handle menu = CreateMenu(MenuJobs3);
-			SetMenuTitle(menu, "Que voulez vous lui demander:");
+			SetMenuTitle(menu, "Que voulez vous lui demander ?");
 			int target = StringToInt(szMenuItem);
 			int jobid = rp_GetClientJobID(target);
 			int amount = 0;
@@ -425,7 +425,7 @@ public int MenuJobs3(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 					CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin de {lime}%s{default}, il est actuellement: %s", client, tmp, zoneName);
 				}
 			}
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} La demande à été envoyée à la personne");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} La demande à été envoyée à la personne.");
 			ClientCommand(target, "play buttons/blip1.wav");
 			rp_Effect_BeamBox(target, client, NULL_VECTOR, 122, 122, 0);
 			Handle dp;
