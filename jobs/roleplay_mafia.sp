@@ -107,10 +107,10 @@ public Action Cmd_ItemDoorProtect(int args) {
 		float time = (appartID == 50 ? 12.0:24.0);
 		
 		if( g_flAppartProtection[appartID] <= GetGameTime() ) {
-			g_flAppartProtection[appartID] = GetGameTime() + time * 60.0;
+			g_flAppartProtection[appartID] = GetGameTime() + (time * 60.0);
 		}
 		else {
-			g_flAppartProtection[appartID] += (GetGameTime() + time * 60.0);
+			g_flAppartProtection[appartID] += (time * 60.0);
 		}
 		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} La protection est activée pour %d minutes", RoundFloat((g_flAppartProtection[appartID] - GetGameTime()) / 60.0));
