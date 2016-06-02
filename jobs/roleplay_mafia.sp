@@ -42,7 +42,7 @@ public Plugin myinfo = {
 };
 
 int g_iDoorDefine_LOCKER[2049];
-float g_flAppartProtection[110];
+float g_flAppartProtection[200];
 Handle g_hForward_RP_OnClientStealItem, g_hForward_RP_OnClientWeaponPick, g_vCapture;
 int g_cBeam;
 DataPack g_hBuyMenu;
