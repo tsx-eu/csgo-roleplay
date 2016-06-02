@@ -317,7 +317,7 @@ public Action CmdItemMask(int args) {
 	int item_id = GetCmdArgInt(args);
 	
 	
-	if( rp_GetClientInt(client, i_MaskCount) >= 1 ) {
+	if( rp_GetClientInt(client, i_MaskCount) <= 0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser de masque pour le moment.");
 		ITEM_CANCEL(client, item_id);
 		return Plugin_Handled;
