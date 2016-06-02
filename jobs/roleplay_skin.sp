@@ -317,6 +317,12 @@ public Action CmdItemMask(int args) {
 	int item_id = GetCmdArgInt(args);
 	
 	
+	if( rp_GetClientInt(client, i_MaskCount) >= 1 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser de masque pour le moment.");
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
+	
 	if (rp_GetClientInt(client, i_Mask) != 0) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous portez déjà un masque.");
 		ITEM_CANCEL(client, item_id);
@@ -339,6 +345,7 @@ public Action CmdItemMask(int args) {
 		case 7:Format(model, sizeof(model), "models/player/holiday/facemasks/facemask_chains.mdl");
 	}
 	
+	rp_SetClientInt(client, i_MaskCount, rp_GetClientInt(client, i_MaskCount) - 1);
 	int ent = CreateEntityByName("prop_dynamic");
 	DispatchKeyValue(ent, "model", model);
 	DispatchSpawn(ent);

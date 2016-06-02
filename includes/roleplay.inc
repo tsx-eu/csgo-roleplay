@@ -607,6 +607,7 @@ enum int_user_data {
 	i_TeleportTo,
 	i_Disposed,
 	i_Mask,
+	i_MaskCount,
 	i_AppartCount,
 	i_LastKillTime,
 	i_AddToPay,
