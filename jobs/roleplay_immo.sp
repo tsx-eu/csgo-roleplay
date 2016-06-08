@@ -1050,6 +1050,10 @@ public void SQL_GetAppartWiner(Handle owner, Handle hQuery, const char[] error, 
 			SQL_FetchString(hQuery, 1, szName, sizeof(szName));	
 			
 			CPrintToChatAll("{lightblue}[TSX-RP]{default} Le gagnant de la villa est... %s(%s) pour %d$!", szName, szSteamID, gain);
+			LogToGame("[TSX-RP] [VILLA] %s %s gagne la villa pour %d$", szName, szSteamID, gain);
+			
+			dispatchToJob(gain);
+			
 			rp_SetServerString(villaOwnerID,  	szSteamID, sizeof(szSteamID));
 			rp_SetServerString(villaOwnerName,  szName, sizeof(szName));
 			
@@ -1084,4 +1088,17 @@ public void SQL_GetAppartWiner(Handle owner, Handle hQuery, const char[] error, 
 	}
 	
 	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, "TRUNCATE `rp_bid`");
+}
+void dispatchToJob(int gain) {
+	int jobCount = 0;
+	for (int i = 1; i <= 221; i+=10) {
+		if( rp_GetJobInt(i, job_type_isboss) == 1 ) {
+			jobCount++;
+		}
+	}
+	for (int i = 1; i <= 221; i+=10) {
+		if( rp_GetJobInt(i, job_type_isboss) == 1 ) {
+			rp_SetJobCapital(i, rp_GetJobCapital(i) + (gain / jobCount));
+		}
+	}
 }
