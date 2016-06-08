@@ -12,10 +12,11 @@
 
 #include <sourcemod>
 #include <sdkhooks>
-#include <smlib>
-#include <colors_csgo>
 #include <basecomm>
 #include <topmenus>
+#include <smlib>		// https://github.com/bcserv/smlib
+#include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
+#include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
 
 #define __LAST_REV__ 		"v:0.1.0"
 
@@ -34,7 +35,8 @@
 #define FLAG_MAX		10
 #define FLAG_POINT_MIN	50
 #define ELO_FACTEUR_K	40.0
-
+#define MAX_ANNOUNCES	32
+#define MAX_DELAYS		10
 // -----------------------------------------------------------------------------------------------------------------
 enum flag_data { data_group, data_skin, data_red, data_green, data_blue, data_time, data_owner, data_lastOwner, flag_data_max };
 int g_iClientFlag[65];
@@ -42,7 +44,7 @@ float g_fLastDrop[65], g_flClientLastScore[65];
 int g_iFlagData[MAX_ENTITIES+1][flag_data_max];
 // -----------------------------------------------------------------------------------------------------------------
 Handle g_hCapturable = INVALID_HANDLE;
-Handle g_hGodTimer[65];
+Handle g_hGodTimer[65], g_hKillTimer[65];
 int g_iCapture_POINT[MAX_GROUPS];
 float g_flCaptureStart;
 bool g_bIsInCaptureMode = false;
@@ -52,6 +54,57 @@ StringMap g_hGlobalDamage, g_hGlobalSteamID;
 enum damage_data { gdm_shot, gdm_touch, gdm_damage, gdm_hitbox, gdm_elo, gdm_flag, gdm_kill, gdm_max };
 TopMenu g_hStatsMenu;
 TopMenuObject g_hStatsMenu_Shoot, g_hStatsMenu_Head, g_hStatsMenu_Damage, g_hStatsMenu_Flag, g_hStatsMenu_ELO, g_hStatsMenu_KILL;
+// -----------------------------------------------------------------------------------------------------------------
+enum soundList {
+	snd_YouHaveTheFlag,
+	snd_YouAreOnBlue, snd_YouAreOnRed,
+	snd_1MinuteRemain, snd_5MinutesRemain,
+	snd_EndOfRound,
+	snd_Congratulations, snd_YouHaveLostTheMatch, snd_FlawlessVictory, snd_HumiliatingDefeat,
+	snd_YouAreLeavingTheBattlefield,
+	snd_FirstBlood,
+	snd_DoubleKill, snd_MultiKill, snd_MegaKill, snd_UltraKill, snd_MonsterKill,
+	snd_KillingSpree, snd_Unstopppable, snd_Dominating, snd_Godlike
+};
+enum announcerData {
+	ann_Client,
+	ann_SoundID,
+	ann_Time,
+	ann_max
+};
+char g_szSoundList[soundList][] = {
+	"DeadlyDesire/announce/YouHaveTheFlag.mp3",
+	"DeadlyDesire/announce/YouAreOnBlue.mp3",
+	"DeadlyDesire/announce/YouAreOnRed.mp3",
+
+	"DeadlyDesire/announce/1MinutesRemain.mp3",
+	"DeadlyDesire/announce/5MinutesRemain.mp3",
+	
+	"DeadlyDesire/announce/EndOfRound.mp3",
+	"DeadlyDesire/announce/Congratulations.mp3",
+	"DeadlyDesire/announce/YouHaveLostTheMatch.mp3",
+	"DeadlyDesire/announce/FlawlessVictory.mp3",
+	"DeadlyDesire/announce/HumiliatingDefeat.mp3",
+	
+	"DeadlyDesire/announce/YouAreLeavingTheBattlefield.mp3",
+	
+	"DeadlyDesire/announce/FristBlood.mp3",
+	
+	"DeadlyDesire/announce/DoubleKill.mp3",
+	"DeadlyDesire/announce/MultiKill.mp3",
+	"DeadlyDesire/announce/MegaKill.mp3",
+	"DeadlyDesire/announce/UltraKill.mp3",
+	"DeadlyDesire/announce/MonsterKill.mp3",
+	
+	"DeadlyDesire/announce/KillingSpree.mp3",
+	"DeadlyDesire/announce/Unstopppable.mp3",
+	"DeadlyDesire/announce/Dominating.mp3",
+	"DeadlyDesire/announce/Godlike.mp3"
+};
+int g_CyclAnnouncer[MAX_ANNOUNCES][announcerData], g_CyclAnnouncer_start, g_CyclAnnouncer_end;
+int g_iKillingSpree[65], g_iKilling[65];
+bool g_bStopSound[65];
+bool g_bFirstBlood;
 // -----------------------------------------------------------------------------------------------------------------
 public Plugin myinfo = {
 	name = "Utils: PvP", author = "KoSSoLaX",
@@ -78,6 +131,13 @@ public void OnConfigsExecuted() {
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt");
+	
+	char tmp[PLATFORM_MAX_PATH];
+	for (int i = 0; i < sizeof(g_szSoundList); i++) {
+		PrecacheSoundAny(g_szSoundList[i]);
+		Format(tmp, sizeof(tmp), "sound/%s", g_szSoundList[i]);
+		AddFileToDownloadsTable(tmp);
+	}
 }
 public void OnCvarChange(Handle cvar, const char[] oldVal, const char[] newVal) {
 	#if defined DEBUG
@@ -94,6 +154,7 @@ public void OnCvarChange(Handle cvar, const char[] oldVal, const char[] newVal) 
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
+	g_bStopSound[client] = false;
 	
 	if( g_bIsInCaptureMode ) {
 		GDM_Init(client);
@@ -106,7 +167,6 @@ public void OnClientPostAdminCheck(int client) {
 	}
 }
 // -----------------------------------------------------------------------------------------------------------------
-
 public Action Cmd_SpawnTag(int args) {
 	static iPrecached[MAX_GROUPS];
 	#if defined DEBUG
@@ -342,6 +402,7 @@ void CAPTURE_Start() {
 		rowPoint = 0;
 	
 	g_iLastGroup = rp_GetCaptureInt(cap_bunker);
+	g_bFirstBlood = false;
 
 	for(int i=1; i<=MaxClients; i++) {
 		if( !IsValidClient(i) )
@@ -357,10 +418,13 @@ void CAPTURE_Start() {
 		
 		gID = rp_GetClientGroupID(i);
 		g_iCapture_POINT[gID] += 50;
-		if( gID == rp_GetCaptureInt(cap_bunker) )
+		if( gID == rp_GetCaptureInt(cap_bunker) ) {
 			g_iCapture_POINT[gID] += rowPoint;
-		
-		ClientCommand(i, "play *tsx/roleplay/bombing.mp3");
+			EmitSoundToClientAny(i, g_szSoundList[snd_YouAreOnBlue], _, 6, _, _, 1.0);
+		}
+		else {
+			EmitSoundToClientAny(i, g_szSoundList[snd_YouAreOnRed], _, 6, _, _, 1.0);
+		}
 		
 		if( !(rp_GetZoneBit(rp_GetPlayerZone(i)) & BITZONE_PVP) )
 			continue;
@@ -395,6 +459,10 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	if( StrEqual(command, "pvp") ) {
 		if( g_hStatsMenu != INVALID_HANDLE )
 			g_hStatsMenu.Display(client, TopMenuPosition_Start);
+		return Plugin_Handled;
+	}
+	if( StrEqual(command, "stopsound") ) {
+		g_bStopSound[client] = !g_bStopSound[client];
 		return Plugin_Handled;
 	}
 	return Plugin_Continue;
@@ -513,19 +581,31 @@ void CAPTURE_Reward(int totalPoints) {
 		int gID = rp_GetClientGroupID(client);
 		int bonus = RoundToCeil(g_iCapture_POINT[gID] / 200.0);
 		
+		GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
+		int array[gdm_max];
+		g_hGlobalDamage.GetArray(szSteamID, array, sizeof(array));
+		
 		if( gID == rp_GetCaptureInt(cap_bunker) ) {
 			amount = 10;
 			rp_IncrementSuccess(client, success_list_pvpkill, 100);
 			bonus += RoundToCeil((totalPoints-g_iCapture_POINT[gID]) / 200.0);
+			
+			if( array[gdm_elo] >= 1600 )
+				EmitSoundToClientAny(client, g_szSoundList[snd_FlawlessVictory], _, 6, _, _, 1.0);
+			else
+				EmitSoundToClientAny(client, g_szSoundList[snd_Congratulations], _, 6, _, _, 1.0);
 		}
 		else {
 			amount = 1;
+			
+			if( array[gdm_damage] >= 500 || array[gdm_flag] >= 1 || array[gdm_kill] >= 3 ) {
+				EmitSoundToClientAny(client, g_szSoundList[snd_YouHaveLostTheMatch], _, 6, _, _, 1.0);
+			}
+			else {
+				EmitSoundToClientAny(client, g_szSoundList[snd_HumiliatingDefeat], _, 6, _, _, 1.0);
+			}
 		}
 		
-		GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
-	
-		int array[gdm_max];
-		g_hGlobalDamage.GetArray(szSteamID, array, sizeof(array));
 		amount = RoundFloat( float(array[gdm_elo]) / 1500.0 * float(amount) );
 		
 		if( array[gdm_damage] >= 500 || array[gdm_flag] >= 1 || array[gdm_kill] >= 3 ) {
@@ -567,8 +647,13 @@ public Action CAPTURE_Tick(Handle timer, any none) {
 		for (int i = 1; i <= MaxClients; i++) {
 			if( !IsValidClient(i) )
 				continue;
-			if( rp_GetClientGroupID(i) != defense )
+			if( rp_GetClientGroupID(i) != defense ) {
+				if( rp_GetClientGroupID(i) == winner )
+					EmitSoundToClientAny(i, g_szSoundList[snd_YouAreOnBlue], _, 6, _, _, 1.0);
 				continue;
+			}
+			
+			EmitSoundToClientAny(i, g_szSoundList[snd_YouAreOnRed], _, 6, _, _, 1.0);
 			if( rp_GetPlayerZone(i) != ZONE_RESPAWN )
 				continue;
 			rp_ClientSendToSpawn(i, true);
@@ -587,6 +672,27 @@ public Action CAPTURE_Tick(Handle timer, any none) {
 	
 	Effect_DrawBeamBoxToAll(mins, maxs, g_cBeam, g_cBeam, 0, 30, 2.0, 5.0, 5.0, 2, 1.0, color, 0);
 	
+	if( GetTime() % 2 == 0 ) {
+		bool found = CyclAnnouncer_Empty();
+		int NowTime = RoundToCeil(GetGameTime());
+		int time, soundID, target;
+		
+		while( !found  ) {
+			time = g_CyclAnnouncer[g_CyclAnnouncer_end][ann_Time];
+			soundID = g_CyclAnnouncer[g_CyclAnnouncer_end][ann_SoundID];
+			target = g_CyclAnnouncer[g_CyclAnnouncer_end][ann_Client];
+			
+			g_CyclAnnouncer_end = (g_CyclAnnouncer_end+1) % MAX_ANNOUNCES;
+			
+			if( (time+MAX_DELAYS) >= NowTime && IsValidClient(target) ) {
+				announceSound(target, soundID);
+				found = true;
+			}
+			else {
+				found = CyclAnnouncer_Empty();
+			}
+		}
+	}
 	CreateTimer(1.0, CAPTURE_Tick);
 	return Plugin_Handled;
 }
@@ -666,13 +772,14 @@ bool CanTP(float pos[3], int client) {
 	#endif
 	return ret;
 }
-
 public Action fwdDead(int victim, int attacker, float& respawn) {
 	bool dropped = false;
 	if( g_iClientFlag[victim] > 0 ) {
 		CTF_DropFlag(victim, false);
 		dropped = true;
 	}
+	
+	g_iKillingSpree[victim] = 0;
 	if( victim != attacker ) {
 		GDM_RegisterKill(attacker);
 		
@@ -689,6 +796,17 @@ public Action fwdDead(int victim, int attacker, float& respawn) {
 		}
 		g_flClientLastScore[attacker] = GetGameTime();
 		rp_IncrementSuccess(attacker, success_list_killpvp2);
+		
+		if( g_bFirstBlood == false ) {
+			g_bFirstBlood = true;
+			CyclAnnouncer_Push(attacker, snd_FirstBlood);
+		}
+		g_iKillingSpree[attacker]++;
+		g_iKilling[attacker]++;
+		if( g_hKillTimer[attacker] != INVALID_HANDLE )
+			delete g_hKillTimer[attacker];
+		g_hKillTimer[attacker] = CreateTimer(10.0, ResetKillCount, attacker);
+		CyclAnnouncer(attacker);
 	}
 	if( victim == attacker ) {
 		GDM_ELOSuicide(victim);
@@ -702,7 +820,7 @@ public Action fwdDead(int victim, int attacker, float& respawn) {
 public Action fwdHUD(int client, char[] szHUD, const int size) {
 	int gID = rp_GetClientGroupID(client);
 	int defTeam = rp_GetCaptureInt(cap_bunker);
-	char optionsBuff[4][32], tmp[128], loading[64];
+	static char optionsBuff[4][32], tmp[128], loading[64];
 	
 	float timeLeft = g_flCaptureStart + (30.0 * 60.0) - GetGameTime();
 	
@@ -990,6 +1108,8 @@ void CTF_FlagTouched(int client, int flag) {
 	ClientCommand(client, "thirdperson");
 	CreateTimer(0.5, SwitchToFirst, client);
 	
+	EmitSoundToClientAny(client, g_szSoundList[snd_YouHaveTheFlag], _, _, _, _, 0.5);
+	
 	SDKHook(flag, SDKHook_SetTransmit, SDKHideFlag);
 }
 public Action CTF_SpawnFlag_Delay(Handle timer, any ent2) {
@@ -1215,8 +1335,10 @@ void Client_SetSpawnProtect(int client, bool status) {
 		
 		if( rp_GetCaptureInt(cap_bunker) == rp_GetClientGroupID(client) )
 			rp_ClientColorize(client, { 64, 64, 255, 255 } );
-		else
+		else if( rp_GetClientGroupID(client) != 0 )
 			rp_ClientColorize(client, { 255, 64, 64, 255 } );
+		else
+			rp_ClientColorize(client);
 	}
 }
 public Action fwdGodThink(int client) {
@@ -1250,6 +1372,7 @@ public Action fwdGod_PlayerShoot(Handle event, char[] name, bool dontBroadcast) 
 public Action GOD_Expire(Handle timer, any client) {
 	if( g_hGodTimer[client] != INVALID_HANDLE )
 		Client_SetSpawnProtect(client, false);
+	g_hGodTimer[client] = INVALID_HANDLE;
 }
 // -----------------------------------------------------------------------------------------------------------------
 public void MenuPvPResume(Handle topmenu, TopMenuAction action, TopMenuObject topobj_id, int param, char[] buffer, int maxlength) {
@@ -1274,4 +1397,100 @@ public void MenuPvPResume(Handle topmenu, TopMenuAction action, TopMenuObject to
 	else if (action == TopMenuAction_SelectOption) {
 		g_hStatsMenu.Display(param, TopMenuPosition_Start);
 	}
+}
+// -----------------------------------------------------------------------------------------------------------------
+void announceSound(int client, int sound) {
+	int clients[65], clientCount = 0;
+	char msg[128];
+	
+	switch( sound ) {
+		case snd_FirstBlood: Format(msg, sizeof(msg), 	"%N\n<font color='#33ff33'><b>a versé le premier sang !</b></font>", client);
+		case snd_DoubleKill: Format(msg, sizeof(msg), 	"%N\n<font color='#33ff33'><b>   Double kill</b></font>", client);
+		case snd_MultiKill: Format(msg, sizeof(msg), 	"%N\n<font color='#33ff33'><b>   MULTI kill</b></font>", client);
+		case snd_MegaKill: Format(msg, sizeof(msg), 	"%N\n<font color='#33ff33'><b>   MEGA KILL</b></font>", client);
+		case snd_UltraKill: Format(msg, sizeof(msg), 	"%N\n<font color='#33ff33'><b>   ULTRAAA-KILL !</b></font>", client);
+		case snd_MonsterKill: Format(msg, sizeof(msg), 	"%N\n<font color='#33ff33'><b>MOOOONSTER KILL !</b></font>", client);
+		case snd_KillingSpree: Format(msg, sizeof(msg),	"%N\n<font color='#33ff33'><b>fait une série meurtrière</b></font>", client);
+		case snd_Unstopppable: Format(msg, sizeof(msg),	"%N\n<font color='#33ff33'><b> est inarrêtable!</b></font>", client);
+		case snd_Dominating: Format(msg, sizeof(msg),	"%N\n<font color='#33ff33'><b>   DOMINE !</b></font>", client);
+		case snd_Godlike: Format(msg, sizeof(msg),		"%N\n<font color='#33ff33'><b> EST DIVAIN !</b></font>", client);
+	}
+	for (int i = 1; i <= MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		if( rp_GetClientGroupID(i) <= 0 )
+			continue;
+		
+		g_flClientLastScore[i] = GetGameTime();
+		PrintHintText(i, msg);
+		
+		if( !g_bStopSound[client] )
+			clients[clientCount++] = i;
+	}
+	EmitSoundAny(clients, clientCount, g_szSoundList[sound], _, _, _, _, 0.5);
+}
+void CyclAnnouncer(int client) {
+	bool sound = false;
+	
+	switch( g_iKilling[client] ) {
+		case 2: sound = CyclAnnouncer_Push(client, snd_DoubleKill);
+		case 3: sound = CyclAnnouncer_Push(client, snd_MultiKill);
+		case 4: sound = CyclAnnouncer_Push(client, snd_MegaKill);
+		case 5: sound = CyclAnnouncer_Push(client, snd_UltraKill);
+		case 6: sound = CyclAnnouncer_Push(client, snd_MonsterKill);
+		default: {
+			if( g_iKilling[client] >= 6 )
+				sound = CyclAnnouncer_Push(client, snd_MonsterKill);
+		}
+	}
+	
+	if( !sound ) {
+		switch( g_iKillingSpree[client] ) {
+			case 4: sound = CyclAnnouncer_Push(client, snd_KillingSpree);
+			case 6: sound = CyclAnnouncer_Push(client, snd_Dominating);
+			case 8: sound = CyclAnnouncer_Push(client, snd_Unstopppable);
+			case 10: sound = CyclAnnouncer_Push(client, snd_Godlike);
+			default: {
+				if( g_iKillingSpree[client] >= 12 && g_iKillingSpree[client] % 2 )
+					sound = CyclAnnouncer_Push(client, snd_Godlike);
+			}
+		}
+	}
+}
+bool CyclAnnouncer_Push(int client, int soundID) {
+	
+	if( !CyclAnnouncer_Empty() ) {
+		int i = g_CyclAnnouncer_end;
+		
+		while( i != g_CyclAnnouncer_start ) {
+			if( g_CyclAnnouncer[i][ann_Client] == client ) {
+				g_CyclAnnouncer[i][ann_SoundID] = soundID;
+				g_CyclAnnouncer[i][ann_Time] = RoundToCeil(GetGameTime());
+				return true;
+			}
+			
+			i = (i + 1) % MAX_ANNOUNCES;
+		}
+	}
+	if( CyclAnnouncer_Full() )
+		return false;
+	
+	g_CyclAnnouncer[g_CyclAnnouncer_start][ann_Client] = client;
+	g_CyclAnnouncer[g_CyclAnnouncer_start][ann_SoundID] = soundID;
+	g_CyclAnnouncer[g_CyclAnnouncer_start][ann_Time] = RoundToCeil(GetGameTime());
+	
+	g_CyclAnnouncer_start = (g_CyclAnnouncer_start+1) % MAX_ANNOUNCES;
+	
+	return true;
+}
+bool CyclAnnouncer_Full() {
+	return ((g_CyclAnnouncer_end + 1) % MAX_ANNOUNCES == g_CyclAnnouncer_start);
+}
+bool CyclAnnouncer_Empty() {
+	return (g_CyclAnnouncer_end == g_CyclAnnouncer_start);
+}
+public Action ResetKillCount(Handle timer, any client) {
+	if( g_hKillTimer[client] != INVALID_HANDLE )
+		g_iKilling[client] = 0;
+	g_hKillTimer[client] = INVALID_HANDLE;
 }
