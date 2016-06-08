@@ -36,7 +36,8 @@
 #define FLAG_POINT_MIN	50
 #define ELO_FACTEUR_K	40.0
 #define MAX_ANNOUNCES	32
-#define MAX_DELAYS		10
+#define ANNONCES_DELAY	10
+#define	ANNONCES_VOLUME 0.33
 // -----------------------------------------------------------------------------------------------------------------
 enum flag_data { data_group, data_skin, data_red, data_green, data_blue, data_time, data_owner, data_lastOwner, flag_data_max };
 int g_iClientFlag[65];
@@ -46,7 +47,7 @@ int g_iFlagData[MAX_ENTITIES+1][flag_data_max];
 Handle g_hCapturable = INVALID_HANDLE;
 Handle g_hGodTimer[65], g_hKillTimer[65];
 int g_iCapture_POINT[MAX_GROUPS];
-float g_flCaptureStart;
+int g_iCaptureStart;
 bool g_bIsInCaptureMode = false;
 int g_cBeam;
 int g_iLastGroup;
@@ -104,7 +105,7 @@ char g_szSoundList[soundList][] = {
 int g_CyclAnnouncer[MAX_ANNOUNCES][announcerData], g_CyclAnnouncer_start, g_CyclAnnouncer_end;
 int g_iKillingSpree[65], g_iKilling[65];
 bool g_bStopSound[65];
-bool g_bFirstBlood;
+bool g_bFirstBlood, g_b5MinutesLeft, g_b1MinuteLeft;
 // -----------------------------------------------------------------------------------------------------------------
 public Plugin myinfo = {
 	name = "Utils: PvP", author = "KoSSoLaX",
@@ -331,7 +332,7 @@ public Action FlagThink(Handle timer, any data) {
 		if( rp_GetPlayerZone(entity) == ZONE_BUNKER ) {
 			
 			if( rp_GetCaptureInt(cap_bunker) != g_iFlagData[entity][data_group] ) {
-				int point = RoundFloat(FLAG_POINT_MAX - ((FLAG_POINT_MAX - FLAG_POINT_MIN) * (GetGameTime() - g_flCaptureStart) / (30.0 * 60.0)));
+				int point = RoundFloat(FLAG_POINT_MAX - ((FLAG_POINT_MAX - FLAG_POINT_MIN) * float(GetTime() - g_iCaptureStart) / (30.0 * 60.0)));
 				
 				g_iCapture_POINT[g_iFlagData[entity][data_group]] += point;
 				g_iCapture_POINT[rp_GetCaptureInt(cap_bunker)] -= point;
@@ -382,7 +383,7 @@ void CAPTURE_Start() {
 	CPrintToChatAll("{lightblue} Le bunker peut maintenant être capturé! {default}");
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	
-	g_flCaptureStart = GetGameTime();
+	g_iCaptureStart = GetTime();
 	CAPTURE_UpdateLight();
 	
 	int wall = Entity_FindByName("job=201__-pvp_wall", "func_brush");
@@ -397,12 +398,12 @@ void CAPTURE_Start() {
 		g_iCapture_POINT[i] = 0;
 	}
 	
-	int rowPoint = 100 - ((rp_GetCaptureInt(cap_pvpRow) - 1) * 5);
+	int rowPoint = 100 - ((rp_GetCaptureInt(cap_pvpRow) - 1) * 10);
 	if( rowPoint < 0 )
 		rowPoint = 0;
 	
 	g_iLastGroup = rp_GetCaptureInt(cap_bunker);
-	g_bFirstBlood = false;
+	g_bFirstBlood = g_b5MinutesLeft = g_b1MinuteLeft = false;
 
 	for(int i=1; i<=MaxClients; i++) {
 		if( !IsValidClient(i) )
@@ -417,7 +418,7 @@ void CAPTURE_Start() {
 		rp_HookEvent(i, RP_OnPlayerZoneChange, fwdZoneChange);
 		
 		gID = rp_GetClientGroupID(i);
-		g_iCapture_POINT[gID] += 50;
+		g_iCapture_POINT[gID] += 100;
 		if( gID == rp_GetCaptureInt(cap_bunker) ) {
 			g_iCapture_POINT[gID] += rowPoint;
 			EmitSoundToClientAny(i, g_szSoundList[snd_YouAreOnBlue], _, 6, _, _, 1.0);
@@ -435,13 +436,7 @@ void CAPTURE_Start() {
 		if( v > 0 )
 			rp_ClientVehicleExit(i, v, true);
 		
-		g_iCapture_POINT[gID] += 100;
-		
 		rp_ClientSendToSpawn(i, true);
-		if( g_iClientFlag[i] > 0 ) {
-			AcceptEntityInput(g_iClientFlag[i], "KillHierarchy");
-			g_iClientFlag[i] = 0;
-		}
 	}
 	for(int i=MaxClients; i<=2048; i++)
 		if( rp_IsValidVehicle(i) && rp_GetVehicleInt(i, car_health) >= 2500 )
@@ -672,10 +667,21 @@ public Action CAPTURE_Tick(Handle timer, any none) {
 	
 	Effect_DrawBeamBoxToAll(mins, maxs, g_cBeam, g_cBeam, 0, 30, 2.0, 5.0, 5.0, 2, 1.0, color, 0);
 	
+	
 	if( GetTime() % 2 == 0 ) {
 		bool found = CyclAnnouncer_Empty();
 		int NowTime = RoundToCeil(GetGameTime());
 		int time, soundID, target;
+		int timeLeft = g_iCaptureStart + (30 * 60) - GetTime();
+	
+		if( !g_b5MinutesLeft && timeLeft <= 5*60 ) {
+			EmitSoundToAllAny(g_szSoundList[snd_5MinutesRemain], _, 6, _, _, 1.0);
+			g_b5MinutesLeft = true;
+		}
+		if( !g_b1MinuteLeft && timeLeft <= 1*60 ) {
+			EmitSoundToAllAny(g_szSoundList[snd_1MinuteRemain], _, 6, _, _, 1.0);
+			g_b1MinuteLeft = true;
+		}
 		
 		while( !found  ) {
 			time = g_CyclAnnouncer[g_CyclAnnouncer_end][ann_Time];
@@ -684,7 +690,7 @@ public Action CAPTURE_Tick(Handle timer, any none) {
 			
 			g_CyclAnnouncer_end = (g_CyclAnnouncer_end+1) % MAX_ANNOUNCES;
 			
-			if( (time+MAX_DELAYS) >= NowTime && IsValidClient(target) ) {
+			if( (time+ANNONCES_DELAY) >= NowTime && IsValidClient(target) ) {
 				announceSound(target, soundID);
 				found = true;
 			}
@@ -822,12 +828,12 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 	int defTeam = rp_GetCaptureInt(cap_bunker);
 	static char optionsBuff[4][32], tmp[128], loading[64];
 	
-	float timeLeft = g_flCaptureStart + (30.0 * 60.0) - GetGameTime();
+	int timeLeft = g_iCaptureStart + (30 * 60) - GetTime();
 	
-	if( timeLeft > 10.0 )
-		rp_Effect_LoadingBar(loading, sizeof(loading), (GetGameTime() - g_flCaptureStart) / (30.0 * 60.0));
+	if( timeLeft > 10 )
+		rp_Effect_LoadingBar(loading, sizeof(loading), float(GetTime() - g_iCaptureStart) / (30.0 * 60.0));
 	else
-		Format(loading, sizeof(loading), "Il reste %.0f seconde%s", timeLeft, timeLeft >= 2 ? "s": "");
+		Format(loading, sizeof(loading), "Il reste %d seconde%s", timeLeft, timeLeft >= 2 ? "s": "");
 	
 	if( g_bIsInCaptureMode && gID > 0 ) {
 		
@@ -1108,7 +1114,7 @@ void CTF_FlagTouched(int client, int flag) {
 	ClientCommand(client, "thirdperson");
 	CreateTimer(0.5, SwitchToFirst, client);
 	
-	EmitSoundToClientAny(client, g_szSoundList[snd_YouHaveTheFlag], _, _, _, _, 0.5);
+	EmitSoundToClientAny(client, g_szSoundList[snd_YouHaveTheFlag], _, _, _, _, ANNONCES_VOLUME);
 	
 	SDKHook(flag, SDKHook_SetTransmit, SDKHideFlag);
 }
@@ -1259,7 +1265,6 @@ void GDM_Resume() {
 	g_hStatsMenu_ELO = g_hStatsMenu.AddCategory("elo", MenuPvPResume);
 	g_hStatsMenu_KILL = g_hStatsMenu.AddCategory("kill", MenuPvPResume);
 	
-	
 	for (int i = 0; i < nbrParticipant; i++) {
 		KeyList.GetKey(i, szSteamID, sizeof(szSteamID));
 		g_hGlobalDamage.GetArray(szSteamID, array, sizeof(array));
@@ -1318,7 +1323,8 @@ void Client_SetSpawnProtect(int client, bool status) {
 		float duration = 10.0;
 		if( rp_GetCaptureInt(cap_bunker) == rp_GetClientGroupID(client) )
 			duration = 15.0;
-		
+		if( g_hGodTimer[client] != INVALID_HANDLE )
+			delete g_hGodTimer[client];
 		g_hGodTimer[client] = CreateTimer(duration, GOD_Expire, client);
 		SetEntProp(client, Prop_Data, "m_takedamage", 0);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez %d secondes de spawn-protection.", RoundFloat(duration));
@@ -1413,7 +1419,7 @@ void announceSound(int client, int sound) {
 		case snd_KillingSpree: Format(msg, sizeof(msg),	"%N\n<font color='#33ff33'><b>fait une série meurtrière</b></font>", client);
 		case snd_Unstopppable: Format(msg, sizeof(msg),	"%N\n<font color='#33ff33'><b> est inarrêtable!</b></font>", client);
 		case snd_Dominating: Format(msg, sizeof(msg),	"%N\n<font color='#33ff33'><b>   DOMINE !</b></font>", client);
-		case snd_Godlike: Format(msg, sizeof(msg),		"%N\n<font color='#33ff33'><b> EST DIVAIN !</b></font>", client);
+		case snd_Godlike: Format(msg, sizeof(msg),		"%N\n<font color='#33ff33'><b> EST DIVIN !</b></font>", client);
 	}
 	for (int i = 1; i <= MaxClients; i++) {
 		if( !IsValidClient(i) )
@@ -1427,7 +1433,7 @@ void announceSound(int client, int sound) {
 		if( !g_bStopSound[client] )
 			clients[clientCount++] = i;
 	}
-	EmitSoundAny(clients, clientCount, g_szSoundList[sound], _, _, _, _, 0.5);
+	EmitSoundAny(clients, clientCount, g_szSoundList[sound], _, _, _, _, ANNONCES_VOLUME);
 }
 void CyclAnnouncer(int client) {
 	bool sound = false;
@@ -1439,7 +1445,7 @@ void CyclAnnouncer(int client) {
 		case 5: sound = CyclAnnouncer_Push(client, snd_UltraKill);
 		case 6: sound = CyclAnnouncer_Push(client, snd_MonsterKill);
 		default: {
-			if( g_iKilling[client] >= 6 )
+			if( g_iKilling[client] >= 6 && g_iKilling[client] % 2)
 				sound = CyclAnnouncer_Push(client, snd_MonsterKill);
 		}
 	}
