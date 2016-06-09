@@ -36,7 +36,7 @@
 #define FLAG_POINT_MIN	50
 #define ELO_FACTEUR_K	40.0
 #define MAX_ANNOUNCES	32
-#define ANNONCES_DELAY	10
+#define ANNONCES_DELAY	12
 #define	ANNONCES_VOLUME 0.33
 // -----------------------------------------------------------------------------------------------------------------
 enum flag_data { data_group, data_skin, data_red, data_green, data_blue, data_time, data_owner, data_lastOwner, flag_data_max };
@@ -668,7 +668,7 @@ public Action CAPTURE_Tick(Handle timer, any none) {
 	Effect_DrawBeamBoxToAll(mins, maxs, g_cBeam, g_cBeam, 0, 30, 2.0, 5.0, 5.0, 2, 1.0, color, 0);
 	
 	
-	if( GetTime() % 2 == 0 ) {
+	if( GetTime() % 3 == 0 ) {
 		bool found = CyclAnnouncer_Empty();
 		int NowTime = RoundToCeil(GetGameTime());
 		int time, soundID, target;
