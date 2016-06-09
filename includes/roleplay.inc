@@ -337,12 +337,46 @@ native void rp_SetVehicleInt(int vehicleID, car_data typeID, int value);
  * @return int      La valeur
  */
 native int rp_GetVehicleInt(int vehicleID, car_data typeID);
+/**
+ * Crée un véhicule
+ * @param  {[type]} float  origin[3]     coordonnée
+ * @param  {[type]} float  angle[3]      angle
+ * @param  {[type]} char[] model         Le model doit être mis en cache avant d'appeler cette fonction.
+ * @param  {[type]} int    skin          Le numéro du skin
+ * @param  {[type]} int    client        =             0 Le propriétaire.
+ * @return {[type]}        retourne le numéro de la voiture
+ */
 native int rp_CreateVehicle(float origin[3], float angle[3], char[] model, int skin, int client = 0);
 // ----------------------------------------------------------------------------
-native void rp_SetAppartementInt(int appartID, type_appart_bonus typeID, int value);		/* Définir une propriétée d'un appartement */
-native int rp_GetAppartementInt(int appartID, type_appart_bonus typeID);				/* Récupérer une propriétée d'un appartement */
-native void rp_SetClientKeyAppartement(int client, int appartID, bool status=false);		/* Donner une clé à un joueur d'un appartement */
-native bool rp_GetClientKeyAppartement(int client, int appartID);						/* Est-ce qu'un joueur possède la clé d'un appartement ? */
+/**
+ * Définir une propriétée d'un appartement
+ * @param  {[type]} int               appartID      Le numéro de l'appart, de 1 à 200
+ * @param  {[type]} type_appart_bonus typeID        La propriétée
+ * @param  {[type]} int               value         sa valeur
+ */
+native void rp_SetAppartementInt(int appartID, type_appart_bonus typeID, int value);
+/**
+ * Récupérer une propriétée d'un appartement
+ * @param  {[type]} int               appartID      Le numéro de l'appart, de 1 à 200
+ * @param  {[type]} type_appart_bonus typeID        La propriétée
+ * @return {[type]}                   Sa valeur
+ */
+native int rp_GetAppartementInt(int appartID, type_appart_bonus typeID);
+/**
+ * Définir si un joueur a la clé d'un appartement
+ * @param  {[type]} int  client        Le joueur
+ * @param  {[type]} int  appartID      Le numéro de l'appart, de 1 à 200
+ * @param  {[type]} bool status=false  Vrai il l'a, faux il a pas la clé
+ * @return {[type]}      [description]
+ */
+native void rp_SetClientKeyAppartement(int client, int appartID, bool status=false);
+/**
+ * Le joueur a t-il la clé d'un appartement?
+ * @param  {[type]} int client        Le joueur
+ * @param  {[type]} int appartID      Le numéro de l'appart, de 1 à 200
+ * @return {[type]}     Vrai, s'il a la clé.
+ */
+native bool rp_GetClientKeyAppartement(int client, int appartID);
 // ----------------------------------------------------------------------------
 native void rp_Effect_PropExplode(int entityID, bool tazer = false);					/* Explose un props, s'il est piégé */
 native void rp_Effect_Smoke(int client, float duration = 30.0);						/* Petit effect de fumée de cigarette */
@@ -657,12 +691,12 @@ enum float_user_data {
 	Float:fl_Alcool,
 	Float:fl_LowDamage,
 	Float:fl_HallucinationTime,
-	Float:fl_RespawnTime,	
+	Float:fl_RespawnTime,
 	Float:fl_ArtisanFatigue,
 	Float:fl_LastPoison,
 	Float:fl_LastCrochettage,
 	Float:fl_Ratio,
-	
+
 	fl_udata_max
 };
 enum sz_user_data {
@@ -677,7 +711,7 @@ enum fd_user_data {
 	fd_vol,
 	fd_job,
 	fd_kidnapping,
-	
+
 	fd_udata_max
 };
 enum sick_type {
