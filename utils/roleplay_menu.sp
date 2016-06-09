@@ -187,8 +187,8 @@ void openHelpAt(int client, int index) {
 	
 	PrintToChat(client, "%d", index);
 	g_kvHelp.Rewind();
-	g_kvHelp.GotoFirstSubKey();
 	g_kvHelp.JumpToKeySymbol(index);
+	g_kvHelp.GotoFirstSubKey();
 	
 	Menu menu = new Menu(Menu_HELP);
 	if( index == 0 ) {
