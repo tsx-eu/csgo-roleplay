@@ -89,7 +89,7 @@ public void OnPluginStart() {
 	
 	g_hBuyMenu = new DataPack();
 	g_hBuyMenu.WriteCell(0);
-	int pos = g_hBuyMenu.Position;
+	DataPackPos pos = g_hBuyMenu.Position;
 	g_hBuyMenu.Reset();
 	g_hBuyMenu.WriteCell(pos);
 	
@@ -1031,10 +1031,10 @@ public Action fwdDead(int client, int attacker) {
 	CreateTimer(0.1, appear, client);
 }
 
-void deleteBuyMenu(int pos) {
+void deleteBuyMenu(DataPackPos pos) {
 	g_hBuyMenu.Reset();
-	int max = g_hBuyMenu.ReadCell();
-	int position = g_hBuyMenu.Position;
+	DataPackPos max = g_hBuyMenu.ReadCell();
+	DataPackPos position = g_hBuyMenu.Position;
 	
 	DataPack clone = new DataPack();
 	clone.WriteCell(0);
@@ -1061,7 +1061,7 @@ void deleteBuyMenu(int pos) {
 	delete g_hBuyMenu;
 	g_hBuyMenu = clone;
 }
-void getBuyMenu(int pos, int data[IM_Max]) {
+void getBuyMenu(DataPackPos pos, int data[IM_Max]) {
 	g_hBuyMenu.Position = pos;
 	
 	for (int i = 0; i < view_as<int>(IM_Max); i++) {
@@ -1077,7 +1077,7 @@ void addBuyMenu(int client, int itemID) {
 	data[IM_Prix] = (rp_GetItemInt(itemID, item_type_prix) * MARCHE_PERCENT) / 100;
 	
 	g_hBuyMenu.Reset();
-	int pos = g_hBuyMenu.ReadCell();
+	DataPackPos pos = g_hBuyMenu.ReadCell();
 	g_hBuyMenu.Position = pos;
 	for (int i = 0; i < view_as<int>(IM_Max); i++) {
 		g_hBuyMenu.WriteCell(data[i]);
@@ -1088,8 +1088,8 @@ void addBuyMenu(int client, int itemID) {
 }
 void Cmd_BuyItemMenu(int client) {
 	g_hBuyMenu.Reset();
-	int max = g_hBuyMenu.ReadCell();
-	int position = g_hBuyMenu.Position;
+	DataPackPos max = g_hBuyMenu.ReadCell();
+	DataPackPos position = g_hBuyMenu.Position;
 	char tmp[8], tmp2[129];
 	int data[IM_Max];
 	
@@ -1125,7 +1125,7 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 		char szMenu[64], tmp[64];
 		if( GetMenuItem(p_hMenu, p_iParam2, szMenu, sizeof(szMenu)) ) {
 			int data[IM_Max];
-			int position = StringToInt(szMenu);
+			DataPackPos position = view_as<DataPackPos>(StringToInt(szMenu));
 			getBuyMenu(position, data);
 			
 			if( data[IM_ItemID] == 0 )

@@ -490,12 +490,12 @@ native int rp_WeaponMenu_GetOwner(int wepID);
 native DataPack rp_WeaponMenu_Create();
 native void rp_WeaponMenu_Clear(DataPack& hBuyMenu);
 native void rp_WeaponMenu_Reset(DataPack hBuyMenu);
-native void rp_WeaponMenu_SetPosition(DataPack hBuyMenu, int position);
-native int rp_WeaponMenu_GetPosition(DataPack hBuyMenu);
-native int rp_WeaponMenu_GetMax(DataPack hBuyMenu);
+native void rp_WeaponMenu_SetPosition(DataPack hBuyMenu, DataPackPos position);
+native DataPackPos rp_WeaponMenu_GetPosition(DataPack hBuyMenu);
+native DataPackPos rp_WeaponMenu_GetMax(DataPack hBuyMenu);
 native bool rp_WeaponMenu_Add(DataPack hBuyMenu, int weaponID, int owner);
-native void rp_WeaponMenu_Delete(DataPack& hBuyMenu, int pos);
-native void rp_WeaponMenu_Get(DataPack hBuyMenu, int pos, char weapon[65], int data[BM_Max]);
+native void rp_WeaponMenu_Delete(DataPack& hBuyMenu, DataPackPos pos);
+native void rp_WeaponMenu_Get(DataPack hBuyMenu, DataPackPos pos, char weapon[65], int data[BM_Max]);
 // ----------------------------------------------------------------------------
 #define ACCESS_DENIED(%1)	CPrintToChat(%1, "{lightblue}[TSX-RP]{default} Vous n'avez pas accès à cette commande.");	return Plugin_Handled
 #define ITEM_CANCEL(%1,%2)	rp_ClientGiveItem(%1,%2); rp_SetClientFloat(%1, fl_CoolDown, 0.05)

@@ -2877,8 +2877,8 @@ public Action fwdOnPlayerUse(int client) {
 	return Plugin_Continue;
 }
 void Cmd_BuyWeapon(int client) {
-	int max = rp_WeaponMenu_GetMax(g_hBuyMenu);
-	int position = rp_WeaponMenu_GetPosition(g_hBuyMenu);
+	DataPackPos max = rp_WeaponMenu_GetMax(g_hBuyMenu);
+	DataPackPos position = rp_WeaponMenu_GetPosition(g_hBuyMenu);
 	char name[65], tmp[8], tmp2[129];
 	int data[BM_Max];
 	
@@ -2936,7 +2936,7 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 		if( GetMenuItem(p_hMenu, p_iParam2, szMenu, sizeof(szMenu)) ) {
 			char name[65];
 			int data[BM_Max];
-			int position = StringToInt(szMenu);
+			DataPackPos position = view_as<DataPackPos>(StringToInt(szMenu));
 			rp_WeaponMenu_Get(g_hBuyMenu, position, name, data);
 			
 			if( rp_GetClientInt(client, i_Bank) < data[BM_Prix] )
