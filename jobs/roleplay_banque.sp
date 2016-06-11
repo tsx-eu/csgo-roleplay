@@ -30,6 +30,7 @@ public Plugin myinfo = {
 	description = "RolePlay - Jobs: Banquier",
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
+Handle g_hEVENT;
 
 // ----------------------------------------------------------------------------
 public Action Cmd_Reload(int args) {
@@ -58,13 +59,16 @@ public void OnPluginStart() {
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
 }
-
+public void OnConfigsExecuted() {
+	g_hEVENT =  FindConVar("rp_event");
+}
 public void OnMapStart() {
 	PrecacheModel(MODEL_CASH, true);
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
+	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);
 }
 public Action fwdCommand(int client, char[] command, char[] arg) {	
 	if( StrEqual(command, "search") || StrEqual(command, "lookup")) {
@@ -555,3 +559,168 @@ public Action DamageATM(int victim, int &attacker, int &inflictor, float &damage
 	return Plugin_Continue;
 }
 
+
+public Action fwdUse(int client) {
+	
+	if( IsInMetro(client) ) {
+		DisplayMetroMenu(client);
+	}
+}
+
+void DisplayMetroMenu(int client) {
+	#if defined DEBUG
+	PrintToServer("DisplayMetroMenu");
+	#endif
+	
+	if( !rp_IsTutorialOver(client) )
+		return;
+	
+	Handle menu = CreateMenu(eventMetroMenu);
+	SetMenuTitle(menu, "== Station de métro ==");
+	
+	if( GetConVarInt(g_hEVENT) == 1 )
+		AddMenuItem(menu, "metro_event", "Métro: Station événementiel");
+	
+	AddMenuItem(menu, "metro_paix", 	"Métro: Station de la paix");
+	AddMenuItem(menu, "metro_zoning", 	"Métro: Station Place Station");
+	AddMenuItem(menu, "metro_inno", 	"Métro: Station de l'innovation");
+	AddMenuItem(menu, "metro_pvp", 		"Métro: Station Belmont");
+	if( rp_GetClientKeyAppartement(client, 50) ) {
+		AddMenuItem(menu, "metro_villa", 	"Métro: Villa");
+	}
+	
+	SetMenuPagination(menu, MENU_NO_PAGINATION);
+	SetMenuExitBackButton(menu, false);
+	SetMenuExitButton(menu, true);
+	DisplayMenu(menu, client, 30);
+}
+
+public int eventMetroMenu(Handle menu, MenuAction action, int client, int param2) {
+	#if defined DEBUG
+	PrintToServer("eventMetroMenu");
+	#endif
+	if( action == MenuAction_Select ) {
+		char options[64], tmp[64];
+		GetMenuItem(menu, param2, options, sizeof(options));
+		
+		if( !IsInMetro(client) )
+			return;
+		
+		if( StrEqual(options, "metro_event") && GetConVarInt(g_hEVENT) == 0 ) {
+			return;
+		}
+		
+		int Max, i, hours, min, iLocation[150];
+		
+		for( i=0; i<150; i++ ) {
+			rp_GetLocationData(i, location_type_base, tmp, sizeof(tmp));
+			
+			if( StrEqual(tmp, options, false) ) {
+				iLocation[Max++] = i;
+			}
+		}
+		i = iLocation[Math_GetRandomInt(0, (Max-1))];
+		float pos[3];
+		
+		pos[0] = float(rp_GetLocationInt(i, location_type_origin_x));
+		pos[1] = float(rp_GetLocationInt(i, location_type_origin_y));
+		pos[2] = float(rp_GetLocationInt(i, location_type_origin_z))+8.0;
+		
+		rp_GetTime(hours, min);
+		min = 5 - (min % 5);
+		
+		rp_GetZoneData(rp_GetZoneFromPoint(pos), zone_type_name, tmp, sizeof(tmp));
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Restez assis à l'intérieur du métro, le prochain départ pour %s est dans %d seconde(s).", tmp, min );
+		rp_SetClientInt(client, i_TeleportTo, i);
+		CreateTimer(float(min) + Math_GetRandomFloat(0.01, 0.8), metroTeleport, client);
+	}
+	else if( action == MenuAction_End ) {
+		CloseHandle(menu);
+	}
+}
+public Action metroTeleport(Handle timer, any client) {
+	
+	char tmp[32];
+	rp_GetZoneData(rp_GetPlayerZone(client), zone_type_type, tmp, sizeof(tmp));
+	int tp = rp_GetClientInt(client, i_TeleportTo);
+	rp_SetClientInt(client, i_TeleportTo, 0);
+	
+	if( tp == 0 )
+		return Plugin_Handled;
+	if( !IsInMetro(client) )
+			return Plugin_Handled;
+	
+	bool paid = false;
+	
+	rp_GetLocationData(tp, location_type_base, tmp, sizeof(tmp));
+	
+	if( StrEqual(tmp, "metro_event") ) {
+		if( rp_GetClientBool(client, b_IsMuteEvent) == true ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} En raison de votre mauvais comportement, il vous est temporairement interdit de participer à un event.");
+			return Plugin_Handled;
+		}
+		if( rp_GetClientBool(client, b_IsSearchByTribunal) == true ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes recherché par le Tribunal, impossible de participer à un event.");
+			return Plugin_Handled;
+		}
+		paid = true;
+	}
+	if( !paid && rp_GetClientJobID(client) == 31 ) {
+		paid = true;
+	}
+	if( !paid && rp_GetClientItem(client, 42) > 0 ) {
+		paid = true;
+		rp_ClientGiveItem(client, 42, -1);
+	}
+	if( !paid && rp_GetClientItem(client, 42, true) > 0) { 		
+		paid = true;
+		rp_ClientGiveItem(client, 42, -1, true);
+	}
+	if( !paid && (rp_GetClientInt(client, i_Money)+rp_GetClientInt(client, i_Bank)) >= 100 ) {
+		rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - 100);
+		rp_SetJobCapital(31, rp_GetJobCapital(31) + 100);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le métro vous a couté 100$. Pensez à acheter des tickets à un banquier pour obtenir une réduction.");
+		paid = true;
+	}
+	
+	if( paid  ) {
+		float pos[3], vel[3];
+		pos[0] = float(rp_GetLocationInt(tp, location_type_origin_x));
+		pos[1] = float(rp_GetLocationInt(tp, location_type_origin_y));
+		pos[2] = float(rp_GetLocationInt(tp, location_type_origin_z))+8.0;
+		
+		vel[0] = Math_GetRandomFloat(-300.0, 300.0);
+		vel[1] = Math_GetRandomFloat(-300.0, 300.0);
+		vel[2] = 100.0;
+						
+		TeleportEntity(client, pos, NULL_VECTOR, vel);
+		FakeClientCommandEx(client, "sm_stuck");
+	}
+	
+	
+	return Plugin_Continue;
+}
+bool IsInMetro(int client) {
+	char tmp[32];
+	rp_GetZoneData(rp_GetPlayerZone(client), zone_type_type, tmp, sizeof(tmp));
+	
+	if( StrEqual(tmp, "metro") ) {
+		return true;
+	}
+	
+	int app = rp_GetPlayerZoneAppart(client);
+	if( app == 50 ) {
+		if( rp_GetClientKeyAppartement(client, app) ) {
+			float min[3] = { -1752.0, -9212.0, -1819.0 };
+			float max[3] =  { -1522.0, -8982.0, -1679.0 };
+			float origin[3];
+			GetClientAbsOrigin(client, origin);
+			if( origin[0] > min[0] && origin[0] < max[0] &&
+				origin[1] > min[1] && origin[1] < max[1] &&
+				origin[2] > min[2] && origin[2] < max[2] ) {
+				return true;
+			}
+		}
+	}
+	return false;
+}

@@ -50,8 +50,11 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_permi_tir",	Cmd_ItemPermiTir,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_shoes", 		Cmd_ItemShoes, 			"RP-ITEM", 	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_packequipement", Cmd_ItemPackEquipement, "RP-ITEM", FCVAR_UNREGISTERED);
-	
 	RegServerCmd("rp_item_riotshield",	Cmd_ItemRiotShield,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_needforspeed",Cmd_ItemNeedForSpeed,	"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_lessive",		Cmd_ItemLessive,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_cafe",		Cmd_ItemCafe,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_crayons",		Cmd_ItemCrayons,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	
 	for (int i = 1; i <= MaxClients; i++) 
 		if( IsValidClient(i) )
@@ -66,6 +69,8 @@ public void OnMapStart() {
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_PostTakeDamageKnife, fwdWeapon);
 	rp_HookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
+	if( rp_GetClientBool(client, b_Crayon) )
+		rp_HookEvent(client, RP_PrePlayerTalk, fwdTalkCrayon);
 }
 public void OnClientDisconnect(int client) {
 	removeShield(client);
@@ -717,4 +722,139 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 		CloseHandle(p_hItemMenu);
 	}
 
+}
+
+public Action Cmd_ItemNeedForSpeed(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemNeedForSpeed");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+	
+	rp_HookEvent(client, RP_PrePlayerPhysic, fwdCigSpeed, 60.0);
+	rp_HookEvent(client, RP_PrePlayerPhysic, fwdCigSpeed, 10.0);
+}
+public Action fwdCigSpeed(int client, float& speed, float& gravity) {
+	#if defined DEBUG
+	PrintToServer("fwdCigSpeed");
+	#endif
+	speed += 0.15;
+	
+	return Plugin_Changed;
+}
+
+public Action Cmd_ItemLessive(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemLessive");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+	int item_id = GetCmdArgInt(args);
+	
+	if( rp_IsInPVP(client) ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit en PvP.");
+		return Plugin_Handled;
+	}
+	
+	SDKHooks_TakeDamage(client, client, client, 5000.0);
+	rp_ClientDamage(client, 5000, client);
+	
+	rp_ClientRespawn(client);
+	return Plugin_Handled;
+}
+public Action Cmd_ItemCafe(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemCafe");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+	
+	rp_HookEvent(client, RP_PrePlayerPhysic, fwdCigSpeed, 10.0);
+	rp_HookEvent(client, RP_PrePlayerPhysic, fwdCigSpeed, 10.0);
+	
+	rp_IncrementSuccess(client, success_list_cafeine);
+}
+public Action Cmd_ItemCrayons(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemCrayons");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+	int item_id = GetCmdArgInt(args);
+	
+	bool crayon = rp_GetClientBool(client, b_Crayon);
+	
+	if( crayon ) {
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
+	
+	rp_IncrementSuccess(client, success_list_rainbow);
+	rp_HookEvent(client, RP_PrePlayerTalk,	fwdTalkCrayon);	
+	rp_HookEvent(client, RP_OnAssurance,	fwdAssuranceCrayon);
+	
+	rp_SetClientBool(client, b_Crayon, true);
+	return Plugin_Handled;
+}
+public Action fwdAssuranceCrayon(int client, int& amount) {
+	amount += 900;
+}
+public Action fwdTalkCrayon(int client, char[] szSayText, int length, bool local) {
+	
+	char tmp[64];
+	int hours, minutes;
+	rp_GetTime(hours, minutes);
+	
+	IntToString( GetClientHealth(client), tmp, sizeof(tmp));
+	ReplaceString(szSayText, length, "{hp}", tmp);
+	
+	IntToString( rp_GetClientInt(client, i_Kevlar), tmp, sizeof(tmp));
+	ReplaceString(szSayText, length, "{ap}", tmp);
+	
+	IntToString( hours, tmp, sizeof(tmp));
+	ReplaceString(szSayText, length, "{heure}", tmp);
+
+	if(hours != 23)
+		IntToString( hours+1, tmp, sizeof(tmp));
+	else
+		tmp="0";
+
+	ReplaceString(szSayText, length, "{h+1}", tmp);
+
+	IntToString( minutes, tmp, sizeof(tmp));
+	ReplaceString(szSayText, length, "{minute}", tmp);
+	
+	rp_GetDate(tmp, length);
+	ReplaceString(szSayText, length, "{date}", tmp);
+	GetClientName(client, tmp, sizeof(tmp));							ReplaceString(szSayText, length, "{me}", tmp);
+	
+	int target = rp_GetClientTarget(client);
+	if( IsValidClient(target) ) {
+		GetClientName(target, tmp, sizeof(tmp));
+		ReplaceString(szSayText, length, "{target}", tmp);
+	}
+	else {
+		ReplaceString(szSayText, length, "{target}", "Personne");
+	}
+	
+	rp_GetZoneData(rp_GetPlayerZone( rp_IsValidDoor(target) ? target : client ), zone_type_name, tmp, sizeof(tmp));
+	ReplaceString(szSayText, length, "{door}", tmp);
+	
+	rp_GetJobData(rp_GetClientInt(client, i_Job), job_type_name, tmp, sizeof(tmp));
+	ReplaceString(szSayText, length, "{job}", tmp);
+	
+	rp_GetJobData(rp_GetClientInt(client, i_Group), job_type_name, tmp, sizeof(tmp));
+	ReplaceString(szSayText, length, "{gang}", tmp);
+	
+	rp_GetZoneData(rp_GetPlayerZone( client ), zone_type_name, tmp, sizeof(tmp));
+	ReplaceString(szSayText, length, "{zone}", tmp);
+	
+	IntToString( rp_GetServerInt(lotoCagnotte), tmp, sizeof(tmp));
+	ReplaceString(szSayText, length, "{cagnotte}", tmp);
+	
+	ReplaceString(szSayText, length, "[TSX-RP]", "");	
+	ReplaceString(szSayText, length, "{white}", "{default}");
+	
+	return Plugin_Changed;
 }

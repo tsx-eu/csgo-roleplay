@@ -69,6 +69,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_enquete",		Cmd_ItemEnquete,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_camera",		Cmd_ItemCamera,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_cryptage",	Cmd_ItemCryptage,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_map",			Cmd_ItemMaps,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	
 	g_vConfigTueur = CreateConVar("rp_config_kidnapping", "171,172,173,174,182,183-184");
 	
@@ -1194,3 +1195,16 @@ public Action fwdWeapon(int victim, int attacker, float &damage, int wepID, floa
 		return Plugin_Changed;
 	return Plugin_Continue;
 }
+public Action Cmd_ItemMaps(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemMaps");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+	rp_SetClientBool(client, b_Map, true);
+	rp_HookEvent(client, RP_OnAssurance,	fwdAssurance2);
+}
+public Action fwdAssurance2(int client, int& amount) {
+		amount += 1000;
+}
+

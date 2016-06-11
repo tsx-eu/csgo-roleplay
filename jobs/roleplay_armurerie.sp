@@ -45,6 +45,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_giveitem_pvp",		Cmd_GiveItemPvP,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_balltype",	Cmd_ItemBallType,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_redraw",		Cmd_ItemRedraw,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_sanandreas",	Cmd_ItemSanAndreas,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
@@ -538,5 +539,44 @@ public Action Cmd_ItemRedraw(int args) {
 	rp_SetWeaponGroupID(wep_id, g);
 	rp_SetWeaponStorage(wep_id, s);
 	
+	return Plugin_Handled;
+}
+
+// ----------------------------------------------------------------------------
+public Action Cmd_ItemSanAndreas(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemSanAndreas");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+	int item_id = GetCmdArgInt(args);
+	int wepid = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	char classname[64];
+	
+	if( !IsValidEntity(wepid) ) {
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
+	
+	GetEdictClassname(wepid, classname, sizeof(classname));
+		
+	if( StrContains(classname, "weapon_bayonet") == 0 || StrContains(classname, "weapon_knife") == 0 ) {
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
+		
+	int ammo = Weapon_GetPrimaryClip(wepid);
+	if( ammo >= 5000 ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous aviez déjà 5000 balles.");
+		return Plugin_Handled;
+	}
+	ammo += 1000;
+	if( ammo > 5000 )
+		ammo = 5000;
+	Weapon_SetPrimaryClip(wepid, ammo);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre arme a maintenant %i balles", ammo);
+	
+	SDKHook(wepid, SDKHook_Reload, OnWeaponReload);
 	return Plugin_Handled;
 }
