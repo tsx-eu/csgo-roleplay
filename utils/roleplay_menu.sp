@@ -15,6 +15,7 @@
 #include <smlib>
 #include <colors_csgo>
 #include <basecomm>
+#include <topmenus>
 
 #define __LAST_REV__ 		"v:0.1.0"
 
@@ -27,7 +28,8 @@ float g_flPressUse[MAXPLAYERS + 1];
 bool g_bPressedUse[MAXPLAYERS + 1];
 bool g_bClosed[MAXPLAYERS + 1];
 bool g_bInsideMenu[MAXPLAYERS + 1];
-KeyValues g_kvHelp;
+TopMenu g_hHelpMenu;
+TopMenuObject obj;
 
 public Plugin myinfo = {
 	name = "Utils: Menu", author = "KoSSoLaX",
@@ -41,8 +43,11 @@ public void OnPluginStart() {
 	
 	char file[PLATFORM_MAX_PATH];
 	BuildPath(Path_SM, file, sizeof(file), "configs/help.cfg");
-	g_kvHelp = CreateKeyValues("root");
-	g_kvHelp.ImportFromFile(file);
+	KeyValues kv = CreateKeyValues("root");
+	kv.ImportFromFile(file);
+	g_hHelpMenu = new TopMenu (Menu_HELP);
+	obj = g_hHelpMenu.AddCategory("Besoin d'aide?", Menu_HELP);
+	BrowseKeyValues(kv, obj);
 }
 public void OnClientPostAdminCheck(int client) {
 	g_flPressUse[client] = -1.0;
@@ -57,7 +62,7 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 		return Plugin_Handled;
 	}
 	if( StrEqual(command, "taide") ) {
-		openHelpAt(client, 0);
+		g_hHelpMenu.Display(client, TopMenuPosition_Start); 
 		return Plugin_Handled;
 	}
 	return Plugin_Continue;
@@ -182,54 +187,40 @@ public int menuOpenMenu(Handle hItem, MenuAction oAction, int client, int param)
 		g_bInsideMenu[client] = false;
 	}
 }
-
-void openHelpAt(int client, int index) {
-	
-	PrintToChat(client, "%d", index);
-	g_kvHelp.Rewind();
-	g_kvHelp.JumpToKeySymbol(index);
-	g_kvHelp.GotoFirstSubKey();
-	
-	Menu menu = new Menu(Menu_HELP);
-	if( index == 0 ) {
-		menu.SetTitle("Vous avez besoin d'aide?");
-	}
-	else {
-		// TODO:
-	}
-	
-	char tmp[64], tmp2[64], tmp3[64];
+void BrowseKeyValues(KeyValues kv, TopMenuObject TOP) {
+	char tmp[255], tmp2[255];
 	int i;
 	
 	do {
-		
-		g_kvHelp.GetSectionSymbol(i);
-		g_kvHelp.GetSectionName(tmp, sizeof(tmp));
-		g_kvHelp.GetString("1", tmp2, sizeof(tmp2));
-		
-		Format(tmp3, sizeof(tmp3), "%d", i);
-		AddMenuItem(menu, tmp3, tmp);
-		
-		PrintToChat(client, "%d, %s, %s", i, tmp, tmp2);
-		
-		if( strlen(tmp2) >= 1 )
-			AddMenuItem(menu, tmp2, tmp2, ITEMDRAW_DISABLED);
-		
-	}
-	while (g_kvHelp.GotoNextKey());
-	
-	menu.Display(client, MENU_TIME_FOREVER);
-	
-}
-
-public int Menu_HELP(Handle hItem, MenuAction oAction, int client, int param) {
-	if (oAction == MenuAction_Select) {
-		char options[64];
-		if( GetMenuItem(hItem, param, options, sizeof(options)) ) {
-			openHelpAt(client, StringToInt(options));
+ 		kv.GetSectionName(tmp, sizeof(tmp));
+ 		
+		if (kv.GotoFirstSubKey(true)) {
+			kv.GetSectionName(tmp, sizeof(tmp));
+			PrintToChatAll(tmp);
+			BrowseKeyValues(kv, TOP.AddCategory(tmp, Menu_HELP));
+			kv.GoBack();
 		}
+		else {
+			kv.GetSectionName(tmp, sizeof(tmp));
+			kv.GetSectionSymbol(i);
+			Format(tmp, sizeof(tmp), "%s_%d", tmp, i);
+			
+			kv.GetString(NULL_STRING, tmp2, sizeof(tmp2));
+			Format(tmp, sizeof(tmp), "%s_%d_%d", tmp, i, kv.GetNum(NULL_STRING, 0));
+			g_hHelpMenu.AddItem(tmp, Menu_HELP, TOP, "", 0, tmp2);
+		}
+	} while (kv.GotoNextKey(false));
+}
+public void Menu_HELP(Handle topmenu, TopMenuAction action, TopMenuObject topobj_id, int param, char[] buffer, int maxlength) {
+	PrintToChatAll("%d", topobj_id);
+	if (action == TopMenuAction_DisplayTitle || action == TopMenuAction_DisplayOption) {
+		if( topobj_id == INVALID_TOPMENUOBJECT ) 
+			Format(buffer, maxlength, "Besoin d'aide?");
+		else
+			GetTopMenuObjName(topmenu, topobj_id, buffer, maxlength);
+//			GetTopMenuInfoString(topmenu, topobj_id, buffer, maxlength);
 	}
-	else if (oAction == MenuAction_End ) {
-		CloseHandle(hItem);
+	else if (action == TopMenuAction_SelectOption) {
+		g_hHelpMenu.DisplayCategory(param, param, TopMenuPosition_Start);
 	}
 }
