@@ -197,7 +197,7 @@ void BrowseKeyValues(KeyValues kv, TopMenuObject TOP) {
 		if (kv.GotoFirstSubKey(true)) {
 			kv.GetSectionName(tmp, sizeof(tmp));
 			PrintToChatAll(tmp);
-			BrowseKeyValues(kv, TOP.AddCategory(tmp, Menu_HELP));
+			BrowseKeyValues(kv, g_hHelpMenu.AddCategory(tmp, Menu_HELP));
 			kv.GoBack();
 		}
 		else {
@@ -221,6 +221,6 @@ public void Menu_HELP(Handle topmenu, TopMenuAction action, TopMenuObject topobj
 //			GetTopMenuInfoString(topmenu, topobj_id, buffer, maxlength);
 	}
 	else if (action == TopMenuAction_SelectOption) {
-		g_hHelpMenu.DisplayCategory(param, param, TopMenuPosition_Start);
+		g_hHelpMenu.Display(param, TopMenuPosition_Start);
 	}
 }
