@@ -845,6 +845,9 @@ bool findAreaInRoom(int jobID, float pos[3]) {
 	
 	if( !loaded ) {
 		for (int i = 1; i < MAX_ZONES; i++) {
+		if (i == 181) { 
+		continue;
+		}
 			int job = rp_GetZoneInt(i, zone_type_type);
 			if( job <= 0 || job >= MAX_JOBS || job == 14 || job == 101 )
 				continue;
