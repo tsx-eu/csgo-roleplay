@@ -90,12 +90,6 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_pilule",		Cmd_ItemPilule,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_moreplant", 	Cmd_ItemMorePlant, 		"RP-ITEM", 	FCVAR_UNREGISTERED);
 	
-	g_hForward_RP_OnClientMaxPlantCount = CreateGlobalForward("RP_OnClientMaxPlantCount", ET_Event, Param_Cell, Param_CellByRef);
-	g_hForward_RP_OnClientPiedBiche = CreateGlobalForward("RP_OnClientPiedBiche", ET_Event, Param_Cell);
-	g_hForward_RP_ClientCanTP = CreateGlobalForward("RP_ClientCanTP", ET_Event, Param_Cell);
-	g_hForward_RP_OnClientBuildingPrice = CreateGlobalForward("RP_OnClientBuildingPrice", ET_Event, Param_Cell, Param_CellByRef);
-	g_RP_On18thStealWeapon = CreateGlobalForward("RP_On18thStealWeapon", ET_Event, Param_Cell, Param_Cell, Param_Cell);
-	
 	for (int j = 1; j <= MaxClients; j++)
 		if( IsValidClient(j) )
 			OnClientPostAdminCheck(j);
@@ -117,6 +111,13 @@ public void OnPluginStart() {
 			CreateTimer(Math_GetRandomFloat(0.25, 5.0), BuildingPlant_post, i);
 		}
 	}
+}
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {
+	g_hForward_RP_OnClientMaxPlantCount = CreateGlobalForward("RP_OnClientMaxPlantCount", ET_Event, Param_Cell, Param_CellByRef);
+	g_hForward_RP_OnClientPiedBiche = CreateGlobalForward("RP_OnClientPiedBiche", ET_Event, Param_Cell);
+	g_hForward_RP_ClientCanTP = CreateGlobalForward("RP_ClientCanTP", ET_Event, Param_Cell);
+	g_hForward_RP_OnClientBuildingPrice = CreateGlobalForward("RP_OnClientBuildingPrice", ET_Event, Param_Cell, Param_CellByRef);
+	g_RP_On18thStealWeapon = CreateGlobalForward("RP_On18thStealWeapon", ET_Event, Param_Cell, Param_Cell, Param_Cell);
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);

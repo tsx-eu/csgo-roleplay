@@ -120,13 +120,8 @@ public Action Cmd_Reload(int args) {
 }
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
-	g_hForward_RP_OnClientTazedItem = CreateGlobalForward("RP_OnClientTazedItem", ET_Event, Param_Cell, Param_Cell);
-	g_hForward_RP_OnClientSendJail = CreateGlobalForward("RP_OnClientSendJail", ET_Event, Param_Cell, Param_Cell);
-	
 	
 	g_hBuyMenu = rp_WeaponMenu_Create();
-	
-	
 	
 	RegConsoleCmd("sm_jugement",	Cmd_Jugement);
 	
@@ -141,8 +136,13 @@ public void OnPluginStart() {
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
 }
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {
+	g_hForward_RP_OnClientTazedItem = CreateGlobalForward("RP_OnClientTazedItem", ET_Event, Param_Cell, Param_Cell);
+	g_hForward_RP_OnClientSendJail = CreateGlobalForward("RP_OnClientSendJail", ET_Event, Param_Cell, Param_Cell);
+}
 public void OnPluginEnd() {
-	rp_WeaponMenu_Clear(g_hBuyMenu);
+	if( IsValidHandle(g_hBuyMenu) )
+		rp_WeaponMenu_Clear(g_hBuyMenu);
 }
 public Action Cmd_SendToJail(int args) {
 	#if defined DEBUG

@@ -14,6 +14,24 @@
 #define _tsxrp_included_
 
 // ----------------------------------------------------------------------------
+// Artisan:
+forward int RP_CanClientCraftForFree(int client, int itemID);
+forward void RP_ClientCraftOver(int client, int itemID);
+// Dealer
+forward void RP_On18thStealWeapon(int client, int victim, int weaponID);
+forward void RP_OnClientMaxPlantCount(int client, int& max);
+forward void RP_OnClientPiedBiche(int client);
+forward void RP_OnClientBuildingPrice(int client, int& price);
+forward Action RP_ClientCanTP(int client);
+// Mafia
+forward Action RP_CanClientStealItem(int client, int target);
+forward void RP_OnClientWeaponPick(int client, int type);
+// Police:
+forward void RP_OnClientTazedItem(int client, int reward);
+forward Action RP_OnClientSendJail(int client, int target);
+// Technicien:
+forward void RP_OnClientMaxMachineCount(int client, int& max);
+// ----------------------------------------------------------------------------
 enum rp_event {
 	RP_PreTakeDamage,			     /* Le joueur recoit des dégats, quelques soit l'arme. Attention, n'est jamais appelé en zone EVENT */
 	RP_PostTakeDamageWeapon,	 /* La détection d'arme a été faites. */

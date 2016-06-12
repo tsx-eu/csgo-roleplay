@@ -70,8 +70,6 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_cashbig",		Cmd_ItemCashBig,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_morecash",	Cmd_ItemMoreCash,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	
-	g_hForward_RP_OnClientMaxMachineCount = CreateGlobalForward("RP_OnClientMaxMachineCount", ET_Event, Param_Cell, Param_CellByRef);
-
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
@@ -98,6 +96,9 @@ public void OnPluginStart() {
 			CreateTimer(Math_GetRandomFloat(0.0, 2.5), BuildingCashMachine_post, i);
 		}
 	}
+}
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {
+	g_hForward_RP_OnClientMaxMachineCount = CreateGlobalForward("RP_OnClientMaxMachineCount", ET_Event, Param_Cell, Param_CellByRef);
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);

@@ -83,14 +83,15 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_craftbook",		Cmd_ItemCraftBook,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 	RegAdminCmd("rp_fatigue", CmdSetFatigue, ADMFLAG_ROOT);
 	
-	g_hForward_RP_CanClientCraftForFree = CreateGlobalForward("RP_CanClientCraftForFree", ET_Event, Param_Cell, Param_Cell);
-	g_hForward_RP_CanClientCraftOver = CreateGlobalForward("RP_ClientCraftOver", ET_Event, Param_Cell, Param_Cell);
-	
 	SQL_TQuery(rp_GetDatabase(), SQL_LoadReceipe, "SELECT `itemid`, `raw`, `amount`, REPLACE(`extra_cmd`, 'rp_item_primal ', '') `rate` FROM `rp_csgo`.`rp_craft` C INNER JOIN `rp_items` I ON C.`raw`=I.`id` ORDER BY `itemid`, `raw`", 0, DBPrio_Low);
 	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
+}
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {
+	g_hForward_RP_CanClientCraftForFree = CreateGlobalForward("RP_CanClientCraftForFree", ET_Event, Param_Cell, Param_Cell);
+	g_hForward_RP_CanClientCraftOver = CreateGlobalForward("RP_ClientCraftOver", ET_Event, Param_Cell, Param_Cell);
 }
 public Action CmdSetFatigue(int client, int args) {
 	rp_SetClientFloat(GetCmdArgInt(1), fl_ArtisanFatigue, GetCmdArgFloat(2) / 100.0);
