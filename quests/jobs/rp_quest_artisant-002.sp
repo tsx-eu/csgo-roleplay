@@ -38,13 +38,14 @@ bool g_bDoingQuest[65];
 
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
-	
+	SQL_TQuery(rp_GetDatabase(), SQL_LoadReceipe, "SELECT `itemid`, `prix` FROM rp_craft C INNER JOIN rp_items I ON C.`itemid`=I.`id` WHERE I.`job_id`>0 AND I.`extra_cmd`<>'rp_item_spawnflag' GROUP BY `itemid`;", 0, DBPrio_Low);
+}
+public void OnAllPluginsLoaded() {
 	g_iQuest = rp_RegisterQuest(QUEST_UNIQID, QUEST_NAME, QUEST_TYPE, fwdCanStart);
 	if (g_iQuest == -1)
 		SetFailState("Erreur lors de la création de la quête %s %s", QUEST_UNIQID, QUEST_NAME);
 	
-	SQL_TQuery(rp_GetDatabase(), SQL_LoadReceipe, "SELECT `itemid`, `prix` FROM rp_craft C INNER JOIN rp_items I ON C.`itemid`=I.`id` WHERE I.`job_id`>0 AND I.`extra_cmd`<>'rp_item_spawnflag' GROUP BY `itemid`;", 0, DBPrio_Low);
-	
+
 	int i;
 	rp_QuestAddStep(g_iQuest, i++, Q1_Start, Q1_Frame, Q_Abort, QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL, Q2_Frame, Q_Abort, Q_Done);

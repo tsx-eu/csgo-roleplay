@@ -54,6 +54,12 @@ int g_iPlayerTeam[2049], g_stkTeam[QUEST_TEAMS + 1][MAXPLAYERS + 1], g_stkTeamCo
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	
+	HookEvent("hostage_follows", EV_PickupHostage, EventHookMode_Post);
+	HookEvent("hostage_rescued", EV_RescuseHostage, EventHookMode_Post);
+	
+	g_hActive 		= CreateConVar("rp_braquage", "0");
+}
+public void OnAllPluginsLoaded() {
 	g_iQuest = rp_RegisterQuest(QUEST_UNIQID, QUEST_NAME, QUEST_TYPE, fwdCanStart);
 	if (g_iQuest == -1)
 		SetFailState("Erreur lors de la création de la quête %s %s", QUEST_UNIQID, QUEST_NAME);
@@ -66,11 +72,6 @@ public void OnPluginStart() {
 	rp_QuestAddStep(g_iQuest, i++, Q5_Start,	Q5_Frame,	Q_Abort, QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++, Q6_Start,	Q6_Frame,	Q_Abort, QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q7_Frame,	Q_Abort, Q_Complete);
-	
-	HookEvent("hostage_follows", EV_PickupHostage, EventHookMode_Post);
-	HookEvent("hostage_rescued", EV_RescuseHostage, EventHookMode_Post);
-	
-	g_hActive 		= CreateConVar("rp_braquage", "0");
 	
 	g_bCanMakeQuest = true;
 }

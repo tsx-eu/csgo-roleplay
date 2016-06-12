@@ -48,7 +48,8 @@ float g_flLocation[5][3] =  {
 
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
-	
+}
+public void OnAllPluginsLoaded() {
 	g_iQuest = rp_RegisterQuest(QUEST_UNIQID, QUEST_NAME, QUEST_TYPE, fwdCanStart);
 	if (g_iQuest == -1)
 		SetFailState("Erreur lors de la création de la quête %s %s", QUEST_UNIQID, QUEST_NAME);
