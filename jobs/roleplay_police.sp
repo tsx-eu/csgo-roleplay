@@ -121,8 +121,6 @@ public Action Cmd_Reload(int args) {
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	
-	g_hBuyMenu = rp_WeaponMenu_Create();
-	
 	RegConsoleCmd("sm_jugement",	Cmd_Jugement);
 	
 	RegServerCmd("rp_item_mandat", 		Cmd_ItemPickLock,		"RP-ITEM",	FCVAR_UNREGISTERED);
@@ -137,6 +135,8 @@ public void OnPluginStart() {
 			OnClientPostAdminCheck(i);
 }
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {
+	g_hBuyMenu = rp_WeaponMenu_Create();
+	
 	g_hForward_RP_OnClientTazedItem = CreateGlobalForward("RP_OnClientTazedItem", ET_Event, Param_Cell, Param_Cell);
 	g_hForward_RP_OnClientSendJail = CreateGlobalForward("RP_OnClientSendJail", ET_Event, Param_Cell, Param_Cell);
 }
