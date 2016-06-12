@@ -120,7 +120,7 @@ public int RP_CanClientCraftForFree(int client, int itemID) {
 	}
 	return 0;
 }
-public Action RP_ClientCraftOver(int client, int itemID) {
+public void RP_ClientCraftOver(int client, int itemID) {
 	if( g_bDoingQuest[client] && g_iCraftItem[client] == itemID && g_iCraftLeft[client] > 0 ) {
 		g_iCraftLeft[client]--;
 		rp_ClientGiveItem(client, itemID, -1);
