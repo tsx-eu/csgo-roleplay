@@ -875,7 +875,7 @@ int countPolice(int client) {
 		job = rp_GetClientInt(i, i_Job);
 		
 		if( GetClientTeam(i) == CS_TEAM_CT || (job >= 1 && job <= 7 ) ) {
-			if( Entity_GetDistance(client, i) < (MAX_AREA_DIST+100) || !rp_GetClientBool(i, b_IsAFK)) {
+			if( Entity_GetDistance(client, i) < (MAX_AREA_DIST+100) && !rp_GetClientBool(i, b_IsAFK)) {
 				count++;
 			}
 		}
