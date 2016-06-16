@@ -29,6 +29,7 @@
 #define STEAL_TIME			30.0
 #define ITEM_PIEDBICHE		1
 #define ITEM_KITCROCHTAGE	2
+#define ZONE_ITEMSELL		132
 #define DRUG_DURATION 		90.0
 #define MODEL_PLANT			"models/props/cs_office/plant01_static.mdl"
 
@@ -42,6 +43,8 @@ int g_cBeam, g_cGlow, g_cExplode;
 bool g_bCanSearchPlant[65];
 Handle g_hDrugTimer[65];
 int g_iWeaponStolen[2049], g_iStolenAmountTime[65];
+int g_iMarket[MAX_ITEMS];
+int g_iMarketClient[MAX_ITEMS][65];
 
 //forward void RP_On18thStealWeapon(int client, int victim, int weaponID);
 //forward RP_OnClientMaxPlantCount(int client, int& max);
@@ -130,6 +133,10 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse,	fwdOnPlayerUse);
 	rp_HookEvent(client, RP_OnPlayerSteal,	fwdOnPlayerSteal);	
 	g_bCanSearchPlant[client] = true;
+	
+	for (int i = 0; i < MAX_ITEMS; i++) {
+		g_iMarketClient[i][client] = 0;
+	}
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemDrugs(int args) {
@@ -442,7 +449,6 @@ public Action Cmd_ItemPlant(int args) {
 	
 	return Plugin_Handled;
 }
-
 int BuildingPlant(int client, int type) {
 	#if defined DEBUG
 	PrintToServer("BuildingPlant");
@@ -541,6 +547,7 @@ int BuildingPlant(int client, int type) {
 	rp_SetBuildingData(ent, BD_count, 0);
 	rp_SetBuildingData(ent, BD_owner, client);
 	rp_SetBuildingData(ent, BD_item_id, type);
+	rp_SetBuildingData(ent, BD_FromBuild, 0);
 	
 	CreateTimer(3.0, BuildingPlant_post, ent);
 	
@@ -650,7 +657,6 @@ void Plant_Destroy(int entity) {
 		}
 	}
 }
-
 public Action Frame_BuildingPlant(Handle timer, any ent) {
 	ent = EntRefToEntIndex(ent); if( ent == -1 ) { return Plugin_Handled; }
 	#if defined DEBUG
@@ -719,21 +725,22 @@ public Action fwdOnPlayerUse(int client) {
 		}
 	}
 	
-	
+	if( rp_GetPlayerZone(client) == ZONE_ITEMSELL ) {
+		openMarketMenu(client);
+	}
+		
 	Format(tmp2, sizeof(tmp2), "rp_plant");
 	
 	float vecOrigin[3];
 	GetClientAbsOrigin(client, vecOrigin);
 	
-	for(int i=1; i<=2048; i++) {
+	for(int i=MaxClients; i<=2048; i++) {
 		if( !IsValidEdict(i) )
 			continue;
 		if( !IsValidEntity(i) )
 			continue;
 		
-		
 		GetEdictClassname(i, tmp, 63);
-		
 		
 		if( StrEqual(tmp, tmp2) && rp_GetBuildingData(i, BD_owner) == client ) {
 			float vecOrigin2[3];
@@ -745,42 +752,38 @@ public Action fwdOnPlayerUse(int client) {
 					continue;
 					
 				rp_IncrementSuccess(client, success_list_trafiquant, rp_GetBuildingData(i, BD_count) );
-				rp_ClientGiveItem(client, sub, rp_GetBuildingData(i, BD_count));
-				rp_SetBuildingData(i, BD_count, 0);
+				if( rp_GetBuildingData(i, BD_FromBuild) == 0 ) {
+					rp_ClientGiveItem(client, sub, rp_GetBuildingData(i, BD_count));
+					FakeClientCommand(client, "say /item");
+				}
+				else {
+					addItemToMarket(client, sub, rp_GetBuildingData(i, BD_count));
+				}
 				
-				rp_Effect_BeamBox(client, i, NULL_VECTOR, 255, 255, 0);
-				FakeClientCommand(client, "say /item");
+				rp_SetBuildingData(i, BD_count, 0);			
+				rp_Effect_BeamBox(client, i, NULL_VECTOR, 255, 255, 0);			
 			}
 		}
 	}
 }
-
 public Action fwdOnPlayerBuild(int client, float& cooldown) {
 	if( rp_GetClientJobID(client) != 81 )
 		return Plugin_Continue;
 	
 	Handle menu = CreateMenu(MenuBuildingDealer);
 	char tmp[12], tmp2[64];
-	int prix;
 			
 	SetMenuTitle(menu, " Menu des dealers");
 	
 	for(int i = 0; i < MAX_ITEMS; i++) {
-		
 		rp_GetItemData(i, item_type_extra_cmd, tmp2, sizeof(tmp2));
-		
 		if( StrContains(tmp2, "rp_item_drug") != 0 )
 			continue;
 		
 		rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2));
 		
-		prix = rp_GetItemInt(i, item_type_prix) * 3;
-		doRP_OnClientBuildingPrice(client, prix);
-		
 		Format(tmp, sizeof(tmp), "%d", i);
-		Format(tmp2, sizeof(tmp2), "%s %d$", tmp2, prix);
 		AddMenuItem(menu, tmp, tmp2);
-		
 	}
 	
 	SetMenuExitButton(menu, true);
@@ -798,19 +801,14 @@ public int MenuBuildingDealer(Handle menu, MenuAction action, int client, int pa
 		char szMenuItem[64];
 		
 		if( GetMenuItem(menu, param, szMenuItem, sizeof(szMenuItem)) ) {
-			int mnt = rp_GetItemInt(StringToInt(szMenuItem), item_type_prix) * 3;
-			doRP_OnClientBuildingPrice(client, mnt);
-			
-			if( rp_GetClientInt(client, i_Money) + rp_GetClientInt(client, i_Bank) < mnt ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas assez d'argent.");
-				return;
-			}
 			
 			int ent = BuildingPlant(client, StringToInt(szMenuItem));
 			if( ent > 0 ) {
+				rp_SetBuildingData(ent, BD_FromBuild, 1);
+				rp_SetBuildingData(ent, BD_max, 30);
 				
-				rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - mnt);
-				rp_SetJobCapital(81, rp_GetJobCapital(81) + mnt);
+				for (float i = 20.0; i < 120.0; i += 10.0)
+					CreateTimer(i, Frame_BuildingPlant, EntIndexToEntRef(ent));
 			}
 		}
 	}
@@ -889,7 +887,6 @@ public Action fwdZoneChange(int client, int newZone, int oldZone) {
 		g_bCanSearchPlant[client] = true;
 	}
 }
-
 public Action ItemPiedBicheOver(Handle timer, any client) {
 	#if defined DEBUG
 	PrintToServer("ItemPiedBicheOver");
@@ -934,7 +931,6 @@ public Action ItemPiedBicheOver(Handle timer, any client) {
 	
 	return Plugin_Handled;
 }
-
 public Action AllowUltimate(Handle timer, any client) {
 	#if defined DEBUG
 	PrintToServer("AllowUltimate");
@@ -942,8 +938,6 @@ public Action AllowUltimate(Handle timer, any client) {
 
 	rp_SetClientBool(client, b_MayUseUltimate, true);
 }
-
-
 public Action Cmd_ItemPilule(int args){
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemPilule");
@@ -1039,7 +1033,6 @@ public Action Cmd_ItemPilule(int args){
 	WritePackCell(dp, tptozone);
 	return Plugin_Handled;
 }
-
 public Action ItemPiluleOver(Handle timer, Handle dp) {
 	ResetPack(dp);
 	int client = ReadPackCell(dp);
@@ -1093,7 +1086,6 @@ public Action ItemPiluleOver(Handle timer, Handle dp) {
 	rp_SetClientBool(client, b_MayUseUltimate, true);
 	return Plugin_Handled;
 }
-
 int appartToZoneID(int appartid){
 	static int res[128];
 	if( res[appartid] != 0 )
@@ -1111,8 +1103,6 @@ int appartToZoneID(int appartid){
 	res[appartid] = -1;
 	return res[appartid];
 }
-
-
 bool CanTP(float pos[3], int client) {
 	static float mins[3], maxs[3];
 	static bool init = false;
@@ -1137,7 +1127,6 @@ bool CanTP(float pos[3], int client) {
 	#endif
 	return ret;
 }
-
 public Action tpbeam(Handle timer,int client){
 	int clientzonebit = rp_GetZoneBit(rp_GetPlayerZone(client));
 	if(!IsValidClient(client) || !IsPlayerAlive(client) || ( clientzonebit & BITZONE_JAIL ||  clientzonebit & BITZONE_LACOURS ||  clientzonebit & BITZONE_HAUTESECU ) )
@@ -1149,8 +1138,6 @@ public Action tpbeam(Handle timer,int client){
 	TE_SendToAll();
 	return Plugin_Handled;
 }
-
-
 public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	if( rp_GetClientJobID(client) != 181 )
 		return Plugin_Continue;
@@ -1246,7 +1233,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
 	
-	if( rp_GetClientJobID(client) != 181 ) {
+	if( rp_GetClientJobID(client) != 81 ) {
 		return Plugin_Continue;
 	}
 	
@@ -1272,7 +1259,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 	Entity_GetModel(target, model, sizeof(model));
 	
 	if( StrContains(model, "07crownvic_cvpi") == -1 ) {
-		if( rp_GetClientInt(client, i_Job) >= 184 ) {
+		if( rp_GetClientInt(client, i_Job) >= 84 ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes pas assez haut gradé.");
 			return Plugin_Handled;
 		}
@@ -1736,3 +1723,112 @@ int GetMaxKit(int client, int itemID) {
 	
 	return 1;
 }
+void addItemToMarket(int client, int itemID, int amount) {
+	g_iMarket[itemID] += amount;
+	g_iMarketClient[itemID][client] += amount;
+}
+void getItemFromMarket(int itemID, int amount) {
+	g_iMarket[itemID] -= amount;
+	
+	int stackClient[65], stackCpt, cpt = amount, rnd;
+	for (int i = 1; i <= MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		if( g_iMarketClient[itemID][i] <= 0 )
+			continue;
+		if( rp_GetClientJobID(i) != 81 )
+			continue;
+		stackClient[stackCpt++] = i;
+	}
+	stackCpt--;
+	
+	while( cpt < amount && stackCpt > 0 ) {
+		rnd = Math_GetRandomInt(0, stackCpt);
+		
+		g_iMarketClient[itemID][stackClient[rnd]]--;
+		rp_SetClientInt(stackClient[rnd], i_AddToPay, rp_GetClientInt(stackClient[rnd], i_AddToPay) + rp_GetItemInt(itemID, item_type_prix));
+		
+		if( g_iMarketClient[itemID][stackClient[rnd]] == 0 ) {
+			for (int i = stackClient[rnd]; i<stackCpt ; i++) 
+				g_iMarketClient[itemID][i] = g_iMarketClient[itemID][i + 1];
+			stackCpt--;
+		}
+		
+		cpt++;
+	}
+	
+	if( cpt < amount ) {
+		rp_SetJobCapital(81, rp_GetJobCapital(81) + ( rp_GetItemInt(itemID, item_type_prix)*(amount-cpt)) );
+	}
+}
+void openMarketMenu(int client, int itemID = 0) {
+	if( rp_GetPlayerZone(client) != ZONE_ITEMSELL )
+		return;
+	
+	char tmp[128], tmp2[32];
+	Menu menu = new Menu(Menu_Market);
+	if( itemID == 0 ) {
+		menu.SetTitle("Marché noir: Dealers");
+		
+		for(int i = 0; i < MAX_ITEMS; i++) {
+			if( g_iMarket[i] <= 0 )
+				continue;
+			
+			rp_GetItemData(i, item_type_name, tmp, sizeof(tmp));
+			Format(tmp2, sizeof(tmp2), "%d 0", i);
+			Format(tmp, sizeof(tmp), "%d %s - %d$", g_iMarket[i], tmp, rp_GetItemInt(i, item_type_prix));
+			
+			menu.AddItem(tmp2, tmp);
+		}
+	}
+	else {
+		rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
+		menu.SetTitle("Dealers - %s", tmp);
+
+		int prix = rp_GetItemInt(itemID, item_type_prix);
+		for(int i = 1; i < g_iMarket[itemID]; i++) {
+			Format(tmp2, sizeof(tmp2), "%d %d", itemID, i);
+			Format(tmp, sizeof(tmp), "%d %s - %d$", g_iMarket[i], tmp, prix*i);
+			
+			menu.AddItem(tmp2, tmp);
+		}
+	}
+	
+	SetMenuExitButton(menu, true);
+	DisplayMenu(menu, client, 30);
+}
+
+public int Menu_Market(Handle menu, MenuAction action, int client, int param2) {
+	if( action == MenuAction_Select ) {
+		char options[64], buff[2][16];
+		GetMenuItem(menu, param2, options, sizeof(options));
+		ExplodeString(options, " ", buff, sizeof(buff), sizeof(buff[]));
+		
+		int itemID = StringToInt(buff[0]);
+		int amount = StringToInt(buff[1]);
+		
+		if( amount == 0 ) {
+			openMarketMenu(client, itemID);
+		}
+		else {
+			if( g_iMarket[itemID] < amount )
+				amount = g_iMarket[itemID];
+			if( amount == 0 )
+				return;
+			
+			int prix = rp_GetItemInt(itemID, item_type_prix) * amount;
+			if( rp_GetClientInt(client, i_Money) < prix )
+				return;
+			
+			rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - prix);
+			getItemFromMarket(itemID, amount);
+			
+			FakeClientCommand(client, "say /item");
+		}
+	}
+	else if( action == MenuAction_End ) {
+		CloseHandle(menu);
+	}
+}
+
+
