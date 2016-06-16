@@ -89,6 +89,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_drug", 		Cmd_ItemDrugs,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_engrais",		Cmd_ItemEngrais,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_piedbiche", 	Cmd_ItemPiedBiche,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_picklock", 	Cmd_ItemPickLock,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_plant",		Cmd_ItemPlant,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_pilule",		Cmd_ItemPilule,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_moreplant", 	Cmd_ItemMorePlant, 		"RP-ITEM", 	FCVAR_UNREGISTERED);
@@ -1729,7 +1730,7 @@ void addItemToMarket(int client, int itemID, int amount) {
 void getItemFromMarket(int itemID, int amount) {
 	g_iMarket[itemID] -= amount;
 	
-	int stackClient[65], stackCpt, cpt = amount, rnd;
+	int stackClient[65], stackCpt, cpt, rnd;
 	for (int i = 1; i <= MaxClients; i++) {
 		if( !IsValidClient(i) )
 			continue;
@@ -1741,7 +1742,7 @@ void getItemFromMarket(int itemID, int amount) {
 	}
 	stackCpt--;
 	
-	while( cpt < amount && stackCpt > 0 ) {
+	while( cpt < amount && stackCpt >= 0 ) {
 		rnd = Math_GetRandomInt(0, stackCpt);
 		
 		g_iMarketClient[itemID][stackClient[rnd]]--;
@@ -1826,7 +1827,7 @@ public int Menu_Market(Handle menu, MenuAction action, int client, int param2) {
 			rp_ClientGiveItem(client, itemID, amount);
 			
 			rp_GetItemData(itemID, item_type_name, options, sizeof(options));
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez acheté %d %s pour %d$.", amount, itemID, prix);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez acheté %d %s pour %d$.", amount, options, prix);
 			
 			FakeClientCommand(client, "say /item");
 		}
