@@ -690,7 +690,11 @@ public Action Frame_BuildingPlant(Handle timer, any ent) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le plant %s est prêt pour %i utilisations.", tmp, cpt);
 	}
 	
-	CreateTimer(Math_GetRandomFloat(110.0, 120.0), Frame_BuildingPlant, EntIndexToEntRef(ent));
+	float time = Math_GetRandomFloat(110.0, 120.0);
+	if( rp_GetBuildingData(ent, BD_FromBuild) == 1 )
+		time /= 10.0;
+	
+	CreateTimer(time, Frame_BuildingPlant, EntIndexToEntRef(ent));
 	
 	return Plugin_Handled;
 }
@@ -806,9 +810,6 @@ public int MenuBuildingDealer(Handle menu, MenuAction action, int client, int pa
 			if( ent > 0 ) {
 				rp_SetBuildingData(ent, BD_FromBuild, 1);
 				rp_SetBuildingData(ent, BD_max, 30);
-				
-				for (float i = 20.0; i < 120.0; i += 10.0)
-					CreateTimer(i, Frame_BuildingPlant, EntIndexToEntRef(ent));
 			}
 		}
 	}
