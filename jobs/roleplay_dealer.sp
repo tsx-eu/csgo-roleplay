@@ -1745,7 +1745,8 @@ void getItemFromMarket(int itemID, int amount) {
 		rnd = Math_GetRandomInt(0, stackCpt);
 		
 		g_iMarketClient[itemID][stackClient[rnd]]--;
-		rp_SetClientInt(stackClient[rnd], i_AddToPay, rp_GetClientInt(stackClient[rnd], i_AddToPay) + rp_GetItemInt(itemID, item_type_prix));
+		rp_SetClientInt(stackClient[rnd], i_AddToPay, rp_GetClientInt(stackClient[rnd], i_AddToPay) + (rp_GetItemInt(itemID, item_type_prix)*9/10));
+		rp_SetJobCapital(81, rp_GetJobCapital(81) + (rp_GetItemInt(itemID, item_type_prix)/10) );
 		
 		if( g_iMarketClient[itemID][stackClient[rnd]] == 0 ) {
 			for (int i = stackClient[rnd]; i<stackCpt ; i++) 
