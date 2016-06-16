@@ -629,7 +629,7 @@ void VehicleRemove(int vehicle, bool explode = false) {
 	}
 	
 	ServerCommand("sm_effect_fading %i 2.5 1", vehicle);
-	rp_ScheduleEntityInput(vehicle, 2.5, "KillHierarchy");
+	rp_ScheduleEntityInput(vehicle, 2.5, "Kill");
 }
 // ----------------------------------------------------------------------------
 public Action rp_SetClientVehicleTask(Handle timer, Handle dp) {
@@ -714,7 +714,6 @@ void dettachVehicleLight(int vehicle) {
 		AcceptEntityInput(ent, "Kill");
 	
 	rp_SetVehicleInt(vehicle, car_light, -1);
-	
 }
 public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 	ent = EntRefToEntIndex(ent);
