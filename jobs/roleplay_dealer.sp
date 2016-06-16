@@ -466,11 +466,14 @@ int BuildingPlant(int client, int type) {
 	int count, max = 3;
 	
 	switch( rp_GetClientInt(client, i_Job) ) {
-		case 81: max = 14;
-		case 82: max = 10;
-		case 83: max = 6;
-		case 84: max = 5;
-		case 85: max = 4;
+		case 81: max = 10;
+		case 82: max = 9;
+		case 83: max = 8;
+		case 84: max = 7;
+		case 85: max = 6;
+		case 86: max = 5;
+		case 87: max = 4;
+		default: max = 3;
 	}
 	doRP_OnClientMaxPlantCount(client, max);
 	
@@ -480,7 +483,7 @@ int BuildingPlant(int client, int type) {
 		if( !IsValidEntity(i) )
 			continue;
 		
-		GetEdictClassname(i, tmp, 63);
+		GetEdictClassname(i, tmp, sizeof(tmp));
 		
 		if( StrEqual(classname, tmp) && rp_GetBuildingData(i, BD_owner) == client ) {
 			count++;
@@ -551,7 +554,7 @@ int BuildingPlant(int client, int type) {
 	
 	CreateTimer(3.0, BuildingPlant_post, ent);
 	
-	return 1;
+	return ent;
 }
 public Action BuildingPlant_post(Handle timer, any entity) {
 	#if defined DEBUG
@@ -563,8 +566,6 @@ public Action BuildingPlant_post(Handle timer, any entity) {
 	rp_Effect_BeamBox(client, entity, NULL_VECTOR, 255, 255, 0);
 	SetEntProp(entity, Prop_Data, "m_takedamage", 2);
 	
-	
-	rp_SetBuildingData(entity, BD_max, 3);
 	HookSingleEntityOutput(entity, "OnBreak", BuildingPlant_break);
 	
 	SDKHook(entity, SDKHook_OnTakeDamage, DamagePlant);
@@ -684,10 +685,7 @@ public Action Frame_BuildingPlant(Handle timer, any ent) {
 		
 		rp_GetItemData(sub, item_type_name, tmp, sizeof(tmp));
 		
-		if( cpt == 0 ) 
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le plant %s est prêt pour 1 utilisation.", tmp);
-		else
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le plant %s est prêt pour %i utilisations.", tmp, cpt);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le plant %s est prêt pour %d utilisation%s.", tmp, cpt, (cpt>=2?"s":"") );
 	}
 	
 	float time = Math_GetRandomFloat(110.0, 120.0);
@@ -1766,7 +1764,7 @@ void openMarketMenu(int client, int itemID = 0) {
 	if( rp_GetPlayerZone(client) != ZONE_ITEMSELL )
 		return;
 	
-	char tmp[128], tmp2[32];
+	char tmp[128], tmp2[32], tmp3[64];
 	Menu menu = new Menu(Menu_Market);
 	if( itemID == 0 ) {
 		menu.SetTitle("Marché noir: Dealers");
@@ -1783,13 +1781,13 @@ void openMarketMenu(int client, int itemID = 0) {
 		}
 	}
 	else {
-		rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
-		menu.SetTitle("Dealers - %s", tmp);
+		rp_GetItemData(itemID, item_type_name, tmp3, sizeof(tmp3));
+		menu.SetTitle("Dealers - %s", tmp3);
 
 		int prix = rp_GetItemInt(itemID, item_type_prix);
-		for(int i = 1; i < g_iMarket[itemID]; i++) {
+		for(int i = 1; i <= g_iMarket[itemID]; i++) {
 			Format(tmp2, sizeof(tmp2), "%d %d", itemID, i);
-			Format(tmp, sizeof(tmp), "%d %s - %d$", g_iMarket[i], tmp, prix*i);
+			Format(tmp, sizeof(tmp), "%d %s - %d$", i, tmp3, prix*i);
 			
 			menu.AddItem(tmp2, tmp);
 		}
@@ -1823,6 +1821,11 @@ public int Menu_Market(Handle menu, MenuAction action, int client, int param2) {
 			
 			rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - prix);
 			getItemFromMarket(itemID, amount);
+			
+			rp_ClientGiveItem(client, itemID, amount);
+			
+			rp_GetItemData(itemID, item_type_name, options, sizeof(options));
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez acheté %d %s pour %d$.", amount, itemID, prix);
 			
 			FakeClientCommand(client, "say /item");
 		}
