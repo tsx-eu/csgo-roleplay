@@ -486,8 +486,9 @@ native int rp_RegisterQuest(char uniqID[32], char name[64], quest_type_type type
 native void rp_QuestAddStep(int questID, int stepID, QuestFct start, QuestFct frame, QuestFct abort, QuestFct done);
 native int rp_QuestCreateInstance(int client, char model[PLATFORM_MAX_PATH], float vecPos[3]);
 native void rp_QuestSetGroupCreationFct(int questID, QuestFctInit fwd);
-native void rp_QuestStart(int clientID, int questID);
-native void rp_QuestCancel(int clientID, int questID);
+native void rp_QuestStart(int client, int questID);
+native void rp_QuestCancel(int client, int questID);
+native bool rp_QuestComplete(int client, char uniqID[32], bool status);
 // ----------------------------------------------------------------------------
 native int rp_GetClientTarget(int client, float dst[3] = {0.0, 0.0, 0.0});
 native int rp_GetClientSSO(int client, char[] sso, int length);

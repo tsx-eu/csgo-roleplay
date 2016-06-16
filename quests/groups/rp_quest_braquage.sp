@@ -124,6 +124,23 @@ public bool fwdCanStart(int client) {
 }
 // ----------------------------------------------------------------------------
 public void Q_Abort(int objectiveID, int client) {
+	
+	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
+		if( client != g_stkTeam[TEAM_BRAQUEUR][i] )
+			rp_QuestComplete(g_stkTeam[TEAM_BRAQUEUR][i], QUEST_UNIQID, false);
+	}
+	
+	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR_DEAD]; i++) {		
+		if( client != g_stkTeam[TEAM_BRAQUEUR_DEAD][i] )
+			rp_QuestComplete(g_stkTeam[TEAM_BRAQUEUR_DEAD][i], QUEST_UNIQID, false);
+	}
+	
+	for (int i = 0; i < g_stkTeamCount[TEAM_POLICE]; i++) {
+		if( client != g_stkTeam[TEAM_POLICE][i] )
+			rp_QuestComplete(g_stkTeam[TEAM_POLICE][i], QUEST_UNIQID, true);
+	}
+}
+void Q_Clean() {
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
 		OnBraqueurKilled(g_stkTeam[TEAM_BRAQUEUR][i]);
 	}
@@ -476,6 +493,18 @@ public void Q_Complete(int objectiveID, int client) {
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
 		CPrintToChat(g_stkTeam[TEAM_BRAQUEUR][i], "{lightblue}[TSX-RP]{default} Vous avez gagné %d$ pour votre braquage de %s.", gain, tmp2[0]);
 		rp_SetClientInt(g_stkTeam[TEAM_BRAQUEUR][i], i_AddToPay, rp_GetClientInt(g_stkTeam[TEAM_BRAQUEUR][i], i_AddToPay) + gain);
+		
+		if( client != g_stkTeam[TEAM_BRAQUEUR][i] )
+			rp_QuestComplete(g_stkTeam[TEAM_BRAQUEUR][i], QUEST_UNIQID, true);
+	}
+	
+	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR_DEAD]; i++) {		
+		if( client != g_stkTeam[TEAM_BRAQUEUR_DEAD][i] )
+			rp_QuestComplete(g_stkTeam[TEAM_BRAQUEUR_DEAD][i], QUEST_UNIQID, true);
+	}
+	for (int i = 0; i < g_stkTeamCount[TEAM_POLICE]; i++) {
+		if( client != g_stkTeam[TEAM_POLICE][i] )
+			rp_QuestComplete(g_stkTeam[TEAM_POLICE][i], QUEST_UNIQID, false);
 	}
 	
 	rp_SetJobCapital(g_iPlanque, rp_GetJobCapital(g_iPlanque) - gain*3/4);
@@ -490,7 +519,7 @@ public void Q_Complete(int objectiveID, int client) {
 			rp_SetClientInt(g_stkTeam[TEAM_POLICE][i], i_Money, rp_GetClientInt(g_stkTeam[TEAM_POLICE][i], i_Money) - amendePolice);
 		}
 	}
-	Q_Abort(objectiveID, client);
+	Q_Clean();
 }
 // ----------------------------------------------------------------------------
 public Action EV_PickupHostage(Handle ev, const char[] name, bool broadcast) {
@@ -626,9 +655,6 @@ public Action fwdDead(int client, int attacker) {
 public Action fwdDamage(int attacker, int victim, float& damage, int wepID, float pos[3]) {
 	
 	if( g_iPlayerTeam[attacker] == TEAM_BRAQUEUR && g_iPlayerTeam[victim] != TEAM_POLICE && rp_GetZoneInt(rp_GetPlayerZone(victim), zone_type_type) != g_iPlanque ) {
-		return Plugin_Handled;
-	}
-	if( g_iPlayerTeam[attacker] != TEAM_POLICE && g_iPlayerTeam[victim] == TEAM_BRAQUEUR ) {
 		return Plugin_Handled;
 	}
 	
@@ -845,9 +871,9 @@ bool findAreaInRoom(int jobID, float pos[3]) {
 	
 	if( !loaded ) {
 		for (int i = 1; i < MAX_ZONES; i++) {
-		if (i == 181) { 
-		continue;
-		}
+			if (i == 181)
+				continue;
+			
 			int job = rp_GetZoneInt(i, zone_type_type);
 			if( job <= 0 || job >= MAX_JOBS || job == 14 || job == 101 )
 				continue;
