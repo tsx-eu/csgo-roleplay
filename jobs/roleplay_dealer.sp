@@ -120,10 +120,15 @@ public void OnMapStart() {
 	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt", true);
 	PrecacheModel(MODEL_PLANT, true);
 }
+public void OnEntityCreated(int ent, const char[] classname) {
+	if( ent > 0 ) {
+		g_iWeaponStolen[ent] = GetTime() - 110;
+	}
+}
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
 	rp_HookEvent(client, RP_OnPlayerUse,	fwdOnPlayerUse);
-	rp_HookEvent(client, RP_OnPlayerSteal,	fwdOnPlayerSteal);	
+	rp_HookEvent(client, RP_OnPlayerSteal,	fwdOnPlayerSteal);
 	g_bCanSearchPlant[client] = true;
 	
 	for (int i = 0; i < MAX_ITEMS; i++) {
@@ -264,116 +269,6 @@ public Action Cmd_ItemDrugs(int args) {
 	
 	return Plugin_Handled;
 }
-public Action ItemDrugStop(Handle time, any client) {
-	#if defined DEBUG
-	PrintToServer("ItemDrugStop");
-	#endif
-	if( !IsValidClient(client) )
-		return Plugin_Continue;
-
-	rp_SetClientBool(client, b_Drugged, false);
-	rp_SetClientBool(client, b_KeyReverse, false);
-	
-	return Plugin_Continue;
-}
-// ----------------------------------------------------------------------------
-public Action fwdCrack(int victim, int attacker, float& damage) {
-	#if defined DEBUG
-	PrintToServer("fwdCrack");
-	#endif
-	damage /= 2.0;
-	
-	return Plugin_Changed;
-}
-public Action fwdPCP(int client, float& speed, float& gravity) {
-	#if defined DEBUG
-	PrintToServer("fwdPCP");
-	#endif
-	
-	if( speed > 0.5 )
-		speed -= 0.25;
-	return Plugin_Changed;
-}
-public Action fwdHeroine(int client, float& speed, float& gravity) {
-	#if defined DEBUG
-	PrintToServer("fwdHeroine");
-	#endif
-	speed += 0.75;
-	gravity -= 0.2;
-	
-	return Plugin_Changed;
-}
-public Action fwdHeroine2(int client, int color[4]) {
-	#if defined DEBUG
-	PrintToServer("fwdHeroine2");
-	#endif
-	
-	color[0] -= 50;
-	color[1] += 100;
-	color[2] -= 50;
-	color[3] += 50;
-	return Plugin_Changed;
-}
-public Action fwdCocaine(int client, int color[4]) {
-	#if defined DEBUG
-	PrintToServer("fwdCocaine");
-	#endif
-	color[0] -= 50;
-	color[1] += 50;
-	color[2] += 100;
-	color[3] += 50;
-	return Plugin_Changed;
-}
-public Action fwdChampi(int client, float& speed, float& gravity) {
-	#if defined DEBUG
-	PrintToServer("fwdChampi");
-	#endif
-	speed -= 0.2;
-	gravity -= 0.6;
-	
-	return Plugin_Changed;
-}
-public Action fwdCrystal(int client, float& speed, float& gravity) {
-	#if defined DEBUG
-	PrintToServer("fwdCrystal");
-	#endif
-	speed += 0.25;
-	gravity -= 0.4;
-	
-	return Plugin_Changed;
-}
-public Action fwdCrystal2(int client, int color[4]) {
-	#if defined DEBUG
-	PrintToServer("fwdCrystal2");
-	#endif
-	color[0] += 100;
-	color[1] += 100;
-	color[2] += 100;
-	color[3] += 50;
-	return Plugin_Changed;
-}
-public Action fwdEcstasy(int client, float& speed, float& gravity) {
-	#if defined DEBUG
-	PrintToServer("fwdEcstasy");
-	#endif
-	speed += 0.25;
-	gravity -= 0.2;
-	
-	return Plugin_Changed;
-}
-public Action fwdBeuh(int client, float& speed, float& gravity) {
-	#if defined DEBUG
-	PrintToServer("fwdBeuh");
-	#endif
-	gravity -= 0.4;
-	
-	return Plugin_Changed;
-}
-public Action fwdFrozen(int client, float& speed, float& gravity) {
-	speed = 0.0;
-	return Plugin_Stop;
-}
-// ----------------------------------------------------------------------------
 public Action Cmd_ItemEngrais(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemEngrais");
@@ -408,7 +303,6 @@ public Action Cmd_ItemEngrais(int args) {
 	
 	return Plugin_Handled;
 }
-// ------------------------------------------------------------------------------
 public Action Cmd_ItemMorePlant(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemMorePlant");
@@ -425,7 +319,6 @@ public Action Cmd_ItemMorePlant(int args) {
 	else
 		rp_SetClientInt(client, i_Plant, amount + 1);
 }
-// ----------------------------------------------------------------------------
 public Action Cmd_ItemPlant(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemPlant");
@@ -441,6 +334,466 @@ public Action Cmd_ItemPlant(int args) {
 	
 	return Plugin_Handled;
 }
+public Action Cmd_ItemPiedBiche(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemPiedBiche");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+	int item_id = GetCmdArgInt(args);
+	
+	if( rp_GetClientJobID(client) != 81 ) {
+		return Plugin_Continue;
+	}
+	
+	if( rp_GetClientBool(client, b_MaySteal) == false ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler pour le moment.");
+		return Plugin_Handled;
+	}
+	
+	int type = getDistrib(client);
+	if( type <= 0 ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être sur la place.");
+		return Plugin_Handled;
+	}
+	
+	if( type == 2 ) {
+		rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 10.0);
+	}		
+	
+	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) + 1);
+
+	rp_ClientGiveItem(client, item_id, -rp_GetClientItem(client, item_id));
+	rp_SetClientBool(client, b_MaySteal, false);
+	rp_SetClientInt(client, i_LastVolTime, GetTime());
+	rp_SetClientInt(client, i_LastVolAmount, 100);
+	rp_SetClientInt(client, i_LastVolTarget, -1);	
+	rp_ClientReveal(client);
+	
+	ServerCommand("sm_effect_particles %d weapon_sensorgren_detonate 1 facemask", client);
+	ServerCommand("sm_effect_particles %d Trail2 2 legacy_weapon_bone", client);
+	
+	Handle dp;
+	CreateDataTimer(0.1, ItemPiedBiche_frame, dp, TIMER_DATA_HNDL_CLOSE|TIMER_REPEAT);
+	WritePackCell(dp, client);
+	WritePackCell(dp, type);
+	WritePackCell(dp, 0.0);
+	
+	return Plugin_Handled;
+}
+public Action Cmd_ItemPilule(int args){
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemPilule");
+	#endif
+
+	int type = GetCmdArgInt(1);	// 1 Pour Appart, 2 pour planque
+	int client = GetCmdArgInt(2);
+	int item_id = GetCmdArgInt(args);
+	int tptozone = -1;
+
+	if( !rp_GetClientBool(client, b_MayUseUltimate) ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet item pour le moment.");
+		return Plugin_Handled;
+	}
+	if( !doRP_ClientCanTP(client) ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet item pour le moment.");
+		return Plugin_Handled;
+	}
+	
+
+	if(type == 1) { // Appart
+		int appartcount = rp_GetClientInt(client, i_AppartCount);
+		if(appartcount == 0){
+			ITEM_CANCEL(client, item_id);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas vous téléporter à votre appartement si vous n'en avez pas.");
+			return Plugin_Handled;
+		}
+		else{
+			for (int i = 1; i < 200; i++) {
+				if( rp_GetClientKeyAppartement(client, i) ) {
+					tptozone = appartToZoneID(i);
+					break;
+				}
+			}
+		}
+	}
+	else if (type == 2){ // Planque
+		
+		if(rp_GetClientJobID(client)==0){
+			ITEM_CANCEL(client, item_id);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas vous teleporter à votre planque puisque vous êtes sans-emploi.");
+			return Plugin_Handled;
+		}
+		switch(rp_GetClientJobID(client)){
+			case 1:   tptozone = 11;
+			case 11:  tptozone = 168;
+			case 21:  tptozone = 90;
+			case 31:  tptozone = 111;
+			case 41:  tptozone = 273;
+			case 51:  tptozone = 128;
+			case 61:  tptozone = 19;
+			case 71:  tptozone = 131;
+			case 81:  tptozone = 210;
+			case 91:  tptozone = 288;
+			case 101: tptozone = 68;
+			case 111: tptozone = 200;
+			case 121: tptozone = 215;
+			case 131: tptozone = 266;
+			case 171: tptozone = 75;
+			case 181: tptozone = 71;
+			case 191: tptozone = 276;
+			case 211: tptozone = 179;
+			case 221: tptozone = 147;
+		}
+	}
+
+	if(tptozone == -1){
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Nous n'avons pas trouvé d'endroit où vous téléporter.");
+		return Plugin_Handled;
+	}
+
+	if(type == 1) {
+		ServerCommand("sm_effect_particles %d Aura7 %d", client, RoundFloat(TP_CHANNEL_DURATION));
+		rp_ClientColorize(client, { 238, 148, 52, 255} );
+	}
+	else if( type == 2 ) {
+		ServerCommand("sm_effect_particles %d Aura8 %d", client, RoundFloat(TP_CHANNEL_DURATION));
+		rp_ClientColorize(client, { 52, 148, 238, 255} );
+	}
+	
+	rp_ClientReveal(client);
+	ServerCommand("sm_effect_panel %d %f \"Téléportation en cours...\"", client, TP_CHANNEL_DURATION);
+	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, TP_CHANNEL_DURATION);
+	
+
+	Handle dp;
+	CreateDataTimer(TP_CHANNEL_DURATION, ItemPiluleOver, dp, TIMER_DATA_HNDL_CLOSE);
+	WritePackCell(dp, client);
+	WritePackCell(dp, item_id);
+	WritePackCell(dp, tptozone);
+	return Plugin_Handled;
+}
+// ----------------------------------------------------------------------------
+public Action ItemDrugStop(Handle time, any client) {
+	#if defined DEBUG
+	PrintToServer("ItemDrugStop");
+	#endif
+	if( !IsValidClient(client) )
+		return Plugin_Continue;
+
+	rp_SetClientBool(client, b_Drugged, false);
+	rp_SetClientBool(client, b_KeyReverse, false);
+	
+	return Plugin_Continue;
+}
+public Action AllowUltimate(Handle timer, any client) {
+	#if defined DEBUG
+	PrintToServer("AllowUltimate");
+	#endif
+
+	rp_SetClientBool(client, b_MayUseUltimate, true);
+}
+public Action ItemPiluleOver(Handle timer, Handle dp) {
+	ResetPack(dp);
+	int client = ReadPackCell(dp);
+	int item_id = ReadPackCell(dp);
+	int tptozone = ReadPackCell(dp);
+	int clientzone = rp_GetPlayerZone(client);
+	int clientzonebit = rp_GetZoneBit(clientzone);
+
+	if(!IsValidClient(client) || !IsPlayerAlive(client) || ( clientzonebit & BITZONE_JAIL ||  clientzonebit & BITZONE_LACOURS ||  clientzonebit & BITZONE_HAUTESECU ) ){
+		if(IsValidClient(client))
+			rp_ClientColorize(client);
+		return Plugin_Handled;
+	}
+	float zonemin[3], zonemax[3], tppos[3];
+
+	zonemin[0] = rp_GetZoneFloat(tptozone, zone_type_min_x);
+	zonemin[1] = rp_GetZoneFloat(tptozone, zone_type_min_y);
+	zonemin[2] = rp_GetZoneFloat(tptozone, zone_type_min_z)+5.0;
+	zonemax[0] = rp_GetZoneFloat(tptozone, zone_type_max_x);
+	zonemax[1] = rp_GetZoneFloat(tptozone, zone_type_max_y);
+	zonemax[2] = rp_GetZoneFloat(tptozone, zone_type_max_z)-80.0;
+
+	for(int i=0; i<30; i++){
+		for(int j=0; j<3; j++)
+			tppos[j] = Math_GetRandomFloat(zonemin[j],zonemax[j]);
+		
+		if( rp_GetZoneFromPoint(tppos) != tptozone ) 
+			continue;
+		if( !CanTP(tppos, client) )
+			continue;
+		
+		rp_ClientColorize(client, { 255, 255, 255, 255} );
+		TeleportEntity(client, tppos, NULL_VECTOR, NULL_VECTOR);
+		rp_SetClientBool(client, b_MayUseUltimate, false);
+		CreateTimer( TP_CD_DURATION, AllowUltimate, client);
+		return Plugin_Handled;
+	}
+	ITEM_CANCEL(client, item_id);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Nous n'avons pas trouvé d'endroit où vous téléporter.");
+	rp_ClientColorize(client, { 255, 255, 255, 255} );
+	rp_SetClientBool(client, b_MayUseUltimate, true);
+	return Plugin_Handled;
+}
+public Action timerAlarm(Handle timer, any door) {
+	#if defined DEBUG
+	PrintToServer("timerAlarm");
+	#endif
+	
+	EmitSoundToAllAny("UI/arm_bomb.wav", door);
+	return Plugin_Handled;
+}
+public Action AllowStealing(Handle timer, any client) {
+	#if defined DEBUG
+	PrintToServer("AllowStealing");
+	#endif
+	
+	rp_SetClientBool(client, b_MaySteal, true);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez à nouveau voler.");
+}
+public Action RemoveStealAmount(Handle time, any client) {
+	g_iStolenAmountTime[client]--;
+}
+// ----------------------------------------------------------------------------
+public Action fwdOnPlayerUse(int client) {
+	#if defined DEBUG
+	PrintToServer("BuildingPlant_use");
+	#endif
+	
+	static char tmp[64], tmp2[64];
+	
+	if( rp_GetClientJobID(client) == 81 && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == 81 ) {
+		int itemID = ITEM_PIEDBICHE;
+		int mnt = rp_GetClientItem(client, itemID);
+		int max = 1;
+		if( mnt <  max ) {
+			rp_ClientGiveItem(client, itemID, max - mnt);
+			rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez récupéré %i %s.", max - mnt, tmp);
+			rp_SetClientStat(client, i_DrugPickedUp, rp_GetClientStat(client, i_DrugPickedUp) + (max - mnt));
+			FakeClientCommand(client, "say /item");
+		}
+		
+		itemID = ITEM_KITCROCHTAGE;
+		mnt = rp_GetClientItem(client, itemID);
+		max = GetMaxKit(client, itemID);
+		if( mnt <  max ) {
+			rp_ClientGiveItem(client, itemID, max - mnt);
+			rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez récupéré %i %s.", max - mnt, tmp);
+			
+			FakeClientCommand(client, "say /item");
+		}
+	}
+	
+	if( rp_GetPlayerZone(client) == ZONE_ITEMSELL ) {
+		openMarketMenu(client);
+	}
+		
+	Format(tmp2, sizeof(tmp2), "rp_plant");
+	
+	float vecOrigin[3];
+	GetClientAbsOrigin(client, vecOrigin);
+	
+	for(int i=MaxClients; i<=2048; i++) {
+		if( !IsValidEdict(i) )
+			continue;
+		if( !IsValidEntity(i) )
+			continue;
+		
+		GetEdictClassname(i, tmp, 63);
+		
+		if( StrEqual(tmp, tmp2) && rp_GetBuildingData(i, BD_owner) == client ) {
+			float vecOrigin2[3];
+			Entity_GetAbsOrigin(i, vecOrigin2);
+			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 50 && rp_GetBuildingData(i, BD_count) > 0.0 ) {
+				
+				int sub = rp_GetBuildingData(i, BD_item_id);
+				if( sub < 0 && sub > MAX_ITEMS )
+					continue;
+					
+				rp_IncrementSuccess(client, success_list_trafiquant, rp_GetBuildingData(i, BD_count) );
+				if( rp_GetBuildingData(i, BD_FromBuild) == 0 ) {
+					rp_ClientGiveItem(client, sub, rp_GetBuildingData(i, BD_count));
+					FakeClientCommand(client, "say /item");
+				}
+				else {
+					addItemToMarket(client, sub, rp_GetBuildingData(i, BD_count));
+				}
+				
+				rp_SetBuildingData(i, BD_count, 0);			
+				rp_Effect_BeamBox(client, i, NULL_VECTOR, 255, 255, 0);			
+			}
+		}
+	}
+}
+public Action fwdOnPlayerBuild(int client, float& cooldown) {
+	if( rp_GetClientJobID(client) != 81 )
+		return Plugin_Continue;
+	
+	Handle menu = CreateMenu(MenuBuildingDealer);
+	char tmp[12], tmp2[64];
+			
+	SetMenuTitle(menu, " Menu des dealers");
+	
+	for(int i = 0; i < MAX_ITEMS; i++) {
+		rp_GetItemData(i, item_type_extra_cmd, tmp2, sizeof(tmp2));
+		if( StrContains(tmp2, "rp_item_drug") != 0 )
+			continue;
+		
+		rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2));
+		
+		Format(tmp, sizeof(tmp), "%d", i);
+		AddMenuItem(menu, tmp, tmp2);
+	}
+	
+	SetMenuExitButton(menu, true);
+	DisplayMenu(menu, client, 30);
+	
+	cooldown = 10.0;
+	return Plugin_Stop;
+}
+public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
+	if( rp_GetClientJobID(client) != 81 )
+		return Plugin_Continue;
+	static char tmp[128], szQuery[1024];
+	
+	if( rp_GetClientJobID(target) == 81 ) {
+		ACCESS_DENIED(client);
+	}
+	if( rp_GetZoneBit( rp_GetPlayerZone(target) ) & BITZONE_BLOCKSTEAL ) {
+		ACCESS_DENIED(client);
+	}
+	
+	if( rp_ClientFloodTriggered(client, target, fd_vol) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler %N, pour le moment.", target);
+		return Plugin_Handled;
+	}
+	
+	int VOL_MAX, amount, money;
+	money = rp_GetClientInt(target, i_Money);
+	VOL_MAX = (money+rp_GetClientInt(target, i_Bank)) / 200;
+	
+	if( rp_IsClientNew(target) )
+		amount = Math_GetRandomPow(1, VOL_MAX);
+	else
+		amount = Math_GetRandomInt(1, VOL_MAX);
+	
+	if( VOL_MAX > 0 && money <= 0 && rp_GetClientInt(client, i_Job) <= 83 && !rp_IsClientNew(target) /*&& doRP_CanClientStealItem(client, target)*/ ) {
+
+		int wepid = findPlayerWeapon(client, target);
+		
+		if( wepid == -1 ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'a pas d'argent, ni d'arme sur lui.", target);
+			cooldown = 1.0;
+			return Plugin_Stop;
+		}
+				
+		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Quelqu'un essaye de vous voler.");
+		
+		char wepname[64];
+		GetEdictClassname(wepid, wepname, sizeof(wepname));
+		ReplaceString(wepname, sizeof(wepname), "weapon_", "");	
+		int price = rp_GetWeaponPrice(wepid); 
+		
+		float StealTime = (Logarithm(float(price), 2.0) * 0.5) - 1.0;
+		
+		if( !rp_IsTargetSeen(target, client) ) {
+			StealTime -= 0.5;
+		}
+		
+		rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) + 1);
+		rp_SetClientInt(client, i_LastVolVehicleTime, GetTime());
+		rp_SetClientInt(client, i_LastVolAmount, 100);
+		rp_SetClientInt(client, i_LastVolTarget, target);
+		ServerCommand("sm_effect_particles %d Aura1 %d", client, RoundToCeil(StealTime));
+		
+		rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, StealTime);
+		rp_HookEvent(client, RP_PreTakeDamage, fwdDamage, StealTime);
+		
+		Handle dp;
+		CreateDataTimer(StealTime, ItemPickLockOver_18th, dp, TIMER_DATA_HNDL_CLOSE);
+		WritePackCell(dp, client);
+		WritePackCell(dp, target);
+		WritePackCell(dp, EntIndexToEntRef(wepid));
+		
+		rp_SetClientBool(client, b_MaySteal, false);
+		rp_SetClientBool(target, b_Stealing, true);
+		SDKHook(target, SDKHook_WeaponDrop, OnWeaponDrop);
+	}
+	else if( VOL_MAX > 0 && money >= 1 ) {
+		if( amount > money )
+			amount = money;
+			
+		rp_SetClientStat(target, i_MoneySpent_Stolen, rp_GetClientStat(target, i_MoneySpent_Stolen) + amount);
+		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + amount);
+		rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amount);
+		rp_SetClientInt(client, i_LastVolTime, GetTime());
+		rp_SetClientInt(client, i_LastVolAmount, amount);
+		rp_SetClientInt(client, i_LastVolTarget, target);
+		rp_SetClientInt(target, i_LastVol, client);
+		
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez volé %d$ à %N.", amount, target);
+		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Quelqu'un vous a volé %d$.", amount);
+
+		//g_iSuccess_last_mafia[client][1] = GetTime();
+		//g_iSuccess_last_pas_vu_pas_pris[target] = GetTime();
+		LogToGame("[TSX-RP] [VOL] %L a vole %L %i$", client, target, amount);
+		
+		GetClientAuthId(client, AuthId_Engine, tmp, sizeof(tmp), false);
+		Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_sell` (`id`, `steamid`, `job_id`, `timestamp`, `item_type`, `item_id`, `item_name`, `amount`) VALUES (NULL, '%s', '%i', '%i', '4', '%i', '%s', '%i');",
+			tmp, rp_GetClientJobID(client), GetTime(), 0, "Vol: Argent", amount);
+		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
+		
+		if( rp_IsNight() )
+			cooldown *= 0.5;
+		
+		if( amount < 50 )
+			cooldown *= 0.5;
+		if( amount < 5 )
+			cooldown *= 0.5;
+			
+		if( amount > 500 )
+			rp_SetClientFloat(client, fl_LastVente, GetGameTime() + 10.0);
+		if( amount > 2000 )
+			rp_SetClientFloat(client, fl_LastVente, GetGameTime() + 30.0);
+		
+		rp_ClientFloodIncrement(client, target, fd_vol, cooldown);
+		
+		ServerCommand("sm_effect_particles %d Aura2 2", client);
+		
+		int cpt = rp_GetRandomCapital(81);
+		rp_SetJobCapital(81, rp_GetJobCapital(81) + (amount/4));
+		rp_SetJobCapital(cpt, rp_GetJobCapital(cpt) - (amount/4));
+	}
+	else {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'a pas d'argent sur lui.", target);
+		cooldown = 1.0;
+	}
+	
+	return Plugin_Stop;
+}
+// ----------------------------------------------------------------------------
+public Action fwdDamage(int client, int attacker, float& damage) {
+	if( Math_GetRandomInt(0, 4) == 4 && rp_GetClientBool(attacker, b_Stealing) == true ) {
+		rp_SetClientBool(attacker, b_Stealing, false);
+		rp_ClientColorize(client);
+		rp_ClientReveal(client);
+	}	
+	return Plugin_Continue;
+}
+public Action OnWeaponDrop(int client, int weapon) {
+	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas lâcher votre arme pendant qu'un 18th vous vol, tirez lui dessus ou fuyez !");
+	return Plugin_Handled;
+}
+// ----------------------------------------------------------------------------
 int BuildingPlant(int client, int type) {
 	#if defined DEBUG
 	PrintToServer("BuildingPlant");
@@ -688,589 +1041,6 @@ public Action Frame_BuildingPlant(Handle timer, any ent) {
 	
 	return Plugin_Handled;
 }
-public Action fwdOnPlayerUse(int client) {
-	#if defined DEBUG
-	PrintToServer("BuildingPlant_use");
-	#endif
-	
-	static char tmp[64], tmp2[64];
-	
-	if( rp_GetClientJobID(client) == 81 && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == 81 ) {
-		int itemID = ITEM_PIEDBICHE;
-		int mnt = rp_GetClientItem(client, itemID);
-		int max = 1;
-		if( mnt <  max ) {
-			rp_ClientGiveItem(client, itemID, max - mnt);
-			rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez récupéré %i %s.", max - mnt, tmp);
-			rp_SetClientStat(client, i_DrugPickedUp, rp_GetClientStat(client, i_DrugPickedUp) + (max - mnt));
-			FakeClientCommand(client, "say /item");
-		}
-		
-		itemID = ITEM_KITCROCHTAGE;
-		mnt = rp_GetClientItem(client, itemID);
-		max = GetMaxKit(client, itemID);
-		if( mnt <  max ) {
-			rp_ClientGiveItem(client, itemID, max - mnt);
-			rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez récupéré %i %s.", max - mnt, tmp);
-			
-			FakeClientCommand(client, "say /item");
-		}
-	}
-	
-	if( rp_GetPlayerZone(client) == ZONE_ITEMSELL ) {
-		openMarketMenu(client);
-	}
-		
-	Format(tmp2, sizeof(tmp2), "rp_plant");
-	
-	float vecOrigin[3];
-	GetClientAbsOrigin(client, vecOrigin);
-	
-	for(int i=MaxClients; i<=2048; i++) {
-		if( !IsValidEdict(i) )
-			continue;
-		if( !IsValidEntity(i) )
-			continue;
-		
-		GetEdictClassname(i, tmp, 63);
-		
-		if( StrEqual(tmp, tmp2) && rp_GetBuildingData(i, BD_owner) == client ) {
-			float vecOrigin2[3];
-			Entity_GetAbsOrigin(i, vecOrigin2);
-			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 50 && rp_GetBuildingData(i, BD_count) > 0.0 ) {
-				
-				int sub = rp_GetBuildingData(i, BD_item_id);
-				if( sub < 0 && sub > MAX_ITEMS )
-					continue;
-					
-				rp_IncrementSuccess(client, success_list_trafiquant, rp_GetBuildingData(i, BD_count) );
-				if( rp_GetBuildingData(i, BD_FromBuild) == 0 ) {
-					rp_ClientGiveItem(client, sub, rp_GetBuildingData(i, BD_count));
-					FakeClientCommand(client, "say /item");
-				}
-				else {
-					addItemToMarket(client, sub, rp_GetBuildingData(i, BD_count));
-				}
-				
-				rp_SetBuildingData(i, BD_count, 0);			
-				rp_Effect_BeamBox(client, i, NULL_VECTOR, 255, 255, 0);			
-			}
-		}
-	}
-}
-public Action fwdOnPlayerBuild(int client, float& cooldown) {
-	if( rp_GetClientJobID(client) != 81 )
-		return Plugin_Continue;
-	
-	Handle menu = CreateMenu(MenuBuildingDealer);
-	char tmp[12], tmp2[64];
-			
-	SetMenuTitle(menu, " Menu des dealers");
-	
-	for(int i = 0; i < MAX_ITEMS; i++) {
-		rp_GetItemData(i, item_type_extra_cmd, tmp2, sizeof(tmp2));
-		if( StrContains(tmp2, "rp_item_drug") != 0 )
-			continue;
-		
-		rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2));
-		
-		Format(tmp, sizeof(tmp), "%d", i);
-		AddMenuItem(menu, tmp, tmp2);
-	}
-	
-	SetMenuExitButton(menu, true);
-	DisplayMenu(menu, client, 30);
-	
-	cooldown = 10.0;
-	return Plugin_Stop;
-}
-public int MenuBuildingDealer(Handle menu, MenuAction action, int client, int param ) {
-	#if defined DEBUG
-	PrintToServer("MenuBuildingDealer");
-	#endif
-	
-	if( action == MenuAction_Select ) {
-		char szMenuItem[64];
-		
-		if( GetMenuItem(menu, param, szMenuItem, sizeof(szMenuItem)) ) {
-			
-			int ent = BuildingPlant(client, StringToInt(szMenuItem));
-			if( ent > 0 ) {
-				rp_SetBuildingData(ent, BD_FromBuild, 1);
-				rp_SetBuildingData(ent, BD_max, 30);
-			}
-		}
-	}
-	else if( action == MenuAction_End ) {
-		CloseHandle(menu);
-	}
-}
-// ----------------------------------------------------------------------------
-public Action Cmd_ItemPiedBiche(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemPiedBiche");
-	#endif
-	
-	int client = GetCmdArgInt(1);
-	int item_id = GetCmdArgInt(args);
-	
-	if( rp_GetClientJobID(client) != 81 ) {
-		return Plugin_Continue;
-	}
-	
-	if( rp_GetClientBool(client, b_MaySteal) == false ) {
-		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler pour le moment.");
-		return Plugin_Handled;
-	}
-	
-	int type = getDistrib(client);
-	if( type <= 0 ) {
-		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être sur la place.");
-		return Plugin_Handled;
-	}
-	
-	if( type == 2 ) {
-		rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 10.0);
-	}		
-	
-	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) + 1);
-
-	rp_ClientGiveItem(client, item_id, -rp_GetClientItem(client, item_id));
-	rp_SetClientBool(client, b_MaySteal, false);
-	rp_SetClientInt(client, i_LastVolTime, GetTime());
-	rp_SetClientInt(client, i_LastVolAmount, 100);
-	rp_SetClientInt(client, i_LastVolTarget, -1);	
-	rp_ClientReveal(client);
-	
-	ServerCommand("sm_effect_particles %d weapon_sensorgren_detonate 1 facemask", client);
-	ServerCommand("sm_effect_particles %d Trail2 2 legacy_weapon_bone", client);
-	
-	Handle dp;
-	CreateDataTimer(0.1, ItemPiedBiche_frame, dp, TIMER_DATA_HNDL_CLOSE|TIMER_REPEAT);
-	WritePackCell(dp, client);
-	WritePackCell(dp, type);
-	WritePackCell(dp, 0.0);
-	
-	return Plugin_Handled;
-}
-public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
-	ResetPack(dp);
-	int client = ReadPackCell(dp);
-	int type = ReadPackCell(dp);
-	float percent = ReadPackCell(dp);
-	
-	if( !IsValidClient(client ) ) {
-		return Plugin_Stop;
-	}
-	if( getDistrib(client) != type ) {
-		MENU_ShowPickLock(client, percent, -1, type);
-		rp_ClientColorize(client);
-		CreateTimer(0.1, AllowStealing, client);
-		rp_ClientGiveItem(client, ITEM_PIEDBICHE, 1);
-		return Plugin_Stop;
-	}
-	if( percent >= 1.0 ) {
-		rp_ClientColorize(client);
-		
-		rp_SetClientStat(client, i_JobSucess, rp_GetClientStat(client, i_JobSucess) + 1);
-		rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
-		
-		float time = (rp_IsNight() ? STEAL_TIME:STEAL_TIME*2.0);
-		int stealAMount;
-		
-		doRP_OnClientPiedBiche(client);
-		
-		switch(type) {
-			case 2: { // Place de l'indé
-					
-				int amount = 0, ItemRand[32];
-				
-				for(int i = 0; i < MAX_ITEMS; i++) {
-					if( rp_GetItemInt(i, item_type_job_id) != 81 )
-						continue;
-					ItemRand[amount++] = i;
-				}
-					
-				int item_id = ItemRand[ Math_GetRandomInt(0, amount-1) ];
-				amount = 1;
-				if( rp_GetItemInt(item_id, item_type_prix) < 200 )
-					amount = 10;
-				
-				char tmp[64];
-				rp_GetItemData(item_id, item_type_name, tmp, sizeof(tmp));
-			
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez trouvé %d %s", amount, tmp);
-				rp_ClientGiveItem(client, item_id, amount);
-				
-				stealAMount = rp_GetItemInt(item_id, item_type_prix) * amount;
-			}
-		}
-		
-		rp_SetClientInt(client, i_LastVolTime, GetTime());
-		rp_SetClientInt(client, i_LastVolTarget, -1);
-		rp_SetClientInt(client, i_LastVolAmount, stealAMount); 
-		
-		CreateTimer(time, AllowStealing, client);
-		return Plugin_Stop;
-	}
-	
-	if( Math_GetRandomInt(1, 10) == 8 )
-		ServerCommand("sm_effect_particles %d Trail2 2 legacy_weapon_bone", client);
-	if( Math_GetRandomInt(1, 30) == 8 )
-		ServerCommand("sm_effect_particles %d Aura2 1 footplant_L", client);
-	if( Math_GetRandomInt(1, 30) == 8 )
-		ServerCommand("sm_effect_particles %d Aura2 1 footplant_R", client);
-		
-	if( Math_GetRandomInt(1, 500) == 42 )
-		CreateTimer(0.01, timerAlarm, client); 
-	
-	float ratio = 15.0 / 2500.0;
-	
-	rp_SetClientFloat(client, fl_CoolDown, GetGameTime() + 0.15);
-	
-	ResetPack(dp);
-	WritePackCell(dp, client);
-	WritePackCell(dp, type);
-	WritePackCell(dp, percent + ratio);
-	MENU_ShowPickLock(client, percent, 0, type);
-	return Plugin_Continue;
-}
-public Action AllowUltimate(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("AllowUltimate");
-	#endif
-
-	rp_SetClientBool(client, b_MayUseUltimate, true);
-}
-public Action Cmd_ItemPilule(int args){
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemPilule");
-	#endif
-
-	int type = GetCmdArgInt(1);	// 1 Pour Appart, 2 pour planque
-	int client = GetCmdArgInt(2);
-	int item_id = GetCmdArgInt(args);
-	int tptozone = -1;
-
-	if( !rp_GetClientBool(client, b_MayUseUltimate) ) {
-		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet item pour le moment.");
-		return Plugin_Handled;
-	}
-	if( !doRP_ClientCanTP(client) ) {
-		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet item pour le moment.");
-		return Plugin_Handled;
-	}
-	
-
-	if(type == 1) { // Appart
-		int appartcount = rp_GetClientInt(client, i_AppartCount);
-		if(appartcount == 0){
-			ITEM_CANCEL(client, item_id);
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas vous téléporter à votre appartement si vous n'en avez pas.");
-			return Plugin_Handled;
-		}
-		else{
-			for (int i = 1; i < 200; i++) {
-				if( rp_GetClientKeyAppartement(client, i) ) {
-					tptozone = appartToZoneID(i);
-					break;
-				}
-			}
-		}
-	}
-	else if (type == 2){ // Planque
-		
-		if(rp_GetClientJobID(client)==0){
-			ITEM_CANCEL(client, item_id);
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas vous teleporter à votre planque puisque vous êtes sans-emploi.");
-			return Plugin_Handled;
-		}
-		switch(rp_GetClientJobID(client)){
-			case 1:   tptozone = 11;
-			case 11:  tptozone = 168;
-			case 21:  tptozone = 90;
-			case 31:  tptozone = 111;
-			case 41:  tptozone = 273;
-			case 51:  tptozone = 128;
-			case 61:  tptozone = 19;
-			case 71:  tptozone = 131;
-			case 81:  tptozone = 210;
-			case 91:  tptozone = 288;
-			case 101: tptozone = 68;
-			case 111: tptozone = 200;
-			case 121: tptozone = 215;
-			case 131: tptozone = 266;
-			case 171: tptozone = 75;
-			case 181: tptozone = 71;
-			case 191: tptozone = 276;
-			case 211: tptozone = 179;
-			case 221: tptozone = 147;
-		}
-	}
-
-	if(tptozone == -1){
-		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Nous n'avons pas trouvé d'endroit où vous téléporter.");
-		return Plugin_Handled;
-	}
-
-	if(type == 1) {
-		ServerCommand("sm_effect_particles %d Aura7 %d", client, RoundFloat(TP_CHANNEL_DURATION));
-		rp_ClientColorize(client, { 238, 148, 52, 255} );
-	}
-	else if( type == 2 ) {
-		ServerCommand("sm_effect_particles %d Aura8 %d", client, RoundFloat(TP_CHANNEL_DURATION));
-		rp_ClientColorize(client, { 52, 148, 238, 255} );
-	}
-	
-	rp_ClientReveal(client);
-	ServerCommand("sm_effect_panel %d %f \"Téléportation en cours...\"", client, TP_CHANNEL_DURATION);
-	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, TP_CHANNEL_DURATION);
-	
-
-	Handle dp;
-	CreateDataTimer(TP_CHANNEL_DURATION, ItemPiluleOver, dp, TIMER_DATA_HNDL_CLOSE);
-	WritePackCell(dp, client);
-	WritePackCell(dp, item_id);
-	WritePackCell(dp, tptozone);
-	return Plugin_Handled;
-}
-public Action ItemPiluleOver(Handle timer, Handle dp) {
-	ResetPack(dp);
-	int client = ReadPackCell(dp);
-	int item_id = ReadPackCell(dp);
-	int tptozone = ReadPackCell(dp);
-	int clientzone = rp_GetPlayerZone(client);
-	int clientzonebit = rp_GetZoneBit(clientzone);
-
-	if(!IsValidClient(client) || !IsPlayerAlive(client) || ( clientzonebit & BITZONE_JAIL ||  clientzonebit & BITZONE_LACOURS ||  clientzonebit & BITZONE_HAUTESECU ) ){
-		if(IsValidClient(client))
-			rp_ClientColorize(client, { 255, 255, 255, 255} );
-		return Plugin_Handled;
-	}
-	float zonemin[3];
-	float zonemax[3];
-	float tppos[3];
-	char tmp[64];
-
-	rp_GetZoneData(tptozone, zone_type_min_x, tmp, 63);
-	zonemin[0] = StringToFloat(tmp);
-	rp_GetZoneData(tptozone, zone_type_min_y, tmp, 63);
-	zonemin[1] = StringToFloat(tmp);
-	rp_GetZoneData(tptozone, zone_type_min_z, tmp, 63);
-	zonemin[2] = StringToFloat(tmp)+5.0;
-
-	rp_GetZoneData(tptozone, zone_type_max_x, tmp, 63);
-	zonemax[0] = StringToFloat(tmp);
-	rp_GetZoneData(tptozone, zone_type_max_y, tmp, 63);
-	zonemax[1] = StringToFloat(tmp);
-	rp_GetZoneData(tptozone, zone_type_max_z, tmp, 63);
-	zonemax[2] = StringToFloat(tmp)-80.0;
-
-	for(int i=0; i<30; i++){
-		for(int j=0; j<3; j++)
-			tppos[j] = Math_GetRandomFloat(zonemin[j],zonemax[j]);
-		
-		if( rp_GetZoneFromPoint(tppos) != tptozone ) 
-			continue;
-		if( !CanTP(tppos, client) )
-			continue;
-		
-		rp_ClientColorize(client, { 255, 255, 255, 255} );
-		TeleportEntity(client, tppos, NULL_VECTOR, NULL_VECTOR);
-		rp_SetClientBool(client, b_MayUseUltimate, false);
-		CreateTimer( TP_CD_DURATION, AllowUltimate, client);
-		return Plugin_Handled;
-	}
-	ITEM_CANCEL(client, item_id);
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Nous n'avons pas trouvé d'endroit où vous téléporter.");
-	rp_ClientColorize(client, { 255, 255, 255, 255} );
-	rp_SetClientBool(client, b_MayUseUltimate, true);
-	return Plugin_Handled;
-}
-int appartToZoneID(int appartid){
-	static int res[128];
-	if( res[appartid] != 0 )
-		return res[appartid];
-	
-	char appart[32], tmp[32];
-	Format(appart, 31, "appart_%d",appartid);
-	for(int i=1;i<300;i++){
-		rp_GetZoneData(i, zone_type_type, tmp, sizeof(tmp));
-		if(StrEqual(tmp,appart,false)){
-			res[appartid] = i;
-			return res[appartid];
-		}
-	}
-	res[appartid] = -1;
-	return res[appartid];
-}
-bool CanTP(float pos[3], int client) {
-	static float mins[3], maxs[3];
-	static bool init = false;
-	bool ret;
-	
-	if( !init ) {
-		GetClientMins(client, mins);
-		GetClientMaxs(client, maxs);
-		init = true;
-	}
-	
-	Handle tr;
-	tr = TR_TraceHullEx(pos, pos, mins, maxs, MASK_PLAYERSOLID);
-	ret = !TR_DidHit(tr);
-	CloseHandle(tr);
-    #if defined DEBUG
-		if( !ret ) {
-			TR_GetEndPosition(maxs, tr);
-			TE_SetupBeamRingPoint(maxs, 1.0, 1.5, g_cBeam, g_cBeam, 0, 30, 10.0, 1.0, 1.0, { 255, 255, 255, 255 }, 10, 0);
-			TE_SendToAll();
-		}
-	#endif
-	return ret;
-}
-public Action tpbeam(Handle timer,int client){
-	int clientzonebit = rp_GetZoneBit(rp_GetPlayerZone(client));
-	if(!IsValidClient(client) || !IsPlayerAlive(client) || ( clientzonebit & BITZONE_JAIL ||  clientzonebit & BITZONE_LACOURS ||  clientzonebit & BITZONE_HAUTESECU ) )
-		return Plugin_Handled;
-
-	float vecTarget[3];
-	GetClientAbsOrigin(client, vecTarget);
-	TE_SetupBeamRingPoint(vecTarget, 10.0, 500.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, { 238, 148, 52, 200}, 10, 0);
-	TE_SendToAll();
-	return Plugin_Handled;
-}
-public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
-	if( rp_GetClientJobID(client) != 81 )
-		return Plugin_Continue;
-	static char tmp[128], szQuery[1024];
-	
-	if( rp_GetClientJobID(target) == 81 ) {
-		ACCESS_DENIED(client);
-	}
-	if( rp_GetZoneBit( rp_GetPlayerZone(target) ) & BITZONE_BLOCKSTEAL ) {
-		ACCESS_DENIED(client);
-	}
-	
-	if( rp_ClientFloodTriggered(client, target, fd_vol) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler %N, pour le moment.", target);
-		return Plugin_Handled;
-	}
-	
-	int VOL_MAX, amount, money;
-	money = rp_GetClientInt(target, i_Money);
-	VOL_MAX = (money+rp_GetClientInt(target, i_Bank)) / 200;
-	
-	if( rp_IsClientNew(target) )
-		amount = Math_GetRandomPow(1, VOL_MAX);
-	else
-		amount = Math_GetRandomInt(1, VOL_MAX);
-	
-	if( VOL_MAX > 0 && money <= 0 && rp_GetClientInt(client, i_Job) <= 83 && !rp_IsClientNew(target) /*&& doRP_CanClientStealItem(client, target)*/ ) {
-
-		int wepid = findPlayerWeapon(client, target);
-		
-		if( wepid == -1 ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'a pas d'argent, ni d'arme sur lui.", target);
-			cooldown = 1.0;
-			return Plugin_Stop;
-		}
-				
-		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Quelqu'un essaye de vous voler.");
-		
-		char wepname[64];
-		GetEdictClassname(wepid, wepname, sizeof(wepname));
-		ReplaceString(wepname, sizeof(wepname), "weapon_", "");	
-		int price = rp_GetWeaponPrice(wepid); 
-		
-		float StealTime = (Logarithm(float(price), 2.0) * 0.5) - 1.0;
-		
-		if( !rp_IsTargetSeen(target, client) ) {
-			StealTime -= 0.5;
-		}
-		
-		rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) + 1);
-		rp_SetClientInt(client, i_LastVolVehicleTime, GetTime());
-		rp_SetClientInt(client, i_LastVolAmount, 100);
-		rp_SetClientInt(client, i_LastVolTarget, target);
-		ServerCommand("sm_effect_particles %d Aura1 %d", client, RoundToCeil(StealTime));
-		
-		rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, StealTime);
-		rp_HookEvent(client, RP_PreTakeDamage, fwdDamage, StealTime);
-		
-		Handle dp;
-		CreateDataTimer(StealTime, ItemPickLockOver_18th, dp, TIMER_DATA_HNDL_CLOSE);
-		WritePackCell(dp, client);
-		WritePackCell(dp, target);
-		WritePackCell(dp, EntIndexToEntRef(wepid));
-		
-		rp_SetClientBool(client, b_MaySteal, false);
-		rp_SetClientBool(target, b_Stealing, true);
-		SDKHook(target, SDKHook_WeaponDrop, OnWeaponDrop);
-	}
-	else if( VOL_MAX > 0 && money >= 1 ) {
-		if( amount > money )
-			amount = money;
-			
-		rp_SetClientStat(target, i_MoneySpent_Stolen, rp_GetClientStat(target, i_MoneySpent_Stolen) + amount);
-		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + amount);
-		rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amount);
-		rp_SetClientInt(client, i_LastVolTime, GetTime());
-		rp_SetClientInt(client, i_LastVolAmount, amount);
-		rp_SetClientInt(client, i_LastVolTarget, target);
-		rp_SetClientInt(target, i_LastVol, client);
-		
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez volé %d$ à %N.", amount, target);
-		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Quelqu'un vous a volé %d$.", amount);
-
-		//g_iSuccess_last_mafia[client][1] = GetTime();
-		//g_iSuccess_last_pas_vu_pas_pris[target] = GetTime();
-		LogToGame("[TSX-RP] [VOL] %L a vole %L %i$", client, target, amount);
-		
-		GetClientAuthId(client, AuthId_Engine, tmp, sizeof(tmp), false);
-		Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_sell` (`id`, `steamid`, `job_id`, `timestamp`, `item_type`, `item_id`, `item_name`, `amount`) VALUES (NULL, '%s', '%i', '%i', '4', '%i', '%s', '%i');",
-			tmp, rp_GetClientJobID(client), GetTime(), 0, "Vol: Argent", amount);
-		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
-		
-		if( rp_IsNight() )
-			cooldown *= 0.5;
-		
-		if( amount < 50 )
-			cooldown *= 0.5;
-		if( amount < 5 )
-			cooldown *= 0.5;
-			
-		if( amount > 500 )
-			rp_SetClientFloat(client, fl_LastVente, GetGameTime() + 10.0);
-		if( amount > 2000 )
-			rp_SetClientFloat(client, fl_LastVente, GetGameTime() + 30.0);
-		
-		rp_ClientFloodIncrement(client, target, fd_vol, cooldown);
-		
-		ServerCommand("sm_effect_particles %d Aura2 2", client);
-		
-		int cpt = rp_GetRandomCapital(81);
-		rp_SetJobCapital(81, rp_GetJobCapital(81) + (amount/4));
-		rp_SetJobCapital(cpt, rp_GetJobCapital(cpt) - (amount/4));
-	}
-	else {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'a pas d'argent sur lui.", target);
-		cooldown = 1.0;
-	}
-	
-	return Plugin_Stop;
-}
-// ----------------------------------------------------------------------------
-public Action fwdAccelerate(int client, float& speed, float& gravity) {
-	speed += 0.5;
-	return Plugin_Changed;
-}
 // ----------------------------------------------------------------------------
 /*
 public Action Cmd_ItemPiedBiche(int args) {
@@ -1439,12 +1209,89 @@ public Action ItemPiedBicheOver(Handle timer, Handle dp) {
 	return Plugin_Continue;
 }
 */
-public void OnEntityCreated(int ent, const char[] classname) {
-	if( ent > 0 ) {
-		g_iWeaponStolen[ent] = GetTime() - 110;
-	}
-}
 // ----------------------------------------------------------------------------
+public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
+	ResetPack(dp);
+	int client = ReadPackCell(dp);
+	int type = ReadPackCell(dp);
+	float percent = ReadPackCell(dp);
+	
+	if( !IsValidClient(client ) ) {
+		return Plugin_Stop;
+	}
+	if( getDistrib(client) != type ) {
+		MENU_ShowPickLock(client, percent, -1, type);
+		rp_ClientColorize(client);
+		CreateTimer(0.1, AllowStealing, client);
+		rp_ClientGiveItem(client, ITEM_PIEDBICHE, 1);
+		return Plugin_Stop;
+	}
+	if( percent >= 1.0 ) {
+		rp_ClientColorize(client);
+		
+		rp_SetClientStat(client, i_JobSucess, rp_GetClientStat(client, i_JobSucess) + 1);
+		rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
+		
+		float time = (rp_IsNight() ? STEAL_TIME:STEAL_TIME*2.0);
+		int stealAMount;
+		
+		doRP_OnClientPiedBiche(client);
+		
+		switch(type) {
+			case 2: { // Place de l'indé
+					
+				int amount = 0, ItemRand[32];
+				
+				for(int i = 0; i < MAX_ITEMS; i++) {
+					if( rp_GetItemInt(i, item_type_job_id) != 81 )
+						continue;
+					ItemRand[amount++] = i;
+				}
+					
+				int item_id = ItemRand[ Math_GetRandomInt(0, amount-1) ];
+				amount = 1;
+				if( rp_GetItemInt(item_id, item_type_prix) < 200 )
+					amount = 10;
+				
+				char tmp[64];
+				rp_GetItemData(item_id, item_type_name, tmp, sizeof(tmp));
+			
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez trouvé %d %s", amount, tmp);
+				rp_ClientGiveItem(client, item_id, amount);
+				
+				stealAMount = rp_GetItemInt(item_id, item_type_prix) * amount;
+			}
+		}
+		
+		rp_SetClientInt(client, i_LastVolTime, GetTime());
+		rp_SetClientInt(client, i_LastVolTarget, -1);
+		rp_SetClientInt(client, i_LastVolAmount, stealAMount); 
+		
+		CreateTimer(time, AllowStealing, client);
+		return Plugin_Stop;
+	}
+	
+	if( Math_GetRandomInt(1, 10) == 8 )
+		ServerCommand("sm_effect_particles %d Trail2 2 legacy_weapon_bone", client);
+	if( Math_GetRandomInt(1, 30) == 8 )
+		ServerCommand("sm_effect_particles %d Aura2 1 footplant_L", client);
+	if( Math_GetRandomInt(1, 30) == 8 )
+		ServerCommand("sm_effect_particles %d Aura2 1 footplant_R", client);
+		
+	if( Math_GetRandomInt(1, 500) == 42 )
+		CreateTimer(0.01, timerAlarm, client); 
+	
+	float ratio = 15.0 / 2500.0;
+	
+	rp_SetClientFloat(client, fl_CoolDown, GetGameTime() + 0.15);
+	
+	ResetPack(dp);
+	WritePackCell(dp, client);
+	WritePackCell(dp, type);
+	WritePackCell(dp, percent + ratio);
+	MENU_ShowPickLock(client, percent, 0, type);
+	return Plugin_Continue;
+}
 public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 	#if defined DEBUG
 	PrintToServer("ItemPickLockOver_18th");
@@ -1579,81 +1426,71 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 	SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 	return Plugin_Handled;
 }
-int findPlayerWeapon(int client, int target) {
+// ----------------------------------------------------------------------------
+public int MenuBuildingDealer(Handle menu, MenuAction action, int client, int param ) {
+	#if defined DEBUG
+	PrintToServer("MenuBuildingDealer");
+	#endif
 	
-	if( !rp_IsTutorialOver(target) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur n'a pas terminé le tutoriel.");
-		return -1;
-	}
-	if( rp_GetClientBool(target, b_Stealing) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Quelqu'un d'autre est déjà en train de voler ce joueur.");
-		return -1;
-	}
-	
-	if( (g_iStolenAmountTime[target] >= 3 && rp_GetClientFloat(target, fl_LastStolen)+(STEAL_TIME) > GetGameTime()) || (g_iStolenAmountTime[target] >= 5) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur s'est déjà fait volé récemment.");
-		return -1;
-	}
-	if( rp_GetClientFloat(target, fl_Invincible) >= GetGameTime() ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur est invincible.");
-		return -1;
-	}
-	if( rp_GetClientJobID(target) == 181 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler un autre 18th.");
-		return -1;
-	}
-	
-	int wepid;
-	for( int i = 0; i < 5; i++ ) {
-		if( i == 2 )
-			continue;
-			
-		wepid = GetPlayerWeaponSlot( target, i );
-		if( !IsValidEdict(wepid) )
-			continue;
-		if( g_iWeaponStolen[wepid]+120 > GetTime() )
-			continue;
+	if( action == MenuAction_Select ) {
+		char szMenuItem[64];
 		
-		return wepid;
+		if( GetMenuItem(menu, param, szMenuItem, sizeof(szMenuItem)) ) {
+			
+			int ent = BuildingPlant(client, StringToInt(szMenuItem));
+			if( ent > 0 ) {
+				rp_SetBuildingData(ent, BD_FromBuild, 1);
+				rp_SetBuildingData(ent, BD_max, 30);
+			}
+		}
 	}
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur n'a pas d'arme.");
-	return -1;
-}
-public Action OnWeaponDrop(int client, int weapon) {
-	
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas lâcher votre arme pendant qu'un 18th vous vol, tirez lui dessus ou fuyez !");
-	return Plugin_Handled;
-}
-public Action fwdDamage(int client, int attacker, float& damage) {
-	
-	if( Math_GetRandomInt(0, 4) == 4 && rp_GetClientBool(attacker, b_Stealing) == true ) {
-		rp_SetClientBool(attacker, b_Stealing, false);
-		rp_ClientColorize(client);
-		rp_ClientReveal(client);
+	else if( action == MenuAction_End ) {
+		CloseHandle(menu);
 	}
-	
-	return Plugin_Continue;
+}
+public int Menu_Market(Handle menu, MenuAction action, int client, int param2) {
+	if( action == MenuAction_Select ) {
+		char options[64], buff[2][16];
+		GetMenuItem(menu, param2, options, sizeof(options));
+		ExplodeString(options, " ", buff, sizeof(buff), sizeof(buff[]));
+		
+		int itemID = StringToInt(buff[0]);
+		int amount = StringToInt(buff[1]);
+		
+		if( amount == 0 ) {
+			openMarketMenu(client, itemID);
+		}
+		else {
+			if( g_iMarket[itemID] < amount )
+				amount = g_iMarket[itemID];
+			if( amount == 0 )
+				return;
+			
+			int prix = rp_GetItemInt(itemID, item_type_prix) * amount;
+			if( rp_GetClientInt(client, i_Money) < prix )
+				return;
+			
+			rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - prix);
+			getItemFromMarket(itemID, amount);
+			
+			rp_ClientGiveItem(client, itemID, amount);
+			
+			rp_GetItemData(itemID, item_type_name, options, sizeof(options));
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez acheté %d %s pour %d$.", amount, options, prix);
+			
+			FakeClientCommand(client, "say /item");
+		}
+	}
+	else if( action == MenuAction_End ) {
+		CloseHandle(menu);
+	}
+}
+public int eventMenuNone(Handle menu, MenuAction action, int client, int param2) {	
+	if( action == MenuAction_End ) {
+		CloseHandle(menu);
+	}
 }
 // ----------------------------------------------------------------------------
-public Action timerAlarm(Handle timer, any door) {
-	#if defined DEBUG
-	PrintToServer("timerAlarm");
-	#endif
-	
-	EmitSoundToAllAny("UI/arm_bomb.wav", door);
-	return Plugin_Handled;
-}
-public Action AllowStealing(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("AllowStealing");
-	#endif
-	
-	rp_SetClientBool(client, b_MaySteal, true);
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez à nouveau voler.");
-}
-public Action RemoveStealAmount(Handle time, any client) {
-	g_iStolenAmountTime[client]--;
-}
 int GetMaxKit(int client, int itemID) {
 	
 	if( itemID == ITEM_KITCROCHTAGE ) {
@@ -1748,43 +1585,104 @@ void openMarketMenu(int client, int itemID = 0) {
 	SetMenuExitButton(menu, true);
 	DisplayMenu(menu, client, 30);
 }
-public int Menu_Market(Handle menu, MenuAction action, int client, int param2) {
-	if( action == MenuAction_Select ) {
-		char options[64], buff[2][16];
-		GetMenuItem(menu, param2, options, sizeof(options));
-		ExplodeString(options, " ", buff, sizeof(buff), sizeof(buff[]));
+int countPolice(int client) {
+	int job, count;
+	for(int i=1; i<MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
 		
-		int itemID = StringToInt(buff[0]);
-		int amount = StringToInt(buff[1]);
+		job = rp_GetClientInt(i, i_Job);
 		
-		if( amount == 0 ) {
-			openMarketMenu(client, itemID);
-		}
-		else {
-			if( g_iMarket[itemID] < amount )
-				amount = g_iMarket[itemID];
-			if( amount == 0 )
-				return;
-			
-			int prix = rp_GetItemInt(itemID, item_type_prix) * amount;
-			if( rp_GetClientInt(client, i_Money) < prix )
-				return;
-			
-			rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - prix);
-			getItemFromMarket(itemID, amount);
-			
-			rp_ClientGiveItem(client, itemID, amount);
-			
-			rp_GetItemData(itemID, item_type_name, options, sizeof(options));
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez acheté %d %s pour %d$.", amount, options, prix);
-			
-			FakeClientCommand(client, "say /item");
+		if( GetClientTeam(i) == CS_TEAM_CT || (job >= 1 && job <= 7 ) ) {
+			if( Entity_GetDistance(client, i) < (MAX_AREA_DIST+100) && !rp_GetClientBool(i, b_IsAFK)) {
+				count++;
+			}
 		}
 	}
-	else if( action == MenuAction_End ) {
-		CloseHandle(menu);
-	}
+	return count;
 }
+int findPlayerWeapon(int client, int target) {
+	
+	if( !rp_IsTutorialOver(target) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur n'a pas terminé le tutoriel.");
+		return -1;
+	}
+	if( rp_GetClientBool(target, b_Stealing) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Quelqu'un d'autre est déjà en train de voler ce joueur.");
+		return -1;
+	}
+	
+	if( (g_iStolenAmountTime[target] >= 3 && rp_GetClientFloat(target, fl_LastStolen)+(STEAL_TIME) > GetGameTime()) || (g_iStolenAmountTime[target] >= 5) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur s'est déjà fait volé récemment.");
+		return -1;
+	}
+	if( rp_GetClientFloat(target, fl_Invincible) >= GetGameTime() ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur est invincible.");
+		return -1;
+	}
+	if( rp_GetClientJobID(target) == 181 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler un autre 18th.");
+		return -1;
+	}
+	
+	int wepid;
+	for( int i = 0; i < 5; i++ ) {
+		if( i == 2 )
+			continue;
+			
+		wepid = GetPlayerWeaponSlot( target, i );
+		if( !IsValidEdict(wepid) )
+			continue;
+		if( g_iWeaponStolen[wepid]+120 > GetTime() )
+			continue;
+		
+		return wepid;
+	}
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur n'a pas d'arme.");
+	return -1;
+}
+int appartToZoneID(int appartid){
+	static int res[128];
+	if( res[appartid] != 0 )
+		return res[appartid];
+	
+	char appart[32], tmp[32];
+	Format(appart, 31, "appart_%d",appartid);
+	for(int i=1;i<300;i++){
+		rp_GetZoneData(i, zone_type_type, tmp, sizeof(tmp));
+		if(StrEqual(tmp,appart,false)){
+			res[appartid] = i;
+			return res[appartid];
+		}
+	}
+	res[appartid] = -1;
+	return res[appartid];
+}
+bool CanTP(float pos[3], int client) {
+	static float mins[3], maxs[3];
+	static bool init = false;
+	bool ret;
+	
+	if( !init ) {
+		GetClientMins(client, mins);
+		GetClientMaxs(client, maxs);
+		init = true;
+	}
+	
+	Handle tr;
+	tr = TR_TraceHullEx(pos, pos, mins, maxs, MASK_PLAYERSOLID);
+	ret = !TR_DidHit(tr);
+	CloseHandle(tr);
+    #if defined DEBUG
+		if( !ret ) {
+			TR_GetEndPosition(maxs, tr);
+			TE_SetupBeamRingPoint(maxs, 1.0, 1.5, g_cBeam, g_cBeam, 0, 30, 10.0, 1.0, 1.0, { 255, 255, 255, 255 }, 10, 0);
+			TE_SendToAll();
+		}
+	#endif
+	return ret;
+}
+// ----------------------------------------------------------------------------
 int getDistrib(int client) {
 	if( !IsPlayerAlive(client) )
 		return 0;
@@ -1826,24 +1724,104 @@ void MENU_ShowPickLock(int client, float percent, int difficulte, int type) {
 	SetMenuExitBackButton(menu, false);
 	DisplayMenu(menu, client, 1);
 }
-public int eventMenuNone(Handle menu, MenuAction action, int client, int param2) {	
-	if( action == MenuAction_End ) {
-		CloseHandle(menu);
-	}
+// ----------------------------------------------------------------------------
+public Action fwdCrack(int victim, int attacker, float& damage) {
+	#if defined DEBUG
+	PrintToServer("fwdCrack");
+	#endif
+	damage /= 2.0;
+	
+	return Plugin_Changed;
 }
-int countPolice(int client) {
-	int job, count;
-	for(int i=1; i<MaxClients; i++) {
-		if( !IsValidClient(i) )
-			continue;
-		
-		job = rp_GetClientInt(i, i_Job);
-		
-		if( GetClientTeam(i) == CS_TEAM_CT || (job >= 1 && job <= 7 ) ) {
-			if( Entity_GetDistance(client, i) < (MAX_AREA_DIST+100) && !rp_GetClientBool(i, b_IsAFK)) {
-				count++;
-			}
-		}
-	}
-	return count;
+public Action fwdPCP(int client, float& speed, float& gravity) {
+	#if defined DEBUG
+	PrintToServer("fwdPCP");
+	#endif
+	
+	if( speed > 0.5 )
+		speed -= 0.25;
+	return Plugin_Changed;
+}
+public Action fwdHeroine(int client, float& speed, float& gravity) {
+	#if defined DEBUG
+	PrintToServer("fwdHeroine");
+	#endif
+	speed += 0.75;
+	gravity -= 0.2;
+	
+	return Plugin_Changed;
+}
+public Action fwdHeroine2(int client, int color[4]) {
+	#if defined DEBUG
+	PrintToServer("fwdHeroine2");
+	#endif
+	
+	color[0] -= 50;
+	color[1] += 100;
+	color[2] -= 50;
+	color[3] += 50;
+	return Plugin_Changed;
+}
+public Action fwdCocaine(int client, int color[4]) {
+	#if defined DEBUG
+	PrintToServer("fwdCocaine");
+	#endif
+	color[0] -= 50;
+	color[1] += 50;
+	color[2] += 100;
+	color[3] += 50;
+	return Plugin_Changed;
+}
+public Action fwdChampi(int client, float& speed, float& gravity) {
+	#if defined DEBUG
+	PrintToServer("fwdChampi");
+	#endif
+	speed -= 0.2;
+	gravity -= 0.6;
+	
+	return Plugin_Changed;
+}
+public Action fwdCrystal(int client, float& speed, float& gravity) {
+	#if defined DEBUG
+	PrintToServer("fwdCrystal");
+	#endif
+	speed += 0.25;
+	gravity -= 0.4;
+	
+	return Plugin_Changed;
+}
+public Action fwdCrystal2(int client, int color[4]) {
+	#if defined DEBUG
+	PrintToServer("fwdCrystal2");
+	#endif
+	color[0] += 100;
+	color[1] += 100;
+	color[2] += 100;
+	color[3] += 50;
+	return Plugin_Changed;
+}
+public Action fwdEcstasy(int client, float& speed, float& gravity) {
+	#if defined DEBUG
+	PrintToServer("fwdEcstasy");
+	#endif
+	speed += 0.25;
+	gravity -= 0.2;
+	
+	return Plugin_Changed;
+}
+public Action fwdBeuh(int client, float& speed, float& gravity) {
+	#if defined DEBUG
+	PrintToServer("fwdBeuh");
+	#endif
+	gravity -= 0.4;
+	
+	return Plugin_Changed;
+}
+public Action fwdFrozen(int client, float& speed, float& gravity) {
+	speed = 0.0;
+	return Plugin_Stop;
+}
+public Action fwdAccelerate(int client, float& speed, float& gravity) {
+	speed += 0.5;
+	return Plugin_Changed;
 }
