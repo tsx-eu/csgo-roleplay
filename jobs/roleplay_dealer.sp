@@ -1130,7 +1130,7 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 				ServerCommand("rp_GetStoreWeapon %d", client);
 				stealAMount = 100;
 			}
-			case 3: {
+			case 4: {
 				ServerCommand("rp_GetStoreItem %d", client);
 				stealAMount = 100;
 			}
