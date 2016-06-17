@@ -349,21 +349,28 @@ public Action Cmd_ItemPiedBiche(int args) {
 		return Plugin_Handled;
 	}
 	
+	if( rp_GetClientVehiclePassager(client) > 0 || Client_GetVehicle(client) > 0 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible d'utiliser cet objet dans une voiture.");
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
+	
 	if( g_bCanSearchPlant[client] == false ) {
 		ITEM_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler pour le moment.");
 		return Plugin_Handled;
 	}
 	
-	int type = getDistrib(client);
-	if( type <= 0 ) {
+	int type;
+	int target = getDistrib(client, type);
+	if( target <= 0 ) {
 		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être sur la place.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être sur la place, ou viser une voiture.");
 		return Plugin_Handled;
 	}
 	
 	if( type == 2 ) {
-		rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 10.0);
+		rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen);
 	}		
 	
 	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) + 1);
@@ -383,8 +390,9 @@ public Action Cmd_ItemPiedBiche(int args) {
 	Handle dp;
 	CreateDataTimer(0.1, ItemPiedBiche_frame, dp, TIMER_DATA_HNDL_CLOSE|TIMER_REPEAT);
 	WritePackCell(dp, client);
-	WritePackCell(dp, type);
+	WritePackCell(dp, target);
 	WritePackCell(dp, 0.0);
+	WritePackCell(dp, type);
 	
 	return Plugin_Handled;
 }
@@ -564,6 +572,32 @@ public Action AllowStealing(Handle timer, any client) {
 }
 public Action RemoveStealAmount(Handle time, any client) {
 	g_iStolenAmountTime[client]--;
+}
+
+public Action SpawnMoney(Handle timer, any target) {
+	
+	target = EntRefToEntIndex(target);
+	if( !IsValidEdict(target) )
+		return Plugin_Handled;
+	
+	char classname[64];
+	GetEdictClassname(target, classname, sizeof(classname));
+	
+	float vecOrigin[3], vecAngle[3], vecPos[3], min[3], max[3];
+	Entity_GetAbsOrigin(target, vecOrigin);
+	Entity_GetAbsAngles(target, vecAngle);
+	Entity_GetMinSize(target, min);
+	Entity_GetMaxSize(target, max);
+	vecOrigin[2] += max[2] - min[2];
+		
+	vecPos[0] += Math_GetRandomFloat(-100.0, 100.0);
+	vecPos[1] += Math_GetRandomFloat(-100.0, 100.0);
+	vecPos[2] += Math_GetRandomFloat(200.0, 300.0);
+	
+	int m = rp_Effect_SpawnMoney(vecOrigin);
+	TeleportEntity(m, NULL_VECTOR, NULL_VECTOR, vecPos);
+	ServerCommand("sm_effect_particles %d Trail9 3", m);
+	return Plugin_Handled;
 }
 // ----------------------------------------------------------------------------
 public Action fwdOnPlayerUse(int client) {
@@ -1043,188 +1077,26 @@ public Action Frame_BuildingPlant(Handle timer, any ent) {
 	return Plugin_Handled;
 }
 // ----------------------------------------------------------------------------
-/*
-public Action Cmd_ItemPiedBiche(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemPiedBiche");
-	#endif
-	
-	int client = GetCmdArgInt(1);
-	int item_id = GetCmdArgInt(args);
-	
-	if( rp_GetClientJobID(client) != 81 ) {
-		return Plugin_Continue;
-	}
-	
-	if( rp_GetClientBool(client, b_MaySteal) == false ) {
-		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler pour le moment.");
-		return Plugin_Handled;
-	}
-	
-	if( rp_GetClientVehiclePassager(client) > 0 || Client_GetVehicle(client) > 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible d'utiliser cet objet dans une voiture.");
-		ITEM_CANCEL(client, item_id);
-		return Plugin_Handled;
-	}
-	
-	int target = rp_GetClientTarget(client);
-	if( !rp_IsValidVehicle(target) ) {
-		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser une voiture.");
-		return Plugin_Handled;
-	}
-	char model[64];
-	Entity_GetModel(target, model, sizeof(model));
-	
-	if( StrContains(model, "07crownvic_cvpi") == -1 ) {
-		if( rp_GetClientInt(client, i_Job) >= 84 ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes pas assez haut gradé.");
-			return Plugin_Handled;
-		}
-	}
-	
-	if( rp_GetZoneBit( rp_GetPlayerZone(client) ) & BITZONE_BLOCKSTEAL || rp_GetZoneBit( rp_GetPlayerZone(target) ) & BITZONE_BLOCKSTEAL ) {
-		ITEM_CANCEL(client, item_id);
-		ACCESS_DENIED(client);
-	}
-	
-	if( !rp_IsEntitiesNear(client, target) ) {
-		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être plus proche de la voiture pour la voler.");
-		return Plugin_Handled;
-	}
-	
-	
-	int appart = rp_GetPlayerZoneAppart( rp_GetVehicleInt(target, car_owner) );
-	if( appart > 0 && rp_GetAppartementInt(appart, appart_bonus_garage) ) {
-		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler cette voiture, le propriétaire est dans son appartement.");
-		return Plugin_Handled;
-	}
-	
-	if( rp_GetZoneBit(rp_GetPlayerZone(target)) & BITZONE_PARKING ) {
-		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler de voiture dans le garage.");
-		return Plugin_Handled;
-	}
-
-	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) + 1);
-		
-	float vecTarget[3];
-	GetClientAbsOrigin(client, vecTarget);
-	TE_SetupBeamRingPoint(vecTarget, 10.0, 500.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, {255, 0, 0, 200}, 10, 0);
-	TE_SendToAll();
-	
-	rp_ClientGiveItem(client, item_id, -rp_GetClientItem(client, item_id));
-	rp_SetClientBool(client, b_MaySteal, false);
-	rp_SetClientInt(client, i_LastVolTime, GetTime());
-	rp_SetClientInt(client, i_LastVolAmount, 100);
-	rp_SetClientInt(client, i_LastVolTarget, -1);
-	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 15.0);
-		
-	ServerCommand("sm_effect_panel %d 15.0 \"Crochetage de la voiture en cours...\"", client);
-	
-	CreateTimer(5.0, timerAlarm, target);
-	CreateTimer(10.0, timerAlarm, target);
-	
-	rp_ClientColorize(client, { 255, 0, 0, 190 } );
-	rp_ClientReveal(client);
-		
-	Handle dp;
-	CreateDataTimer(15.0, ItemPiedBicheOver, dp, TIMER_DATA_HNDL_CLOSE);
-		
-	WritePackCell(dp, client);
-	WritePackCell(dp, target);
-		
-	return Plugin_Handled;
-
-}
-public Action ItemPiedBicheOver(Handle timer, Handle dp) {
-	#if defined DEBUG
-	PrintToServer("ItemPiedBicheOver");
-	#endif
-	
-	if( dp == INVALID_HANDLE ) {
-		return Plugin_Handled;
-	}
-	ResetPack(dp);
-	int client 	= ReadPackCell(dp);
-	int target	= ReadPackCell(dp);
-	
-	rp_ClientColorize(client);
-	rp_ClientReveal(client);
-	
-	if( !rp_IsEntitiesNear(client, target) || !IsPlayerAlive(client) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être plus proche de la voiture pour la voler.");
-		rp_SetClientBool(client, b_MaySteal, true);
-		return Plugin_Handled;
-	}
-	
-	int rand = 4 + Math_GetRandomPow(0, 4), count = 0, job;
-	for(int i=1; i<MaxClients; i++) {
-		if( !IsValidClient(i) )
-			continue;
-		
-		job = rp_GetClientInt(i, i_Job);
-		
-		if( GetClientTeam(i) == CS_TEAM_CT || (job >= 1 && job <= 7 ) ) {
-			if( Entity_GetDistance(client, i) < (MAX_AREA_DIST+100) ) {
-				rand += (4 + Math_GetRandomPow(0, 12));
-				count++;
-				if( count >= 5 )
-					break;
-			}
-		}
-	}
-	
-	float vecOrigin[3];
-	GetClientEyePosition(client, vecOrigin);
-	
-	if( !rp_GetClientKeyVehicle(client, target) ) {
-			
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %d billets sont sortis de la boîte à gants.", rand);
-			
-		while(rand >= 1 ) {
-			rand--;
-			rp_Effect_SpawnMoney(vecOrigin, true);
-			
-			int mnt = Math_GetRandomInt(2, 5) * 10;
-			int cpt = rp_GetRandomCapital(181);
-			
-			rp_SetJobCapital(181, rp_GetJobCapital(181) + mnt);
-			rp_SetJobCapital(cpt, rp_GetJobCapital(cpt) - mnt);
-		}
-	}
-	
-	rp_SetClientStat(client, i_JobSucess, rp_GetClientStat(client, i_JobSucess) + 1);
-	rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
-	rp_SetClientBool(client, b_MaySteal, true);
-	rp_SetClientKeyVehicle(client, target, true);
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez maintenant les clés de cette voiture.");
-	rp_SetClientInt(client, i_LastVolAmount, 150);
-	rp_SetClientInt(client, i_LastVolTarget, -1);
-	rp_SetClientInt(client, i_LastVolVehicle, target);
-	rp_SetClientInt(client, i_LastVolVehicleTime, GetTime());
-	
-	return Plugin_Continue;
-}
-*/
-// ----------------------------------------------------------------------------
 public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 	ResetPack(dp);
 	int client = ReadPackCell(dp);
-	int type = ReadPackCell(dp);
+	int target = ReadPackCell(dp);
 	float percent = ReadPackCell(dp);
+	int type = ReadPackCell(dp);
+	int type2;
 	
 	if( !IsValidClient(client ) ) {
 		return Plugin_Stop;
 	}
-	if( getDistrib(client) != type ) {
+	if( getDistrib(client, type2) != target || type2 != type ) {
 		MENU_ShowPickLock(client, percent, -1, type);
 		rp_ClientColorize(client);
 		CreateTimer(0.1, AllowStealing, client);
 		rp_ClientGiveItem(client, ITEM_PIEDBICHE, 1);
+		
+		if( type == 2 )
+			rp_UnhookEvent(client, RP_PrePlayerPhysic, fwdFrozen);
+		
 		return Plugin_Stop;
 	}
 	if( percent >= 1.0 ) {
@@ -1239,8 +1111,26 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 		doRP_OnClientPiedBiche(client);
 		
 		switch(type) {
+			case 1: { // Voiture
+				int count = countPolice(client), rand = 4 + Math_GetRandomPow(0, 4), i;
+				
+				for (i = 0; i < count; i++)
+					rand += (4 + Math_GetRandomPow(0, 12));
+				for (i = 0; i < rand; i++)
+					CreateTimer(i / 5.0, SpawnMoney, EntIndexToEntRef(target));
+				
+				stealAMount = 25*rand + 500;
+				
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %d billets ont été sorti de la boite à gant.", rand);
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez maintenant les clés de cette voiture.");
+				
+				rp_SetClientKeyVehicle(client, target, true);
+				rp_SetClientInt(client, i_LastVolVehicle, target);
+				rp_SetClientInt(client, i_LastVolVehicleTime, GetTime());
+			}
 			case 2: { // Place de l'indé
-					
+				
+				rp_UnhookEvent(client, RP_PrePlayerPhysic, fwdFrozen);
 				int amount = 0, ItemRand[32];
 				
 				for(int i = 0; i < MAX_ITEMS; i++) {
@@ -1288,8 +1178,9 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 	
 	ResetPack(dp);
 	WritePackCell(dp, client);
-	WritePackCell(dp, type);
+	WritePackCell(dp, target);
 	WritePackCell(dp, percent + ratio);
+	WritePackCell(dp, type);
 	MENU_ShowPickLock(client, percent, 0, type);
 	return Plugin_Continue;
 }
@@ -1664,27 +1555,45 @@ bool CanTP(float pos[3], int client) {
 	#endif
 	return ret;
 }
+bool CanStealVehicle(int target) {
+	if( (rp_GetZoneBit(rp_GetPlayerZone(target)) & BITZONE_PARKING) )
+		return false;
+	if( !IsValidClient(rp_GetVehicleInt(target, car_owner)) )
+		return false;
+	int owner = rp_GetVehicleInt(target, car_owner);
+	int appart = rp_GetPlayerZoneAppart(owner);
+	if( appart > 0 && rp_GetAppartementInt(appart, appart_bonus_garage) )
+		return false;
+	return true;
+}
 // ----------------------------------------------------------------------------
-int getDistrib(int client) {
+int getDistrib(int client, int& type) {
 	if( !IsPlayerAlive(client) )
 		return 0;
 	
 	if( !rp_IsBuildingAllowed(client, true) )
 		return 0;
-
-	char tmp[64];
-	rp_GetZoneData(rp_GetPlayerZone(client), zone_type_name, tmp, sizeof(tmp));
 	
-	int type;
-	if( StrContains(tmp, "Place de l'ind") == 0 )
-		type = 2;
-		
-	return type;
+	int target = rp_GetClientTarget(client);
+	
+	if( target > 0 && rp_IsValidVehicle(target) && CanStealVehicle(target) )
+		type = 1;
+	else {
+		char tmp[64];
+		rp_GetZoneData(rp_GetPlayerZone(client), zone_type_name, tmp, sizeof(tmp));
+		if( StrContains(tmp, "Place de l'ind") == 0 ) {
+			type = 2;
+			target = client;
+		}
+	}
+	
+	return (type > 0 ? target : 0);
 }
 void MENU_ShowPickLock(int client, float percent, int difficulte, int type) {
 
 	Handle menu = CreateMenu(eventMenuNone);
 	switch( type ) {
+		case 1: SetMenuTitle(menu, "== Dealer: Vol d'une voiture");
 		case 2: SetMenuTitle(menu, "== Dealer: Déracinage d'un plant");
 	}
 	
