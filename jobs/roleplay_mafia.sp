@@ -41,6 +41,7 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
+int g_iLastDoor[65][3];
 int g_iDoorDefine_LOCKER[2049];
 float g_flAppartProtection[200];
 Handle g_hForward_RP_OnClientStealItem, g_hForward_RP_OnClientWeaponPick, g_vCapture;
@@ -704,6 +705,16 @@ public Action ItemPickLockOver_frame(Handle timer, Handle dp) {
 		rp_ClientColorize(client);
 		return Plugin_Stop;
 	}
+	
+	int difficulte = 1;
+	
+	if( rp_IsInPVP(client) )
+		difficulte += 1;
+	if( rp_GetZoneBit( rp_GetPlayerZone(door)) & BITZONE_HAUTESECU )
+		difficulte += 1;
+	if( g_iDoorDefine_LOCKER[doorID] )
+		difficulte += 2;
+	
 	if( percent >= 1.0 ) {
 		
 		if( IsValidClient(g_iDoorDefine_LOCKER[doorID]) ) {
@@ -730,19 +741,22 @@ public Action ItemPickLockOver_frame(Handle timer, Handle dp) {
 		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} La porte a été ouverte.");
 		
+		if( g_iLastDoor[client][2] != doorID && g_iLastDoor[client][1] != doorID && g_iLastDoor[client][0] != doorID ) {
+			g_iLastDoor[client][2] = g_iLastDoor[client][1];
+			g_iLastDoor[client][1] = g_iLastDoor[client][0];
+			g_iLastDoor[client][0] = doorID;
+			
+			int rnd = rp_GetRandomCapital(91);
+			rp_SetJobCapital(rnd, rp_GetJobCapital(rnd) - (50*difficulte));
+			rp_SetJobCapital(91, rp_GetJobCapital(91) + (50*difficulte));
+		}
+		
+		
 		return Plugin_Stop;
 	}
 	
 	rp_SetClientFloat(client, fl_CoolDown, GetGameTime() + 0.15);
 	float ratio = getKitDuration(client) / 5000.0;
-	int difficulte = 1;
-	
-	if( rp_IsInPVP(client) )
-		difficulte += 1;
-	if( rp_GetZoneBit( rp_GetPlayerZone(door)) & BITZONE_HAUTESECU )
-		difficulte += 1;
-	if( g_iDoorDefine_LOCKER[doorID] )
-		difficulte += 2;
 	
 	if( Math_GetRandomInt(1, 10) == 8 )
 		ServerCommand("sm_effect_particles %d Trail2 2 legacy_weapon_bone", client);
