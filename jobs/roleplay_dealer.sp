@@ -1564,7 +1564,6 @@ int getDistrib(int client, int& type) {
 		float vecOrigin[3];
 		GetClientAbsOrigin(client, vecOrigin);
 		
-		if( StrContains(tmp, "Place de l'ind") == 0 ) {
 			type = 2;
 		}
 		else if( GetVectorDistance(vecOrigin, view_as<float>({ 2550.8, 1663.1, -2015.96 })) < 64.0 ) {
