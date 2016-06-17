@@ -372,7 +372,7 @@ stock int rp_GetWeaponPrice(int weaponID) {
 		rp_GetItemData(i, item_type_extra_cmd, tmp, sizeof(tmp));
 		Format(tmp2, sizeof(tmp2), "rp_giveitem %s", classname);
 		if( StrEqual(tmp, tmp2) ) {
-			return rp_GetItemInt(i, item_type_prix) + addCartouchePrice(weaponID);
+			return rp_GetItemInt(i, item_type_prix) + rp_GetWeaponPriceCartouche(weaponID);
 		}
 	}
 	
@@ -380,11 +380,11 @@ stock int rp_GetWeaponPrice(int weaponID) {
 	int owner = GetEntPropEnt(weaponID, Prop_Send, "m_hPrevOwner");
 	
 	if( owner > 0 && view_as<int>(CS_AliasToWeaponID(classname)) > 0 )
-		return CS_GetWeaponPrice(owner, CS_AliasToWeaponID(classname)) + addCartouchePrice(weaponID);
+		return CS_GetWeaponPrice(owner, CS_AliasToWeaponID(classname)) + rp_GetWeaponPriceCartouche(weaponID);
 	// fallback:
 	return 500; 
 }
-int addCartouchePrice(int weaponID) {
+public int rp_GetWeaponPriceCartouche(int weaponID) {
 	int prix;
 	if(rp_GetWeaponGroupID(weaponID) > 0)
 		prix += 250;
