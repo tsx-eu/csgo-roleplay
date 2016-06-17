@@ -364,24 +364,42 @@ public Action rp_ClientRemoveProp(int client, int target, int item_id) {
 	
 	return Plugin_Continue;
 }
-stock int rp_GetWeaponPrice(int target) {
+stock int rp_GetWeaponPrice(int weaponID) {
 	char classname[65], tmp[255], tmp2[255];
-	GetEdictClassname(target, classname, sizeof(classname));
+	GetEdictClassname(weaponID, classname, sizeof(classname));
 	
 	for (int i = 1; i < MAX_ITEMS; i++) {
 		rp_GetItemData(i, item_type_extra_cmd, tmp, sizeof(tmp));
 		Format(tmp2, sizeof(tmp2), "rp_giveitem %s", classname);
 		if( StrEqual(tmp, tmp2) ) {
-			rp_GetItemInt(i, item_type_prix);
-			return rp_GetItemInt(i, item_type_prix);
+			return rp_GetItemInt(i, item_type_prix) + addCartouchePrice(weaponID);
 		}
 	}
 	
 	ReplaceString(classname, sizeof(classname), "weapon_", "");
-	int owner = GetEntPropEnt(target, Prop_Send, "m_hPrevOwner");
+	int owner = GetEntPropEnt(weaponID, Prop_Send, "m_hPrevOwner");
 	
 	if( owner > 0 && view_as<int>(CS_AliasToWeaponID(classname)) > 0 )
-		return CS_GetWeaponPrice(owner, CS_AliasToWeaponID(classname));
+		return CS_GetWeaponPrice(owner, CS_AliasToWeaponID(classname)) + addCartouchePrice(weaponID);
 	// fallback:
 	return 500; 
+}
+int addCartouchePrice(int weaponID) {
+	int prix;
+	if(rp_GetWeaponGroupID(weaponID) > 0)
+		prix += 250;
+
+	switch( rp_GetWeaponBallType(weaponID) ){
+		case ball_type_fire          : prix += 250;
+		case ball_type_caoutchouc    : prix += 200;
+		case ball_type_poison        : prix += 200;
+		case ball_type_vampire       : prix += 200;
+		case ball_type_paintball     : prix += 50;
+		case ball_type_reflexive     : prix += 200;
+		case ball_type_explode       : prix += 300;
+		case ball_type_revitalisante : prix += 200;
+		case ball_type_nosteal       : prix += 50;
+		case ball_type_notk          : prix += 50;
+	}
+	return prix;
 }
