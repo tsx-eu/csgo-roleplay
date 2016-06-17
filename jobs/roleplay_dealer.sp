@@ -28,7 +28,6 @@
 #define MAX_AREA_DIST 		500
 #define STEAL_TIME			30.0
 #define ITEM_PIEDBICHE		1
-#define ITEM_KITCROCHTAGE	2
 #define ZONE_ITEMSELL		132
 #define DRUG_DURATION 		90.0
 #define MODEL_PLANT			"models/props/cs_office/plant01_static.mdl"
@@ -39,7 +38,7 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-int g_cBeam, g_cGlow, g_cExplode;
+int g_cExplode;
 bool g_bCanSearchPlant[65];
 Handle g_hDrugTimer[65];
 int g_iWeaponStolen[2049], g_iStolenAmountTime[65];
@@ -115,8 +114,6 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	g_RP_On18thStealWeapon = CreateGlobalForward("RP_On18thStealWeapon", ET_Event, Param_Cell, Param_Cell, Param_Cell);
 }
 public void OnMapStart() {
-	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
-	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt", true);
 	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt", true);
 	PrecacheModel(MODEL_PLANT, true);
 }
@@ -352,6 +349,12 @@ public Action Cmd_ItemPiedBiche(int args) {
 		return Plugin_Handled;
 	}
 	
+	if( g_bCanSearchPlant[client] == false ) {
+		ITEM_CANCEL(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler pour le moment.");
+		return Plugin_Handled;
+	}
+	
 	int type = getDistrib(client);
 	if( type <= 0 ) {
 		ITEM_CANCEL(client, item_id);
@@ -371,6 +374,8 @@ public Action Cmd_ItemPiedBiche(int args) {
 	rp_SetClientInt(client, i_LastVolAmount, 100);
 	rp_SetClientInt(client, i_LastVolTarget, -1);	
 	rp_ClientReveal(client);
+	g_bCanSearchPlant[client] = false;
+	rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
 	
 	ServerCommand("sm_effect_particles %d weapon_sensorgren_detonate 1 facemask", client);
 	ServerCommand("sm_effect_particles %d Trail2 2 legacy_weapon_bone", client);
@@ -579,17 +584,6 @@ public Action fwdOnPlayerUse(int client) {
 			rp_SetClientStat(client, i_DrugPickedUp, rp_GetClientStat(client, i_DrugPickedUp) + (max - mnt));
 			FakeClientCommand(client, "say /item");
 		}
-		
-		itemID = ITEM_KITCROCHTAGE;
-		mnt = rp_GetClientItem(client, itemID);
-		max = GetMaxKit(client, itemID);
-		if( mnt <  max ) {
-			rp_ClientGiveItem(client, itemID, max - mnt);
-			rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez récupéré %i %s.", max - mnt, tmp);
-			
-			FakeClientCommand(client, "say /item");
-		}
 	}
 	
 	if( rp_GetPlayerZone(client) == ZONE_ITEMSELL ) {
@@ -792,6 +786,13 @@ public Action OnWeaponDrop(int client, int weapon) {
 	
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas lâcher votre arme pendant qu'un 18th vous vol, tirez lui dessus ou fuyez !");
 	return Plugin_Handled;
+}
+public Action fwdZoneChange(int client, int newZone, int oldZone) {
+	int newType = rp_GetZoneInt(newZone, zone_type_type);
+	if( newType == 81 && newType == rp_GetClientJobID(client) ) {
+		g_bCanSearchPlant[client] = true;
+		rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
+	}
 }
 // ----------------------------------------------------------------------------
 int BuildingPlant(int client, int type) {
@@ -1491,25 +1492,6 @@ public int eventMenuNone(Handle menu, MenuAction action, int client, int param2)
 	}
 }
 // ----------------------------------------------------------------------------
-int GetMaxKit(int client, int itemID) {
-	
-	if( itemID == ITEM_KITCROCHTAGE ) {
-		int job = rp_GetClientInt(client, i_Job);
-		switch( job ) {
-			case 81:	return 5;
-			case 82:	return 5;
-			case 83:	return 4; // Haut gradé
-			case 84:	return 3; // Pro
-			case 85:	return 2; // Narmol
-			case 86:	return 1; // Apprenti
-			
-			default:	return 2;
-		}
-		return 2;
-	}
-	
-	return 1;
-}
 void addItemToMarket(int client, int itemID, int amount) {
 	g_iMarket[itemID] += amount;
 	g_iMarketClient[itemID][client] += amount;
