@@ -100,8 +100,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	g_hForward_RP_OnClientStealItem = CreateGlobalForward("RP_CanClientStealItem", ET_Event, Param_Cell, Param_Cell);
 	g_hForward_RP_OnClientWeaponPick = CreateGlobalForward("RP_OnClientWeaponPick", ET_Event, Param_Cell, Param_Cell);
 }
-public Action Cmd_GetStoreWeapon(int args) {
-	Cmd_BuyWeapon(GetCmdArgInt(1), true);
+public Action Cmd_GetStoreItem(int args) {
+	Cmd_BuyItemMenu(GetCmdArgInt(1), true);
 }
 public Action Cmd_ItemDoorProtect(int args) {
 	int client = GetCmdArgInt(1);
@@ -360,7 +360,7 @@ public Action fwdOnPlayerUse(int client) {
 	float vecOrigin[3];
 	GetClientAbsOrigin(client, vecOrigin);
 	if( GetVectorDistance(vecOrigin, MARCHE_NOIR) < 40.0 ) {
-		Cmd_BuyItemMenu(client);
+		Cmd_BuyItemMenu(client, false);
 	}
 }
 // ----------------------------------------------------------------------------
@@ -1133,7 +1133,7 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			
 			ExplodeString(szMenu, " ", buffer, sizeof(buffer), sizeof(buffer[]));
 			int data[IM_Max];
-			DataPackPos position = view_as<DataPackPos>(StringToInt(StringToInt(buffer[0])));
+			DataPackPos position = view_as<DataPackPos>(StringToInt(buffer[0]));
 			getBuyMenu(position, data);
 			
 			if( data[IM_ItemID] == 0 )
