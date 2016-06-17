@@ -573,6 +573,15 @@ public Action SpawnMoney(Handle timer, any target) {
 	ServerCommand("sm_effect_particles %d Trail9 3", m);
 	return Plugin_Handled;
 }
+public Action SwitchTrapped(Handle timer, any target) {
+	
+	target = EntRefToEntIndex(target);
+	if( !IsValidEdict(target) )
+		return Plugin_Handled;
+	
+	rp_SetBuildingData(target, BD_Trapped, false);
+	return Plugin_Handled;
+}
 // ----------------------------------------------------------------------------
 public Action fwdOnPlayerUse(int client) {
 	#if defined DEBUG
@@ -1102,7 +1111,13 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 				rp_SetClientInt(client, i_LastVolVehicle, target);
 				rp_SetClientInt(client, i_LastVolVehicleTime, GetTime());
 			}
-			case 2: { // Place de l'indé
+			case 2: {
+				rp_SetBuildingData(target, BD_Trapped, true);
+				IgniteEntity(ent, 20.0);
+				CreateTimer(20.1, SwitchTrapped, EntIndexToEntRef(target));
+				stealAMount = 100;
+			}
+			case 5: { // Place de l'indé
 				
 				rp_UnhookEvent(client, RP_PrePlayerPhysic, fwdFrozen);
 				int amount = 0, ItemRand[32];
@@ -1126,11 +1141,11 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 				
 				stealAMount = rp_GetItemInt(item_id, item_type_prix) * amount;
 			}
-			case 3: {
+			case 6: {
 				ServerCommand("rp_GetStoreWeapon %d", client);
 				stealAMount = 100;
 			}
-			case 4: {
+			case 7: {
 				ServerCommand("rp_GetStoreItem %d", client);
 				stealAMount = 100;
 			}
@@ -1555,11 +1570,17 @@ int getDistrib(int client, int& type) {
 	
 	if( !rp_IsBuildingAllowed(client, true) )
 		return 0;
-	
+		
+	char classname[64];
 	int target = rp_GetClientTarget(client);
+	if( target ) {
+		GetEdictClassname(target, classname, sizeof(classname));
+	}
 	
 	if( target > 0 && rp_IsValidVehicle(target) && CanStealVehicle(target) )
 		type = 1;
+	else if( target > 0 && StrEqual(classname, "rp_bank") && rp_GetBuildingData(target, BD_Trapped) )
+		type = 2;
 	else {
 		target = client;
 		
@@ -1569,13 +1590,13 @@ int getDistrib(int client, int& type) {
 		GetClientAbsOrigin(client, vecOrigin);
 		
 		if( vecOrigin[2] <= -2000.0 && StrContains(tmp, "Place de l'ind") == 0 ) {
-			type = 2;
+			type = 5;
 		}
 		else if( GetVectorDistance(vecOrigin, view_as<float>({ 2550.8, 1663.1, -2015.96 })) < 64.0 ) {
-			type = 3;
+			type = 6;
 		}
 		else if( GetVectorDistance(vecOrigin, view_as<float>({-144.55,  520.1, -2119.96 })) < 64.0 ) {
-			type = 4;
+			type = 7;
 		}
 	}
 	
@@ -1586,9 +1607,11 @@ void MENU_ShowPickLock(int client, float percent, int difficulte, int type) {
 	Handle menu = CreateMenu(eventMenuNone);
 	switch( type ) {
 		case 1: SetMenuTitle(menu, "== Dealer: Vol d'une voiture");
-		case 2: SetMenuTitle(menu, "== Dealer: Déracinage d'un plant");
-		case 3: SetMenuTitle(menu, "== Dealer: Vol de l'armurerie police");
-		case 4: SetMenuTitle(menu, "== Dealer: Vol du marché noire mafia");
+		case 2: SetMenuTitle(menu, "== Dealer: Vandalisme du distributeur");
+		
+		case 5: SetMenuTitle(menu, "== Dealer: Déracinage d'un plant");
+		case 6: SetMenuTitle(menu, "== Dealer: Vol de l'armurerie police");
+		case 7: SetMenuTitle(menu, "== Dealer: Vol du marché noire mafia");
 	}
 	
 	char tmp[64];

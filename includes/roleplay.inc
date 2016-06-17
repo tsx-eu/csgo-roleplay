@@ -819,7 +819,7 @@ enum building_prop_data {
 	BD_Trapped,
 	BD_item_id,
 	BD_FromBuild,
-
+	
 	building_prop_data_max
 };
 enum rp_capture_zone {
