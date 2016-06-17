@@ -102,6 +102,7 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse,	fwdOnPlayerUse);
 	rp_HookEvent(client, RP_OnPlayerSteal,	fwdOnPlayerSteal);
 	g_bCanSearchPlant[client] = true;
+	rp_SetClientBool(client, b_MaySteal, true);
 	
 	for (int i = 0; i < MAX_ITEMS; i++) {
 		g_iMarketClient[i][client] = 0;
@@ -344,7 +345,7 @@ public Action Cmd_ItemPiedBiche(int args) {
 		return Plugin_Handled;
 	}
 	
-	if( type == 2 ) {
+	if( type == 5 ) {
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen);
 	}		
 	
@@ -1077,7 +1078,7 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 		CreateTimer(0.1, AllowStealing, client);
 		rp_ClientGiveItem(client, ITEM_PIEDBICHE, 1);
 		
-		if( type == 2 )
+		if( type == 5 )
 			rp_UnhookEvent(client, RP_PrePlayerPhysic, fwdFrozen);
 		
 		return Plugin_Stop;
@@ -1113,8 +1114,8 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 			}
 			case 2: {
 				rp_SetBuildingData(target, BD_Trapped, true);
-				IgniteEntity(target, 20.0);
-				CreateTimer(20.1, SwitchTrapped, EntIndexToEntRef(target));
+				ServerCommand("sm_effect_particles %d env_fire_large 30", target);
+				CreateTimer(30.1, SwitchTrapped, EntIndexToEntRef(target));
 				stealAMount = 100;
 			}
 			case 5: { // Place de l'indé
@@ -1579,7 +1580,7 @@ int getDistrib(int client, int& type) {
 	
 	if( target > 0 && rp_IsValidVehicle(target) && CanStealVehicle(target) )
 		type = 1;
-	else if( target > 0 && StrEqual(classname, "rp_bank") && rp_GetBuildingData(target, BD_Trapped) )
+	else if( target > 0 && StrEqual(classname, "rp_bank") && rp_GetBuildingData(target, BD_Trapped) == 0 )
 		type = 2;
 	else {
 		target = client;
