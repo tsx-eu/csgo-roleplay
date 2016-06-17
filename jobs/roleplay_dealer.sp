@@ -1113,7 +1113,7 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 			}
 			case 2: {
 				rp_SetBuildingData(target, BD_Trapped, true);
-				IgniteEntity(ent, 20.0);
+				IgniteEntity(target, 20.0);
 				CreateTimer(20.1, SwitchTrapped, EntIndexToEntRef(target));
 				stealAMount = 100;
 			}
