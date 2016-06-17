@@ -126,6 +126,8 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_mandat", 		Cmd_ItemPickLock,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_ratio",		Cmd_ItemRatio,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_SendToJail",		Cmd_SendToJail,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_GetStoreWeapon",	Cmd_GetStoreWeapon,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	
 
 	HookEvent("bullet_impact", Event_Bullet_Impact);
 	HookEvent("weapon_fire", Event_Weapon_Fire);
@@ -144,6 +146,9 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 public void OnPluginEnd() {
 	if( g_hBuyMenu )
 		rp_WeaponMenu_Clear(g_hBuyMenu);
+}
+public Action Cmd_GetStoreWeapon(int args) {
+	Cmd_BuyWeapon(GetCmdArgInt(1), true);
 }
 public Action Cmd_SendToJail(int args) {
 	#if defined DEBUG
@@ -2873,11 +2878,11 @@ public Action fwdOnPlayerUse(int client) {
 	GetClientAbsOrigin(client, vecOrigin);
 	
 	if( GetVectorDistance(vecOrigin, view_as<float>({ 2550.8, 1663.1, -2015.96 })) < 40.0 ) {
-		Cmd_BuyWeapon(client);
+		Cmd_BuyWeapon(client, false);
 	}
 	return Plugin_Continue;
 }
-void Cmd_BuyWeapon(int client) {
+void Cmd_BuyWeapon(int client, bool free) {
 	DataPackPos max = rp_WeaponMenu_GetMax(g_hBuyMenu);
 	DataPackPos position = rp_WeaponMenu_GetPosition(g_hBuyMenu);
 	char name[65], tmp[8], tmp2[129];
@@ -2894,7 +2899,7 @@ void Cmd_BuyWeapon(int client) {
 	while( position < max ) {
 		
 		rp_WeaponMenu_Get(g_hBuyMenu, position, name, data);
-		Format(tmp, sizeof(tmp), "%d", position);
+		Format(tmp, sizeof(tmp), "%d %d", position, free);
 
 		if(data[BM_PvP] > 0)
 			Format(tmp2, sizeof(tmp2), "[PvP] ");
@@ -2918,7 +2923,8 @@ void Cmd_BuyWeapon(int client) {
 			case ball_type_nosteal       : Format(tmp2, sizeof(tmp2), "%s Anti-Vol", tmp2);
 			case ball_type_notk          : Format(tmp2, sizeof(tmp2), "%s Anti-TK", tmp2);
 		}
-		Format(tmp2, sizeof(tmp2), "%s pour %d$", tmp2, data[BM_Prix]);
+		
+		Format(tmp2, sizeof(tmp2), "%s pour %d$", tmp2, (free?0:data[BM_Prix]));
 		menu.AddItem(tmp, tmp2);
 		
 		position = rp_WeaponMenu_GetPosition(g_hBuyMenu);
@@ -2933,20 +2939,27 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 	#endif
 	if (p_oAction == MenuAction_Select) {
 		
-		char szMenu[64];
+		char szMenu[64], buffer[2][32];
 		if( GetMenuItem(p_hMenu, p_iParam2, szMenu, sizeof(szMenu)) ) {
+			ExplodeString(szMenu, " ", buffer, sizeof(buffer), sizeof(buffer[]));
+			
 			char name[65];
 			int data[BM_Max];
-			DataPackPos position = view_as<DataPackPos>(StringToInt(szMenu));
+			DataPackPos position = view_as<DataPackPos>(StringToInt(buffer[0]));
 			rp_WeaponMenu_Get(g_hBuyMenu, position, name, data);
 			
-			if( rp_GetClientInt(client, i_Bank) < data[BM_Prix] )
-				return 0;
 			float vecOrigin[3];
-			
 			GetClientAbsOrigin(client, vecOrigin);
 			
 			if( GetVectorDistance(vecOrigin, view_as<float>({ 2550.8, 1663.1, -2015.96 })) > 40.0 )
+				return 0;
+			
+			if( StringToInt(buffer[1]) == 1 ) {
+				rp_SetClientInt(client, i_LastVolAmount, 100+data[BM_Prix]); 
+				data[BM_Prix] = 0;
+			}
+			
+			if( rp_GetClientInt(client, i_Bank) < data[BM_Prix] )
 				return 0;
 			
 			Format(name, sizeof(name), "weapon_%s", name);			

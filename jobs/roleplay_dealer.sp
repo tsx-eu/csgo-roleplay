@@ -42,33 +42,8 @@ int g_cExplode;
 bool g_bCanSearchPlant[65];
 Handle g_hDrugTimer[65];
 int g_iWeaponStolen[2049], g_iStolenAmountTime[65];
-int g_iMarket[MAX_ITEMS];
-int g_iMarketClient[MAX_ITEMS][65];
-
-//forward void RP_On18thStealWeapon(int client, int victim, int weaponID);
-//forward RP_OnClientMaxPlantCount(int client, int& max);
-//forward RP_OnClientPiedBiche(int client);
+int g_iMarket[MAX_ITEMS], g_iMarketClient[MAX_ITEMS][65];
 Handle g_hForward_RP_OnClientMaxPlantCount, g_hForward_RP_OnClientPiedBiche, g_hForward_RP_ClientCanTP, g_RP_On18thStealWeapon;
-void doRP_OnClientMaxPlantCount(int client, int& max) {
-	Call_StartForward(g_hForward_RP_OnClientMaxPlantCount);
-	Call_PushCell(client);
-	Call_PushCellRef(max);
-	Call_Finish();
-}
-void doRP_OnClientPiedBiche(int client) {
-	Call_StartForward(g_hForward_RP_OnClientPiedBiche);
-	Call_PushCell(client);
-	Call_Finish();
-}
-bool doRP_ClientCanTP(int client) {
-	Action a;
-	Call_StartForward(g_hForward_RP_ClientCanTP);
-	Call_PushCell(client);
-	Call_Finish(a);
-	if( a == Plugin_Handled || a == Plugin_Stop )
-		return false;
-	return true;
-}
 // ----------------------------------------------------------------------------
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -573,7 +548,6 @@ public Action AllowStealing(Handle timer, any client) {
 public Action RemoveStealAmount(Handle time, any client) {
 	g_iStolenAmountTime[client]--;
 }
-
 public Action SpawnMoney(Handle timer, any target) {
 	
 	target = EntRefToEntIndex(target);
@@ -1152,6 +1126,10 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 				
 				stealAMount = rp_GetItemInt(item_id, item_type_prix) * amount;
 			}
+			case 3: {
+				ServerCommand("rp_GetStoreWeapon %d", client);
+				stealAMount = 100;
+			}
 		}
 		
 		rp_SetClientInt(client, i_LastVolTime, GetTime());
@@ -1579,11 +1557,18 @@ int getDistrib(int client, int& type) {
 	if( target > 0 && rp_IsValidVehicle(target) && CanStealVehicle(target) )
 		type = 1;
 	else {
+		target = client;
+		
 		char tmp[64];
 		rp_GetZoneData(rp_GetPlayerZone(client), zone_type_name, tmp, sizeof(tmp));
+		float vecOrigin[3];
+		GetClientAbsOrigin(client, vecOrigin);
+		
 		if( StrContains(tmp, "Place de l'ind") == 0 ) {
 			type = 2;
-			target = client;
+		}
+		else if( GetVectorDistance(vecOrigin, view_as<float>({ 2550.8, 1663.1, -2015.96 })) < 64.0 ) {
+			type = 3;
 		}
 	}
 	
@@ -1715,4 +1700,25 @@ public Action fwdFrozen(int client, float& speed, float& gravity) {
 public Action fwdAccelerate(int client, float& speed, float& gravity) {
 	speed += 0.5;
 	return Plugin_Changed;
+}
+// ----------------------------------------------------------------------------
+void doRP_OnClientMaxPlantCount(int client, int& max) {
+	Call_StartForward(g_hForward_RP_OnClientMaxPlantCount);
+	Call_PushCell(client);
+	Call_PushCellRef(max);
+	Call_Finish();
+}
+void doRP_OnClientPiedBiche(int client) {
+	Call_StartForward(g_hForward_RP_OnClientPiedBiche);
+	Call_PushCell(client);
+	Call_Finish();
+}
+bool doRP_ClientCanTP(int client) {
+	Action a;
+	Call_StartForward(g_hForward_RP_ClientCanTP);
+	Call_PushCell(client);
+	Call_Finish(a);
+	if( a == Plugin_Handled || a == Plugin_Stop )
+		return false;
+	return true;
 }
