@@ -1130,6 +1130,10 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 				ServerCommand("rp_GetStoreWeapon %d", client);
 				stealAMount = 100;
 			}
+			case 3: {
+				ServerCommand("rp_GetStoreItem %d", client);
+				stealAMount = 100;
+			}
 		}
 		
 		rp_SetClientInt(client, i_LastVolTime, GetTime());
@@ -1570,6 +1574,9 @@ int getDistrib(int client, int& type) {
 		else if( GetVectorDistance(vecOrigin, view_as<float>({ 2550.8, 1663.1, -2015.96 })) < 64.0 ) {
 			type = 3;
 		}
+		else if( GetVectorDistance(vecOrigin, view_as<float>({-144.55,  520.1, -2119.96 })) < 64.0 ) {
+			type = 4;
+		}
 	}
 	
 	return (type > 0 ? target : 0);
@@ -1580,6 +1587,8 @@ void MENU_ShowPickLock(int client, float percent, int difficulte, int type) {
 	switch( type ) {
 		case 1: SetMenuTitle(menu, "== Dealer: Vol d'une voiture");
 		case 2: SetMenuTitle(menu, "== Dealer: Déracinage d'un plant");
+		case 3: SetMenuTitle(menu, "== Dealer: Vol de l'armurerie police");
+		case 4: SetMenuTitle(menu, "== Dealer: Vol du marché noire mafia");
 	}
 	
 	char tmp[64];

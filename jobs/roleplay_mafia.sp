@@ -84,6 +84,8 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_doorDefine",	Cmd_ItemDoorDefine,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_doorprotect", Cmd_ItemDoorProtect,	"RP-ITEM",	FCVAR_UNREGISTERED);
 	
+	RegServerCmd("rp_GetStoreItem",	Cmd_GetStoreItem,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	
 	g_hBuyMenu = new DataPack();
 	g_hBuyMenu.WriteCell(0);
 	DataPackPos pos = g_hBuyMenu.Position;
@@ -97,6 +99,9 @@ public void OnPluginStart() {
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {
 	g_hForward_RP_OnClientStealItem = CreateGlobalForward("RP_CanClientStealItem", ET_Event, Param_Cell, Param_Cell);
 	g_hForward_RP_OnClientWeaponPick = CreateGlobalForward("RP_OnClientWeaponPick", ET_Event, Param_Cell, Param_Cell);
+}
+public Action Cmd_GetStoreWeapon(int args) {
+	Cmd_BuyWeapon(GetCmdArgInt(1), true);
 }
 public Action Cmd_ItemDoorProtect(int args) {
 	int client = GetCmdArgInt(1);
@@ -1087,7 +1092,7 @@ void addBuyMenu(int client, int itemID) {
 	g_hBuyMenu.Reset();
 	g_hBuyMenu.WriteCell(pos);
 }
-void Cmd_BuyItemMenu(int client) {
+void Cmd_BuyItemMenu(int client, bool free) {
 	g_hBuyMenu.Reset();
 	DataPackPos max = g_hBuyMenu.ReadCell();
 	DataPackPos position = g_hBuyMenu.Position;
@@ -1107,8 +1112,8 @@ void Cmd_BuyItemMenu(int client) {
 		getBuyMenu(position, data);
 		
 		rp_GetItemData(data[IM_ItemID], item_type_name, tmp2, sizeof(tmp2));
-		Format(tmp, sizeof(tmp), "%d", position);
-		Format(tmp2, sizeof(tmp2), "%s pour %d$", tmp2, data[IM_Prix]);
+		Format(tmp, sizeof(tmp), "%d %d", position, free);
+		Format(tmp2, sizeof(tmp2), "%s pour %d$", tmp2, free?0:data[IM_Prix]);
 		menu.AddItem(tmp, tmp2);
 		
 		position = g_hBuyMenu.Position;
@@ -1123,14 +1128,21 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 	#endif
 	if (p_oAction == MenuAction_Select) {
 		
-		char szMenu[64], tmp[64];
+		char szMenu[64], tmp[64], buffer[2][32];
 		if( GetMenuItem(p_hMenu, p_iParam2, szMenu, sizeof(szMenu)) ) {
+			
+			ExplodeString(szMenu, " ", buffer, sizeof(buffer), sizeof(buffer[]));
 			int data[IM_Max];
-			DataPackPos position = view_as<DataPackPos>(StringToInt(szMenu));
+			DataPackPos position = view_as<DataPackPos>(StringToInt(StringToInt(buffer[0])));
 			getBuyMenu(position, data);
 			
 			if( data[IM_ItemID] == 0 )
 				return 0;
+			
+			if( StringToInt(buffer[1]) == 1 ) {
+				rp_SetClientInt(client, i_LastVolAmount, 100+data[BM_Prix]); 
+				data[IM_Prix] = 0;
+			}
 			if( rp_GetClientInt(client, i_Bank) < data[IM_Prix] )
 				return 0;
 			
