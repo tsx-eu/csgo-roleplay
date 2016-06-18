@@ -23,17 +23,17 @@
 #include <roleplay.inc>   // https://www.ts-x.eu
 
 //#define DEBUG
-#define QUEST_UNIQID   "18th-001"
+#define QUEST_UNIQID   "dealer-003"
 #define   QUEST_NAME      "Blanchiment d'argent"
 #define   QUEST_TYPE      quest_daily
-#define   QUEST_JOBID      181
+#define   QUEST_JOBID      81
 #define   QUEST_RESUME1   "Voler une arme de la police"
 #define   QUEST_RESUME2   "Rapporter l'arme au chef"
 #define   QUEST_RESUME3   "Déposer l'argent à la banque"
 
 public Plugin myinfo =  {
 	name = "Quête: Blanchiment d'argent", author = "KoSSoLaX", 
-	description = "RolePlay - Quête 18th: Blanchiment d'argent", 
+	description = "RolePlay - Quête Dealer: Blanchiment d'argent", 
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 

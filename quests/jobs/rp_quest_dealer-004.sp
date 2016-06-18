@@ -23,10 +23,10 @@
 #include <roleplay.inc>   // https://www.ts-x.eu
 
 //#define DEBUG
-#define QUEST_UNIQID   "18th-002"
+#define QUEST_UNIQID   "dealer-004"
 #define   QUEST_NAME      "Vol de voiture"
 #define   QUEST_TYPE      quest_daily
-#define   QUEST_JOBID      181
+#define   QUEST_JOBID      81
 #define   QUEST_RESUME1   "Voler une voiture de police"
 #define   QUEST_RESUME2   "Rapporter la voiture au garage"
 #define   QUEST_RESUME3   "Déposer l'argent à la banque"
@@ -34,7 +34,7 @@
 
 public Plugin myinfo =  {
 	name = "Quête: Trafiquant de voiture", author = "KoSSoLaX", 
-	description = "RolePlay - Quête 18th: Trafficant de voiture", 
+	description = "RolePlay - Quête Dealer: Trafficant de voiture", 
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
