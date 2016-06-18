@@ -59,13 +59,13 @@ char g_szJailRaison[][][128] = {
 	{ "Garde à vue",						"12", 	"12",	"0"},
 	{ "Meurtre",							"-1", 	"-1",	"-1"},
 	{ "Agression physique",					"1", 	"6",	"250"},
-	{ "Intrusion propriété privée",		"0", 	"3",	"100"},
+	{ "Intrusion propriété privée",			"0", 	"3",	"100"},
 	{ "Vol, tentative de vol",				"0", 	"3",	"50"},
 	{ "Fuite, refus d'obtempérer",			"0", 	"6",	"200"},
 	{ "Insultes, Irrespect",				"1", 	"6",	"250"},
 	{ "Trafique illégal",					"0", 	"6",	"100"},
 	{ "Nuisance sonore",					"0", 	"6",	"100"},
-	{ "Tir dans la rue",					"0", 	"6",	"50"},
+	{ "Tir dans la rue",					"0", 	"6",	"100"},
 	{ "Conduite dangereuse",				"0", 	"6",	"150"},
 	{ "Mutinerie, évasion",					"-2", 	"-2",	"50"}	
 };
@@ -2162,10 +2162,11 @@ void amendeCalculation(int client, int& amende) {
 	#if defined DEBUG
 	PrintToServer("amendeCalculation");
 	#endif
-	int current = rp_GetClientInt(client, i_Money) + rp_GetClientInt(client, i_Bank);
+	float ratio = float(rp_GetClientInt(client, i_Kill31Days)+1.0) / float(rp_GetClientInt(client, i_Death31Days)+1.0);
+	if( ratio < 0.25 )
+		ratio = 0.25;
 	
-	if( current > 10000 )
-		amende += (((current)-10000)/4000);	
+	amende =  RoundFloat(float(amende) * ratio);
 }
 int GetPerquizResp(int job_id) {
 	#if defined DEBUG

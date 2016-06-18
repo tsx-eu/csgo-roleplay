@@ -683,6 +683,11 @@ enum int_user_data {
 	i_ArtisanLevel,
 	i_ArtisanPoints,
 	i_FakeClient,
+	
+	i_KillMonth,
+	i_DeathMonth,
+	i_Kill31Days,
+	i_Death31Days,
 
 	i_udata_max
 };
@@ -713,7 +718,6 @@ enum float_user_data {
 	Float:fl_ArtisanFatigue,
 	Float:fl_LastPoison,
 	Float:fl_LastCrochettage,
-	Float:fl_Ratio,
 
 	fl_udata_max
 };
