@@ -481,7 +481,7 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 		switch(type) {
 			case 2: { // Banque
 				time *= 2.0;
-				int count = countPolice(client), rand = 4 + Math_GetRandomPow(0, 4), i;
+				int count = rp_CountPoliceNear(client), rand = 4 + Math_GetRandomPow(0, 4), i;
 				
 				for (i = 0; i < count; i++)
 					rand += (4 + Math_GetRandomPow(0, 12));
@@ -885,7 +885,7 @@ int getKitDuration(int client) {
 	}
 	return ratio;
 }
-int countPolice(int client) {
+int rp_CountPoliceNear(int client) {
 	int job, count;
 	for(int i=1; i<MaxClients; i++) {
 		if( !IsValidClient(i) )
@@ -927,7 +927,7 @@ void MENU_ShowPickLock(int client, float percent, int difficulte, int type) {
 		case 4: AddMenuItem(menu, ".", "Difficulté: Très difficile", ITEMDRAW_DISABLED);
 	}
 	
-	Format(tmp, sizeof(tmp), "Policier proche: %d", countPolice(client));
+	Format(tmp, sizeof(tmp), "Policier proche: %d", rp_CountPoliceNear(client));
 	AddMenuItem(menu, ".", tmp, ITEMDRAW_DISABLED);
 	
 	SetMenuExitBackButton(menu, false);
@@ -1174,7 +1174,7 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			
 			LogToGame("[TSX-RP] [ITEM-VENDRE] %L a vendu 1 %s a %L", client, tmp, client);
 			
-			if( IsValidClient(data[IM_Owner]) && rp_GetClientJobID(data[IM_Owner]) == 91 ) {
+			if( IsValidClient(data[IM_Owner]) && rp_GetClientJobID(data[IM_Owner]) == 91 && data[IM_Prix] > 0 ) {
 				rp_SetJobCapital(91, rp_GetJobCapital(91) + RoundToCeil(float(data[IM_Prix]) * 0.5));
 				rp_SetClientInt(data[IM_Owner], i_AddToPay, rp_GetClientInt(data[IM_Owner], i_AddToPay) + RoundToFloor(float(data[IM_Prix]) * 0.5));
 				

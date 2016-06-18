@@ -334,12 +334,6 @@ public Action Cmd_ItemPiedBiche(int args) {
 		return Plugin_Handled;
 	}
 	
-	if( g_bCanSearchPlant[client] == false ) {
-		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler pour le moment.");
-		return Plugin_Handled;
-	}
-	
 	int type;
 	int target = getDistrib(client, type);
 	if( target <= 0 ) {
@@ -1115,7 +1109,7 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 		
 		switch(type) {
 			case 1: { // Voiture
-				int count = countPolice(client), rand = 4 + Math_GetRandomPow(0, 4), i;
+				int count = rp_CountPoliceNear(client), rand = 4 + Math_GetRandomPow(0, 4), i;
 				
 				for (i = 0; i < count; i++)
 					rand += (4 + Math_GetRandomPow(0, 12));
@@ -1475,22 +1469,6 @@ void openMarketMenu(int client, int itemID = 0) {
 	SetMenuExitButton(menu, true);
 	DisplayMenu(menu, client, 30);
 }
-int countPolice(int client) {
-	int job, count;
-	for(int i=1; i<MaxClients; i++) {
-		if( !IsValidClient(i) )
-			continue;
-		
-		job = rp_GetClientInt(i, i_Job);
-		
-		if( GetClientTeam(i) == CS_TEAM_CT || (job >= 1 && job <= 7 ) ) {
-			if( Entity_GetDistance(client, i) < (MAX_AREA_DIST+100) && !rp_GetClientBool(i, b_IsAFK)) {
-				count++;
-			}
-		}
-	}
-	return count;
-}
 int findPlayerWeapon(int client, int target) {
 	
 	if( !rp_IsTutorialOver(target) ) {
@@ -1609,7 +1587,7 @@ int getDistrib(int client, int& type) {
 		float vecOrigin[3];
 		GetClientAbsOrigin(client, vecOrigin);
 		
-		if( vecOrigin[2] <= -2000.0 && StrContains(tmp, "Place de l'ind") == 0 ) {
+		if( g_bCanSearchPlant[client] == true && vecOrigin[2] <= -2000.0 && StrContains(tmp, "Place de l'ind") == 0 ) {
 			type = 5;
 		}
 		else if( GetVectorDistance(vecOrigin, view_as<float>({ 2550.8, 1663.1, -2015.96 })) < 64.0 ) {
@@ -1646,7 +1624,7 @@ void MENU_ShowPickLock(int client, float percent, int difficulte, int type) {
 		case 4: AddMenuItem(menu, ".", "Difficulté: Très difficile", ITEMDRAW_DISABLED);
 	}
 	
-	Format(tmp, sizeof(tmp), "Policier proche: %d", countPolice(client));
+	Format(tmp, sizeof(tmp), "Policier proche: %d", rp_CountPoliceNear(client));
 	AddMenuItem(menu, ".", tmp, ITEMDRAW_DISABLED);
 	
 	SetMenuExitBackButton(menu, false);

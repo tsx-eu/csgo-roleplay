@@ -403,3 +403,30 @@ public int rp_GetWeaponPriceCartouche(int weaponID) {
 	}
 	return prix;
 }
+int rp_CountPoliceNear(int client) {
+	
+	static float g_flLastCheck[MAX_PLAYERS+1];
+	static int g_iLastData[MAX_PLAYERS+1];
+	
+	if( g_flLastCheck[client] > GetGameTime() ) {
+		return g_iLastData[client];
+	}
+	
+	int job, count;
+	for(int i=1; i<MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		
+		job = rp_GetClientInt(i, i_Job);
+		
+		if( GetClientTeam(i) == CS_TEAM_CT || (job >= 1 && job <= 7 ) ) {
+			if( Entity_GetDistance(client, i) < (MAX_AREA_DIST+100) && !rp_GetClientBool(i, b_IsAFK)) {
+				count++;
+			}
+		}
+	}
+	
+	g_flLastCheck[client] = GetGameTime() + 0.5;
+	g_iLastData[client] = count;
+	return count;
+}
