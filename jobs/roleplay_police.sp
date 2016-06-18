@@ -633,8 +633,10 @@ public Action Cmd_Tazer(int client) {
 			LogToGame("[TSX-RP] [TAZER] %L a supprimé un plant de %L dans %s", client, owner, tmp);
 			
 			reward = 100;
-			if( rp_GetBuildingData(target, BD_started)+120 < GetTime() ) {
-				reward = 1000;
+			if( (rp_GetBuildingData(target, BD_started)+120 < GetTime() && rp_GetBuildingData(target, BD_FromBuild) == 0) ||
+				(rp_GetBuildingData(target, BD_started)+300 < GetTime() && rp_GetBuildingData(target, BD_FromBuild) == 1) ) {
+					
+				reward = 200 * (rp_GetBuildingData(target, BD_count)+1);
 				if( owner != client )
 					doRP_OnClientTazedItem(client, reward);
 			}
