@@ -741,7 +741,7 @@ public Action ItemPickLockOver_frame(Handle timer, Handle dp) {
 		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} La porte a été ouverte.");
 		
-		if( g_iLastDoor[client][2] != doorID && g_iLastDoor[client][1] != doorID && g_iLastDoor[client][0] != doorID ) {
+		if( g_iLastDoor[client][2] != doorID && g_iLastDoor[client][1] != doorID && g_iLastDoor[client][0] != doorID && rp_GetPlayerZone(target) != 91 && rp_GetPlayerZone(client) != 91 ) {
 			g_iLastDoor[client][2] = g_iLastDoor[client][1];
 			g_iLastDoor[client][1] = g_iLastDoor[client][0];
 			g_iLastDoor[client][0] = doorID;
