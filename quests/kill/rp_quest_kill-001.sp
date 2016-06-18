@@ -117,7 +117,7 @@ public void Q1_Abort(int objectiveID, int client) {
 public void Q1_Frame(int objectiveID, int client) {
 	g_iDuration[client]--;
 	
-	if( g_iCurrent[client] >= 5 ) {
+	if( g_iCurrent[client] >= 10 ) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else if (g_iDuration[client] <= 0) {
