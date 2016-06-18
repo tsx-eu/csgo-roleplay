@@ -30,7 +30,11 @@
 #define ITEM_PIEDBICHE		1
 #define ZONE_ITEMSELL		132
 #define DRUG_DURATION 		90.0
-#define MODEL_PLANT			"models/props/cs_office/plant01_static.mdl"
+#define MODEL_PLANT_0			"models/custom_prop/marijuana/marijuana_0.mdl"
+#define MODEL_PLANT_1			"models/custom_prop/marijuana/marijuana_1.mdl"
+#define MODEL_PLANT_2			"models/custom_prop/marijuana/marijuana_2.mdl"
+#define MODEL_PLANT_3			"models/custom_prop/marijuana/marijuana_3.mdl"
+
 
 public Plugin myinfo = {
 	name = "Jobs: DEALER", author = "KoSSoLaX",
@@ -90,7 +94,6 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 }
 public void OnMapStart() {
 	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt", true);
-	PrecacheModel(MODEL_PLANT, true);
 }
 public void OnEntityCreated(int ent, const char[] classname) {
 	if( ent > 0 ) {
@@ -629,7 +632,8 @@ public Action fwdOnPlayerUse(int client) {
 				int sub = rp_GetBuildingData(i, BD_item_id);
 				if( sub < 0 && sub > MAX_ITEMS )
 					continue;
-					
+				
+				
 				rp_IncrementSuccess(client, success_list_trafiquant, rp_GetBuildingData(i, BD_count) );
 				if( rp_GetBuildingData(i, BD_FromBuild) == 0 ) {
 					rp_ClientGiveItem(client, sub, rp_GetBuildingData(i, BD_count));
@@ -639,6 +643,7 @@ public Action fwdOnPlayerUse(int client) {
 					addItemToMarket(client, sub, rp_GetBuildingData(i, BD_count));
 				}
 				
+				SetEntityModel(i, MODEL_PLANT_0);
 				rp_SetBuildingData(i, BD_count, 0);			
 				rp_Effect_BeamBox(client, i, NULL_VECTOR, 255, 255, 0);			
 			}
@@ -888,18 +893,21 @@ int BuildingPlant(int client, int type) {
 	int ent = CreateEntityByName("prop_physics");
 	
 	DispatchKeyValue(ent, "classname", classname);
-	DispatchKeyValue(ent, "model", MODEL_PLANT);
+	DispatchKeyValue(ent, "model", MODEL_PLANT_0);
 	DispatchSpawn(ent);
 	ActivateEntity(ent);
 	
-	SetEntityModel(ent, MODEL_PLANT);
+	SetEntityModel(ent, MODEL_PLANT_0);
 	
 	SetEntProp( ent, Prop_Data, "m_iHealth", 250);
 	SetEntProp( ent, Prop_Data, "m_takedamage", 0);
 	
 	SetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity", client);
 	
-	TeleportEntity(ent, vecOrigin, NULL_VECTOR, NULL_VECTOR);
+	float ang[3];
+	ang[1] = Math_GetRandomFloat(-180.0, 180.0);
+	
+	TeleportEntity(ent, vecOrigin, ang, NULL_VECTOR);
 	
 	SetEntityRenderMode(ent, RENDER_NONE);
 	ServerCommand("sm_effect_fading \"%i\" \"3.0\" \"0\"", ent);
@@ -1038,22 +1046,33 @@ public Action Frame_BuildingPlant(Handle timer, any ent) {
 		
 		int cpt = rp_GetBuildingData(ent, BD_count);
 		
-		if( cpt < rp_GetBuildingData(ent, BD_max) )
+		if( cpt < rp_GetBuildingData(ent, BD_max) ) {
 			cpt++;
-		
-		rp_SetBuildingData(ent, BD_count, cpt);
-		rp_Effect_BeamBox(client, ent, NULL_VECTOR, 255, 255, 0);
-		
-		int sub = rp_GetBuildingData(ent, BD_item_id);
-		char tmp[64];
-		
-		rp_GetItemData(sub, item_type_name, tmp, sizeof(tmp));
-		
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le plant %s est prêt pour %d utilisation%s.", tmp, cpt, (cpt>=2?"s":"") );
+			
+			switch( cpt ) {
+				case 1: SetEntityModel(ent, MODEL_PLANT_1);
+				case 2: SetEntityModel(ent, MODEL_PLANT_2);
+				case 3: SetEntityModel(ent, MODEL_PLANT_3);
+			}
+			
+			ServerCommand("sm_effect_particles %d chicken_gone_zombie 1", ent);
+			
+			rp_SetBuildingData(ent, BD_count, cpt);
+			rp_Effect_BeamBox(client, ent, NULL_VECTOR, 255, 255, 0);
+			
+			int sub = rp_GetBuildingData(ent, BD_item_id);
+			char tmp[64];
+			
+			rp_GetItemData(sub, item_type_name, tmp, sizeof(tmp));
+			
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le plant %s est prêt pour %d utilisation%s.", tmp, cpt, (cpt>=2?"s":"") );
+		}
 	}
 	
 	float time = Math_GetRandomFloat(110.0, 120.0);
 	if( rp_GetBuildingData(ent, BD_FromBuild) == 1 )
+		time /= 10.0;
+	if( !rp_IsTutorialOver(client) )
 		time /= 10.0;
 	
 	CreateTimer(time, Frame_BuildingPlant, EntIndexToEntRef(ent));
