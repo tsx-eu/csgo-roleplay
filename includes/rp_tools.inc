@@ -403,7 +403,7 @@ public int rp_GetWeaponPriceCartouche(int weaponID) {
 	}
 	return prix;
 }
-int rp_CountPoliceNear(int client) {
+public int rp_CountPoliceNear(int client) {
 	static float g_flLastCheck[65];
 	static int g_iLastData[65];
 	

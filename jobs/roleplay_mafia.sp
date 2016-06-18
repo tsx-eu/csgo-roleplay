@@ -885,22 +885,6 @@ int getKitDuration(int client) {
 	}
 	return ratio;
 }
-int rp_CountPoliceNear(int client) {
-	int job, count;
-	for(int i=1; i<MaxClients; i++) {
-		if( !IsValidClient(i) )
-			continue;
-		
-		job = rp_GetClientInt(i, i_Job);
-		
-		if( GetClientTeam(i) == CS_TEAM_CT || (job >= 1 && job <= 7 ) ) {
-			if( Entity_GetDistance(client, i) < (MAX_AREA_DIST+100) && !rp_GetClientBool(i, b_IsAFK)) {
-				count++;
-			}
-		}
-	}
-	return count;
-}
 // ----------------------------------------------------------------------------
 void MENU_ShowPickLock(int client, float percent, int difficulte, int type) {
 
