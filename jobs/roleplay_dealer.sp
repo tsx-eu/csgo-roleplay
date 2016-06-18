@@ -1063,7 +1063,7 @@ public Action Frame_BuildingPlant(Handle timer, any ent) {
 		}
 	}
 	
-	float time = Math_GetRandomFloat(110.0, 120.0);
+	float time = Math_GetRandomFloat(80.0, 100.0);
 	if( rp_GetBuildingData(ent, BD_FromBuild) == 1 )
 		time /= 10.0;
 	if( !rp_IsTutorialOver(client) )
