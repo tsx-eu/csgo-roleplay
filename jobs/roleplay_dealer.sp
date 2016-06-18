@@ -1133,8 +1133,8 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 			}
 			case 2: {
 				rp_SetBuildingData(target, BD_Trapped, true);
-				ServerCommand("sm_effect_particles %d env_fire_large 30", target);
-				CreateTimer(30.1, SwitchTrapped, EntIndexToEntRef(target));
+				ServerCommand("sm_effect_particles %d env_fire_large 45", target);
+				CreateTimer(45.1, SwitchTrapped, EntIndexToEntRef(target));
 				stealAMount = 100;
 			}
 			case 5: { // Place de l'indé
