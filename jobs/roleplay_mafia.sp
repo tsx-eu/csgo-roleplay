@@ -30,7 +30,7 @@
 #define ITEM_KITCROCHTAGE	2
 #define ITEM_KITEXPLOSIF	3
 #define MARCHE_NOIR			view_as<float>({-144.55,520.1,-2119.96})
-#define MARCHE_PERCENT		40
+#define MARCHE_PERCENT		50
 
 
 // TODO: Repensé le /vol pour fusionner doublon.
