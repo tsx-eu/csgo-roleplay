@@ -587,7 +587,7 @@ public int MenuSelectParrain(Handle menu, MenuAction action, int client, int par
 }
 
 public void Q14_Frame(int objectiveID, int client) {
-	static int job[] =  { 16, 25, 35, 55, 65, 76, 85, 116, 135, 176, 186, 195, 216, 226 };
+	static int job[] =  { 16, 25, 35, 55, 65, 76, 87, 116, 135, 176, 195, 216, 226 };
 	
 	if( rp_ClientCanDrawPanel(client) ) {
 		g_iQ14 = objectiveID;
