@@ -48,6 +48,7 @@ enum rp_event {
 	RP_OnAssurance,			       /* Modifie l'assurance, est appelé à chaques fois que le serveur la recalcule */
 	RP_OnPlayerSpawn,			     /* Lorsqu'un joueur respawn. Appelé après l'avoir TP Au bon endroit */
 	RP_OnPlayerDead,           /* Un joueur meurt. Return Plugin_Handled pour cacher la mort des logs*/
+	RP_OnPlayerKill,           /* Un joueur tue. Return Plugin_Handled pour cacher la mort des logs*/
 	RP_OnPlayerBuild,          /* Un joueur utilise la commande /build */
 	RP_OnPlayerUse,             /* Un joueur utilise la commande utiliser (touche E). */
 	RP_OnPlayerCommand,        /* Un joueur execute une commande, /vol, /truc, /bidule. command ne contient ni de !, ni de /. */
@@ -79,6 +80,8 @@ typeset rp_event_enum {
 	function Action(int client, int& amount);						                               /* RP_OnAssurance */
 	function Action(int client);							        	                               /* RP_OnPlayerSpawn */
 	function Action(int victim, int attacker, float& respawn);	                       /* RP_OnPlayerDead == return Plugin_Handled = cacher des logs */
+	function Action(int attacker, int victim, char weapon[64]);	                       /* RP_OnPlayerKill == return Plugin_Handled = cacher des logs */
+	
 	function Action(int client, float& cooldown);					                             /* RP_OnPlayerBuild */
 	function Action(int client);								                                       /* RP_OnPlayerUse */
 	function Action(int client, char[] command, char[] arg);		                       /* RP_OnPlayerCommand */
