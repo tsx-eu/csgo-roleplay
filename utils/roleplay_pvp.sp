@@ -438,9 +438,16 @@ void CAPTURE_Start() {
 		
 		rp_ClientSendToSpawn(i, true);
 	}
-	for(int i=MaxClients; i<=2048; i++)
+	for(int i=MaxClients; i<=2048; i++) {
 		if( rp_IsValidVehicle(i) && rp_GetVehicleInt(i, car_health) >= 2500 )
 			rp_SetVehicleInt(i, car_health, 2500);
+		if( IsValidEdict(i) && IsValidEntity(i) && rp_GetWeaponBallType(i) == ball_type_braquage ) {
+			
+			if( Weapon_GetOwner(i) > 0 )
+				RemovePlayerItem(Weapon_GetOwner(i), i);
+			AcceptEntityInput(i, "Kill");
+		}
+	}
 	
 	CreateTimer(1.0, CAPTURE_Tick);
 	

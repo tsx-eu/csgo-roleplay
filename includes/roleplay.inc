@@ -846,6 +846,7 @@ enum enum_ball_type {
 	ball_type_revitalisante,
 	ball_type_nosteal,
 	ball_type_notk,
+	ball_type_braquage,
 	ball_type_max
 };
 enum rp_item_type {

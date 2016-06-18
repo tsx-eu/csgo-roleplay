@@ -112,6 +112,11 @@ public Action Cmd_ItemBallType(int args) {
 		return Plugin_Handled;
 	}
 	
+	if( rp_GetWeaponBallType(wepid) == ball_type_braquage ) {
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
+	
 	if( StrEqual(arg1, "fire") ) {
 		rp_SetWeaponBallType(wepid, ball_type_fire);
 	}
