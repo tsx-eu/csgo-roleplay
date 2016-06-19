@@ -188,6 +188,11 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		ACCESS_DENIED(client);
 	}
 	
+	if( rp_GetZoneInt(rp_GetPlayerZone(target), zone_type_type) == 91 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler %N ici.", target);
+		return Plugin_Handled;
+	}
+	
 	if( rp_ClientFloodTriggered(client, target, fd_vol) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler %N, pour le moment.", target);
 		return Plugin_Handled;
