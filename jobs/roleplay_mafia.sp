@@ -1171,6 +1171,9 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			}
 			else {
 				rp_SetJobCapital(91, rp_GetJobCapital(91) + data[IM_Prix]);
+				
+				if( IsValidClient(data[IM_Owner]) )
+					CPrintToChat(data[IM_Owner], "{lightblue}[TSX-RP]{default} Quelqu'un vous a volé 1 %s au marché noir.", tmp);
 			}
 			
 			
