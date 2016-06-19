@@ -635,8 +635,12 @@ public Action Cmd_Tazer(int client) {
 			reward = 100;
 			if( (rp_GetBuildingData(target, BD_started)+120 < GetTime() && rp_GetBuildingData(target, BD_FromBuild) == 0) ||
 				(rp_GetBuildingData(target, BD_started)+300 < GetTime() && rp_GetBuildingData(target, BD_FromBuild) == 1) ) {
-					
-				reward = 200 * (rp_GetBuildingData(target, BD_count)+1);
+				
+				if( rp_GetBuildingData(target, BD_FromBuild) == 1 )
+					reward += 50 * rp_GetBuildingData(target, BD_count);
+				else
+					reward += 200 * rp_GetBuildingData(target, BD_count);
+				
 				if( owner != client )
 					doRP_OnClientTazedItem(client, reward);
 			}
@@ -2162,7 +2166,7 @@ void amendeCalculation(int client, int& amende) {
 	#if defined DEBUG
 	PrintToServer("amendeCalculation");
 	#endif
-	float ratio = float(rp_GetClientInt(client, i_Kill31Days)+1.0) / float(rp_GetClientInt(client, i_Death31Days)+1.0);
+	float ratio = float(rp_GetClientInt(client, i_Kill31Days)+1) / float(rp_GetClientInt(client, i_Death31Days)+1);
 	if( ratio < 0.25 )
 		ratio = 0.25;
 	
