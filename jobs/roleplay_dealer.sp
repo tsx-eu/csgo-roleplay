@@ -80,7 +80,7 @@ public void OnPluginStart() {
 			
 			rp_SetBuildingData(i, BD_started, GetTime());
 			rp_SetBuildingData(i, BD_owner, GetEntPropEnt(i, Prop_Send, "m_hOwnerEntity") );
-			rp_SetBuildingData(i, BD_max, 3);
+			rp_SetBuildingData(i, BD_max, rp_GetBuildingData(i, BD_FromBuild) == 0 ? 3 : 30 );
 			
 			CreateTimer(Math_GetRandomFloat(0.25, 5.0), BuildingPlant_post, i);
 		}
