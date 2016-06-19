@@ -34,8 +34,8 @@
 // TODO: Gérer le cas ou le mec à 5tdm puis 4 :c
 
 public Plugin myinfo = {
-	name = "Quête: Suivez le lapin blanc", author = "KoSSoLaX",
-	description = "RolePlay - Quête Police: Suivez le lapin blanc",
+	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX",
+	description = "RolePlay - Quête Police: "...QUEST_NAME,
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 

@@ -32,8 +32,8 @@
 #define	MAX_ZONES		300
 
 public Plugin myinfo = {
-	name = "Quête: Documents secrets", author = "KoSSoLaX",
-	description = "RolePlay - Quête Mafia: Documents secrets",
+	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX",
+	description = "RolePlay - Quête Mafia: "...QUEST_NAME,
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 

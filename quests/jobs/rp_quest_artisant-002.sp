@@ -28,8 +28,8 @@
 #define QUEST_TYPE      quest_daily
 
 public Plugin myinfo =  {
-	name = "Quête: Commande d'artisanat", author = "KoSSoLaX", 
-	description = "RolePlay - Quête artisant: Commande d'artisanat", 
+	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX", 
+	description = "RolePlay - Quête artisant: "...QUEST_NAME, 
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 

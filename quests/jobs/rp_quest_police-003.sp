@@ -30,8 +30,8 @@
 #define	QUEST_RESUME1	"Tazer les objects illégaux"
 
 public Plugin myinfo = {
-	name = "Quête: Non à la contrebande", author = "KoSSoLaX",
-	description = "RolePlay - Quête Police: Non à la contrebande",
+	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX",
+	description = "RolePlay - Quête Police: "...QUEST_NAME,
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 

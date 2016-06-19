@@ -30,8 +30,8 @@
 #define	QUEST_RESUME	"Arrêtez-le"
 
 public Plugin myinfo = {
-	name = "Quête: Un homme recherché", author = "KoSSoLaX",
-	description = "RolePlay - Quête Justice: Un homme très recherché",
+	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX",
+	description = "RolePlay - Quête Justice: "...QUEST_NAME,
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 

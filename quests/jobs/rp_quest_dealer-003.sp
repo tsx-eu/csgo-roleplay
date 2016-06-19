@@ -32,8 +32,8 @@
 #define   QUEST_RESUME3   "Déposer l'argent à la banque"
 
 public Plugin myinfo =  {
-	name = "Quête: Blanchiment d'argent", author = "KoSSoLaX", 
-	description = "RolePlay - Quête Dealer: Blanchiment d'argent", 
+	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX", 
+	description = "RolePlay - Quête Dealer: "...QUEST_NAME, 
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 

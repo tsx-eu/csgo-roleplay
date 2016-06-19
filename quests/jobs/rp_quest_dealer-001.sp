@@ -32,8 +32,8 @@
 
 
 public Plugin myinfo = {
-	name = "Quête: Surveillance des plants", author = "KoSSoLaX",
-	description = "RolePlay - Quête Dealer: Surveillance des plants",
+	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX",
+	description = "RolePlay - Quête Dealer: "...QUEST_NAME,
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 

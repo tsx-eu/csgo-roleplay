@@ -35,8 +35,8 @@
 #define MAX_ZONES		310
 
 public Plugin myinfo = {
-	name = "Quête: Braquage des distributeurs", author = "KoSSoLaX",
-	description = "RolePlay - Quête Mafia: Braquage des distributeurs",
+	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX",
+	description = "RolePlay - Quête Mafia: "...QUEST_NAME,
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 

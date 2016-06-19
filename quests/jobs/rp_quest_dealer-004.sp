@@ -33,8 +33,8 @@
 #define QUEST_ITEM      236
 
 public Plugin myinfo =  {
-	name = "Quête: Trafiquant de voiture", author = "KoSSoLaX", 
-	description = "RolePlay - Quête Dealer: Trafficant de voiture", 
+	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX", 
+	description = "RolePlay - Quête Dealer: "...QUEST_NAME, 
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 

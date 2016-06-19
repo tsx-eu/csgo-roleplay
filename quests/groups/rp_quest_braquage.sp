@@ -40,8 +40,8 @@
 
 
 public Plugin myinfo =  {
-	name = "Quête: Braquage", author = "KoSSoLaX", 
-	description = "RolePlay - Quête Braquage", 
+	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX", 
+	description = "RolePlay - Quête "...QUEST_NAME, 
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 

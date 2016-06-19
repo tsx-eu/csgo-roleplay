@@ -30,8 +30,8 @@
 #define	QUEST_RESUME	"Récupérer les armes"
 
 public Plugin myinfo = {
-	name = "Quête: Trafic d'arme", author = "KoSSoLaX",
-	description = "RolePlay - Quête Mafia: Trafic d'arme",
+	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX",
+	description = "RolePlay - Quête Mafia: "...QUEST_NAME,
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 

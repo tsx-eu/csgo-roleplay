@@ -31,8 +31,8 @@
 
 
 public Plugin myinfo = {
-	name = "Quête: Un coup de main pour la justice", author = "Leethium",
-	description = "RolePlay - Quête Mercenaire: Un coup de main pour la justice",
+	name = "Quête: "...QUEST_NAME, author = "Leethium",
+	description = "RolePlay - Quête Mercenaire: "...QUEST_NAME,
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 

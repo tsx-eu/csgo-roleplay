@@ -33,8 +33,8 @@
 // TODO: Pouvoir sélectionner un complice
 
 public Plugin myinfo = {
-	name = "Quête: La justice sournoise", author = "KoSSoLaX",
-	description = "RolePlay - Quête Justice: La justice sournoise",
+	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX",
+	description = "RolePlay - Quête Justice: "...QUEST_NAME,
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 

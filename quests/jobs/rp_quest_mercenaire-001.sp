@@ -31,8 +31,8 @@
 
 
 public Plugin myinfo = {
-	name = "Quête: Le justicier masqué", author = "Leethium",
-	description = "RolePlay - Quête Mercenaire: Le justicier masqué",
+	name = "Quête: "...QUEST_NAME, author = "Leethium",
+	description = "RolePlay - Quête Mercenaire: "...QUEST_NAME,
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 

@@ -30,8 +30,8 @@
 #define QUEST_ITEM      236
 
 public Plugin myinfo =  {
-	name = "Quête: Employé modèle", author = "KoSSoLaX", 
-	description = "RolePlay - Quête Vente: Employé modèle", 
+	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX", 
+	description = "RolePlay - Quête Vente: "...QUEST_NAME, 
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 

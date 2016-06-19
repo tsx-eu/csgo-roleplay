@@ -30,8 +30,8 @@
 #define	QUEST_RESUME	"Condamnez un joueur"
 
 public Plugin myinfo = {
-	name = "Quête: La justice exprès", author = "KoSSoLaX",
-	description = "RolePlay - Quête Justice: La justice exprès",
+	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX",
+	description = "RolePlay - Quête Justice: "...QUEST_NAME,
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 

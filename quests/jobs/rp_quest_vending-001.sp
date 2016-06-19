@@ -31,8 +31,8 @@
 #define QUEST_ITEM      236
 
 public Plugin myinfo =  {
-	name = "Quête: Collecte des matières premières", author = "KoSSoLaX", 
-	description = "RolePlay - Quête 18th/dealer: Collecte des matières premières", 
+	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX", 
+	description = "RolePlay - Quête Vente: "...QUEST_NAME, 
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 

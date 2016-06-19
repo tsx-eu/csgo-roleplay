@@ -30,8 +30,8 @@
 #define	QUEST_RESUME	"Libérez les prisonniers"
 
 public Plugin myinfo = {
-	name = "Quête: Délivrance", author = "KoSSoLaX",
-	description = "RolePlay - Quête Mafia: Délivrance",
+	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX",
+	description = "RolePlay - Quête Mafia: "...QUEST_NAME,
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 

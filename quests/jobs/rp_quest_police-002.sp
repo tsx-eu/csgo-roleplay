@@ -30,8 +30,8 @@
 #define	QUEST_RESUME1	"Surveillez la prison"
 
 public Plugin myinfo = {
-	name = "Quête: Surveillance renforcée", author = "KoSSoLaX",
-	description = "RolePlay - Quête Police: Surveillez la prison",
+	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX",
+	description = "RolePlay - Quête Police: "...QUEST_NAME,
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 

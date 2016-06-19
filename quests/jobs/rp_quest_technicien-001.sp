@@ -30,8 +30,8 @@
 #define	QUEST_RESUME	"Retirer les mouchards"
 
 public Plugin myinfo = {
-	name = "Quête: Sous écoute", author = "KoSSoLaX",
-	description = "RolePlay - Quête Technicien: Sous écoute",
+	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX",
+	description = "RolePlay - Quête Technicien: "...QUEST_NAME,
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
