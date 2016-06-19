@@ -354,7 +354,6 @@ public Action Cmd_ItemPiedBiche(int args) {
 	rp_SetClientInt(client, i_LastVolAmount, 100);
 	rp_SetClientInt(client, i_LastVolTarget, -1);	
 	rp_ClientReveal(client);
-	g_bCanSearchPlant[client] = false;
 	rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
 	
 	ServerCommand("sm_effect_particles %d weapon_sensorgren_detonate 1 facemask", client);
@@ -682,6 +681,11 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		ACCESS_DENIED(client);
 	}
 	
+	if( rp_GetZoneInt(rp_GetPlayerZone(target), zone_type_type) == 81 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler %N ici.", target);
+		return Plugin_Handled;
+	}
+	
 	if( rp_ClientFloodTriggered(client, target, fd_vol) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler %N, pour le moment.", target);
 		return Plugin_Handled;
@@ -888,6 +892,10 @@ int BuildingPlant(int client, int type) {
 	
 	DispatchKeyValue(ent, "classname", classname);
 	DispatchKeyValue(ent, "model", MODEL_PLANT_0);
+	DispatchKeyValue(ent, "solid", "0");
+	SetEntProp(ent, Prop_Data, "m_nSolidType", 0); 
+	SetEntProp(ent, Prop_Send, "m_CollisionGroup", 1); 
+	
 	DispatchSpawn(ent);
 	ActivateEntity(ent);
 	
@@ -1059,7 +1067,8 @@ public Action Frame_BuildingPlant(Handle timer, any ent) {
 			
 			rp_GetItemData(sub, item_type_name, tmp, sizeof(tmp));
 			
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le plant %s est prêt pour %d utilisation%s.", tmp, cpt, (cpt>=2?"s":"") );
+			if( rp_GetBuildingData(ent, BD_FromBuild) == 0 || cpt % 5 == 0 )
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le plant %s est prêt pour %d utilisation%s.", tmp, cpt, (cpt>=2?"s":"") );
 		}
 	}
 	
@@ -1132,7 +1141,7 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 				stealAMount = 100;
 			}
 			case 5: { // Place de l'indé
-				
+				g_bCanSearchPlant[client] = false;
 				rp_UnhookEvent(client, RP_PrePlayerPhysic, fwdFrozen);
 				int amount = 0, ItemRand[32];
 				
@@ -1370,7 +1379,7 @@ public int Menu_Market(Handle menu, MenuAction action, int client, int param2) {
 				return;
 			
 			int prix = rp_GetItemInt(itemID, item_type_prix) * amount;
-			if( rp_GetClientInt(client, i_Money) < prix )
+			if( (rp_GetClientInt(client, i_Money)+rp_GetClientInt(client, i_Bank)) < prix )
 				return;
 			
 			rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - prix);
@@ -1593,7 +1602,7 @@ int getDistrib(int client, int& type) {
 		else if( GetVectorDistance(vecOrigin, view_as<float>({ 2550.8, 1663.1, -2015.96 })) < 64.0 ) {
 			type = 6;
 		}
-		else if( GetVectorDistance(vecOrigin, view_as<float>({-144.55,  520.1, -2119.96 })) < 64.0 ) {
+		else if( GetVectorDistance(vecOrigin, view_as<float>({-144.55,  520.1, -2119.96 })) < 40.0 ) {
 			type = 7;
 		}
 	}
