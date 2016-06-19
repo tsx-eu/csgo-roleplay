@@ -62,6 +62,8 @@ public Action Cmd_Reload(int args) {
 public bool fwdCanStart(int client) {
 	if (rp_GetClientJobID(client) != QUEST_JOBID)
 		return false;
+	if( rp_GetClientInt(client, i_Job) >= 84 )
+		return false;
 	
 	return (countWeapon() >= 3);
 }
