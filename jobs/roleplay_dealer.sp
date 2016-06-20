@@ -1572,10 +1572,14 @@ bool CanTP(float pos[3], int client) {
 	#endif
 	return ret;
 }
-bool CanStealVehicle(int target) {
+bool CanStealVehicle(int client, int target) {
 	if( (rp_GetZoneBit(rp_GetPlayerZone(target)) & BITZONE_PARKING) )
 		return false;
 	if( !IsValidClient(rp_GetVehicleInt(target, car_owner)) )
+		return false;
+	if( client == rp_GetVehicleInt(target, car_owner) )
+		return false;
+	if( rp_GetClientKeyVehicle(client, target) )
 		return false;
 	int owner = rp_GetVehicleInt(target, car_owner);
 	int appart = rp_GetPlayerZoneAppart(owner);
@@ -1597,7 +1601,7 @@ int getDistrib(int client, int& type) {
 		GetEdictClassname(target, classname, sizeof(classname));
 	}
 	
-	if( target > 0 && rp_IsValidVehicle(target) && CanStealVehicle(target) )
+	if( target > 0 && rp_IsValidVehicle(target) && CanStealVehicle(client, target) )
 		type = 1;
 	else if( target > 0 && StrEqual(classname, "rp_bank") && rp_GetBuildingData(target, BD_Trapped) == 0 )
 		type = 2;
