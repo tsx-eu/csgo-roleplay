@@ -615,32 +615,40 @@ public Action fwdOnPlayerUse(int client) {
 		if( !IsValidEntity(i) )
 			continue;
 		
-		GetEdictClassname(i, tmp, 63);
+		GetEdictClassname(i, tmp, sizeof(tmp));
+		if( !StrEqual(tmp, tmp2) )
+			continue;
+		if( rp_GetBuildingData(i, BD_count) <= 0 )
+			continue;
 		
-		if( StrEqual(tmp, tmp2) && rp_GetBuildingData(i, BD_owner) == client ) {
-			float vecOrigin2[3];
-			Entity_GetAbsOrigin(i, vecOrigin2);
-			if( GetVectorDistance(vecOrigin, vecOrigin2) <= 50 && rp_GetBuildingData(i, BD_count) > 0.0 ) {
-				
-				int sub = rp_GetBuildingData(i, BD_item_id);
-				if( sub < 0 && sub > MAX_ITEMS )
-					continue;
-				
-				
-				rp_IncrementSuccess(client, success_list_trafiquant, rp_GetBuildingData(i, BD_count) );
-				if( rp_GetBuildingData(i, BD_FromBuild) == 0 ) {
-					rp_ClientGiveItem(client, sub, rp_GetBuildingData(i, BD_count));
-					FakeClientCommand(client, "say /item");
-				}
-				else {
-					addItemToMarket(client, sub, rp_GetBuildingData(i, BD_count));
-				}
-				
-				SetEntityModel(i, MODEL_PLANT_0);
-				rp_SetBuildingData(i, BD_count, 0);			
-				rp_Effect_BeamBox(client, i, NULL_VECTOR, 255, 255, 0);			
-			}
+		float vecOrigin2[3];
+		Entity_GetAbsOrigin(i, vecOrigin2);
+		if( GetVectorDistance(vecOrigin, vecOrigin2) > 50.0 )
+			continue;
+		
+		int sub = rp_GetBuildingData(i, BD_item_id);
+		if( sub < 0 && sub > MAX_ITEMS )
+			continue;
+		
+		rp_IncrementSuccess(client, success_list_trafiquant, rp_GetBuildingData(i, BD_count) );
+		
+		if( rp_GetBuildingData(i, BD_FromBuild) == 0 ) {
+			if( rp_GetBuildingData(i, BD_owner) != client )
+				continue;
+			
+			rp_ClientGiveItem(client, sub, rp_GetBuildingData(i, BD_count));
+			FakeClientCommand(client, "say /item");
 		}
+		else {
+			if( rp_GetClientJobID(client) != 81 )
+				continue;
+			
+			addItemToMarket(rp_GetBuildingData(i, BD_owner), sub, rp_GetBuildingData(i, BD_count));
+		}
+		
+		SetEntityModel(i, MODEL_PLANT_0);
+		rp_SetBuildingData(i, BD_count, 0);
+		rp_Effect_BeamBox(client, i, NULL_VECTOR, 255, 255, 0);
 	}
 }
 public Action fwdOnPlayerBuild(int client, float& cooldown) {
@@ -1217,8 +1225,6 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 	int target 	 = ReadPackCell(dp);
 	int wepid = EntRefToEntIndex(ReadPackCell(dp));
 	
-	CreateTimer(STEAL_TIME/2.0, AllowStealing, client);	
-	
 	rp_ClientColorize(client);
 	rp_ClientReveal(client);
 	
@@ -1226,22 +1232,25 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N s'est débattu, le vol a échoué.", target);
 		rp_SetClientBool(target, b_Stealing, false);
 		SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
+		CreateTimer(10.0, AllowStealing, client);
 		return Plugin_Handled;
 	}
 	if( (rp_IsClientNew(target) || (rp_GetClientJobID(target)==41 && rp_GetClientInt(target, i_ToKill) > 0) || (rp_GetWeaponBallType(wepid) == ball_type_nosteal)) && Math_GetRandomInt(0,3) != 0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N est plus difficile à voler qu'un autre...", target);
 		rp_SetClientBool(target, b_Stealing, false);
 		SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
+		CreateTimer(5.0, AllowStealing, client);
 		return Plugin_Handled;
 	}
 	
 	if ( rp_GetClientFloat(target, fl_Invincible) >= GetGameTime() ) {
 		rp_SetClientBool(target, b_Stealing, false);
 		SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
+		CreateTimer(1.0, AllowStealing, client);
 		return Plugin_Handled;
 	}
 	
-
+	CreateTimer(STEAL_TIME/2.0, AllowStealing, client);	
 	rp_SetClientBool(target, b_Stealing, false);
 	g_iStolenAmountTime[target]++;
 	CreateTimer(300.0, RemoveStealAmount, target);
@@ -1408,9 +1417,12 @@ void addItemToMarket(int client, int itemID, int amount) {
 	g_iMarketClient[itemID][client] += amount;
 }
 void getItemFromMarket(int itemID, int amount) {
+	float prix = float(rp_GetItemInt(itemID, item_type_prix)) * getReduction(itemID);
+	
 	g_iMarket[itemID] -= amount;
 	
 	int stackClient[65], stackCpt, cpt, rnd;
+	float ratio;
 	for (int i = 1; i <= MaxClients; i++) {
 		if( !IsValidClient(i) )
 			continue;
@@ -1425,9 +1437,11 @@ void getItemFromMarket(int itemID, int amount) {
 	while( cpt < amount && stackCpt >= 0 ) {
 		rnd = Math_GetRandomInt(0, stackCpt);
 		
+		ratio = getTaxe(stackClient[rnd]);
+		
 		g_iMarketClient[itemID][stackClient[rnd]]--;
-		rp_SetClientInt(stackClient[rnd], i_AddToPay, rp_GetClientInt(stackClient[rnd], i_AddToPay) + (rp_GetItemInt(itemID, item_type_prix)*9/10));
-		rp_SetJobCapital(81, rp_GetJobCapital(81) + (rp_GetItemInt(itemID, item_type_prix)/10) );
+		rp_SetClientInt(stackClient[rnd], i_AddToPay, rp_GetClientInt(stackClient[rnd], i_AddToPay) + RoundFloat(prix*(1.0-ratio)));
+		rp_SetJobCapital(81, rp_GetJobCapital(81) + RoundFloat(prix*ratio) );
 		
 		if( g_iMarketClient[itemID][stackClient[rnd]] == 0 ) {
 			for (int i = stackClient[rnd]; i<stackCpt ; i++) 
@@ -1439,7 +1453,7 @@ void getItemFromMarket(int itemID, int amount) {
 	}
 	
 	if( cpt < amount ) {
-		rp_SetJobCapital(81, rp_GetJobCapital(81) + ( rp_GetItemInt(itemID, item_type_prix)*(amount-cpt)) );
+		rp_SetJobCapital(81, rp_GetJobCapital(81) + ( RoundFloat(prix)*(amount-cpt)) );
 	}
 }
 void openMarketMenu(int client, int itemID = 0) {
@@ -1457,8 +1471,7 @@ void openMarketMenu(int client, int itemID = 0) {
 			
 			rp_GetItemData(i, item_type_name, tmp, sizeof(tmp));
 			Format(tmp2, sizeof(tmp2), "%d 0", i);
-			Format(tmp, sizeof(tmp), "%d %s - %d$", g_iMarket[i], tmp, rp_GetItemInt(i, item_type_prix));
-			
+			Format(tmp, sizeof(tmp), "%d %s - %d$", g_iMarket[i], tmp, RoundFloat(rp_GetItemInt(i, item_type_prix) * getReduction(i)));
 			menu.AddItem(tmp2, tmp);
 		}
 	}
@@ -1466,10 +1479,10 @@ void openMarketMenu(int client, int itemID = 0) {
 		rp_GetItemData(itemID, item_type_name, tmp3, sizeof(tmp3));
 		menu.SetTitle("Dealers - %s", tmp3);
 
-		int prix = rp_GetItemInt(itemID, item_type_prix);
+		float prix = float(rp_GetItemInt(itemID, item_type_prix)) * getReduction(itemID);
 		for(int i = 1; i <= g_iMarket[itemID]; i++) {
 			Format(tmp2, sizeof(tmp2), "%d %d", itemID, i);
-			Format(tmp, sizeof(tmp), "%d %s - %d$", i, tmp3, prix*i);
+			Format(tmp, sizeof(tmp), "%d %s - %d$", i, tmp3, RoundFloat(prix*float(i)));
 			
 			menu.AddItem(tmp2, tmp);
 		}
@@ -1760,4 +1773,26 @@ bool doRP_ClientCanTP(int client) {
 	if( a == Plugin_Handled || a == Plugin_Stop )
 		return false;
 	return true;
+}
+
+float getTaxe(int client) {
+	int job = rp_GetClientInt(client, i_Job);
+	float val = 0.5;
+	switch(job) {
+		case 81: val = 0.10;
+		case 82: val = 0.15;
+		case 83: val = 0.20;
+		case 84: val = 0.25;
+		case 85: val = 0.30;
+		case 86: val = 0.35;
+		case 87: val = 0.40;
+		case 88: val = 0.45;
+	}
+	return val;
+}
+float getReduction(int itemID) {
+	if( g_iMarket[itemID] <= 0 )
+		return -0.1;
+	
+	return 1.0-((Logarithm(float(g_iMarket[itemID])) - 1.0) / 10.0);
 }
