@@ -401,6 +401,7 @@ public int rp_GetWeaponPriceCartouche(int weaponID) {
 		case ball_type_revitalisante : prix += 200;
 		case ball_type_nosteal       : prix += 50;
 		case ball_type_notk          : prix += 50;
+		case ball_type_braquage      : prix += 1000;
 	}
 	return prix;
 }
