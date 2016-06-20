@@ -1387,7 +1387,7 @@ public int Menu_Market(Handle menu, MenuAction action, int client, int param2) {
 			if( amount == 0 )
 				return;
 			
-			int prix = rp_GetItemInt(itemID, item_type_prix) * amount;
+			int prix = RoundFloat(float(rp_GetItemInt(itemID, item_type_prix)) * getReduction(itemID) * amount);
 			if( (rp_GetClientInt(client, i_Money)+rp_GetClientInt(client, i_Bank)) < prix )
 				return;
 			
