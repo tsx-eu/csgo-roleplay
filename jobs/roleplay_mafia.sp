@@ -547,6 +547,8 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 					rp_ClientGiveItem(client, sub, count);
 					rp_SetBuildingData(target, BD_count, 0);
 					stealAMount = 75 * count;
+					SetEntityModel(target, "models/custom_prop/marijuana/marijuana_0.mdl");
+					SDKHooks_TakeDamage(target, client, client, 125.0);
 					
 					int owner = rp_GetBuildingData(target, BD_owner);
 					if( IsValidClient(owner) ) {
