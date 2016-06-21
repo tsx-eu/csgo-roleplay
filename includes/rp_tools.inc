@@ -304,13 +304,9 @@ public Action rp_ClientRemoveProp(int client, int target, int item_id) {
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez detruit un plant de drogue de %N", owner);
 					CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos plantations a été detruite.");
 				}
-				else if( owner == client ) {				
+				else if( owner == client && rp_GetBuildingData(target, BD_FromBuild) == 0 ) {				
 					int sub = rp_GetBuildingData(target, BD_item_id);
 					rp_ClientGiveItem(client, sub, rp_GetBuildingData(target, BD_count));
-					
-					if( rp_GetBuildingData(target, BD_started)+180 < GetTime() ) {
-						rp_ClientGiveItem(client, sub, Math_GetRandomInt(1, 5) );
-					}
 				}
 			}
 			
