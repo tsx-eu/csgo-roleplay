@@ -27,7 +27,7 @@
 #define	QUEST_NAME		"Non à la contrebande"
 #define	QUEST_TYPE		quest_daily
 #define	QUEST_JOBID		1
-#define	QUEST_RESUME1	"Tazer les objects illégaux"
+#define	QUEST_RESUME1	"Tazez les objets illégaux"
 
 public Plugin myinfo = {
 	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX",
