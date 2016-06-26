@@ -24,7 +24,7 @@
 
 //#define DEBUG
 #define QUEST_UNIQID	"justice-002"
-#define	QUEST_NAME		"La justice exprès"
+#define	QUEST_NAME		"La justice express"
 #define	QUEST_TYPE		quest_daily
 #define	QUEST_JOBID		1
 #define	QUEST_RESUME	"Condamnez un joueur"
