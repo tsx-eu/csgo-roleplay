@@ -832,38 +832,36 @@ public Action fwdDead(int victim, int attacker, float& respawn) {
 }
 public Action fwdHUD(int client, char[] szHUD, const int size) {
 	int gID = rp_GetClientGroupID(client);
-	int defTeam = rp_GetCaptureInt(cap_bunker);
-	static char optionsBuff[4][32], tmp[128], loading[64];
-	
-	int timeLeft = g_iCaptureStart + (30 * 60) - GetTime();
-	
-	if( timeLeft > 10 )
-		rp_Effect_LoadingBar(loading, sizeof(loading), float(GetTime() - g_iCaptureStart) / (30.0 * 60.0));
-	else
-		Format(loading, sizeof(loading), "Il reste %d seconde%s", timeLeft, timeLeft >= 2 ? "s": "");
+	static char optionsBuff[4][32], tmp[128], loading[64], cache[512];
+	static float lastGen;
 	
 	if( g_bIsInCaptureMode && gID > 0 ) {
-		
-		Format(szHUD, size, "PvP: ");
-		if( gID == defTeam )
-			Format(szHUD, size, "%s Défense du Bunker\n%s\n", szHUD, loading);
-		else
-			Format(szHUD, size, "%s Attaque du Bunker\n%s\n", szHUD, loading);
-			
-		for(int i=1; i<MAX_GROUPS; i+=10) {
-			if( g_iCapture_POINT[i] == 0 && gID != i )
-				continue;
-			
-			rp_GetGroupData(i, group_type_name, tmp, sizeof(tmp));
-			ExplodeString(tmp, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
-				
-			if( gID == i )
-				Format(szHUD, size, "%s [%s]: %d\n", szHUD, optionsBuff[1], g_iCapture_POINT[i]);
-			else
-				Format(szHUD, size, "%s %s: %d\n", szHUD, optionsBuff[1], g_iCapture_POINT[i]);
-				
+		if( lastGen > GetGameTime() ) {
+			strcopy(szHUD, size, cache);
 		}
-		
+		else {	
+			int timeLeft = g_iCaptureStart + (30 * 60) - GetTime();
+			
+			if( timeLeft > 10 )
+				rp_Effect_LoadingBar(loading, sizeof(loading), float(GetTime() - g_iCaptureStart) / (30.0 * 60.0));
+			else
+				Format(loading, sizeof(loading), "Il reste %d seconde%s", timeLeft, timeLeft >= 2 ? "s": "");
+			
+			Format(szHUD, size, "PvP: Capture du Bunker\n%s\n", loading);
+				
+			for(int i=1; i<MAX_GROUPS; i+=10) {
+				if( g_iCapture_POINT[i] == 0 )
+					continue;
+				
+				rp_GetGroupData(i, group_type_name, tmp, sizeof(tmp));
+				ExplodeString(tmp, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
+					
+				Format(szHUD, size, "%s %s: %d\n", szHUD, optionsBuff[1], g_iCapture_POINT[i]);
+			}
+			
+			lastGen = GetGameTime() + 0.66;
+			strcopy(cache, sizeof(cache), szHUD);
+		}
 		return Plugin_Changed;
 	}
 	return Plugin_Continue;
