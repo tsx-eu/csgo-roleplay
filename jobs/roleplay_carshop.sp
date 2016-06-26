@@ -273,6 +273,7 @@ public Action Cmd_ItemVehicle(int args) {
 	rp_SetVehicleInt(car, car_owner, client);
 	rp_SetVehicleInt(car, car_item_id, item_id);
 	rp_SetVehicleInt(car, car_maxPassager, max);
+	rp_SetVehicleInt(car, car_donateur, 0);
 	
 	rp_SetClientKeyVehicle(client, car, true);
 	
@@ -289,6 +290,8 @@ public Action Cmd_ItemVehicle(int args) {
 		rp_SetVehicleInt(car, car_light_b, 32);
 		rp_SetVehicleInt(car, car_radio_station, 1);
 		rp_SetVehicleInt(car, car_boost, 1);
+		rp_SetVehicleInt(car, car_donateur, 1);
+		
 		DispatchKeyValue(car, "vehiclescript", 	"scripts/vehicles/natalya_mustang_csgo_20163.txt");
 		ServerCommand("vehicle_flushscript");
 		attachVehicleLight(car);
@@ -1220,6 +1223,11 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 						CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre véhicule est endommagé.");
 						continue;
 					}
+					
+					if( rp_GetVehicleInt(car, car_donateur) == 1 && rp_GetVehicleInt(car, car_battery) == 0 ) {
+						CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre mustang sportive n'a plus sa batterie.");
+						continue;
+					}		
 					
 					if( Vehicle_GetDriver(target) > 0 ) {
 						CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il y a quelqu'un dans votre véhicule.");

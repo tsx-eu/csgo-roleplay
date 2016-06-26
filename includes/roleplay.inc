@@ -944,7 +944,8 @@ enum car_data {
 	car_maxPassager,
 	car_battery,
 	car_particle,
-
+	car_donateur,
+	
 	car_data_max,
 };
 enum type_appart_bonus {
