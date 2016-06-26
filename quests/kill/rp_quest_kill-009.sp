@@ -79,6 +79,7 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Bonjour collègue, on a de nouveaux projets pour toi.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Tuer des citoyens à l'aide d'explosif.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Si tu arrives à le faire en moins de 24 heures", ITEMDRAW_DISABLED);
@@ -171,6 +172,8 @@ public bool IsKillEligible(int attacker, int victim, const char weapon[64]) {
 		return false;
 	
 	int bit = rp_GetZoneBit(rp_GetPlayerZone(victim));
+	if( bit & BITZONE_EVENT || bit & BITZONE_PEACEFULL )
+		return false;
 	if( rp_GetClientInt(victim, i_JailTime) >= 10 && ( bit & BITZONE_JAIL || bit & BITZONE_HAUTESECU || bit & BITZONE_LACOURS ) )
 		return false;
 	

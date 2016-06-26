@@ -172,6 +172,8 @@ public bool IsKillEligible(int attacker, int victim, const char weapon[64]) {
 		return false;
 	
 	int bit = rp_GetZoneBit(rp_GetPlayerZone(victim));
+	if( bit & BITZONE_EVENT || bit & BITZONE_PEACEFULL )
+		return false;
 	if( rp_GetClientInt(victim, i_JailTime) >= 10 && ( bit & BITZONE_JAIL || bit & BITZONE_HAUTESECU || bit & BITZONE_LACOURS ) )
 		return false;
 	
