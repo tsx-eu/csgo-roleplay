@@ -2218,8 +2218,6 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 	if( action == MenuAction_Select ) {
 		char options[64];
 		GetMenuItem(menu, param2, options, 63);
-		
-		
 		int job_id = rp_GetZoneInt(rp_GetPlayerZone(rp_GetClientTarget(client)), zone_type_type);
 		
 		if( job_id <= 0 || job_id > 250 ) {
@@ -2229,7 +2227,10 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 		
 		if( StrEqual(options, "start") ) {
 			g_iCancel[client] = 0;
-			start_perquiz(client, job_id);
+			if(rp_GetClientJobID(client) == 1)
+				start_perquiz(client, job_id);
+			else
+				begin_perquiz(client, job_id);
 		}
 		else if( StrEqual(options, "cancel") ) {
 			cancel_perquiz(client, job_id);
@@ -2277,14 +2278,20 @@ void begin_perquiz(int client, int job) {
 	rp_GetZoneData(JobToZoneID(job), zone_type_name, tmp, sizeof(tmp));
 	
 	PrintToChatPoliceJob(job, "{lightblue} ================================== {default}");
-	PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [POLICE]{default} Début d'une perquisition dans %s.", tmp);
-	LogToGame("[TSX-RP] [POLICE] La perquisition commence dans %s.", tmp);
+	if(rp_GetClientJobID(client) == 1){
+		PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [POLICE]{default} Début d'une perquisition dans %s.", tmp);
+		LogToGame("[TSX-RP] [POLICE] La perquisition commence dans %s.", tmp);
+		rp_SetJobCapital(1, rp_GetJobCapital(1) + 250);
+	}
+	else{
+		PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [JUSTICE]{default} Début d'une perquisition dans %s.", tmp);
+		LogToGame("[TSX-RP] [JUSTICE] %N débute une perquisition dans %s.", client, tmp);
+		rp_SetJobCapital(101, rp_GetJobCapital(101) + 250);
+	}
 	PrintToChatPoliceJob(job, "{lightblue} ================================== {default}");
 	
 	
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 500);
-	rp_SetJobCapital(1, rp_GetJobCapital(1) + 250);
-	
 }
 void end_perquiz(int client, int job) {
 	#if defined DEBUG
@@ -2294,13 +2301,19 @@ void end_perquiz(int client, int job) {
 	rp_GetZoneData(JobToZoneID(job), zone_type_name, tmp, sizeof(tmp));
 	
 	PrintToChatPoliceJob(job, "{lightblue} ================================== {default}");
-	PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [POLICE]{default} Fin de la perquisition dans %s.", tmp);
+	if(rp_GetClientJobID(client) == 1){
+		PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [POLICE]{default} Fin de la perquisition dans %s.", tmp);
+		rp_SetJobCapital(1, rp_GetJobCapital(1) + 500);
+	}
+	else{
+		PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [JUSTICE]{default} Fin de la perquisition dans %s.", tmp);
+		rp_SetJobCapital(101, rp_GetJobCapital(101) + 500);
+	}
 	LogToGame("[TSX-RP] [POLICE] %N a mis fin à la perquisition dans %s.",client, tmp);
 	
 	PrintToChatPoliceJob(job, "{lightblue} ================================== {default}");
 	
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 500);
-	rp_SetJobCapital(1, rp_GetJobCapital(1) + 500);
 	
 	char szQuery[1024], szSteamID[64];
 	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID), false);
@@ -2317,13 +2330,19 @@ void cancel_perquiz(int client, int job) {
 	rp_GetZoneData(JobToZoneID(job), zone_type_name, tmp, sizeof(tmp));
 	
 	PrintToChatPoliceJob(job, "{lightblue} ================================== {default}");
-	PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [POLICE]{default} Annulation de la perquisition dans %s.", tmp);
+	if(rp_GetClientJobID(client) == 1){
+		PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [POLICE]{default} Annulation de la perquisition dans %s.", tmp);
+		rp_SetJobCapital(1, rp_GetJobCapital(1) - 250);
+	}
+	else{
+		PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [JUSTICE]{default} Annulation de la perquisition dans %s.", tmp);
+		rp_SetJobCapital(101, rp_GetJobCapital(101) - 250);
+	}
 	LogToGame("[TSX-RP] [POLICE] %N a annulé la perquisition dans %s.",client, tmp);
 	
 	PrintToChatPoliceJob(job, "{lightblue} ================================== {default}");
 	
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) - 500);
-	rp_SetJobCapital(1, rp_GetJobCapital(1) - 250);
 }
 public Action PerquizFrame(Handle timer, Handle dp) {
 	#if defined DEBUG
