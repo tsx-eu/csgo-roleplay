@@ -428,7 +428,7 @@ public void Q6_Frame(int objectiveID, int client) {
 		SetEntityHealth(g_stkTeam[TEAM_BRAQUEUR][i], heal);
 		rp_SetClientInt(g_stkTeam[TEAM_BRAQUEUR][i], i_Kevlar, kevlar);
 		
-		PrintHintText(g_stkTeam[TEAM_BRAQUEUR][i], "<b>Objectif</b>: Restez vivant. Prennez la fuite avec votre voiture quand vous le souhaiter. <b>Gain</b>: %d$", g_iQuestGain);
+		PrintHintText(g_stkTeam[TEAM_BRAQUEUR][i], "<b>Objectif</b>: Restez vivant. Prenez la fuite avec votre voiture quand vous le souhaitez. <b>Gain</b>: %d$", g_iQuestGain);
 		
 		for (int j = 0; j < g_stkTeamCount[TEAM_HOSTAGE]; j++) {
 			if( Math_GetRandomInt(0, 4)  == 0 ) {
@@ -456,7 +456,7 @@ public void Q6_Frame(int objectiveID, int client) {
 		for (int j = 0; j < g_stkTeamCount[TEAM_POLICE]; j++) {
 			rp_SetClientInt(g_stkTeam[TEAM_POLICE][j], i_Perquiz, GetTime());
 			
-			PrintHintText(g_stkTeam[TEAM_POLICE][j], "<b>Alerte</b>: Un braquage est en cours dans %s, tuer les braqueurs. <b>Gain</b>: %d$, <b>Amende</b>: %d$.", tmp2[0], gainPolice, amendePolice);
+			PrintHintText(g_stkTeam[TEAM_POLICE][j], "<b>Alerte</b>: Un braquage est en cours dans %s, tuez les braqueurs. <b>Gain</b>: %d$, <b>Amende</b>: %d$.", tmp2[0], gainPolice, amendePolice);
 			
 			for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
 				if( Math_GetRandomInt(0, 4)  == 0 )
