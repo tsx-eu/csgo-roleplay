@@ -190,7 +190,7 @@ int getNearestEligible(int client) {
 	
 	
 	for (int i = 1; i <= MaxClients; i++) {
-		if( IsValidClient(i) && IsKillEligible(client, i, "") ) {
+		if( IsValidClient(i) && IsKillEligible(client, i, "weapon_knife") ) {
 			
 			GetClientAbsOrigin(client, dst);
 			tmp = GetVectorDistance(src, dst);
