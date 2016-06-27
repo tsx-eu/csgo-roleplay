@@ -638,6 +638,8 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 		AddMenuItem(menu, "kevlar", "Changer pour un couteau anti kevlar (50$)", ITEMDRAW_DISABLED);
 	else
 		AddMenuItem(menu, "kevlar", "Changer pour un couteau anti kevlar (50$)");
+			
+	AddMenuItem(menu, "precision", "Ajouter une précision de tir (50$)");
 
 	if(rp_GetClientInt(client, i_KnifeTrain) == 100)
 		AddMenuItem(menu, "full", "Me mettre à 100 niveaux d'entrainement (0$)", ITEMDRAW_DISABLED);
@@ -718,6 +720,16 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 				}
 				else if(StrEqual(szMenuItem, "kevlar")){
 					rp_SetClientKnifeType(client, ball_type_antikevlar);
+				}
+				else if(StrEqual(szMenuItem, "precision")) {
+					client = GetCmdArgInt(1);
+	
+					float train = rp_GetClientFloat(client, fl_WeaponTrain) + 4.0;
+					train = Math_Clamp(train, 0.0, 8.0);
+					
+					rp_SetClientFloat(client, fl_WeaponTrain, train);
+					
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre entraînement est maintenant de %.2f%%", (train/5.0*100.0));
 				}
 			}
 			else{
