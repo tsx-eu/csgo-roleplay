@@ -722,7 +722,6 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 					rp_SetClientKnifeType(client, ball_type_antikevlar);
 				}
 				else if(StrEqual(szMenuItem, "precision")) {
-					client = GetCmdArgInt(1);
 	
 					float train = rp_GetClientFloat(client, fl_WeaponTrain) + 4.0;
 					train = Math_Clamp(train, 0.0, 8.0);
