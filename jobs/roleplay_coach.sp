@@ -639,7 +639,11 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 	else
 		AddMenuItem(menu, "kevlar", "Changer pour un couteau anti kevlar (50$)");
 			
-	AddMenuItem(menu, "precision", "Ajouter une précision de tir (50$)");
+	if(rp_GetClientFloat(client, fl_WeaponTrain) >= 8)
+		AddMenuItem(menu, "precision", "Ajouter une précision de tir (50$)", ITEMDRAW_DISABLED);
+	else 
+		AddMenuItem(menu, "precision", "Ajouter une précision de tir (50$)");
+
 
 	if(rp_GetClientInt(client, i_KnifeTrain) == 100)
 		AddMenuItem(menu, "full", "Me mettre à 100 niveaux d'entrainement (0$)", ITEMDRAW_DISABLED);
