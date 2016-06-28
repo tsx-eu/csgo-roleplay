@@ -143,7 +143,7 @@ public Action Cmd_ItemBioKev(int args) {
 	int item_id = GetCmdArgInt(args);
 	
 	if( g_bBionique[client][ch_Kevlar] ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà une regénération bionique.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà une régénération bionique.");
 		ITEM_CANCEL(client, item_id);
 	}
 	
