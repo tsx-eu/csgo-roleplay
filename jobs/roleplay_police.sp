@@ -1133,7 +1133,7 @@ public Action Cmd_Jugement(int client, int args) {
 
 				if(amende > maxAmount){
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} L'amende excède le montant maximum autorisé.");
-					String_GetRandom(random, sizeof(random), sizeof(random) - 1);
+					String_GetRandom(random, sizeof(random), sizeof(random) - 1, "23456789abcdefg");
 
 					Format(g_szTribunal_DATA[client][tribunal_code], 63, random);
 					Format(g_szTribunal_DATA[client][tribunal_option], 63, "unknown");
@@ -1155,7 +1155,7 @@ public Action Cmd_Jugement(int client, int args) {
 				if(playermoney == -1){
 					PrintToServer("Erreur SQL: Impossible de relever l'argent du joueur (Amende jugement)");
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Erreur: Impossible de relever l'argent du joueur.", playermoney);
-					String_GetRandom(random, sizeof(random), sizeof(random) - 1);
+					String_GetRandom(random, sizeof(random), sizeof(random) - 1, "23456789abcdefg");
 
 					Format(g_szTribunal_DATA[client][tribunal_code], 63, random);
 					Format(g_szTribunal_DATA[client][tribunal_option], 63, "unknown");
@@ -1164,7 +1164,7 @@ public Action Cmd_Jugement(int client, int args) {
 				}
 				else if(amende > playermoney){
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le joueur n'a que %i$, le jugement a été annulé.", playermoney);
-					String_GetRandom(random, sizeof(random), sizeof(random) - 1);
+					String_GetRandom(random, sizeof(random), sizeof(random) - 1, "23456789abcdefg");
 
 					Format(g_szTribunal_DATA[client][tribunal_code], 63, random);
 					Format(g_szTribunal_DATA[client][tribunal_option], 63, "unknown");
@@ -1232,7 +1232,7 @@ public Action Cmd_Jugement(int client, int args) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le code est incorrect, le jugement a été annulé.");
 	}
 	
-	String_GetRandom(random, sizeof(random), sizeof(random) - 1);
+	String_GetRandom(random, sizeof(random), sizeof(random) - 1, "23456789abcdefg");
 	
 	Format(g_szTribunal_DATA[client][tribunal_code], 63, random);
 	Format(g_szTribunal_DATA[client][tribunal_option], 63, "unknown");
@@ -1627,7 +1627,7 @@ public int MenuTribunal_Apply(Handle p_hItemMenu, MenuAction p_oAction, int clie
 		ExplodeString(buff_options, " ", options, sizeof(options), sizeof(options[]));
 		
 		char random[6];
-		String_GetRandom(random, sizeof(random), sizeof(random) - 1);
+		String_GetRandom(random, sizeof(random), sizeof(random) - 1, "23456789abcdefg");
 		
 		strcopy(g_szTribunal_DATA[client][tribunal_option], 63, options[0]);
 		strcopy(g_szTribunal_DATA[client][tribunal_steamid], 63, options[1]);
@@ -1661,7 +1661,7 @@ public int MenuTribunal(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 			
 			char uniqID[64], szSteamID[64], szIP[64], szQuery[1024];
 			
-			String_GetRandom(uniqID, sizeof(uniqID), 32);
+			String_GetRandom(uniqID, sizeof(uniqID), 32, "23456789abcdefg");
 			GetClientAuthId(target, AuthId_Engine, szSteamID, sizeof(szSteamID), false);
 			GetClientIP(client, szIP, sizeof(szIP));
 			
