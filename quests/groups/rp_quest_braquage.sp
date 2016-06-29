@@ -607,8 +607,8 @@ public Action fwdZoneChange(int client, int newZone, int oldZone) {
 		detachHostage(client);
 	}
 }
-public Action fwdGotKey(int client, int doorID) {
-	if( g_iPlayerTeam[client] == TEAM_POLICE || g_iPlayerTeam[client] == TEAM_BRAQUEUR ) {
+public Action fwdGotKey(int client, int doorID, int lockType) {
+	if( lockType == 2 && (g_iPlayerTeam[client] == TEAM_POLICE || g_iPlayerTeam[client] == TEAM_BRAQUEUR) ) {
 		float pos[3];
 		Entity_GetAbsOrigin(doorID, pos);
 		

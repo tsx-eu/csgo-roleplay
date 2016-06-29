@@ -92,7 +92,7 @@ typeset rp_event_enum {
 	function Action(int client);								                                       /* RP_OnPlayerDataLoaded */
 	function Action(int client, int money);					                         	         /* RP_OnPlayerSell */
 	function Action(int client, char[] szHUD, const int maxSize);			                 /* RP_OnPlayerHUD */
-	function Action(int client, int doorID);											/* RP_OnPlayerCheckKey */
+	function Action(int client, int doorID, int lockStatus);											/* RP_OnPlayerCheckKey */
 };
 /**
  * Hook un évenement d'un joueur
