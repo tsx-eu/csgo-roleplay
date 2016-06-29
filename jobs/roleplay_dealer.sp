@@ -1601,9 +1601,9 @@ int getDistrib(int client, int& type) {
 		GetEdictClassname(target, classname, sizeof(classname));
 	}
 	
-	if( target > 0 && rp_IsValidVehicle(target) && CanStealVehicle(client, target) )
+	if( target > 0 && rp_IsValidVehicle(target) && CanStealVehicle(client, target) && rp_IsEntitiesNear(client, target, true) )
 		type = 1;
-	else if( target > 0 && StrEqual(classname, "rp_bank") && rp_GetBuildingData(target, BD_Trapped) == 0 )
+	else if( target > 0 && StrEqual(classname, "rp_bank") && rp_GetBuildingData(target, BD_Trapped) == 0  && rp_IsEntitiesNear(client, target, true))
 		type = 2;
 	else {
 		target = client;
