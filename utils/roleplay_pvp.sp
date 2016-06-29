@@ -123,11 +123,22 @@ public void OnPluginStart() {
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
+	
+	char szDayOfWeek[12];
+	FormatTime(szDayOfWeek, 11, "%w");
+	if( StringToInt(szDayOfWeek) == 3 || StringToInt(szDayOfWeek) == 5 ) { // Mercredi & Vendredi
+		ServerCommand("tv_enable 1");
+	}
 }
 public void OnConfigsExecuted() {
 	if( g_hCapturable == INVALID_HANDLE ) {
 		g_hCapturable = FindConVar("rp_capture");
 		HookConVarChange(g_hCapturable, OnCvarChange);
+	}
+	char szDayOfWeek[12];
+	FormatTime(szDayOfWeek, 11, "%w");
+	if( StringToInt(szDayOfWeek) == 3 || StringToInt(szDayOfWeek) == 5 ) { // Mercredi & Vendredi
+		ServerCommand("tv_enable 1");
 	}
 }
 public void OnMapStart() {
@@ -381,7 +392,7 @@ void CAPTURE_Start() {
 	#endif
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	CPrintToChatAll("{lightblue} Le bunker peut maintenant être capturé! {default}");
-	CPrintToChatAll("{lightblue} ================================== {default}");
+	
 	
 	g_iCaptureStart = GetTime();
 	CAPTURE_UpdateLight();
@@ -393,6 +404,7 @@ void CAPTURE_Start() {
 	
 	g_bIsInCaptureMode = true;
 	int gID;
+	bool botFound = false;
 			
 	for(int i=1; i<MAX_GROUPS; i++) {
 		g_iCapture_POINT[i] = 0;
@@ -408,6 +420,11 @@ void CAPTURE_Start() {
 	for(int i=1; i<=MaxClients; i++) {
 		if( !IsValidClient(i) )
 			continue;
+		
+		if( IsClientSourceTV(i) ) {
+			botFound = true;
+			continue;
+		}
 		
 		GDM_Init(i);
 		rp_HookEvent(i, RP_OnPlayerDead, fwdDead);
@@ -455,7 +472,14 @@ void CAPTURE_Start() {
 	HookEvent("weapon_fire", Event_PlayerShoot, EventHookMode_Post);
 	HookEvent("player_hurt", fwdGod_PlayerHurt, EventHookMode_Pre);
 	HookEvent("weapon_fire", fwdGod_PlayerShoot, EventHookMode_Pre);
-	ServerCommand("mp_logdetail 3");
+	
+	char szDayOfWeek[64];
+	FormatTime(szDayOfWeek, sizeof(szDayOfWeek), "tv/pvp_%d-%m-%y");
+	ServerCommand("tv_record %s", szDayOfWeek);
+	if( botFound ) {
+		CPrintToChatAll("{lightblue} Cette capture est enregistrée à cette adresse: https://www.ts-x.eu/tv/%s.dem", szDayOfWeek);
+		CPrintToChatAll("{lightblue} ================================== {default}");
+	}
 }
 public Action fwdCommand(int client, char[] command, char[] arg) {
 	if( StrEqual(command, "pvp") ) {
@@ -526,7 +550,7 @@ void CAPTURE_Stop() {
 	rp_SetCaptureInt(cap_bunker, winner);
 	rp_SetCaptureInt(cap_villa, winner);
 			
-	CPrintToChatAll("{lightblue} Le bunker appartient maintenant à... %s !", optionsBuff[1]);			
+	CPrintToChatAll("{lightblue} Le bunker appartient maintenant à... %s !", optionsBuff[1]);
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	
 	UnhookEvent("player_hurt", Event_PlayerHurt, EventHookMode_Post);
@@ -536,6 +560,8 @@ void CAPTURE_Stop() {
 	
 	CAPTURE_Reward(totalPoints);
 	GDM_Resume();
+	
+	ServerCommand("tv_stoprecord");
 }
 void CAPTURE_UpdateLight() {
 	char strBuffer[4][32], tmp[64], tmp2[64];
