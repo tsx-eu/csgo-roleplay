@@ -139,6 +139,8 @@ public void Q_Abort(int objectiveID, int client) {
 		if( client != g_stkTeam[TEAM_POLICE][i] )
 			rp_QuestComplete(g_stkTeam[TEAM_POLICE][i], QUEST_UNIQID, true);
 	}
+	
+	Q_Clean();
 }
 void Q_Clean() {
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
