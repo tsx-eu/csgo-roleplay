@@ -170,7 +170,8 @@ public bool IsKillEligible(int attacker, int victim, const char weapon[64]) {
 		return false;
 	if( attacker == victim )
 		return false;
-	
+	if( !rp_IsTutorialOver(victim) )
+		return false;
 	int bit = rp_GetZoneBit(rp_GetPlayerZone(victim));
 	if( bit & BITZONE_EVENT || bit & BITZONE_PEACEFULL || bit & BITZONE_PVP )
 		return false;
@@ -190,7 +191,7 @@ int getNearestEligible(int client) {
 	
 	
 	for (int i = 1; i <= MaxClients; i++) {
-		if( IsValidClient(i) && IsKillEligible(client, i, "") ) {
+		if( IsValidClient(i) && IsPlayerAlive(i) && IsKillEligible(client, i, "") ) {
 			
 			GetClientAbsOrigin(client, dst);
 			tmp = GetVectorDistance(src, dst);
