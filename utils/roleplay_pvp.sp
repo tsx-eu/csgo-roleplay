@@ -139,6 +139,10 @@ public void OnConfigsExecuted() {
 	FormatTime(szDayOfWeek, 11, "%w");
 	if( StringToInt(szDayOfWeek) == 3 || StringToInt(szDayOfWeek) == 5 ) { // Mercredi & Vendredi
 		ServerCommand("tv_enable 1");
+		ServerCommand("mp_restartgame 1");
+		ServerCommand("spec_replay_enable 1");
+		ServerCommand("tv_snapshotrate 64");
+		ServerCommand("rp_wallhack 0");
 	}
 }
 public void OnMapStart() {
@@ -476,10 +480,11 @@ void CAPTURE_Start() {
 	char szDayOfWeek[64];
 	FormatTime(szDayOfWeek, sizeof(szDayOfWeek), "tv/pvp_%d-%m-%y");
 	ServerCommand("tv_record %s", szDayOfWeek);
+	ServerCommand("rp_wallhack 1");
 	if( botFound ) {
-		CPrintToChatAll("{lightblue} Cette capture est enregistrée à cette adresse: https://www.ts-x.eu/tv/%s.dem", szDayOfWeek);
-		CPrintToChatAll("{lightblue} ================================== {default}");
+//		CPrintToChatAll("{lightblue} Cette capture est enregistrée à cette adresse: https://www.ts-x.eu/tv/%s.dem", szDayOfWeek);
 	}
+	CPrintToChatAll("{lightblue} ================================== {default}");
 }
 public Action fwdCommand(int client, char[] command, char[] arg) {
 	if( StrEqual(command, "pvp") ) {
@@ -562,6 +567,7 @@ void CAPTURE_Stop() {
 	GDM_Resume();
 	
 	ServerCommand("tv_stoprecord");
+	ServerCommand("rp_wallhack 0");
 }
 void CAPTURE_UpdateLight() {
 	char strBuffer[4][32], tmp[64], tmp2[64];
