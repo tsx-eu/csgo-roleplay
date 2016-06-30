@@ -73,7 +73,7 @@ public bool fwdCanStart(int client) {
 	
 	int count = 0;
 	for (int i = 1; i <= MaxClients; i++) {
-		if( IsValidClient(i) && rp_GetClientJobID(i) == 41 )
+		if( IsValidClient(i) && !rp_GetClientBool(i, b_IsAFK) && rp_GetClientJobID(i) == 41 )
 			count++;
 	}
 	return (count>=5);
