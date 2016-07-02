@@ -738,26 +738,26 @@ public Action ItemPickLockOver_frame(Handle timer, Handle dp) {
 		
 		rp_ClientColorize(client);
 		
-		rp_SetDoorLock(doorID, false); 
-		rp_ClientOpenDoor(client, doorID, true);
-		
 		rp_SetClientStat(client, i_JobSucess, rp_GetClientStat(client, i_JobSucess) + 1);
 		rp_SetClientStat(client, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
-		
 		rp_SetClientFloat(client, fl_LastCrochettage, GetGameTime());
 		
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} La porte a été ouverte.");
-		
-		if( g_iLastDoor[client][2] != doorID && g_iLastDoor[client][1] != doorID && g_iLastDoor[client][0] != doorID && rp_GetPlayerZone(target) != 91 && rp_GetPlayerZone(client) != 91 ) {
+		if( g_iLastDoor[client][2] != doorID && g_iLastDoor[client][1] != doorID && g_iLastDoor[client][0] != doorID
+			&& rp_GetPlayerZone(target) != 91 && rp_GetPlayerZone(client) != 91
+			&& !rp_GetClientKeyDoor(client, doorID) && GetEntProp(target, Prop_Data, "m_bLocked") ) {
+			
 			g_iLastDoor[client][2] = g_iLastDoor[client][1];
 			g_iLastDoor[client][1] = g_iLastDoor[client][0];
 			g_iLastDoor[client][0] = doorID;
 			
 			int rnd = rp_GetRandomCapital(91);
-			rp_SetJobCapital(rnd, rp_GetJobCapital(rnd) - (50*difficulte));
-			rp_SetJobCapital(91, rp_GetJobCapital(91) + (50*difficulte));
+			rp_SetJobCapital(rnd, rp_GetJobCapital(rnd) - (100*difficulte));
+			rp_SetJobCapital(91, rp_GetJobCapital(91) + (100*difficulte));
 		}
 		
+		rp_SetDoorLock(doorID, false); 
+		rp_ClientOpenDoor(client, doorID, true);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} La porte a été ouverte.");
 		
 		return Plugin_Stop;
 	}
