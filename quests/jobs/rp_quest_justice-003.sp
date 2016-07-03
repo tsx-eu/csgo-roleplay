@@ -57,7 +57,7 @@ public Action Cmd_Reload(int args) {
 // ----------------------------------------------------------------------------
 public bool fwdCanStart(int client) {
 	int job = rp_GetClientInt(client, i_Job);
-	if( job >= 107 && job <= 109 || job == 1 || job == 2 || job >= 4 && job <= 9)
+	if( (job == 107 || job == 108 || job == 107) || (job >= 1 && job <= 9))
 		return (playerMatch() >= 1);
 	
 	return false;
