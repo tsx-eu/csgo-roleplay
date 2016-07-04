@@ -1227,31 +1227,27 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 	
 	rp_ClientColorize(client);
 	rp_ClientReveal(client);
+	if( IsValidClient(target) )
+		SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
+	rp_SetClientBool(target, b_Stealing, false);
 	
 	if( rp_GetClientBool(target, b_Stealing) == false || !IsPlayerAlive(client) || !IsPlayerAlive(target) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N s'est débattu, le vol a échoué.", target);
-		rp_SetClientBool(target, b_Stealing, false);
-		SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 		CreateTimer(10.0, AllowStealing, client);
 		return Plugin_Handled;
 	}
 	if( (rp_IsClientNew(target) || (rp_GetClientJobID(target)==41 && rp_GetClientInt(target, i_ToKill) > 0) || (rp_GetWeaponBallType(wepid) == ball_type_nosteal)) && Math_GetRandomInt(0,3) != 0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N est plus difficile à voler qu'un autre...", target);
-		rp_SetClientBool(target, b_Stealing, false);
-		SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 		CreateTimer(5.0, AllowStealing, client);
 		return Plugin_Handled;
 	}
 	
 	if ( rp_GetClientFloat(target, fl_Invincible) >= GetGameTime() ) {
-		rp_SetClientBool(target, b_Stealing, false);
-		SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 		CreateTimer(1.0, AllowStealing, client);
 		return Plugin_Handled;
 	}
 	
 	CreateTimer(STEAL_TIME/2.0, AllowStealing, client);	
-	rp_SetClientBool(target, b_Stealing, false);
 	g_iStolenAmountTime[target]++;
 	CreateTimer(300.0, RemoveStealAmount, target);
 	
@@ -1293,8 +1289,8 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 				rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amount);
 			}
 			
-			int cpt = rp_GetRandomCapital(181);
-			rp_SetJobCapital(181, (rp_GetJobCapital(181) +  (price/2) ) );
+			int cpt = rp_GetRandomCapital(81);
+			rp_SetJobCapital(81, (rp_GetJobCapital(81) +  (price/2) ) );
 			rp_SetJobCapital(cpt, (rp_GetJobCapital(cpt) -  (price/2) ) );
 			
 			Call_StartForward(g_RP_On18thStealWeapon);
@@ -1302,7 +1298,6 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 			Call_PushCell(target);
 			Call_PushCell(wepid);
 			Call_Finish();
-				
 		}
 		else {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} L'arme %s de %N s'est déjà faite volée il y a quelques instants.", wepname, target);
@@ -1310,7 +1305,6 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 	}
 	else {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le joueur n'avait plus son arme sur lui.");
-		SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 		return Plugin_Handled;
 	}
 	
@@ -1344,7 +1338,6 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 	
 	FakeClientCommand(target, "use weapon_knife");
 	
-	SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 	return Plugin_Handled;
 }
 // ----------------------------------------------------------------------------
@@ -1510,8 +1503,8 @@ int findPlayerWeapon(int client, int target) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ce joueur est invincible.");
 		return -1;
 	}
-	if( rp_GetClientJobID(target) == 181 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler un autre 18th.");
+	if( rp_GetClientJobID(target) == 81 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler un autre dealer.");
 		return -1;
 	}
 	
