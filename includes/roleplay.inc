@@ -109,6 +109,7 @@ native bool rp_HookEvent(int client, rp_event eventID, rp_event_enum hook, float
  * @param  rp_event_enum hook          la fonction à ne plus utiliser
  */
 native bool rp_UnhookEvent(int client, rp_event eventID, rp_event_enum hook);
+native Handle rp_GetForwardHandle(int client, rp_event eventID);
 // ----------------------------------------------------------------------------
 //                                                 Getter et Setter sur joueur
 // ----------------------------------------------------------------------------
