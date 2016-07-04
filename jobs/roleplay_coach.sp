@@ -323,14 +323,14 @@ bool wpnCutDamage(int victim, int attacker, float &damage) {
 			
 			if( rp_IsInPVP(victim) ) {
 				rp_SetClientFloat(victim, fl_FrozenTime, GetGameTime() + 1.5);
-				if( !rp_GetClientBool(victim, b_ChiruYeux) )
+				if( !rp_GetClientBool(victim, ch_Yeux) )
 					ServerCommand("sm_effect_flash %d 1.5 180", victim);
 			}
 			else {
 				if( !rp_ClientFloodTriggered(attacker, victim, fd_flash) ) {
 					rp_ClientFloodIncrement(attacker, victim, fd_flash, 0.75);
 					rp_SetClientFloat(victim, fl_FrozenTime, GetGameTime() + 1.5);
-					if( !rp_GetClientBool(victim, b_ChiruYeux) )
+					if( !rp_GetClientBool(victim, ch_Yeux) )
 						ServerCommand("sm_effect_flash %d 1.5 180", victim);
 				}
 			}

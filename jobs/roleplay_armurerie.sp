@@ -413,7 +413,7 @@ public Action fwdWeapon(int victim, int attacker, float &damage, int wepID, floa
 				damage *= 0.5;
 				
 				rp_SetClientFloat(victim, fl_FrozenTime, GetGameTime() + 1.5);
-				if(!rp_GetClientBool(victim, b_ChiruYeux))
+				if(!rp_GetClientBool(victim, ch_Yeux))
 					ServerCommand("sm_effect_flash %d 1.5 180", victim);
 			}
 			else {
@@ -421,7 +421,7 @@ public Action fwdWeapon(int victim, int attacker, float &damage, int wepID, floa
 					rp_ClientFloodIncrement(attacker, victim, fd_flash, 1.0);
 					
 					rp_SetClientFloat(victim, fl_FrozenTime, GetGameTime() + 1.5);
-					if(!rp_GetClientBool(victim, b_ChiruYeux))
+					if(!rp_GetClientBool(victim, ch_Yeux))
 						ServerCommand("sm_effect_flash %d 1.5 180", victim);
 				}
 			}
