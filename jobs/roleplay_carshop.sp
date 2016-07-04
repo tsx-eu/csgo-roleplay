@@ -124,7 +124,6 @@ public void OnMapStart() {
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);
-	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 	rp_HookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
 	
 	for (int i = 1; i < 65; i++)
@@ -156,23 +155,6 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 	cooldown = 5.0;
 	
 	return Plugin_Stop;
-}
-public Action fwdCommand(int client, char[] command, char[] arg) {
-	if( StrEqual(command, "radio") ) {
-		int vehicle = Client_GetVehicle(client);
-		
-		if( rp_GetVehicleInt(vehicle, car_radio_station) <= 0 ) {
-			ACCESS_DENIED(client);
-		}
-		if( !rp_IsValidVehicle(vehicle) ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être dans une voiture pour utiliser cette commande.");
-			return Plugin_Handled;
-		}
-		
-		displayRadioMenu(client);
-		return Plugin_Handled;
-	}
-	return Plugin_Continue;
 }
 public Action taskGarageMenu(Handle timer, any client) {
 	if( rp_ClientCanDrawPanel(client) )
@@ -288,7 +270,6 @@ public Action Cmd_ItemVehicle(int args) {
 		rp_SetVehicleInt(car, car_light_r, 255);
 		rp_SetVehicleInt(car, car_light_g, 64);
 		rp_SetVehicleInt(car, car_light_b, 32);
-		rp_SetVehicleInt(car, car_radio_station, 1);
 		rp_SetVehicleInt(car, car_boost, 1);
 		rp_SetVehicleInt(car, car_donateur, 1);
 		
@@ -439,15 +420,6 @@ public Action Cmd_ItemVehicleStuff(int args) {
 		rp_SetVehicleInt(target, car_battery, 0);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre voiture est maintenant équipée d'une batterie secondaire.");
 	}
-	else if( StrEqual(arg1, "radio") ){
-		if(rp_GetVehicleInt(target, car_radio_station)!= -1){
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre voiture est déjà équipée d'une radio.");
-			ITEM_CANCEL(client, item_id);
-			return Plugin_Handled;
-		}
-		rp_SetVehicleInt(target, car_radio_station, 1);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre voiture est maintenant équipée d'une radio.");
-	}
 	else if( StrEqual(arg1, "boost") ){
 		if( rp_GetVehicleInt(target, car_boost) != -1){
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre voiture est déjà équipée d'un boost.");
@@ -548,7 +520,6 @@ public int Native_rp_CreateVehicle(Handle plugin, int numParams) {
 	rp_SetVehicleInt(ent, car_light_g, -1);
 	rp_SetVehicleInt(ent, car_light_b, -1);
 	rp_SetVehicleInt(ent, car_battery, -1);
-	rp_SetVehicleInt(ent, car_radio_station, -1);
 	rp_SetVehicleInt(ent, car_boost, -1);
 	rp_SetVehicleInt(ent, car_particle, -1);	
 	rp_SetVehicleInt(ent, car_health, 1000);
@@ -624,12 +595,6 @@ void VehicleRemove(int vehicle, bool explode = false) {
 		}
 	}
 	dettachVehicleLight(vehicle);
-	
-	if( rp_GetVehicleInt(vehicle, car_radio_station) > 0 ) {
-		char arg2[64];
-		Format(arg2, sizeof(arg2), "DeadlyDesire/princeton/disco/%i.wav", rp_GetVehicleInt(vehicle, car_radio_station));
-		StopSoundAny(vehicle, SNDCHAN_VOICE, arg2);
-	}
 	
 	ServerCommand("sm_effect_fading %i 2.5 1", vehicle);
 	rp_ScheduleEntityInput(vehicle, 2.5, "Kill");
@@ -931,19 +896,6 @@ void DisplayGarageMenu(int client) {
 	SetMenuExitButton(menu, true);
 	DisplayMenu(menu, client, MENU_TIME_DURATION);
 }
-void displayRadioMenu(int client) {
-	Handle menu = CreateMenu(eventRadioMenu);
-	SetMenuTitle(menu, "Menu de la radio");
-		
-	AddMenuItem(menu, "start", "Allumer la radio");
-	AddMenuItem(menu, "stop", "Éteindre la radio");
-	
-	AddMenuItem(menu, "prev", "Radio suivante");
-	AddMenuItem(menu, "next", "Radio précédente");
-
-	SetMenuExitButton(menu, true);
-	DisplayMenu(menu, client, MENU_TIME_DURATION);
-}
 void displayColorMenu(int client) {
 	Handle menu2 = CreateMenu(eventGarageMenu);
 	SetMenuTitle(menu2, "Menu du garage");
@@ -1003,44 +955,6 @@ void displayKlaxonMenu(int client){
 		menu.AddItem(tmp, tmp);
 	}
 	menu.Display(client, 60);
-}
-public int eventRadioMenu(Handle menu, MenuAction action, int client, int param) {
-	if( action == MenuAction_Select ) {
-		char arg1[64], arg2[64];
-		
-		if( GetMenuItem(menu, param, arg1, sizeof(arg1)) ) {
-			int vehicle = Client_GetVehicle(client);
-			
-			if( rp_IsValidVehicle(vehicle) ) {
-				
-				if( rp_GetVehicleInt(vehicle, car_radio_station) <= 0 )
-					return;
-				
-				int station = rp_GetVehicleInt(vehicle, car_radio_station);
-				
-				if( StrEqual(arg1, "prev") )
-					station--;
-				else if( StrEqual(arg1, "next") )
-					station++;
-				
-				if( station <= 0 )
-					station = 24;
-				if( station >= 25 )
-					station = 1;
-					
-				rp_SetVehicleInt(vehicle, car_radio_station, station);
-				
-				Format(arg2, sizeof(arg2), "DeadlyDesire/princeton/disco/%i.wav", station);
-				
-				if( !StrEqual(arg1, "stop") )
-					EmitSoundToClientAny(client, arg2, vehicle, SNDCHAN_VOICE, SNDLEVEL_NORMAL, SND_NOFLAGS, 0.33);
-				else
-					StopSoundAny(vehicle, SNDCHAN_VOICE, arg2);
-				
-				displayRadioMenu(client);
-			}
-		}
-	}
 }
 public int eventGarageMenu(Handle menu, MenuAction action, int client, int param) {
 	#if defined DEBUG
