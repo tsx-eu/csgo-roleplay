@@ -3052,7 +3052,7 @@ void explainJail(int client, int jailReason, int cop) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez posé des plants de drogue, imprimante(s) à faux billet, ou demandé à quelqu'un de vous aider pour une mission. Cela est interdit.");
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Nuisance ") == 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez fait trop de bruit sur un lieu publique.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez fait trop de bruit sur un lieu public.");
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Tir dans ") == 0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez tiré dans la rue ou sur un autre citoyen en présence du policier %N. Que vous ayez touché ou non votre cible, il est interdit de tirer dans la rue.", cop); 
