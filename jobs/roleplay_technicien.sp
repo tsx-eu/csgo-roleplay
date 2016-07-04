@@ -31,16 +31,8 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-enum ch_bio {
-	ch_Kevlar,
-	ch_Yeux,
-	
-	ch_Max
-};
-bool g_bBionique[65][ch_Max];
 int g_cBeam, g_cGlow, g_cExplode;
 bool g_bProps_trapped[2049];
-
 
 //forward RP_OnClientMaxMachineCount(int client, int& max);
 Handle g_hForward_RP_OnClientMaxMachineCount;
@@ -111,17 +103,17 @@ public void OnMapStart() {
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnAssurance,	fwdAssurance);
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
-}
-public void OnClientDisconnect(int client) {		
-	for (int i = 0; i < view_as<int>(ch_Max); i++) {
-		g_bBionique[client][i] = false;
-	}
+	
+	if( rp_GetClientBool(client, ch_Kevlar) )
+		rp_HookEvent(client, RP_OnFrameSeconde, fwdRegenKevlar);
+	if( rp_GetClientBool(client, ch_Yeux) )
+		rp_HookEvent(client, RP_PreHUDColorize, fwfBioYeux);
 }
 public Action fwdAssurance(int client, int& amount) {	
 	
-	if( g_bBionique[client][ch_Kevlar] )
+	if( rp_GetClientBool(client, ch_Kevlar) )
 		amount += 100;
-	if( g_bBionique[client][ch_Yeux] )
+	if( rp_GetClientBool(client, ch_Yeux) )
 		amount += 100;
 	
 	return Plugin_Changed; // N'a pas d'impact, pour le moment.
@@ -142,13 +134,13 @@ public Action Cmd_ItemBioKev(int args) {
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
 	
-	if( g_bBionique[client][ch_Kevlar] ) {
+	if( rp_GetClientBool(client, ch_Kevlar) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà une régénération bionique.");
 		ITEM_CANCEL(client, item_id);
 	}
 	
 	rp_HookEvent(client, RP_OnFrameSeconde, fwdRegenKevlar);
-	g_bBionique[client][ch_Kevlar] = true;
+	rp_SetClientBool(client, ch_Kevlar, true);
 }
 // ------------------------------------------------------------------------------
 public Action Cmd_ItemBioYeux(int args) {
@@ -159,14 +151,13 @@ public Action Cmd_ItemBioYeux(int args) {
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
 	
-	if( g_bBionique[client][ch_Yeux] ) {
+	if( rp_GetClientBool(client, ch_Yeux) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà des yeux bioniques.");
 		ITEM_CANCEL(client, item_id);
 	}
 	
 	rp_HookEvent(client, RP_PreHUDColorize, fwfBioYeux);
-	g_bBionique[client][ch_Yeux] = true;
-	rp_SetClientBool(client, b_ChiruYeux, true);
+	rp_SetClientBool(client, ch_Yeux, true);
 }
 public Action fwfBioYeux(int client, int color[4]) {
 	#if defined DEBUG
@@ -320,7 +311,7 @@ public Action Cmd_ItemNano(int args) {
 			
 			TE_SetupBeamPoints(vecStart, vecEnd, g_cBeam, 0, 0, 0, 1.0, 5.0, 5.0, 1, 0.5, {255, 255, 255, 192}, 0);
 			TE_SendToAll();
-			if(!rp_GetClientBool(i, b_ChiruYeux))
+			if(!rp_GetClientBool(i, ch_Yeux))
 				ServerCommand("sm_effect_flash %d 5.0 255", i);
 		}
 	}

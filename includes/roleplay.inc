@@ -581,10 +581,6 @@ enum bool_user_data {
 	b_HasShoes,
 	b_SpawnToGrave,
 	b_Pissing,
-	b_ChiruRegen,
-	b_ChiruMaxHeal,
-	b_ChiruKevlar,
-	b_ChiruYeux,
 	b_IsAFK,
 	b_IsMuteGlobal,
 	b_IsMuteLocal,
@@ -603,7 +599,13 @@ enum bool_user_data {
 	b_HasVilla,
 	b_CanSort,
 	b_MayUseUltimate,
-
+	ch_Force,
+	ch_Speed,
+	ch_Jump,
+	ch_Regen,
+	ch_Heal,
+	ch_Kevlar,
+	ch_Yeux,
 	b_udata_max
 };
 enum int_user_data {

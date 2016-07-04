@@ -30,17 +30,6 @@ public Plugin myinfo = {
 };
 
 int g_cBeam;
-
-enum chiruList {
-	ch_Force,
-	ch_Speed,
-	ch_Jump,
-	ch_Regen,
-	ch_Heal,
-	
-	ch_Max
-};
-bool g_bChirurgie[65][ch_Max];
 int g_iSuccess_last_faster_dead[65];
 // ----------------------------------------------------------------------------
 public Action Cmd_Reload(int args) {
@@ -83,11 +72,17 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnAssurance,	fwdAssurance);
 	rp_HookEvent(client, RP_OnPlayerDead,	fwdDeath);
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
-}
-public void OnClientDisconnect(int client) {
-	for (int i = 0; i < view_as<int>(ch_Max); i++) {
-		g_bChirurgie[client][i] = false;
-	}
+	
+	if( rp_GetClientBool(client, ch_Force) )
+		rp_HookEvent(client, RP_PreGiveDamage, fwdChiruForce); 
+	if( rp_GetClientBool(client, ch_Speed) )
+		rp_HookEvent(client, RP_PrePlayerPhysic, fwdChiruSpeed); 
+	if( rp_GetClientBool(client, ch_Jump) )
+		rp_HookEvent(client, RP_PrePlayerPhysic, fwdChiruJump);
+	if( rp_GetClientBool(client, ch_Regen))
+		rp_HookEvent(client, RP_OnFrameSeconde, fwdChiruHealing);
+	if( rp_GetClientBool(client, ch_Heal))
+		rp_HookEvent(client, RP_OnPlayerSpawn, fwdSpawn);
 }
 public Action fwdDeath(int victim, int attacker, float& respawn) {
 	if( g_iSuccess_last_faster_dead[attacker] +1 >= GetTime() ) {
@@ -134,33 +129,32 @@ public Action Cmd_ItemChirurgie(int args) {
 	rp_Effect_Particle(client, "blood_pool");
 	
 	if( StrEqual(arg1, "force") || StrEqual(arg1, "full") ) {
-		if( !g_bChirurgie[client][ch_Force] )
+		if( !rp_GetClientBool(client, ch_Force) )
 			rp_HookEvent(client, RP_PreGiveDamage, fwdChiruForce); 
-		g_bChirurgie[client][ch_Force] = true;
+		rp_SetClientBool(client, ch_Force, true);
 	}
 	if( StrEqual(arg1, "speed") || StrEqual(arg1, "full") ) {
-		if( !g_bChirurgie[client][ch_Speed] )
+		if( !rp_GetClientBool(client, ch_Speed) )
 			rp_HookEvent(client, RP_PrePlayerPhysic, fwdChiruSpeed); 
-		g_bChirurgie[client][ch_Speed] = true;
+		rp_SetClientBool(client, ch_Speed, true);
 	}
 	if( StrEqual(arg1, "jump") || StrEqual(arg1, "full") ) {
-		if( !g_bChirurgie[client][ch_Jump] )
+		if( !rp_GetClientBool(client, ch_Jump) )
 			rp_HookEvent(client, RP_PrePlayerPhysic, fwdChiruJump);
-		g_bChirurgie[client][ch_Jump] = true;
+		rp_SetClientBool(client, ch_Jump, true);
 	}
 	if( StrEqual(arg1, "regen") || StrEqual(arg1, "full") ) {
-		if( !g_bChirurgie[client][ch_Regen])
+		if( !rp_GetClientBool(client, ch_Regen))
 			rp_HookEvent(client, RP_OnFrameSeconde, fwdChiruHealing);
-		g_bChirurgie[client][ch_Regen] = true;
+		rp_SetClientBool(client, ch_Regen, true);
 	}
 	if( StrEqual(arg1, "heal") || StrEqual(arg1, "full") ) {
 		
 		SetEntityHealth(client, 500);
-		if( !g_bChirurgie[client][ch_Heal])
+		if( !rp_GetClientBool(client, ch_Heal))
 			rp_HookEvent(client, RP_OnPlayerSpawn, fwdSpawn);
 		
-		
-		g_bChirurgie[client][ch_Heal] = true;
+		rp_SetClientBool(client, ch_Heal, true);
 	}
 	
 	return Plugin_Handled;
@@ -199,27 +193,22 @@ public Action fwdChiruHealing(int client) {
 	if( GetClientHealth(client) < Entity_GetMaxHealth(client) ) {
 		SetEntityHealth(client, GetClientHealth(client)+1);
 	}
-	
-	if( g_bChirurgie[client][ch_Force] && g_bChirurgie[client][ch_Heal] && g_bChirurgie[client][ch_Jump] &&
-		g_bChirurgie[client][ch_Regen] && g_bChirurgie[client][ch_Speed] ) {
-		rp_IncrementSuccess(client, success_list_hopital);
-	}
 }
 public Action fwdAssurance(int client, int& amount) {
 	
-	if( g_bChirurgie[client][ch_Force] ) {
+	if( rp_GetClientBool(client, ch_Force) ) {
 		amount += 500;
 	}
-	if( g_bChirurgie[client][ch_Heal] ) {
+	if( rp_GetClientBool(client, ch_Heal) ) {
 		amount += 1000;
 	}
-	if( g_bChirurgie[client][ch_Jump] ) {
+	if( rp_GetClientBool(client, ch_Jump) ) {
 		amount += 750;
 	}
-	if( g_bChirurgie[client][ch_Regen] ) {
+	if( rp_GetClientBool(client, ch_Regen) ) {
 		amount += 500;
 	}
-	if( g_bChirurgie[client][ch_Speed] ) {
+	if( rp_GetClientBool(client, ch_Speed) ) {
 		amount += 1000;
 	}	
 	
