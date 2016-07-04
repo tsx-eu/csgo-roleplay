@@ -708,7 +708,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	else
 		amount = Math_GetRandomInt(1, VOL_MAX);
 	
-	if( VOL_MAX > 0 && money <= 0 && rp_GetClientInt(client, i_Job) <= 83 && !rp_IsClientNew(target) /*&& doRP_CanClientStealItem(client, target)*/ ) {
+	if( VOL_MAX > 0 && money <= 0 && rp_GetClientInt(client, i_Job) <= 84 && !rp_IsClientNew(target) /*&& doRP_CanClientStealItem(client, target)*/ ) {
 
 		int wepid = findPlayerWeapon(client, target);
 		
