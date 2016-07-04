@@ -647,7 +647,6 @@ enum int_user_data {
 	i_jailTime_Last,
 	i_jailTime_Reason,
 	i_Perquiz,
-	i_Camera,
 	i_GPS,
 	i_Machine,
 	i_Plant,

@@ -67,7 +67,6 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_conprotect",	Cmd_ItemConProtect,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_enquete_menu",Cmd_ItemEnqueteMenu,	"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_enquete",		Cmd_ItemEnquete,		"RP-ITEM",	FCVAR_UNREGISTERED);
-	RegServerCmd("rp_item_camera",		Cmd_ItemCamera,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_cryptage",	Cmd_ItemCryptage,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_map",			Cmd_ItemMaps,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	
@@ -892,43 +891,6 @@ public Action fwdFrameKidnap(int client) {
 	OpenKidnappingMenu(client);
 }
 // ----------------------------------------------------------------------------
-public Action Cmd_ItemCamera(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemCamera");
-	#endif
-	char arg1[12];
-	GetCmdArg(1, arg1, 11);
-	
-	int client = StringToInt(arg1);
-	int target = GetClientAimTarget(client, false);
-	
-
-	int item_id = GetCmdArgInt(args);
-	
-	if( !IsValidClient(target) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez vous rapprocher pour lui coller une caméra."); // Pas sûr pour les 2 p
-		ITEM_CANCEL(client, item_id);
-		return Plugin_Handled;
-	}
-	
-	
-	if( rp_GetClientInt(client, i_Camera) > 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible de mettre une caméra sur ce joueur pour le moment.");
-		ITEM_CANCEL(client, item_id);
-		return Plugin_Handled;
-	}
-	
-	rp_SetClientInt(client, i_Camera, target);
-	
-	SetEntPropEnt(client, Prop_Send, "m_hViewEntity", target);
-	SetEntProp(client, Prop_Send, "m_bShouldDrawPlayerWhileUsingViewEntity", 1);
-	SetEntProp(client, Prop_Send, "m_iDefaultFOV", 130);
-	
-	if( rp_GetClientInt(client, i_ThirdPerson) == 1 ) {
-		ClientCommand(client, "firstperson");
-	}
-	return Plugin_Handled;
-}
 public Action Cmd_ItemCryptage(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemCryptage");
