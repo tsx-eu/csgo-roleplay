@@ -102,11 +102,13 @@ public bool FilterToOne(int entity, int mask, any data) {
 	static char classname[64];
 	if( entity == data )
 		return false;
-	GetEdictClassname(entity, classname, sizeof(classname));
-	
-	if( StrEqual(classname, "notsolid") )
+	if( Entity_GetParent(entity) == data )
 		return false;
 		
+	GetEdictClassname(entity, classname, sizeof(classname));
+	if( StrEqual(classname, "notsolid") )
+		return false;
+	
 	return true;
 }
 public void SQL_QueryCallBack(Handle owner, Handle handle, const char[] error, any data) {
