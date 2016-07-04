@@ -130,7 +130,7 @@ public Action fwdAssurance(int client, int& amount) {
 public Action fwdRegenKevlar(int client) {
 	
 	int kev = rp_GetClientInt(client, i_Kevlar);
-	if( kev < 100 ) {
+	if( kev < 250 ) {
 		rp_SetClientInt(client, i_Kevlar, kev + 1);
 	}
 }
