@@ -1116,6 +1116,9 @@ void Cmd_BuyItemMenu(int client, bool free) {
 		
 		getBuyMenu(position, data);
 		
+		if( data[IM_Owner] == client )
+			data[IM_Prix] /= 10;
+		
 		rp_GetItemData(data[IM_ItemID], item_type_name, tmp2, sizeof(tmp2));
 		Format(tmp, sizeof(tmp), "%d %d", position, free);
 		Format(tmp2, sizeof(tmp2), "%s pour %d$", tmp2, free?0:data[IM_Prix]);
@@ -1144,6 +1147,12 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			if( data[IM_ItemID] == 0 )
 				return 0;
 			
+			if( data[IM_Owner] == client ) {
+				data[IM_Prix] /= 10;
+				if( data[IM_Prix] == 0 )
+					data[IM_Prix] = 1;
+			}
+			
 			if( StringToInt(buffer[1]) == 1 ) {
 				rp_SetClientInt(client, i_LastVolAmount, 100+data[BM_Prix]); 
 				data[IM_Prix] = 0;
@@ -1165,7 +1174,10 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			
 			LogToGame("[TSX-RP] [ITEM-VENDRE] %L a vendu 1 %s a %L", client, tmp, client);
 			
-			if( IsValidClient(data[IM_Owner]) && rp_GetClientJobID(data[IM_Owner]) == 91 && data[IM_Prix] > 0 ) {
+			if( data[IM_Owner] == client ) {
+				rp_SetJobCapital(91, rp_GetJobCapital(91) + RoundToCeil(float(data[IM_Prix]*10) * 0.5));
+			}
+			else if( IsValidClient(data[IM_Owner]) && rp_GetClientJobID(data[IM_Owner]) == 91 && data[IM_Prix] > 0 ) {
 				rp_SetJobCapital(91, rp_GetJobCapital(91) + RoundToCeil(float(data[IM_Prix]) * 0.5));
 				rp_SetClientInt(data[IM_Owner], i_AddToPay, rp_GetClientInt(data[IM_Owner], i_AddToPay) + RoundToFloor(float(data[IM_Prix]) * 0.5));
 				
