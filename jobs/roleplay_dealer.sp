@@ -1146,7 +1146,10 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 				rp_SetBuildingData(target, BD_Trapped, true);
 				ServerCommand("sm_effect_particles %d env_fire_large 45", target);
 				CreateTimer(45.1, SwitchTrapped, EntIndexToEntRef(target));
+				
 				stealAMount = 100;
+				
+				rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 100 ); 
 			}
 			case 5: { // Place de l'indé
 				g_bCanSearchPlant[client] = false;

@@ -844,7 +844,7 @@ int getDistrib(int client, int& type) {
 	int owner = rp_GetBuildingData(target, BD_owner);
 	
 	
-	if( StrEqual(classname, "rp_bank") && owner == 0 )
+	if( StrEqual(classname, "rp_bank") && owner == 0 && !rp_GetBuildingData(target, BD_Trapped) )
 		type = 2;
 	if( StrEqual(classname, "rp_weaponbox") )
 		type = 3;
