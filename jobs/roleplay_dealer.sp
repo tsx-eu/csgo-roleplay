@@ -123,6 +123,12 @@ public Action Cmd_ItemDrugs(int args) {
 	int item_id = GetCmdArgInt(args);
 	float dur = DRUG_DURATION;
 	
+	if( StrEqual(arg0, "ghb") && rp_GetClientInt(client, i_MaskCount) <= 0 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser de GHB pour le moment.");
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
+	
 	if( StrEqual(arg0, "lsd2") || StrEqual(arg0, "pcp2") || StrEqual(arg0, "ghb") ){
 		int target = rp_GetClientTarget(client);
 	
@@ -169,6 +175,8 @@ public Action Cmd_ItemDrugs(int args) {
 		if( StrEqual(arg0, "lsd2")) rp_Effect_VisionTrouble(target);  //Si c'est de la LSD
 		else if( StrEqual(arg0, "pcp2")) rp_HookEvent(target, RP_PrePlayerPhysic, fwdPCP, dur); //Si c'est du PCP
 		else if( StrEqual(arg0, "ghb")) rp_HookEvent(target, RP_OnPlayerDead, fwdGHB, dur); //Si c'est du GHB
+		
+		if( StrEqual(arg0, "ghb") ) rp_SetClientInt(client, i_MaskCount, rp_GetClientInt(client, i_MaskCount) - 1);
 		
 		ServerCommand("sm_effect_particles %d Trail9 10", client);
 		
