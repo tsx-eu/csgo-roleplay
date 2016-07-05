@@ -20,7 +20,7 @@ forward void RP_ClientCraftOver(int client, int itemID);
 // Dealer
 forward void RP_On18thStealWeapon(int client, int victim, int weaponID);
 forward void RP_OnClientMaxPlantCount(int client, int& max);
-forward void RP_OnClientPiedBiche(int client);
+forward void RP_OnClientPiedBiche(int client, int type );
 forward Action RP_ClientCanTP(int client);
 // Mafia
 forward Action RP_CanClientStealItem(int client, int target);

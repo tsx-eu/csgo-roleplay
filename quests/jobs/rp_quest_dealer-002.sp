@@ -115,11 +115,13 @@ public void Q1_Abort(int objectiveID, int client) {
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 	RemoveFromArray(g_hDoing, FindValueInArray(g_hDoing, client));
 }
-public void RP_OnClientPiedBiche(int client) {
-	int length = GetArraySize(g_hDoing);
-	for (int i = 0; i < length; i++) {
-		if( GetArrayCell(g_hDoing, i) == client ) {
-			rp_QuestStepComplete(client, g_iStep[client]);
+public void RP_OnClientPiedBiche(int client, int type) {
+	if( type == 5  ) {
+		int length = GetArraySize(g_hDoing);
+		for (int i = 0; i < length; i++) {
+			if( GetArrayCell(g_hDoing, i) == client ) {
+				rp_QuestStepComplete(client, g_iStep[client]);
+			}
 		}
 	}
 }

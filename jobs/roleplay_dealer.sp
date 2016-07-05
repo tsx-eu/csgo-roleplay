@@ -88,7 +88,7 @@ public void OnPluginStart() {
 }
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {
 	g_hForward_RP_OnClientMaxPlantCount = CreateGlobalForward("RP_OnClientMaxPlantCount", ET_Event, Param_Cell, Param_CellByRef);
-	g_hForward_RP_OnClientPiedBiche = CreateGlobalForward("RP_OnClientPiedBiche", ET_Event, Param_Cell);
+	g_hForward_RP_OnClientPiedBiche = CreateGlobalForward("RP_OnClientPiedBiche", ET_Event, Param_Cell, Param_Cell);
 	g_hForward_RP_ClientCanTP = CreateGlobalForward("RP_ClientCanTP", ET_Event, Param_Cell);
 	g_RP_On18thStealWeapon = CreateGlobalForward("RP_On18thStealWeapon", ET_Event, Param_Cell, Param_Cell, Param_Cell);
 }
@@ -1122,7 +1122,7 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 		float time = (rp_IsNight() ? STEAL_TIME:STEAL_TIME*2.0);
 		int stealAMount;
 		
-		doRP_OnClientPiedBiche(client);
+		doRP_OnClientPiedBiche(client, type);
 		
 		switch(type) {
 			case 1: { // Voiture
@@ -1760,9 +1760,10 @@ void doRP_OnClientMaxPlantCount(int client, int& max) {
 	Call_PushCellRef(max);
 	Call_Finish();
 }
-void doRP_OnClientPiedBiche(int client) {
+void doRP_OnClientPiedBiche(int client, int type) {
 	Call_StartForward(g_hForward_RP_OnClientPiedBiche);
 	Call_PushCell(client);
+	Call_PushCell(type);
 	Call_Finish();
 }
 bool doRP_ClientCanTP(int client) {
