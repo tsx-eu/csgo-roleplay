@@ -123,7 +123,7 @@ public Action Cmd_ItemDrugs(int args) {
 	int item_id = GetCmdArgInt(args);
 	float dur = DRUG_DURATION;
 	
-	if( StrEqual(arg0, "lsd2") || StrEqual(arg0, "pcp2") ){
+	if( StrEqual(arg0, "lsd2") || StrEqual(arg0, "pcp2") || StrEqual(arg0, "ghb") ){
 		int target = rp_GetClientTarget(client);
 	
 		if( rp_GetZoneBit( rp_GetPlayerZone(client) ) & BITZONE_PEACEFULL ) {
@@ -162,8 +162,9 @@ public Action Cmd_ItemDrugs(int args) {
 		
 		//Effets des drogues
 		if( StrEqual(arg0, "lsd2")) rp_Effect_VisionTrouble(target);  //Si c'est de la LSD
-		else rp_HookEvent(target, RP_PrePlayerPhysic, fwdPCP, dur); //Si c'est du PCP
-	
+		else if( StrEqual(arg0, "pcp2")) rp_HookEvent(target, RP_PrePlayerPhysic, fwdPCP, dur); //Si c'est du PCP
+		else if( StrEqual(arg0, "ghb")) rp_HookEvent(target, RP_OnPlayerKill, fwdGHB, dur); //Si c'est du GHB
+		
 		ServerCommand("sm_effect_particles %d Trail9 10", client);
 		
 		//Envoie de messages d'information
@@ -243,6 +244,11 @@ public Action Cmd_ItemDrugs(int args) {
 	rp_SetClientBool(client, b_Drugged, true);
 	g_hDrugTimer[client] = CreateTimer( dur, ItemDrugStop, client);
 	
+	return Plugin_Handled;
+}
+public Action fwdGHB(int attacker, int victim, char weapon[64]) {
+	if( attacker == victim )
+		return Plugin_Continue;
 	return Plugin_Handled;
 }
 public Action Cmd_ItemEngrais(int args) {
