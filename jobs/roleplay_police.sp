@@ -370,6 +370,11 @@ public Action Cmd_Cop(int client) {
 		ACCESS_DENIED(client);
 	}
 	
+	if(rp_GetClientInt(client, i_KillingSpread)>= 1 && GetClientTeam(client) == CS_TEAM_T) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez attendre, votre dernier meurtre était il y a moins de 6 minutes.");
+		return Plugin_Handled;
+	}
+	
 	float origin[3], vecAngles[3];
 	GetClientAbsOrigin(client, origin);
 	GetClientEyeAngles(client, vecAngles);
