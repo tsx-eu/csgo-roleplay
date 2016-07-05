@@ -193,7 +193,7 @@ public void Q1_Start(int objectiveID, int client) {
 	LogToGame("[BRAQUAGE] %N a lancé un braquage", client);
 }
 public void Q1_Frame(int objectiveID, int client) {
-	if( g_stkTeamCount[TEAM_BRAQUEUR] >= REQUIRED_T && g_stkTeamCount[TEAM_POLICE] >= REQUIRED_CT ) {
+	if( g_stkTeamCount[TEAM_BRAQUEUR] >= REQUIRED_T ) {
 		rp_QuestStepComplete(client, objectiveID);
 		return;
 	}
@@ -658,6 +658,12 @@ public Action fwdDead(int client, int attacker) {
 public Action fwdDamage(int attacker, int victim, float& damage, int wepID, float pos[3]) {
 	
 	if( g_iPlayerTeam[attacker] == TEAM_BRAQUEUR && g_iPlayerTeam[victim] != TEAM_POLICE && rp_GetZoneInt(rp_GetPlayerZone(victim), zone_type_type) != g_iPlanque ) {
+		return Plugin_Handled;
+	}
+	if( g_iPlayerTeam[attacker] != TEAM_BRAQUEUR && g_iPlayerTeam[victim] == TEAM_POLICE && rp_GetZoneInt(rp_GetPlayerZone(victim), zone_type_type) == g_iPlanque ) {
+		return Plugin_Handled;
+	}
+	if( g_iPlayerTeam[attacker] != TEAM_POLICE && g_iPlayerTeam[victim] == TEAM_BRAQUEUR ) {
 		return Plugin_Handled;
 	}
 	
