@@ -171,8 +171,9 @@ public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 					if( rp_GetZoneBit(oldZone) & BITZONE_JAIL &&  zoneID[k] == newZone ) {
 						
 						int cap = rp_GetRandomCapital(91);
-						rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 1000);
+						rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 1100);
 						rp_SetClientInt(target, i_AddToPay, rp_GetClientInt(target, i_AddToPay) + 1000);
+						rp_SetJobCapital(91, rp_GetJobCapital(91) + 100);
 						
 						rp_ClientSendToSpawn(client, false);
 						
