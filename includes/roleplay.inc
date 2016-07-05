@@ -22,12 +22,15 @@ forward void RP_On18thStealWeapon(int client, int victim, int weaponID);
 forward void RP_OnClientMaxPlantCount(int client, int& max);
 forward void RP_OnClientPiedBiche(int client, int type );
 forward Action RP_ClientCanTP(int client);
+forward void RP_OnMarcheNoireDealer(int client, int prix);
 // Mafia
 forward Action RP_CanClientStealItem(int client, int target);
 forward void RP_OnClientWeaponPick(int client, int type);
+forward void RP_OnMarcheNoireMafia(int client, int target, int victim, int itemID, int prix);
 // Police:
 forward void RP_OnClientTazedItem(int client, int reward);
 forward Action RP_OnClientSendJail(int client, int target);
+forward void RP_OnMarchePolice(int client, int prix, int realPrice);
 // Technicien:
 forward void RP_OnClientMaxMachineCount(int client, int& max);
 // ----------------------------------------------------------------------------
@@ -61,6 +64,7 @@ enum rp_event {
 	RP_OnPlayerSell,           /* Quand un joueur fait une vente */
 	RP_OnPlayerHUD,            /* A chaque fois que le HUD à gauche se refresh */
 	RP_OnPlayerCheckKey,	   /* A chaque vérification s'il a la clé */
+	RP_OnResellWeapon,		   /* Revente d'arme au marché noire */
 
 	RP_EventMax
 }
@@ -93,6 +97,7 @@ typeset rp_event_enum {
 	function Action(int client, int money);					                         	         /* RP_OnPlayerSell */
 	function Action(int client, char[] szHUD, const int maxSize);			                 /* RP_OnPlayerHUD */
 	function Action(int client, int doorID, int lockStatus);											/* RP_OnPlayerCheckKey */
+	function Action(int client, int weaponID, int price);									/* RP_OnResellWeapon */
 };
 /**
  * Hook un évenement d'un joueur

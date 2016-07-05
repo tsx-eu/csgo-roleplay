@@ -44,11 +44,12 @@ public Plugin myinfo = {
 int g_iLastDoor[65][3];
 int g_iDoorDefine_LOCKER[2049];
 float g_flAppartProtection[200];
-Handle g_hForward_RP_OnClientStealItem, g_hForward_RP_OnClientWeaponPick, g_vCapture;
+Handle g_hForward_RP_OnClientStealItem, g_hForward_RP_OnClientWeaponPick, g_hForward_RP_OnMarcheNoireMafia, g_vCapture;
 int g_cBeam;
 DataPack g_hBuyMenu;
 enum IM_Int {
 	IM_Owner,
+	IM_StealFrom,
 	IM_ItemID,
 	IM_Prix,
 	IM_Max
@@ -67,6 +68,16 @@ void doRP_OnClientWeaponPick(int client, int type) {
 	Call_StartForward(g_hForward_RP_OnClientWeaponPick);
 	Call_PushCell(client);
 	Call_PushCell(type);
+	Call_Finish();
+}
+void doRP_RP_OnMarcheNoireMafia(int client, int target, int victim, int itemID, int prix) {
+	
+	Call_StartForward(g_hForward_RP_OnMarcheNoireMafia);
+	Call_PushCell(client);
+	Call_PushCell(target);
+	Call_PushCell(victim);
+	Call_PushCell(itemID);
+	Call_PushCell(prix);
 	Call_Finish();
 }
 // ----------------------------------------------------------------------------
@@ -100,6 +111,7 @@ public void OnPluginStart() {
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {
 	g_hForward_RP_OnClientStealItem = CreateGlobalForward("RP_CanClientStealItem", ET_Event, Param_Cell, Param_Cell);
 	g_hForward_RP_OnClientWeaponPick = CreateGlobalForward("RP_OnClientWeaponPick", ET_Event, Param_Cell, Param_Cell);
+	g_hForward_RP_OnMarcheNoireMafia = CreateGlobalForward("RP_OnMarcheNoireMafia", ET_Event, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell);
 }
 public Action Cmd_GetStoreItem(int args) {
 	Cmd_BuyItemMenu(GetCmdArgInt(1), true);
@@ -243,7 +255,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		
 		rp_GetItemData(i, item_type_name, tmp, sizeof(tmp));
 		
-		addBuyMenu(client, i);
+		addBuyMenu(client, target, i);
 		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez volé %s à %N, il a été envoyé au marché noir.", tmp, target);
 		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Quelqu'un vous a volé: %s.", tmp);
@@ -1079,11 +1091,12 @@ void getBuyMenu(DataPackPos pos, int data[IM_Max]) {
 		data[i] = g_hBuyMenu.ReadCell();
 	}
 }
-void addBuyMenu(int client, int itemID) {
+void addBuyMenu(int client, int target, int itemID) {
 	
 	int data[IM_Max];
 	
 	data[IM_Owner] = client;
+	data[IM_StealFrom] = target;
 	data[IM_ItemID] = itemID;
 	data[IM_Prix] = (rp_GetItemInt(itemID, item_type_prix) * MARCHE_PERCENT) / 100;
 	
@@ -1171,6 +1184,8 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) - data[IM_Prix]);
 			rp_ClientGiveItem(client, data[IM_ItemID]);
 			rp_GetItemData(data[IM_ItemID], item_type_name, tmp, sizeof(tmp));
+			
+			doRP_RP_OnMarcheNoireMafia(client, data[IM_Owner], data[IM_StealFrom], data[IM_ItemID], data[IM_Prix]);
 			
 			LogToGame("[TSX-RP] [ITEM-VENDRE] %L a vendu 1 %s a %L", client, tmp, client);
 			
