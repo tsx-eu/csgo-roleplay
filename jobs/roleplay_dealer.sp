@@ -1232,9 +1232,11 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 	rp_ClientReveal(client);
 	if( IsValidClient(target) )
 		SDKUnhook(target, SDKHook_WeaponDrop, OnWeaponDrop);
+	
+	bool couldSteal = rp_GetClientBool(target, b_Stealing);
 	rp_SetClientBool(target, b_Stealing, false);
 	
-	if( rp_GetClientBool(target, b_Stealing) == false || !IsPlayerAlive(client) || !IsPlayerAlive(target) ) {
+	if( couldSteal == false || !IsPlayerAlive(client) || !IsPlayerAlive(target) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N s'est débattu, le vol a échoué.", target);
 		CreateTimer(10.0, AllowStealing, client);
 		return Plugin_Handled;
