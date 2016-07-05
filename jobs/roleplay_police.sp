@@ -922,6 +922,11 @@ public Action Cmd_Perquiz(int client) {
 		return Plugin_Handled;
 	}
 	
+	if(job >= 101 && job <= 107) { //Tous les juges + GOS
+		justice_perquiz(client);
+		return Plugin_Handled;
+	}
+	
 	
 	Handle menu = CreateMenu(MenuPerquiz);
 	SetMenuTitle(menu, "Gestion des perquisitions");
@@ -2232,10 +2237,8 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 		
 		if( StrEqual(options, "start") ) {
 			g_iCancel[client] = 0;
-			if(rp_GetClientJobID(client) == 1)
+			if (rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101)
 				start_perquiz(client, job_id);
-			else
-				begin_perquiz(client, job_id);
 		}
 		else if( StrEqual(options, "cancel") ) {
 			cancel_perquiz(client, job_id);
@@ -2249,6 +2252,87 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 		CloseHandle(menu);
 	}
 }
+
+void justice_perquiz(int client) {
+	#if defined DEBUG
+	PrintToServer("justice_perquiz");
+	#endif
+	
+	Handle menuJustice = CreateMenu(MenuJustice);
+	SetMenuTitle(menuJustice, "Choix des perquisitions");
+	AddMenuItem(menuJustice, "rechercher", "Rechercher");
+	AddMenuItem(menuJustice, "illegal", "Trafic illégal");
+	
+	SetMenuExitButton(menuJustice, true);
+	DisplayMenu(menuJustice, client, MENU_TIME_DURATION);
+}
+
+int MenuJustice(Handle menu, MenuAction action, int client, int param2) {
+	#if defined DEBUG
+	PrintToServer("MenuJustice");
+	#endif
+	
+	if(action == MenuAction_Select) {
+		char options[64];
+		GetMenuItem(menu, param2, options, 63);
+		int job_id = rp_GetZoneInt(rp_GetPlayerZone(rp_GetClientTarget(client)), zone_type_type);
+		
+		if( job_id <= 0 || job_id > 250 ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cette porte ne peut pas être perquisitionnée.");
+			return;
+		}
+		
+		if(StrEqual(options, "rechercher")) {
+			begin_perquiz(client, job_id);
+		}
+		
+		if(StrEqual(options, "illegal")) {
+			illegal_perquiz(client, job_id);
+		}
+	
+
+	} else if(action == MenuAction_End) {
+		CloseHandle(menu);
+	}
+}
+
+void illegal_perquiz(int client, int job_id) {
+	#if defined DEBUG
+	PrintToServer("MenuJustice");
+	#endif
+	
+	Handle menu = CreateMenu(MenuPerquiz);
+	SetMenuTitle(menu, "Gestion des perquisitions");
+	Handle DB = rp_GetDatabase();
+	SQL_LockDatabase( DB ); //!!!!!!!!!!!
+	char szQuery[1024];
+	Format(szQuery, sizeof(szQuery), "SELECT `time` FROM  `rp_perquiz` WHERE `job`='%i' ORDER BY `id` DESC LIMIT 1;", job_id);
+	Handle row = SQL_Query(DB, szQuery);
+	if( row != INVALID_HANDLE ) {
+		if( SQL_FetchRow(row) ) {
+			char tmp[128];
+			Format(tmp, sizeof(tmp), "Il y a %d minutes", (GetTime()-SQL_FetchInt(row, 0))/60 );
+			AddMenuItem(menu, "", tmp,		ITEMDRAW_DISABLED);
+		}
+		else {
+			AddMenuItem(menu, "", "Pas encore perqui",		ITEMDRAW_DISABLED);
+		}
+	}
+	SQL_UnlockDatabase( DB );
+
+	char szResp[128];
+	Format(szResp, sizeof(szResp), "Responsable: %N", GetPerquizResp(job_id));
+
+	AddMenuItem(menu, "", szResp,		ITEMDRAW_DISABLED);
+	AddMenuItem(menu, "start",	"Debuter");
+	AddMenuItem(menu, "cancel", "Annuler");
+	AddMenuItem(menu, "stop",	"Terminer");
+
+	SetMenuExitButton(menu, true);
+	DisplayMenu(menu, client, MENU_TIME_DURATION);
+	
+}
+
 void start_perquiz(int client, int job) {
 	#if defined DEBUG
 	PrintToServer("start_perquiz");
@@ -2265,13 +2349,23 @@ void start_perquiz(int client, int job) {
 	char tmp[255];
 	rp_GetZoneData(JobToZoneID(job), zone_type_name, tmp, sizeof(tmp));
 	
-	PrintToChatPoliceJob(job, "{lightblue} ================================== {default}");
-	PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [POLICE]{default} Début d'une perquisition dans: %s.", tmp);
-	LogToGame("[TSX-RP] [POLICE] %N débute une perquisition dans %s.",client, tmp);
+	if(rp_GetClientJobID(client) == 1) {	
+		PrintToChatPoliceJob(job, "{lightblue} ================================== {default}");
+		PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [POLICE]{default} Début d'une perquisition dans: %s.", tmp);
+		LogToGame("[TSX-RP] [POLICE] %N débute une perquisition dans %s.",client, tmp);
+	} else if(rp_GetClientJobID(client) == 101) {
+		PrintToChatPoliceJob(job, "{lightblue} ================================== {default}");
+		PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [JUSTICE]{default} Début d'une perquisition dans: %s.", tmp);
+		LogToGame("[TSX-RP] [JUSTICE] %N débute une perquisition dans %s.",client, tmp);
+	}	
 	
-	if( REP > 0 )
+	if( REP > 0 && rp_GetClientJobID(client) == 1) {
 		PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [POLICE]{default} %N {default}est prié de se présenter sur les lieux.", REP);
-	PrintToChatPoliceJob(job, "{lightblue} ================================== {default}");
+		PrintToChatPoliceJob(job, "{lightblue} ================================== {default}");
+	} else if(REP > 0 && rp_GetClientJobID(client) == 101) {
+		PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [JUSTICE]{default} %N {default}est prié de se présenter sur les lieux.", REP);
+		PrintToChatPoliceJob(job, "{lightblue} ================================== {default}");
+	}
 	
 	rp_SetJobCapital(1, rp_GetJobCapital(1) + 250);
 }
