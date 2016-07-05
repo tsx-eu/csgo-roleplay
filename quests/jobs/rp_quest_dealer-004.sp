@@ -125,7 +125,8 @@ public Action fwdResellWeapon(int client, int weaponID, int realPrice) {
 	g_iCount[client]++;
 }
 public void RP_OnMarcheNoireMafia(int client, int target, int victim, int itemID, int prix) {
-	if( victim != client && prix == 0 ) {
+	
+	if( g_iDoing[client] && victim != client && prix == 0 ) {
 		
 		int realPrice = rp_GetItemInt(itemID, item_type_prix) / 2;
 		int cap = rp_GetRandomCapital(QUEST_JOBID);
@@ -135,8 +136,8 @@ public void RP_OnMarcheNoireMafia(int client, int target, int victim, int itemID
 		g_iCount[client]++;
 	}
 }
-public void RP_RP_OnMarchePolice(int client, int prix, int realPrice) {
-	if( prix == 0 ) {
+public void RP_OnMarchePolice(int client, int prix, int realPrice) {
+	if( g_iDoing[client] && prix == 0 ) {
 		
 		int cap = rp_GetRandomCapital(QUEST_JOBID);
 		rp_SetJobCapital(cap, rp_GetJobCapital(cap) - realPrice);

@@ -145,6 +145,11 @@ public Action Cmd_ItemDrugs(int args) {
 			ITEM_CANCEL(client, item_id);
 			return Plugin_Handled;
 		}
+		if( rp_IsClientNew(target) ) {
+			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N est un nouveau joueur.", target);
+			ITEM_CANCEL(client, item_id);
+			return Plugin_Handled;
+		}
 		if( rp_GetClientBool(target, b_Lube) ) {
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N vous glisse entre les mains.", target);
 			ITEM_CANCEL(client, item_id);
@@ -163,7 +168,7 @@ public Action Cmd_ItemDrugs(int args) {
 		//Effets des drogues
 		if( StrEqual(arg0, "lsd2")) rp_Effect_VisionTrouble(target);  //Si c'est de la LSD
 		else if( StrEqual(arg0, "pcp2")) rp_HookEvent(target, RP_PrePlayerPhysic, fwdPCP, dur); //Si c'est du PCP
-		else if( StrEqual(arg0, "ghb")) rp_HookEvent(target, RP_OnPlayerKill, fwdGHB, dur); //Si c'est du GHB
+		else if( StrEqual(arg0, "ghb")) rp_HookEvent(target, RP_OnPlayerDead, fwdGHB, dur); //Si c'est du GHB
 		
 		ServerCommand("sm_effect_particles %d Trail9 10", client);
 		
