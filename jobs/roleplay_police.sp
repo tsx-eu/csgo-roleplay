@@ -91,7 +91,6 @@ int g_TribunalSearch[MAXPLAYERS+1][tribunal_search_max];
 char g_szTribunal_DATA[65][tribunal_max][64];
 DataPack g_hBuyMenu;
 
-Handle g_hForward_RP_OnMarchePolice;
 bool CanSendToJail(int client, int target) {
 	Action a;
 	Call_StartForward(rp_GetForwardHandle(target, RP_PreClientSendToJail));
@@ -106,14 +105,6 @@ void ClientTazedItem(int client, int reward) {
 	Call_StartForward(rp_GetForwardHandle(client, RP_OnClientTazedItem));
 	Call_PushCell(client);
 	Call_PushCell(reward);
-	Call_Finish();
-}
-void doRP_RP_OnMarchePolice(int client, int prix, int realPrice) {
-	
-	Call_StartForward(g_hForward_RP_OnMarchePolice);
-	Call_PushCell(client);
-	Call_PushCell(prix);
-	Call_PushCell(realPrice);
 	Call_Finish();
 }
 
@@ -144,10 +135,6 @@ public void OnPluginStart() {
 }
 public void OnAllPluginsLoaded() {
 	g_hBuyMenu = rp_WeaponMenu_Create();
-}
-public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {
-	g_hForward_RP_OnMarchePolice = CreateGlobalForward("RP_OnMarchePolice", ET_Event, Param_Cell, Param_Cell, Param_Cell);
-	
 }
 public void OnPluginEnd() {
 	if( g_hBuyMenu )
@@ -3147,7 +3134,14 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			rp_SetJobCapital(rnd, rp_GetJobCapital(rnd) - data[BM_Prix]);
 			LogToGame("[TSX-RP] [ITEM-VENDRE] %L a vendu 1 %s a %L", client, name, client);
 			
-			doRP_RP_OnMarchePolice(client, data[BM_Prix], rp_GetClientInt(client, i_LastVolAmount)-100);
+			Call_StartForward(rp_GetForwardHandle(client, RP_OnBlackMarket));
+			Call_PushCell(client);
+			Call_PushCell(1);
+			Call_PushCell(client);
+			Call_PushCell(client);
+			Call_PushCellRef(data[BM_Prix]);
+			Call_PushCell(rp_GetClientInt(client, i_LastVolAmount)-100);
+			Call_Finish();
 		}
 	}
 	else if (p_oAction == MenuAction_End) {

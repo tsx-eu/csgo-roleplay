@@ -97,6 +97,7 @@ public void Q1_Start(int objectiveID, int client) {
 	g_iDoing[client] = true;
 	rp_SetClientInt(client, i_Disposed, rp_GetClientInt(client, i_Disposed) + 1);
 	rp_HookEvent(client, RP_OnResellWeapon, fwdResellWeapon);
+	rp_HookEvent(client, RP_OnBlackMarket, fwdBlackMarket);
 }
 public void Q1_Frame(int objectiveID, int client) {
 	g_iDuration[client]--;
@@ -114,42 +115,31 @@ public void Q1_Frame(int objectiveID, int client) {
 public void Q1_Abort(int objectiveID, int client) {
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 	g_iDoing[client] = false;
+	
+	rp_UnhookEvent(client, RP_OnResellWeapon, fwdResellWeapon);
+	rp_UnhookEvent(client, RP_OnBlackMarket, fwdBlackMarket);
 }
 
 public Action fwdResellWeapon(int client, int weaponID, int realPrice) {
-
 	int cap = rp_GetRandomCapital(QUEST_JOBID);
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - realPrice);
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + realPrice);
 	rp_SetClientInt(client, i_Disposed, rp_GetClientInt(client, i_Disposed) + 1);
 	g_iCount[client]++;
 }
-public void RP_OnMarcheNoireMafia(int client, int target, int victim, int itemID, int prix) {
-	
-	if( g_iDoing[client] && victim != client && prix == 0 ) {
-		
-		int realPrice = rp_GetItemInt(itemID, item_type_prix) / 2;
-		int cap = rp_GetRandomCapital(QUEST_JOBID);
-		rp_SetJobCapital(cap, rp_GetJobCapital(cap) - realPrice);
-		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + realPrice);
-	
-		g_iCount[client]++;
-	}
-}
-public void RP_OnMarchePolice(int client, int prix, int realPrice) {
-	if( g_iDoing[client] && prix == 0 ) {
-		
-		int cap = rp_GetRandomCapital(QUEST_JOBID);
-		rp_SetJobCapital(cap, rp_GetJobCapital(cap) - realPrice);
-		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + realPrice);
-		g_iCount[client]++;
+
+public Action fwdBlackMarket(int client, int jobID, int target, int victim, int& prix, int arg) {
+	if( prix == 0 ) {
+		if( jobID == 1 || (jobID == 91 && victim != client ) ) {
+			int cap = rp_GetRandomCapital(QUEST_JOBID);
+			rp_SetJobCapital(cap, rp_GetJobCapital(cap) - arg);
+			rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + arg);
+			g_iCount[client]++;
+		}
 	}
 }
 public void Q1_Done(int objectiveID, int client) {
 	Q1_Abort(objectiveID, client);
-	
-	
-	
 }
 // ----------------------------------------------------------------------------
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {

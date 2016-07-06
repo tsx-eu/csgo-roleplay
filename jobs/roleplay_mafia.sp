@@ -44,7 +44,7 @@ public Plugin myinfo = {
 int g_iLastDoor[65][3];
 int g_iDoorDefine_LOCKER[2049];
 float g_flAppartProtection[200];
-Handle g_hForward_RP_OnMarcheNoireMafia, g_vCapture;
+Handle g_vCapture;
 int g_cBeam;
 DataPack g_hBuyMenu;
 enum IM_Int {
@@ -63,16 +63,6 @@ bool CanClientStealItem(int client, int target) {
 	if( a == Plugin_Handled || a == Plugin_Stop )
 		return false;
 	return true;
-}
-void doRP_RP_OnMarcheNoireMafia(int client, int target, int victim, int itemID, int prix) {
-	
-	Call_StartForward(g_hForward_RP_OnMarcheNoireMafia);
-	Call_PushCell(client);
-	Call_PushCell(target);
-	Call_PushCell(victim);
-	Call_PushCell(itemID);
-	Call_PushCell(prix);
-	Call_Finish();
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_Reload(int args) {
@@ -101,9 +91,6 @@ public void OnPluginStart() {
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
-}
-public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {
-	g_hForward_RP_OnMarcheNoireMafia = CreateGlobalForward("RP_OnMarcheNoireMafia", ET_Event, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell);
 }
 public Action Cmd_GetStoreItem(int args) {
 	Cmd_BuyItemMenu(GetCmdArgInt(1), true);
@@ -1180,7 +1167,14 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			rp_ClientGiveItem(client, data[IM_ItemID]);
 			rp_GetItemData(data[IM_ItemID], item_type_name, tmp, sizeof(tmp));
 			
-			doRP_RP_OnMarcheNoireMafia(client, data[IM_Owner], data[IM_StealFrom], data[IM_ItemID], data[IM_Prix]);
+			Call_StartForward(rp_GetForwardHandle(client, RP_OnBlackMarket));
+			Call_PushCell(client);
+			Call_PushCell(91);
+			Call_PushCell(data[IM_Owner]);
+			Call_PushCell(data[IM_StealFrom]);
+			Call_PushCellRef(data[IM_Prix]);
+			Call_PushCell(rp_GetItemInt(data[IM_ItemID], item_type_prix) / 2);
+			Call_Finish();
 			
 			LogToGame("[TSX-RP] [ITEM-VENDRE] %L a vendu 1 %s a %L", client, tmp, client);
 			

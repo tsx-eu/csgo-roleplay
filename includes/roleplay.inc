@@ -75,6 +75,7 @@ enum rp_event {
 	RP_PreClientStealItem,		/* Lorsqu'un joueur vol un autre */
 	RP_PreClientSendToJail,		/* Lorsqu'nu joueur envois un autre en taule */
 	RP_OnClientTazedItem,		/* Lorsqu'un joueur taze quelque chose */
+	RP_OnBlackMarket,			/* Lorsqu'un joueur achète quelque chose au marché noire */
 	
 	RP_EventMax
 }
@@ -117,6 +118,7 @@ typeset rp_event_enum {
 	function Action(int client, int target);												/* RP_PreClientStealItem */
 	function Action(int target, int client);												/* RP_PreClientSendToJail */
 	function Action(int client, int reward);												/* RP_OnClientTazedItem */
+	function Action(int client, int jobID, int target, int victim, int& prix, int arg);		/* RP_OnBlackMarket */
 };
 /**
  * Hook un évenement d'un joueur
