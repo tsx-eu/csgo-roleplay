@@ -24,8 +24,8 @@
 //forward Action RP_ClientCanTP(int client);
 forward void RP_OnMarcheNoireDealer(int client, int prix);
 // Mafia
-forward Action RP_CanClientStealItem(int client, int target);
-forward void RP_OnClientWeaponPick(int client, int type);
+//forward Action RP_CanClientStealItem(int client, int target);
+//forward void RP_OnClientWeaponPick(int client, int type);
 forward void RP_OnMarcheNoireMafia(int client, int target, int victim, int itemID, int prix);
 // Police:
 forward void RP_OnClientTazedItem(int client, int reward);
@@ -72,6 +72,7 @@ enum rp_event {
 	RP_PostPiedBiche,			/* Lorsqu'un pied de biche se termine */
 	RP_PreClientTeleport,		/* Lorsqu'un joueur tente de se téléporter */
 	RP_PostStealWeapon,			/* Lorsqu'un joueur termine de voler une arme */
+	RP_PreClientStealItem,		/* Lorsqu'un joueur vol un autre */
 
 	RP_EventMax
 }
@@ -111,6 +112,7 @@ typeset rp_event_enum {
 	function Action(int client, int type); 													/* RP_PostPiedBiche */
 	function Action(int client);															/* RP_PreClientTeleport */
 	function Action(int client, int target, int weaponID);									/* RP_PostStealWeapon */
+	function Action(int client, int target);												/* RP_PreClientStealItem */
 };
 /**
  * Hook un évenement d'un joueur

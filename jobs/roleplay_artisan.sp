@@ -174,6 +174,7 @@ public void OnClientPostAdminCheck(int client) {
 	
 	rp_HookEvent(client, RP_OnPlayerUse, 	fwdUse);
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
+	rp_HookEvent(client, RP_PreClientStealItem, fwdCanStealItem);
 	
 	for(int i = 0; i < view_as<int>(book_max); i++)
 		g_flClientBook[client][i] = 0.0;
@@ -220,10 +221,9 @@ public Action fwdOnPlayerBuild(int client, float& cooldown) {
 	
 	return Plugin_Stop;
 }
-public Action RP_CanClientStealItem(int client, int target) {
-	if( isNearTable(target) && g_flClientBook[target][book_steal] > GetTickedTime() ) {
-		return Plugin_Stop;
-	}
+public Action fwdCanStealItem(int client, int target) {
+	if( g_flClientBook[target][book_steal] > GetTickedTime() && isNearTable(target) )
+		return Plugin_Handled;
 	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------

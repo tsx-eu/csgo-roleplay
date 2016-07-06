@@ -48,6 +48,16 @@ Handle g_hDrugTimer[65];
 int g_iWeaponStolen[2049], g_iStolenAmountTime[65];
 int g_iMarket[MAX_ITEMS], g_iMarketClient[MAX_ITEMS][65];
 // ----------------------------------------------------------------------------
+bool CanClientStealItem(int client, int target) {
+	Action a;
+	Call_StartForward(rp_GetForwardHandle(client, RP_PreClientStealItem));
+	Call_PushCell(client);
+	Call_PushCell(target);
+	Call_Finish(a);
+	if( a == Plugin_Handled || a == Plugin_Stop )
+		return false;
+	return true;
+}
 public Action Cmd_Reload(int args) {
 	char name[64];
 	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
@@ -725,7 +735,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	else
 		amount = Math_GetRandomInt(1, VOL_MAX);
 	
-	if( VOL_MAX > 0 && money <= 0 && rp_GetClientInt(client, i_Job) <= 84 && !rp_IsClientNew(target) /*&& doRP_CanClientStealItem(client, target)*/ ) {
+	if( VOL_MAX > 0 && money <= 0 && rp_GetClientInt(client, i_Job) <= 84 && !rp_IsClientNew(target) && CanClientStealItem(client, target) ) {
 
 		int wepid = findPlayerWeapon(client, target);
 		

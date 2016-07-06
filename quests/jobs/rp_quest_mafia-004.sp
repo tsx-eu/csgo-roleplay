@@ -76,7 +76,7 @@ public bool fwdCanStart(int client) {
 public void OnClientPostAdminCheck(int client) {
 	g_iStep[client] = 0;
 }
-public void RP_OnClientWeaponPick(int client, int type) {
+public Action fwdPiedDeBiche(int client, int type) {
 	if( type == 3 && g_iDoing[client] > 0 ) {
 		rp_QuestStepComplete(client, g_iDoing[client]);
 	}
@@ -97,6 +97,7 @@ public void Q1_Start(int objectiveID, int client) {
 	g_iDuration[client] = 12 * 60;
 	g_iStep[client] = 0;
 	g_iDoing[client] = objectiveID;
+	rp_HookEvent(client, RP_PostPiedBiche, fwdPiedDeBiche);
 }
 public void Q1_Frame(int objectiveID, int client) {
 	
@@ -154,6 +155,7 @@ public void Q3_End(int objectiveID, int client) {
 }
 public void Q1_Abort(int objectiveID, int client) {
 	g_iDoing[client] = 0;
+	rp_UnhookEvent(client, RP_PostPiedBiche, fwdPiedDeBiche);
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 }
 // ----------------------------------------------------------------------------

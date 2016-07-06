@@ -44,7 +44,7 @@ public Plugin myinfo = {
 int g_iLastDoor[65][3];
 int g_iDoorDefine_LOCKER[2049];
 float g_flAppartProtection[200];
-Handle g_hForward_RP_OnClientStealItem, g_hForward_RP_OnClientWeaponPick, g_hForward_RP_OnMarcheNoireMafia, g_vCapture;
+Handle g_hForward_RP_OnMarcheNoireMafia, g_vCapture;
 int g_cBeam;
 DataPack g_hBuyMenu;
 enum IM_Int {
@@ -54,21 +54,15 @@ enum IM_Int {
 	IM_Prix,
 	IM_Max
 }
-bool doRP_CanClientStealItem(int client, int target) {
+bool CanClientStealItem(int client, int target) {
 	Action a;
-	Call_StartForward(g_hForward_RP_OnClientStealItem);
+	Call_StartForward(rp_GetForwardHandle(client, RP_PreClientStealItem));
 	Call_PushCell(client);
 	Call_PushCell(target);
 	Call_Finish(a);
 	if( a == Plugin_Handled || a == Plugin_Stop )
 		return false;
 	return true;
-}
-void doRP_OnClientWeaponPick(int client, int type) {
-	Call_StartForward(g_hForward_RP_OnClientWeaponPick);
-	Call_PushCell(client);
-	Call_PushCell(type);
-	Call_Finish();
 }
 void doRP_RP_OnMarcheNoireMafia(int client, int target, int victim, int itemID, int prix) {
 	
@@ -109,8 +103,6 @@ public void OnPluginStart() {
 			OnClientPostAdminCheck(i);
 }
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {
-	g_hForward_RP_OnClientStealItem = CreateGlobalForward("RP_CanClientStealItem", ET_Event, Param_Cell, Param_Cell);
-	g_hForward_RP_OnClientWeaponPick = CreateGlobalForward("RP_OnClientWeaponPick", ET_Event, Param_Cell, Param_Cell);
 	g_hForward_RP_OnMarcheNoireMafia = CreateGlobalForward("RP_OnMarcheNoireMafia", ET_Event, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell);
 }
 public Action Cmd_GetStoreItem(int args) {
@@ -219,7 +211,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	else
 		amount = Math_GetRandomInt(1, VOL_MAX);
 	
-	if( VOL_MAX > 0 && money <= 0 && rp_GetClientInt(client, i_Job) <= 93 && !rp_IsClientNew(target) && doRP_CanClientStealItem(client, target) ) {
+	if( VOL_MAX > 0 && money <= 0 && rp_GetClientInt(client, i_Job) <= 93 && !rp_IsClientNew(target) && CanClientStealItem(client, target) ) {
 		amount = 0;
 		
 		for(int i = 0; i < MAX_ITEMS; i++) {
@@ -493,7 +485,10 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 		float time = (rp_IsNight() ? STEAL_TIME:STEAL_TIME*2.0);
 		int stealAMount;
 		
-		doRP_OnClientWeaponPick(client, type);
+		Call_StartForward(rp_GetForwardHandle(client, RP_PostPiedBiche));
+		Call_PushCell(client);
+		Call_PushCell(type);
+		Call_Finish();
 		
 		switch(type) {
 			case 2: { // Banque
