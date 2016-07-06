@@ -709,7 +709,7 @@ public Action CAPTURE_Tick(Handle timer, any none) {
 	
 	Effect_DrawBeamBoxToAll(mins, maxs, g_cBeam, g_cBeam, 0, 30, 2.0, 5.0, 5.0, 2, 1.0, color, 0);
 	
-	if( GetTime() % 10 == 0 ) {
+	if( winner != defense && GetTime() % 2 == 0 ) {
 		g_iCapture_POINT[defense]++;
 	}
 	
