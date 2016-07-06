@@ -93,6 +93,9 @@ public void Q1_Start(int objectiveID, int client) {
 	g_iCraftLeft[client] = count;
 	g_iCraftItem[client] = itemID;
 	g_bDoingQuest[client] = true;
+	
+	rp_HookEvent(client, RP_PreClientCraft, fwdPreClientCraft);
+	rp_HookEvent(client, RP_PostClientCraft, fwdPostClientCraft);
 }
 public void Q2_Frame(int objectiveID, int client) {
 	if( g_iCraftLeft[client] == 0 ) {
@@ -108,6 +111,8 @@ public void Q_Abort(int objectiveID, int client) {
 	g_iCraftLeft[client] = 0;
 	g_iCraftItem[client] = 0;
 	g_bDoingQuest[client] = false;
+	rp_UnhookEvent(client, RP_PreClientCraft, fwdPreClientCraft);
+	rp_UnhookEvent(client, RP_PostClientCraft, fwdPostClientCraft);
 }
 public void Q_Done(int objectiveID, int client) {
 	Q_Abort(objectiveID, client);
@@ -115,13 +120,14 @@ public void Q_Done(int objectiveID, int client) {
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Merci pour votre aide, voici 5000$ !");
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 5000);
 }
-public int RP_CanClientCraftForFree(int client, int itemID) {
+public Action fwdPreClientCraft(int client, int itemID, int& free) {
 	if( g_bDoingQuest[client] && g_iCraftItem[client] == itemID && g_iCraftLeft[client] > 0 ) {
-		return g_iCraftLeft[client];
+		free += g_iCraftLeft[client];
+		return Plugin_Changed;
 	}
-	return 0;
+	return Plugin_Continue;
 }
-public void RP_ClientCraftOver(int client, int itemID) {
+public Action fwdPostClientCraft(int client, int itemID) {
 	if( g_bDoingQuest[client] && g_iCraftItem[client] == itemID && g_iCraftLeft[client] > 0 ) {
 		g_iCraftLeft[client]--;
 		rp_ClientGiveItem(client, itemID, -1);

@@ -53,23 +53,14 @@ public Plugin myinfo = {
 	description = "RolePlay - Jobs: Artisan",
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
-// ----------------------------------------------------------------------------
-//forward RP_CanClientCraftForFree(int client, int itemID);
-//forward RP_ClientCraftOver(int client, int itemID);
-Handle g_hForward_RP_CanClientCraftForFree, g_hForward_RP_CanClientCraftOver;
 int doRP_CanClientCraftForFree(int client, int itemID) {
 	int a;
-	Call_StartForward(g_hForward_RP_CanClientCraftForFree);
+	Call_StartForward(rp_GetForwardHandle(client, RP_PreClientCraft));
 	Call_PushCell(client);
 	Call_PushCell(itemID);
-	Call_Finish(a);
-	return a;
-}
-bool doRP_ClientCraftOver(int client, int itemID) {
-	Call_StartForward(g_hForward_RP_CanClientCraftOver);
-	Call_PushCell(client);
-	Call_PushCell(itemID);
+	Call_PushCellRef(a);
 	Call_Finish();
+	return a;
 }
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -89,10 +80,6 @@ public void OnPluginStart() {
 }
 public void OnAllPluginsLoaded() {
 	SQL_TQuery(rp_GetDatabase(), SQL_LoadReceipe, "SELECT `itemid`, `raw`, `amount`, REPLACE(`extra_cmd`, 'rp_item_primal ', '') `rate` FROM `rp_csgo`.`rp_craft` C INNER JOIN `rp_items` I ON C.`raw`=I.`id` ORDER BY `itemid`, `raw`", 0, DBPrio_Low);
-}
-public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {	
-	g_hForward_RP_CanClientCraftForFree = CreateGlobalForward("RP_CanClientCraftForFree", ET_Event, Param_Cell, Param_Cell);
-	g_hForward_RP_CanClientCraftOver = CreateGlobalForward("RP_ClientCraftOver", ET_Event, Param_Cell, Param_Cell);
 }
 public Action CmdSetFatigue(int client, int args) {
 	rp_SetClientFloat(GetCmdArgInt(1), fl_ArtisanFatigue, GetCmdArgFloat(2) / 100.0);
@@ -656,7 +643,11 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	if( positive > 0 ) { // Craft
 		if( !failed ) { // Si on échoue pas on give l'item
 			rp_ClientGiveItem(client, itemID, positive);
-			doRP_ClientCraftOver(client, itemID);
+
+			Call_StartForward(rp_GetForwardHandle(client, RP_PostClientCraft));
+			Call_PushCell(client);
+			Call_PushCell(itemID);
+			Call_Finish();
 		}
 		
 		if( g_flClientBook[client][book_luck] > GetTickedTime() && Math_GetRandomInt(0, 1000) < 50 )

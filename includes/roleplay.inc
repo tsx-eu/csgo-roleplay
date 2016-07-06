@@ -15,8 +15,8 @@
 
 // ----------------------------------------------------------------------------
 // Artisan:
-forward int RP_CanClientCraftForFree(int client, int itemID);
-forward void RP_ClientCraftOver(int client, int itemID);
+//forward int RP_CanClientCraftForFree(int client, int itemID);
+//forward void RP_ClientCraftOver(int client, int itemID);
 // Dealer
 forward void RP_On18thStealWeapon(int client, int victim, int weaponID);
 forward void RP_OnClientMaxPlantCount(int client, int& max);
@@ -65,6 +65,8 @@ enum rp_event {
 	RP_OnPlayerHUD,            /* A chaque fois que le HUD à gauche se refresh */
 	RP_OnPlayerCheckKey,	   /* A chaque vérification s'il a la clé */
 	RP_OnResellWeapon,		   /* Revente d'arme au marché noire */
+	RP_PreClientCraft,			/* Avant qu'un craft se fasse, permet de changer le cout */
+	RP_PostClientCraft,			/* Après qu'un craft réussisse */
 
 	RP_EventMax
 }
@@ -98,6 +100,8 @@ typeset rp_event_enum {
 	function Action(int client, char[] szHUD, const int maxSize);			                 /* RP_OnPlayerHUD */
 	function Action(int client, int doorID, int lockStatus);											/* RP_OnPlayerCheckKey */
 	function Action(int client, int weaponID, int price);									/* RP_OnResellWeapon */
+	function Action(int client, int itemID, int& free);										/* RP_PreClientCraft */
+	function Action(int client, int itemID);												/* RP_PostClientCraft */	
 };
 /**
  * Hook un évenement d'un joueur
