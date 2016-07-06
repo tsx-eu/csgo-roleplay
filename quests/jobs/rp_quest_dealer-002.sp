@@ -36,8 +36,7 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-int g_iQuest, g_iDuration[MAXPLAYERS + 1], g_iCount[MAXPLAYERS + 1], g_iStep[MAXPLAYERS + 1];
-Handle g_hDoing;
+int g_iQuest, g_iDuration[MAXPLAYERS + 1], g_iCount[MAXPLAYERS + 1], g_iStep[MAXPLAYERS + 1], g_iDoing[MAXPLAYERS + 1];
 
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
@@ -53,9 +52,6 @@ public void OnAllPluginsLoaded() {
 	rp_QuestAddStep(g_iQuest, i++,	Q2_Start,	Q1_Frame,	Q1_Abort,	Q1_Done);
 	rp_QuestAddStep(g_iQuest, i++,	Q2_Start,	Q1_Frame,	Q1_Abort,	Q1_Done);
 	rp_QuestAddStep(g_iQuest, i++,	Q2_Start,	Q1_Frame,	Q1_Abort,	Q2_Done);
-	
-	
-	g_hDoing = CreateArray(MAXPLAYERS);
 }
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -97,8 +93,9 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.Display(client, 60);
 	
 	g_iDuration[client] = 6 * 60;
-	g_iCount[client] = 5;
-	PushArrayCell(g_hDoing, client);
+	g_iCount[client] = 0;
+	g_iDoing[client] = true;
+	rp_HookEvent(client, RP_PostPiedBiche, fwdPiedDeBiche);
 }
 public void Q1_Frame(int objectiveID, int client) {
 	g_iDuration[client]--;
@@ -108,21 +105,17 @@ public void Q1_Frame(int objectiveID, int client) {
 		rp_QuestStepFail(client, objectiveID);
 	}
 	else {
-		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s %d/5", QUEST_NAME, g_iDuration[client], QUEST_RESUME, g_iCount[client]-5);
+		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s %d/5", QUEST_NAME, g_iDuration[client], QUEST_RESUME, g_iCount[client]);
 	}
 }
 public void Q1_Abort(int objectiveID, int client) {
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
-	RemoveFromArray(g_hDoing, FindValueInArray(g_hDoing, client));
+	g_iDoing[client] = false;
+	rp_UnhookEvent(client, RP_PostPiedBiche, fwdPiedDeBiche);
 }
-public void RP_OnClientPiedBiche(int client, int type) {
-	if( type == 5  ) {
-		int length = GetArraySize(g_hDoing);
-		for (int i = 0; i < length; i++) {
-			if( GetArrayCell(g_hDoing, i) == client ) {
-				rp_QuestStepComplete(client, g_iStep[client]);
-			}
-		}
+public Action fwdPiedDeBiche(int client, int type) {
+	if( g_iDoing[client] && type == 5 ) {
+		rp_QuestStepComplete(client, g_iStep[client]);
 	}
 }
 public void Q1_Done(int objectiveID, int client) {
@@ -145,11 +138,12 @@ public void Q2_Start(int objectiveID, int client) {
 	menu.Display(client, 60);
 	
 	g_iDuration[client] = 6 * 60;
-	g_iCount[client]--;
+	g_iCount[client]++;
 }
 public void Q2_Done(int objectiveID, int client) {
 	Q1_Done(objectiveID, client);
-	RemoveFromArray(g_hDoing, FindValueInArray(g_hDoing, client));
+	g_iDoing[client] = false;
+	rp_UnhookEvent(client, RP_PostPiedBiche, fwdPiedDeBiche);
 }
 // ----------------------------------------------------------------------------
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {

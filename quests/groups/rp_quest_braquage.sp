@@ -155,6 +155,8 @@ void Q_Clean() {
 			if( !IsValidClient(i) )
 				continue;
 			rp_UnhookEvent(i, RP_OnPlayerDead, fwdDead);
+			rp_UnhookEvent(i, RP_PreGiveDamage, fwdDamage);
+			rp_UnhookEvent(i, RP_PreClientTeleport, fwdTeleport);
 		}
 	}
 	if( g_bByPassDoor ) {
@@ -162,7 +164,6 @@ void Q_Clean() {
 			if( !IsValidClient(i) )
 				continue;
 			rp_UnhookEvent(i, RP_OnPlayerCheckKey, fwdGotKey);
-			rp_UnhookEvent(i, RP_PreGiveDamage, fwdDamage);
 		}
 	}
 	
@@ -362,6 +363,7 @@ public void Q5_Start(int objectiveID, int client) {
 			continue;
 		rp_HookEvent(i, RP_OnPlayerDead, fwdDead);
 		rp_HookEvent(i, RP_PreGiveDamage, fwdDamage);
+		rp_HookEvent(i, RP_PreClientTeleport, fwdTeleport);
 	}
 }
 public void Q5_Frame(int objectiveID, int client) {
@@ -554,12 +556,14 @@ public void OnClientPostAdminCheck(int client) {
 	g_iPlayerTeam[client] = TEAM_NONE;
 	if( g_bDoingQuest )
 		rp_HookEvent(client, RP_OnPlayerDataLoaded, fwdLoaded);
-	if( g_bHasHelmet )
+	if( g_bHasHelmet ) {
 		rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
-		
+		rp_HookEvent(client, RP_PreGiveDamage, fwdDamage);
+		rp_HookEvent(client, RP_PreClientTeleport, fwdTeleport);
+	}
+	
 	if( g_bByPassDoor ) {
 		rp_HookEvent(client, RP_OnPlayerCheckKey, fwdGotKey);
-		rp_HookEvent(client, RP_PreGiveDamage, fwdDamage);
 	}
 	
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
@@ -669,18 +673,18 @@ public Action fwdDamage(int attacker, int victim, float& damage, int wepID, floa
 	
 	return Plugin_Continue;
 }
+public Action fwdTeleport(int client) {
+	if( IsValidClient(client) && g_iPlayerTeam[client] == TEAM_BRAQUEUR ) {
+		return Plugin_Handled;
+	}
+	return Plugin_Continue;
+}
 public Action RP_OnClientSendJail(int client, int target) {
 	if( IsValidClient(target) && g_iPlayerTeam[target] == TEAM_BRAQUEUR ) {
 		if( isInVehicle(target) )
 			return Plugin_Handled;
 		if( rp_GetZoneInt(rp_GetPlayerZone(target), zone_type_type) == g_iPlanque )
 			return Plugin_Handled;
-	}
-	return Plugin_Continue;
-}
-public Action RP_ClientCanTP(int client) {
-	if( IsValidClient(client) && g_iPlayerTeam[client] == TEAM_BRAQUEUR ) {
-		return Plugin_Handled;
 	}
 	return Plugin_Continue;
 }

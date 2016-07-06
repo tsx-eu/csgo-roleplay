@@ -47,7 +47,6 @@ bool g_bCanSearchPlant[65];
 Handle g_hDrugTimer[65];
 int g_iWeaponStolen[2049], g_iStolenAmountTime[65];
 int g_iMarket[MAX_ITEMS], g_iMarketClient[MAX_ITEMS][65];
-Handle g_hForward_RP_OnClientMaxPlantCount, g_hForward_RP_OnClientPiedBiche, g_hForward_RP_ClientCanTP, g_RP_On18thStealWeapon;
 // ----------------------------------------------------------------------------
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -85,12 +84,6 @@ public void OnPluginStart() {
 			CreateTimer(Math_GetRandomFloat(0.25, 5.0), BuildingPlant_post, i);
 		}
 	}
-}
-public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {
-	g_hForward_RP_OnClientMaxPlantCount = CreateGlobalForward("RP_OnClientMaxPlantCount", ET_Event, Param_Cell, Param_CellByRef);
-	g_hForward_RP_OnClientPiedBiche = CreateGlobalForward("RP_OnClientPiedBiche", ET_Event, Param_Cell, Param_Cell);
-	g_hForward_RP_ClientCanTP = CreateGlobalForward("RP_ClientCanTP", ET_Event, Param_Cell);
-	g_RP_On18thStealWeapon = CreateGlobalForward("RP_On18thStealWeapon", ET_Event, Param_Cell, Param_Cell, Param_Cell);
 }
 public void OnMapStart() {
 	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt", true);
@@ -402,7 +395,12 @@ public Action Cmd_ItemPilule(int args){
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet item pour le moment.");
 		return Plugin_Handled;
 	}
-	if( !doRP_ClientCanTP(client) ) {
+	
+	Action a;
+	Call_StartForward(rp_GetForwardHandle(client, RP_PreClientTeleport));
+	Call_PushCell(client);
+	Call_Finish(a);
+	if( a == Plugin_Handled || a == Plugin_Stop ) {
 		ITEM_CANCEL(client, item_id);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet item pour le moment.");
 		return Plugin_Handled;
@@ -869,7 +867,12 @@ int BuildingPlant(int client, int type) {
 		case 87: max = 4;
 		default: max = 3;
 	}
-	doRP_OnClientMaxPlantCount(client, max);
+	
+	Call_StartForward(rp_GetForwardHandle(client, RP_PreBuildingCount));
+	Call_PushCell(client);
+	Call_PushCell(type);
+	Call_PushCellRef(max);
+	Call_Finish();
 	
 	for(int i=1; i<=2048; i++) {
 		if( !IsValidEdict(i) )
@@ -1141,7 +1144,10 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 		float time = (rp_IsNight() ? STEAL_TIME:STEAL_TIME*2.0);
 		int stealAMount;
 		
-		doRP_OnClientPiedBiche(client, type);
+		Call_StartForward(rp_GetForwardHandle(client, RP_PostPiedBiche));
+		Call_PushCell(client);
+		Call_PushCell(type);
+		Call_Finish();
 		
 		switch(type) {
 			case 1: { // Voiture
@@ -1317,7 +1323,7 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 			rp_SetJobCapital(81, (rp_GetJobCapital(81) +  (price/2) ) );
 			rp_SetJobCapital(cpt, (rp_GetJobCapital(cpt) -  (price/2) ) );
 			
-			Call_StartForward(g_RP_On18thStealWeapon);
+			Call_StartForward(rp_GetForwardHandle(client, RP_PostStealWeapon));
 			Call_PushCell(client);
 			Call_PushCell(target);
 			Call_PushCell(wepid);
@@ -1775,28 +1781,6 @@ public Action fwdAccelerate(int client, float& speed, float& gravity) {
 	return Plugin_Changed;
 }
 // ----------------------------------------------------------------------------
-void doRP_OnClientMaxPlantCount(int client, int& max) {
-	Call_StartForward(g_hForward_RP_OnClientMaxPlantCount);
-	Call_PushCell(client);
-	Call_PushCellRef(max);
-	Call_Finish();
-}
-void doRP_OnClientPiedBiche(int client, int type) {
-	Call_StartForward(g_hForward_RP_OnClientPiedBiche);
-	Call_PushCell(client);
-	Call_PushCell(type);
-	Call_Finish();
-}
-bool doRP_ClientCanTP(int client) {
-	Action a;
-	Call_StartForward(g_hForward_RP_ClientCanTP);
-	Call_PushCell(client);
-	Call_Finish(a);
-	if( a == Plugin_Handled || a == Plugin_Stop )
-		return false;
-	return true;
-}
-
 float getTaxe(int client) {
 	int job = rp_GetClientInt(client, i_Job);
 	float val = 0.5;

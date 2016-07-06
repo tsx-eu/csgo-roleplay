@@ -37,8 +37,7 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-int g_iQuest, g_iDuration[MAXPLAYERS + 1];
-Handle g_hDoing;
+int g_iQuest, g_iDuration[MAXPLAYERS + 1], g_iDoing[MAXPLAYERS+1];
 
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
@@ -49,10 +48,8 @@ public void OnAllPluginsLoaded() {
 		SetFailState("Erreur lors de la création de la quête %s %s", QUEST_UNIQID, QUEST_NAME);
 	
 	int i;
-	rp_QuestAddStep(g_iQuest, i++,	Q1_Start,	Q1_Frame,	Q1_Abort,	Q1_Abort);
+	rp_QuestAddStep(g_iQuest, i++,	Q1_Start,	Q1_Frame,	Q1_Abort,	Q1_Done);
 	rp_QuestAddStep(g_iQuest, i++,	Q2_Start,	Q2_Frame,	Q2_Abort,	Q2_Done);
-	
-	g_hDoing = CreateArray(MAXPLAYERS);
 }
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -83,7 +80,8 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.Display(client, 60);
 	
 	g_iDuration[client] = 12 * 60;
-	PushArrayCell(g_hDoing, client);
+	g_iDoing[client] = true;
+	rp_HookEvent(client, RP_PreBuildingCount, fwdBuildCount);
 }
 public void Q1_Frame(int objectiveID, int client) {
 	g_iDuration[client]--;
@@ -101,7 +99,11 @@ public void Q1_Frame(int objectiveID, int client) {
 }
 public void Q1_Abort(int objectiveID, int client) {
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
-	RemoveFromArray(g_hDoing, FindValueInArray(g_hDoing, client));
+	g_iDoing[client] = false;
+	rp_UnhookEvent(client, RP_PreBuildingCount, fwdBuildCount);
+}
+public void Q1_Done(int objectiveID, int client) {
+	rp_UnhookEvent(client, RP_PreBuildingCount, fwdBuildCount);
 }
 public void Q2_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
@@ -119,12 +121,16 @@ public void Q2_Start(int objectiveID, int client) {
 	menu.Display(client, 30);
 	g_iDuration[client] = 24 * 60;
 }
-public void RP_OnClientMaxPlantCount(int client, int& max) {
-	int length = GetArraySize(g_hDoing);
-	for (int i = 0; i < length; i++) {
-		if( GetArrayCell(g_hDoing, i) == client && max < 10 && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == QUEST_JOBID )
+public Action fwdBuildCount(int client, int itemID, int& max) {
+	if( g_iDoing[client] ) {
+		char tmp[64];
+		rp_GetItemData(itemID, item_type_extra_cmd, tmp, sizeof(tmp));
+		if(  StrContains(tmp, "rp_item_drug") == 0 && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == QUEST_JOBID ) {
 			max += 10;
+			return Plugin_Changed;
+		}
 	}
+	return Plugin_Continue;
 }
 public void Q2_Frame(int objectiveID, int client) {
 	g_iDuration[client]--;
@@ -139,6 +145,10 @@ public void Q2_Frame(int objectiveID, int client) {
 		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s", QUEST_NAME, g_iDuration[client], QUEST_RESUME2);
 	}
 }
+public void Q2_Abort(int objectiveID, int client) {
+	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée", QUEST_NAME);
+	g_iDoing[client] = false;
+}
 public void Q2_Done(int objectiveID, int client) {
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 	
@@ -147,9 +157,6 @@ public void Q2_Done(int objectiveID, int client) {
 	
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - amount);
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + amount);	
-}
-public void Q2_Abort(int objectiveID, int client) {
-	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 }
 // ----------------------------------------------------------------------------
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {

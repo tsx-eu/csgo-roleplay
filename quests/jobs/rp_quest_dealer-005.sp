@@ -70,9 +70,8 @@ public bool fwdCanStart(int client) {
 public void OnClientPostAdminCheck(int client) {
 	g_iStep[client] = 0;
 }
-public void RP_OnClientPiedBiche(int client, int type) {
+public Action fwdPiedDeBiche(int client, int type) {
 	if( type == 2 && g_iDoing[client] > 0 && g_iDoneDistrib[client][rp_GetPlayerZone(client)] == 0) {
-		
 		g_iDoneDistrib[client][rp_GetPlayerZone(client)] = 1;
 		rp_QuestStepComplete(client, g_iDoing[client]);
 	}
@@ -94,6 +93,7 @@ public void Q1_Start(int objectiveID, int client) {
 	g_iStep[client] = 0;
 	g_iDoing[client] = objectiveID;
 	g_iDoneDistrib[client][METRO_STATION] = g_iDoneDistrib[client][METRO_PAIX] = g_iDoneDistrib[client][METRO_INNO] = 0;
+	rp_HookEvent(client, RP_PostPiedBiche, fwdPiedDeBiche);
 }
 public void Q1_Frame(int objectiveID, int client) {
 	
@@ -118,7 +118,7 @@ public void Q2_End(int objectiveID, int client) {
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 2500);
 }
 public void Q1_Abort(int objectiveID, int client) {
-	g_iDoing[client] = 0;
+	rp_UnhookEvent(client, RP_PostPiedBiche, fwdPiedDeBiche);
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 }
 // ----------------------------------------------------------------------------

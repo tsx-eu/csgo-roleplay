@@ -18,10 +18,10 @@
 //forward int RP_CanClientCraftForFree(int client, int itemID);
 //forward void RP_ClientCraftOver(int client, int itemID);
 // Dealer
-forward void RP_On18thStealWeapon(int client, int victim, int weaponID);
-forward void RP_OnClientMaxPlantCount(int client, int& max);
-forward void RP_OnClientPiedBiche(int client, int type );
-forward Action RP_ClientCanTP(int client);
+//forward void RP_On18thStealWeapon(int client, int victim, int weaponID);
+//forward void RP_OnClientMaxPlantCount(int client, int& max);
+//forward void RP_OnClientPiedBiche(int client, int type );
+//forward Action RP_ClientCanTP(int client);
 forward void RP_OnMarcheNoireDealer(int client, int prix);
 // Mafia
 forward Action RP_CanClientStealItem(int client, int target);
@@ -67,6 +67,11 @@ enum rp_event {
 	RP_OnResellWeapon,		   /* Revente d'arme au marché noire */
 	RP_PreClientCraft,			/* Avant qu'un craft se fasse, permet de changer le cout */
 	RP_PostClientCraft,			/* Après qu'un craft réussisse */
+	
+	RP_PreBuildingCount,		/* Calcule du nombre maximum de plant/machine */
+	RP_PostPiedBiche,			/* Lorsqu'un pied de biche se termine */
+	RP_PreClientTeleport,		/* Lorsqu'un joueur tente de se téléporter */
+	RP_PostStealWeapon,			/* Lorsqu'un joueur termine de voler une arme */
 
 	RP_EventMax
 }
@@ -102,6 +107,10 @@ typeset rp_event_enum {
 	function Action(int client, int weaponID, int price);									/* RP_OnResellWeapon */
 	function Action(int client, int itemID, int& free);										/* RP_PreClientCraft */
 	function Action(int client, int itemID);												/* RP_PostClientCraft */	
+	function Action(int client, int itemID, int & max); 									/* RP_PreBuildingCount */
+	function Action(int client, int type); 													/* RP_PostPiedBiche */
+	function Action(int client);															/* RP_PreClientTeleport */
+	function Action(int client, int target, int weaponID);									/* RP_PostStealWeapon */
 };
 /**
  * Hook un évenement d'un joueur
