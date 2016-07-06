@@ -180,6 +180,7 @@ public void OnClientPostAdminCheck(int client) {
 		rp_HookEvent(client, RP_OnFrameSeconde, fwdFrame);
 		rp_HookEvent(client, RP_PreTakeDamage, fwdTakeDamage);
 		rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
+		rp_HookEvent(client, RP_PreClientStealItem, fwdStealItem);
 	}
 }
 // -----------------------------------------------------------------------------------------------------------------
@@ -437,6 +438,7 @@ void CAPTURE_Start() {
 		rp_HookEvent(i, RP_OnFrameSeconde, fwdFrame);
 		rp_HookEvent(i, RP_PreTakeDamage, fwdTakeDamage);
 		rp_HookEvent(i, RP_OnPlayerZoneChange, fwdZoneChange);
+		rp_HookEvent(i, RP_PreClientStealItem, fwdStealItem);
 		
 		gID = rp_GetClientGroupID(i);
 		g_iCapture_POINT[gID] += 100;
@@ -524,6 +526,7 @@ void CAPTURE_Stop() {
 		rp_UnhookEvent(i, RP_OnFrameSeconde, fwdFrame);
 		rp_UnhookEvent(i, RP_PreTakeDamage, fwdTakeDamage);
 		rp_UnhookEvent(i, RP_OnPlayerZoneChange, fwdZoneChange);
+		rp_UnhookEvent(i, RP_PreClientStealItem, fwdStealItem);
 
 		if( IsPlayerAlive(i) )
 			rp_ClientColorize(i);
@@ -896,6 +899,11 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 		}
 		return Plugin_Changed;
 	}
+	return Plugin_Continue;
+}
+public Action fwdStealItem(int client, int target) {
+	if( rp_GetClientGroupID(target) > 0 && rp_GetZoneBit(rp_GetPlayerZone(target)) & BITZONE_PVP )
+		return Plugin_Handled;
 	return Plugin_Continue;
 }
 public Action fwdFrame(int client) {
