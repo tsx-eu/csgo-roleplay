@@ -2276,14 +2276,7 @@ int MenuJustice(Handle menu, MenuAction action, int client, int param2) {
 		}
 		
 		if(StrEqual(options, "rechercher")) {
-			Handle menuRechercher = CreateMenu(MenuRechercher);
-			SetMenuTitle(menuRechercher, "Gestion des perquisitions");
-			AddMenuItem(menuRechercher, "debuter",	"Debuter");
-			AddMenuItem(menuRechercher, "annuler", "Annuler");
-			AddMenuItem(menuRechercher, "terminer",	"Terminer");
-			
-			SetMenuExitButton(menuRechercher, true);
-			DisplayMenu(menu, client, MENU_TIME_DURATION);
+			rechercher_perquiz(client);
 		}
 		
 		if(StrEqual(options, "illegal")) {
@@ -2317,6 +2310,21 @@ int MenuRechercher(Handle menu, MenuAction action, int client, int param2) {
 	} else if(action == MenuAction_End) {
 		CloseHandle(menu);
 	}
+}
+
+void rechercher_perquiz(int client) {
+	#if defined DEBUG
+	PrintToServer("MenuRechercher");
+	#endif
+
+	Handle menuRechercher = CreateMenu(MenuRechercher);
+	SetMenuTitle(menuRechercher, "Gestion des perquisitions");
+	AddMenuItem(menuRechercher, "debuter",	"Debuter");
+	AddMenuItem(menuRechercher, "annuler", "Annuler");
+	AddMenuItem(menuRechercher, "terminer",	"Terminer");
+	
+	SetMenuExitButton(menuRechercher, true);
+	DisplayMenu(menuRechercher, client, MENU_TIME_DURATION);
 }
 
 void illegal_perquiz(int client, int job_id) {
@@ -2381,6 +2389,7 @@ void start_perquiz(int client, int job) {
 		PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [JUSTICE]{default} Début d'une perquisition dans: %s.", tmp);
 		LogToGame("[TSX-RP] [JUSTICE] %N débute une perquisition dans %s.",client, tmp);
 	}	
+	PrintToChatPoliceJob(job, "{lightblue} ================================== {default}");
 	
 	if( REP > 0 && rp_GetClientJobID(client) == 1) {
 		PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [POLICE]{default} %N {default}est prié de se présenter sur les lieux.", REP);
