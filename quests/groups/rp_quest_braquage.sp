@@ -682,7 +682,7 @@ public Action fwdTeleport(int client) {
 	}
 	return Plugin_Continue;
 }
-public Action fwdSendToJail(int target, int client) {
+public Action fwdSendToJail(int client, int target) {
 	if( IsValidClient(target) && g_iPlayerTeam[target] == TEAM_BRAQUEUR ) {
 		if( isInVehicle(target) )
 			return Plugin_Handled;
