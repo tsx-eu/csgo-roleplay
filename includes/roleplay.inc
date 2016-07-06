@@ -32,7 +32,7 @@ forward void RP_OnMarcheNoireMafia(int client, int target, int victim, int itemI
 //forward Action RP_OnClientSendJail(int client, int target);
 forward void RP_OnMarchePolice(int client, int prix, int realPrice);
 // Technicien:
-forward void RP_OnClientMaxMachineCount(int client, int& max);
+//forward void RP_OnClientMaxMachineCount(int client, int& max);
 // ----------------------------------------------------------------------------
 enum rp_event {
 	RP_PreTakeDamage,			     /* Le joueur recoit des dégats, quelques soit l'arme. Attention, n'est jamais appelé en zone EVENT */

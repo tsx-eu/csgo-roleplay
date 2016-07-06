@@ -34,14 +34,6 @@ public Plugin myinfo = {
 int g_cBeam, g_cGlow, g_cExplode;
 bool g_bProps_trapped[2049];
 
-//forward RP_OnClientMaxMachineCount(int client, int& max);
-Handle g_hForward_RP_OnClientMaxMachineCount;
-void doRP_OnClientMaxMachineCount(int client, int& max) {
-	Call_StartForward(g_hForward_RP_OnClientMaxMachineCount);
-	Call_PushCell(client);
-	Call_PushCellRef(max);
-	Call_Finish();
-}
 // ----------------------------------------------------------------------------
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -88,9 +80,6 @@ public void OnPluginStart() {
 			CreateTimer(Math_GetRandomFloat(0.0, 2.5), BuildingCashMachine_post, i);
 		}
 	}
-}
-public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {
-	g_hForward_RP_OnClientMaxMachineCount = CreateGlobalForward("RP_OnClientMaxMachineCount", ET_Event, Param_Cell, Param_CellByRef);
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
@@ -397,12 +386,19 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 		return Plugin_Continue;
 	int job = rp_GetClientInt(client, i_Job);
 	int max, ent;
-	doRP_OnClientMaxMachineCount(client, max);
+	
+	Call_StartForward(rp_GetForwardHandle(client, RP_PreBuildingCount));
+	Call_PushCell(client);
+	Call_PushCell(81);
+	Call_PushCellRef(max);
+	Call_Finish();
+	
 	if(max >= 10000){
 		ent = BuildingCashMachine(client, true);
 		cooldown = 3.0;
 		return Plugin_Stop;
 	}
+	
 	ent = (job == 221 || job == 222) ? BuildingBigCashMachine(client) : BuildingCashMachine(client, false);
 	if( ent > 0 ) {
 		rp_SetClientStat(client, i_TotalBuild, rp_GetClientStat(client, i_TotalBuild)+1);
