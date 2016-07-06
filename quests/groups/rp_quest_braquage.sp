@@ -157,6 +157,7 @@ void Q_Clean() {
 			rp_UnhookEvent(i, RP_OnPlayerDead, fwdDead);
 			rp_UnhookEvent(i, RP_PreGiveDamage, fwdDamage);
 			rp_UnhookEvent(i, RP_PreClientTeleport, fwdTeleport);
+			rp_UnhookEvent(i, RP_PreClientSendToJail, fwdSendToJail);
 		}
 	}
 	if( g_bByPassDoor ) {
@@ -364,6 +365,7 @@ public void Q5_Start(int objectiveID, int client) {
 		rp_HookEvent(i, RP_OnPlayerDead, fwdDead);
 		rp_HookEvent(i, RP_PreGiveDamage, fwdDamage);
 		rp_HookEvent(i, RP_PreClientTeleport, fwdTeleport);
+		rp_HookEvent(i, RP_PreClientSendToJail, fwdSendToJail);
 	}
 }
 public void Q5_Frame(int objectiveID, int client) {
@@ -560,6 +562,7 @@ public void OnClientPostAdminCheck(int client) {
 		rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
 		rp_HookEvent(client, RP_PreGiveDamage, fwdDamage);
 		rp_HookEvent(client, RP_PreClientTeleport, fwdTeleport);
+		rp_HookEvent(client, RP_PreClientSendToJail, fwdSendToJail);
 	}
 	
 	if( g_bByPassDoor ) {
@@ -679,7 +682,7 @@ public Action fwdTeleport(int client) {
 	}
 	return Plugin_Continue;
 }
-public Action RP_OnClientSendJail(int client, int target) {
+public Action fwdSendToJail(int target, int client) {
 	if( IsValidClient(target) && g_iPlayerTeam[target] == TEAM_BRAQUEUR ) {
 		if( isInVehicle(target) )
 			return Plugin_Handled;

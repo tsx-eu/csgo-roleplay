@@ -28,8 +28,8 @@ forward void RP_OnMarcheNoireDealer(int client, int prix);
 //forward void RP_OnClientWeaponPick(int client, int type);
 forward void RP_OnMarcheNoireMafia(int client, int target, int victim, int itemID, int prix);
 // Police:
-forward void RP_OnClientTazedItem(int client, int reward);
-forward Action RP_OnClientSendJail(int client, int target);
+//forward void RP_OnClientTazedItem(int client, int reward);
+//forward Action RP_OnClientSendJail(int client, int target);
 forward void RP_OnMarchePolice(int client, int prix, int realPrice);
 // Technicien:
 forward void RP_OnClientMaxMachineCount(int client, int& max);
@@ -73,7 +73,9 @@ enum rp_event {
 	RP_PreClientTeleport,		/* Lorsqu'un joueur tente de se téléporter */
 	RP_PostStealWeapon,			/* Lorsqu'un joueur termine de voler une arme */
 	RP_PreClientStealItem,		/* Lorsqu'un joueur vol un autre */
-
+	RP_PreClientSendToJail,		/* Lorsqu'nu joueur envois un autre en taule */
+	RP_OnClientTazedItem,		/* Lorsqu'un joueur taze quelque chose */
+	
 	RP_EventMax
 }
 typeset rp_event_enum {
@@ -113,6 +115,8 @@ typeset rp_event_enum {
 	function Action(int client);															/* RP_PreClientTeleport */
 	function Action(int client, int target, int weaponID);									/* RP_PostStealWeapon */
 	function Action(int client, int target);												/* RP_PreClientStealItem */
+	function Action(int target, int client);												/* RP_PreClientSendToJail */
+	function Action(int client, int reward);												/* RP_OnClientTazedItem */
 };
 /**
  * Hook un évenement d'un joueur

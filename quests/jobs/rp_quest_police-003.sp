@@ -35,8 +35,7 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-int g_iQuest, g_iDuration[MAXPLAYERS + 1];
-Handle g_hDoing;
+int g_iQuest, g_iDuration[MAXPLAYERS + 1], g_iDoing[MAXPLAYERS + 1];
 
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
@@ -48,8 +47,6 @@ public void OnAllPluginsLoaded() {
 	
 	int i;
 	rp_QuestAddStep(g_iQuest, i++,	Q1_Start,	Q1_Frame,	Q1_Abort,	Q1_Abort);
-	
-	g_hDoing = CreateArray(MAXPLAYERS);
 }
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -80,7 +77,8 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.Display(client, 60);
 	
 	g_iDuration[client] = 24 * 60;
-	PushArrayCell(g_hDoing, client);
+	g_iDoing[client] = true;
+	rp_HookEvent(client, RP_OnClientTazedItem, fwdTazedItem);
 }
 public void Q1_Frame(int objectiveID, int client) {
 	g_iDuration[client]--;
@@ -97,20 +95,16 @@ public void Q1_Frame(int objectiveID, int client) {
 	}
 }
 public void Q1_Abort(int objectiveID, int client) {
-	RemoveFromArray(g_hDoing, FindValueInArray(g_hDoing, client));
+	rp_UnhookEvent(client, RP_OnClientTazedItem, fwdTazedItem);
+	g_iDoing[client] = false;
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 }
-public void RP_OnClientTazedItem(int attacker, int reward) {
-	
-	int length = GetArraySize(g_hDoing);
-	for (int i = 0; i < length; i++) {
-		if( GetArrayCell(g_hDoing, i) == attacker ) {
-			rp_SetClientInt(attacker, i_AddToPay, rp_GetClientInt(attacker, i_AddToPay) + reward);
-			CPrintToChat(attacker, "{lightblue}[TSX-RP]{default} Vous avez gagnez %d$ supplémentaires grace à la quête %s.", reward, QUEST_NAME);
-		}
+public Action fwdTazedItem(int client, int reward) {
+	if( g_iDoing[client] ) {
+		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + reward);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez gagnez %d$ supplémentaires grace à la quête %s.", reward, QUEST_NAME);
 	}
-}
-		
+}	
 // ----------------------------------------------------------------------------
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
 	if( action == MenuAction_Select ) {

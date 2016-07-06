@@ -91,11 +91,10 @@ int g_TribunalSearch[MAXPLAYERS+1][tribunal_search_max];
 char g_szTribunal_DATA[65][tribunal_max][64];
 DataPack g_hBuyMenu;
 
-//forward RP_OnClientTazedItem(int attacker, int reward);
-Handle g_hForward_RP_OnClientTazedItem, g_hForward_RP_OnClientSendJail, g_hForward_RP_OnMarchePolice;
-bool doRP_OnClientSendJail(int client, int target) {
+Handle g_hForward_RP_OnMarchePolice;
+bool CanSendToJail(int client, int target) {
 	Action a;
-	Call_StartForward(g_hForward_RP_OnClientSendJail);
+	Call_StartForward(rp_GetForwardHandle(target, RP_PreClientSendToJail));
 	Call_PushCell(client);
 	Call_PushCell(target);
 	Call_Finish(a);
@@ -103,8 +102,8 @@ bool doRP_OnClientSendJail(int client, int target) {
 		return false;
 	return true;
 }
-void doRP_OnClientTazedItem(int client, int reward) {
-	Call_StartForward(g_hForward_RP_OnClientTazedItem);
+void ClientTazedItem(int client, int reward) {
+	Call_StartForward(rp_GetForwardHandle(client, RP_OnClientTazedItem));
 	Call_PushCell(client);
 	Call_PushCell(reward);
 	Call_Finish();
@@ -147,8 +146,6 @@ public void OnAllPluginsLoaded() {
 	g_hBuyMenu = rp_WeaponMenu_Create();
 }
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {
-	g_hForward_RP_OnClientTazedItem = CreateGlobalForward("RP_OnClientTazedItem", ET_Event, Param_Cell, Param_Cell);
-	g_hForward_RP_OnClientSendJail = CreateGlobalForward("RP_OnClientSendJail", ET_Event, Param_Cell, Param_Cell);
 	g_hForward_RP_OnMarchePolice = CreateGlobalForward("RP_OnMarchePolice", ET_Event, Param_Cell, Param_Cell, Param_Cell);
 	
 }
@@ -514,7 +511,7 @@ public Action Cmd_Tazer(int client) {
 			return Plugin_Handled;
 		}
 		
-		if( !doRP_OnClientSendJail(client, target) ) {
+		if( !CanSendToJail(client, target) ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N vous glisse entre les mains.", target);
 			return Plugin_Handled;
 		}
@@ -615,7 +612,7 @@ public Action Cmd_Tazer(int client) {
 			if( rp_GetBuildingData(target, BD_started)+120 < GetTime() ) {
 				reward = 100;
 				if( owner != client )
-					doRP_OnClientTazedItem(client, reward);
+					ClientTazedItem(client, reward);
 			}
 			
 			if( owner > 0 ) {
@@ -633,7 +630,7 @@ public Action Cmd_Tazer(int client) {
 			if( rp_GetBuildingData(target, BD_started)+120 < GetTime() ) {
 				reward = 1500;
 				if( owner != client )
-					doRP_OnClientTazedItem(client, reward);
+					ClientTazedItem(client, reward);
 			}
 			
 			if( owner > 0 ) {
@@ -656,7 +653,7 @@ public Action Cmd_Tazer(int client) {
 					reward += 200 * rp_GetBuildingData(target, BD_count);
 				
 				if( owner != client )
-					doRP_OnClientTazedItem(client, reward);
+					ClientTazedItem(client, reward);
 			}
 			
 			if( owner > 0 ) {
@@ -850,7 +847,7 @@ public Action Cmd_Jail(int client) {
 	if( rp_IsValidVehicle(target) ) {
 		int client2 = GetEntPropEnt(target, Prop_Send, "m_hPlayer");
 		
-		if( !doRP_OnClientSendJail(client, client2) ) {
+		if( !CanSendToJail(client, client2) ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N ne pas peut être mis en prison pour le moment à cause d'une quête.", client2);
 			return Plugin_Handled;
 		}
@@ -866,7 +863,7 @@ public Action Cmd_Jail(int client) {
 
 	if ( Client_GetVehicle(target) > 0 ) {
 		if( IsValidClient(target) ) {
-			if( !doRP_OnClientSendJail(client, target) ) {
+			if( !CanSendToJail(client, target) ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N ne pas peut être mis en prison pour le moment à cause d'une quête.", target);
 				return Plugin_Handled;
 			}
@@ -880,7 +877,7 @@ public Action Cmd_Jail(int client) {
 		ACCESS_DENIED(client);
 	}
 	
-	if( !doRP_OnClientSendJail(client, target) ) {
+	if( !CanSendToJail(client, target) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N ne pas peut être mis en prison pour le moment à cause d'une quête.", target);
 		return Plugin_Handled;
 	}
