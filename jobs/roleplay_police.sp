@@ -2318,12 +2318,14 @@ void end_perquiz(int client, int job) {
 	if(rp_GetClientJobID(client) == 1){
 		PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [POLICE]{default} Fin de la perquisition dans %s.", tmp);
 		rp_SetJobCapital(1, rp_GetJobCapital(1) + 500);
+		LogToGame("[TSX-RP] [POLICE] %N a mis fin à la perquisition dans %s.",client, tmp);
 	}
 	else{
 		PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [JUSTICE]{default} Fin de la perquisition dans %s.", tmp);
 		rp_SetJobCapital(101, rp_GetJobCapital(101) + 500);
+		LogToGame("[TSX-RP] [JUSTICE] %N a mis fin à la perquisition dans %s.",client, tmp);
 	}
-	LogToGame("[TSX-RP] [POLICE] %N a mis fin à la perquisition dans %s.",client, tmp);
+	
 	
 	PrintToChatPoliceJob(job, "{lightblue} ================================== {default}");
 	
