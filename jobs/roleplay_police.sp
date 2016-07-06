@@ -2289,7 +2289,14 @@ int MenuJustice(Handle menu, MenuAction action, int client, int param2) {
 		}
 		
 		if(StrEqual(options, "rechercher")) {
-			begin_perquiz(client, job_id);
+			Handle menuRechercher = CreateMenu(MenuRechercher);
+			SetMenuTitle(menuRechercher, "Gestion des perquisitions");
+			AddMenuItem(menuRechercher, "debuter",	"Debuter");
+			AddMenuItem(menuRechercher, "annuler", "Annuler");
+			AddMenuItem(menuRechercher, "terminer",	"Terminer");
+			
+			SetMenuExitButton(menuRechercher, true);
+			DisplayMenu(menu, client, MENU_TIME_DURATION);
 		}
 		
 		if(StrEqual(options, "illegal")) {
@@ -2297,6 +2304,29 @@ int MenuJustice(Handle menu, MenuAction action, int client, int param2) {
 		}
 	
 
+	} else if(action == MenuAction_End) {
+		CloseHandle(menu);
+	}
+}
+
+int MenuRechercher(Handle menu, MenuAction action, int client, int param2) {
+	#if defined DEBUG
+	PrintToServer("MenuRechercher");
+	#endif
+	
+	if(action == MenuAction_Select) {
+		char options[64];
+		GetMenuItem(menu, param2, options, 63);
+		int job_id = rp_GetZoneInt(rp_GetPlayerZone(rp_GetClientTarget(client)), zone_type_type);
+		
+		if(StrEqual(options, "debuter")) {
+			begin_perquiz(client, job_id);
+		} else if(StrEqual(options, "annuler")) {
+			cancel_perquiz(client, job_id);
+		} else if(StrEqual(options, "terminer")) {
+			end_perquiz(client, job_id);
+		}
+		
 	} else if(action == MenuAction_End) {
 		CloseHandle(menu);
 	}
