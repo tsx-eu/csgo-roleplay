@@ -2415,8 +2415,8 @@ void begin_perquiz(int client, int job) {
 		rp_SetJobCapital(1, rp_GetJobCapital(1) + 250);
 	}
 	else{
-		PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [JUSTICE]{default} Début d'une perquisition dans %s.", tmp);
-		LogToGame("[TSX-RP] [JUSTICE] %N débute une perquisition dans %s.", client, tmp);
+		PrintToChatPoliceJob(job, "{lightblue}[TSX-RP] [JUSTICE]{default} Début d'une perquisition dans %s pour rechercher.", tmp);
+		LogToGame("[TSX-RP] [JUSTICE] %N débute une perquisition dans %s pour rechercher.", client, tmp);
 		rp_SetJobCapital(101, rp_GetJobCapital(101) + 250);
 	}
 	PrintToChatPoliceJob(job, "{lightblue} ================================== {default}");
