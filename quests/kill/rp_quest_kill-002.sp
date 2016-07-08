@@ -110,7 +110,7 @@ public Action fwdOnPlayerKill(int attacker, int victim, char weapon[64]) {
 	return Plugin_Continue;
 }
 public void Q1_Abort(int objectiveID, int client) {
-	CreateTimer(15.0 * 60.0, task_NewMission);
+	CreateTimer(30.0 * 60.0, task_NewMission);
 	rp_UnhookEvent(client, RP_OnPlayerKill, fwdOnPlayerKill);
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 	for (int i = 1; i <= MaxClients; i++)
