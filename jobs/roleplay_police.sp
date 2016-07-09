@@ -2253,7 +2253,7 @@ void justice_perquiz(int client) {
 	
 	Handle menuJustice = CreateMenu(MenuJustice);
 	SetMenuTitle(menuJustice, "Choix des perquisitions");
-	AddMenuItem(menuJustice, "rechercher", "Rechercher");
+	AddMenuItem(menuJustice, "rechercher", "Recherché/Kidnappé");
 	AddMenuItem(menuJustice, "illegal", "Trafic illégal");
 	
 	SetMenuExitButton(menuJustice, true);
