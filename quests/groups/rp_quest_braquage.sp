@@ -870,6 +870,8 @@ int spawnVehicle(int client) {
 		}
 	}
 	if( ent > 0 && rp_IsValidVehicle(ent) ) {
+		
+		SetEntProp(ent, Prop_Data, "m_bLocked", 1);
 		rp_SetVehicleInt(ent, car_owner, client);
 		rp_SetVehicleInt(ent, car_maxPassager, 3);
 		rp_SetVehicleInt(ent, car_health, 10000);
