@@ -674,6 +674,14 @@ public Action fwdDamage(int attacker, int victim, float& damage, int wepID, floa
 		return Plugin_Handled;
 	}
 	
+	if( g_iPlayerTeam[attacker] == TEAM_BRAQUEUR && rp_GetWeaponBallType(wepID) == ball_type_braquage) {
+		if( rp_GetZoneInt(rp_GetPlayerZone(attacker), zone_type_type) == g_iPlanque && rp_GetZoneInt(rp_GetPlayerZone(victim), zone_type_type) == g_iPlanque  )
+			damage *= 1.10;
+		else
+			damage *= 0.8;
+		return Plugin_Changed;		
+	}
+	
 	return Plugin_Continue;
 }
 public Action fwdTeleport(int client) {

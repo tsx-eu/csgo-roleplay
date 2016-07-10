@@ -264,9 +264,17 @@ public Action Cmd_ItemSucette2(int args) {
 	rp_SetClientBool(client, b_MayUseUltimate, false);
 	
 	float duration = 1.0;
-	if( rp_IsInPVP(client) || GetClientTeam(client) == CS_TEAM_CT) {
+	if( rp_IsInPVP(client) ) {
 		CreateTimer(45.0, AllowUltimate, client);
-		duration += 0.66;
+		duration += 0.5;
+		
+		rp_HookEvent(client, RP_PreTakeDamage, fwdDamage, duration);
+	}
+	else if( GetClientTeam(client) == CS_TEAM_CT ) {
+		CreateTimer(60.0, AllowUltimate, client);
+		duration += 1.0;
+		
+		rp_HookEvent(client, RP_PreTakeDamage, fwdDamage, duration);
 	}
 	else{
 		CreateTimer(30.0, AllowUltimate, client);
@@ -281,6 +289,10 @@ public Action Cmd_ItemSucette2(int args) {
 	CreateTimer(duration, 				Cmd_ItemSucette2_task, client);
 	
 	return Plugin_Handled;
+}
+public Action fwdDamage(int attacker, int victim, float& damage, int wepID, float pos[3]) {
+	damage *= 1.10;
+	return Plugin_Changed;
 }
 public Action Beep(Handle timer, any client) {
 	#if defined DEBUG
