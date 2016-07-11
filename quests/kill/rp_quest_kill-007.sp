@@ -64,7 +64,7 @@ public void OnClientPostAdminCheck(int client) {
 public bool fwdCanStart(int client) {
 	if( g_bRunning )
 		return false;
-	if( GetClientCount(true) < 20 )
+	if( GetClientCount(true) < 30 )
 		return false;
 	int job = rp_GetClientJobID(client);
 	
