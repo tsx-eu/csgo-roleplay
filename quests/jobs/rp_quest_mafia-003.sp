@@ -126,7 +126,7 @@ public void Q2_Frame(int objectiveID, int client) {
 	GetClientAbsOrigin(client, vec);
 	
 	g_iDuration[client]--;
-	if( rp_GetPlayerZone(client) == 290 ) {
+	if( rp_GetPlayerZone(client) == 289 ) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else if( g_iDuration[client] <= 0 ) {
