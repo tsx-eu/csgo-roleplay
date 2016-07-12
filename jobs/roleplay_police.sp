@@ -488,7 +488,7 @@ public Action Cmd_Tazer(int client) {
 		if( GetClientTeam(target) == CS_TEAM_CT ) {
 			ACCESS_DENIED(client);
 		}
-		if( (job == 103 || job == 104 || job == 105 || job == 106) && (rp_GetZoneInt(Tzone, zone_type_type) != 101) ) { // J et HJ en dehors du tribu
+		if( (job >= 103 && job <= 106) && (rp_GetZoneInt(Tzone, zone_type_type) != 101) ) { // J et HJ en dehors du tribu
 			if( !(rp_GetZoneBit(target, -999.0) & BITZONE_PERQUIZ) ) { // Si perquiz en cours, on doit test le by-pass du cache.
 				ACCESS_DENIED(client);
 			}
@@ -541,7 +541,7 @@ public Action Cmd_Tazer(int client) {
 	}
 	else {
 		// Props:
-		if( (job == 103 || job == 104 || job == 105 || job == 106) && !(rp_GetZoneBit(Czone) & BITZONE_PERQUIZ) ) {
+		if( (job >= 103 && job <= 106) && !(rp_GetZoneBit(Czone) & BITZONE_PERQUIZ) ) {
 			ACCESS_DENIED(client);
 		}
 		if( GetClientTeam(client) == CS_TEAM_T && job != 1 && job != 2 && job != 4 &&  job != 5 && job != 6 && job != 7 ) {
@@ -722,7 +722,7 @@ public Action Cmd_Jail(int client) {
 	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
 		ACCESS_DENIED(client);
 	}	
-	if( GetClientTeam(client) == CS_TEAM_T && (job == 8 || job == 9 || job == 107 || job == 108 || job == 109 ) ) {
+	if( GetClientTeam(client) == CS_TEAM_T && ((job == 8 || job == 9) || (job >= 107 && job <= 109 )) ) {
 		ACCESS_DENIED(client);
 	}
 	
@@ -770,7 +770,7 @@ public Action Cmd_Jail(int client) {
 	}
 	
 	if( (rp_GetZoneInt(Czone, zone_type_type) == 101) // On check si le CT est bien dans le tribunal
-			&& (job == 101 || job == 102 || job == 103 || job == 104 || job == 105 || job == 106) ) {
+			&& (job >= 101 && job <= 106) ) {
 
 		if (rp_GetZoneInt(Tzone, zone_type_type) != 101){ // On check si la cible est bien dans le tribunal (ticket #1029)
 			ACCESS_DENIED(client);
@@ -827,7 +827,7 @@ public Action Cmd_Jail(int client) {
 		
 		return Plugin_Handled;
 	}
-	else if( (job == 103 || job == 104 || job == 105 || job == 106) && (rp_GetZoneInt(Czone, zone_type_type) != 101 || rp_GetZoneInt(Czone, zone_type_type) != 1)) {
+	else if( (job >= 103 && job <= 106) && (rp_GetZoneInt(Czone, zone_type_type) != 101 || rp_GetZoneInt(Czone, zone_type_type) != 1)) {
 		ACCESS_DENIED(client);
 	}
 
@@ -860,7 +860,7 @@ public Action Cmd_Jail(int client) {
 		return Plugin_Handled;
 	}
 	
-	if( GetClientTeam(target) == CS_TEAM_CT && !(job == 101 || job == 102 || job == 103 ) ) {
+	if( GetClientTeam(target) == CS_TEAM_CT && !(job >= 101 && job <= 103 ) ) {
 		ACCESS_DENIED(client);
 	}
 	
@@ -1252,7 +1252,7 @@ public Action Cmd_Conv(int client) {
 	if( rp_GetClientJobID(client) != 101 ) {
 		ACCESS_DENIED(client);
 	}
-	if( job == 109 || job == 108 || job == 107 ) {
+	if( job >= 107 && job <= 109 ) {
 		ACCESS_DENIED(client);
 	}
 
@@ -1427,7 +1427,7 @@ public Action Cmd_Tribunal(int client) {
 
 	SetMenuTitle(menu, "  Tribunal \n--------------------");
 
-	if( job == 101 || job == 102 || job == 103 || job == 104 ) {
+	if( job >= 101 && job <= 104 ) {
 		if( GetConVarInt(FindConVar("hostport")) == 27015 )
 			AddMenuItem(menu, "forum",		"Juger les cas du forum");
 		else
