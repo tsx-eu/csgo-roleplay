@@ -27,9 +27,9 @@
 #define MAX_GROUPS		150
 #define MAX_ZONES		310
 #define	MAX_ENTITIES	2048
-#define	ZONE_BUNKER		235
-#define ZONE_RESPAWN	231
-#define ZONE_VILLA		286
+#define	ZONE_BUNKER		234
+#define ZONE_RESPAWN	230
+#define ZONE_VILLA		285
 #define	FLAG_SPEED		280.0
 #define	FLAG_POINT_MAX	150
 #define FLAG_MAX		10
