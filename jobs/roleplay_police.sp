@@ -731,7 +731,7 @@ public Action Cmd_Jail(int client) {
 	for(int i=1; i<=MaxClients; i++) {
 		if( !IsValidClient(i) || IsPlayerAlive(i) )
 			continue;
-		if( IsClientSourceTV(i) || IsClientObserver(i) )
+		if( IsClientSourceTV(i) )
 			continue;
 		if( rp_GetClientFloat(i, fl_RespawnTime) > time )
 			continue;

@@ -356,7 +356,7 @@ public Action Cmd_ItemRespawn(int args) {
 	if( IsPlayerAlive(client) ) {
 		return Plugin_Handled;
 	}
-	if( IsClientSourceTV(client) || IsClientObserver(client) )
+	if( IsClientSourceTV(client) )
 		return Plugin_Handled;
 	
 	int ragdoll = GetEntPropEnt(client, Prop_Send, "m_hRagdoll");
