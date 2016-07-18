@@ -175,16 +175,16 @@ public bool IsKillEligible(int attacker, int victim, const char weapon[64]) {
 		return false;
 	if( attacker == victim )
 		return false;
-	if( !rp_IsTutorialOver(victim) )
+	if( !rp_IsTutorialOver(victim) || rp_IsClientNew(victim) )
 		return false;
 	int bit = rp_GetZoneBit(rp_GetPlayerZone(victim));
 	if( bit & BITZONE_EVENT || bit & BITZONE_PEACEFULL || bit & BITZONE_PVP )
 		return false;
 	if( rp_GetClientInt(victim, i_JailTime) >= 10 && ( bit & BITZONE_JAIL || bit & BITZONE_HAUTESECU || bit & BITZONE_LACOURS ) )
 		return false;
-	
 	if( GetClientTeam(victim) == CS_TEAM_CT )
 		return true;
+	
 	
 	return false;
 }
