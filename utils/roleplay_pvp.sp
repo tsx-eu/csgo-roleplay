@@ -484,7 +484,7 @@ void CAPTURE_Start() {
 	ServerCommand("tv_record %s", szDayOfWeek);
 	ServerCommand("rp_wallhack 1");
 	if( botFound ) {
-//		CPrintToChatAll("{lightblue} Cette capture est enregistrée à cette adresse: https://www.ts-x.eu/tv/%s.dem", szDayOfWeek);
+		CPrintToChatAll("{lightblue} Cette capture est enregistrée à cette adresse: https://www.ts-x.eu/tv/%s.dem", szDayOfWeek);
 	}
 	CPrintToChatAll("{lightblue} ================================== {default}");
 }
