@@ -126,7 +126,7 @@ public void Q3_Frame(int objectiveID, int client) {
 	GetClientAbsOrigin(client, vec);
 	
 	g_iDuration[client]--;
-	if( rp_GetPlayerZone(client) == 289 ) {
+	if( rp_GetPlayerZone(client) == rp_GetZoneFromPoint(dst) ) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else if( g_iDuration[client] <= 0 ) {
@@ -135,15 +135,6 @@ public void Q3_Frame(int objectiveID, int client) {
 	else {
 		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: Retourner à la planque", QUEST_NAME, g_iDuration[client]);
 		ServerCommand("sm_effect_gps %d %f %f %f", client, dst[0], dst[1], dst[2]);
-		
-		if( rp_GetPlayerZone(client) == 195 || rp_GetPlayerZone(client) == 196 ) {
-			if( rp_GetClientItem(client, 3) == 0 ) {
-				char item[64];
-				rp_GetItemData(3, item_type_name, item, sizeof(item));
-				rp_ClientGiveItem(client, 3);
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu: %s", item);
-			}
-		}
 	}
 }
 public void Q3_End(int objectiveID, int client) {

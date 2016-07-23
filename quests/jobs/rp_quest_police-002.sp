@@ -132,7 +132,7 @@ public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
 }
 bool zoneJail(int client) {
 	int zone = rp_GetPlayerZone(client);
-	if( zone == 13 || zone == 198 || zone == 221 )
+	if( zone == 13 || zone == 158 || zone == 180 )
 		return true;
 	return false;
 }

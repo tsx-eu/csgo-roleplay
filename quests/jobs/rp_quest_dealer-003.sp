@@ -128,16 +128,15 @@ public void Q2_Start(int objectiveID, int client) {
 	g_iDuration[client] = 24 * 60;
 }
 public void Q2_Frame(int objectiveID, int client) {
-	static int zoneDest = 211;
-	static float dst[3] =  { -3423.0, -5427.0, -2007.0 };
-
+	static float dst[3] =  { -3467.7, -5529.9, -2007.96 };
+	
 	float vec[3];
 	GetClientAbsOrigin(client, vec);
 	
 	int wep = Client_GetActiveWeapon(client);
 	g_iDuration[client]--;
 	
-	if (wep > 0 && rp_GetWeaponStorage(wep) == true && rp_GetPlayerZone(client) == zoneDest) {
+	if (wep > 0 && rp_GetWeaponStorage(wep) == true && rp_GetPlayerZone(client) == rp_GetZoneFromPoint(dst)) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else if (g_iDuration[client] <= 0) {

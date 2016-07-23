@@ -144,25 +144,6 @@ public void Q2_Start(int objectiveID, int client) {
 	g_iCurrent[client]++;
 	g_iGoing[client] = rp_QuestCreateInstance(client, "models/props/cs_office/box_office_indoor_32.mdl", g_flLocation[g_iCurrent[client]]);
 }
-public void Q2_Frame(int objectiveID, int client) {
-	static int zoneDest = 89;
-	static float dst[3] =  { -1544.0, -2997.3, -1978.9 };
-	float vec[3];
-	GetClientAbsOrigin(client, vec);
-	
-	g_iDuration[client]--;
-	if (rp_GetPlayerZone(client) == zoneDest) {
-		rp_QuestStepComplete(client, objectiveID);
-	}
-	else if (g_iDuration[client] <= 0) {
-		rp_QuestStepFail(client, objectiveID);
-	}
-	else {
-		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s", QUEST_NAME, g_iDuration[client], QUEST_RESUME2);
-		rp_Effect_BeamBox(client, -1, dst, 255, 255, 255);
-	}
-}
-
 public void Q3_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
@@ -188,11 +169,7 @@ public void Q3_Frame(int objectiveID, int client) {
 	GetClientAbsOrigin(client, vec);
 	
 	g_iDuration[client]--;
-	if ( rp_GetClientJobID(client) == 61 //Exception pour les IMMO qui n'ont plus de planque officielle
-		&& rp_GetPlayerZone(client) == 2 ) { //On les envoie dans la disco (zone "2")
-		rp_QuestStepComplete(client, objectiveID);
-	}
-	else if ( rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == rp_GetClientJobID(client) ) {
+	if ( rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == rp_GetClientJobID(client) ) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else if (g_iDuration[client] <= 0) {
