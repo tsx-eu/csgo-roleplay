@@ -70,7 +70,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_cryptage",	Cmd_ItemCryptage,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_map",			Cmd_ItemMaps,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	
-	g_vConfigTueur = CreateConVar("rp_config_kidnapping", "171,172,173,174,182,183-184");
+	g_vConfigTueur = CreateConVar("rp_config_kidnapping", "149,150,151,152,160,161-162");
 	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
@@ -650,9 +650,9 @@ public Action SendToTribunal(Handle timer, any client) {
 	#endif
 	
 	if( Math_GetRandomInt(0, 1) )
-		TeleportEntity(client, view_as<float>({-276.0, -276.0, -1980.0}), NULL_VECTOR, NULL_VECTOR);
+		TeleportEntity(client, view_as<float>({473.7, -1979.5, -2007.9}), NULL_VECTOR, NULL_VECTOR);
 	else
-		TeleportEntity(client, view_as<float>({632.0, -1258.0, -1980.0}), NULL_VECTOR, NULL_VECTOR);
+		TeleportEntity(client, view_as<float>({-966.1, -570.6, -2007.9}), NULL_VECTOR, NULL_VECTOR);
 }
 // ----------------------------------------------------------------------------
 public Action SendToTueur(Handle timer, any client) {
