@@ -719,6 +719,9 @@ enum int_user_data {
 	i_DeathMonth,
 	i_Kill31Days,
 	i_Death31Days,
+	
+	i_JetonRouge,
+	i_JetonBleu,
 
 	i_udata_max
 };
