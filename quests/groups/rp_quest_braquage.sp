@@ -158,6 +158,7 @@ void Q_Clean() {
 			rp_UnhookEvent(i, RP_PreGiveDamage, fwdDamage);
 			rp_UnhookEvent(i, RP_PreClientTeleport, fwdTeleport);
 			rp_UnhookEvent(i, RP_PreClientSendToJail, fwdSendToJail);
+			rp_UnhookEvent(i, RP_OnPlayerZoneChange, fwdZoneChangeTUTO);
 		}
 	}
 	if( g_bByPassDoor ) {
@@ -366,6 +367,7 @@ public void Q5_Start(int objectiveID, int client) {
 		rp_HookEvent(i, RP_PreGiveDamage, fwdDamage);
 		rp_HookEvent(i, RP_PreClientTeleport, fwdTeleport);
 		rp_HookEvent(i, RP_PreClientSendToJail, fwdSendToJail);
+		rp_HookEvent(i, RP_OnPlayerZoneChange, fwdZoneChangeTUTO);
 	}
 }
 public void Q5_Frame(int objectiveID, int client) {
@@ -563,6 +565,7 @@ public void OnClientPostAdminCheck(int client) {
 		rp_HookEvent(client, RP_PreGiveDamage, fwdDamage);
 		rp_HookEvent(client, RP_PreClientTeleport, fwdTeleport);
 		rp_HookEvent(client, RP_PreClientSendToJail, fwdSendToJail);
+		rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZoneChangeTUTO);
 	}
 	
 	if( g_bByPassDoor ) {
@@ -614,6 +617,11 @@ public Action fwdHostageCarryDead(int client, int attacker) {
 public Action fwdZoneChange(int client, int newZone, int oldZone) {
 	if( rp_GetZoneInt(newZone, zone_type_type) != g_iPlanque ) {
 		detachHostage(client);
+	}
+}
+public Action fwdZoneChangeTUTO(int client, int newZone, int oldZone) {
+	if( !rp_IsTutorialOver(client) && rp_GetZoneInt(newZone, zone_type_type) == g_iPlanque ) {
+		rp_ClientSendToSpawn(client, true);
 	}
 }
 public Action fwdGotKey(int client, int doorID, int lockType) {
