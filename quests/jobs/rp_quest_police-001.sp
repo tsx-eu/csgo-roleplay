@@ -82,7 +82,7 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.AddItem("", "Prends le en filature, jusqu'à ce qu'il commette", ITEMDRAW_DISABLED);
 	menu.AddItem("", "un meurtre. Ensuite, arrête le.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Il est important de ne pas te faire répérer,", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Il est important de ne pas te faire repérer,", ITEMDRAW_DISABLED);
 	menu.AddItem("", "si l'assassin te voit, il ne commettra pas de crime.", ITEMDRAW_DISABLED); 
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Tu as 12 heures pour le prendre en flagrant délit.", ITEMDRAW_DISABLED);
