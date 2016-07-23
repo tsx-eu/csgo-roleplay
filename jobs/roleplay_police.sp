@@ -1380,7 +1380,7 @@ public Action Timer_ConvTribu(Handle timer, any target) {
 	}
 	float vecOrigin[3];
 	Entity_GetAbsOrigin(target, vecOrigin);
-	if( GetVectorDistance(vecOrigin, view_as<float>({496.0, -1787.0, -1997.0})) < 64.0 || GetVectorDistance(vecOrigin, view_as<float>({-782.0, -476.0, -2000.0})) < 64.0 ){
+	if( rp_GetPlayerZone(target) == 288 || rp_GetPlayerZone(target) == 287 ){
 		PrintToChatPoliceSearch(target, "{lightblue} ================================== {default}");
 		PrintToChatPoliceSearch(target, "{lightblue}[TSX-RP] [TRIBUNAL]{default} %N {default}n'est plus recherché par le Tribunal.", target);
 		PrintToChatPoliceSearch(target, "{lightblue} ================================== {default}");
