@@ -28,7 +28,7 @@
 #define MAX_AREA_DIST 		500
 #define STEAL_TIME			30.0
 #define ITEM_PIEDBICHE		1
-#define ZONE_ITEMSELL		132
+#define ZONE_ITEMSELL		95
 #define DRUG_DURATION 		90.0
 #define MODEL_PLANT_0			"models/custom_prop/marijuana/marijuana_0.mdl"
 #define MODEL_PLANT_1			"models/custom_prop/marijuana/marijuana_1.mdl"
