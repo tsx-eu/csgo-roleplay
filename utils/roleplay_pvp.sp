@@ -27,9 +27,10 @@
 #define MAX_GROUPS		150
 #define MAX_ZONES		310
 #define	MAX_ENTITIES	2048
-#define	ZONE_BUNKER		234
-#define ZONE_RESPAWN	230
-#define ZONE_VILLA		285
+#define	ZONE_BUNKER		194
+#define ZONE_RESPAWN	190
+#define ZONE_VILLA		245
+#define	ZONE_VILLA2		156
 #define	FLAG_SPEED		280.0
 #define	FLAG_POINT_MAX	150
 #define FLAG_MAX		10
@@ -446,7 +447,7 @@ void CAPTURE_Start() {
 			g_iCapture_POINT[gID] += rowPoint;
 			EmitSoundToClientAny(i, g_szSoundList[snd_YouAreOnBlue], _, 6, _, _, 1.0);
 		}
-		else {
+		else if( gID > 0 ) {
 			EmitSoundToClientAny(i, g_szSoundList[snd_YouAreOnRed], _, 6, _, _, 1.0);
 		}
 		
@@ -830,8 +831,12 @@ public Action fwdDead(int victim, int attacker, float& respawn) {
 		dropped = true;
 	}
 	
+	if( rp_GetClientGroupID(attacker) == 0 || rp_GetClientGroupID(victim) == 0 )
+		return Plugin_Continue;
+	
 	g_iKillingSpree[victim] = 0;
-	if( victim != attacker ) {
+
+	if( victim != attacker && (rp_GetZoneBit(rp_GetPlayerZone(victim)) & BITZONE_PVP || rp_GetZoneBit(rp_GetPlayerZone(attacker)) & BITZONE_PVP) ) {
 		GDM_RegisterKill(attacker);
 		
 		int points = GDM_ELOKill(attacker, victim);
@@ -968,14 +973,20 @@ public Action Event_PlayerHurt(Handle event, char[] name, bool dontBroadcast) {
 	return Plugin_Continue;
 }
 public Action fwdTakeDamage(int victim, int attacker, float& damage, int wepID, float pos[3]) {
-	if( rp_GetClientGroupID(victim) == rp_GetClientGroupID(attacker) )
-		return Plugin_Handled;
-	if( rp_GetClientGroupID(attacker) != rp_GetCaptureInt(cap_bunker) && rp_GetClientGroupID(victim) != rp_GetCaptureInt(cap_bunker) )
-		return Plugin_Handled;
-	if( rp_GetClientGroupID(victim) == 0 || rp_GetClientGroupID(attacker) == 0  )
-		return Plugin_Handled;
-	if( !(rp_GetZoneBit(rp_GetPlayerZone(victim)) & BITZONE_PVP || rp_GetZoneBit(rp_GetPlayerZone(attacker)) & BITZONE_PVP) )
-		return Plugin_Handled;
+	
+	
+	if( rp_GetClientGroupID(attacker) > 0 && rp_GetClientGroupID(victim) > 0 ) {
+		
+		if( rp_GetClientGroupID(attacker) != rp_GetCaptureInt(cap_bunker) && rp_GetClientGroupID(victim) != rp_GetCaptureInt(cap_bunker) ) {
+			return Plugin_Handled;
+		}
+		if( rp_GetClientGroupID(attacker) == rp_GetCaptureInt(cap_bunker) && rp_GetClientGroupID(victim) == rp_GetCaptureInt(cap_bunker) ) {
+			return Plugin_Handled;
+		}
+		if( !(rp_GetZoneBit(rp_GetPlayerZone(victim)) & BITZONE_PVP || rp_GetZoneBit(rp_GetPlayerZone(attacker)) & BITZONE_PVP) ) {
+			return Plugin_Handled;
+		}
+	}
 	
 	return Plugin_Continue;
 }
@@ -988,6 +999,12 @@ public Action fwdZoneChange(int client, int newZone, int oldZone) {
 		ForcePlayerSuicide(client);
 	}
 	if( newZone == ZONE_VILLA && !rp_GetClientKeyAppartement(client, 50) ) {
+		rp_ClientSendToSpawn(client, true);
+	}
+	if( newZone == ZONE_VILLA2 && rp_GetClientGroupID(client) != rp_GetCaptureInt(cap_bunker) ) {
+		rp_ClientSendToSpawn(client, true);
+	}
+	if( rp_GetClientGroupID(client) == 0 && (rp_GetZoneBit(newZone) & BITZONE_PVP) ) {
 		rp_ClientSendToSpawn(client, true);
 	}
 	return Plugin_Continue;
