@@ -150,14 +150,8 @@ public void Q3_Start(int objectiveID, int client) {
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Bien joué !", ITEMDRAW_DISABLED);
-	if ( rp_GetClientJobID(client) == 61 ) { //Exception pour les IMMO qui n'ont plus de planque officielle
-		menu.AddItem("", "Va déposer tout ces colis dans la", ITEMDRAW_DISABLED);
-		menu.AddItem("", "disco, tu recevras une récompense.", ITEMDRAW_DISABLED);
-	}
-	else {
-		menu.AddItem("", "Va déposer tout ces colis dans notre", ITEMDRAW_DISABLED);
-		menu.AddItem("", "planque, tu recevras une récompense.", ITEMDRAW_DISABLED);
-	}
+	menu.AddItem("", "Va déposer tout ces colis dans notre", ITEMDRAW_DISABLED);
+	menu.AddItem("", "planque, tu recevras une récompense.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 30);
