@@ -423,6 +423,7 @@ public int MenuJobs3(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 				default:{
 					rp_GetItemData(item_id, item_type_name, tmp, sizeof(tmp));
 					CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin de {lime}%s{default}, il est actuellement: %s", client, tmp, zoneName);
+					LogToGame("[TSX-RP] [CALL] %L a demandé %s à %L", client, tmp, target);
 				}
 			}
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} La demande à été envoyée à la personne.");
