@@ -23,7 +23,7 @@
 
 //#define DEBUG
 #define MODEL_KNIFE	"models/weapons/w_knife_flip.mdl"
-#define	ZONE_CABINE 214
+#define	ZONE_CABINE 173
 #define MENU_TIME_DURATION 60
 
 public Plugin myinfo = {
