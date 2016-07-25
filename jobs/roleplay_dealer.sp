@@ -453,25 +453,22 @@ public Action Cmd_ItemPilule(int args){
 			return Plugin_Handled;
 		}
 		switch(rp_GetClientJobID(client)){
-			case 1:   tptozone = 11;
-			case 11:  tptozone = 168;
-			case 21:  tptozone = 90;
-			case 31:  tptozone = 111;
-			case 41:  tptozone = 273;
-			case 51:  tptozone = 128;
-			case 61:  tptozone = 19;
-			case 71:  tptozone = 131;
-			case 81:  tptozone = 210;
-			case 91:  tptozone = 288;
-			case 101: tptozone = 68;
-			case 111: tptozone = 200;
-			case 121: tptozone = 215;
-			case 131: tptozone = 266;
-			case 171: tptozone = 75;
-			case 181: tptozone = 71;
-			case 191: tptozone = 276;
-			case 211: tptozone = 179;
-			case 221: tptozone = 147;
+			case 1:   tptozone = 7;
+			case 11:  tptozone = 121;
+			case 21:  tptozone = 69;
+			case 31:  tptozone = 272;
+			case 41:  tptozone = 226;
+			case 51:  tptozone = 298;
+			case 61:  tptozone = 266;
+			case 71:  tptozone = 90;
+			case 81:  tptozone = 95;
+			case 91:  tptozone = 6;
+			case 101: tptozone = 290;
+			case 111: tptozone = 100;
+			case 131: tptozone = 222;
+			case 171: tptozone = 236;
+			case 211: tptozone = 118;
+			case 221: tptozone = 101;
 		}
 	}
 
