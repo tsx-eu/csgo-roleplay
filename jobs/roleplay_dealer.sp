@@ -249,6 +249,11 @@ public Action Cmd_ItemDrugs(int args) {
 	bool drugged = rp_GetClientBool(client, b_Drugged);
 	
 	if( drugged ) {
+		if( !rp_IsTutorialOver(client) ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Attention vous allez tomber malade, terminer votre tutoriel avant de tenter le diable.");
+			ITEM_CANCEL(client, item_id);
+			return Plugin_Handled;
+			}
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Attention, vous étiez déjà drogué.");
 		
 		if( g_hDrugTimer[client] ) {
