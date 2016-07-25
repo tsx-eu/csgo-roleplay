@@ -20,6 +20,11 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
+//#define	INSTANT
+#define ITEM_TICKETID	76
+#define	ITEM_JETONROUGE	286
+#define ITEM_JETONBLEU	276
+#define getWheel(%1,%2,%3,%4) (g_iJoker[%1][%3] == %4 ? 6 : wheel[%2][%3][%4])
 
 public Plugin myinfo = {
 	name = "Jobs: Loto", author = "KoSSoLaX",
@@ -27,7 +32,39 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-int g_iTicketID = 76;
+char symbol[][] = {" ☘ ", "㍴", " ♥ ", "☎", " ♫ ", "♘", "☆", "☠", "♕", " ♠ ", "Δ", "§", " ♦ ", " † ", "☀", "♙ "};
+int wheel[10][3][13];
+int gain[10][7] =  {
+	{200,	100,	50,	25,	5,	3,	-1}, // 1
+	{250,	100,	50,	20,	10,	5,	-1}, // 2
+	{100,	50,		25,	20,	15,	10,	-1}, // 3
+	{1000,	5,		4,	3,	2,	1,	-1}, // 4
+	{100,	50,		20,	20,	20,	5,	-1}, // 5
+	{100,	50,		30,	25,	20,	6,	-1}, // 6
+	{500,	100,	20,	10,	6,	3,	-1}, // 7
+	{150,	30,		25,	20,	15,	10,	-1}, // 8
+	{15,	15,		15,	15,	15,	15,	-1}, // 9
+	{0,		0,		0,	0,	0,	25,	-1}  // 10
+};
+
+float rows[][][] = {
+	{{2505.0, -5624.0, -1962.0}, {2545.0, -5530.0, -1882.0}},
+	{{2505.0, -5528.0, -1962.0}, {2545.0, -5434.0, -1882.0}},
+	{{2505.0, -5428.0, -1962.0}, {2545.0, -5334.0, -1882.0}},
+	{{2505.0, -5324.0, -1962.0}, {2545.0, -5190.0, -1882.0}},
+	{{2353.0, -5620.0, -1962.0}, {2393.0, -5478.0, -1882.0}},
+	{{2353.0, -5468.0, -1962.0}, {2393.0, -5326.0, -1882.0}},
+	{{2249.0, -5468.0, -1962.0}, {2289.0, -5326.0, -1882.0}},
+	{{2249.0, -5620.0, -1962.0}, {2289.0, -5478.0, -1882.0}},
+	{{1788.0, -5359.0, -1962.0}, {1938.0, -5309.0, -1882.0}},
+	{{1938.0, -5359.0, -1962.0}, {2028.0, -5309.0, -1882.0}}
+};
+
+int g_iLastMachine[65], g_iRotation[65][2][3], g_iJettonInMachine[65], g_iJoker[65][3];
+bool g_bPlaying[65];
+float g_flNext[65][3];
+int g_iJackpot = 1000;
+
 // ----------------------------------------------------------------------------
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -43,15 +80,46 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_stuffpvp", 	Cmd_ItemStuffPvP, 		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegAdminCmd("rp_force_loto", 		CmdForceLoto, 			ADMFLAG_ROOT);
 	
+	
+	char query[1024];
+	Format(query, sizeof(query), "SELECT `jackpot` FROM `rp_servers` WHERE `port`='%d'", GetConVarInt(FindConVar("hostport")));
+	SQL_TQuery(rp_GetDatabase(), SQL_GetJackpot, query);
+	CreateTimer(300.0, TIMER_SyncJackpot, 0, TIMER_REPEAT);
+	
+	for (int i = 0; i < sizeof(wheel); i++) {
+		wheel[i][0] =  { 0,	1,	2,	2,	3,	3,	4,	4,	4,	5,	5,	5, 5};
+		wheel[i][1] =  { 0,	1,	1,	2,	3,	3,	4,	4,	4,	5,	5,	5, 6};
+		wheel[i][2] =  { 0,	1,	2,	2,	3,	3,	4,	4,	5,	5,	5,	5, 6};
+		
+		int j;
+		for (j = 0; j < 10000; j++) {
+			rotateWheel(i);
+			if( validate(i) )
+				break;
+		}
+	}
+	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
 }
+public Action TIMER_SyncJackpot(Handle timer, any none) {
+	char query[1024];
+	Format(query, sizeof(query), "UPDATE `rp_servers` SET `jackpot`='%d' WHERE `port`='%d'", g_iJackpot, GetConVarInt(FindConVar("hostport")));
+	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
+}
+public void SQL_GetJackpot(Handle owner, Handle hQuery, const char[] error, any client) {
+	if( SQL_FetchRow(hQuery) ) {
+		g_iJackpot = SQL_FetchInt(hQuery, 0);
+	}
+}
 // ------------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
+	rp_HookEvent(client, RP_OnPlayerUse, fwdOnPlayerUse);
+	
 }
-public Action fwdOnPlayerBuild(int client, float& cooldown){
+public Action fwdOnPlayerBuild(int client, float& cooldown) {
 	if( rp_GetClientJobID(client) != 171 )
 		return Plugin_Continue;
 	
@@ -60,6 +128,23 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 	cooldown = 10.0;
 	
 	return Plugin_Stop;
+}
+public Action fwdOnPlayerUse(int client) {
+	if( rp_GetPlayerZone(client) == 278 ) {
+		displayCasino(client);
+	}
+}
+int IsPlayerInCasino(int client) {
+	float pos[3];
+	GetClientAbsOrigin(client, pos);
+	
+	for (int i = 0; i < sizeof(rows); i++) {
+		if(	pos[0] <= rows[i][1][0] && pos[1] <= rows[i][1][1] && pos[2] <= rows[i][1][2] &&
+			pos[0] >= rows[i][0][0] && pos[1] >= rows[i][0][1] && pos[2] >= rows[i][0][2] ) {
+				return i;
+		}
+	}
+	return -1;
 }
 public Action Cmd_ItemStuffPvP(int args) {
 	int client = GetCmdArgInt(1);
@@ -136,7 +221,7 @@ public void SQL_GetLotoCount(Handle owner, Handle hQuery, const char[] error, an
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre ticket a été validé. Un tirage exceptionnel pour la brocante de Noël aura lieu mercredi vers 21h30.");
 		}
 		else {
-			rp_ClientGiveItem(client, g_iTicketID, 1, true);
+			rp_ClientGiveItem(client, ITEM_TICKETID, 1, true);
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre ticket a déjà été validé. Vous avez été remboursé dans votre banque.");
 		}
 	}		
@@ -157,7 +242,6 @@ public Action Cmd_ItemLoto(int args) {
 	
 	if( amount == -1 ) {
 		char query[1024];
-		g_iTicketID = GetCmdArgInt(3);
 		//Format(query, sizeof(query), "SELECT COUNT(*) FROM `rp_loto` WHERE `steamid`='%s';", szSteamID);
 		//SQL_TQuery(rp_GetDatabase(), SQL_GetLotoCount, query, client, DBPrio_Low);
 		//CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre ticket a été validé. Un tirage exceptionnel pour la brocante de Noël aura lieu mercredi vers 21h30.");
@@ -243,7 +327,7 @@ public void SQL_GetLoteryWiner(Handle owner, Handle hQuery, const char[] error, 
 	PrintToServer("SQL_GetLoteryWiner");
 	#endif
 	int place = 0;
-	int gain = 0;
+	int iGain = 0;
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	char szSteamID[32], szName[64];
 	
@@ -256,26 +340,26 @@ public void SQL_GetLoteryWiner(Handle owner, Handle hQuery, const char[] error, 
 		SQL_FetchString(hQuery, 1, szName, sizeof(szName));
 		
 		if( place == 1 ) {
-			gain = (g_iLOTO/100*70);
-			CPrintToChatAll("{lightblue}[TSX-RP]{default} Le gagnant de la loterie est... %s et remporte %d$!", szName, gain);
+			iGain = (g_iLOTO/100*70);
+			CPrintToChatAll("{lightblue}[TSX-RP]{default} Le gagnant de la loterie est... %s et remporte %d$!", szName, iGain);
 		}
 		else if( place == 2 ) {
-			gain = (g_iLOTO/100*20);
-			CPrintToChatAll("{lightblue}[TSX-RP]{default} suivi de.... %s et remporte %d$!", szName, gain);
+			iGain = (g_iLOTO/100*20);
+			CPrintToChatAll("{lightblue}[TSX-RP]{default} suivi de.... %s et remporte %d$!", szName, iGain);
 		}
 		else if( place == 3 ) {
-			gain = (g_iLOTO/100*10);
-			CPrintToChatAll("{lightblue}[TSX-RP]{default} %s remporte le lot de consolation de %d$!", szName, gain);
+			iGain = (g_iLOTO/100*10);
+			CPrintToChatAll("{lightblue}[TSX-RP]{default} %s remporte le lot de consolation de %d$!", szName, iGain);
 		}
-		LogToGame("[LOTO-%d] %s %s %d", place, szName, szSteamID, gain);
+		LogToGame("[LOTO-%d] %s %s %d", place, szName, szSteamID, iGain);
 		
 		
 		char szQuery[1024];
-		Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_users2` (`steamid`,  `bank`) VALUES ('%s', %d);", szSteamID, gain);
+		Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_users2` (`steamid`,  `bank`) VALUES ('%s', %d);", szSteamID, iGain);
 		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
 		
 		Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_sell` (`id`, `steamid`, `job_id`, `timestamp`, `item_type`, `item_id`, `item_name`, `amount`) VALUES (NULL, '%s', '%i', '%i', '4', '%i', '%s', '%i');",
-		szSteamID, 171, GetTime(), -1, "LOTO", gain);			
+		szSteamID, 171, GetTime(), -1, "LOTO", iGain);			
 		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
 		
 		Format(szQuery, sizeof(szQuery), "UPDATE `rp_success` SET `lotto`='-1' WHERE `SteamID`='%s';", szSteamID);
@@ -286,4 +370,356 @@ public void SQL_GetLoteryWiner(Handle owner, Handle hQuery, const char[] error, 
 	
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, "TRUNCATE `rp_loto`");
+}
+// ------------------------------------------------------------------------------
+public Action OnPlayerRunCmd(int client) {
+	float time = GetGameTime();
+	
+	if( g_bPlaying[client] && (g_flNext[client][0] < time || g_flNext[client][1] < time || g_flNext[client][2] < time) ) {
+		int k[3];
+		
+		if( g_iRotation[client][0][0] == g_iRotation[client][1][0] && g_iRotation[client][0][1] == g_iRotation[client][1][1] && g_iRotation[client][0][2] == g_iRotation[client][1][2] ) {
+			displayWheel(client, g_iLastMachine[client], g_iRotation[client][0], k, true);
+			g_bPlaying[client] = false;
+		}
+		else {
+			displayWheel(client,  g_iLastMachine[client], g_iRotation[client][0], k, false);
+			for (int i = 0; i < 3; i++) {
+				if ( g_iRotation[client][0][i] != g_iRotation[client][1][i] && g_flNext[client][i] < time ) {
+					g_iRotation[client][0][i]++;
+					g_flNext[client][i] = GetGameTime() + getSpeed(g_iRotation[client][1][i]-g_iRotation[client][0][i]);
+				}
+			}
+#if defined INSTANT
+			g_iRotation[client][0][0] = g_iRotation[client][1][0];
+			g_iRotation[client][0][1] = g_iRotation[client][1][1];
+			g_iRotation[client][0][2] = g_iRotation[client][1][2];
+#endif
+		}
+	}
+}
+float getSpeed(int delta) {
+#if defined INSTANT
+	if( delta ) { }
+	return -1.0;
+#else
+	float val = 0.15 - (delta / 140.0);
+	return val;
+#endif
+}
+
+public Action Cmd_ShowSymbol(int client, int args) {
+	Menu menu = CreateMenu(MenuNothing);
+	char tmp[64];
+	
+	for (int i = 0; i < sizeof(symbol); i++) {
+		Format(tmp, sizeof(tmp), "%d --> %s", i, symbol[i]);
+		menu.AddItem("", tmp);
+	}
+	menu.Display(client, MENU_TIME_FOREVER);
+}
+void displayCasino(int client) {
+	int n = IsPlayerInCasino(client);
+	if( n < 0 )
+		return;
+	
+	char tmp[512];
+	
+	int jeton = getPlayerJeton(client);
+	
+	Format(tmp, sizeof(tmp), "Machine à sous n°%d\n", n + 1, g_iJackpot);
+	Format(tmp, sizeof(tmp), "%sVous avez %d jeton%s\n----------------------------\n", tmp, jeton, jeton>1?"s":"");
+	
+	Format(tmp, sizeof(tmp), "%s1.      %4s     %d jetons\n", tmp, symbol[6], g_iJackpot);
+	
+	for (int i = 0; i < sizeof(gain[])-1; i++) {
+		Format(tmp, sizeof(tmp), "%s%d.      %4s     %d jetons\n", tmp, i+2, symbol[i], gain[n][i]);
+	}
+	Format(tmp, sizeof(tmp), "%s ", tmp);
+	
+	
+	Menu menu = CreateMenu(MenuCasino);
+	
+	menu.AddItem("1", 		"Jouer 1 jeton", jeton >= 1 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem("2", 		"Jouer 2 jetons", jeton >= 2 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem("3", 		"Jouer 3 jetons\n", jeton >= 3 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	
+	menu.SetTitle(tmp);
+	menu.Pagination = MENU_NO_PAGINATION;
+	menu.ExitButton = true;
+	menu.Display(client, MENU_TIME_FOREVER);
+	
+	g_iLastMachine[client] = n;
+}
+void EffectCasino(int client, int jeton) {
+	if( g_bPlaying[client] )
+		return;
+	if( IsPlayerInCasino(client) < 0 )
+		return;
+	
+	if( !takePlayerJeton(client, jeton) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez plus assez de jeton.");
+		return;
+	}
+	
+	int size = sizeof(wheel[][]);
+	
+	for (int i = 0; i < 3; i++)
+		g_iRotation[client][1][i] = (size*i) + (Math_GetRandomInt(0, size*1024) % (size*2));
+	
+
+	g_iJackpot += jeton;
+	g_bPlaying[client] = true;
+	g_iRotation[client][0][0] = g_iRotation[client][0][1] = g_iRotation[client][0][2] = 0;
+	g_iJettonInMachine[client] = jeton;
+	
+	g_iJoker[client][0] = Math_GetRandomInt(-size*4, 11);
+	g_iJoker[client][1] = Math_GetRandomInt(-size*8, 11);
+	g_iJoker[client][2] = Math_GetRandomInt(-size*16, 11);
+}
+public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
+	if( action == MenuAction_Select ) {
+		if( menu != INVALID_HANDLE )
+			CloseHandle(menu);
+	}
+	else if( action == MenuAction_End ) {
+		if( menu != INVALID_HANDLE )
+			CloseHandle(menu);
+	}
+}
+public int MenuCasino(Handle menu, MenuAction action, int client, int param2) {
+	if( action == MenuAction_Select ) {
+		char szMenuItem[64];
+		GetMenuItem(menu, param2, szMenuItem, sizeof(szMenuItem));
+		int jeton = StringToInt(szMenuItem);
+		if( jeton > 0 ) {
+			EffectCasino(client, jeton);
+		}
+		else
+			CloseHandle(menu);
+	}
+	else if( action == MenuAction_End ) {
+		if( menu != INVALID_HANDLE )
+			CloseHandle(menu);
+	}
+}
+void displayWheel(int client, int n, int l[3], int k[3], bool last) { 
+	static char tmp[128], pre[12], post[12], title[512];
+	int i, j, size = sizeof(wheel[][]);
+	
+	Menu menu = CreateMenu( last ? MenuCasino : MenuNothing );
+	
+	int line[5], won;
+	line[0] = last && g_iJettonInMachine[client] == 3 ? UpDownMatch(client, n, l, size) : 0;
+	line[4] = last && g_iJettonInMachine[client] == 3 ? DownUpMatch(client, n, l, size) : 0;
+	
+	title[0] = 0;
+	
+	for (i = 0; i < 5; i++) {
+		for (j = 0; j < 3; j++)
+			k[j] = (l[j] + i) % size;
+		
+		line[i] = (i > 0 && i < 4 && last && (i==2 || g_iJettonInMachine[client] >= 2 ) ? lineMatch(client, n, k) : line[i]);
+		won += line[i];
+		
+		preSymbol(client, pre, sizeof(pre), i, line[i]>0, line[0]>0, line[4]>0);
+		postSymbol(client, post, sizeof(post), i, line[i]>0, line[0]>0, line[4]>0);
+		
+		
+		if( i == 4 ) Format(title, sizeof(title), "%s  ────────────────\n", title);
+		Format(title, sizeof(title), "%s %s │ %4s │ %4s │ %4s │ %s\n", title, pre, symbol[getWheel(client, n, 0, k[0])], symbol[getWheel(client, n, 1, k[1])], symbol[getWheel(client, n, 2, k[2])], post);
+		if( i == 0 ) Format(title, sizeof(title), "%s  ────────────────\n", title);
+	}
+	
+	Format(tmp, sizeof(tmp), " ");
+	
+	if( last && won>0 ) ClientCommand(client, "play common/stuck1.wav");
+	if( last && won<=0 ) ClientCommand(client, "play common/stuck2.wav");
+	
+	if( last && won>0 ) {
+		givePlayerJeton(client, won);
+		g_iJackpot -= won;
+		Format(tmp, sizeof(tmp), "Vous avez gagné %d jeton%s!", won, won>1?"s":"");
+	}
+	
+	
+	int jeton = getPlayerJeton(client);
+	
+	menu.SetTitle("Machine à sous n°%d\nIl vous reste %d jeton%s\n%s\n\n%s", n+1, jeton, jeton>1?"s":"", tmp, title);
+	
+	menu.AddItem("1", 		"Jouer 1 jeton", last && jeton >= 1 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem("2", 		"Jouer 2 jetons", last && jeton >= 2 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem("3", 		"Jouer 3 jetons\n", last && jeton >= 3 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	
+	menu.Pagination = MENU_NO_PAGINATION;
+	menu.ExitButton = true;
+	menu.Display(client, MENU_TIME_FOREVER);
+#if defined INSTANT
+	if (last) CreateTimer(0.1, fake, client);
+#endif
+}
+public Action fake(Handle timer, any client) {
+	FakeClientCommand(client, "menuselect 3");
+}
+void rotateWheel(int n) {
+	int a, b, c, d;
+	d = sizeof(wheel[][]);
+	
+	for (int i = 0; i < sizeof(wheel[]); i++) {
+		for (int j = 0; j < d; j++) {
+			a = GetRandomInt(0, d-1);
+			b = GetRandomInt(0, d-1);
+			
+			c = wheel[n][i][a];
+			wheel[n][i][a] = wheel[n][i][b];
+			wheel[n][i][b] = c;
+		}
+	}
+}
+int lineMatch(int client, int n, int k[3]) {
+	if( getWheel(client, n, 0, k[0]) == getWheel(client, n, 1, k[1]) && getWheel(client, n, 1, k[1]) == getWheel(client, n, 2, k[2]) )
+		return (gain[n][getWheel(client, n, 0, k[0])] == -1 ? g_iJackpot : gain[n][getWheel(client, n, 0, k[0])]);
+	return 0;
+}
+int UpDownMatch(int client, int n, int l[3], int size) {
+	int k[3];
+	
+	k[0] = (l[0] + 1) % size;
+	k[1] = (l[1] + 2) % size;
+	k[2] = (l[2] + 3) % size;
+	
+	return lineMatch(client, n, k);
+}
+int DownUpMatch(int client, int n, int l[3], int size) {
+	int k[3];
+	
+	k[0] = (l[0] + 3) % size;
+	k[1] = (l[1] + 2) % size;
+	k[2] = (l[2] + 1) % size;
+	
+	return lineMatch(client, n, k);
+}
+// "↘", "→", "↗", "↙", "←", "↖", "⇘", "⇒", "⇗", "⇙","⇐","⇖"
+void preSymbol(int client, char[] tmp, int length, int i, bool line, bool upDown, bool downUp) {
+	
+	if( g_iJettonInMachine[client] == 1 && i != 2 ) {
+		Format(tmp, length, "   ");
+	}
+	else if( g_iJettonInMachine[client] == 2 && (i == 0 || i == 4) ) {
+		Format(tmp, length, "   ");
+	}
+	else {
+		if( i == 0 ) {
+			if( upDown )	Format(tmp, length, "⇘ ");
+			else			Format(tmp, length, "↘ ");
+		}
+		else if( i == 4 ) {
+			if( downUp )	Format(tmp, length, "⇗ ");
+			else			Format(tmp, length, "↗ ");
+		}
+		else {
+			if( line )		Format(tmp, length, "⇒");
+			else			Format(tmp, length, "→");
+		}
+	}
+}
+void postSymbol(int client, char[] tmp, int length, int i, bool line, bool upDown, bool downUp) {
+	if( g_iJettonInMachine[client] == 1 && i != 2 ) {
+		Format(tmp, length, "   ");
+	}
+	else if( g_iJettonInMachine[client] == 2 && (i == 0 || i == 4) ) {
+		Format(tmp, length, "   ");
+	}
+	else {
+		if( i == 0 ) {
+			if( downUp )	Format(tmp, length, " ⇙");
+			else			Format(tmp, length, " ↙");
+		}
+		else if( i == 4 ) {
+			if( upDown )	Format(tmp, length, " ⇖\n ");
+			else			Format(tmp, length, " ↖\n ");
+		}
+		else {
+			if( line )		Format(tmp, length, " ⇐");
+			else			Format(tmp, length, " ←");
+		}
+	}
+}
+bool validate(int n) {
+	int i, j, k;
+	for (i = 0; i < sizeof(wheel[][]); i++) {
+		for (j = 0; j < sizeof(wheel[][]); j++) { 
+			for (k = 0; k < sizeof(wheel[][]); k++) {
+				if( subValidate(n, i, j, k) ) {
+					return false;
+				}
+			}
+		}
+	}
+	return true;
+}
+bool subValidate(int n, int i, int j, int k) {
+	int m = sizeof(wheel[][]);
+
+	if( wheel[n][0][i] == wheel[n][1][j] && wheel[n][1][j] == wheel[n][2][k] ) {
+		if( wheel[n][0][ modulo(i-1,m) ] == wheel[n][1][ modulo(j-1,m) ] && wheel[n][1][ modulo(j-1,m) ] == wheel[n][2][ modulo(k-1,m) ] ) {
+			return true;
+		}
+		if( wheel[n][0][ modulo(i+1,m) ] == wheel[n][1][ modulo(j+1,m) ] && wheel[n][1][ modulo(j+1,m) ] == wheel[n][2][ modulo(k+1,m) ] ) {
+			return true;
+		}
+		if( wheel[n][0][ modulo(i+1,m) ] == wheel[n][1][ modulo(j,m) ] && wheel[n][1][ modulo(j,m) ] == wheel[n][2][ modulo(k-1,m) ] ) {			
+			return true;
+		}
+		if( wheel[n][0][ modulo(i-1,m) ] == wheel[n][1][ modulo(j,m) ] && wheel[n][1][ modulo(j,m) ] == wheel[n][2][ modulo(k+1,m) ] ) {
+			return true;
+		}
+	}
+	if( wheel[n][0][modulo(i+1,m)] == wheel[n][1][modulo(j+1,m)] && wheel[n][1][modulo(j+1,m)] == wheel[n][2][modulo(k+1,m)] ) {
+		if( wheel[n][0][ modulo(i+1,m) ] == wheel[n][1][ modulo(j,m) ] && wheel[n][1][ modulo(j,m) ] == wheel[n][2][ modulo(k-1,m) ] ) {			
+			return true;
+		}
+		if( wheel[n][0][ modulo(i-1,m) ] == wheel[n][1][ modulo(j,m) ] && wheel[n][1][ modulo(j,m) ] == wheel[n][2][ modulo(k+1,m) ] ) {
+			return true;
+		}
+	}
+	if( wheel[n][0][modulo(i-1,m)] == wheel[n][1][modulo(j-1,m)] && wheel[n][1][modulo(j-1,m)] == wheel[n][2][modulo(k-1,m)] ) {
+		if( wheel[n][0][ modulo(i+1,m) ] == wheel[n][1][ modulo(j,m) ] && wheel[n][1][ modulo(j,m) ] == wheel[n][2][ modulo(k-1,m) ] ) {			
+			return true;
+		}
+		if( wheel[n][0][ modulo(i-1,m) ] == wheel[n][1][ modulo(j,m) ] && wheel[n][1][ modulo(j,m) ] == wheel[n][2][ modulo(k+1,m) ] ) {
+			return true;
+		}
+		if( wheel[n][0][modulo(i+1,m)] == wheel[n][1][modulo(j+1,m)] && wheel[n][1][modulo(j+1,m)] == wheel[n][2][modulo(k+1,m)] ) {
+			return true;
+		}
+	}
+	
+	
+	
+	return false;
+}
+int modulo(int i, int j) {
+	return ((i % j) + j) % j;
+}
+int getPlayerJeton(int client) {
+	return rp_GetClientItem(client, ITEM_JETONROUGE) + rp_GetClientItem(client, ITEM_JETONBLEU);
+}
+bool takePlayerJeton(int client, int amount) {
+	if( getPlayerJeton(client) < amount )
+		return false;
+	
+	int rouge = rp_GetClientItem(client, ITEM_JETONROUGE);	
+	if( rouge >= amount ) {
+		rp_ClientGiveItem(client, ITEM_JETONROUGE, -amount);
+	}
+	else {
+		amount -= rouge;
+		rp_ClientGiveItem(client, ITEM_JETONROUGE, -rouge);
+		rp_ClientGiveItem(client, ITEM_JETONBLEU, -amount);
+	}
+	return true;
+}
+void givePlayerJeton(int client, int amount) {
+	rp_ClientGiveItem(client, ITEM_JETONBLEU, amount);
 }
