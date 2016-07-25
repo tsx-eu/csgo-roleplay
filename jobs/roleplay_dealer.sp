@@ -126,6 +126,12 @@ public Action Cmd_ItemDrugs(int args) {
 	int item_id = GetCmdArgInt(args);
 	float dur = DRUG_DURATION;
 	
+	bool drugged = rp_GetClientBool(client, b_Drugged);
+	if (drugged && !rp_IsTutorialOver(client) ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Attention vous allez tomber malade, terminer votre tutoriel avant de tenter le diable.");
+			ITEM_CANCEL(client, item_id);
+			return Plugin_Handled;
+			}
 	if( StrEqual(arg0, "ghb") ) {
 		if( rp_GetClientInt(client, i_MaskCount) <= 0 ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser de GHB pour le moment.");
@@ -246,7 +252,6 @@ public Action Cmd_ItemDrugs(int args) {
 		rp_Effect_Smoke(client, dur);
 	}
 	
-	bool drugged = rp_GetClientBool(client, b_Drugged);
 	
 	if( drugged ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Attention, vous étiez déjà drogué.");
