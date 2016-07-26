@@ -80,12 +80,6 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_stuffpvp", 	Cmd_ItemStuffPvP, 		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegAdminCmd("rp_force_loto", 		CmdForceLoto, 			ADMFLAG_ROOT);
 	
-	
-	char query[1024];
-	Format(query, sizeof(query), "SELECT `jackpot` FROM `rp_servers` WHERE `port`='%d'", GetConVarInt(FindConVar("hostport")));
-	SQL_TQuery(rp_GetDatabase(), SQL_GetJackpot, query);
-	CreateTimer(300.0, TIMER_SyncJackpot, 0, TIMER_REPEAT);
-	
 	for (int i = 0; i < sizeof(wheel); i++) {
 		wheel[i][0] =  { 0,	1,	2,	2,	3,	3,	4,	4,	4,	5,	5,	5, 5};
 		wheel[i][1] =  { 0,	1,	1,	2,	3,	3,	4,	4,	4,	5,	5,	5, 6};
@@ -102,6 +96,12 @@ public void OnPluginStart() {
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
+}
+public void OnAllPluginsLoaded() {
+	char query[1024];
+	Format(query, sizeof(query), "SELECT `jackpot` FROM `rp_servers` WHERE `port`='%d'", GetConVarInt(FindConVar("hostport")));
+	SQL_TQuery(rp_GetDatabase(), SQL_GetJackpot, query);
+	CreateTimer(300.0, TIMER_SyncJackpot, 0, TIMER_REPEAT);
 }
 public Action TIMER_SyncJackpot(Handle timer, any none) {
 	char query[1024];
