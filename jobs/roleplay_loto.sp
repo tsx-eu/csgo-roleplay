@@ -46,7 +46,6 @@ int gain[10][7] =  {
 	{15,	15,		15,	15,	15,	15,	-1}, // 9
 	{0,		0,		0,	0,	0,	25,	-1}  // 10
 };
-
 float rows[][][] = {
 	{{2505.0, -5624.0, -1962.0}, {2545.0, -5530.0, -1882.0}},
 	{{2505.0, -5528.0, -1962.0}, {2545.0, -5434.0, -1882.0}},
@@ -60,11 +59,11 @@ float rows[][][] = {
 	{{1938.0, -5359.0, -1962.0}, {2028.0, -5309.0, -1882.0}}
 };
 int lstJOB[] =  { 11, 21, 31, 41, 51, 61, 71, 81, 111, 131, 171, 191, 211, 221 };
-
 int g_iLastMachine[65], g_iRotation[65][2][3], g_iJettonInMachine[65], g_iJoker[65][3];
 bool g_bPlaying[65];
 float g_flNext[65][3];
 int g_iJackpot = 1000;
+Handle g_hTimer[65];
 
 // ----------------------------------------------------------------------------
 public Action Cmd_Reload(int args) {
@@ -100,20 +99,19 @@ public void OnPluginStart() {
 }
 public void OnAllPluginsLoaded() {
 	char query[1024];
-	Format(query, sizeof(query), "SELECT `jackpot` FROM `rp_servers` WHERE `port`='%d'", GetConVarInt(FindConVar("hostport")));
+	Format(query, sizeof(query), "SELECT `jackpot` FROM `rp_csgo`.`rp_servers` WHERE `port`='%d'", GetConVarInt(FindConVar("hostport")));
 	SQL_TQuery(rp_GetDatabase(), SQL_GetJackpot, query);
 	CreateTimer(300.0, TIMER_SyncJackpot, 0, TIMER_REPEAT);
 }
 public Action TIMER_SyncJackpot(Handle timer, any none) {
 	char query[1024];
-	Format(query, sizeof(query), "UPDATE `rp_servers` SET `jackpot`='%d' WHERE `port`='%d'", g_iJackpot, GetConVarInt(FindConVar("hostport")));
+	Format(query, sizeof(query), "UPDATE `rp_csgo`.`rp_servers` SET `jackpot`='%d' WHERE `port`='%d'", g_iJackpot, GetConVarInt(FindConVar("hostport")));
 	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
 }
 public void SQL_GetJackpot(Handle owner, Handle hQuery, const char[] error, any client) {
 	if( SQL_FetchRow(hQuery) ) {
 		g_iJackpot = SQL_FetchInt(hQuery, 0);
 	}
-	PrintToChatAll(error);
 }
 // ------------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
@@ -215,7 +213,7 @@ public Action Cmd_ItemLotoBonus(int args) {
 	rp_HookEvent(client, RP_OnAssurance, fwdAssurance, 30.0);
 }
 public Action fwdAssurance(int client, int& amount) {
-		amount += 250;
+	amount += 250;
 }
 public void SQL_GetLotoCount(Handle owner, Handle hQuery, const char[] error, any client) {
 	
@@ -236,6 +234,7 @@ public void SQL_GetLotoCount(Handle owner, Handle hQuery, const char[] error, an
 		}
 	}		
 }
+int ticketAmountType[] =  { -1, 9999999, 1, 2, 3, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000 };
 public Action Cmd_ItemLoto(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemLoto");
@@ -243,10 +242,118 @@ public Action Cmd_ItemLoto(int args) {
 	
 	int amount = GetCmdArgInt(1);
 	int client = GetCmdArgInt(2);
+	int itemID = GetCmdArgInt(args);
+	int itemCount = rp_GetClientItem(client, itemID);
 
 	if( amount > 1000)
 		return Plugin_Handled;
+	
+	
+	if( g_hTimer[client] ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes déjà entrain de gratter des tickets.");
+		return Plugin_Handled;
+	}
+	
+	if( itemCount >= 9 ) {
+		rp_ClientGiveItem(client, itemID);
+		
+		Handle dp;
+		CreateDataTimer(0.1, Delay_MenuLoto, dp, TIMER_DATA_HNDL_CLOSE);
+		WritePackCell(dp, client);
+		WritePackCell(dp, itemID);
+		WritePackCell(dp, amount);
+	}
+	else {
+		gratterTicket(client, amount, itemID);
+	}
 
+
+	return Plugin_Handled;
+}
+public Action Delay_MenuLoto(Handle timer, Handle dp) {
+	ResetPack(dp);
+	int client = ReadPackCell(dp);
+	int itemID = ReadPackCell(dp);
+	int amount = ReadPackCell(dp);
+	int count = rp_GetClientItem(client, itemID);
+	
+	Menu menu = CreateMenu(MenuLoto);
+	if( amount == -1 )
+		menu.SetTitle("Vous avez %d ticket cagnotte.\nCombien voulez-vous gratter?", count);
+	else
+		menu.SetTitle("Vous avez %d ticket de %d$.\nCombien voulez-vous gratter?", count, amount);
+		
+	char tmp[64], tmp2[64];
+		
+	for (int i = 0; i < sizeof(ticketAmountType); i++) {
+		Format(tmp, sizeof(tmp), "%d %d %d", itemID, amount, ticketAmountType[i]);
+		
+		if( i > 2 && count < ticketAmountType[i] )
+			continue;
+		
+		if( ticketAmountType[i] == -1 && amount > 0 )
+			Format(tmp2, sizeof(tmp2), "Gratter jusqu'à ce que je gagne");
+		else if( ticketAmountType[i] > 1000 )
+			Format(tmp2, sizeof(tmp2), "Gratter tous mes tickets");
+		else
+			Format(tmp2, sizeof(tmp2), "Gratter %d ticket%s", ticketAmountType[i], ticketAmountType[i] > 1 ? "s":"");
+		
+		menu.AddItem(tmp, tmp2);
+	}
+	
+	menu.Display(client, 30);
+}
+public Action TIMER_Grattage(Handle timer, Handle dp) {
+	ResetPack(dp);
+	int total = ReadPackCell(dp);
+	int client = ReadPackCell(dp);
+	int itemID = ReadPackCell(dp);
+	int amount = ReadPackCell(dp);
+	
+	if( rp_GetClientItem(client, itemID) == 0 ) {
+		delete g_hTimer[client];
+		return Plugin_Stop;
+	}
+	
+	rp_ClientGiveItem(client, itemID, -1);
+	bool won = gratterTicket(client, amount, itemID);
+	
+	if( total < 0 && won ) {
+		delete g_hTimer[client];
+		return Plugin_Stop;
+	}
+	if( total == 1 ) {
+		delete g_hTimer[client];
+		return Plugin_Stop;
+	}
+	
+	ResetPack(dp);
+	WritePackCell(dp, total-1);
+	return Plugin_Continue;
+}
+public int MenuLoto(Handle menu, MenuAction action, int client, int param2) {
+	if( action == MenuAction_Select ) {
+		char szMenuItem[64], tmp[3][8];
+		GetMenuItem(menu, param2, szMenuItem, sizeof(szMenuItem));
+		ExplodeString(szMenuItem, " ", tmp, sizeof(tmp), sizeof(tmp[]));
+		
+		int itemID = StringToInt(tmp[0]);
+		int amount = StringToInt(tmp[1]);
+		int count = StringToInt(tmp[2]);
+		
+		Handle dp;
+		g_hTimer[client] = CreateDataTimer(0.01, TIMER_Grattage, dp, TIMER_DATA_HNDL_CLOSE|TIMER_REPEAT);
+		WritePackCell(dp, count);
+		WritePackCell(dp, client);
+		WritePackCell(dp, itemID);
+		WritePackCell(dp, amount);
+	}
+	else if( action == MenuAction_End ) {
+		if( menu != INVALID_HANDLE )
+			CloseHandle(menu);
+	}
+}
+bool gratterTicket(int client, int amount, int itemID) {
 	char szSteamID[32];
 	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID), false);
 	
@@ -257,9 +364,10 @@ public Action Cmd_ItemLoto(int args) {
 		//CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre ticket a été validé. Un tirage exceptionnel pour la brocante de Noël aura lieu mercredi vers 21h30.");
 		Format(query, sizeof(query), "INSERT INTO `rp_loto` (`id`, `steamid`) VALUES (NULL, '%s');", szSteamID);
 		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query, 0, DBPrio_High);
+		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre ticket a été validé. Les tirages ont lieu le mardi et le samedi à 21h00.");
 		
-		return Plugin_Handled;
+		return false;
 	}
 	int luck = 100;
 	
@@ -269,31 +377,30 @@ public Action Cmd_ItemLoto(int args) {
 	if( !rp_IsClientLucky(client) )
 		luck += 40;
 	
-	if( Math_GetRandomInt(1, luck) == 42 ) {
-			
+	if( Math_GetRandomInt(1, luck) == 42 && itemID ) {
+		
 		rp_SetClientStat(client, i_LotoWon, rp_GetClientStat(client, i_LotoWon) + (amount*100));
 		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) + (amount * 100));
+		
 		rp_SetJobCapital(171, rp_GetJobCapital(171) - (amount*100));
-			
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Félicitations! Vous avez gagné %i$.", (amount*100));
-		LogToGame("[TSX-RP] [LOTO] %N gagne: %d$", client, (amount*100));
 		
 		char szQuery[1024];
 		Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_sell` (`id`, `steamid`, `job_id`, `timestamp`, `item_type`, `item_id`, `item_name`, `amount`) VALUES (NULL, '%s', '%i', '%i', '4', '%i', '%s', '%i');",
 		szSteamID, 171, GetTime(), -1, "LOTO", amount*100);			
 		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
+		LogToGame("[TSX-RP] [LOTO] %N gagne: %d$", client, (amount*100));
 		
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Félicitations! Vous avez gagné %i$.", (amount*100));
 		rp_IncrementSuccess(client, success_list_loterie, (amount*100));			
 		rp_Effect_Particle(client, "weapon_confetti_balloons", 10.0);
 			
 		rp_ClientSave(client);
+		
+		return true;
 	}
-	else {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Désolé, vous n'avez rien gagné.");
-	}
-
-
-	return Plugin_Handled;
+	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Désolé, vous n'avez rien gagné.");
+	return false;
 }
 // ------------------------------------------------------------------------------
 public Action CmdForceLoto(int client, int args) {
@@ -417,7 +524,6 @@ float getSpeed(int delta) {
 	return val;
 #endif
 }
-
 public Action Cmd_ShowSymbol(int client, int args) {
 	Menu menu = CreateMenu(MenuNothing);
 	char tmp[64];
