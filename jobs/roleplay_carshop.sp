@@ -681,6 +681,7 @@ void dettachVehicleLight(int vehicle) {
 	rp_SetVehicleInt(vehicle, car_light, -1);
 }
 public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
+	static int rotate[2049];
 	ent = EntRefToEntIndex(ent);
 	if( ent <= 0 || !IsValidEdict(ent) )
 		return Plugin_Handled;
@@ -767,6 +768,28 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 	}
 	else {
 		rp_SetVehicleInt(ent, car_awayTick, 0 );
+	}
+	
+	float vecAngles[3];
+	Entity_GetAbsAngles(ent, vecAngles);
+	
+	if( (vecAngles[2] >= 150 || vecAngles[2] <= -150) && !rp_IsGrabbed(ent) /*&& Math_GetRandomInt(0, 5) == 0*/ ) {
+		
+		if( GetEntProp(ent, Prop_Data, "m_nSpeed") == 0 )
+			rotate[ent]++;
+		
+		if( rotate[ent] >= 5 ) {
+			vecOrigin[0] = Math_GetRandomFloat(-100.0, 100.0);
+			vecOrigin[1] = Math_GetRandomFloat(-100.0, 100.0);
+			vecOrigin[2] = Math_GetRandomFloat(200.0, 300.0);
+			
+			vecAngles[0] = 0.0;
+			vecAngles[2] = 0.0;
+			TeleportEntity(ent, NULL_VECTOR, vecAngles, NULL_VECTOR);
+		}
+	}
+	else if( rotate[ent] > 0 ) {
+		rotate[ent]--;
 	}
 	
 	CreateTimer(1.01, Timer_VehicleRemoveCheck, EntIndexToEntRef(ent));
