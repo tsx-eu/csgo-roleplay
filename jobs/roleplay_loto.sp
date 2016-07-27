@@ -22,8 +22,8 @@
 //#define DEBUG
 //#define	INSTANT
 #define ITEM_TICKETID	76
-#define	ITEM_JETONROUGE	286
-#define ITEM_JETONBLEU	276
+#define	ITEM_JETONROUGE	276
+#define ITEM_JETONBLEU	286
 #define getWheel(%1,%2,%3,%4) (g_iJoker[%1][%3] == %4 ? 6 : wheel[%2][%3][%4])
 
 public Plugin myinfo = {
@@ -59,6 +59,7 @@ float rows[][][] = {
 	{{1788.0, -5359.0, -1962.0}, {1938.0, -5309.0, -1882.0}},
 	{{1938.0, -5359.0, -1962.0}, {2028.0, -5309.0, -1882.0}}
 };
+int lstJOB[] =  { 11, 21, 31, 41, 51, 61, 71, 81, 111, 131, 171, 191, 211, 221 };
 
 int g_iLastMachine[65], g_iRotation[65][2][3], g_iJettonInMachine[65], g_iJoker[65][3];
 bool g_bPlaying[65];
@@ -112,6 +113,7 @@ public void SQL_GetJackpot(Handle owner, Handle hQuery, const char[] error, any 
 	if( SQL_FetchRow(hQuery) ) {
 		g_iJackpot = SQL_FetchInt(hQuery, 0);
 	}
+	PrintToChatAll(error);
 }
 // ------------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
@@ -123,9 +125,17 @@ public Action fwdOnPlayerBuild(int client, float& cooldown) {
 	if( rp_GetClientJobID(client) != 171 )
 		return Plugin_Continue;
 	
-	rp_SetClientStat(client, i_TotalBuild, rp_GetClientStat(client, i_TotalBuild)+1);
-	rp_Effect_Particle(client, "weapon_confetti_balloons", 10.0);
-	cooldown = 10.0;
+	int target = rp_GetClientTarget(client);
+	if( IsValidClient(target) && rp_IsEntitiesNear(client, target, true) && rp_GetZoneInt(rp_GetPlayerZone(target), zone_type_type) == 171
+		&& rp_GetClientItem(target, ITEM_JETONBLEU) >= 1 && rp_ClientCanDrawPanel(target) ) {
+		drawEchange(client, target, -1);
+		cooldown = 1.0;
+	}
+	else {
+		rp_SetClientStat(client, i_TotalBuild, rp_GetClientStat(client, i_TotalBuild)+1);
+		rp_Effect_Particle(client, "weapon_confetti_balloons", 10.0);
+		cooldown = 10.0;
+	}
 	
 	return Plugin_Stop;
 }
@@ -467,7 +477,8 @@ void EffectCasino(int client, int jeton) {
 	for (int i = 0; i < 3; i++)
 		g_iRotation[client][1][i] = (size*i) + (Math_GetRandomInt(0, size*1024) % (size*2));
 	
-
+	rp_SetClientInt(client, i_JetonBleu, rp_GetClientItem(client, ITEM_JETONBLEU, false) + rp_GetClientItem(client, ITEM_JETONBLEU, true));
+	
 	g_iJackpot += jeton;
 	g_bPlaying[client] = true;
 	g_iRotation[client][0][0] = g_iRotation[client][0][1] = g_iRotation[client][0][2] = 0;
@@ -538,6 +549,13 @@ void displayWheel(int client, int n, int l[3], int k[3], bool last) {
 	
 	if( last && won>0 ) {
 		givePlayerJeton(client, won);
+		
+		if( (g_iJackpot-won) == 0 && won > 1000 ) {
+			LogToGame("[CASINO] %L a remporté un jackpot de %d$.", client, won);
+			PrintToChatZone(171, "{lightblue}[TSX-RP]{default} %L vient de gagner le jackpot de %d jetons !", client, won);
+			rp_Effect_Particle(client, "weapon_confetti_balloons", 10.0);
+		}
+		
 		g_iJackpot -= won;
 		Format(tmp, sizeof(tmp), "Vous avez gagné %d jeton%s!", won, won>1?"s":"");
 	}
@@ -722,4 +740,90 @@ bool takePlayerJeton(int client, int amount) {
 }
 void givePlayerJeton(int client, int amount) {
 	rp_ClientGiveItem(client, ITEM_JETONBLEU, amount);
+}
+void drawEchange(int client, int target, int jobID) {
+	char tmp[64], tmp2[128], prettyJob[2][64];
+	int price;
+	
+	Menu menu = CreateMenu( MenuTrade );
+	
+	int bleu = rp_GetClientItem(target, ITEM_JETONBLEU);
+	
+	if( jobID == -1 ) {
+		menu.SetTitle("%N vous propose\nd'échanger vos jetons bleus\ncontre des lots.", client);
+		menu.AddItem("0", "Argent");
+		
+		for (int i = 0; i < sizeof(lstJOB); i++) {
+			rp_GetJobData(lstJOB[i], job_type_name, tmp, sizeof(tmp));
+			ExplodeString(tmp, " - ", prettyJob, sizeof(prettyJob), sizeof(prettyJob[]));
+			Format(tmp, sizeof(tmp), "%d", lstJOB[i]);
+			menu.AddItem(tmp, prettyJob[1]);
+		}
+		menu.ExitButton = true;
+	}
+	else {
+		menu.SetTitle("Vous avez %d jeton%s bleu%s\nQue souhaitez-vous échanger?", bleu, bleu > 1 ? "s" : "", bleu > 1 ? "s" : "");
+		
+		if( jobID == 0 ) {
+			menu.AddItem("0 10000 125", "10 000$ - 125 Jetons bleus", bleu >= 125 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+			menu.AddItem("0 100000 1200", "100 000$ - 1 200 Jetons bleus", bleu >= 1200 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+			menu.AddItem("0 1000000 1200", "1 000 000$ - 1 1000 Jetons bleus", bleu >= 11000 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+		}
+		else {
+			for(int i = 0; i < MAX_ITEMS; i++) {
+				if( rp_GetItemInt(i, item_type_job_id) != jobID )
+					continue;
+				
+				rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2)); 
+				price = RoundToCeil(float(rp_GetItemInt(i, item_type_prix)*10) * 1.2 / 100.0);
+				
+				Format(tmp, sizeof(tmp), "%d %d %d", jobID, i, price);
+				Format(tmp2, sizeof(tmp2), "10x %s - %d Jetons bleus", tmp2, price);
+				menu.AddItem(tmp, tmp2, bleu >= price ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+			}
+		}
+	}
+	menu.Display(target, MENU_TIME_FOREVER);
+}
+public int MenuTrade(Handle menu, MenuAction action, int client, int param2) {
+	if( action == MenuAction_Select ) {
+		char szMenuItem[64], tmp[3][8];
+		GetMenuItem(menu, param2, szMenuItem, sizeof(szMenuItem));
+		ExplodeString(szMenuItem, " ", tmp, sizeof(tmp), sizeof(tmp[]));
+		
+		int jobID = StringToInt(tmp[0]);
+		int itemID = StringToInt(tmp[1]);
+		int jetons = StringToInt(tmp[2]);
+		
+		if( jetons == 0 ) {
+			drawEchange(0, client, jobID);
+		}
+		else {
+			int bleu = rp_GetClientItem(client, ITEM_JETONBLEU);
+			
+			if( jetons > bleu ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas suffisement de jetons bleus.");
+				return;
+			}
+			
+			rp_SetJobCapital(171, rp_GetJobCapital(171) - RoundToCeil(float(jetons * 100) * 0.75));
+			rp_ClientGiveItem(client, ITEM_JETONBLEU, -jetons);
+			
+			if( jobID == 0 ) {
+				rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) + itemID);
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu: %d$!", itemID);
+			}
+			else {
+				rp_ClientGiveItem(client, itemID, 10);
+				rp_GetItemData(itemID, item_type_name, szMenuItem, sizeof(szMenuItem)); 
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu: 10x %s!", szMenuItem);
+			}
+			drawEchange(0, client, jobID);
+		}
+	}
+	else if( action == MenuAction_End ) {
+		if( menu != INVALID_HANDLE )
+			CloseHandle(menu);
+	}
+	return;
 }
