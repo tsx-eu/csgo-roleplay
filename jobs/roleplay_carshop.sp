@@ -86,10 +86,12 @@ public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", 	Cmd_Reload);
 	RegServerCmd("rp_item_vehicle", 	Cmd_ItemVehicle,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_vehicle2", 	Cmd_ItemVehicle,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_vehicle3", 	Cmd_ItemVehicle,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	
 	RegServerCmd("rp_item_carstuff", 	Cmd_ItemVehicleStuff,	"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegAdminCmd("rp_vehiclexit",		Cmd_VehicleExit,		ADMFLAG_KICK);
 	
-	g_hMAX_CAR = CreateConVar("rp_max_car",	"25", "Nombre de voiture maximum sur le serveur", 0, true, 0.0, true, 50.0);
+	g_hMAX_CAR = CreateConVar("rp_max_car",	"25", "Nombre de voiture maximum sur le serveur", 0, true, 0.0, true, GetConVarInt(FindConVar("hostport")) == 27015 ? 50.0 : 500.0 );
 	
 	// Reload:
 	for (int i = 1; i <= MaxClients; i++) {
@@ -276,6 +278,10 @@ public Action Cmd_ItemVehicle(int args) {
 		DispatchKeyValue(car, "vehiclescript", 	"scripts/vehicles/natalya_mustang_csgo_20163.txt");
 		ServerCommand("vehicle_flushscript");
 		attachVehicleLight(car);
+	}
+	
+	if( StrEqual(arg0, "rp_item_vehicle3") ) {
+		rp_SetVehicleInt(car, car_owner, 0);
 	}
 	
 	return;
@@ -609,15 +615,6 @@ public Action rp_SetClientVehicleTask(Handle timer, Handle dp) {
 	int client = ReadPackCell(dp);
 	int car = ReadPackCell(dp);
 	rp_SetClientVehicle(client, car, true);
-	
-	int enteffects = GetEntProp(client, Prop_Send, "m_fEffects");
-	enteffects |= 1;	/* This is EF_BONEMERGE */
-	enteffects |= 16;	/* This is EF_NOSHADOW */
-	enteffects &= ~32;	/* This is EF_NODRAW */
-	enteffects |= 64;	/* This is EF_NORECEIVESHADOW */
-	enteffects |= 128;	/* This is EF_BONEMERGE_FASTCULL */
-	enteffects |= 512;	/* This is EF_PARENT_ANIMATES */
-	SetEntProp(client, Prop_Send, "m_fEffects", enteffects);
 }
 public Action BatchLeave(Handle timer, any vehicle) {
 	#if defined DEBUG
@@ -727,7 +724,7 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 			g_lastpos[ent] = vecOrigin;
 		}
 	}
-	else if( rp_GetZoneBit(rp_GetPlayerZone(ent)) & BITZONE_PARKING )
+	else if( rp_GetZoneBit(rp_GetPlayerZone(ent)) & BITZONE_PARKING || owner == 0 )
 		IsNear = true;
 	else {
 		float vecTarget[3];
