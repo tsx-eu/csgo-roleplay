@@ -1232,11 +1232,11 @@ public Action fwdUse(int client) {
 	AddMenuItem(menu, "models/player/custom_player/legacy/tm_balkan_variantd.mdl", "Balkan - C");
 	AddMenuItem(menu, "models/player/custom_player/legacy/tm_balkan_variante.mdl", "Balkan - D");
 	
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_leet_varianta.mdl", "Phoenix");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_leet_variantb.mdl", "Phoenix - A");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_leet_variantc.mdl", "Phoenix - B");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_leet_variantd.mdl", "Phoenix - C");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_leet_variante.mdl", "Phoenix - D");
+	AddMenuItem(menu, "models/player/custom_player/legacy/tm_leet_varianta.mdl", "Leet");
+	AddMenuItem(menu, "models/player/custom_player/legacy/tm_leet_variantb.mdl", "Leet - A");
+	AddMenuItem(menu, "models/player/custom_player/legacy/tm_leet_variantc.mdl", "Leet - B");
+	AddMenuItem(menu, "models/player/custom_player/legacy/tm_leet_variantd.mdl", "Leet - C");
+	AddMenuItem(menu, "models/player/custom_player/legacy/tm_leet_variante.mdl", "Leet - D");
 	
 	AddMenuItem(menu, "models/player/custom_player/legacy/tm_phoenix.mdl", "Phoenix");
 	AddMenuItem(menu, "models/player/custom_player/legacy/tm_phoenix_varianta.mdl", "Phoenix - A");
