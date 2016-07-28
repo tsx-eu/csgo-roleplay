@@ -290,8 +290,10 @@ public Action Delay_MenuLoto(Handle timer, Handle dp) {
 		
 		if( i > 2 && count < ticketAmountType[i] )
 			continue;
+		if( i == 0 && amount == -1 )
+			continue;
 		
-		if( ticketAmountType[i] == -1 && amount > 0 )
+		if( ticketAmountType[i] == -1 )
 			Format(tmp2, sizeof(tmp2), "Gratter jusqu'à ce que je gagne");
 		else if( ticketAmountType[i] > 1000 )
 			Format(tmp2, sizeof(tmp2), "Gratter tous mes tickets");
@@ -592,7 +594,7 @@ void EffectCasino(int client, int jeton) {
 	
 	g_iJoker[client][0] = Math_GetRandomInt(-size*4, 11);
 	g_iJoker[client][1] = Math_GetRandomInt(-size*8, 11);
-	g_iJoker[client][2] = Math_GetRandomInt(-size*16, 11);
+	g_iJoker[client][2] = Math_GetRandomInt(-size*32, 11);
 }
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
 	if( action == MenuAction_Select ) {
