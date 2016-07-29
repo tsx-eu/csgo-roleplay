@@ -358,7 +358,7 @@ public int MenuJobs2(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 				AddMenuItem(menu, tmp2, "Demander ses services d'avocat");
 				amount++;
 			}
-			if(jobid == 101 && !(jobid == 103 || jobid == 104 || jobid == 105 || jobid == 106)){
+			if(jobid == 101 && (jobid == 103 || jobid == 104 || jobid == 105 || jobid == 106)){
 				Format(tmp2, sizeof(tmp2), "%i_-4", target);
 				AddMenuItem(menu, tmp2, "Demander pour une audience");
 				amount++;
