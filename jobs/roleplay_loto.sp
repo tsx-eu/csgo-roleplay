@@ -592,9 +592,16 @@ void EffectCasino(int client, int jeton) {
 	g_iRotation[client][0][0] = g_iRotation[client][0][1] = g_iRotation[client][0][2] = 0;
 	g_iJettonInMachine[client] = jeton;
 	
-	g_iJoker[client][0] = Math_GetRandomInt(-size*2, 11);
-	g_iJoker[client][1] = Math_GetRandomInt(-size*8, 11);
-	g_iJoker[client][2] = Math_GetRandomInt(-size*64, 11);
+	if( g_iJackpot >= 100 ) {
+		g_iJoker[client][0] = Math_GetRandomInt(-size*2, 11);
+		g_iJoker[client][1] = Math_GetRandomInt(-size*8, 11);
+		g_iJoker[client][2] = Math_GetRandomInt(-size*64, 11);
+	}
+	else {
+		g_iJoker[client][0] = -1;
+		g_iJoker[client][1] = -1;
+		g_iJoker[client][2] = -1;
+	}
 }
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
 	if( action == MenuAction_Select ) {
