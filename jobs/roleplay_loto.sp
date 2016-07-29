@@ -390,7 +390,7 @@ bool gratterTicket(int client, int amount, int itemID) {
 		Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_sell` (`id`, `steamid`, `job_id`, `timestamp`, `item_type`, `item_id`, `item_name`, `amount`) VALUES (NULL, '%s', '%i', '%i', '4', '%i', '%s', '%i');",
 		szSteamID, 171, GetTime(), -1, "LOTO", amount*100);			
 		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
-		LogToGame("[TSX-RP] [LOTO] %N gagne: %d$", client, (amount*100));
+		LogToGame("[TSX-RP] [LOTO] %N gagne: %d jetons", client, (amount*100));
 		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Félicitations! Vous avez gagné %i$.", (amount*100));
 		rp_IncrementSuccess(client, success_list_loterie, (amount*100));			
@@ -592,9 +592,9 @@ void EffectCasino(int client, int jeton) {
 	g_iRotation[client][0][0] = g_iRotation[client][0][1] = g_iRotation[client][0][2] = 0;
 	g_iJettonInMachine[client] = jeton;
 	
-	g_iJoker[client][0] = Math_GetRandomInt(-size*4, 11);
+	g_iJoker[client][0] = Math_GetRandomInt(-size*2, 11);
 	g_iJoker[client][1] = Math_GetRandomInt(-size*8, 11);
-	g_iJoker[client][2] = Math_GetRandomInt(-size*32, 11);
+	g_iJoker[client][2] = Math_GetRandomInt(-size*64, 11);
 }
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
 	if( action == MenuAction_Select ) {
