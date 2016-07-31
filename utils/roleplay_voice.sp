@@ -36,7 +36,7 @@ public void OnPluginStart() {
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
-	RegConsoleCmd("sm_job", Cmd_job, "Ouvre la liste des jobs");
+	
 	g_vAllTalk = CreateConVar("rp_alltalk", "0", "alltalk en zone event", 0, true, 0.0, true, 1.0);
 	HookConVarChange(g_vAllTalk, OnCvarChange);
 }
@@ -58,7 +58,12 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	#if defined DEBUG
 	PrintToServer("fwdCommand");
 	#endif
-	if( StrEqual(command, "me") || StrEqual(command, "annonce") ) {
+	
+	if( StrEqual(command, "job") || StrEqual(command, "jobs") ) {
+		Cmd_job(client);
+		return Plugin_Handled;
+	}
+	else if( StrEqual(command, "me") || StrEqual(command, "annonce") ) {
 		
 		if( !rp_GetClientBool(client, b_IsNoPyj) ) {
 			ACCESS_DENIED(client);
@@ -229,7 +234,7 @@ public Action AllowTalking(Handle timer, any client) {
 	g_bMayTalk[client] = true;
 }
 
-public Action Cmd_job(int client, int args){
+void Cmd_job(int client) {
 	Handle jobmenu = CreateMenu(MenuJobs);
 	SetMenuTitle(jobmenu, "Liste des jobs disponibles:");
 	AddMenuItem(jobmenu, "-1", "Tout afficher");
@@ -255,20 +260,23 @@ public Action Cmd_job(int client, int args){
 
 		bJob[job] = true;
 	}
-
+	
+	char tmp3[2][64];
 
 	for(int i=1; i<MAX_JOBS; i++) {
 		if( bJob[i] == false )
 			continue;
 		Format(tmp, sizeof(tmp), "%d", i);
 		rp_GetJobData(i, job_type_name, tmp2, sizeof(tmp2));
+		
+		ExplodeString(tmp2, " - ", tmp3, sizeof(tmp3), sizeof(tmp3[]));
 
-		AddMenuItem(jobmenu, tmp, tmp2);
+		AddMenuItem(jobmenu, tmp, tmp3[1]);
 	}
 
 	SetMenuExitButton(jobmenu, true);
 	DisplayMenu(jobmenu, client, 60);
-	return Plugin_Handled;
+	return;
 }
 
 public int MenuJobs(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
