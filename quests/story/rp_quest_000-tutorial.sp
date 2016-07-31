@@ -34,11 +34,21 @@ public Plugin myinfo = {
 
 int g_iQuest;
 
+char qualif[][] =  	{ "Recommandé", "Amusant", "Difficile", "Métier de vente", "Non recommandé"};
+int g_iJob[] =  			{ 16,25, 35, 46, 55, 65, 76, 87, 96, 116, 135, 176, 195, 216, 226 };
+int g_iRecom[MAX_JOBS];
+	
 // TODO: Déplacer les récompenses dans les fonctions appropriées
 // TODO: Trié les jobs par sous quota, ou quota "non respecté"
 
 int g_iQ9, g_iQ12, g_iQ14, g_iClientDoingQ[65];
 public void OnPluginStart() {
+	g_iRecom[116] = g_iRecom[176] = 0;
+	g_iRecom[87] = g_iRecom[96] = g_iRecom[226] = 1;
+	g_iRecom[46] = g_iRecom[35] = 2;
+	g_iRecom[16] = g_iRecom[25] = g_iRecom[55] = g_iRecom[65] = g_iRecom[76] = g_iRecom[135] = g_iRecom[176] = g_iRecom[216] = 3;
+	g_iRecom[195] = 4;
+	
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	
 	for (int j = 1; j <= MaxClients; j++)
@@ -60,6 +70,7 @@ public void OnAllPluginsLoaded() {
 	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q7_Frame,	QUEST_NULL,	QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q8_Frame,	QUEST_NULL,	QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++, Q9_Start,	Q9_Frame,	Q9_Abort,	Q9_Abort);
+	rp_QuestAddStep(g_iQuest, i++, Q92_Start,	Q92_Frame,	Q92_Abort,	QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q10_Frame,	QUEST_NULL,	QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++, Q11_Start,	Q11_Frame,	Q11_Abort,	Q11_Abort);
 	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q12_Frame,	QUEST_NULL,	QUEST_NULL);
@@ -77,13 +88,19 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 }
 public Action fwdCommand(int client, char[] command, char[] arg) {	
-	if( StrEqual(command, "aide") || StrEqual(command, "aides") || StrEqual(command, "wiki") || StrEqual(command, "help")  ) { // C'est pour nous !
-		QueryClientConVar(client, "cl_disablehtmlmotd", view_as<ConVarQueryFinished>(ClientConVar), client);
-		ShowMOTDPanel(client, "Role-Play: WiKi", "http://www.ts-x.eu/popup.php?url=/wiki/", MOTDPANEL_TYPE_URL);
+	if( StrEqual(command, "aide") || StrEqual(command, "aides") || StrEqual(command, "help")  ) { // C'est pour nous !
+		
+		OpenHelpMenu(client, 1, 0);
 		
 		if( g_iClientDoingQ[client] > 0 ) {
 			rp_QuestStepComplete(client, g_iClientDoingQ[client]);
 		}
+		
+		return Plugin_Handled;
+	}
+	else if( StrEqual(command, "wiki") ) {
+		QueryClientConVar(client, "cl_disablehtmlmotd", view_as<ConVarQueryFinished>(ClientConVar), client);
+		ShowMOTDPanel(client, "Role-Play: WiKi", "http://www.ts-x.eu/popup.php?url=/wiki/", MOTDPANEL_TYPE_URL);
 		
 		return Plugin_Handled;
 	}
@@ -113,7 +130,7 @@ public void Q1_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "vous devez donc faire notre tutoriel ");
 		DrawPanelText(panel, "afin de vous familiariser avec ce mode");
 		DrawPanelText(panel, "de jeu. A la fin de celui-ci vous");
-		DrawPanelText(panel, "gagnerez 10.000$: la monnaie du jeu");
+		DrawPanelText(panel, "gagnerez 25.000$: la monnaie du jeu");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " Ce mode Roleplay est une sorte de simulation");
 		DrawPanelText(panel, "de vie: vous pouvez avoir de l'argent,");
@@ -411,7 +428,6 @@ public void Q9_Frame(int objectiveID, int client) {
 		CreateTimer(1.1, PostKillHandle, panel);
 	}
 }
-// ----------------------------------------------------------------------------
 public void Q9_Start(int objectiveID, int client) {
 	g_iQ9 = objectiveID;
 	rp_HookEvent(client, RP_PrePlayerTalk, OnPlayerTalk);
@@ -425,6 +441,77 @@ public Action OnPlayerTalk(int client, char[] szSayText, int length, bool local)
 	}
 }
 // ----------------------------------------------------------------------------
+int g_iQ92;
+public void Q92_Start(int objectiveID, int client) {
+	g_iQ92 = objectiveID;
+	rp_HookEvent(client, RP_OnPlayerUse, fwdUsePhone);
+}
+public void Q92_Abort(int objectiveID, int client) {
+	rp_UnhookEvent(client, RP_OnPlayerUse, fwdUsePhone);
+}
+public Action fwdUsePhone(int client) {
+	float origin[3], target[3] = {-452.0, -2065.0, -2000.0};
+	GetClientAbsOrigin(client, origin);
+	
+	if( GetVectorDistance(origin, target) < 32.0 ) {
+		ServerCommand("sm_effect_copter 0 -2364");
+		rp_UnhookEvent(client, RP_OnPlayerUse, fwdUsePhone);
+		rp_QuestStepComplete(client, g_iQ92);
+		
+		Handle panel = CreateMenu(MenuNothing);
+		SetMenuTitle(panel, "== Objectif 9: Les quêtes\n\n Un hélicoptère vous envois un colis.\nIl sera envoyé près de vous,\ndans la rue du commerce.");
+		AddMenuItem(panel, "_", "Récupérez le.", ITEMDRAW_DISABLED);
+		DisplayMenu(panel, client, 10);
+	}
+}
+public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
+	#if defined DEBUG
+	PrintToServer("MenuNothing");
+	#endif
+	if( action == MenuAction_Select ) {
+		if( menu != INVALID_HANDLE )
+			CloseHandle(menu);
+	}
+	else if( action == MenuAction_End ) {
+		if( menu != INVALID_HANDLE )
+			CloseHandle(menu);
+	}
+}
+public void Q92_Frame(int objectiveID, int client) {
+	float origin[3], target[3] = {-452.0, -2065.0, -2000.0};
+	GetClientAbsOrigin(client, origin);
+	
+	ServerCommand("sm_effect_gps %d %f %f %f", client, target[0], target[1], target[2]);
+	
+	if( rp_ClientCanDrawPanel(client) ) {
+		Handle panel = CreatePanel();
+		
+		if( GetTime() %3 == 0 ) {
+			EmitSoundToClientAny(client, "DeadlyDesire/princeton/ambiant/phone1.mp3", SOUND_FROM_WORLD, _, _, _, _, _, _, target);
+		}
+		
+		SetPanelTitle(panel, "== Objectif 9: Les quêtes");
+		DrawPanelItem(panel, "", ITEMDRAW_SPACER);
+		DrawPanelText(panel, " Les téléphones de la ville sont très");
+		DrawPanelText(panel, "utile pour gagner de l'argent facilement.");
+		DrawPanelText(panel, " ");
+		DrawPanelText(panel, " De temps à autres, ceux-ci se mettent");
+		DrawPanelText(panel, "à sonner. Si vous décrocher, un colis");
+		DrawPanelText(panel, "vous est envoyé par hélicoptère.");
+		DrawPanelText(panel, "diverses commandes (comme le /item qu'on vient de voir).");
+		DrawPanelText(panel, " ");
+		DrawPanelText(panel, " De plus, de nombreuse quête sont disponible");
+		DrawPanelText(panel, "selon votre job. Il suffit de se rendre");
+		DrawPanelText(panel, "à un téléphone pour débuter l'une d'elle.");
+		DrawPanelText(panel, " ");
+		DrawPanelText(panel, "→ Décrochez au téléphonne à l'aide");
+		DrawPanelText(panel, "de votre touche utiliser (E).");
+		
+		rp_SendPanelToClient(panel, client, 1.1);
+		CreateTimer(1.1, PostKillHandle, panel);
+	}
+}
+// ----------------------------------------------------------------------------
 public void Q10_Frame(int objectiveID, int client) {
 	float origin[3], target[3] = {763.0,-4748.0, -2014.0};
 	GetClientAbsOrigin(client, origin);
@@ -433,7 +520,7 @@ public void Q10_Frame(int objectiveID, int client) {
 		
 		Handle panel = CreatePanel();
 		
-		SetPanelTitle(panel, "== Objectif 9: Les commandes utiles");
+		SetPanelTitle(panel, "== Objectif 10: Les commandes utiles");
 		DrawPanelItem(panel, "", ITEMDRAW_SPACER);
 		DrawPanelText(panel, " Il existe de nombreuses commandes sur le");
 		DrawPanelText(panel, "serveur. La plupart liées à votre");
@@ -466,20 +553,20 @@ public void Q11_Frame(int objectiveID, int client) {
 		
 		Handle panel = CreatePanel();
 		
-		SetPanelTitle(panel, "== Objectif 10: Le site, le forum, le WiKi");
+		SetPanelTitle(panel, "== Objectif 11: Le site, le forum, le WiKi");
 		DrawPanelItem(panel, "", ITEMDRAW_SPACER);
 		DrawPanelText(panel, " Le forum et notre site sont deux parties");
 		DrawPanelText(panel, "importantes du serveur. Si vous y êtes");
 		DrawPanelText(panel, "inscrit, et confirmé comme ayant 16 ans ou");
 		DrawPanelText(panel, "plus (le rang no-pyj). Vous augmentez vos");
 		DrawPanelText(panel, "chances de trouver un emploi intéressant.");
-		DrawPanelText(panel, "Besoin d'aide? Consultez notre wiki");
+		DrawPanelText(panel, "Besoin d'aide? Consultez notre FAQ");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " Site: http://www.ts-x.eu");
 		DrawPanelText(panel, " WiKi: http://www.ts-x.eu/wiki/");
 		DrawPanelText(panel, " TeamSpeak: ts.ts-x.eu");
 		DrawPanelText(panel, " ");
-		DrawPanelText(panel, "→ Allez faire un tour sur notre wiki ( dites /aide ) ");
+		DrawPanelText(panel, "→ Allez faire un tour sur notre FAQ ( dites /aide ) ");
 		DrawPanelText(panel, " afin d'obtenir davantage d'aide et de");
 		DrawPanelText(panel, "continuer votre apprentissage.");
 		
@@ -502,14 +589,17 @@ public void Q12_Frame(int objectiveID, int client) {
 		
 		Handle panel = CreatePanel();
 		
-		SetPanelTitle(panel, "== Objectif 11: Le mot de la fin");
+		SetPanelTitle(panel, "== Objectif 12: Le mot de la fin");
 		DrawPanelItem(panel, "", ITEMDRAW_SPACER);
 		DrawPanelText(panel, " Derniers conseils avant de vous laisser");
 		DrawPanelText(panel, "partir sur de bonnes bases.");
+		DrawPanelText(panel, " ");
 		DrawPanelText(panel, "- Nous sommes sur CSGO, pas sur ARMA ni GMOD.");
-		DrawPanelText(panel, "Il y a donc beaucoup de meurtre en ville, armez vous.");
+		DrawPanelText(panel, "Il y a donc BEAUCOUP de meurtre en ville, armez vous.");
+		DrawPanelText(panel, "- Seul les policiers et les juges sont là pour");
+		DrawPanelText(panel, "sanctionner les meurtres. CACHEZ-VOUS.");
+		DrawPanelText(panel, " ");
 		DrawPanelText(panel, "- Trouvez vous un job");
-		DrawPanelText(panel, "- Attention aux arnaques");
 		DrawPanelText(panel, "- Décrochez le rang no-pyj");
 		DrawPanelText(panel, "- Faites un tour sur notre TeamSpeak");
 		DrawPanelText(panel, " ");
@@ -587,7 +677,7 @@ public int MenuSelectParrain(Handle menu, MenuAction action, int client, int par
 }
 
 public void Q14_Frame(int objectiveID, int client) {
-	static int job[] =  { 16, 25, 35, 55, 65, 76, 87, 116, 135, 176, 195, 216, 226 };
+
 	
 	if( rp_ClientCanDrawPanel(client) ) {
 		g_iQ14 = objectiveID;
@@ -598,12 +688,15 @@ public void Q14_Frame(int objectiveID, int client) {
 		AddMenuItem(menu, "", "vous-même et être recruté par le chef d'un job.", ITEMDRAW_DISABLED);
 			
 		char tmp[128], tmp2[8];
-		SortIntegers(job, sizeof(job), Sort_Random);
+		SortIntegers(g_iJob, sizeof(g_iJob), Sort_Random);
 	
-		for( int i=1;i<sizeof(job); i++) {
-			rp_GetJobData(job[i], job_type_name, tmp, sizeof(tmp));
+		for( int i=1;i<sizeof(g_iJob); i++) {
+			if( rp_GetJobInt(g_iJob[i], job_type_current) >= (rp_GetJobInt(g_iJob[i], job_type_max)*2) )
+				continue;
 			
-			Format(tmp2, sizeof(tmp2), "%d", job[i]);	
+			rp_GetJobData(g_iJob[i], job_type_name, tmp, sizeof(tmp));
+			Format(tmp, sizeof(tmp), "%s: %s", qualif[g_iRecom[g_iJob[i]]], tmp);
+			Format(tmp2, sizeof(tmp2), "%d", g_iJob[i]+1000);
 			AddMenuItem(menu, tmp2, tmp);
 		}
 					
@@ -615,24 +708,39 @@ public int MenuSelectJob(Handle menu, MenuAction action, int client, int param2)
 	if( action == MenuAction_Select ) {
 		char options[64];
 		GetMenuItem(menu, param2, options, sizeof(options));
+		int job = StringToInt(options);
 		
-		if( !StrEqual(options, "") ) {
-			int job = StringToInt(options);
+		if( job > 1000 ) {
+			job -= 1000;
+			rp_GetJobData(job, job_type_name, options, sizeof(options));
+			
+			Handle menu2 = CreateMenu(MenuSelectJob);
+			
+			Format(options, sizeof(options), "%s: %s", qualif[g_iRecom[job]], options);
+			SetMenuTitle(menu2, "== Votre premier job vous est offert\nVous avez choisis comme métier\n%s\n \nSachez que plus tard, vous devrez le trouver\nVOUS-MÊME et être recruté par le chef d'un job.\n---------------------", options);
+			
+			Format(options, sizeof(options), "%d", job);
+			AddMenuItem(menu2, "0", "Je veux choisir un autre job");
+			AddMenuItem(menu2, options, "Je confirme mon choix");
+			SetMenuExitButton(menu2, true);
+			DisplayMenu(menu2, client, 60);
+		}
+		else if( job > 0 ) {
+			
 			rp_SetClientInt(client, i_Job, job);
+			rp_SetClientInt(client, i_JetonRouge, (job - (job % 10))+1);
 			
 			rp_GetJobData(job, job_type_name, options, sizeof(options));
 			LogToGame("[TSX-RP] [TUTORIAL] %L a terminé son tutoriel. Il a choisi %s comme job.", client, options);
 			FakeClientCommand(client, "say /shownotes");
+			
+			rp_SetClientInt(client, i_Tutorial, 20);
+			rp_ClientGiveItem(client, 223);
+			rp_QuestStepComplete(client, g_iQ14);
+			rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) + 15000);
+			
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez terminé le tutoriel, une voiture vous a été offerte. (Faites /item !)");
 		}
-		
-		rp_SetClientInt(client, i_Tutorial, 20);
-		rp_ClientGiveItem(client, 223);
-		rp_QuestStepComplete(client, g_iQ14);
-		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) + 15000);
-		
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez terminé le tutoriel, une voiture vous a été offerte. (Faites /item !)");
-		
-		
 	}
 	else if( action == MenuAction_End ) {
 		CloseHandle(menu);
@@ -641,4 +749,69 @@ public int MenuSelectJob(Handle menu, MenuAction action, int client, int param2)
 public Action PostKillHandle(Handle timer, any data) {
 	if( data != INVALID_HANDLE )
 		CloseHandle(data);
+}
+
+
+
+// ------------------------------------------------------------
+void OpenHelpMenu(int client, int section, int parent) {
+	char query[1024];
+	Format(query, sizeof(query), "SELECT `id`, `goto`, `txt`  FROM `rp_shared`.`rp_help_question` WHERE `qid`=%d OR `id`=%d", section, parent);
+	
+	Handle pack = CreateDataPack();
+	WritePackCell(pack, client);
+	WritePackCell(pack, parent);
+	
+	SQL_TQuery(rp_GetDatabase(), SQL_OpenHelpMenu, query, pack, DBPrio_High);
+}
+public void SQL_OpenHelpMenu(Handle owner, Handle hQuery, const char[] error, any pack) {
+	ResetPack(pack);
+	int client, parent, id, go;
+	char txt[255], tmp[16];
+	
+	client = ReadPackCell(pack);
+	parent = ReadPackCell(pack);
+	
+	Menu menu = CreateMenu(helpMenu);
+	menu.SetTitle("Besoin d'aide?\n--------------------");
+	
+	while( SQL_FetchRow(hQuery) ) {
+		id = SQL_FetchInt(hQuery, 0);
+		go = SQL_FetchInt(hQuery, 1);
+		SQL_FetchString(hQuery, 2, txt, sizeof(txt));
+		
+		
+		if( id == parent )
+			menu.SetTitle("%s\n--------------------", txt);
+		else {
+			Format(tmp, sizeof(tmp), "%d %d", id, go);
+			
+			menu.AddItem(tmp, txt, go > 0 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+		}
+	}
+	
+	if( parent != 0 )
+		menu.ExitBackButton = true;
+	menu.Display(client, MENU_TIME_FOREVER);
+}
+
+
+public int helpMenu(Handle hItem, MenuAction oAction, int client, int param) {
+	#if defined DEBUG
+	PrintToServer("helpMenu");
+	#endif
+	
+	if (oAction == MenuAction_Select) {
+		char options[64], tmp[2][16];
+		if( GetMenuItem(hItem, param, options, sizeof(options)) ) {
+			ExplodeString(options, " ", tmp, sizeof(tmp), sizeof(tmp[]));
+			OpenHelpMenu(client, StringToInt(tmp[1]), StringToInt(tmp[0]));
+		}
+	}
+	else if (oAction == MenuAction_Cancel && param == MenuCancel_ExitBack  ) {
+		OpenHelpMenu(client, 1, 0);
+	}
+	else if (oAction == MenuAction_End ) {
+		CloseHandle(hItem);
+	}
 }
