@@ -740,6 +740,14 @@ public int MenuSelectJob(Handle menu, MenuAction action, int client, int param2)
 			rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) + 15000);
 			
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez terminé le tutoriel, une voiture vous a été offerte. (Faites /item !)");
+			
+			for (int i = 1; i <= MaxClients; i++) {
+				if( !IsValidClient(i) )
+					continue;
+				if( i == client )
+					continue;
+				CPrintToChat(i, "{lightblue}[TSX-RP]{default} %N vient de terminé son tutorial, il est %s. Aidez le !", client, options);
+			}
 		}
 	}
 	else if( action == MenuAction_End ) {
