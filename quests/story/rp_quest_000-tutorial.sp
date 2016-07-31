@@ -493,19 +493,19 @@ public void Q92_Frame(int objectiveID, int client) {
 		SetPanelTitle(panel, "== Objectif 9: Les quêtes");
 		DrawPanelItem(panel, "", ITEMDRAW_SPACER);
 		DrawPanelText(panel, " Les téléphones de la ville sont très");
-		DrawPanelText(panel, "utile pour gagner de l'argent facilement.");
+		DrawPanelText(panel, "utiles pour gagner de l'argent facilement.");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " De temps à autres, ceux-ci se mettent");
-		DrawPanelText(panel, "à sonner. Si vous décrocher, un colis");
+		DrawPanelText(panel, "à sonner. Si vous décrochez, un colis");
 		DrawPanelText(panel, "vous est envoyé par hélicoptère.");
 		DrawPanelText(panel, "diverses commandes (comme le /item qu'on vient de voir).");
 		DrawPanelText(panel, " ");
-		DrawPanelText(panel, " De plus, de nombreuse quête sont disponible");
+		DrawPanelText(panel, " De plus, de nombreuses quêtes sont disponibles");
 		DrawPanelText(panel, "selon votre job. Il suffit de se rendre");
-		DrawPanelText(panel, "à un téléphone pour débuter l'une d'elle.");
+		DrawPanelText(panel, "à un téléphone pour débuter l'une d'entre elle.");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, "→ Décrochez au téléphonne à l'aide");
-		DrawPanelText(panel, "de votre touche utiliser (E).");
+		DrawPanelText(panel, "de votre touche utiliser (E par défaut).");
 		
 		rp_SendPanelToClient(panel, client, 1.1);
 		CreateTimer(1.1, PostKillHandle, panel);
