@@ -453,7 +453,7 @@ public Action fwdUsePhone(int client) {
 	float origin[3], target[3] = {-452.0, -2065.0, -2000.0};
 	GetClientAbsOrigin(client, origin);
 	
-	if( GetVectorDistance(origin, target) < 32.0 ) {
+	if( GetVectorDistance(origin, target) < 40.0 ) {
 		ServerCommand("sm_effect_copter 0 -2364");
 		rp_UnhookEvent(client, RP_OnPlayerUse, fwdUsePhone);
 		rp_QuestStepComplete(client, g_iQ92);
@@ -631,7 +631,7 @@ public void Q13_Frame(int objectiveID, int client) {
 		AddMenuItem(menu, "", "à jouer sur notre serveur?  Si oui, qui?",		ITEMDRAW_DISABLED);
 		
 		AddMenuItem(menu, "none", "Personne, j'ai connu autrement le serveur");
-		AddMenuItem(menu, "youtube", "Youtube, en regardant une vidéo");
+//		AddMenuItem(menu, "youtube", "Youtube, en regardant une vidéo");
 				
 		char szSteamID[64], szName[128];
 		for( int i=1;i<=MaxClients; i++) {
@@ -691,7 +691,8 @@ public void Q14_Frame(int objectiveID, int client) {
 		SortIntegers(g_iJob, sizeof(g_iJob), Sort_Random);
 	
 		for( int i=1;i<sizeof(g_iJob); i++) {
-			if( rp_GetJobInt(g_iJob[i], job_type_current) >= (rp_GetJobInt(g_iJob[i], job_type_max)*2) )
+			
+			if( rp_GetJobInt((g_iJob[i] - (g_iJob[i] % 10))+1, job_type_current) >= (rp_GetJobInt((g_iJob[i] - (g_iJob[i] % 10))+1, job_type_quota)*2) )
 				continue;
 			
 			rp_GetJobData(g_iJob[i], job_type_name, tmp, sizeof(tmp));
