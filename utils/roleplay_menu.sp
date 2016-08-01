@@ -85,7 +85,7 @@ void openMenu(int client) {
 			menu.AddItem("vendre", "Vendre");
 		
 		
-		if( near && rp_GetClientBool(client, b_MaySteal) && (jobID == 91 || jobID == 181) )
+		if( near && rp_GetClientBool(client, b_MaySteal) && (jobID == 81 || jobID == 91) )
 			menu.AddItem("vol", "Voler le joueur");
 		
 		if( near && jobID == 71 )
