@@ -522,6 +522,7 @@ public void Q_Complete(int objectiveID, int client) {
 	
 	if( g_stkTeamCount[TEAM_POLICE] > 0 ) {
 		int amendePolice = (g_iQuestGain / 4) / g_stkTeamCount[TEAM_POLICE];
+		amendePolice = amendePolice < 1000 ? amendePolice : 1000;
 		
 		for (int i = 0; i < g_stkTeamCount[TEAM_POLICE]; i++) {
 			CPrintToChat(g_stkTeam[TEAM_POLICE][i], "{lightblue}[TSX-RP]{default} Vous avez payé une amende de %d$ à cause du braquage de %s.", amendePolice, tmp2[0]);
