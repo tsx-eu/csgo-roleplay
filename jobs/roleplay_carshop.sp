@@ -35,10 +35,11 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-Handle g_hMAX_CAR;
-int g_cExplode;
+Handle g_hMAX_CAR, g_hCarJump, g_hCarUnstuck, g_hCarHeal;
+int g_cExplode, g_cModel;
 int g_iBlockedTime[65][65];
 float g_lastpos[2049][3];
+bool g_bVehicleCanJump;
 
 char g_szParticles[][][32] =  {
 	{ "Trail",		"Propulseur" },
@@ -92,6 +93,12 @@ public void OnPluginStart() {
 	RegAdminCmd("rp_vehiclexit",		Cmd_VehicleExit,		ADMFLAG_KICK);
 	
 	g_hMAX_CAR = CreateConVar("rp_max_car",	"25", "Nombre de voiture maximum sur le serveur", 0, true, 0.0, true, GetConVarInt(FindConVar("hostport")) == 27015 ? 50.0 : 500.0 );
+	g_hCarJump = CreateConVar("rp_car_jump", GetConVarInt(FindConVar("hostport")) == 27015 ? "0" : "1", "Les voitures peuvent-être sauter?", 0, true, 0.0, true, 1.0);
+	g_hCarUnstuck = CreateConVar("rp_car_unstuck", "1", "Les voitures peuvent-elle s'auto-débloquer?", 0, true, 0.0, true, 1.0);
+	g_hCarHeal = CreateConVar("rp_car_heal", "1000", "La vie des voitures", 0, true, 100.0, true, 100000.0);
+	
+	HookConVarChange(g_hCarJump, OnConVarChanged);
+	g_bVehicleCanJump = GetConVarBool(g_hCarUnstuck);
 	
 	// Reload:
 	for (int i = 1; i <= MaxClients; i++) {
@@ -101,9 +108,14 @@ public void OnPluginStart() {
 	for (int i = MaxClients; i <= 2048; i++) {
 		if( rp_IsValidVehicle(i) ) {
 			SDKHook(i, SDKHook_Touch, VehicleTouch);
+			SDKHook(i, SDKHook_Think, OnThink);	
 			CreateTimer(3.5, Timer_VehicleRemoveCheck, EntIndexToEntRef(i));
 		}
 	}
+}
+public void OnConVarChanged(Handle cvar, const char[] oldVal, const char[] newVal) {
+	if( cvar == g_hCarJump )
+		g_bVehicleCanJump = GetConVarBool(cvar);
 }
 public Action Cmd_VehicleExit(int client, int args) {
 	for (int i = 1; i <= MaxClients; i++) {
@@ -123,6 +135,7 @@ public Action Cmd_VehicleExit(int client, int args) {
 }
 public void OnMapStart() {
 	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt", true);
+	g_cModel = PrecacheModel("materials/sprites/laserbeam.vmt");
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);
@@ -528,7 +541,7 @@ public int Native_rp_CreateVehicle(Handle plugin, int numParams) {
 	rp_SetVehicleInt(ent, car_battery, -1);
 	rp_SetVehicleInt(ent, car_boost, -1);
 	rp_SetVehicleInt(ent, car_particle, -1);	
-	rp_SetVehicleInt(ent, car_health, 1000);
+	rp_SetVehicleInt(ent, car_health, GetConVarInt(g_hCarHeal));
 	rp_SetVehicleInt(ent, car_klaxon, Math_GetRandomInt(1, 6));
 	
 	SetEntProp(ent, Prop_Data, "m_takedamage", DAMAGE_NO); // Nope
@@ -561,6 +574,37 @@ public int Native_rp_CreateVehicle(Handle plugin, int numParams) {
 public void OnThink(int ent) {
 	SetEntPropFloat(ent, Prop_Data, "m_flTurnOffKeepUpright", 1.0);
 	SetEntProp(ent, Prop_Send, "m_bEnterAnimOn", 0);
+	
+	if( g_bVehicleCanJump ) {
+		int player = Vehicle_GetDriver(ent);
+		if( player > 0 && IsValidClient(player) && (GetClientButtons(player) & IN_JUMP) ) {
+			Handle trace;
+			float src[3], ang[3], dst[3];
+			Entity_GetAbsOrigin(ent, src);
+			Entity_GetAbsAngles(ent, ang);
+			ang[0] += 90.0;
+			trace = TR_TraceRayFilterEx(src, ang, MASK_SHOT, RayType_Infinite, FilterToAll);
+			
+			if( TR_DidHit(trace) ) {
+				TR_GetEndPosition(dst, trace);
+				
+				if( GetVectorDistance(src, dst) <= 1.0 ) {
+					float speed = float(GetEntProp(ent, Prop_Send, "m_nSpeed"));
+					ang[0] -= 90.0;
+					ang[1] += 90.0;
+					GetAngleVectors(ang, dst, NULL_VECTOR, NULL_VECTOR);
+					ScaleVector(dst, speed*25.0);
+					dst[2] += 400.0;
+					
+					TeleportEntity(ent, NULL_VECTOR, NULL_VECTOR, dst);
+				}
+			}
+			delete trace;
+		}
+	}
+}
+public bool FilterToAll(int entity, int mask, any data) {
+	return (entity < 0);
 }
 void VehicleRemove(int vehicle, bool explode = false) {
 	#if defined DEBUG
@@ -773,12 +817,12 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 	float vecAngles[3];
 	Entity_GetAbsAngles(ent, vecAngles);
 	
-	if( (vecAngles[2] >= 150 || vecAngles[2] <= -150) && !rp_IsGrabbed(ent) /*&& Math_GetRandomInt(0, 5) == 0*/ ) {
+	if( (vecAngles[2] >= 150 || vecAngles[2] <= -150) && !rp_IsGrabbed(ent) ) {
 		
 		if( GetEntProp(ent, Prop_Data, "m_nSpeed") == 0 )
 			rotate[ent]++;
-		
-		if( rotate[ent] >= 5 ) {
+	
+		if( rotate[ent] >= 5 &&  GetConVarInt(g_hCarUnstuck) == 1 ) {
 			vecOrigin[0] = Math_GetRandomFloat(-100.0, 100.0);
 			vecOrigin[1] = Math_GetRandomFloat(-100.0, 100.0);
 			vecOrigin[2] = Math_GetRandomFloat(200.0, 300.0);
@@ -786,6 +830,7 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 			vecAngles[0] = 0.0;
 			vecAngles[2] = 0.0;
 			TeleportEntity(ent, NULL_VECTOR, vecAngles, NULL_VECTOR);
+			rotate[ent] = 0;
 		}
 	}
 	else if( rotate[ent] > 0 ) {
