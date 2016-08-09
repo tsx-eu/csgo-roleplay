@@ -582,13 +582,14 @@ public void OnThink(int ent) {
 			float src[3], ang[3], dst[3];
 			Entity_GetAbsOrigin(ent, src);
 			Entity_GetAbsAngles(ent, ang);
+			src[2] += 8.0;
 			ang[0] += 90.0;
 			trace = TR_TraceRayFilterEx(src, ang, MASK_SHOT, RayType_Infinite, FilterToAll);
 			
 			if( TR_DidHit(trace) ) {
 				TR_GetEndPosition(dst, trace);
 				
-				if( GetVectorDistance(src, dst) <= 1.0 ) {
+				if( GetVectorDistance(src, dst) <= 9.0 ) {
 					float speed = float(GetEntProp(ent, Prop_Send, "m_nSpeed"));
 					ang[0] -= 90.0;
 					ang[1] += 90.0;
