@@ -98,7 +98,7 @@ public void OnPluginStart() {
 	g_hCarHeal = CreateConVar("rp_car_heal", "1000", "La vie des voitures", 0, true, 100.0, true, 100000.0);
 	
 	HookConVarChange(g_hCarJump, OnConVarChanged);
-	g_bVehicleCanJump = GetConVarBool(g_hCarUnstuck);
+	g_bVehicleCanJump = GetConVarBool(g_hCarJump);
 	
 	// Reload:
 	for (int i = 1; i <= MaxClients; i++) {
