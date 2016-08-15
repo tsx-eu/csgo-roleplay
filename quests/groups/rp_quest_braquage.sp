@@ -741,11 +741,11 @@ public Action fwdDamage(int attacker, int victim, float& damage, int wepID, floa
 	}
 	
 	if( g_iPlayerTeam[attacker] == TEAM_BRAQUEUR && rp_GetWeaponBallType(wepID) == ball_type_braquage) {
-		if( rp_GetZoneInt(rp_GetPlayerZone(attacker), zone_type_type) == g_iPlanque && rp_GetZoneInt(rp_GetPlayerZone(victim), zone_type_type) == g_iPlanque  )
-			damage *= 1.10;
+		if( g_iPlayerTeam[victim] == TEAM_POLICE )
+			damage *= 1.15;
 		else
 			damage *= 0.8;
-		return Plugin_Changed;		
+		return Plugin_Changed;
 	}
 	
 	return Plugin_Continue;
@@ -797,6 +797,8 @@ public int MenuRespawnBraqueur(Handle menu, MenuAction action, int client, int p
 			OnBraqueurRespawn(target);
 			TeleportEntity(target, pos, NULL_VECTOR, NULL_VECTOR);
 			FakeClientCommand(target, "sm_stuck");
+			FakeClientCommand(client, "sm_stuck");
+			
 			
 			SetEntityHealth(target, 500);
 			rp_SetClientInt(target, i_Kevlar, 250);

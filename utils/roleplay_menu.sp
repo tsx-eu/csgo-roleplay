@@ -47,8 +47,12 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 }
 public Action fwdCommand(int client, char[] command, char[] arg) {
-	if( StrEqual(command, "rpmenu") || StrEqual(command, "menu") ) {
-		openMenu(client);
+	if( StrEqual(command, "menu") ) {
+		openMenuInteractif(client);
+		return Plugin_Handled;
+	}
+	if( StrEqual(command, "rp") || StrEqual(command, "rpmenu") ) {
+		openMenuGeneral(client);
 		return Plugin_Handled;
 	}
 	return Plugin_Continue;
@@ -68,18 +72,18 @@ public Action OnPlayerRunCmd(int client, int &button) {
 }
 public Action taskOpenMenu(Handle timer, any client) {
 	if( rp_ClientCanDrawPanel(client) || g_bInsideMenu[client] )
-		 openMenu(client);
+		 openMenuInteractif(client);
 }
-void openMenu(int client) {
+void openMenuInteractif(int client) {
 	int target = rp_GetClientTarget(client);
 	bool near = rp_IsEntitiesNear(client, target, true);
 	int jobID = rp_GetClientJobID(client);
 	
 	Menu menu = CreateMenu(menuOpenMenu);
 	menu.SetTitle("RolePlay");
-	menu.AddItem("item", "Ouvrir l'inventaire");
 	
 	if( IsValidClient(target) ) {
+		menu.SetTitle("RolePlay: %N", target);
 		
 		if( near && ((jobID >= 11 && jobID <= 81) || jobID >= 111) )
 			menu.AddItem("vendre", "Vendre");
@@ -95,7 +99,7 @@ void openMenu(int client) {
 			menu.AddItem("heal", "Soigner le joueur");
 		
 		
-		if( near && (jobID == 1 || jobID == 101) )
+		if( true && (jobID == 1 || jobID == 101) )
 			menu.AddItem("search", "Vérifier les permis");
 		if( true && (jobID == 1 || jobID == 101) )
 			menu.AddItem("jail", "Mettre en prison");
@@ -107,6 +111,8 @@ void openMenu(int client) {
 			menu.AddItem("give", "Donner de l'argent");
 	}
 	else if( rp_IsValidDoor(target) ) {
+		menu.SetTitle("RolePlay: Une porte");
+		
 		int doorID = rp_GetDoorID(target);
 		if( doorID > 0 && rp_GetClientKeyDoor(client, doorID) ) {
 			if( GetEntProp(target, Prop_Data, "m_bLocked") ) 
@@ -115,23 +121,41 @@ void openMenu(int client) {
 				menu.AddItem("lock", "Verrouiller la porte");
 		}
 	}
+	else {
+		delete menu;
+		return;
+	}
+	
+	if( g_bClosed[client] )
+		menu.AddItem("exit", "Ouvrir ce menu automatiquement");
+	else
+		menu.AddItem("exit", "Ne plus ouvrir ce menu automatiquement");
+	
+	menu.Pagination = 8;
+	menu.Display(client, 30);
+	
+	g_bInsideMenu[client] = true;
+}
+void openMenuGeneral(int client) {
+	int jobID = rp_GetClientJobID(client);
+	
+	Menu menu = CreateMenu(menuOpenMenu);
+	menu.SetTitle("RolePlay");
+	
+	menu.AddItem("item", "Ouvrir l'inventaire");
+	
 	if( jobID == 11 ) {
 		menu.AddItem("mort", "Faire revivre les morts");
 	}
 	if( jobID == 11 || jobID == 21 || jobID == 31 || jobID == 51 || jobID == 71 || jobID == 81 || jobID == 111 || jobID == 171 || jobID == 191 || jobID == 211 || jobID == 221 ) {
 		menu.AddItem("build", "Construire");
 	}
+	
 	menu.AddItem("job", "Appeler un joueur");
 	menu.AddItem("stats", "Statistiques");
-	if( rp_IsClientNew(client) )
-		menu.AddItem("report", "Rappporter un mauvais comportement");
-	
-	if( g_bClosed[client] )
-		menu.AddItem("exit", "Ouvrir ce menu automatiquement");
-	else
-		menu.AddItem("exit", "Ne plus ouvrir ce menu automatiquement");
+	menu.AddItem("report", "Rappporter un mauvais comportement");
 		
-	menu.Display(client, 5);
+	menu.Display(client, 30);
 	
 	g_bInsideMenu[client] = true;
 }
