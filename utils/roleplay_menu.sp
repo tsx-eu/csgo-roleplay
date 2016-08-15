@@ -79,6 +79,7 @@ void openMenuInteractif(int client) {
 	bool veryNear = rp_IsEntitiesNear(client, target, true);
 	bool near = rp_IsEntitiesNear(client, target, false);
 	
+	
 	int jobID = rp_GetClientJobID(client);
 	int optionCount = 0;
 	
@@ -86,6 +87,8 @@ void openMenuInteractif(int client) {
 	menu.SetTitle("RolePlay");
 	
 	if( IsValidClient(target) ) {
+		bool hear = rp_IsTargetHear(client, target);
+		
 		menu.SetTitle("RolePlay: %N", target);
 		
 		if( near && ((jobID >= 11 && jobID <= 81) || jobID >= 111) ) {
@@ -110,7 +113,7 @@ void openMenuInteractif(int client) {
 		}
 		
 		
-		if( near && (jobID == 1 || jobID == 101) ) {
+		if( hear && (jobID == 1 || jobID == 101) ) {
 			menu.AddItem("search", "Vérifier les permis");
 			menu.AddItem("jail", "Mettre en prison");
 			menu.AddItem("tazer", "Coup de tazer");
