@@ -76,8 +76,11 @@ public Action taskOpenMenu(Handle timer, any client) {
 }
 void openMenuInteractif(int client) {
 	int target = rp_GetClientTarget(client);
-	bool near = rp_IsEntitiesNear(client, target, true);
+	bool veryNear = rp_IsEntitiesNear(client, target, true);
+	bool near = rp_IsEntitiesNear(client, target, false);
+	
 	int jobID = rp_GetClientJobID(client);
+	int optionCount = 0;
 	
 	Menu menu = CreateMenu(menuOpenMenu);
 	menu.SetTitle("RolePlay");
@@ -85,30 +88,40 @@ void openMenuInteractif(int client) {
 	if( IsValidClient(target) ) {
 		menu.SetTitle("RolePlay: %N", target);
 		
-		if( near && ((jobID >= 11 && jobID <= 81) || jobID >= 111) )
+		if( near && ((jobID >= 11 && jobID <= 81) || jobID >= 111) ) {
 			menu.AddItem("vendre", "Vendre");
+			optionCount++;
+		}
 		
 		
-		if( near && rp_GetClientBool(client, b_MaySteal) && (jobID == 81 || jobID == 91) )
+		if( veryNear && rp_GetClientBool(client, b_MaySteal) && (jobID == 81 || jobID == 91) ) {
 			menu.AddItem("vol", "Voler le joueur");
+			optionCount++;
+		}
 		
-		if( near && jobID == 71 )
+		if( near && jobID == 71 ) {
 			menu.AddItem("cutinfo", "Informations entraînement");
+			optionCount++;
+		}
 		
-		if( near && jobID == 11 )
+		if( near && jobID == 11 ) {
 			menu.AddItem("heal", "Soigner le joueur");
+			optionCount++;
+		}
 		
 		
-		if( true && (jobID == 1 || jobID == 101) )
+		if( near && (jobID == 1 || jobID == 101) ) {
 			menu.AddItem("search", "Vérifier les permis");
-		if( true && (jobID == 1 || jobID == 101) )
 			menu.AddItem("jail", "Mettre en prison");
-		if( true && (jobID == 1 || jobID == 101) )
 			menu.AddItem("tazer", "Coup de tazer");
+			optionCount++;
+		}
 		
 		
-		if( near && rp_GetClientInt(client, i_Money) > 0 && !rp_IsClientNew(client) )
+		if( near && rp_GetClientInt(client, i_Money) > 0 && !rp_IsClientNew(client) ) {
 			menu.AddItem("give", "Donner de l'argent");
+			optionCount++;
+		}
 	}
 	else if( rp_IsValidDoor(target) ) {
 		menu.SetTitle("RolePlay: Une porte");
@@ -119,9 +132,12 @@ void openMenuInteractif(int client) {
 				menu.AddItem("unlock", "Déverrouiller la porte");
 			else
 				menu.AddItem("lock", "Verrouiller la porte");
+			
+			optionCount++;
 		}
 	}
-	else {
+	
+	if( optionCount == 0 ) {
 		delete menu;
 		return;
 	}
