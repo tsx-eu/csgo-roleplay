@@ -143,7 +143,7 @@ public void OnConfigsExecuted() {
 		ServerCommand("mp_restartgame 1");
 		ServerCommand("spec_replay_enable 1");
 		ServerCommand("tv_snapshotrate 64");
-		ServerCommand("rp_wallhack 0");
+		//ServerCommand("rp_wallhack 0");
 	}
 }
 public void OnMapStart() {
@@ -571,7 +571,7 @@ void CAPTURE_Stop() {
 	GDM_Resume();
 	
 	ServerCommand("tv_stoprecord");
-	ServerCommand("rp_wallhack 0");
+	//ServerCommand("rp_wallhack 0");
 }
 void CAPTURE_UpdateLight() {
 	char strBuffer[4][32], tmp[64], tmp2[64];
