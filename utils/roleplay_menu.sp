@@ -48,6 +48,7 @@ public void OnClientPostAdminCheck(int client) {
 }
 public Action fwdCommand(int client, char[] command, char[] arg) {
 	if( StrEqual(command, "menu") ) {
+		g_bClosed[client] = false;
 		openMenuInteractif(client);
 		return Plugin_Handled;
 	}
@@ -145,11 +146,7 @@ void openMenuInteractif(int client) {
 		return;
 	}
 	
-	if( g_bClosed[client] )
-		menu.AddItem("exit", "Ouvrir ce menu automatiquement");
-	else
-		menu.AddItem("exit", "Ne plus ouvrir ce menu automatiquement");
-	
+	menu.AddItem("exit", "Ne plus ouvrir ce menu automatiquement");
 	menu.Pagination = 8;
 	menu.Display(client, 30);
 	
@@ -203,7 +200,7 @@ public int menuOpenMenu(Handle hItem, MenuAction oAction, int client, int param)
 			}
 			if( StrEqual(options, "exit") ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez réouvrir ce menu avec /menu.");
-				g_bClosed[client] = !g_bClosed[client];
+				g_bClosed[client] = false;
 				return;
 			}
 			FakeClientCommand(client, "say /%s", options);
