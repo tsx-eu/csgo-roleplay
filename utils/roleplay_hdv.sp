@@ -87,7 +87,7 @@ void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) 
 				continue;
 			
 			Format(tmp, sizeof(tmp), "sell %d %d", itemID, i);
-			Format(tmp2, sizeof(tmp2), "%s", tmp3);
+			Format(tmp2, sizeof(tmp2), "%dx %s", i, tmp3);
 			menu.AddItem(tmp, tmp2);
 		}
 	}
@@ -134,7 +134,18 @@ void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) 
 			return;
 		}
 		
-		// TODO: INSERT INTO...
+		rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money)-tax);
+		rp_ClientGiveItem(client, itemID, -quantity);
+		
+		char szQuery[256], steamid[32];
+		Handle pack = CreateDataPack();
+		WritePackCell(pack, client);
+		WritePackCell(pack, itemID);
+		WritePackCell(pack, quantity);
+		WritePackCell(pack, tax);
+		GetClientAuthId(client, AuthId_Engine, steamid, sizeof(steamid));
+		Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_trade`(`steamid`, `itemID`, `amount`, `price`, `time`) VALUES ('%s', '%d', '%d', '%d', '%d')", steamid, itemID, quantity, sellPrice, GetTime());
+		SQL_TQuery(rp_GetDatabase(), SQL_DepositCB, szQuery, pack);
 		delete menu;
 		return;
 	}
@@ -150,7 +161,6 @@ public int Handler_MainHDV(Handle hItem, MenuAction oAction, int client, int par
 		GetMenuItem(hItem, param, options, sizeof(options));
 		
 		ExplodeString(options, " ", exploded, sizeof(exploded), sizeof(exploded[]));
-		PrintToChatAll("%s", options);
 		
 		if( StrContains(options, "sell") == 0 ) {
 			HDV_Sell(client, StringToInt(exploded[1]), StringToInt(exploded[2]), StringToInt(exploded[3]), StringToInt(exploded[4]));
@@ -161,3 +171,20 @@ public int Handler_MainHDV(Handle hItem, MenuAction oAction, int client, int par
 	}
 }
 
+public void SQL_DepositCB(Handle owner, Handle handle, const char[] error, any data) {
+	if( strlen(error) >= 1  ) {
+		ResetPack(data);
+		int client, itemID ,quantity ,tax;
+		client = ReadPackCell(data);
+		itemID = ReadPackCell(data);
+		quantity = ReadPackCell(data);
+		tax = ReadPackCell(data);
+		
+		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank)+tax);
+		rp_ClientGiveItem(client, itemID, quantity);
+		
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Une erreur s'est produite lors de la mise en vente, vos objets ainsi que la taxe de mise en vente vous ont été restitués.");
+		LogError("[SQL] [ERROR] %s - HDVDeposit", error);
+		return;
+	}
+}
