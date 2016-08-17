@@ -304,7 +304,7 @@ public int MenuCheque(Handle p_hItemMenu, MenuAction p_oAction, int client, int 
 			
 			// Setup menu
 			Handle hGiveMenu = CreateMenu(MenuCheque2);
-			SetMenuTitle(hGiveMenu, "Sélectionnez un objet à acheter:");
+			SetMenuTitle(hGiveMenu, "Sélectionnez un objet à acheter\n ");
 			
 			for(int i = 0; i < MAX_ITEMS; i++) {
 				
@@ -359,7 +359,7 @@ public int MenuCheque2(Handle p_hItemMenu, MenuAction p_oAction, int client, int
 			// Setup menu
 			Handle hGiveMenu = rp_CreateSellingMenu();			
 			
-			SetMenuTitle(hGiveMenu, "Sélectionnez combien en acheter:");
+			SetMenuTitle(hGiveMenu, "Sélectionnez combien en acheter\n ");
 			int amount = 0;
 			for(int i = 1; i <= 100; i++) {
 				
@@ -576,7 +576,7 @@ void DisplayMetroMenu(int client) {
 		return;
 	
 	Handle menu = CreateMenu(eventMetroMenu);
-	SetMenuTitle(menu, "== Station de métro ==");
+	SetMenuTitle(menu, "== Station de métro ==\n ");
 	
 	if( GetConVarInt(g_hEVENT) == 1 )
 		AddMenuItem(menu, "metro_event", "Métro: Station événementiel");

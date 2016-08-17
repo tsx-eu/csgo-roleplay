@@ -862,7 +862,7 @@ void AskToJoinCar(int client, int vehicle) {
 	char tmp[255];	
 	Handle menu = CreateMenu(AskToJoinCar_Menu);
 	
-	Format(tmp, sizeof(tmp), "%N souhaite entrer dans votre voiture.\n L'acceptez-vous ?", client);
+	Format(tmp, sizeof(tmp), "%N souhaite entrer dans votre voiture.\n L'acceptez-vous ?\n ", client);
 	SetMenuTitle(menu, tmp);
 	
 	Format(tmp, sizeof(tmp), "%i_%i_1", client, vehicle);	AddMenuItem(menu, tmp, "Accepter la demande");
@@ -947,7 +947,7 @@ void DisplayGarageMenu(int client) {
 	#endif
 	
 	Handle menu = CreateMenu(eventGarageMenu);
-	SetMenuTitle(menu, "Menu du garage");
+	SetMenuTitle(menu, "Menu du garage\n ");
 	
 	AddMenuItem(menu, "to_bank", 	"Ranger la voiture");
 	AddMenuItem(menu, "from_bank", 	"Sortir la voiture");
@@ -964,7 +964,7 @@ void DisplayGarageMenu(int client) {
 }
 void displayColorMenu(int client) {
 	Handle menu2 = CreateMenu(eventGarageMenu);
-	SetMenuTitle(menu2, "Menu du garage");
+	SetMenuTitle(menu2, "Menu du garage\n ");
 	AddMenuItem(menu2, "colors_custom",		"Personnalisé");
 			
 	char tmp[64];
@@ -978,7 +978,7 @@ void displayColorMenu(int client) {
 }
 void displayColorMenu2(int client) {
 	Handle menu2 = CreateMenu(eventGarageMenu);
-	SetMenuTitle(menu2, "Menu du garage");
+	SetMenuTitle(menu2, "Menu du garage\n ");
 	AddMenuItem(menu2, "white",	"Ajouter du blanc");
 	AddMenuItem(menu2, "black",	"Ajouter du noir");
 	AddMenuItem(menu2, "red", 	"Ajouter du rouge");
@@ -989,7 +989,7 @@ void displayColorMenu2(int client) {
 }
 void displayNeonMenu(int client) {
 	Handle menu2 = CreateMenu(eventGarageMenu);
-	SetMenuTitle(menu2, "Menu du garage");
+	SetMenuTitle(menu2, "Menu du garage\n ");
 				
 	char tmp[64];
 	for (int i = 0; i < sizeof(g_szColor); i++) {
@@ -1003,7 +1003,7 @@ void displayNeonMenu(int client) {
 void displayParticleMenu(int client) {
 	Handle menu2 = CreateMenu(eventGarageMenu);
 	char tmp[64];
-	SetMenuTitle(menu2, "Menu du garage");
+	SetMenuTitle(menu2, "Menu du garage\n ");
 				
 	for (int i = 0; i < sizeof(g_szParticles); i++) {
 		Format(tmp, sizeof(tmp), "Particule %d", i+1);
@@ -1015,7 +1015,7 @@ void displayParticleMenu(int client) {
 void displayKlaxonMenu(int client){
 	char tmp[32];
 	Menu menu = new Menu(eventGarageMenu);
-	menu.SetTitle("Changer de klaxon");
+	menu.SetTitle("Changer de klaxon\n ");
 	for(int i=1; i<=6; i++){
 		Format(tmp, sizeof(tmp), "Klaxon %d", i);
 		menu.AddItem(tmp, tmp);
@@ -1042,7 +1042,7 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 			if( StrEqual(arg1, "from_bank") ) {
 					
 				Handle menu2 = CreateMenu(eventGarageMenu2);
-				SetMenuTitle(menu2, "Sélectionnez votre voiture:");
+				SetMenuTitle(menu2, "Sélectionnez votre voiture\n ");
 				
 				char tmp[12], tmp2[64];
 				

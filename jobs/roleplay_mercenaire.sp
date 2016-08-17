@@ -880,7 +880,7 @@ void OpenKidnappingMenu(int client) {
 		
 	if( g_bShouldOpen[client] && rp_GetZoneInt( rp_GetPlayerZone(client), zone_type_type) == 41 && rp_ClientCanDrawPanel(client) ) {
 		Handle menu = CreateMenu(eventKidnapping);
-		SetMenuTitle(menu, "Vous avez été enlevé ! Que faire ?");
+		SetMenuTitle(menu, "Vous avez été enlevé ! Que faire ?\n ");
 			
 		AddMenuItem(menu, "pay", "Payer la rançon de 2500$");
 		AddMenuItem(menu, "free", "Tenter l'évasion");
@@ -930,7 +930,7 @@ public Action Cmd_ItemEnqueteMenu(int args) {
 	int client = StringToInt(arg1);
 	
 	Handle menu = CreateMenu(Cmd_ItemEnqueteMenu_2);
-	SetMenuTitle(menu, "Sélectionner sur qui récupérer des informations :");
+	SetMenuTitle(menu, "Sélectionner sur qui récupérer des informations\n ");
 	
 	char name[128], tmp[64];
 	GetClientName(client, name, 127);
@@ -987,7 +987,7 @@ public Action Cmd_ItemEnquete(int args) {
 	
 	// Setup menu
 	Handle menu = CreateMenu(MenuNothing);
-	SetMenuTitle(menu, "Information sur %N:", target);
+	SetMenuTitle(menu, "Information sur %N\n ", target);
 	
 	PrintToConsole(client, "\n\n\n\n\n -------------------------------------------------------------------------------------------- ");
 	

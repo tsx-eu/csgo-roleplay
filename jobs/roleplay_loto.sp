@@ -279,9 +279,9 @@ public Action Delay_MenuLoto(Handle timer, Handle dp) {
 	
 	Menu menu = CreateMenu(MenuLoto);
 	if( amount == -1 )
-		menu.SetTitle("Vous avez %d ticket cagnotte.\nCombien voulez-vous gratter?", count);
+		menu.SetTitle("Vous avez %d ticket cagnotte.\nCombien voulez-vous gratter?\n ", count);
 	else
-		menu.SetTitle("Vous avez %d ticket de %d$.\nCombien voulez-vous gratter?", count, amount);
+		menu.SetTitle("Vous avez %d ticket de %d$.\nCombien voulez-vous gratter?\n ", count, amount);
 		
 	char tmp[64], tmp2[64];
 		
@@ -678,7 +678,7 @@ void displayWheel(int client, int n, int l[3], int k[3], bool last) {
 	
 	int jeton = getPlayerJeton(client);
 	
-	menu.SetTitle("Machine à sous n°%d\nIl vous reste %d jeton%s\n%s\n\n%s", n+1, jeton, jeton>1?"s":"", tmp, title);
+	menu.SetTitle("Machine à sous n°%d\nIl vous reste %d jeton%s\n%s\n\n%s\n ", n+1, jeton, jeton>1?"s":"", tmp, title);
 	
 	menu.AddItem("1", 		"Jouer 1 jeton", last && jeton >= 1 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem("2", 		"Jouer 2 jetons", last && jeton >= 2 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
@@ -865,7 +865,7 @@ void drawEchange(int client, int target, int jobID) {
 	int bleu = rp_GetClientItem(target, ITEM_JETONBLEU);
 	
 	if( jobID == -1 ) {
-		menu.SetTitle("%N vous propose\nd'échanger vos jetons bleus\ncontre des lots.", client);
+		menu.SetTitle("%N vous propose\nd'échanger vos jetons bleus\ncontre des lots.\n ", client);
 		menu.AddItem("0", "Argent");
 		
 		for (int i = 0; i < sizeof(lstJOB); i++) {
@@ -877,7 +877,7 @@ void drawEchange(int client, int target, int jobID) {
 		menu.ExitButton = true;
 	}
 	else {
-		menu.SetTitle("Vous avez %d jeton%s bleu%s\nQue souhaitez-vous échanger?", bleu, bleu > 1 ? "s" : "", bleu > 1 ? "s" : "");
+		menu.SetTitle("Vous avez %d jeton%s bleu%s\nQue souhaitez-vous échanger?\n ", bleu, bleu > 1 ? "s" : "", bleu > 1 ? "s" : "");
 		
 		if( jobID == 0 ) {
 			menu.AddItem("0 10000 125", "10 000$ - 125 Jetons bleus", bleu >= 125 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);

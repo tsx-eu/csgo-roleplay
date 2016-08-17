@@ -891,13 +891,13 @@ void MENU_ShowPickLock(int client, float percent, int difficulte, int type) {
 
 	Handle menu = CreateMenu(eventMenuNone);
 	switch( type ) {
-		case 1: SetMenuTitle(menu, "== Mafia: Ouverture d'une porte");
-		case 2: SetMenuTitle(menu, "== Mafia: Crochetage d'un distributeur");
-		case 3: SetMenuTitle(menu, "== Mafia: Crochetage d'une armurerie");
-		case 4: SetMenuTitle(menu, "== Mafia: Crochetage d'une imprimante");
-		case 5: SetMenuTitle(menu, "== Mafia: Crochetage d'une photocopieuse");
-		case 6: SetMenuTitle(menu, "== Mafia: Crochetage d'un téléphone");
-		case 7: SetMenuTitle(menu, "== Mafia: Crochetage d'un plant de drogue");
+		case 1: SetMenuTitle(menu, "== Mafia: Ouverture d'une porte\n ");
+		case 2: SetMenuTitle(menu, "== Mafia: Crochetage d'un distributeur\n ");
+		case 3: SetMenuTitle(menu, "== Mafia: Crochetage d'une armurerie\n ");
+		case 4: SetMenuTitle(menu, "== Mafia: Crochetage d'une imprimante\n ");
+		case 5: SetMenuTitle(menu, "== Mafia: Crochetage d'une photocopieuse\n ");
+		case 6: SetMenuTitle(menu, "== Mafia: Crochetage d'un téléphone\n ");
+		case 7: SetMenuTitle(menu, "== Mafia: Crochetage d'un plant de drogue\n ");
 	}
 	
 	char tmp[64];
@@ -946,7 +946,7 @@ void missionTelephone(int client) {
 	char msg[256];
 	rp_GetZoneData(rp_GetZoneFromPoint(vecDir), zone_type_name, msg, sizeof(msg));
 	Handle menu = CreateMenu(eventMenuNone);
-	SetMenuTitle(menu, "== MISSION TELEPHONE == ");
+	SetMenuTitle(menu, "== MISSION TELEPHONE == \n ");
 	AddMenuItem(menu, "_", "Un hélicoptère vous envois un colis.", ITEMDRAW_DISABLED);
 	AddMenuItem(menu, "_", "Il sera envoyé près de:", ITEMDRAW_DISABLED);
 	AddMenuItem(menu, "_", msg, ITEMDRAW_DISABLED);
@@ -1105,7 +1105,7 @@ void Cmd_BuyItemMenu(int client, bool free) {
 	}
 	
 	Menu menu = new Menu(Menu_BuyWeapon);
-	menu.SetTitle("Marché noir:");
+	menu.SetTitle("Marché noir\n ");
 	
 	while( position < max ) {
 		

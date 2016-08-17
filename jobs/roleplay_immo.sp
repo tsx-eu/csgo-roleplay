@@ -359,7 +359,7 @@ public Action Cmd_ItemPropAppart(int args){
 }
 public Action task_ItemPropAppart(Handle timer, any client) {
 	Handle menu = CreateMenu(MenuPropAppart);
-	SetMenuTitle(menu, "Quel props voulez vous spawn");
+	SetMenuTitle(menu, "Quel props voulez vous spawn\n ");
 	for(int i=0; i<sizeof(g_PropsAppart); i++){
 		AddMenuItem(menu, g_PropsAppart[i][1], g_PropsAppart[i][0]);
 	}
@@ -457,7 +457,7 @@ public Action Cmd_ItemPropOutdoor(int args){
 
 public Action task_ItemPropOutdoor(Handle timer, any client){
 	Handle menu = CreateMenu(MenuPropOutdoor);
-	SetMenuTitle(menu, "Quel props voulez vous spawn");
+	SetMenuTitle(menu, "Quel props voulez vous spawn\n ");
 	for(int i=0; i<sizeof(g_PropsOutdoor); i++){
 		AddMenuItem(menu, g_PropsOutdoor[i][1], g_PropsOutdoor[i][0]);
 	}
@@ -772,7 +772,7 @@ public Action Cmd_InfoColoc(int client){
 	char tmp2[64];
 	int proprio;
 	Handle menu = CreateMenu(MenuNothing);
-	SetMenuTitle(menu, "Information sur vos appartements");
+	SetMenuTitle(menu, "Information sur vos appartements\n ");
 	for (int i = 1; i < 200; i++) {
 		if( rp_GetClientKeyAppartement(client, i) ) {
 
@@ -977,7 +977,7 @@ public int bedVillaMenu_KEY(Handle p_hItemMenu, MenuAction p_oAction, int client
 }
 void OpenBedMenu(int client) {
 	Handle menu = CreateMenu(bedVillaMenu_BED);
-	SetMenuTitle(menu, "Combien souhaitez-vous miser?\n Attention, vous ne serrez remboursé\nqu'à la fin des enchères (dimanche 21 heures)");
+	SetMenuTitle(menu, "Combien souhaitez-vous miser?\n Attention, vous ne serrez remboursé\nqu'à la fin des enchères (dimanche 21 heures)\n ");
 	
 	
 	AddMenuItem(menu, "1",		"1$");

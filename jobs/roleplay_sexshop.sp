@@ -829,7 +829,7 @@ public int MenuRubanWho(Handle menu, MenuAction action, int client, int param2) 
 		}
 		char tmp[64];
 		Handle menucolor = CreateMenu(MenuRubanColor);
-		SetMenuTitle(menucolor, "De quelle couleur ?");
+		SetMenuTitle(menucolor, "De quelle couleur ?\n ");
 		Format(tmp,63,"%s_%i_%i_%i_%i_%i", data[0], target, 255, 0  , 0  , 200);
 		AddMenuItem(menucolor, tmp, "Rouge");
 		Format(tmp,63,"%s_%i_%i_%i_%i_%i", data[0], target, 0  , 255, 0  , 200);

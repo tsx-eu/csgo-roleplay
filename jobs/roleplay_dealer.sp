@@ -1506,7 +1506,7 @@ void openMarketMenu(int client, int itemID = 0) {
 	char tmp[128], tmp2[32], tmp3[64];
 	Menu menu = new Menu(Menu_Market);
 	if( itemID == 0 ) {
-		menu.SetTitle("Marché noir: Dealers");
+		menu.SetTitle("Marché noir: Dealers\n ");
 		
 		for(int i = 0; i < MAX_ITEMS; i++) {
 			if( g_iMarket[i] <= 0 )
@@ -1520,7 +1520,7 @@ void openMarketMenu(int client, int itemID = 0) {
 	}
 	else {
 		rp_GetItemData(itemID, item_type_name, tmp3, sizeof(tmp3));
-		menu.SetTitle("Dealers - %s", tmp3);
+		menu.SetTitle("Dealers - %s\n ", tmp3);
 
 		float prix = float(rp_GetItemInt(itemID, item_type_prix)) * getReduction(itemID);
 		for(int i = 1; i <= g_iMarket[itemID]; i++) {

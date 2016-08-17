@@ -167,7 +167,7 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 	}
 
 	Handle menu = CreateMenu(ModifyWeapon);
-	SetMenuTitle(menu, "Modifier l'arme");
+	SetMenuTitle(menu, "Modifier l'arme\n ");
 	AddMenuItem(menu, "reload_50", "Recharger l'arme (50$)");
 	AddMenuItem(menu, "sanandreas_150", "Ajouter 1000 balles (150$)");
 
@@ -259,7 +259,7 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 			if(StrEqual(type, "pvp")){
 				Handle menupvp = CreateMenu(ModifyWeaponPVP);
 				char tmp[64], tmp2[64];
-				SetMenuTitle(menupvp, "A quel groupe attribuer l'arme?");
+				SetMenuTitle(menupvp, "A quel groupe attribuer l'arme?\n ");
 				for(int i=1; i<MAX_GROUPS; i+=10){
 					for(int j=1;j< MAXPLAYERS+1;j++){
 						if( !IsValidClient(j) )

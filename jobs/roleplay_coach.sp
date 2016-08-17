@@ -961,7 +961,7 @@ public Action task_ItemAnarchist(Handle timer, any client) {
 	#endif
 	
 	Handle menu = CreateMenu(MenuSetSkin);
-	SetMenuTitle(menu, "Choisissez un skin:");
+	SetMenuTitle(menu, "Choisissez un skin\n ");
 	
 	AddMenuItem(menu, "models/player/custom_player/legacy/tm_anarchist.mdl", "Anarchist");
 	AddMenuItem(menu, "models/player/custom_player/legacy/tm_anarchist_varianta.mdl", "Anarchist - A");
@@ -988,7 +988,7 @@ public Action task_ItemBalkan(Handle timer, any client) {
 	#endif
 	
 	Handle menu = CreateMenu(MenuSetSkin);
-	SetMenuTitle(menu, "Choisissez un skin:");
+	SetMenuTitle(menu, "Choisissez un skin\n ");
 	
 	AddMenuItem(menu, "models/player/custom_player/legacy/tm_balkan_varianta.mdl", "Balkan");
 	AddMenuItem(menu, "models/player/custom_player/legacy/tm_balkan_variantb.mdl", "Balkan - A");
@@ -1015,7 +1015,7 @@ public Action task_ItemLeet(Handle timer, any client) {
 	#endif
 	
 	Handle menu = CreateMenu(MenuSetSkin);
-	SetMenuTitle(menu, "Choisissez un skin:");
+	SetMenuTitle(menu, "Choisissez un skin\n ");
 	
 	AddMenuItem(menu, "models/player/custom_player/legacy/tm_leet_varianta.mdl", "Leet");
 	AddMenuItem(menu, "models/player/custom_player/legacy/tm_leet_variantb.mdl", "Leet - A");
@@ -1042,7 +1042,7 @@ public Action task_ItemPhoenix(Handle timer, any client) {
 	#endif
 	
 	Handle menu = CreateMenu(MenuSetSkin);
-	SetMenuTitle(menu, "Choisissez un skin:");
+	SetMenuTitle(menu, "Choisissez un skin\n ");
 	
 	AddMenuItem(menu, "models/player/custom_player/legacy/tm_phoenix.mdl", "Phoenix");
 	AddMenuItem(menu, "models/player/custom_player/legacy/tm_phoenix_varianta.mdl", "Phoenix - A");
@@ -1069,7 +1069,7 @@ public Action task_ItemPirate(Handle timer, any client) {
 	#endif
 	
 	Handle menu = CreateMenu(MenuSetSkin);
-	SetMenuTitle(menu, "Choisissez un skin:");
+	SetMenuTitle(menu, "Choisissez un skin\n ");
 	
 	AddMenuItem(menu, "models/player/custom_player/legacy/tm_pirate.mdl", "Pirate");
 	AddMenuItem(menu, "models/player/custom_player/legacy/tm_pirate_varianta.mdl", "Pirate - A");
@@ -1096,7 +1096,7 @@ public Action task_ItemProfessional(Handle timer, any client) {
 	#endif
 	
 	Handle menu = CreateMenu(MenuSetSkin);
-	SetMenuTitle(menu, "Choisissez un skin:");
+	SetMenuTitle(menu, "Choisissez un skin\n ");
 	
 	AddMenuItem(menu, "models/player/custom_player/legacy/tm_professional.mdl", "Professional");
 	AddMenuItem(menu, "models/player/custom_player/legacy/tm_professional_var1.mdl", "Professional - A");
@@ -1123,7 +1123,7 @@ public Action task_ItemSeparatist(Handle timer, any client) {
 	#endif
 	
 	Handle menu = CreateMenu(MenuSetSkin);
-	SetMenuTitle(menu, "Choisissez un skin:");
+	SetMenuTitle(menu, "Choisissez un skin\n ");
 	
 	AddMenuItem(menu, "models/player/custom_player/legacy/tm_separatist.mdl", "Séparatist");
 	AddMenuItem(menu, "models/player/custom_player/legacy/tm_separatist_varianta.mdl", "Séparatist - A");
@@ -1202,7 +1202,7 @@ public Action fwdUse(int client) {
 		return Plugin_Continue;
 	
 	Handle menu = CreateMenu(MenuTrySkin);
-	SetMenuTitle(menu, "Selection du skin à essayer:");
+	SetMenuTitle(menu, "Selection du skin à essayer\n ");
 	
 	AddMenuItem(menu, "models/player/custom_player/legacy/lara/lara.mdl", "Lara");
 	AddMenuItem(menu, "models/player/custom_player/legacy/swagirl/swagirl.mdl", "Désirée");

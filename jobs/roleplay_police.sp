@@ -799,7 +799,7 @@ public Action Cmd_Jail(int client) {
 		// Setup menu
 		Handle menu = CreateMenu(eventAskJail2Time);
 		char tmp[256], tmp2[256];
-		Format(tmp, 255, "Combien de temps doit rester %N?", target);
+		Format(tmp, 255, "Combien de temps doit rester %N?\n ", target);
 		SetMenuTitle(menu, tmp);
 
 		Format(tmp, 255, "%i_-1", target);
@@ -924,7 +924,7 @@ public Action Cmd_Perquiz(int client) {
 	
 	
 	Handle menu = CreateMenu(MenuPerquiz);
-	SetMenuTitle(menu, "Gestion des perquisitions");
+	SetMenuTitle(menu, "Gestion des perquisitions\n ");
 	Handle DB = rp_GetDatabase();
 	SQL_LockDatabase( DB ); // !!!!!!!!!!!
 	char szQuery[1024];
@@ -1260,7 +1260,7 @@ public Action Cmd_Conv(int client) {
 
 	// Setup menu
 	Handle menu = CreateMenu(eventConvocation);
-	SetMenuTitle(menu, "Liste des joueurs:");
+	SetMenuTitle(menu, "Liste des joueurs\n ");
 	char tmp[24], tmp2[64];
 
 	for(int i=1; i<=MaxClients; i++) {
@@ -1292,7 +1292,7 @@ public int eventConvocation(Handle menu, MenuAction action, int client, int para
 
 		// Setup menu
 		Handle menu2 = CreateMenu(eventConvocation_2);
-		Format(options, sizeof(options), "Que faire pour %N", target);
+		Format(options, sizeof(options), "Que faire pour %N\n ", target);
 		SetMenuTitle(menu2, options);
 		if(g_TribunalSearch[target][tribunal_search_status] == -1){
 			Format(options, sizeof(options), "%i_1", target);
@@ -1427,7 +1427,7 @@ public Action Cmd_Tribunal(int client) {
 	// Setup menu
 	Handle menu = CreateMenu(MenuTribunal_main);
 
-	SetMenuTitle(menu, "  Tribunal \n--------------------");
+	SetMenuTitle(menu, "  Tribunal\n ");
 
 	if( job >= 101 && job <= 104 ) {
 		if( GetConVarInt(FindConVar("hostport")) == 27015 )
@@ -1461,7 +1461,7 @@ public int MenuTribunal_main(Handle p_hItemMenu, MenuAction p_oAction, int clien
 		
 		if( StrEqual( options, "forum", false) ) {
 			
-			SetMenuTitle(menu, "  Tribunal - Cas Forum \n--------------------");
+			SetMenuTitle(menu, "  Tribunal - Cas Forum\n ");
 			PrintToServer("LOCK-2");
 			SQL_LockDatabase(DB);
 			
@@ -1495,7 +1495,7 @@ public int MenuTribunal_main(Handle p_hItemMenu, MenuAction p_oAction, int clien
 		}
 		else if( StrEqual( options, "connected", false) ) {
 			
-			SetMenuTitle(menu, "  Tribunal - Cas connecté \n--------------------");
+			SetMenuTitle(menu, "  Tribunal - Cas connecté\n ");
 			char tmp[255], tmp2[255], szSteam[32];
 			
 			for(int i = 1; i <= MaxClients; i++) {
@@ -1514,7 +1514,7 @@ public int MenuTribunal_main(Handle p_hItemMenu, MenuAction p_oAction, int clien
 		}
 		else if( StrEqual( options, "disconnect", false) ) {
 			
-			SetMenuTitle(menu, "  Tribunal - Cas déconnecté \n--------------------");
+			SetMenuTitle(menu, "  Tribunal - Cas déconnecté\n ");
 			PrintToServer("LOCK-3");
 			SQL_LockDatabase(DB);
 			Handle hQuery = SQL_Query(DB, "SELECT `steamid`, `name` FROM `rp_users` ORDER BY `rp_users`.`last_connected` DESC LIMIT 100;");
@@ -1556,7 +1556,7 @@ public int MenuTribunal_main(Handle p_hItemMenu, MenuAction p_oAction, int clien
 		}
 		else if( StrEqual( options, "stats", false) ) {
 			
-			SetMenuTitle(menu, "  Tribunal - Stats joueur \n--------------------");
+			SetMenuTitle(menu, "  Tribunal - Stats joueur\n ");
 			char tmp[255], tmp2[255], szSteam[32];
 			
 			for(int i = 1; i <= MaxClients; i++) {
@@ -1603,7 +1603,7 @@ public int MenuTribunal_selectplayer(Handle p_hItemMenu, MenuAction p_oAction, i
 		if( !StrEqual(options[0], "stats") ) {
 			
 			Handle menu = CreateMenu(MenuTribunal_Apply);
-			SetMenuTitle(menu, "  Tribunal - Sélection de la peine \n--------------------");
+			SetMenuTitle(menu, "  Tribunal - Sélection de la peine\n ");
 			
 			for(int i=0; i<=100; i+=2) {
 				Format(tmp, sizeof(tmp), "%s %s %s %i", options[0], options[1], options[2], i);
@@ -1788,7 +1788,7 @@ void AskJailTime(int client, int target) {
 	GetClientAuthId(target, AuthId_Engine, g_szTribunal_DATA[client][tribunal_steamid], sizeof(g_szTribunal_DATA[][]), false);
 
 	Handle menu = CreateMenu(eventSetJailTime);
-	Format(tmp, 255, "Combien de temps doit rester %N?", target);	
+	Format(tmp, 255, "Combien de temps doit rester %N?\n ", target);	
 	SetMenuTitle(menu, tmp);
 	
 	Format(tmp, 255, "%d_-1", target);
@@ -2093,7 +2093,7 @@ void WantPayForLeaving(int client, int police, int type, int amende) {
 	// Setup menu
 	Handle menu = CreateMenu(eventPayForLeaving);
 	char tmp[256];
-	Format(tmp, 255, "Vous avez été mis en prison pour \n %s\nUne caution de %i$ vous est demandé", g_szJailRaison[type][jail_raison], amende);	
+	Format(tmp, 255, "Vous avez été mis en prison pour \n %s\nUne caution de %i$ vous est demandé\n ", g_szJailRaison[type][jail_raison], amende);	
 	SetMenuTitle(menu, tmp);
 	
 	Format(tmp, 255, "%i_%i_%i", police, type, amende);
@@ -2254,7 +2254,7 @@ void justice_perquiz(int client) {
 	#endif
 	
 	Handle menuJustice = CreateMenu(MenuJustice);
-	SetMenuTitle(menuJustice, "Choix des perquisitions");
+	SetMenuTitle(menuJustice, "Choix des perquisitions\n ");
 	AddMenuItem(menuJustice, "rechercher", "Recherché/Kidnappé");
 	AddMenuItem(menuJustice, "illegal", "Trafic illégal");
 	
@@ -2320,7 +2320,7 @@ void rechercher_perquiz(int client) {
 	#endif
 
 	Handle menuRechercher = CreateMenu(MenuRechercher);
-	SetMenuTitle(menuRechercher, "Gestion des perquisitions");
+	SetMenuTitle(menuRechercher, "Gestion des perquisitions\n ");
 	AddMenuItem(menuRechercher, "debuter",	"Debuter");
 	AddMenuItem(menuRechercher, "annuler", "Annuler");
 	AddMenuItem(menuRechercher, "terminer",	"Terminer");
@@ -2335,7 +2335,7 @@ void illegal_perquiz(int client, int job_id) {
 	#endif
 	
 	Handle menu = CreateMenu(MenuPerquiz);
-	SetMenuTitle(menu, "Gestion des perquisitions");
+	SetMenuTitle(menu, "Gestion des perquisitions\n ");
 	Handle DB = rp_GetDatabase();
 	SQL_LockDatabase( DB ); //!!!!!!!!!!!
 	char szQuery[1024];
@@ -2776,7 +2776,7 @@ public Action task_RatioTarget(Handle timer, any client) {
 	#endif
 	
 	Handle menu = CreateMenu(MenuTribunal_selectplayer);
-	SetMenuTitle(menu, "  Tribunal - Stats joueur \n--------------------");
+	SetMenuTitle(menu, "  Tribunal - Stats joueur\n ");
 	char tmp[255], tmp2[255], szSteam[32];
 	
 	for(int i = 1; i <= MaxClients; i++) {
@@ -2802,7 +2802,7 @@ public Action task_GPS(Handle timer, any client) {
 	PrintToServer("task_GPS");
 	#endif
 	Handle menu = CreateMenu(MenuTribunal_GPS);
-	SetMenuTitle(menu, "  GPS \n--------------------");
+	SetMenuTitle(menu, "  GPS\n ");
 	char tmp[255], tmp2[255];
 	
 	for(int i = 1; i <= MaxClients; i++) {
@@ -3055,7 +3055,7 @@ void Cmd_BuyWeapon(int client, bool free) {
 	}
 	
 	Menu menu = new Menu(Menu_BuyWeapon);
-	menu.SetTitle("Armes trouvées par la police:");
+	menu.SetTitle("Armes trouvées par la police\n ");
 	
 	while( position < max ) {
 		

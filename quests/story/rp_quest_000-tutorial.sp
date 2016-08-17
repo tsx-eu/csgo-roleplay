@@ -498,7 +498,6 @@ public void Q92_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, " De temps à autres, ceux-ci se mettent");
 		DrawPanelText(panel, "à sonner. Si vous décrochez, un colis");
 		DrawPanelText(panel, "vous est envoyé par hélicoptère.");
-		DrawPanelText(panel, "diverses commandes (comme le /item qu'on vient de voir).");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " De plus, de nombreuses quêtes sont disponibles");
 		DrawPanelText(panel, "selon votre job. Il suffit de se rendre");
@@ -562,13 +561,13 @@ public void Q11_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "chances de trouver un emploi intéressant.");
 		DrawPanelText(panel, "Besoin d'aide? Consultez notre FAQ");
 		DrawPanelText(panel, " ");
-		DrawPanelText(panel, " Site: http://www.ts-x.eu");
-		DrawPanelText(panel, " WiKi: http://www.ts-x.eu/wiki/");
-		DrawPanelText(panel, " TeamSpeak: ts.ts-x.eu");
-		DrawPanelText(panel, " ");
 		DrawPanelText(panel, "→ Allez faire un tour sur notre FAQ ( dites /aide ) ");
 		DrawPanelText(panel, " afin d'obtenir davantage d'aide et de");
 		DrawPanelText(panel, "continuer votre apprentissage.");
+		DrawPanelText(panel, " ");
+		DrawPanelText(panel, " Site: https://www.ts-x.eu");
+		DrawPanelText(panel, " WiKi: https://www.ts-x.eu/wiki/");
+		DrawPanelText(panel, " TeamSpeak: ts.ts-x.eu");
 		
 		rp_SendPanelToClient(panel, client, 1.1);
 		CreateTimer(1.1, PostKillHandle, panel);
@@ -782,7 +781,7 @@ public void SQL_OpenHelpMenu(Handle owner, Handle hQuery, const char[] error, an
 	parent = ReadPackCell(pack);
 	
 	Menu menu = CreateMenu(helpMenu);
-	menu.SetTitle("Besoin d'aide?\n--------------------");
+	menu.SetTitle("Besoin d'aide?\n--------------------\n ");
 	
 	while( SQL_FetchRow(hQuery) ) {
 		id = SQL_FetchInt(hQuery, 0);
@@ -791,7 +790,7 @@ public void SQL_OpenHelpMenu(Handle owner, Handle hQuery, const char[] error, an
 		
 		
 		if( id == parent )
-			menu.SetTitle("%s\n--------------------", txt);
+			menu.SetTitle("%s\n--------------------\n <", txt);
 		else {
 			Format(tmp, sizeof(tmp), "%d %d", id, go);
 			
@@ -799,8 +798,11 @@ public void SQL_OpenHelpMenu(Handle owner, Handle hQuery, const char[] error, an
 		}
 	}
 	
-	if( parent != 0 )
+	if( parent != 0 ) {
 		menu.ExitBackButton = true;
+		menu.Pagination = 8;
+	}
+	
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 

@@ -233,7 +233,7 @@ void displayArtisanMenu(int client) {
 	#endif
 	
 	Handle menu = CreateMenu(eventArtisanMenu);
-	SetMenuTitle(menu, "== Artisanat ==");
+	SetMenuTitle(menu, "== Artisanat ==\n ");
 	
 	AddMenuItem(menu, "build", 	"Construire");
 	AddMenuItem(menu, "recycl", "Recycler");
@@ -255,7 +255,7 @@ void displayBuildMenu(int client, int jobID, int itemID) {
 	
 	Handle menu = CreateMenu(eventArtisanMenu);
 	if( jobID == 0 ) {
-		SetMenuTitle(menu, "== Artisanat: Construire");
+		SetMenuTitle(menu, "== Artisanat: Construire\n ");
 		AddMenuItem(menu, "build -1", "Tous les jobs");
 		
 		for (int i = 0; i < sizeof(lstJOB); i++) {
@@ -267,7 +267,7 @@ void displayBuildMenu(int client, int jobID, int itemID) {
 		}
 	}
 	else if( itemID == 0 ) {
-		SetMenuTitle(menu, "== Artisanat: Construire");
+		SetMenuTitle(menu, "== Artisanat: Construire\n ");
 		
 		for(int i = 0; i < MAX_ITEMS; i++) {
 			if( !g_bCanCraft[client][i] && !doRP_CanClientCraftForFree(client, i) )
@@ -305,7 +305,7 @@ void displayBuildMenu(int client, int jobID, int itemID) {
 	else {
 		
 		rp_GetItemData(itemID, item_type_name, tmp2, sizeof(tmp2));
-		Format(tmp2, sizeof(tmp2), "== Artisanat: Construire: %s", tmp2);
+		Format(tmp2, sizeof(tmp2), "== Artisanat: Construire: %s\n ", tmp2);
 		SetMenuTitle(menu, tmp2);
 		
 		Format(tmp, sizeof(tmp), "%d", itemID);
@@ -349,7 +349,7 @@ void displayRecyclingMenu(int client, int itemID) {
 	char tmp[64], tmp2[64];
 	
 	if( itemID == 0 ) {
-		SetMenuTitle(menu, "== Artisanat: Recycler");
+		SetMenuTitle(menu, "== Artisanat: Recycler\n ");
 		
 		for(int i = 0; i < MAX_ITEMS; i++) {
 			if( rp_GetClientItem(client, i) <= 0 )
@@ -365,7 +365,7 @@ void displayRecyclingMenu(int client, int itemID) {
 	}
 	else {
 		rp_GetItemData(itemID, item_type_name, tmp2, sizeof(tmp2));
-		Format(tmp2, sizeof(tmp2), "== Artisanat: Recycler: %s", tmp2);
+		Format(tmp2, sizeof(tmp2), "== Artisanat: Recycler: %s\n ", tmp2);
 		SetMenuTitle(menu, tmp2);
 		
 		float duration = getDuration(client, itemID);
@@ -399,9 +399,9 @@ void displayLearngMenu(char[] type, int client, int jobID, int itemID) {
 	}
 	
 	if( !skip )
-		SetMenuTitle(menu, "== Artisanat: Apprendre (%d)", count);
+		SetMenuTitle(menu, "== Artisanat: Apprendre (%d)\n ", count);
 	else
-		SetMenuTitle(menu, "== Artisanat: Livre des recettes", count);
+		SetMenuTitle(menu, "== Artisanat: Livre des recettes\n ");
 	
 	if( jobID == 0 ) {
 		for (int i = 0; i < sizeof(lstJOB); i++) {
@@ -438,7 +438,7 @@ void displayLearngMenu(char[] type, int client, int jobID, int itemID) {
 	}
 	else {
 		rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
-		SetMenuTitle(menu, "== Artisanat: Livre: %s", tmp);
+		SetMenuTitle(menu, "== Artisanat: Livre: %s\n ", tmp);
 		
 		Format(tmp, sizeof(tmp), "%d", itemID);
 		g_hReceipe.GetValue(tmp, magic);
@@ -460,7 +460,7 @@ void displayLearngMenu(char[] type, int client, int jobID, int itemID) {
 }
 void displayStatsMenu(int client) {
 	Handle menu = CreateMenu(eventArtisanMenu);
-	SetMenuTitle(menu, "== Artisanat: Votre profil");
+	SetMenuTitle(menu, "== Artisanat: Votre profil\n ");
 	
 	addStatsToMenu(client, menu);
 	
@@ -705,9 +705,9 @@ void MENU_ShowCraftin(int client, int total, int amount, int positive, int fatig
 	char tmp[64];
 	Handle menu = CreateMenu(eventArtisanMenu);
 	if( positive > 0 )
-		SetMenuTitle(menu, "== Artisanat: Construction");
+		SetMenuTitle(menu, "== Artisanat: Construction\n ");
 	else
-		SetMenuTitle(menu, "== Artisanat: Recyclage");
+		SetMenuTitle(menu, "== Artisanat: Recyclage\n ");
 	
 	float percent = (float(total) - float(amount)) / float(total);
 	
