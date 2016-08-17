@@ -25,8 +25,8 @@
 #define	MAX_ENTITIES	2048
 
 public Plugin myinfo = {
-	name = "Utils: Menu", author = "KoSSoLaX",
-	description = "RolePlay - Utils: Menu",
+	name = "Utils: HDV", author = "KoSSoLaX",
+	description = "RolePlay - Utils: HDV",
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 public void OnPluginStart() {	
@@ -78,7 +78,6 @@ void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) 
 		
 		quantity = rp_GetClientItem(client, itemID);
 		rp_GetItemData(itemID, item_type_name, tmp3, sizeof(tmp3));
-		float price = rp_GetItemFloat(itemID, item_type_prix) * 0.05;
 		menu.SetTitle("Hotel des ventes: Vendre\nCombien voulez-vous vendre de\n%s?\n ", tmp3);
 		
 		
@@ -88,36 +87,32 @@ void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) 
 				continue;
 			
 			Format(tmp, sizeof(tmp), "sell %d %d", itemID, i);
-			Format(tmp2, sizeof(tmp2), "%s - taxe: %d$", tmp3, RoundToFloor(price * i));
+			Format(tmp2, sizeof(tmp2), "%s", tmp3);
 			menu.AddItem(tmp, tmp2);
 		}
 	}
 	else if( sellPrice == 0 ) {
 		rp_GetItemData(itemID, item_type_name, tmp3, sizeof(tmp3));
-		
-		// TODO: Taxe supplémentaire si l'item coute moins cher (10% moins cher, 1% de taxe en plus. 10% plus cher, 1% de taxe en moins.
-		// + L'afficher
-		
-		int price = RoundToFloor(rp_GetItemFloat(itemID, item_type_prix) * 0.05 * quantity);
+	
 		int minPrice = RoundToFloor(rp_GetItemFloat(itemID, item_type_prix) * 0.75 * quantity);
 		int maxPrice = RoundToFloor(rp_GetItemFloat(itemID, item_type_prix) * 1.25 * quantity);
 		int step = RoundToFloor(rp_GetItemFloat(itemID, item_type_prix) * 0.01 * quantity);
 		
 		menu.SetTitle("Hotel des ventes: Vendre\nA quel prix voulez-vous vendre\n%d %s?\n ", quantity, tmp3);
-		
 		for (int p = maxPrice; p >= minPrice; p -= step) {
+			float taxfact = (1 - float(p) / (rp_GetItemFloat(itemID, item_type_prix) * quantity)) / 10;
+			int tax = RoundToFloor(rp_GetItemFloat(itemID, item_type_prix) * (0.05 + taxfact) * quantity);
 			Format(tmp, sizeof(tmp), "sell %d %d %d", itemID, quantity, p);
-			Format(tmp2, sizeof(tmp2), "%d$", p);
+			Format(tmp2, sizeof(tmp2), "%d$ (Coût du dépot: %d$)", p, tax);
 			menu.AddItem(tmp, tmp2);
 		}
 	}
 	else if( confirm == 0 ) {
 		
-		// TODO: Taxe supplémentaire si l'item coute moins cher (10% moins cher, 1% de taxe en plus. 10% plus cher, 1% de taxe en moins.
-		
-		int price = RoundToFloor( rp_GetItemFloat(itemID, item_type_prix) * 0.05 * quantity );
+		float taxfact = (1 - float(sellPrice) / (rp_GetItemFloat(itemID, item_type_prix) * quantity)) / 10;
+		int tax = RoundToFloor(rp_GetItemFloat(itemID, item_type_prix) * (0.05 + taxfact) * quantity);
 		rp_GetItemData(itemID, item_type_name, tmp3, sizeof(tmp3));
-		menu.SetTitle("Hotel des ventes: Vendre\nVoulez-vous déposer une offre pour\n%d %s pour %d$?\nCoût du dépot: %d$\n \nConfirmez-vous ?\n ", quantity, tmp3, sellPrice, price);
+		menu.SetTitle("Hotel des ventes: Vendre\nVoulez-vous déposer une offre pour\n%d %s pour %d$?\nCoût du dépot: %d$\n \nConfirmez-vous ?\n ", quantity, tmp3, sellPrice, tax);
 		
 		Format(tmp, sizeof(tmp), "sell %d %d %d 1", itemID, quantity, sellPrice);
 		
@@ -126,15 +121,16 @@ void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) 
 		
 	}
 	else {
-		int price = RoundToFloor( rp_GetItemFloat(itemID, item_type_prix) * 0.05 * quantity );
+		float taxfact = (1 - float(sellPrice) / (rp_GetItemFloat(itemID, item_type_prix) * quantity)) / 10;
+		int tax = RoundToFloor(rp_GetItemFloat(itemID, item_type_prix) * (0.05 + taxfact) * quantity);
 		
 		if( rp_GetClientItem(client, itemID) < quantity ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas la quantité que vous avez spécifié.");
 			return;
 		}
 		
-		if( rp_GetClientInt(client, i_Money)+rp_GetClientInt(client, i_Bank) < price ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas la quantité que vous avez spécifié.");
+		if( rp_GetClientInt(client, i_Money)+rp_GetClientInt(client, i_Bank) < tax ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas payer la taxe de mise en vente.");
 			return;
 		}
 		
