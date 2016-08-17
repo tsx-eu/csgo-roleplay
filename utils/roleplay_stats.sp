@@ -90,7 +90,7 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	#endif
 	if( StrEqual(command, "compteur") || StrEqual(command, "count") || StrEqual(command, "stats") || StrEqual(command, "stat") || StrEqual(command, "statistics") ) {
 		Handle menu = CreateMenu(MenuViewStats);
-		SetMenuTitle(menu, "Quelles stats afficher ?");
+		SetMenuTitle(menu, "Quelles stats afficher ?\n ");
 		AddMenuItem(menu, "sess", "Sur la connexion");
 		//AddMenuItem(menu, "full", "Le total");
 		AddMenuItem(menu, "real", "En temps réel");
@@ -152,7 +152,7 @@ public void DisplayStats(int client, bool full){
 	char tmp[128];
 	Handle menu = CreateMenu(MenuNothing);
 	if(full){
-		SetMenuTitle(menu, "Vos stats totales:");
+		SetMenuTitle(menu, "Vos stats totales\n ");
 		Format(tmp, sizeof(tmp), "Argent gagné par la paye: %d", rp_GetClientStat(client, i_S_MoneyEarned_Pay));
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
 		Format(tmp, sizeof(tmp), "Argent gagné par les missions téléphones: %d", rp_GetClientStat(client, i_S_MoneyEarned_Phone));
@@ -197,7 +197,7 @@ public void DisplayStats(int client, bool full){
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
 	}
 	else{
-		SetMenuTitle(menu, "Vos stats sur la connection:");
+		SetMenuTitle(menu, "Vos stats sur la connection\n ");
 		if(( rp_GetClientInt(client, i_Money) + rp_GetClientInt(client, i_Bank) )-rp_GetClientStat(client, i_Money_OnConnection) > 0)
 			Format(tmp, sizeof(tmp), "Evolution de l'argent: +%d", ( rp_GetClientInt(client, i_Money) + rp_GetClientInt(client, i_Bank) )-rp_GetClientStat(client, i_Money_OnConnection));
 		else
@@ -265,7 +265,7 @@ public void DisplayRTStats(int client){
 	char tmp[128];
 	Handle menu = CreateMenu(MenuNothing);
 	int wep_id = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-	SetMenuTitle(menu, "Vos stats en temps réel:");
+	SetMenuTitle(menu, "Vos stats en temps réel\n ");
 	Format(tmp, sizeof(tmp), "Nombre de machines: %d", CountMachine(client, false));
 	AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
 	Format(tmp, sizeof(tmp), "Nombre de photocopieuses: %d", CountMachine(client, true));

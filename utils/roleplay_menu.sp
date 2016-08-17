@@ -85,12 +85,12 @@ void openMenuInteractif(int client) {
 	int optionCount = 0;
 	
 	Menu menu = CreateMenu(menuOpenMenu);
-	menu.SetTitle("RolePlay");
+	menu.SetTitle("RolePlay\n ");
 	
 	if( IsValidClient(target) ) {
 		bool hear = rp_IsTargetHear(client, target);
 		
-		menu.SetTitle("RolePlay: %N", target);
+		menu.SetTitle("RolePlay: %N\n ", target);
 		
 		if( near && ((jobID >= 11 && jobID <= 81) || jobID >= 111) ) {
 			menu.AddItem("vendre", "Vendre");
@@ -128,7 +128,7 @@ void openMenuInteractif(int client) {
 		}
 	}
 	else if( rp_IsValidDoor(target) ) {
-		menu.SetTitle("RolePlay: Une porte");
+		menu.SetTitle("RolePlay: Une porte\n ");
 		
 		int doorID = rp_GetDoorID(target);
 		if( doorID > 0 && rp_GetClientKeyDoor(client, doorID) ) {
@@ -156,7 +156,7 @@ void openMenuGeneral(int client) {
 	int jobID = rp_GetClientJobID(client);
 	
 	Menu menu = CreateMenu(menuOpenMenu);
-	menu.SetTitle("RolePlay");
+	menu.SetTitle("RolePlay\n ");
 	
 	menu.AddItem("item", "Ouvrir l'inventaire");
 	
@@ -187,7 +187,7 @@ public int menuOpenMenu(Handle hItem, MenuAction oAction, int client, int param)
 					return;
 				
 				Menu menu = CreateMenu(menuOpenMenu);
-				menu.SetTitle("RolePlay: Donner de l'argent");
+				menu.SetTitle("RolePlay: Donner de l'argent\n ");
 				if( rp_GetClientInt(client, i_Money) >= 1 ) menu.AddItem("give 1", "1$");
 				if( rp_GetClientInt(client, i_Money) >= 10 ) menu.AddItem("give 10", "10$");
 				if( rp_GetClientInt(client, i_Money) >= 100 ) menu.AddItem("give 100", "100$");

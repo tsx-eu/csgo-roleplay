@@ -236,7 +236,7 @@ public Action AllowTalking(Handle timer, any client) {
 
 void Cmd_job(int client) {
 	Handle jobmenu = CreateMenu(MenuJobs);
-	SetMenuTitle(jobmenu, "Liste des jobs disponibles:");
+	SetMenuTitle(jobmenu, "Liste des jobs disponibles\n ");
 	AddMenuItem(jobmenu, "-1", "Tout afficher");
 	AddMenuItem(jobmenu, "-2", "Avocats");
 	char tmp[12], tmp2[64];
@@ -284,7 +284,7 @@ public int MenuJobs(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_
 		char szMenuItem[8];
 		if (GetMenuItem(p_hItemMenu, p_iParam2, szMenuItem, sizeof(szMenuItem))){
 			Handle menu = CreateMenu(MenuJobs2);
-			SetMenuTitle(menu, "Liste des employés connectés:");
+			SetMenuTitle(menu, "Liste des employés connectés\n ");
 			int jobid = StringToInt(szMenuItem);
 			int amount = 0;
 			char tmp[128], tmp2[128];
@@ -340,7 +340,7 @@ public int MenuJobs2(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 		char szMenuItem[8];
 		if (GetMenuItem(p_hItemMenu, p_iParam2, szMenuItem, sizeof(szMenuItem))){
 			Handle menu = CreateMenu(MenuJobs3);
-			SetMenuTitle(menu, "Que voulez vous lui demander ?");
+			SetMenuTitle(menu, "Que voulez vous lui demander ?\n ");
 			int target = StringToInt(szMenuItem);
 			int jobid = rp_GetClientJobID(target);
 			int amount = 0;
