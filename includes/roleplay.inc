@@ -706,6 +706,7 @@ enum int_user_data {
 
 	i_LastAgression,
 	i_LastShot,
+	i_LastDangerousShot,
 	i_LastAmende,
 	i_LastAmendeBy,
 

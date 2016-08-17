@@ -1920,17 +1920,17 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				return;
 			}
 		}
-		if( StrEqual(g_szJailRaison[type][jail_raison],"Tir dans la rue") 
+		if( StrEqual(g_szJailRaison[type][jail_raison], "Tir dans la rue") 
 			&& !(rp_GetClientInt(client, i_Job) >= 101 || rp_GetClientInt(client, i_Job) >= 106) ) { // Tir dans la rue
-			if(rp_GetClientInt(target, i_LastShot)+30 < GetTime()){
+			if(rp_GetClientInt(target, i_LastDangerousShot)+30 < GetTime()){
 				rp_SetClientInt(target, i_JailTime, 0);
 				rp_SetClientInt(target, i_jailTime_Last, 0);
 				rp_SetClientInt(target, i_JailledBy, 0);
 				
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N{default} a été libéré car il n'a pas effectué de tir.", target);
-				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été libéré car vous n'avez pas effectué de tir.", client);
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N{default} a été libéré car il n'a pas effectué de tir dangereux.", target);
+				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été libéré car vous n'avez pas effectué de tir dangereux.", client);
 				
-				LogToGame("[TSX-RP] [JAIL] %L a été libéré car il n'avait pas effectué de tir", target);
+				LogToGame("[TSX-RP] [JAIL] %L a été libéré car il n'avait pas effectué de tir dangereux", target);
 				
 				rp_ClientResetSkin(target);
 				rp_ClientSendToSpawn(target, true);
