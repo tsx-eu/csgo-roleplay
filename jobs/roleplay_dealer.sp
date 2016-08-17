@@ -1568,6 +1568,8 @@ int findPlayerWeapon(int client, int target) {
 			continue;
 		if( g_iWeaponStolen[wepid]+120 > GetTime() )
 			continue;
+		if( rp_GetWeaponBallType(wepid) == ball_type_braquage )
+			continue;
 		
 		return wepid;
 	}
