@@ -66,6 +66,13 @@ void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) 
 			quantity = rp_GetClientItem(client, itemID);
 			if( quantity <= 0 )
 				continue;
+			rp_GetItemData(itemID, item_type_prix, tmp3, sizeof(tmp3));
+			if( StringToInt(tmp3) == 0 )
+				continue;
+			rp_GetItemData(itemID, item_type_auto, tmp3, sizeof(tmp3));
+			if( StringToInt(tmp3) == 1 )
+				continue;
+
 			
 			Format(tmp, sizeof(tmp), "sell %d", itemID);
 			rp_GetItemData(itemID, item_type_name, tmp2, sizeof(tmp2));
