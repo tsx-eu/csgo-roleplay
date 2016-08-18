@@ -202,8 +202,9 @@ public Action Cmd_ItemCutThrow(int args) {
 	PrintToServer("Cmd_ItemCutThrow");
 	#endif
 	
+	
 	int client = GetCmdArgInt(1);
-	rp_SetClientInt(client, i_LastShot, GetTime());
+	rp_SetClientInt(client, i_LastDangerousShot, GetTime());
 	g_iKnifeThrowID = GetCmdArgInt(args);
 	
 	rp_SetClientInt(client, i_LastAgression, GetTime());
