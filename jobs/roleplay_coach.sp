@@ -193,8 +193,8 @@ public Action Cmd_ItemCutRemove(int args) {
 	#endif
 
 	int client = GetCmdArgInt(1);
-	rp_SetClientInt(client, i_KnifeTrain, 0);
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre entraînement est maintenant à 0.");
+	rp_SetClientInt(client, i_KnifeTrain, 5);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre entraînement est maintenant à 5.");
 }
 
 public Action Cmd_ItemCutThrow(int args) {	
