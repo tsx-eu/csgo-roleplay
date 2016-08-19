@@ -25,7 +25,7 @@
 #define	MAX_ENTITIES	2048
 
 public Plugin myinfo = {
-	name = "Utils: HDV", author = "KoSSoLaX",
+	name = "Utils: HDV", author = "KoSSoLaX, Leethium",
 	description = "RolePlay - Utils: HDV",
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
@@ -151,7 +151,7 @@ void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) 
 		WritePackCell(pack, quantity);
 		WritePackCell(pack, tax);
 		GetClientAuthId(client, AuthId_Engine, steamid, sizeof(steamid));
-		Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_trade`(`steamid`, `itemID`, `amount`, `price`, `time`) VALUES ('%s', '%d', '%d', '%d', '%d')", steamid, itemID, quantity, sellPrice, GetTime());
+		Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_trade`(`steamid`, `itemID`, `amount`, `price`, `time`) VALUES ('%s', '%d', '%d', '%d', '%d')", steamid, itemID, quantity, sellPrice/quantity, GetTime());
 		SQL_TQuery(rp_GetDatabase(), SQL_DepositCB, szQuery, pack);
 		delete menu;
 		return;
@@ -222,13 +222,38 @@ void HDV_Buy(int client, int jobID, int itemID, int transactID, int confirm, int
 		WritePackCell(pack, dataQte);
 		WritePackCell(pack, dataPrix);
 		GetClientAuthId(client, AuthId_Engine, steamid, sizeof(steamid));
-		Format(szQuery, sizeof(szQuery), "UPDATE `rp_trade` SET `done`=1, `boughtBy`='%s' WHERE `id`=%d AND `done`=0", steamid, transactID);
+		Format(szQuery, sizeof(szQuery), "UPDATE `rp_trade` SET `time`=UNIX_TIMESTAMP(), `done`=1, `boughtBy`='%s' WHERE `id`=%d AND `done`=0", steamid, transactID);
 		SQL_TQuery(rp_GetDatabase(), SQL_AchatCB, szQuery, pack);
 		delete menu;
 		return;
 		
 	}
 	menu.Display(client, 30);
+}
+
+void HDV_History(int client, int action, int cancelID) {
+	char tmp[32];
+	if(action == 0){
+		Menu menu = CreateMenu(Handler_MainHDV);
+		menu.SetTitle("Hotel des ventes: Historique\n ");
+		menu.AddItem("history 1", "Ventes en cours");
+		menu.AddItem("history 2", "Historique des achats");
+		menu.AddItem("history 3", "Historique des ventes");
+		menu.Display(client, 30);
+	}
+	else if(cancelID == 0){
+		char szQuery[256];
+		GetClientAuthId(client, AuthId_Engine, tmp, sizeof(tmp));
+		if(action == 1)
+			Format(szQuery, sizeof(szQuery), "SELECT `id`, `itemID`, `amount`, `price` FROM `rp_trade` WHERE `done`=0 AND `steamid`='%s' ORDER BY `time`", tmp);
+		else if(action == 2)
+			Format(szQuery, sizeof(szQuery), "SELECT `id`, `itemID`, `amount`, `price` FROM `rp_trade` WHERE `done`=1 AND `boughtBy`='%s' ORDER BY `time` DESC LIMIT 50", tmp);
+		else
+			Format(szQuery, sizeof(szQuery), "SELECT `id`, `itemID`, `amount`, `price` FROM `rp_trade` WHERE `done`=1 AND `steamid`='%s' ORDER BY `time` DESC LIMIT 50", tmp);
+			
+		int data = client + action*1000;
+		SQL_TQuery(rp_GetDatabase(), SQL_HistoryCB, szQuery, data);
+	}
 }
 public int Handler_MainHDV(Handle hItem, MenuAction oAction, int client, int param) {
 	#if defined DEBUG
@@ -318,8 +343,8 @@ public void SQL_ListItemsCB(Handle owner, Handle row, const char[] error, any cl
 			itemID = SQL_FetchInt(row, 1);
 			amount = SQL_FetchInt(row, 2);
 			price = SQL_FetchInt(row, 3);
-			Format(tmp, sizeof(tmp), "buy -1 %d %d 0 %d %d", itemID, transactID, amount, price);
-			Format(tmp2, sizeof(tmp2), "%d unités pour %d$ (%d$/unité)", amount, price, price/amount);
+			Format(tmp, sizeof(tmp), "buy -1 %d %d 0 %d %d", itemID, transactID, amount, price*amount);
+			Format(tmp2, sizeof(tmp2), "%d unités pour %d$ (%d$/unité)", amount, price*amount, price);
 			menu.AddItem(tmp, tmp2);
 		}
 		rp_GetItemData(itemID, item_type_name, tmp2, sizeof(tmp2));
