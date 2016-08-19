@@ -633,6 +633,7 @@ enum bool_user_data {
 	ch_Heal,
 	ch_Kevlar,
 	ch_Yeux,
+	b_WeaponIsKnife,
 	b_udata_max
 };
 enum int_user_data {
