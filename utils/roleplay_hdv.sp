@@ -50,7 +50,7 @@ void HDV_Main(int client) {
 	
 	menu.AddItem("sell", "Vendre", rp_GetClientInt(client, i_ItemCount) > 0 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem("buy", "Acheter");
-	menu.AddItem("history", "Votre historique", ITEMDRAW_DISABLED);
+	menu.AddItem("history", "Votre historique");
 	
 	menu.Display(client, 30);
 }
@@ -166,14 +166,14 @@ void HDV_Buy(int client, int jobID, int itemID, int transactID, int confirm, int
 
 	if( jobID == 0 ) {
 		menu.SetTitle("Hotel des ventes: Acheter\n ");
-		
+		char tmp3[2][32];
 		for (jobID = 11; jobID <= MAX_JOBS; jobID+=10) {
-			
 			Format(tmp, sizeof(tmp), "buy %d", jobID);
 			rp_GetJobData(jobID, job_type_name, tmp2, sizeof(tmp2));
 			if(strlen(tmp2) < 2)
 				continue;
-			menu.AddItem(tmp, tmp2);
+			ExplodeString(tmp2, " ", tmp3, sizeof(tmp3), sizeof(tmp3[]));
+			menu.AddItem(tmp, tmp3[1]);
 			
 		}
 	}
@@ -270,7 +270,10 @@ public int Handler_MainHDV(Handle hItem, MenuAction oAction, int client, int par
 		}
 		else if( StrContains(options, "buy") == 0 ) {
 			HDV_Buy(client, StringToInt(exploded[1]), StringToInt(exploded[2]), StringToInt(exploded[3]), StringToInt(exploded[4]), StringToInt(exploded[5]), StringToInt(exploded[6]));
-		}			
+		}
+		else if( StrContains(options, "history") == 0 ) {
+			HDV_History(client, StringToInt(exploded[1]), StringToInt(exploded[2]));
+		}
 	}
 	else if (oAction == MenuAction_End ) {
 		CloseHandle(hItem);
@@ -384,4 +387,45 @@ public void SQL_AchatCB(Handle owner, Handle handle, const char[] error, any dat
 	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
 	rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez acheté %d %s à %d$.", dataQte, tmp, dataPrix);
+}
+
+public void SQL_HistoryCB(Handle owner, Handle row, const char[] error, any data) {
+	#if defined DEBUG
+	PrintToServer("CallBackHDVHistory");
+	#endif
+	int client = data%1000;
+	data = (data-client)/1000;
+	if( strlen(error) >= 1  ) {
+		LogError("[SQL] [ERROR] %s", error);
+		return;
+	}
+	char tmp[64],tmp2[64];
+	int transactID, itemID, amount, price;
+	if(row != INVALID_HANDLE){
+		Menu menu = CreateMenu(Handler_MainHDV);
+		while( SQL_FetchRow(row) ) {
+			transactID = SQL_FetchInt(row, 0);
+			itemID = SQL_FetchInt(row, 1);
+			rp_GetItemData(itemID, item_type_name, tmp2, sizeof(tmp2));
+			amount = SQL_FetchInt(row, 2);
+			price = SQL_FetchInt(row, 3);
+			Format(tmp2, sizeof(tmp2), "%d %s pour %d$ (%d$/unité)", amount, tmp2, price*amount, price);
+			Format(tmp, sizeof(tmp), "history 1 %d", transactID);
+			if(data == 1)
+				menu.AddItem(tmp, tmp2);
+			else
+				menu.AddItem(tmp, tmp2, ITEMDRAW_DISABLED);
+		}
+		if(data == 1)
+			menu.SetTitle("Hotel des ventes: Ventes en cours\n ");
+		else if(data == 2)
+			menu.SetTitle("Hotel des ventes: Historique des achats\n ");
+		else
+			menu.SetTitle("Hotel des ventes: Historique des ventes\n ");
+		menu.Display(client, 120);
+	}
+	else{
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Pas de transactions récentes.");
+		return;
+	}
 }
