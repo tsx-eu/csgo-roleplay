@@ -49,10 +49,10 @@ public void OnClientPostAdminCheck(int client) {
 public Action fwdCommand(int client, char[] command, char[] arg) {
 	if( StrEqual(command, "menu") ) {
 		
-		if( g_bClosed[client] == true ) {
-			openMenuGeneral(client);
+		openMenuGeneral(client);
+		
+		if( g_bClosed[client] == true )	
 			g_bClosed[client] = false;
-		}
 		
 		openMenuInteractif(client);
 		return Plugin_Handled;
@@ -181,13 +181,11 @@ void openMenuGeneral(int client) {
 		menu.AddItem("shownote", "Information sur mon job");
 	}
 	menu.AddItem("job", "Appeler un joueur");
-	menu.AddItem("stats", "Statistiques");
-	menu.AddItem("report", "Signaler un mauvais comportement");
 	menu.AddItem("gps", "Trouver un lieu sur la carte");
 	menu.AddItem("aide", "Besoin d'aide");
+	menu.AddItem("stats", "Statistiques");
+	menu.AddItem("report", "Signaler un mauvais comportement");
 	
-	menu.Pagination = 9;
-	menu.ExitButton = false;
 	menu.Display(client, 30);
 	
 	g_bInsideMenu[client] = true;
@@ -217,7 +215,7 @@ public int menuOpenMenu(Handle hItem, MenuAction oAction, int client, int param)
 			}
 			if( StrEqual(options, "exit") ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez réouvrir ce menu avec /menu.");
-				g_bClosed[client] = false;
+				g_bClosed[client] = true;
 				return;
 			}
 			FakeClientCommand(client, "say /%s", options);
