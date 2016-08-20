@@ -113,6 +113,8 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 				CPrintToChatEx(j, client, "{lightblue}%N{default} ({purple}COLOC{default}): %s", client, arg);
 			}
 		}
+		
+		LogToGame("[TSX-RP] [CHAT-COLLOC] %L: %s", client, arg);
 		return Plugin_Handled;
 	}
 	else if( StrEqual(command, "t") || StrEqual(command, "team") ) {
@@ -142,7 +144,8 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 				CPrintToChatEx(i, client, "{lightblue}%N{default} ({orange}TEAM{default}): %s", client, arg);
 			}
 		}
-
+		
+		LogToGame("[TSX-RP] [CHAT-TEAM] %L: %s", client, arg);
 		return Plugin_Handled;
 	}
 	else if( StrEqual(command, "m") || StrEqual(command, "marie") ) {
@@ -155,7 +158,7 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 		CPrintToChatEx(mari, client, "{lightblue}%N{default} ({red}MARIÉ{default}): %s", client, arg);
 		CPrintToChatEx(client, client, "{lightblue}%N{default} ({red}MARIÉ{default}): %s", client, arg);
 		
-
+		LogToGame("[TSX-RP] [CHAT-MARIE] %L: %s", client, arg);
 		return Plugin_Handled;
 	}
 	else if( StrEqual(command, "g") || StrEqual(command, "group") ) {
@@ -171,7 +174,8 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 				CPrintToChatEx(i, client, "{lightblue}%N{default} ({red}GROUP{default}): %s", client, arg);
 			}
 		}
-
+		
+		LogToGame("[TSX-RP] [CHAT-GROUP] %L: %s", client, arg);
 		return Plugin_Handled;
 	}
 	else if( StrEqual(command, "stopsound") ) {
