@@ -127,6 +127,12 @@ void openMenuInteractif(int client) {
 		}
 		
 		
+		
+		if( hear && jobID > 0 && rp_GetPlayerZone(target) == rp_GetPlayerZone(client) && rp_GetZoneInt(client, zone_type_type) == jobID ) {
+			menu.AddItem("out", "Sortir le joueur");
+		}
+		
+		
 		if( near && rp_GetClientInt(client, i_Money) > 0 && !rp_IsClientNew(client) ) {
 			menu.AddItem("give", "Donner de l'argent");
 			optionCount++;
