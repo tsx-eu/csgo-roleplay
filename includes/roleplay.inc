@@ -698,6 +698,7 @@ enum int_user_data {
 	i_TimeAFK,
 	i_TimeAFK_today,
 	i_TimeAFK_total,
+	i_TimePlays,
 	i_MarriedTo,
 
 	i_ItemCount,
