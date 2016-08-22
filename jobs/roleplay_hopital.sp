@@ -710,8 +710,7 @@ public Action Frame_HealBox(Handle timer, any ent) {
 	
 	SetEntProp(ent, Prop_Data, "m_iHealth", boxHeal);
 	
-	TE_SetupBeamRingPoint(vecOrigin, 1.0, maxDist*2.0, g_cBeam, g_cBeam, 1, 20, 1.0, 20.0, 0.0, {0, 255, 0, 128}, 10, 0);
-	TE_SendToAll();
+	rp_Effect_Particle(ent, "beamring_heal", 0.5);
 	
 	CreateTimer(1.0, Frame_HealBox, EntIndexToEntRef(ent));
 	return Plugin_Handled;
