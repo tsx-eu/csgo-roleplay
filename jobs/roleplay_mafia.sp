@@ -79,7 +79,6 @@ public void OnPluginStart() {
 	// Epicier
 	RegServerCmd("rp_item_doorDefine",	Cmd_ItemDoorDefine,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_doorprotect", Cmd_ItemDoorProtect,	"RP-ITEM",	FCVAR_UNREGISTERED);
-	
 	RegServerCmd("rp_GetStoreItem",	Cmd_GetStoreItem,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	
 	g_hBuyMenu = new DataPack();
@@ -312,7 +311,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		
 		rp_ClientFloodIncrement(client, target, fd_vol, cooldown);
 		
-		ServerCommand("sm_effect_particles %d Aura2 2", client);
+		CashFlow(client, amount);
 		
 		int cpt = rp_GetRandomCapital(91);
 		rp_SetJobCapital(91, rp_GetJobCapital(91) + (amount/4));
@@ -325,7 +324,19 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	
 	return Plugin_Stop;
 }
-
+void CashFlow(int client, int amount) {
+	if( amount <= 10 ) {
+		ServerCommand("sm_effect_particles %d trail_money %d knife", client, amount);	
+	}
+	else {
+		for (int i = 0; i <= amount; i+=100) {
+			CreateTimer( i / 100.0, CashFlow_TASK, client);
+		}
+	}
+}
+public Action CashFlow_TASK(Handle timer, any client) {
+	ServerCommand("sm_effect_particles %d trail_money 10 knife", client);
+}
 public Action fwdOnPlayerUse(int client) {
 	#if defined DEBUG
 	PrintToServer("fwdOnPlayerUse");
