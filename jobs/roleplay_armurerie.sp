@@ -399,8 +399,14 @@ public int ModifyWeaponPVP(Handle p_hItemMenu, MenuAction p_oAction, int client,
 
 public Action fwdWeapon(int victim, int attacker, float &damage, int wepID, float pos[3]) {
 	bool changed = true;
+	int wepType = rp_GetWeaponBallType(wepID);
 	
-	switch( rp_GetWeaponBallType(wepID) ) {
+	rp_ClientAggroIncrement(attacker, victim, RoundFloat(damage));
+	
+	if( wepType != ball_type_revitalisante )
+		rp_ClientAggroIncrement(attacker, victim, RoundFloat(damage));
+	
+	switch( wepType ) {
 		case ball_type_fire: {
 			rp_ClientIgnite(victim, 10.0, attacker);
 			changed = false;

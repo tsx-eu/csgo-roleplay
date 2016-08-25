@@ -199,6 +199,8 @@ public Action Cmd_ItemDrugs(int args) {
 		//Envoie de messages d'information
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez drogué %N.", target);
 		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été drogué.");
+		
+		rp_ClientAggroIncrement(client, target, 1000);
 		client = target;
 	}
 	else if( StrEqual(arg0, "crack2") ) {
@@ -786,6 +788,8 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		rp_SetClientBool(client, b_MaySteal, false);
 		rp_SetClientBool(target, b_Stealing, true);
 		SDKHook(target, SDKHook_WeaponDrop, OnWeaponDrop);
+		
+		rp_ClientAggroIncrement(client, target, 1000);
 	}
 	else if( VOL_MAX > 0 && money >= 1 ) {
 		if( amount > money )
@@ -831,6 +835,8 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		int cpt = rp_GetRandomCapital(81);
 		rp_SetJobCapital(81, rp_GetJobCapital(81) + (amount/4));
 		rp_SetJobCapital(cpt, rp_GetJobCapital(cpt) - (amount/4));
+		
+		rp_ClientAggroIncrement(client, target, 1000);
 	}
 	else {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'a pas d'argent sur lui.", target);

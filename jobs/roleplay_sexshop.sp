@@ -198,6 +198,7 @@ public Action Cmd_ItemMenottes(int args){
 		return;
 	}
 	rp_ClientFloodIncrement(client, target, fd_menotte, 5.0);
+	rp_ClientAggroIncrement(client, target, 250);
 					
 	rp_SetClientInt(client, i_LastAgression, GetTime());
 	rp_IncrementSuccess(client, success_list_menotte);
@@ -379,6 +380,7 @@ public Action Cmd_ItemFouet(int args) {
 	rp_SetClientInt(client, i_LastAgression, GetTime());
 	rp_Effect_Tazer(client, target);
 	rp_ClientDamage(target, rp_GetClientInt(client, i_KnifeTrain), client);
+	rp_ClientAggroIncrement(client, target, 100);
 	
 	SlapPlayer(target, 0, true);
 	SlapPlayer(target, 0, true);
@@ -423,6 +425,7 @@ public Action Cmd_ItemAlcool(int args) {
 		TE_SetupBeamRingPoint(vecTarget, 10.0, 500.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, { 255, 0, 191, 200}, 10, 0);
 		rp_SetClientInt(client, i_LastAgression, GetTime());
 		LogToGame("[TSX-RP] [DROGUE] %L a alcoolisé %L.", client, target);
+		rp_ClientAggroIncrement(client, target, 1000);
 	}
 
 	float level = rp_GetClientFloat(target, fl_Alcool) + GetCmdArgFloat(2);

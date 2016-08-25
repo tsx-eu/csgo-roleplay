@@ -269,6 +269,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		GetClientAbsOrigin(client, vecTarget);
 
 		ServerCommand("sm_effect_particles %d Aura2 3", client);
+		rp_ClientAggroIncrement(client, target, 1000);
 		
 		//g_iSuccess_last_pas_vu_pas_pris[target] = GetTime();		
 	}
@@ -316,6 +317,8 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		int cpt = rp_GetRandomCapital(91);
 		rp_SetJobCapital(91, rp_GetJobCapital(91) + (amount/4));
 		rp_SetJobCapital(cpt, rp_GetJobCapital(cpt) - (amount/4));
+		
+		rp_ClientAggroIncrement(client, target, 1000);
 	}
 	else {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'a pas d'argent sur lui.", target);
