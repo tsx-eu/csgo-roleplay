@@ -882,7 +882,7 @@ void drawEchange(int client, int target, int jobID) {
 		if( jobID == 0 ) {
 			menu.AddItem("0 10000 125", "10 000$ - 125 Jetons bleus", bleu >= 125 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 			menu.AddItem("0 100000 1200", "100 000$ - 1 200 Jetons bleus", bleu >= 1200 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
-			menu.AddItem("0 1000000 1200", "1 000 000$ - 1 1000 Jetons bleus", bleu >= 11000 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+			menu.AddItem("0 1000000 11000", "1 000 000$ - 1 1000 Jetons bleus", bleu >= 11000 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 		}
 		else {
 			for(int i = 0; i < MAX_ITEMS; i++) {
