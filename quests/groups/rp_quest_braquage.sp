@@ -825,8 +825,10 @@ public int MenuInviterBraqueur(Handle menu, MenuAction action, int client, int p
 		if( StrEqual(options, "refresh") )
 			return;
 		else if( StrEqual(options, "oui") ) {
-			if( g_stkTeamCount[TEAM_BRAQUEUR] < REQUIRED_T && g_iPlayerTeam[client] == TEAM_INVITATION )
+			if( g_stkTeamCount[TEAM_BRAQUEUR] < REQUIRED_T && g_iPlayerTeam[client] == TEAM_INVITATION ) {
 				addClientToTeam(client, TEAM_BRAQUEUR);
+				LogToGame("[BRAQUAGE] %N a accepté l'invitation", client);
+			}
 			else
 				removeClientTeam(client);
 		}
