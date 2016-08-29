@@ -941,11 +941,31 @@ public Action CmdItemMask(int args) {
 	AcceptEntityInput(ent, "SetParentAttachment");
 	
 	SDKHook(ent, SDKHook_SetTransmit, Hook_SetTransmit);
-	rp_HookEvent(client, RP_OnAssurance, fwdAssuranceMask, 30.0);
+	rp_HookEvent(client, RP_OnAssurance, fwdAssuranceMask);
+	rp_HookEvent(client, RP_OnPlayerKill, fwdKill);
 	rp_SetClientInt(client, i_Mask, ent);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous portez maintenant un masque.");
 	
 	return Plugin_Handled;
+}
+public Action fwdKill(int client, int victim, char weapon[64]) {
+	int maskID = rp_GetClientInt(client, i_Mask);
+	
+	if( client != victim && maskID > 0 ) {
+		if( IsValidEdict(maskID) && IsValidEntity(maskID) && Entity_GetParent(maskID) == client )
+			AcceptEntityInput(maskID, "Kill");
+		
+		rp_SetClientInt(client, i_Mask, 0); 
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez perdu votre masque");
+		
+		rp_ClientResetSkin(client);
+		
+		rp_UnhookEvent(client, RP_OnAssurance, fwdAssuranceMask);
+		rp_UnhookEvent(client, RP_OnPlayerKill, fwdKill);
+		return Plugin_Handled;
+	}
+	
+	return Plugin_Continue;
 }
 public Action fwdAssuranceMask(int client, int& amount) {
 		amount += 500;

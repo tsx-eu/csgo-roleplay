@@ -361,11 +361,6 @@ public Action Cmd_Cop(int client) {
 		ACCESS_DENIED(client);
 	}
 	
-	if(rp_GetClientInt(client, i_KillingSpread)>= 1 && GetClientTeam(client) == CS_TEAM_T) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez attendre, votre dernier meurtre était il y a moins de 6 minutes.");
-		return Plugin_Handled;
-	}
-	
 	float origin[3], vecAngles[3];
 	GetClientAbsOrigin(client, origin);
 	GetClientEyeAngles(client, vecAngles);
@@ -1938,7 +1933,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 		int amende = StringToInt(g_szJailRaison[type][jail_amende]);
 		
 		if( amende == -1 )
-			amende = rp_GetClientInt(target, i_KillingSpread) * 200;
+			amende = rp_GetClientInt(target, i_KillJailDuration) * 50;
 		
 		if( String_StartsWith(g_szJailRaison[type][jail_raison], "Vol") ) {
 			if(rp_GetClientInt(target, i_LastVolVehicleTime)+300 > GetTime()){
@@ -1995,12 +1990,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			
 			time_to_spend = StringToInt(g_szJailRaison[type][jail_temps]);
 			if( time_to_spend == -1 ) {
-				float kill = float(rp_GetClientInt(target, i_KillingSpread));
-				time_to_spend = RoundToCeil(Logarithm(kill + 1.0) * 4.0 * kill + 4.0); // Mais oui, c'est claire !
-				
-				if( kill <= 0.0 )
-					time_to_spend = 2;
-				rp_SetClientInt(target, i_FreekillSick, 0);
+				time_to_spend = rp_GetClientInt(target, i_KillJailDuration);
 				
 				for(int i=1; i<MAXPLAYERS+1; i++){
 					if(!IsValidClient(i))
@@ -2024,12 +2014,8 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 		else {
 			time_to_spend = StringToInt(g_szJailRaison[type][jail_temps_nopay]);
 			if( time_to_spend == -1 ) {
-				float kill = float(rp_GetClientInt(target, i_KillingSpread));
-				time_to_spend = RoundToCeil(Logarithm(kill + 1.0) * 4.0 * kill + 4.0); // Mais oui, c'est claire !
+				time_to_spend = rp_GetClientInt(target, i_KillJailDuration);
 				
-				if( kill <= 0.0 )
-					time_to_spend = 2;
-				rp_SetClientInt(target, i_FreekillSick, 0);	
 				
 				for(int i=1; i<MAXPLAYERS+1; i++){
 					if(!IsValidClient(i))
@@ -2140,12 +2126,7 @@ public int eventPayForLeaving(Handle menu, MenuAction action, int client, int pa
 			
 		time_to_spend = StringToInt(g_szJailRaison[type][jail_temps]);
 		if( time_to_spend == -1 ) {
-			float kill = float(rp_GetClientInt(target, i_KillingSpread));
-			time_to_spend = RoundToCeil(Logarithm(kill + 1.0) * 4.0 * kill + 4.0); // Mais oui, c'est claire !
-			
-			if( kill <= 0.0 )
-				time_to_spend = 2;
-			rp_SetClientInt(target, i_FreekillSick, 0);
+			time_to_spend = rp_GetClientInt(target, i_KillJailDuration);
 			
 			time_to_spend /= 2;
 		}

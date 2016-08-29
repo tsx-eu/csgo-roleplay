@@ -399,7 +399,7 @@ public int ModifyWeaponPVP(Handle p_hItemMenu, MenuAction p_oAction, int client,
 
 public Action fwdWeapon(int victim, int attacker, float &damage, int wepID, float pos[3]) {
 	bool changed = true;
-	int wepType = rp_GetWeaponBallType(wepID);
+	enum_ball_type wepType = rp_GetWeaponBallType(wepID);
 	
 	rp_ClientAggroIncrement(attacker, victim, RoundFloat(damage));
 	
