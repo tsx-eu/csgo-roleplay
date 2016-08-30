@@ -635,6 +635,7 @@ enum bool_user_data {
 	ch_Kevlar,
 	ch_Yeux,
 	b_WeaponIsKnife,
+	b_GameModePassive,
 	b_udata_max
 };
 enum int_user_data {
@@ -727,7 +728,8 @@ enum int_user_data {
 	
 	i_JetonRouge,
 	i_JetonBleu,
-
+	i_FPD,
+	
 	i_udata_max
 };
 enum float_user_data {
