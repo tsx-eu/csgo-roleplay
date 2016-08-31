@@ -172,11 +172,11 @@ public Action Cmd_ItemContrat(int args) {
 		rp_SetClientInt(vendeur, i_ContratPay, 0);
 
 	rp_HookEvent(vendeur, RP_OnPlayerDead, fwdTueurDead);
+	rp_HookEvent(vendeur, RP_OnPlayerCanKill, fwdTueurCanKill);
 	rp_HookEvent(target, RP_OnPlayerDead, fwdTueurKill);
 	rp_HookEvent(vendeur, RP_OnFrameSeconde, fwdFrame);
-	
 	rp_HookEvent(vendeur, RP_PreGiveDamage, fwdDamage);
-
+	
 	rp_SetClientStat(vendeur, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
 
 	
@@ -211,6 +211,11 @@ public Action Cmd_ItemContrat(int args) {
 	return Plugin_Handled;
 }
 // ----------------------------------------------------------------------------
+public Action fwdTueurCanKill(int attacker, int victim) {
+	if( victim == rp_GetClientInt(attacker, i_ToKill) )
+		return Plugin_Handled;
+	return Plugin_Continue;
+}
 public Action fwdFrame(int client) {
 	int target = rp_GetClientInt(client, i_ToKill);
 	
@@ -582,6 +587,7 @@ void RestoreAssassinNormal(int client) {
 	
 	SDKUnhook(client, SDKHook_WeaponDrop, OnWeaponDrop);
 	rp_UnhookEvent(client, RP_OnPlayerDead, fwdTueurDead);
+	rp_UnhookEvent(client, RP_OnPlayerCanKill, fwdTueurCanKill);
 	rp_UnhookEvent(client, RP_OnFrameSeconde, fwdFrame);
 	rp_UnhookEvent(client, RP_PreGiveDamage, fwdDamage);
 	

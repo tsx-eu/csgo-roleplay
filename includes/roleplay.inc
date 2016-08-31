@@ -45,6 +45,8 @@ enum rp_event {
 
 	RP_PrePlayerPhysic,        /* Permet de modifier la physique d'un joueur. Utiliser return Plugin_Stop pour forcer les valeurs et ignorer toutes les autres. */
 	RP_PostPlayerPhysic,       /* By-pass les zones en BITZONE_BLOCKCHIRU */
+	
+	RP_PlayerCanKill,
 
 	RP_PreHUDColorize,		     /* Modifie la couleur de l'écran */
 	RP_OnFrameSeconde,		     /* Appelé chaque seconde */
@@ -90,6 +92,9 @@ typeset rp_event_enum {
 
 	function Action(int client, float& speed, float& gravity); 	                       /* RP_PrePlayerPhysic == return Plugin_Stop pour forcer les valeurs et ignorer les autres plugins/hook*/
 	function Action(int client, float& speed, float& gravity); 	                       /* RP_PostPlayerPhysic */
+	
+	function Action(int attacker, int victim);											/* RP_PlayerCanKill */
+	
 	function Action(int client, int color[4]); 					                               /* RP_PreHUDColorize == idem */
 	function Action(int client);								                                       /* RP_OnFrameSeconde */
 	function Action(int client, int& amount);						                               /* RP_OnAssurance */
@@ -636,6 +641,7 @@ enum bool_user_data {
 	ch_Yeux,
 	b_WeaponIsKnife,
 	b_GameModePassive,
+	b_IsFirstSpawn,
 	b_udata_max
 };
 enum int_user_data {
