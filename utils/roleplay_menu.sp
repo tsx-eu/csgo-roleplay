@@ -170,6 +170,7 @@ void openMenuGeneral(int client) {
 	menu.SetTitle("RolePlay\n ");
 	
 	menu.AddItem("item", "Ouvrir l'inventaire");
+	menu.AddItem("passif", "Changer le mode de jeu");
 	
 	if( jobID == 11 ) {
 		menu.AddItem("mort", "Faire revivre les morts");
@@ -185,6 +186,8 @@ void openMenuGeneral(int client) {
 	menu.AddItem("aide", "Besoin d'aide");
 	menu.AddItem("stats", "Statistiques");
 	menu.AddItem("report", "Signaler un mauvais comportement");
+	
+	
 	
 	menu.Display(client, 30);
 	
