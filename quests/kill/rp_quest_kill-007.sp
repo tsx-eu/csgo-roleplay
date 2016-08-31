@@ -95,7 +95,7 @@ public void Q1_Start(int objectiveID, int client) {
 		g_iKilled[client][i] = 0;
 	
 	rp_HookEvent(client, RP_OnPlayerKill, fwdOnPlayerKill);
-	rp_HookEvent(client, RP_OnPlayerCanKill, fwdOnPlayerCanKill);
+	rp_HookEvent(client, RP_PlayerCanKill, fwdOnPlayerCanKill);
 }
 public Action fwdOnPlayerCanKill(int attacker, int victim) {
 	if( IsKillEligible(attacker, victim, "") )
@@ -113,7 +113,7 @@ public Action fwdOnPlayerKill(int attacker, int victim, char weapon[64]) {
 public void Q1_Abort(int objectiveID, int client) {
 	CreateTimer(60.0 * 60.0, task_NewMission);
 	rp_UnhookEvent(client, RP_OnPlayerKill, fwdOnPlayerKill);
-	rp_UnhookEvent(client, RP_OnPlayerCanKill, fwdOnPlayerCanKill);
+	rp_UnhookEvent(client, RP_PlayerCanKill, fwdOnPlayerCanKill);
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 	for (int i = 1; i <= MaxClients; i++)
 		g_iKilled[client][i] = 0;
