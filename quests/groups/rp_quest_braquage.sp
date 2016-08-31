@@ -159,6 +159,7 @@ void Q_Clean() {
 			rp_UnhookEvent(i, RP_PreClientTeleport, fwdTeleport);
 			rp_UnhookEvent(i, RP_PreClientSendToJail, fwdSendToJail);
 			rp_UnhookEvent(i, RP_OnPlayerZoneChange, fwdZoneChangeTUTO);
+			rp_UnhookEvent(i, RP_PlayerCanKill, fwdCanKill);
 		}
 	}
 	if( g_bByPassDoor ) {
@@ -368,7 +369,18 @@ public void Q5_Start(int objectiveID, int client) {
 		rp_HookEvent(i, RP_PreClientTeleport, fwdTeleport);
 		rp_HookEvent(i, RP_PreClientSendToJail, fwdSendToJail);
 		rp_HookEvent(i, RP_OnPlayerZoneChange, fwdZoneChangeTUTO);
+		rp_HookEvent(i, RP_PlayerCanKill, fwdCanKill);
 	}
+}
+public Action fwdCanKill(int attacker, int victim) {
+	if( g_iPlayerTeam[attacker] == TEAM_BRAQUEUR && rp_GetZoneInt(rp_GetPlayerZone(victim), zone_type_type) == g_iPlanque )
+		return Plugin_Handled;
+	if( g_iPlayerTeam[attacker] == TEAM_BRAQUEUR && g_iPlayerTeam[victim] == TEAM_POLICE )
+		return Plugin_Handled;
+	if( g_iPlayerTeam[attacker] == TEAM_POLICE && g_iPlayerTeam[victim] == TEAM_BRAQUEUR )
+		return Plugin_Handled;
+	
+	return Plugin_Continue;
 }
 public void Q5_Frame(int objectiveID, int client) {
 	char tmp[64], tmp2[2][64];
