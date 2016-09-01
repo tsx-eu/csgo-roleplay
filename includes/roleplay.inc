@@ -530,6 +530,7 @@ native int rp_GetClientSSO(int client, char[] sso, int length);
 native void rp_ClientFloodIncrement(int client, int target, fd_user_data type, float cooldown);
 native bool rp_ClientFloodTriggered(int client, int target, fd_user_data type);
 native void rp_ClientAggroIncrement(int client, int target, int damage);
+native void rp_ClientOverlays(int client, overlaysImg img, float duration = -1.0);
 // ----------------------------------------------------------------------------
 enum BM_Int {
 	BM_Owner = 0,
@@ -1088,6 +1089,31 @@ enum int_stat_data {
 	i_S_JobFails,
 
 	i_uStat_max
+};
+enum overlaysImg {
+	o_OverlayNone = 0,
+	o_Jail_Meurtre = 1,
+	o_Jail_Agression,
+	o_Jail_Intrusion,
+	o_Jail_Vol,
+	o_Jail_Refus,
+	o_Jail_Traffic,
+	o_Jail_Tir,
+	o_Jail_Conduite,
+	o_Jail_Nuisance,
+	o_Jail_Juge,
+	o_Jail_Evasion,
+	o_Jail_GAV,
+	o_Death_MisAPrix = 21,
+	o_Death_Voiture,
+	o_Death_Tribunal,
+	o_Death_Passive,
+	o_Death_Mercenaire,
+	o_Death_Legitime,
+	o_Death_Basket,
+	o_Death_Police,
+	
+	o_OverlaysMax
 };
 
 #include <rp_tools.inc>

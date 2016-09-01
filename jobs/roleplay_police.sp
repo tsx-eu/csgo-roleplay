@@ -1839,6 +1839,7 @@ public int eventAskJail2Time(Handle menu, MenuAction action, int client, int par
 			SendPlayerToJail(iTarget);
 			rp_SetClientInt(iTarget, i_JailTime, (iTime*60) + 20);		
 			rp_SetClientInt(iTarget, i_JailledBy, client);
+			rp_ClientOverlays(iTarget, o_Jail_Juge, 20.0);
 			
 			CPrintToChatAll("{lightblue}[TSX-RP]{default} %N {default}a été condamné à faire %i heures de prison par le juge %N{default}.", iTarget, iTime, client);
 			LogToGame("[TSX-RP] [JUGE] %L a été condamné à faire %i heures de prison par le juge %L.", iTarget, iTime, client);
@@ -3140,51 +3141,40 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 void explainJail(int client, int jailReason, int cop) {
 	
 	if( StrContains(g_szJailRaison[jailReason][jail_raison], "Garde ") == 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} La raison de votre garde à vue est que vous avez fait des actions interdites lors d'une perquisition; ou que vous étiez convoqué au Tribunal.");
-		if( rp_GetClientInt(cop, i_Job) <= 7 )
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il est possible aussi qu'un haut gradé de la police vous ait fait plusieurs sommations vous demandant d'arrêter vos bétises.");
+		rp_ClientOverlays(client, o_Jail_GAV, 20.0);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Meurtre") == 0 ) {
-		if( IsValidClient(rp_GetClientInt(client, i_LastKilled_Reverse)) )
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez tué {red}%N{default} en présence du policier %N. Que ce soit de la légitime défense, ou non {red}un meurtre reste illégal{default}.", rp_GetClientInt(client, i_LastKilled_Reverse), cop);
+		rp_ClientOverlays(client, o_Jail_Meurtre, 20.0);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Agression ") == 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez agressé un autre citoyen en présence du policier %N.", cop);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Que ce soit de la légitime défense ou non; que vous ayez fait des dégâts ou non: une agression reste une agression et est toujours punie de la même façon."); 
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Sachez que {red}cette peine vous libère automatiquement si aucune agression n'a été détectée{default} dans les 30 dernières secondes.");
+		rp_ClientOverlays(client, o_Jail_Agression, 20.0);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Intrusion ") == 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas entrer dans certains endroits sans autorisation.");
+		rp_ClientOverlays(client, o_Jail_Intrusion, 20.0);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Vol, ") == 0 ) {
-		if( IsValidClient( rp_GetClientInt(client, i_LastVolTarget) ) )
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez volé %N en présence du policier %N.", rp_GetClientInt(client, i_LastVolTarget), cop);
-		else
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas le droit de voler ou même essayer de voler que ce soit un citoyen, un distributeur ou même une voiture en présence d'un policier.");
+		rp_ClientOverlays(client, o_Jail_Vol, 20.0);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Fuite, ") == 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous vous êtes enfuit, ou vous avez désobéi à un ordre direct de %N. Cela est interdit.", cop);
+		rp_ClientOverlays(client, o_Jail_Refus, 20.0);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Insultes, ") == 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez insulté un citoyen ou un agent des forces de l'ordre.");
+		// TODO: 
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Trafique ") == 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez posé des plants de drogue, imprimante(s) à faux billet, ou demandé à quelqu'un de vous aider pour une mission. Cela est interdit.");
+		rp_ClientOverlays(client, o_Jail_Traffic, 20.0);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Nuisance ") == 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez fait trop de bruit sur un lieu public.");
+		rp_ClientOverlays(client, o_Jail_Nuisance, 20.0);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Tir dans ") == 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez tiré dans la rue ou sur un autre citoyen en présence du policier %N. Que vous ayez touché ou non votre cible, il est interdit de tirer dans la rue.", cop); 
+		rp_ClientOverlays(client, o_Jail_Tir, 20.0);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Conduite ") == 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez roulé sur le trottoire en présence du policier %N.", cop);
+		rp_ClientOverlays(client, o_Jail_Conduite, 20.0);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Mutinerie, ") == 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes sorti de votre cellule sans autorisation. Un agent des forces de l'ordre s'est chargé de vous rajouter 6heures de prison supplémentaires.");
-	}
-	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Vol de voiture") == 0 ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Après enquête, %N vous a mis en prison pour le vol de la voiture que vous conduisiez.");
+		rp_ClientOverlays(client, o_Jail_Evasion, 20.0);
 	}
 }
 bool canWeaponBeAddedInPoliceStore(int weaponID) {
