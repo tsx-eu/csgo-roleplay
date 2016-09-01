@@ -2047,7 +2047,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 		if( IsValidClient(client) && IsValidClient(target) ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N {default}restera en prison %.1f heures pour \"%s\"", target, time_to_spend/60.0, g_szJailRaison[type][jail_raison]);
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N {default}vous a mis %.1f heures de prison pour \"%s\"", client, time_to_spend/60.0, g_szJailRaison[type][jail_raison]);
-			explainJail(target, type, client);
+			explainJail(target, type);
 		}
 		else {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le joueur s'est déconnecté mais il fera %.1f heures de prison", time_to_spend / 60.0);
@@ -3138,7 +3138,7 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 	return 0;
 }
 
-void explainJail(int client, int jailReason, int cop) {
+void explainJail(int client, int jailReason) {
 	
 	if( StrContains(g_szJailRaison[jailReason][jail_raison], "Garde ") == 0 ) {
 		rp_ClientOverlays(client, o_Jail_GAV, 20.0);
@@ -3159,7 +3159,7 @@ void explainJail(int client, int jailReason, int cop) {
 		rp_ClientOverlays(client, o_Jail_Refus, 20.0);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Insultes, ") == 0 ) {
-		// TODO: 
+		rp_ClientOverlays(client, o_Jail_Insultes, 20.0);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Trafique ") == 0 ) {
 		rp_ClientOverlays(client, o_Jail_Traffic, 20.0);

@@ -1104,6 +1104,7 @@ enum overlaysImg {
 	o_Jail_Juge,
 	o_Jail_Evasion,
 	o_Jail_GAV,
+	o_Jail_Insultes,
 	o_Death_MisAPrix = 21,
 	o_Death_Voiture,
 	o_Death_Tribunal,
