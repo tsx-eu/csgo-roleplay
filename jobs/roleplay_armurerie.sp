@@ -401,8 +401,6 @@ public Action fwdWeapon(int victim, int attacker, float &damage, int wepID, floa
 	bool changed = true;
 	enum_ball_type wepType = rp_GetWeaponBallType(wepID);
 	
-	rp_ClientAggroIncrement(attacker, victim, RoundFloat(damage));
-	
 	if( wepType != ball_type_revitalisante )
 		rp_ClientAggroIncrement(attacker, victim, RoundFloat(damage));
 	
