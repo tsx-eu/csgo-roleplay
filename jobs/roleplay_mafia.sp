@@ -270,7 +270,9 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 
 		ServerCommand("sm_effect_particles %d Aura2 3", client);
 		rp_ClientAggroIncrement(client, target, 1000);
-		
+		if( rp_GetClientBool(client, b_GameModePassive) == false ) {
+			rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, 5.0);
+		}
 		//g_iSuccess_last_pas_vu_pas_pris[target] = GetTime();		
 	}
 	else if( VOL_MAX > 0 && money >= 1 ) {
@@ -319,6 +321,9 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		rp_SetJobCapital(cpt, rp_GetJobCapital(cpt) - (amount/4));
 		
 		rp_ClientAggroIncrement(client, target, 1000);
+		if( rp_GetClientBool(client, b_GameModePassive) == false ) {
+			rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, 5.0);
+		}
 	}
 	else {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'a pas d'argent sur lui.", target);
@@ -326,6 +331,10 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	}
 	
 	return Plugin_Stop;
+}
+public Action fwdAccelerate(int client, float& speed, float& gravity) {
+	speed += 0.5;
+	return Plugin_Changed;
 }
 void CashFlow(int client, int amount) {
 	if( amount <= 10 ) {

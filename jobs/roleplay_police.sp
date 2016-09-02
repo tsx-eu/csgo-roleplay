@@ -1979,8 +1979,15 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			
 			rp_SetClientStat(target, i_MoneySpent_Fines, rp_GetClientStat(target, i_MoneySpent_Fines) + amende);
 			rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amende);
-			rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + (amende / 4));
-			rp_SetJobCapital(jobID, rp_GetJobCapital(jobID) + (amende/4 * 3));
+			
+			if( rp_GetClientBool(client, b_GameModePassive) ) {
+				rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + (amende / 4));
+				rp_SetJobCapital(jobID, rp_GetJobCapital(jobID) + (amende/4 * 3));
+			}
+			else {
+				rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + (amende / 2));
+				rp_SetJobCapital(jobID, rp_GetJobCapital(jobID) + (amende / 2));
+			}
 			
 			GetClientAuthId(client, AuthId_Engine, options, sizeof(options), false);
 			

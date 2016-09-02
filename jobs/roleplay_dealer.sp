@@ -128,10 +128,10 @@ public Action Cmd_ItemDrugs(int args) {
 	
 	bool drugged = rp_GetClientBool(client, b_Drugged);
 	if (drugged && !rp_IsTutorialOver(client) ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Attention vous allez tomber malade, terminer votre tutoriel avant de tenter le diable.");
-			ITEM_CANCEL(client, item_id);
-			return Plugin_Handled;
-			}
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Attention vous allez tomber malade, terminer votre tutoriel avant de tenter le diable.");
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
 	if( StrEqual(arg0, "ghb") ) {
 		if( rp_GetClientInt(client, i_MaskCount) <= 0 ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser de GHB pour le moment.");
@@ -262,11 +262,12 @@ public Action Cmd_ItemDrugs(int args) {
 			delete g_hDrugTimer[client];
 			
 			if( Math_GetRandomInt(1, 100) >= 80 && !rp_GetClientBool(client, b_HasProtImmu)) {
-				rp_IncrementSuccess(client, success_list_dealer);
 				
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes en état d'overdose.");			
-				
-				rp_SetClientInt(client, i_Sick, Math_GetRandomInt((view_as<int>(sick_type_none))+1, (view_as<int>(sick_type_max))-1));
+				if( !(rp_GetClientJobID(client) == 11 && rp_GetClientBool(client, b_GameModePassive) == false) ) {
+					rp_IncrementSuccess(client, success_list_dealer);
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes en état d'overdose.");			
+					rp_SetClientInt(client, i_Sick, Math_GetRandomInt((view_as<int>(sick_type_none))+1, (view_as<int>(sick_type_max))-1));
+				}
 			}
 		}
 	}
@@ -790,6 +791,9 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		SDKHook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 		
 		rp_ClientAggroIncrement(client, target, 1000);
+		if( rp_GetClientBool(client, b_GameModePassive) == false ) {
+			rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, 5.0);
+		}
 	}
 	else if( VOL_MAX > 0 && money >= 1 ) {
 		if( amount > money )
@@ -837,6 +841,9 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		rp_SetJobCapital(cpt, rp_GetJobCapital(cpt) - (amount/4));
 		
 		rp_ClientAggroIncrement(client, target, 1000);
+		if( rp_GetClientBool(client, b_GameModePassive) == false ) {
+			rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, 5.0);
+		}
 	}
 	else {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'a pas d'argent sur lui.", target);
@@ -1324,7 +1331,10 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, 5.0);
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, 1.0);
 	}
-	
+	else if( rp_GetClientBool(client, b_GameModePassive) == false ) {
+		rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, 5.0);
+	}
+
 	char wepname[64];
 	GetEdictClassname(wepid, wepname, sizeof(wepname));
 	ReplaceString(wepname, sizeof(wepname), "weapon_", "");	
