@@ -104,17 +104,23 @@ void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) 
 			if(lastp == p)
 				continue;
 			lastp = p;
-			float taxfact = (1 - float(p) / (rp_GetItemFloat(itemID, item_type_prix))) / 10;
-			int tax = RoundToFloor(rp_GetItemFloat(itemID, item_type_prix) * (0.05 + taxfact) * quantity);
+			int tax = 0;
+			if( rp_GetClientJobID(client) != 211 || rp_GetClientBool(client, b_GameModePassive) ){
+				float taxfact = (1 - float(p) / (rp_GetItemFloat(itemID, item_type_prix))) / 10;
+				tax = RoundToFloor(rp_GetItemFloat(itemID, item_type_prix) * (0.05 + taxfact) * quantity);
+			}
 			Format(tmp, sizeof(tmp), "sell %d %d %d", itemID, quantity, p*quantity);
-			Format(tmp2, sizeof(tmp2), "%d$  (%d$/Unité)    (Coût du dépot: %d$)", p*quantity, tax, p);
+			Format(tmp2, sizeof(tmp2), "%d$  (%d$/Unité)    (Coût du dépot: %d$)", p*quantity, p, tax);
 			menu.AddItem(tmp, tmp2);
 		}
 	}
 	else if( confirm == 0 ) {
-		
-		float taxfact = (1 - float(sellPrice) / (rp_GetItemFloat(itemID, item_type_prix) * quantity)) / 10;
-		int tax = RoundToFloor(rp_GetItemFloat(itemID, item_type_prix) * (0.05 + taxfact) * quantity);
+		int tax = 0;
+		if( rp_GetClientJobID(client) != 211 || rp_GetClientBool(client, b_GameModePassive) ){
+			float taxfact = (1 - float(sellPrice) / (rp_GetItemFloat(itemID, item_type_prix) * quantity)) / 10;
+			tax = RoundToFloor(rp_GetItemFloat(itemID, item_type_prix) * (0.05 + taxfact) * quantity);
+		}
+
 		rp_GetItemData(itemID, item_type_name, tmp3, sizeof(tmp3));
 		menu.SetTitle("Hotel des ventes: Vendre\nVous allez déposer une offre pour\n%d %s pour %d$?\nCoût du dépot: %d$\n \nConfirmez-vous ?\n ", quantity, tmp3, sellPrice, tax);
 		
@@ -125,8 +131,11 @@ void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) 
 		
 	}
 	else {
-		float taxfact = (1 - float(sellPrice) / (rp_GetItemFloat(itemID, item_type_prix) * quantity)) / 10;
-		int tax = RoundToFloor(rp_GetItemFloat(itemID, item_type_prix) * (0.05 + taxfact) * quantity);
+		int tax = 0;
+		if( rp_GetClientJobID(client) != 211 || rp_GetClientBool(client, b_GameModePassive) ){
+			float taxfact = (1 - float(sellPrice) / (rp_GetItemFloat(itemID, item_type_prix) * quantity)) / 10;
+			tax = RoundToFloor(rp_GetItemFloat(itemID, item_type_prix) * (0.05 + taxfact) * quantity);
+		}
 		
 		if( rp_GetClientItem(client, itemID) < quantity ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas la quantité que vous avez spécifié.");
