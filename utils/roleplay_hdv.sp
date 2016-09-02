@@ -105,7 +105,7 @@ void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) 
 				continue;
 			lastp = p;
 			int tax = 0;
-			if( rp_GetClientJobID(client) != 211 || !rp_GetClientBool(client, b_GameModePassive) ){
+			if( rp_GetClientJobID(client) != 211 || rp_GetClientBool(client, b_GameModePassive) ){
 				float taxfact = (1 - float(p) / (rp_GetItemFloat(itemID, item_type_prix))) / 10;
 				tax = RoundToFloor(rp_GetItemFloat(itemID, item_type_prix) * (0.05 + taxfact) * quantity);
 			}
@@ -116,7 +116,7 @@ void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) 
 	}
 	else if( confirm == 0 ) {
 		int tax = 0;
-		if( rp_GetClientJobID(client) != 211 || !rp_GetClientBool(client, b_GameModePassive) ){
+		if( rp_GetClientJobID(client) != 211 || rp_GetClientBool(client, b_GameModePassive) ){
 			float taxfact = (1 - float(sellPrice) / (rp_GetItemFloat(itemID, item_type_prix) * quantity)) / 10;
 			tax = RoundToFloor(rp_GetItemFloat(itemID, item_type_prix) * (0.05 + taxfact) * quantity);
 		}
@@ -132,7 +132,7 @@ void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) 
 	}
 	else {
 		int tax = 0;
-		if( rp_GetClientJobID(client) != 211 || !rp_GetClientBool(client, b_GameModePassive) ){
+		if( rp_GetClientJobID(client) != 211 || rp_GetClientBool(client, b_GameModePassive) ){
 			float taxfact = (1 - float(sellPrice) / (rp_GetItemFloat(itemID, item_type_prix) * quantity)) / 10;
 			tax = RoundToFloor(rp_GetItemFloat(itemID, item_type_prix) * (0.05 + taxfact) * quantity);
 		}
