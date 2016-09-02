@@ -577,7 +577,7 @@ public void OnThink(int ent) {
 	
 	if( g_bVehicleCanJump ) {
 		int player = Vehicle_GetDriver(ent);
-		if( player > 0 && IsValidClient(player) && (GetClientButtons(player) & IN_JUMP) ) {
+		if( player > 0 && IsValidClient(player) && (GetClientButtons(player) & IN_DUCK) ) {
 			Handle trace;
 			float src[3], ang[3], dst[3];
 			Entity_GetAbsOrigin(ent, src);
@@ -911,7 +911,7 @@ public int AskToJoinCar_Menu(Handle p_hItemMenu, MenuAction p_oAction, int clien
 				}
 				
 				if( rp_SetClientVehiclePassager(request, vehicle) )
-					ClientCommand(request, "firstperson");
+					ClientCommand(request, "thirdperson");
 			}
 			else if( type == 2 ) {
 				CPrintToChat(request, "{lightblue}[TSX-RP]{default} Le conducteur a refusé votre demande.");
