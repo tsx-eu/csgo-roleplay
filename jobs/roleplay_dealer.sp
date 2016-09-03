@@ -1646,7 +1646,7 @@ bool CanTP(float pos[3], int client) {
 	#endif
 	return ret;
 }
-bool CanStealVehicle(int client, int target) {
+bool CanStealVehicle(int client, int target) {	
 	if( (rp_GetZoneBit(rp_GetPlayerZone(target)) & BITZONE_PARKING) )
 		return false;
 	if( !IsValidClient(rp_GetVehicleInt(target, car_owner)) )
@@ -1658,6 +1658,8 @@ bool CanStealVehicle(int client, int target) {
 	int owner = rp_GetVehicleInt(target, car_owner);
 	int appart = rp_GetPlayerZoneAppart(owner);
 	if( appart > 0 && rp_GetAppartementInt(appart, appart_bonus_garage) )
+		return false;
+	if( rp_GetVehicleInt(target, car_health) > 5000 && GetConVarInt(FindConVar("rp_braquage")) == 1 )
 		return false;
 	return true;
 }
