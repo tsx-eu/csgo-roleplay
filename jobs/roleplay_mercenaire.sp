@@ -314,11 +314,9 @@ public Action fwdTueurKill(int client, int attacker, float& respawn) {
 }
 public Action fwdOnRespawn(int client) {
 	if( rp_GetClientBool(client, b_SpawnToTueur) ) {
-		rp_SetClientBool(client, b_SpawnToTueur, false);
 		CreateTimer(0.01, SendToTueur, client);
 	}
 	if( rp_GetClientBool(client, b_SpawnToTribunal) ) {
-		rp_SetClientBool(client, b_SpawnToTribunal, false);
 		CreateTimer(0.01, SendToTribunal, client);
 	}
 }
@@ -656,10 +654,12 @@ public Action SendToTribunal(Handle timer, any client) {
 	PrintToServer("SendToTribunal");
 	#endif
 	
+	rp_SetClientBool(client, b_SpawnToTribunal, false);
+	
 	if( Math_GetRandomInt(0, 1) )
-		TeleportEntity(client, view_as<float>({473.7, -1979.5, -2007.9}), NULL_VECTOR, NULL_VECTOR);
+		TeleportEntity(client, view_as<float>({473.0, -1979.0, -1950.0}), NULL_VECTOR, NULL_VECTOR);
 	else
-		TeleportEntity(client, view_as<float>({-966.1, -570.6, -2007.9}), NULL_VECTOR, NULL_VECTOR);
+		TeleportEntity(client, view_as<float>({-966.0, -570.0, -1950.0}), NULL_VECTOR, NULL_VECTOR);
 }
 // ----------------------------------------------------------------------------
 public Action SendToTueur(Handle timer, any client) {
@@ -667,6 +667,7 @@ public Action SendToTueur(Handle timer, any client) {
 	PrintToServer("SendToTueur");
 	#endif
 	
+	rp_SetClientBool(client, b_SpawnToTueur, false);
 	TeleportEntity(client,  view_as<float>({-5553.0, -2818.0, -1958.0}), NULL_VECTOR, NULL_VECTOR);
 	
 	char classname[64];
