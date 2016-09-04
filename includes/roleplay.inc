@@ -557,7 +557,7 @@ native void rp_WeaponMenu_Get(DataPack hBuyMenu, DataPackPos pos, char weapon[65
 
 #define BITZONE_DEFAULT		(0)		// https://www.ts-x.eu/shared_public/bit.html
 #define BITZONE_PEACEFULL	(1<<0)
-#define BITZONE_PVP		(1<<1)
+#define BITZONE_PVP			(1<<1)
 #define BITZONE_DENY		(1<<2)
 #define BITZONE_BLOCKITEM	(1<<3)
 #define BITZONE_BLOCKSELL	(1<<4)
@@ -570,6 +570,7 @@ native void rp_WeaponMenu_Get(DataPack hBuyMenu, DataPackPos pos, char weapon[65
 #define BITZONE_BLOCKJAIL	(1<<11)
 #define BITZONE_BLOCKSPEAK	(1<<12)
 #define BITZONE_PARKING		(1<<15)
+#define BITZONE_ROAD		(1<<16)
 #define BITZONE_JUSTICEITEM	(1<<18)
 #define BITZONE_POLICEFORCE	(1<<19)
 #define BITZONE_JAIL		(1<<20)
@@ -643,6 +644,7 @@ enum bool_user_data {
 	b_WeaponIsKnife,
 	b_GameModePassive,
 	b_IsFirstSpawn,
+	b_Debuging,
 	b_udata_max
 };
 enum int_user_data {
