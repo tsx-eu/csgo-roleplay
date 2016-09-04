@@ -87,6 +87,7 @@ enum tribunal_search_data {
 	tribunal_search_max
 }
 
+float g_flLastPos[65][3];
 int g_TribunalSearch[MAXPLAYERS+1][tribunal_search_max];
 char g_szTribunal_DATA[65][tribunal_max][64];
 DataPack g_hBuyMenu;
@@ -1704,47 +1705,30 @@ void SendPlayerToJail(int target, int client = 0) {
 	GetEntPropVector(target, Prop_Send, "m_vecMins", MinHull);
 	GetEntPropVector(target, Prop_Send, "m_vecMaxs", MaxHull);
 	
-	for (int j = 0; j <= 1; j++) {
-		for( int i=0; i<MAX_LOCATIONS; i++ ) {
-			rp_GetLocationData(i, location_type_base, tmp, sizeof(tmp));
-			if( StrEqual(tmp, "jail", false) ) {
+	for( int i=0; i<MAX_LOCATIONS; i++ ) {
+		rp_GetLocationData(i, location_type_base, tmp, sizeof(tmp));
+		if( StrEqual(tmp, "jail", false) ) {
 				
-				fLocation[MaxJail][0] = float(rp_GetLocationInt(i, location_type_origin_x));
-				fLocation[MaxJail][1] = float(rp_GetLocationInt(i, location_type_origin_y));
-				fLocation[MaxJail][2] = float(rp_GetLocationInt(i, location_type_origin_z)) + 5.0;
+			fLocation[MaxJail][0] = float(rp_GetLocationInt(i, location_type_origin_x));
+			fLocation[MaxJail][1] = float(rp_GetLocationInt(i, location_type_origin_y));
+			fLocation[MaxJail][2] = float(rp_GetLocationInt(i, location_type_origin_z)) + 5.0;
 				
-				MaxJail++;
-				
-				if( j == 0 ) {
-					Handle tr = TR_TraceHullFilterEx(fLocation[MaxJail], fLocation[MaxJail], MinHull, MaxHull, MASK_PLAYERSOLID, TraceRayDontHitSelf, target);
-					if( TR_DidHit(tr) ) {
-						CloseHandle(tr);
-						MaxJail--;
-						continue;
-					}
-					CloseHandle(tr);
-				}
-			}
+			MaxJail++;	
 		}
-		if( MaxJail > 0 )
-			break;
-	}
-	
-	if( MaxJail == 0 ) {
-		LogToGame("DEBUG ---> AUCUNE JAIL DISPO TROUVEE OMG");
 	}
 	
 	if( GetClientTeam(target) == CS_TEAM_CT ) {
 		CS_SwitchTeam(target, CS_TEAM_T);
 	}
 	
+	GetClientAbsOrigin(target, g_flLastPos[target]);
+	Entity_GetModel(target, tmp, sizeof(tmp));
 	Entity_SetModel(target, MODEL_PRISONNIER);
 	rp_ClientColorize(target); // Remet la couleur normale au prisonnier si jamais il est coloré
-	SetEntProp(target, Prop_Send, "m_nSkin", Math_GetRandomInt(0, 14));
+	if( !StrEqual(tmp, MODEL_PRISONNIER) )
+		SetEntProp(target, Prop_Send, "m_nSkin", Math_GetRandomInt(0, 14));
 	
 	if( IsValidClient(client) ) {
-		
-		
 		if( !IsValidClient(rp_GetClientInt(target, i_JailledBy)) )
 			rp_SetClientInt(target, i_JailledBy, client);
 		
@@ -1878,7 +1862,13 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			LogToGame("[TSX-RP] [JAIL] [LIBERATION] %L a liberé %L", client, target);
 			
 			rp_ClientResetSkin(target);
-			rp_ClientSendToSpawn(target, true);
+			int bit = rp_GetZoneBit(rp_GetZoneFromPoint(g_flLastPos[target]));
+			if( bit & BITZONE_JAIL || bit & BITZONE_HAUTESECU || bit & BITZONE_LACOURS )
+				rp_ClientSendToSpawn(target, true);
+			else
+				TeleportEntity(target, g_flLastPos[target], NULL_VECTOR, NULL_VECTOR);
+			
+			FakeClientCommand(target, "sm_stuck");
 			return;
 		}
 		if( type == -2 || type == -3 ) {
@@ -1910,7 +1900,8 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				LogToGame("[TSX-RP] [JAIL] %L a été libéré car il n'avait pas commis d'agression", target);
 				
 				rp_ClientResetSkin(target);
-				rp_ClientSendToSpawn(target, true);
+				TeleportEntity(target, g_flLastPos[target], NULL_VECTOR, NULL_VECTOR);
+				FakeClientCommand(target, "sm_stuck");
 				return;
 			}
 		}
@@ -1927,7 +1918,8 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				LogToGame("[TSX-RP] [JAIL] %L a été libéré car il n'avait pas effectué de tir dangereux", target);
 				
 				rp_ClientResetSkin(target);
-				rp_ClientSendToSpawn(target, true);
+				TeleportEntity(target, g_flLastPos[target], NULL_VECTOR, NULL_VECTOR);
+				FakeClientCommand(target, "sm_stuck");
 				return;
 			}
 		}
@@ -1955,7 +1947,8 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				LogToGame("[TSX-RP] [JAIL] %L a été libéré car il n'avait pas commis de vol", target);
 				
 				rp_ClientResetSkin(target);
-				rp_ClientSendToSpawn(target, true);
+				TeleportEntity(target, g_flLastPos[target], NULL_VECTOR, NULL_VECTOR);
+				FakeClientCommand(target, "sm_stuck");
 				return;
 			}
 			if( IsValidClient( rp_GetClientInt(target, i_LastVolTarget) ) ) {
