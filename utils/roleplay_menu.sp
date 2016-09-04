@@ -172,6 +172,12 @@ void openMenuGeneral(int client) {
 	menu.AddItem("item", "Ouvrir l'inventaire");
 	menu.AddItem("passif", "Changer le mode de jeu");
 	
+	if( jobID == 101 && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == 101 ) {
+		menu.AddItem("audience", "Rapport d'audience");
+		menu.AddItem("conv", "Convoquer un joueur");
+	}
+	
+	
 	if( jobID == 11 ) {
 		menu.AddItem("mort", "Faire revivre les morts");
 	}
