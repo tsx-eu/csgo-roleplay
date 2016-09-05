@@ -531,6 +531,7 @@ native void rp_ClientFloodIncrement(int client, int target, fd_user_data type, f
 native bool rp_ClientFloodTriggered(int client, int target, fd_user_data type);
 native void rp_ClientAggroIncrement(int client, int target, int damage);
 native void rp_ClientOverlays(int client, overlaysImg img, float duration = -1.0);
+native void rp_ClientXPIncrement(int client, int xp=1);
 // ----------------------------------------------------------------------------
 enum BM_Int {
 	BM_Owner = 0,
