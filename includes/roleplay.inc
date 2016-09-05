@@ -738,6 +738,10 @@ enum int_user_data {
 	i_JetonRouge,
 	i_JetonBleu,
 	i_FPD,
+	i_PlayerXP,
+	i_PlayerLVL,
+	i_PlayerRank,
+	i_PlayerPrestige,	
 	
 	i_udata_max
 };
@@ -1118,6 +1122,15 @@ enum overlaysImg {
 	o_Death_Police,
 	
 	o_OverlaysMax
+};
+
+enum rankType {
+	rank_type_id,
+	rank_type_level,
+	rank_type_name,
+	rank_type_description,
+	
+	rank_type_max
 };
 
 #include <rp_tools.inc>
