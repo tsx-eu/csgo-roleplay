@@ -328,7 +328,7 @@ public Action Cmd_Amende(int client, const char[] arg) {
 	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
 
 	
-	LogToGame("[TSX-RP] [AMENDE] %N (%s) a pris %i$ a %N (%s).", client, SteamID, amount, target, szTarget);
+	LogToGame("[TSX-RP] [AMENDE] %L a été prélever de  %i$ d'amende par le juge %L.", iTarget, amount, client);
 	rp_SetClientBool(client, b_MaySteal, false);
 	
 	CreateTimer(30.0, AllowStealing, client);
