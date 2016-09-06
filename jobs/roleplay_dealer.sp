@@ -947,13 +947,14 @@ int BuildingPlant(int client, int type) {
 		max = 14;
 		
 	int appart = rp_GetPlayerZoneAppart(client);
-	if( appart > 0 && rp_GetAppartementInt(appart, appart_bonus_coffre) ) {
+	if( appart > 0 && rp_GetAppartementInt(appart, appart_bonus_coffre) )
 		max += 1;
-	}
-			
-	if(rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101){
-		max = 1;
-	}
+	if( rp_GetClientInt(client, i_PlayerLVL) >= 110 )
+		max += 2;
+	if( rp_GetClientInt(client, i_PlayerLVL) >= 420 )
+		max += 3;
+	if( rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101 )
+		max = 2;
 	
 	if( count >= max ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez trop de plants actifs.");
@@ -1153,6 +1154,8 @@ public Action Frame_BuildingPlant(Handle timer, any ent) {
 		time /= 10.0;
 	if( !rp_IsTutorialOver(client) )
 		time /= 10.0;
+	if( rp_GetClientInt(client, i_PlayerLVL) >= 812 )
+		time *= 0.75;
 	
 	CreateTimer(time, Frame_BuildingPlant, EntIndexToEntRef(ent));
 	

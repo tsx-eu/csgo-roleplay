@@ -66,6 +66,8 @@ public bool fwdCanStart(int client) {
 		return false;
 	if( GetClientCount(true) < 20 )
 		return false;
+	if( rp_GetClientInt(client, i_PlayerLVL) < 342 )
+		return false;
 	int job = rp_GetClientJobID(client);
 	
 	if( job == 1 || job == 101 || job == 91 )
@@ -183,6 +185,8 @@ public bool IsKillEligible(int attacker, int victim, const char weapon[64]) {
 	if( attacker == victim )
 		return false;
 	if( !rp_IsTutorialOver(victim) )
+		return false;
+	if( rp_GetClientBool(victim, b_GameModePassive) )
 		return false;
 	int bit = rp_GetZoneBit(rp_GetPlayerZone(victim));
 	if( bit & BITZONE_EVENT || bit & BITZONE_PEACEFULL || bit & BITZONE_PVP )

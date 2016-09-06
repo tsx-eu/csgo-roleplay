@@ -840,6 +840,11 @@ public Action Cmd_BedVilla(int client){
 	PrintToServer("Cmd_BedVilla");
 	#endif
 	
+	if( rp_GetClientInt(client, i_PlayerLVL) < 42 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être au moins de niveau 42 \"Propriétaire\", afin d'utiliser cette commande.");
+		return Plugin_Handled;
+	}
+	
 	if( rp_GetClientBool(client, b_MaySteal) == false ) {
 		ACCESS_DENIED(client);
 	}

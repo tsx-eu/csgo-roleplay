@@ -94,6 +94,8 @@ public bool fwdCanStart(int client) {
 		return false;
 	if( rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101 )
 		return false;
+	if( rp_GetClientInt(client, i_PlayerLVL) < 210 )
+		return false;
 	
 	char szDayOfWeek[12], szHours[12];
 	FormatTime(szDayOfWeek, 11, "%w");
@@ -110,14 +112,21 @@ public bool fwdCanStart(int client) {
 		}
 	}
 	int ct = 0;
+	int t = 0;
 	for (int i = 1; i <= MaxClients; i++) {
 		if( !IsValidClient(i) )
 			continue;
+		if( i == client )
+			continue;
 		if( rp_GetClientJobID(i) == 1 || rp_GetClientJobID(i) == 101 )
 			ct++;
+		if( rp_GetClientInt(i, i_PlayerLVL) >= 132 )
+			t++;
 	}
 	
 	if( ct < REQUIRED_CT )
+		return false;
+	if( t < REQUIRED_T )
 		return false;
 	
 	return true;
@@ -238,6 +247,8 @@ public void Q1_Frame(int objectiveID, int client) {
 				if( g_iPlayerTeam[i] != TEAM_NONE )
 					continue;
 				if( rp_GetClientBool(i, b_IsMuteEvent) == true )
+					continue;
+				if( rp_GetClientInt(i, i_PlayerLVL) < 132 )
 					continue;
 				
 				Format(tmp, sizeof(tmp), "%d", i);

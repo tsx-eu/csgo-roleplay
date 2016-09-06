@@ -451,9 +451,12 @@ int BuildingCashMachine(int client, bool force=false) {
 		max = 15;
 	
 	int appart = rp_GetPlayerZoneAppart(client);
-	if( appart > 0 && rp_GetAppartementInt(appart, appart_bonus_coffre) ) {
+	if( appart > 0 && rp_GetAppartementInt(appart, appart_bonus_coffre) )
 		max += 3;
-	}
+	if( rp_GetClientInt(client, i_PlayerLVL) >= 182 )
+		max += 2;
+	if( rp_GetClientInt(client, i_PlayerLVL) >= 506 )
+		max += 3;
 	
 	if( count > (max-1) && !force) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez trop de machines actives.");
@@ -817,7 +820,8 @@ public Action Frame_BigCashMachine(Handle timer, any ent) {
 float GetMachineTime(int client) {
 	if( rp_GetClientBool(client, b_HasVilla) && rp_GetClientPvPBonus(client, cap_villa) )
 		return Math_GetRandomFloat(8.0, 12.0);
-	else if( rp_GetClientBool(client, b_HasVilla) || rp_GetClientPvPBonus(client, cap_villa) || (rp_GetClientJobID(client) == 221 && rp_GetClientBool(client, b_GameModePassive) == false) )
+	else if( rp_GetClientBool(client, b_HasVilla) || rp_GetClientPvPBonus(client, cap_villa) || rp_GetClientInt(client, i_PlayerLVL) >= 812 ||
+			(rp_GetClientJobID(client) == 221 && rp_GetClientBool(client, b_GameModePassive) == false) )
 		return Math_GetRandomFloat(12.0, 18.0);
 	else
 		return Math_GetRandomFloat(18.0, 22.0);
