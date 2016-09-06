@@ -125,8 +125,8 @@ public void Q_Done(int objectiveID, int client) {
 	int rnd = Math_GetRandomInt(0, sizeof(MP) - 1);
 	char tmp[128];
 	rp_GetItemData(rnd, item_type_name, tmp, sizeof(tmp));
-	CPrintToChat(i, "{lightblue}[TSX-RP]{default} Vous avez trouvé 25x%s", tmp);
-	rp_ClientGiveItem(i, rnd, 25);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez trouvé 25x%s", tmp);
+	rp_ClientGiveItem(client, rnd, 25);
 }
 public Action fwdPreClientCraft(int client, int itemID, int& free) {
 	if( g_bDoingQuest[client] && g_iCraftItem[client] == itemID && g_iCraftLeft[client] > 0 ) {

@@ -128,8 +128,8 @@ public void Q1_Frame(int objectiveID, int client) {
 		int rnd = Math_GetRandomInt(0, sizeof(MP) - 1);
 		char tmp[128];
 		rp_GetItemData(rnd, item_type_name, tmp, sizeof(tmp));
-		CPrintToChat(i, "{lightblue}[TSX-RP]{default} Vous avez trouvé 10x%s", tmp);
-		rp_ClientGiveItem(i, rnd, 10);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez trouvé 10x%s", tmp);
+		rp_ClientGiveItem(client, rnd, 10);
 		
 	}
 	else if (g_iDuration[client] <= 0) {
