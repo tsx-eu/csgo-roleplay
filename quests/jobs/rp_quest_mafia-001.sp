@@ -62,28 +62,15 @@ public bool fwdCanStart(int client) {
 	if( rp_GetClientJobID(client) != QUEST_JOBID )
 		return false;
 	
-	int count = 0;
-	
 	for (int i = 1; i <= MaxClients; i++) {
 		if( !IsValidClient(i) )
 			continue;
-		if( rp_GetClientInt(i, i_JailTime) >= (3*60) ) {
-			count++;
+		if( rp_GetClientInt(i, i_JailTime) >= (6*60) ) {
+			int z = rp_GetZoneBit(rp_GetPlayerZone(i));
+			if( z & BITZONE_JAIL || z & BITZONE_LACOURS ) 
+				return true;
 		}
 	}
-	
-	if( count >= 2 ) {
-		for (int i = 1; i <= MaxClients; i++) {
-			if( !IsValidClient(i) )
-				continue;
-			if( rp_GetClientInt(i, i_JailTime) >= (12*60) ) {
-				int z = rp_GetZoneBit(rp_GetPlayerZone(i));
-				if( z & BITZONE_JAIL || z & BITZONE_LACOURS ) 
-					return true;
-			}
-		}
-	}
-	
 	
 	return false;
 }
@@ -171,15 +158,17 @@ public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 					if( rp_GetZoneBit(oldZone) & BITZONE_JAIL &&  zoneID[k] == newZone ) {
 						
 						int cap = rp_GetRandomCapital(91);
-						rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 1100);
-						rp_SetClientInt(target, i_AddToPay, rp_GetClientInt(target, i_AddToPay) + 1000);
+						rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 600);
+						rp_SetClientInt(target, i_AddToPay, rp_GetClientInt(target, i_AddToPay) + 500);
 						rp_SetJobCapital(91, rp_GetJobCapital(91) + 100);
+						
+						rp_ClientXPIncrement(client, 250);
 						
 						rp_ClientSendToSpawn(client, false);
 						
 						CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N vous a libéré.", target);
 						PrintHintText(client,"{lightblue}[TSX-RP]{red} Vous avez été libéré de prison par %N . Vous avez donc été teleporté sur la map ! Ne vous faites pas prendre par les forces de l'ordre. ", target);
-						CPrintToChat(target, "{lightblue}[TSX-RP]{default} vous avez libéré %N et reçu une récompense de 1000$.", client);
+						CPrintToChat(target, "{lightblue}[TSX-RP]{default} vous avez libéré %N et reçu une récompense de 500$.", client);
 						LogToGame("[QUETE] [MAFIA] %L a libéré %L", target, client);
 						
 						lastFree[client] = GetGameTime() + 180.0;

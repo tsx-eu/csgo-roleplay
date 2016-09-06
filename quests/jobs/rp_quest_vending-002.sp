@@ -118,8 +118,10 @@ public void Q1_End(int objectiveID, int client) {
 	menu.Display(client, 10);
 	
 	int cap = rp_GetClientJobID(client);
-	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 2500);
-	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 2500);
+	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 1000);
+	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 1000);
+	
+	rp_ClientXPIncrement(client, 2500);
 }
 // ----------------------------------------------------------------------------
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {

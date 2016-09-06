@@ -114,8 +114,10 @@ public void Q2_End(int objectiveID, int client) {
 	Q1_Abort(objectiveID, client);
 	
 	int cap = rp_GetRandomCapital(81);
-	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 2500);
-	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 2500);
+	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 1250);
+	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 1250);
+	
+	rp_ClientXPIncrement(client, 500);
 }
 public void Q1_Abort(int objectiveID, int client) {
 	rp_UnhookEvent(client, RP_PostPiedBiche, fwdPiedDeBiche);

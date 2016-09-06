@@ -27,7 +27,7 @@
 #define QUEST_NAME      "Criminels de haut rang"
 #define QUEST_TYPE      quest_daily
 #define QUEST_ITEM      236
-#define QUEST_RATIO		500
+#define QUEST_RATIO		250
 
 public Plugin myinfo =  {
 	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX", 
@@ -130,7 +130,7 @@ public void Q1_Abort(int objectiveID, int client) {
 public void Q1_Frame(int objectiveID, int client) {
 	g_iDuration[client]--;
 	
-	if( g_iCurrent[client] >= 10 ) {
+	if( g_iCurrent[client] >= 20 ) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else if (g_iDuration[client] <= 0) {
@@ -165,6 +165,7 @@ public void Q1_End(int objectiveID, int client) {
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - win);
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + win); 
 	rp_ClientGiveItem(client, QUEST_ITEM);
+	rp_ClientXPIncrement(client, win / 2);
 }
 public Action task_NewMission(Handle timer, any none) {
 	g_bRunning = false;

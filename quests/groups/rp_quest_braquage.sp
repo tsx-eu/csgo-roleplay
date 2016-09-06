@@ -437,6 +437,8 @@ public void Q6_Frame(int objectiveID, int client) {
 			for (int j = 0; j < g_stkTeamCount[TEAM_POLICE]; j++) { 
 				CPrintToChat(g_stkTeam[TEAM_POLICE][j], "{lightblue}[TSX-RP]{default} Vous avez gagné %d$ pour avoir tué tous les braqueurs de %s", gainPolice, tmp2[0]);
 				rp_SetClientInt(g_stkTeam[TEAM_POLICE][j], i_AddToPay, rp_GetClientInt(g_stkTeam[TEAM_POLICE][j], i_AddToPay) + gainPolice);
+				
+				rp_ClientXPIncrement(g_stkTeam[TEAM_POLICE][j], gainPolice / 10);
 			}
 		}
 		rp_QuestStepFail(client, objectiveID);
@@ -531,6 +533,8 @@ public void Q7_Frame(int objectiveID, int client) {
 			for (int j = 0; j < g_stkTeamCount[TEAM_POLICE]; j++) { 
 				CPrintToChat(g_stkTeam[TEAM_POLICE][j], "{lightblue}[TSX-RP]{default} Vous avez gagné %d$ pour avoir tué tous les braqueurs de %s", gainPolice, tmp2[0]);
 				rp_SetClientInt(g_stkTeam[TEAM_POLICE][j], i_AddToPay, rp_GetClientInt(g_stkTeam[TEAM_POLICE][j], i_AddToPay) + gainPolice);
+				
+				rp_ClientXPIncrement(g_stkTeam[TEAM_POLICE][j], gainPolice / 10);
 			}
 		}
 		rp_QuestStepFail(client, objectiveID);
@@ -570,6 +574,8 @@ public void Q_Complete(int objectiveID, int client) {
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
 		CPrintToChat(g_stkTeam[TEAM_BRAQUEUR][i], "{lightblue}[TSX-RP]{default} Vous avez gagné %d$ pour votre braquage de %s.", gain, tmp2[0]);
 		rp_SetClientInt(g_stkTeam[TEAM_BRAQUEUR][i], i_AddToPay, rp_GetClientInt(g_stkTeam[TEAM_BRAQUEUR][i], i_AddToPay) + gain);
+		
+		rp_ClientXPIncrement(g_stkTeam[TEAM_BRAQUEUR][i], gain / 10);
 		
 		if( client != g_stkTeam[TEAM_BRAQUEUR][i] )
 			rp_QuestComplete(g_stkTeam[TEAM_BRAQUEUR][i], QUEST_UNIQID, true);
@@ -621,6 +627,9 @@ public Action EV_RescuseHostage(Handle ev, const char[] name, bool broadcast) {
 		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez gagné %d$ pour avoir libéré un otage de %s.", 1000, tmp2[0]);
 		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 1000);
+		
+		rp_ClientXPIncrement(client, 100);
+		
 		removeClientTeam(hostage);
 	}
 }

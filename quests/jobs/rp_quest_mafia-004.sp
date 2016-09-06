@@ -143,6 +143,8 @@ public void Q3_End(int objectiveID, int client) {
 	int cap = rp_GetRandomCapital(91);
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 2500);
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 2500);
+	
+	rp_ClientXPIncrement(client, 1250);
 }
 public void Q1_Abort(int objectiveID, int client) {
 	g_iDoing[client] = 0;

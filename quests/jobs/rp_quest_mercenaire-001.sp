@@ -155,8 +155,10 @@ public void Q1_Done(int objectiveID, int client) {
 	
 	int cap = rp_GetRandomCapital(QUEST_JOBID);
 	
-	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 2500);
-	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 2500);	
+	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 2000);
+	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 2000);
+	
+	rp_ClientXPIncrement(client, 1000);
 }
 
 public int getFreekiller(int client){
@@ -179,9 +181,9 @@ public int getFreekiller(int client){
 			continue;
 			
 			
-		if(rp_GetClientInt(i, i_KillingSpread) > tdm){
+		if(rp_GetClientInt(i, i_KillJailDuration) > tdm){
 			ret = i;
-			tdm = rp_GetClientInt(i, i_KillingSpread);
+			tdm = rp_GetClientInt(i, i_KillJailDuration);
 		}
 	}
 	return ret;

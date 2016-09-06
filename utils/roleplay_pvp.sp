@@ -355,6 +355,7 @@ public Action FlagThink(Handle timer, any data) {
 				g_iCapture_POINT[rp_GetCaptureInt(cap_bunker)] -= point;
 				
 				GDM_RegisterFlag(g_iFlagData[entity][data_lastOwner]);
+				rp_ClientXPIncrement(g_iFlagData[entity][data_lastOwner], point);
 				
 				PrintHintText(g_iFlagData[entity][data_lastOwner], "<b>Drapeau posé !</b>\n <font color='#33ff33'>+%d</span> points !", point);
 				g_flClientLastScore[g_iFlagData[entity][data_lastOwner]] = GetGameTime();
@@ -1283,6 +1284,9 @@ int GDM_ELOKill(int client, int target) {
 	
 	g_hGlobalDamage.SetArray(szSteamID, attacker, sizeof(attacker));
 	g_hGlobalDamage.SetArray(szSteamID2, victim, sizeof(victim));
+	
+	
+	rp_ClientXPIncrement(client, tmp);
 	
 	return tmp;
 }

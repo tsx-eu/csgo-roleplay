@@ -121,6 +121,16 @@ public void Q1_Frame(int objectiveID, int client) {
 		int cap = rp_GetRandomCapital(181);
 		rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 500);
 		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 500);
+		
+		rp_ClientXPIncrement(client, 250);
+		
+		int MP[] =  { 128, 129, 234, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256, 257 };
+		int rnd = Math_GetRandomInt(0, sizeof(MP) - 1);
+		char tmp[128];
+		rp_GetItemData(rnd, item_type_name, tmp, sizeof(tmp));
+		CPrintToChat(i, "{lightblue}[TSX-RP]{default} Vous avez trouvé 10x%s", tmp);
+		rp_ClientGiveItem(i, rnd, 10);
+		
 	}
 	else if (g_iDuration[client] <= 0) {
 		rp_QuestStepFail(client, objectiveID);

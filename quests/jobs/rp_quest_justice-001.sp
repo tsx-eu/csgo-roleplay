@@ -152,6 +152,7 @@ public void Q2_Done(int objectiveID, int client) {
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 5000);
 	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 5000);
 	
+	rp_ClientXPIncrement(client, 2500);
 }
 // ----------------------------------------------------------------------------
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {

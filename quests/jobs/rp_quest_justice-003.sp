@@ -109,8 +109,10 @@ public void Q1_Done(int objectiveID, int client) {
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 	
 	int cap = rp_GetRandomCapital(101);
-	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 2500);
-	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 2500);	
+	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 1000);
+	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 1000);
+	
+	rp_ClientXPIncrement(client, 750);
 }
 // ----------------------------------------------------------------------------
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
