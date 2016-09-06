@@ -742,7 +742,8 @@ enum int_user_data {
 	i_PlayerXP,
 	i_PlayerLVL,
 	i_PlayerRank,
-	i_PlayerPrestige,	
+	i_PlayerPrestige,
+	i_GiveAmountTime,
 	
 	i_udata_max
 };
