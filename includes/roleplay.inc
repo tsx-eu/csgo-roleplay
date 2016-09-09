@@ -1101,6 +1101,7 @@ enum int_stat_data {
 };
 enum overlaysImg {
 	o_OverlayNone = 0,
+	
 	o_Jail_Meurtre = 1,
 	o_Jail_Agression,
 	o_Jail_Intrusion,
@@ -1114,6 +1115,7 @@ enum overlaysImg {
 	o_Jail_Evasion,
 	o_Jail_GAV,
 	o_Jail_Insultes,
+	
 	o_Death_MisAPrix = 21,
 	o_Death_Voiture,
 	o_Death_Tribunal,
@@ -1122,6 +1124,18 @@ enum overlaysImg {
 	o_Death_Legitime,
 	o_Death_Basket,
 	o_Death_Police,
+	
+	o_Action_StealAppart = 41,
+	o_Action_StealItem,
+	o_Action_StealMoney,
+	o_Action_StealWeapon,
+	o_Action_StealVehicle,
+	o_Action_DestroyPlant,
+	o_Action_DestroyMachine,
+	o_Action_Overdose,
+	o_Action_Maladie,
+	o_Action_Poison,
+	o_Action_Insultes,
 	
 	o_OverlaysMax
 };

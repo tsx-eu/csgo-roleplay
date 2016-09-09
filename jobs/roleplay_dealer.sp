@@ -200,6 +200,7 @@ public Action Cmd_ItemDrugs(int args) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez drogué %N.", target);
 		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été drogué.");
 		
+		rp_ClientOverlays(target, o_Action_Poison, 10.0);
 		rp_ClientAggroIncrement(client, target, 1000);
 		client = target;
 	}
@@ -265,6 +266,8 @@ public Action Cmd_ItemDrugs(int args) {
 				
 				if( !(rp_GetClientJobID(client) == 11 && rp_GetClientBool(client, b_GameModePassive) == false) ) {
 					rp_IncrementSuccess(client, success_list_dealer);
+					rp_ClientOverlays(client, o_Action_Overdose, 10.0);
+					
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes en état d'overdose.");			
 					rp_SetClientInt(client, i_Sick, Math_GetRandomInt((view_as<int>(sick_type_none))+1, (view_as<int>(sick_type_max))-1));
 				}
@@ -794,6 +797,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		if( rp_GetClientBool(client, b_GameModePassive) == false ) {
 			rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, 5.0);
 		}
+		rp_ClientOverlays(client, o_Action_StealWeapon, 10.0);
 	}
 	else if( VOL_MAX > 0 && money >= 1 ) {
 		if( amount > money )
@@ -844,6 +848,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		if( rp_GetClientBool(client, b_GameModePassive) == false ) {
 			rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, 5.0);
 		}
+		rp_ClientOverlays(client, o_Action_StealMoney, 10.0);
 	}
 	else {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'a pas d'argent sur lui.", target);
@@ -1104,6 +1109,7 @@ void Plant_Destroy(int entity) {
 	int owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
 	if( IsValidClient(owner) ) {
 		CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos plantations a été detruite.");
+		rp_ClientOverlays(owner, o_Action_DestroyPlant, 10.0);
 		if( rp_GetBuildingData(entity, BD_started)+120 < GetTime() ) {
 			rp_SetClientInt(owner, i_Bank, rp_GetClientInt(owner, i_Bank)-125);
 		}
@@ -1200,6 +1206,7 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 		
 		switch(type) {
 			case 1: { // Voiture
+			
 				int count = rp_CountPoliceNear(client), rand = 4 + Math_GetRandomPow(0, 4), i;
 				
 				for (i = 0; i < count; i++)
@@ -1212,9 +1219,11 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %d billets ont été sorti de la boite à gant.", rand);
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez maintenant les clés de cette voiture.");
 				
+				
 				rp_SetClientKeyVehicle(client, target, true);
 				rp_SetClientInt(client, i_LastVolVehicle, target);
 				rp_SetClientInt(client, i_LastVolVehicleTime, GetTime());
+				rp_ClientOverlays(client, o_Action_StealVehicle, 10.0);
 			}
 			case 2: {
 				rp_SetBuildingData(target, BD_Trapped, true);

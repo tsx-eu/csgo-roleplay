@@ -292,6 +292,7 @@ public Action Cmd_ItemPoison(int args) {
 	CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été empoisonné.");
 	rp_ClientPoison(target, 120.0, client);
 	rp_ClientAggroIncrement(client, target, 1000);
+	rp_ClientOverlays(target, o_Action_Poison, 10.0);
 	
 	return Plugin_Handled;
 }
