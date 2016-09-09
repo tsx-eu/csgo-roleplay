@@ -315,10 +315,7 @@ public Action fwdFrame(int client) {
 			ShareKeyCar(client, target);
 		}
 		
-		float vecTarget[3];
-		GetClientAbsOrigin(client, vecTarget);
-		TE_SetupBeamRingPoint(vecTarget, 10.0, 100.0, g_cBeam, g_cGlow, 0, 15, 0.5, 50.0, 0.0, {255, 92, 205, 100}, 10, 0);
-		TE_SendToAll();
+		ServerCommand("sm_effect_particles %d trail_heart 1");
 		
 		if( GetClientHealth(client) < 500 ) {
 			SetEntityHealth(client, GetClientHealth(client)+5);
