@@ -19,6 +19,38 @@
 public int Math_GetRandomPow(int min, int max) {
 	return RoundToFloor(float(max - min) * Pow(GetURandomFloat(), 2.0)) + min;
 }
+public void String_WordWrap(char[] s, int wrapline) {
+	int i, k, wraploc, lastwrap;
+	
+	for (i = 0; s[i] != '\0'; ++i, ++wraploc) {
+		if (wraploc >= wrapline) {
+			for (k = i; k > 0; --k) {
+				if (k - lastwrap <= wrapline && s[k] == ' ') {
+					s[k] = '\n';
+					lastwrap = k+1;
+					break;
+				}
+			}
+			wraploc = i - lastwrap;
+		}
+	}
+}
+public void String_ColorsToHTML(char[] text, int length) {
+	ReplaceString(text, length, "{darkred}",	"<font color='#bb0000'>");
+	ReplaceString(text, length, "{red}",		"<font color='#ff0000'>");
+	ReplaceString(text, length, "{pink}", 		"<font color='#ffc0cc'>");
+	ReplaceString(text, length, "{green}", 		"<font color='#00cc00'>");
+	ReplaceString(text, length, "{lightgreen}", "<font color='#90ff90'>");
+	ReplaceString(text, length, "{lime}",		"<font color='#00ff00'>");
+	ReplaceString(text, length, "{grey}",		"<font color='#808080'>");
+	ReplaceString(text, length, "{olive}",		"<font color='#808000'>");
+	ReplaceString(text, length, "{lightblue}",	"<font color='#add8e6'>");
+	ReplaceString(text, length, "{blue}",		"<font color='#0000ff'>");
+	ReplaceString(text, length, "{purple}",		"<font color='#800080'>");
+	ReplaceString(text, length, "{darkorange}", "<font color='#ff8c00'>");
+	ReplaceString(text, length, "{orange}",		"<font color='#ffa500'>");
+	ReplaceString(text, length, "{default}",	"<font color='#ffffff'>");
+}
 // ----------------------------------------------------------------------------
 public void PrintToChatClientArea(int client, const char[] message, any ...) {
 	char buffer[250];

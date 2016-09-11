@@ -537,7 +537,7 @@ native void rp_ClientAggroIncrement(int client, int target, int damage);
 native void rp_ClientOverlays(int client, overlaysImg img, float duration = -1.0);
 native void rp_ClientXPIncrement(int client, int xp=1);
 // ----------------------------------------------------------------------------
-typedef NextMessageCallback = function void(int client, any data, const char[] message);
+typedef NextMessageCallback = function void(int client, any data, char[] message);
 native void rp_GetClientNextMessage(int client, any data, NextMessageCallback cb);
 // ----------------------------------------------------------------------------
 enum BM_Int {

@@ -812,7 +812,7 @@ bool isNearTable(int client) {
 int isNearSign(int client) {
 	char classname[65];
 	int target = rp_GetClientTarget(client);
-	if( IsValidEdict(target) && IsValidEntity(target) ) {
+	if( IsValidEdict(target) && IsValidEntity(target) && g_iSignPermission[target] > 0 ) {
 		GetEdictClassname(target, classname, sizeof(classname));
 		if( StrContains(classname, "rp_sign") == 0 && rp_IsEntitiesNear(client, target) )
 			return target;
@@ -1003,7 +1003,7 @@ public Action BuildingSIGN_post(Handle timer, any entity) {
 	HookSingleEntityOutput(entity, "OnBreak", BuildingSIGN_break);
 	
 	g_iSignPermission[entity] = 1;
-	g_hSignData[entity] = new ArrayList(128);
+	g_hSignData[entity] = new ArrayList(255);
 	g_hSignData[entity].PushString("Appuyez sur E pour modifier le panneau");
 	
 	
@@ -1027,9 +1027,13 @@ public void BuildingSIGN_break(const char[] output, int caller, int activator, f
 	}
 }
 public Action fwdPlayerHINT(int client, int entity) {
+	static char tmp[255];
 	if( g_iSignPermission[entity] > 0 ) {
-		char tmp[128];
 		g_hSignData[entity].GetString(0, tmp, sizeof(tmp));
+		
+		String_ColorsToHTML(tmp, sizeof(tmp));
+		ReplaceString(tmp, sizeof(tmp), "%", "%%");
+		
 		PrintHintText(client, tmp);
 		return Plugin_Stop;
 	}
@@ -1039,15 +1043,48 @@ void displaySignMenu(int client, int entity) {
 	Menu menu = new Menu(Menu_displayMenu);
 	char tmp[128], tmp2[32];
 	
-	menu.SetTitle("Panneau de %N", Entity_GetOwner(entity));
+	int owner = rp_GetBuildingData(entity, BD_owner);
+	menu.SetTitle("Panneau de %N\n ", owner);
+	
+	bool hasPerm = false;
+	if( owner == client )
+		hasPerm = true;
+	if( g_iSignPermission[entity] == 2 && rp_GetClientJobID(owner) == rp_GetClientJobID(client) ) {
+		int jobID = rp_GetClientJobID(client);
+		int job = rp_GetClientInt(client, i_Job);
+		if( job == jobID || job-1 == jobID )
+			hasPerm = true;
+	}
+	if( g_iSignPermission[entity] == 3 && rp_GetClientJobID(owner) == rp_GetClientJobID(client) )
+		hasPerm = true;
+	if( g_iSignPermission[entity] == 4 && rp_GetClientGroupID(owner) == rp_GetClientGroupID(client) )
+		hasPerm = true;
+	if( g_iSignPermission[entity] == 5 )
+		hasPerm = true;
 	
 	for (int i = 0; i < g_hSignData[entity].Length; i++) {
 		g_hSignData[entity].GetString(i, tmp, sizeof(tmp));
 		
 		Format(tmp2, sizeof(tmp2), "%d %d", i, entity);
+		CRemoveTags(tmp, sizeof(tmp));
 		
-		menu.AddItem(tmp2, tmp);
+		if( strlen(tmp) > 40 )
+			String_WordWrap(tmp, 40);
+		
+		
+		menu.AddItem(tmp2, tmp, hasPerm ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	}
+	
+	if( hasPerm ) {
+		Format(tmp2, sizeof(tmp2), "%d %d", -1, entity);
+		menu.AddItem(tmp2, "Ajouter une ligne");
+	}
+	
+	if( client == rp_GetBuildingData(entity, BD_owner) ) {
+		Format(tmp2, sizeof(tmp2), "%d %d", -2, entity);
+		menu.AddItem(tmp2, "Modifier les permissions");
+	}
+	
 	
 	menu.Display(client, MENU_TIME_FOREVER);
 }
@@ -1061,19 +1098,37 @@ public int Menu_displayMenu(Handle menu, MenuAction action, int client, int para
 		char options[64], explo[2][32];
 		GetMenuItem(menu, param2, options, sizeof(options));
 		ExplodeString(options, " ", explo, sizeof(explo), sizeof(explo[]));
+		int i = StringToInt(explo[0]);
+		int entity = StringToInt(explo[1]);
 		
-		DataPack dp = new DataPack();
-		dp.WriteCell(StringToInt(explo[0]));
-		dp.WriteCell(StringToInt(explo[1]));
-		rp_GetClientNextMessage(client, dp, cbTest);
-		
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Entrez une phrase dans le chat pour remplacer cette ligne");
+		if( i <= -100 ) {
+			g_iSignPermission[entity] = i + 1000;
+		}
+		else if( i == -2 ) {
+			Menu menu2 = new Menu(Menu_displayMenu);
+			menu2.SetTitle("Qui peut modifier ce panneau?\n ");
+			Format(options, sizeof(options), "%d %d", -1000+1, entity);	menu2.AddItem(options, "Uniquement moi");
+			Format(options, sizeof(options), "%d %d", -1000+2, entity);	menu2.AddItem(options, "Tous les chefs de mon job");
+			Format(options, sizeof(options), "%d %d", -1000+3, entity);	menu2.AddItem(options, "Toutes les personnes de mon job");
+			Format(options, sizeof(options), "%d %d", -1000+4, entity); menu2.AddItem(options, "Toutes les personnes de mon gang");
+			Format(options, sizeof(options), "%d %d", -1000+5, entity); menu2.AddItem(options, "Tous le monde");
+			
+			menu2.Display(client, MENU_TIME_FOREVER);
+		}
+		else {
+			DataPack dp = new DataPack();
+			dp.WriteCell(i);
+			dp.WriteCell(entity);
+			rp_GetClientNextMessage(client, dp, cbTest);
+			
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Entrez une phrase dans le chat pour remplacer cette ligne. Entrez \".\" pour la supprimer. ");
+		}
 	}
 	else if( action == MenuAction_End ) {
 		CloseHandle(menu);
 	}
 }
-public void cbTest(int client, any data, const char[] message) {
+public void cbTest(int client, any data, char[] message) {
 	DataPack dp = view_as<DataPack>(data);
 	dp.Reset();
 	int i = dp.ReadCell();
@@ -1081,7 +1136,17 @@ public void cbTest(int client, any data, const char[] message) {
 	
 	delete dp;
 	
-	g_hSignData[entity].SetString(i, message);
-	
-	PrintToChatAll("%N --> %d_%d : %s", client, i, entity, message);
+	if( i >= 0 ) {
+		if( strlen(message) > 1 ) {
+			g_hSignData[entity].SetString(i, message);
+		}
+		else {
+			g_hSignData[entity].Erase(i);
+			if( g_hSignData[entity].Length <= 0 ) 
+				g_hSignData[entity].PushString("Appuyez sur E pour modifier le panneau");
+		}
+	}
+	else if( i == -1 ) {
+		g_hSignData[entity].PushString(message);
+	}
 }
