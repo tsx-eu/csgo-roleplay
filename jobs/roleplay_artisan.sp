@@ -42,9 +42,13 @@ bool g_bCanCraft[65][MAX_ITEMS];
 bool g_bInCraft[65];
 float g_flClientBook[65][book_max];
 
+int g_iSignPermission[2049];
+ArrayList g_hSignData[2049];
+
 //#define DEBUG
 #define MODEL_TABLE1 	"models/props/de_boathouse/table_drafting01.mdl"
 #define MODEL_TABLE2	"models/props/de_boathouse/table_drafting02.mdl"
+#define	MODEL_PANNEAU	"models/props/de_cbble/cobble_sign02.mdl"
 
 int lstJOB[] =  { 11, 21, 31, 41, 51, 61, 71, 81, 111, 131, 171, 191, 211, 221 };
 
@@ -71,7 +75,9 @@ public Action Cmd_Reload(int args) {
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);	
 	RegServerCmd("rp_item_crafttable",		Cmd_ItemCraftTable,		"RP-ITEM", 	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_sign",			Cmd_ItemCraftSign,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_craftbook",		Cmd_ItemCraftBook,		"RP-ITEM", 	FCVAR_UNREGISTERED);
+	
 	RegAdminCmd("rp_fatigue", CmdSetFatigue, ADMFLAG_ROOT);
 	
 	for (int i = 1; i <= MaxClients; i++)
@@ -87,6 +93,7 @@ public Action CmdSetFatigue(int client, int args) {
 public void OnMapStart() {
 	PrecacheModel(MODEL_TABLE1);
 	PrecacheModel(MODEL_TABLE2);
+	PrecacheModel(MODEL_PANNEAU);
 }
 public Action Cmd_ItemCraftTable(int args) {
 	#if defined DEBUG
@@ -96,6 +103,19 @@ public Action Cmd_ItemCraftTable(int args) {
 	int item_id = GetCmdArgInt(args);
 	
 	if( BuidlingTABLE(client) == 0 ) {
+		ITEM_CANCEL(client, item_id);
+	}
+	
+	return Plugin_Handled;
+}
+public Action Cmd_ItemCraftSign(int args) {
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemCraftTable");
+	#endif
+	int client = GetCmdArgInt(1);
+	int item_id = GetCmdArgInt(args);
+	
+	if( BuidlingSIGN(client) == 0 ) {
 		ITEM_CANCEL(client, item_id);
 	}
 	
@@ -175,6 +195,8 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse, 	fwdUse);
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
 	rp_HookEvent(client, RP_PreClientStealItem, fwdCanStealItem);
+	rp_HookEvent(client, RP_OnPlayerHINT, fwdPlayerHINT);
+	
 	
 	for(int i = 0; i < view_as<int>(book_max); i++)
 		g_flClientBook[client][i] = 0.0;
@@ -203,6 +225,12 @@ public Action fwdUse(int client) {
 		displayArtisanMenu(client);
 		return Plugin_Handled;
 	}
+	
+	int sign = isNearSign(client);
+	if( sign > 0 ) { 
+		displaySignMenu(client, sign);
+	}
+	
 	return Plugin_Continue;
 }
 public Action fwdOnPlayerBuild(int client, float& cooldown) {
@@ -781,6 +809,16 @@ bool isNearTable(int client) {
 	}
 	return false;
 }
+int isNearSign(int client) {
+	char classname[65];
+	int target = rp_GetClientTarget(client);
+	if( IsValidEdict(target) && IsValidEntity(target) ) {
+		GetEdictClassname(target, classname, sizeof(classname));
+		if( StrContains(classname, "rp_sign") == 0 && rp_IsEntitiesNear(client, target) )
+			return target;
+	}
+	return -1;
+}
 void addStatsToMenu(int client, Handle menu) {
 	char tmp[128], tmp2[32];
 	Format(tmp, sizeof(tmp), "Niveau: %d", rp_GetClientInt(client, i_ArtisanLevel));
@@ -890,4 +928,160 @@ public void BuildingTABLE_break(const char[] output, int caller, int activator, 
 	if( IsValidClient(owner) ) {
 		CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre table de craft a été détruite.");
 	}
+}
+
+int BuidlingSIGN(int client) {
+	#if defined DEBUG
+	PrintToServer("BuidlingTABLE");
+	#endif
+	
+	if( !rp_IsBuildingAllowed(client) )
+		return 0;	
+	
+	char classname[64], tmp[64];
+	float vecOrigin[3];
+	
+	Format(classname, sizeof(classname), "rp_sign");
+	GetClientAbsOrigin(client, vecOrigin);
+	int count;
+	
+	for(int i=1; i<=2048; i++) {
+		if( !IsValidEdict(i) )
+			continue;
+		if( !IsValidEntity(i) )
+			continue;
+		
+		GetEdictClassname(i, tmp, sizeof(tmp));
+		
+		if( StrEqual(classname, tmp) && rp_GetBuildingData(i, BD_owner) == client ) {
+			count++;
+			if( count >= 1 ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez panneau indicateur de placé.");
+				return 0;
+			}
+		}
+	}
+	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Construction en cours...");
+
+	EmitSoundToAllAny("player/ammo_pack_use.wav", client);
+	
+	int ent = CreateEntityByName("prop_physics_override");
+	DispatchKeyValue(ent, "classname", classname);
+	DispatchKeyValue(ent, "model", MODEL_PANNEAU);
+	DispatchSpawn(ent);
+	ActivateEntity(ent);
+	
+	SetEntProp( ent, Prop_Data, "m_iHealth", 10000);
+	SetEntProp( ent, Prop_Data, "m_takedamage", 0);
+	
+	SetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity", client);
+	
+	float vecAngles[3]; GetClientEyeAngles(client, vecAngles); vecAngles[0] = vecAngles[2] = 0.0;
+	TeleportEntity(ent, vecOrigin, vecAngles, NULL_VECTOR);
+	
+	SetEntityRenderMode(ent, RENDER_NONE);
+	ServerCommand("sm_effect_fading \"%i\" \"3.0\" \"0\"", ent);
+	
+	SetEntityMoveType(client, MOVETYPE_NONE);
+	SetEntityMoveType(ent, MOVETYPE_NONE);
+	
+	CreateTimer(3.0, BuildingSIGN_post, ent);
+	rp_SetBuildingData(ent, BD_owner, client);
+	return ent;
+}
+public Action BuildingSIGN_post(Handle timer, any entity) {
+	#if defined DEBUG
+	PrintToServer("BuildingTABLE_post");
+	#endif
+	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
+	SetEntityMoveType(client, MOVETYPE_WALK);
+	
+	rp_Effect_BeamBox(client, entity, NULL_VECTOR, 255, 255, 0);
+	
+	SetEntProp(entity, Prop_Data, "m_takedamage", 2);
+	HookSingleEntityOutput(entity, "OnBreak", BuildingSIGN_break);
+	
+	g_iSignPermission[entity] = 1;
+	g_hSignData[entity] = new ArrayList(128);
+	g_hSignData[entity].PushString("Appuyez sur E pour modifier le panneau");
+	
+	
+	return Plugin_Handled;
+}
+public void OnEntityDestroyed(int entity) {
+	if( g_hSignData[entity] ) {
+		g_hSignData[entity].Clear();
+		delete g_hSignData[entity];
+		g_iSignPermission[entity] = 0;
+	}
+}
+public void BuildingSIGN_break(const char[] output, int caller, int activator, float delay) {
+	#if defined DEBUG
+	PrintToServer("BuildingTABLE_break");
+	#endif
+	
+	int owner = GetEntPropEnt(caller, Prop_Send, "m_hOwnerEntity");
+	if( IsValidClient(owner) ) {
+		CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre panneau a été détruit.");
+	}
+}
+public Action fwdPlayerHINT(int client, int entity) {
+	if( g_iSignPermission[entity] > 0 ) {
+		char tmp[128];
+		g_hSignData[entity].GetString(0, tmp, sizeof(tmp));
+		PrintHintText(client, tmp);
+		return Plugin_Stop;
+	}
+	return Plugin_Continue;
+}
+void displaySignMenu(int client, int entity) {
+	Menu menu = new Menu(Menu_displayMenu);
+	char tmp[128], tmp2[32];
+	
+	menu.SetTitle("Panneau de %N", Entity_GetOwner(entity));
+	
+	for (int i = 0; i < g_hSignData[entity].Length; i++) {
+		g_hSignData[entity].GetString(i, tmp, sizeof(tmp));
+		
+		Format(tmp2, sizeof(tmp2), "%d %d", i, entity);
+		
+		menu.AddItem(tmp2, tmp);
+	}
+	
+	menu.Display(client, MENU_TIME_FOREVER);
+}
+
+public int Menu_displayMenu(Handle menu, MenuAction action, int client, int param2) {
+	#if defined DEBUG
+	PrintToServer("Menu_displayMenu");
+	#endif
+	
+	if( action == MenuAction_Select ) {
+		char options[64], explo[2][32];
+		GetMenuItem(menu, param2, options, sizeof(options));
+		ExplodeString(options, " ", explo, sizeof(explo), sizeof(explo[]));
+		
+		DataPack dp = new DataPack();
+		dp.WriteCell(StringToInt(explo[0]));
+		dp.WriteCell(StringToInt(explo[1]));
+		rp_GetClientNextMessage(client, dp, cbTest);
+		
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Entrez une phrase dans le chat pour remplacer cette ligne");
+	}
+	else if( action == MenuAction_End ) {
+		CloseHandle(menu);
+	}
+}
+public void cbTest(int client, any data, const char[] message) {
+	DataPack dp = view_as<DataPack>(data);
+	dp.Reset();
+	int i = dp.ReadCell();
+	int entity = dp.ReadCell();
+	
+	delete dp;
+	
+	g_hSignData[entity].SetString(i, message);
+	
+	PrintToChatAll("%N --> %d_%d : %s", client, i, entity, message);
 }

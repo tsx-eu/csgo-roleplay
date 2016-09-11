@@ -429,3 +429,4 @@ public int rp_CountPoliceNear(int client) {
 	g_iLastData[client] = count;
 	return count;
 }
+

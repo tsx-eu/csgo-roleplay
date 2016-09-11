@@ -65,6 +65,7 @@ enum rp_event {
 	RP_OnPlayerDataLoaded,     /* Quand le joueur a chargé */
 	RP_OnPlayerSell,           /* Quand un joueur fait une vente */
 	RP_OnPlayerHUD,            /* A chaque fois que le HUD à gauche se refresh */
+	RP_OnPlayerHINT,			/* A chaque fois que le HINT apparait */
 	RP_OnPlayerCheckKey,	   /* A chaque vérification s'il a la clé */
 	RP_OnResellWeapon,		   /* Revente d'arme au marché noire */
 	RP_PreClientCraft,			/* Avant qu'un craft se fasse, permet de changer le cout */
@@ -110,9 +111,11 @@ typeset rp_event_enum {
 	function Action(int client, int target, float& dist);				                       /* RP_OnPlayerHear Est-ce que client peut entendre target ? */
 	function Action(int client, char[] message, int length, bool local);	             /* RP_PrePlayerTalk */
 	function Action(int client);								                                       /* RP_OnPlayerDataLoaded */
-	function Action(int client, int money);					                         	         /* RP_OnPlayerSell */
-	function Action(int client, char[] szHUD, const int maxSize);			                 /* RP_OnPlayerHUD */
-	function Action(int client, int doorID, int lockStatus);											/* RP_OnPlayerCheckKey */
+	function Action(int client, int money);					                         	    /* RP_OnPlayerSell */
+	function Action(int client, char[] szHUD, const int maxSize);			                /* RP_OnPlayerHUD */
+	function Action(int client, int target);			             						/* RP_OnPlayerHINT */
+	
+	function Action(int client, int doorID, int lockStatus);								/* RP_OnPlayerCheckKey */
 	function Action(int client, int weaponID, int price);									/* RP_OnResellWeapon */
 	function Action(int client, int itemID, int& free);										/* RP_PreClientCraft */
 	function Action(int client, int itemID);												/* RP_PostClientCraft */	
@@ -533,6 +536,9 @@ native bool rp_ClientFloodTriggered(int client, int target, fd_user_data type);
 native void rp_ClientAggroIncrement(int client, int target, int damage);
 native void rp_ClientOverlays(int client, overlaysImg img, float duration = -1.0);
 native void rp_ClientXPIncrement(int client, int xp=1);
+// ----------------------------------------------------------------------------
+typedef NextMessageCallback = function void(int client, any data, const char[] message);
+native void rp_GetClientNextMessage(int client, any data, NextMessageCallback cb);
 // ----------------------------------------------------------------------------
 enum BM_Int {
 	BM_Owner = 0,
