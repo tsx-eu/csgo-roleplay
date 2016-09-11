@@ -3180,6 +3180,12 @@ void explainJail(int client, int jailReason) {
 	}
 }
 bool canWeaponBeAddedInPoliceStore(int weaponID) {
+	
+	char classname[64];
+	GetEdictClassname(weaponID, classname, sizeof(classname));
+	if( StrContains(classname, "weapon_default") == 0 || StrContains(classname, "weapon_knife") == 0 )
+		return false;
+	
 	int owner = GetEntPropEnt(weaponID, Prop_Send, "m_hPrevOwner");
 	if( IsValidClient(owner) && (rp_GetClientJobID(owner) == 1 || rp_GetClientJobID(owner) == 101) )
 		return false;
