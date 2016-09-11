@@ -1887,8 +1887,10 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			LogToGame("[TSX-RP] [TRIBUNAL] %L a mis %L dans la prison du Tribunal.", client, target);
 			return;
 		}
-		if( StrEqual(g_szJailRaison[type][jail_raison],"Agression physique") 
-			&& !(rp_GetClientInt(client, i_Job) >= 101 || rp_GetClientInt(client, i_Job) >= 106) ) { // Agression physique
+		
+		
+		if( StrEqual(g_szJailRaison[type][jail_raison],"Agression physique")
+			&& !( (rp_GetClientInt(client, i_Job) >= 101 || rp_GetClientInt(client, i_Job) >= 106)) && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == 101 ) { // Agression physique
 			if(rp_GetClientInt(target, i_LastAgression)+30 < GetTime()){
 				rp_SetClientInt(target, i_JailTime, 0);
 				rp_SetClientInt(target, i_jailTime_Last, 0);
@@ -1906,7 +1908,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			}
 		}
 		if( StrEqual(g_szJailRaison[type][jail_raison], "Tir dans la rue") 
-			&& !(rp_GetClientInt(client, i_Job) >= 101 || rp_GetClientInt(client, i_Job) >= 106) ) { // Tir dans la rue
+			&& !( (rp_GetClientInt(client, i_Job) >= 101 || rp_GetClientInt(client, i_Job) >= 106)) && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == 101 ) { // Tir dans la rue
 			if(rp_GetClientInt(target, i_LastDangerousShot)+30 < GetTime()){
 				rp_SetClientInt(target, i_JailTime, 0);
 				rp_SetClientInt(target, i_jailTime_Last, 0);
