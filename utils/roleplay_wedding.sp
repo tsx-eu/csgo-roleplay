@@ -315,7 +315,8 @@ public Action fwdFrame(int client) {
 			ShareKeyCar(client, target);
 		}
 		
-		ServerCommand("sm_effect_particles %d trail_heart 1");
+		ServerCommand("sm_effect_particles %d trail_heart 3", client);
+		
 		
 		if( GetClientHealth(client) < 500 ) {
 			SetEntityHealth(client, GetClientHealth(client)+5);
