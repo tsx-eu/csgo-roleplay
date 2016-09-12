@@ -55,7 +55,15 @@ public void OnPluginStart() {
 		if( IsValidClient(j) )
 			OnClientPostAdminCheck(j);
 }
+public int Sort_ByJob(int a, int b, const int[] array, Handle hndl) {
+	int d1 = rp_GetJobInt((a - (a % 10))+1, job_type_quota) - rp_GetJobInt((a - (a % 10))+1, job_type_current);
+	int d2 = rp_GetJobInt((b - (b % 10))+1, job_type_quota) - rp_GetJobInt((b - (b % 10))+1, job_type_current);
+	
+	return d2 - d1;
+}
 public void OnAllPluginsLoaded() {
+	SortCustom1D(g_iJob, sizeof(g_iJob), Sort_ByJob);
+	
 	g_iQuest = rp_RegisterQuest(QUEST_UNIQID, QUEST_NAME, QUEST_TYPE, fwdCanStart);
 	if( g_iQuest == -1 )
 		SetFailState("Erreur lors de la création de la quête %s %s", QUEST_UNIQID, QUEST_NAME);
@@ -624,7 +632,7 @@ public void Q13_Frame(int objectiveID, int client) {
 		g_iQ12 = objectiveID;
 		
 		Handle menu = CreateMenu(MenuSelectParrain);
-		SetMenuTitle(menu, "== Parrainage");
+		SetMenuTitle(menu, "== Parrainage\n ");
 					
 		AddMenuItem(menu, "", "Quelqu'un de présent vous a t-il invité",		ITEMDRAW_DISABLED);
 		AddMenuItem(menu, "", "à jouer sur notre serveur?  Si oui, qui?",		ITEMDRAW_DISABLED);
@@ -682,17 +690,13 @@ public void Q14_Frame(int objectiveID, int client) {
 		g_iQ14 = objectiveID;
 		
 		Handle menu = CreateMenu(MenuSelectJob);
-		SetMenuTitle(menu, "== Votre premier job vous est offert");
+		SetMenuTitle(menu, "== Votre premier job vous est offert\n ");
 		AddMenuItem(menu, "", "Sachez que plus tard, vous devrez le trouver", ITEMDRAW_DISABLED);
-		AddMenuItem(menu, "", "vous-même et être recruté par le chef d'un job.", ITEMDRAW_DISABLED);
+		AddMenuItem(menu, "", "vous-même et être recruté par le chef d'un job.\n ", ITEMDRAW_DISABLED);
 			
 		char tmp[128], tmp2[8];
-		SortIntegers(g_iJob, sizeof(g_iJob), Sort_Random);
 	
-		for( int i=1;i<sizeof(g_iJob); i++) {
-			
-			if( rp_GetJobInt((g_iJob[i] - (g_iJob[i] % 10))+1, job_type_current) >= (rp_GetJobInt((g_iJob[i] - (g_iJob[i] % 10))+1, job_type_quota)*2) )
-				continue;
+		for( int i=0; i<sizeof(g_iJob) - 2; i++) {
 			
 			rp_GetJobData(g_iJob[i], job_type_name, tmp, sizeof(tmp));
 			Format(tmp, sizeof(tmp), "%s: %s", qualif[g_iRecom[g_iJob[i]]], tmp);
@@ -739,7 +743,7 @@ public int MenuSelectJob(Handle menu, MenuAction action, int client, int param2)
 			rp_QuestStepComplete(client, g_iQ14);
 			rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) + 15000);
 			
-			rp_ClientXPIncrement(client, 3600);
+			rp_ClientXPIncrement(client, 5000);
 			
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez terminé le tutoriel, une voiture vous a été offerte. (Faites /item !)");
 			
