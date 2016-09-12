@@ -273,7 +273,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		if( rp_GetClientBool(client, b_GameModePassive) == false ) {
 			rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, 5.0);
 		}
-		rp_ClientOverlays(client, o_Action_StealItem, 10.0);
+		rp_ClientOverlays(target, o_Action_StealItem, 10.0);
 		//g_iSuccess_last_pas_vu_pas_pris[target] = GetTime();		
 	}
 	else if( VOL_MAX > 0 && money >= 1 ) {
@@ -326,7 +326,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 			rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, 5.0);
 		}
 		
-		rp_ClientOverlays(client, o_Action_StealMoney, 10.0);
+		rp_ClientOverlays(target, o_Action_StealMoney, 10.0);
 	}
 	else {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'a pas d'argent sur lui.", target);
