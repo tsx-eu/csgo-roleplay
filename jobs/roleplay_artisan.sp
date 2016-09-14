@@ -702,7 +702,8 @@ public Action stopBuilding(Handle timer, Handle dp) {
 			magic.GetArray(i, data);
 				
 			for (int j = 0; j < data[craft_amount]; j++) { // Pour chaque quantité nécessaire de la recette
-				if( (data[craft_rate]+level+focus) >= Math_GetRandomInt(0, 100) ) { // De facon aléatoire
+			
+				if( (float(data[craft_rate]) + (float(level) / 100.0 * float(data[craft_rate])) + float(focus)) >= Math_GetRandomFloat(0.0, 100.0) ) { // De facon aléatoire
 					ClientGiveXP(client, rp_GetItemInt(data[craft_raw], item_type_prix));
 					rp_ClientGiveItem(client, data[craft_raw]);
 				}
@@ -773,12 +774,7 @@ float getDuration(int client, int itemID) {
 	return duration;
 }
 int getNextLevel(int level) {
-	if( level >= 75 )
-		return level * level * 750;
-	else if( level >= 50 )
-		return RoundToFloor(Pow(float(level), 1.8) * 750.0);
-	else
-		return RoundToFloor(Pow(float(level), 1.6) * 750.0);
+	return RoundToFloor(Pow(float(level), 1.750) * 750.0);
 }
 int ClientGiveXP(int client, int xp) {
 	if( g_flClientBook[client][book_xp] > GetTickedTime() )
