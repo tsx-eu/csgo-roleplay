@@ -35,6 +35,41 @@ public void String_WordWrap(char[] s, int wrapline) {
 		}
 	}
 }
+public void String_NumberFormat(int value, char[] buffer, int size) {
+	
+    char[] helper = new char[size];
+    IntToString(value, helper, size);
+    strcopy(buffer, size, helper);
+
+    int length = strlen(helper);
+
+    int n_helper;
+
+    if (helper[0] == '-') {
+        n_helper += ((length-1) % 3) + 1;
+
+        if (n_helper == 1) {
+            n_helper = 4;
+        }
+    }
+    else {
+        n_helper += length % 3;
+
+        if (n_helper == 0) {
+            n_helper = 3;
+        }
+    }
+
+    int n_buffer = n_helper;
+
+    while (n_helper < length) {
+        buffer[n_buffer] = ' ';
+        strcopy(buffer[n_buffer + 1], size, helper[n_helper]);
+
+        n_buffer += 4;
+        n_helper += 3;
+    }
+}
 public void String_ColorsToHTML(char[] text, int length) {
 	ReplaceString(text, length, "{darkred}",	"<font color='#bb0000'>");
 	ReplaceString(text, length, "{red}",		"<font color='#ff0000'>");
