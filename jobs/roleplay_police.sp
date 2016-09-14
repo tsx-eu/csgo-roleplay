@@ -1926,6 +1926,8 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				return;
 			}
 		}
+		
+		
 		int amende = StringToInt(g_szJailRaison[type][jail_amende]);
 		
 		if( amende == -1 )
@@ -2037,7 +2039,11 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 		}
 		
 		if( time_to_spend < 0 ) {
-			time_to_spend = rp_GetClientInt(target, i_JailTime) + (6 * 60);
+			int d = 6;
+			if( ZoneDeJailSansIntrusion(rp_GetZoneFromPoint(g_flLastPos[target])) )
+				d = 1;
+			
+			time_to_spend = rp_GetClientInt(target, i_JailTime) + ( d * 60);
 		}
 		else {
 			rp_SetClientInt(target, i_jailTime_Reason, type);
@@ -3195,4 +3201,9 @@ bool canWeaponBeAddedInPoliceStore(int weaponID) {
 		return false;
 		
 	return true;
+}
+bool ZoneDeJailSansIntrusion(int zone) {
+	if( zone == 13 || zone == 14 || zone == 15 || zone == 158 || zone == 87 || zone == 88 || zone == 89 || zone == 157  )
+		return true;
+	return false;
 }
