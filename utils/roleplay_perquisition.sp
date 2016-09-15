@@ -109,7 +109,7 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 				subMenu.Display(client, MENU_TIME_FOREVER);
 			}
 			else {
-				START_PERQUIZ(client, zone, StringToInt(expl[2]));
+				INIT_PERQUIZ(client, zone, StringToInt(expl[2]));
 			}
 		}
 		else if( StrEqual(expl[0], "trafic") ) {
@@ -138,7 +138,7 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 			}
 			
 			if( weapon > 3 || machine > 2 || plant > 2 )
-				START_PERQUIZ(client, zone, 0);
+				INIT_PERQUIZ(client, zone, 0);
 		}
 	}
 	else if( action == MenuAction_End ) {
@@ -147,7 +147,7 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 	return 0;
 }
 
-void START_PERQUIZ(int client, int zone, int type) {
+void INIT_PERQUIZ(int client, int zone, int type) {
 	char tmp[64];
 	rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
 	
@@ -160,13 +160,17 @@ void START_PERQUIZ(int client, int zone, int type) {
 		dp.WriteCell(60);
 	}
 	else {
-		DataPack dp = new DataPack();
-		CreateDataTimer(1.0, TIMER_PERQUIZ, dp, TIMER_REPEAT);
-		dp.WriteCell(client);
-		dp.WriteCell(zone);
-		dp.WriteCell(type);
-		dp.WriteCell(0);
+		START_PERQUIZ(client, zone, type, 0);
 	}
+}
+void START_PERQUIZ(int client, int zone, int type, int responsable) {
+	DataPack dp = new DataPack();
+	CreateDataTimer(1.0, TIMER_PERQUIZ, dp, TIMER_REPEAT);
+	dp.WriteCell(client);
+	dp.WriteCell(zone);
+	dp.WriteCell(type);
+	dp.WriteCell(responsable);
+	dp.WriteCell(0);
 }
 public Action TIMER_PERQUIZ(Handle timer, DataPack dp) {
 	dp.Reset();
@@ -174,6 +178,25 @@ public Action TIMER_PERQUIZ(Handle timer, DataPack dp) {
 	int zone = dp.ReadCell();
 	int type = dp.ReadCell();
 	int resp = dp.ReadCell();
+	int timeout = dp.ReadCell();
+	
+	char tmp[128], tmp2[128];
+	
+	if( !hasCopInZone(zone) ) {
+		timeout++;
+		if( timeout == 20 ) {
+			rp_GetZoneData(zone, zone_type_name, tmp, sizeof(tmp));
+			
+			PrintToChatPoliceSearch(resp, "{red} ================================== {default}");
+			PrintToChatPoliceSearch(resp, "{red}[TSX-RP] [POLICE]{default} La perquisition dans %s sera annulée,", tmp);
+			PrintToChatPoliceSearch(resp, "{red}[TSX-RP] [POLICE]{default} si aucun flic n'est présent dans les 10 secondes.");
+			PrintToChatPoliceSearch(resp, "{red} ================================== {default}");
+		}
+		else if( timeout >= 30 ) {
+		}
+	}
+	else
+		timeout = 0;
 	
 	Effect_DrawPerqui(zone);
 	PrintToChatAll("%N -> %d -> %N -> %N", client, zone, type, resp);
@@ -211,12 +234,7 @@ public Action TIMER_PERQUIZ_LOOKUP(Handle timer, DataPack dp) {
 	
 	
 	if( canStart ) {
-		DataPack dp2 = new DataPack();
-		CreateDataTimer(1.0, TIMER_PERQUIZ, dp2, TIMER_REPEAT);
-		dp2.WriteCell(client);
-		dp2.WriteCell(zone);
-		dp2.WriteCell(type);
-		dp2.WriteCell(resp);
+		START_PERQUIZ(client, zone, type, resp);
 		return Plugin_Stop;
 	}
 			
@@ -376,4 +394,19 @@ void Effect_DrawPane(float bottomCorner[3], float upperCorner[3], int subDivisio
 			TE_SendToAllInRange(median, RangeType_Audibility);
 		}
 	}
+}
+bool hasCopInZone(int zone) {
+	char tmp[128], tmp2[128];
+	rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
+	
+	for (int i = 1; i <= MaxClients; i++) {
+		if( !IsValidClient(i) || !IsPlayerAlive(i) )
+			continue;
+		if( GetClientTeam(i) == CS_TEAM_T )
+			continue;
+		rp_GetZoneData(rp_GetPlayerZone(i), zone_type_type, tmp2, sizeof(tmp2));
+		if( StrEqual(tmp, tmp2) )
+			return true;
+	}
+	return false;
 }
