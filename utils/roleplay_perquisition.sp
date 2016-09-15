@@ -164,6 +164,9 @@ void INIT_PERQUIZ(int client, int zone, int type) {
 	}
 }
 void START_PERQUIZ(int client, int zone, int type, int responsable) {
+	
+	changeZoneState(zone, true);
+	
 	DataPack dp = new DataPack();
 	CreateDataTimer(1.0, TIMER_PERQUIZ, dp, TIMER_REPEAT);
 	dp.WriteCell(client);
@@ -172,6 +175,10 @@ void START_PERQUIZ(int client, int zone, int type, int responsable) {
 	dp.WriteCell(responsable);
 	dp.WriteCell(0);
 }
+void END_PERQUIZ(int client, int zone, int type, int responsable) {
+	changeZoneState(zone, false);
+}
+
 public Action TIMER_PERQUIZ(Handle timer, DataPack dp) {
 	dp.Reset();
 	int client = dp.ReadCell();
@@ -409,4 +416,26 @@ bool hasCopInZone(int zone) {
 			return true;
 	}
 	return false;
+}
+
+void changeZoneState(int zone, bool enabled) {
+	int bits;
+	char tmp[128], tmp2[128];
+	rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
+	
+	for (int i = 0; i < 310; i++) {
+		
+		rp_GetZoneData(i, zone_type_type, tmp2, sizeof(tmp2));
+		if( !StrEqual(tmp, tmp2) )
+			continue;
+		
+		bits = rp_GetZoneBit(i);
+		
+		if( enabled )
+			bits = (bits & BITZONE_PERQUIZ);
+		else
+			bits = (!(bits & BITZONE_PERQUIZ));
+		
+		rp_SetZoneBit(i, bits);
+	}
 }
