@@ -231,6 +231,13 @@ public Action Cmd_ItemSucette(int args) {
 		ITEM_CANCEL(client, item_id);
 		return Plugin_Handled;
 	}
+	
+	if( rp_GetZoneBit(rp_GetPlayerZone(client)) & BITZONE_PERQUIZ ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Une perquisition est en cours, impossible d'utiliser cet objet pour le moment.");
+		int item_id = GetCmdArgInt(args);
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
 
 	float Origin[3];	
 	GetClientAbsOrigin(client, Origin);

@@ -482,11 +482,15 @@ public Action Cmd_Tazer(int client) {
 		if( GetClientTeam(target) == CS_TEAM_CT ) {
 			ACCESS_DENIED(client);
 		}
-		if( (job >= 103 && job <= 106) && (rp_GetZoneInt(Tzone, zone_type_type) != 101) ) { // J et HJ en dehors du tribu
-			if( !(rp_GetZoneBit(target, -999.0) & BITZONE_PERQUIZ) ) { // Si perquiz en cours, on doit test le by-pass du cache.
-				ACCESS_DENIED(client);
-			}
+		
+		float maxDist = MAX_AREA_DIST * 3.0;
+		if( rp_GetZoneBit(rp_GetPlayerZone(client)) & BITZONE_PERQUIZ || rp_GetZoneBit(rp_GetPlayerZone(target)) & BITZONE_PERQUIZ )
+			maxDist = 255.0;
+		
+		if( Entity_GetDistance(client, target) > maxDist ) {
+			ACCESS_DENIED(client);
 		}
+		
 		if( rp_GetClientBool(target, b_Lube) && Math_GetRandomInt(1, 5) != 5) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N vous glisse entre les mains.", target);
 			return Plugin_Handled;
@@ -757,7 +761,12 @@ public Action Cmd_Jail(int client) {
 	int Tzone = rp_GetPlayerZone(target);
 	int Tbit = rp_GetZoneBit(Tzone);
 	
-	if( Entity_GetDistance(client, target) > MAX_AREA_DIST*3 ) {
+	float maxDist = MAX_AREA_DIST * 2.0;
+	
+	if( Cbit & BITZONE_PERQUIZ || Tbit & BITZONE_PERQUIZ )
+		maxDist = 255.0;
+	
+	if( Entity_GetDistance(client, target) > maxDist ) {
 		ACCESS_DENIED(client);
 	}
 	

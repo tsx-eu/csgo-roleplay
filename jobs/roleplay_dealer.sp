@@ -424,6 +424,7 @@ public Action Cmd_ItemPilule(int args){
 		return Plugin_Handled;
 	}
 	
+	
 	Action a;
 	Call_StartForward(rp_GetForwardHandle(client, RP_PreClientTeleport));
 	Call_PushCell(client);
@@ -534,9 +535,11 @@ public Action ItemPiluleOver(Handle timer, Handle dp) {
 	int clientzone = rp_GetPlayerZone(client);
 	int clientzonebit = rp_GetZoneBit(clientzone);
 
-	if(!IsValidClient(client) || !IsPlayerAlive(client) || ( clientzonebit & BITZONE_JAIL ||  clientzonebit & BITZONE_LACOURS ||  clientzonebit & BITZONE_HAUTESECU ) ){
-		if(IsValidClient(client))
+	if(!IsValidClient(client) || !IsPlayerAlive(client) || ( clientzonebit & BITZONE_JAIL || clientzonebit & BITZONE_LACOURS || clientzonebit & BITZONE_HAUTESECU || clientzonebit & BITZONE_PERQUIZ ) ){
+		if(IsValidClient(client)) {
 			rp_ClientColorize(client);
+			ITEM_CANCEL(client, item_id);
+		}
 		return Plugin_Handled;
 	}
 	float zonemin[3], zonemax[3], tppos[3];

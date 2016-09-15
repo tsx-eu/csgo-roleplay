@@ -786,6 +786,13 @@ public Action Cmd_ItemLessive(int args) {
 		return Plugin_Handled;
 	}
 	
+	if( rp_GetZoneBit(rp_GetPlayerZone(client)) & BITZONE_PERQUIZ ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Une perquisition est en cours, impossible d'utiliser cet objet pour le moment.");
+		int item_id = GetCmdArgInt(args);
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
+	
 	SDKHooks_TakeDamage(client, client, client, 5000.0);
 	rp_ClientDamage(client, 5000, client);
 	
