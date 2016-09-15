@@ -235,7 +235,7 @@ public Action fwdHookDead(int victim, int attacker) {
 		rp_UnhookEvent(victim, RP_OnPlayerDead, fwdHookDead);
 	}
 	
-	rp_SetClientInt(client, i_JailTime, (rp_GetClientInt(client, i_JailTime) + 6 * 60));
+	rp_SetClientInt(victim, i_JailTime, (rp_GetClientInt(victim, i_JailTime) + 6 * 60));
 	
 	END_PERQUIZ(zone, false);
 	
