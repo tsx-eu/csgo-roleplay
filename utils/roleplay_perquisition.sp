@@ -14,8 +14,6 @@
 #include <sdkhooks>
 #include <smlib>
 #include <colors_csgo>
-#include <basecomm>
-#include <topmenus>
 
 #define __LAST_REV__ 		"v:0.1.0"
 
@@ -205,6 +203,7 @@ void START_PERQUIZ(int zone) {
 	
 	if( IsValidClient(array[PQ_type]) ) {
 		rp_HookEvent(array[PQ_type], RP_OnPlayerDead, fwdHookDead);
+		rp_HookEvent(array[PQ_type], RP_PreClientSendToJail, fwdHookJail);
 	}
 	CreateTimer(1.0, TIMER_PERQUIZ, zone, TIMER_REPEAT);
 }
@@ -220,6 +219,7 @@ void END_PERQUIZ(int zone, bool abort) {
 	
 	if( IsValidClient(array[PQ_type]) ) {
 		rp_UnhookEvent(array[PQ_type], RP_OnPlayerDead, fwdHookDead);
+		rp_UnhookEvent(array[PQ_type], RP_PreClientSendToJail, fwdHookJail);
 	}
 	
 	g_hPerquisition.Remove(tmp);
@@ -228,6 +228,20 @@ void END_PERQUIZ(int zone, bool abort) {
 	PrintToChatPoliceSearch(array[PQ_resp], "{red} ================================== {default}");
 	PrintToChatPoliceSearch(array[PQ_resp], "{red}[TSX-RP] [POLICE]{default} La perquisition dans %s est %s.", tmp, abort ? "annulée" : "terminée");
 	PrintToChatPoliceSearch(array[PQ_resp], "{red} ================================== {default}");
+}
+public Action fwdHookJail(int victim, int attacker) {
+	char tmp[64];
+	int zone = rp_GetZoneFromPoint(g_flLastPos[victim]);
+	int array[PQ_Max];
+	rp_GetZoneData( zone, zone_type_type, tmp, sizeof(tmp));
+	
+	if( !g_hPerquisition.GetArray(tmp, array, sizeof(array)) ) {
+		rp_UnhookEvent(victim, RP_PreClientSendToJail, fwdHookJail);
+	}
+	
+	END_PERQUIZ(zone, false);
+	
+	return Plugin_Continue;
 }
 public Action fwdHookDead(int victim, int attacker) {
 	char tmp[64];
