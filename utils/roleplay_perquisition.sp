@@ -128,27 +128,7 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 		else if( StrEqual(expl[0], "trafic") ) {
 			int weapon, machine, plant;
 			
-			for (int i = MaxClients; i <= MAX_ENTITIES; i++) {
-				if( !IsValidEdict(i) || !IsValidEntity(i) )
-					continue;
-				
-				GetEdictClassname(i, tmp, sizeof(tmp));
-				if( StrContains(tmp, "weapon_") == -1 && StrContains(tmp, "rp_") == -1 )
-					continue;
-				
-				rp_GetZoneData(rp_GetPlayerZone(i), zone_type_type, options, sizeof(options));
-				if( !StrEqual(options, expl[1]) )
-					continue;
-				
-				if( StrContains(tmp, "weapon_") == 0 && StrContains(tmp, "knife") == -1 )
-					weapon++;
-				if( StrContains(tmp, "rp_plant") == 0 )
-					plant++;
-				if( StrContains(tmp, "rp_cash") == 0 )
-					machine++;
-				if( StrContains(tmp, "rp_bigcash") == 0 )
-					machine+=15;
-			}
+			countBadThing(expl[1], weapon, plant, machine);
 			
 			if( weapon > 3 || machine > 2 || plant > 2 )
 				INIT_PERQUIZ(client, zone, 0);
@@ -216,6 +196,8 @@ void END_PERQUIZ(int zone, bool abort) {
 		return;
 	}
 	changeZoneState(zone, false);
+	TeleportCT(zone);
+	DoorLock(zone);
 	
 	if( IsValidClient(array[PQ_type]) ) {
 		rp_UnhookEvent(array[PQ_type], RP_OnPlayerDead, fwdHookDead);
@@ -279,6 +261,14 @@ public Action TIMER_PERQUIZ(Handle timer, any zone) {
 		}
 		else
 			GetClientAbsOrigin(array[PQ_type], g_flLastPos[array[PQ_type]]);
+	}
+	else {
+		int weapon, machine, plant;
+			
+		countBadThing(tmp, weapon, plant, machine);
+		if( (weapon + plant + machine) == 0 ) {
+			END_PERQUIZ(zone, false);
+		}
 	}
 	
 	if( hasCopInZone(zone) ) {
@@ -552,4 +542,62 @@ void updatePerquizData(int zone, int array[PQ_Max]) {
 	rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
 	
 	g_hPerquisition.SetArray(tmp, array, sizeof(array));
+}
+
+void countBadThing(char[] zone, int& weapon, int& plant, int& machine) {
+	char tmp[64], tmp2[64];
+	
+	for (int i = MaxClients; i <= MAX_ENTITIES; i++) {
+		if( !IsValidEdict(i) || !IsValidEntity(i) )
+			continue;
+		
+		GetEdictClassname(i, tmp, sizeof(tmp));
+		if( StrContains(tmp, "weapon_") == -1 && StrContains(tmp, "rp_") == -1 )
+			continue;
+		
+		rp_GetZoneData(rp_GetPlayerZone(i), zone_type_type, tmp2, sizeof(tmp2));
+		if( !StrEqual(tmp2, zone) )
+			continue;
+		
+		if( StrContains(tmp, "weapon_") == 0 && StrContains(tmp, "knife") == -1 &&  Weapon_GetOwner(i) == 0 )
+			weapon++;
+		if( StrContains(tmp, "rp_plant") == 0 )
+			plant++;
+		if( StrContains(tmp, "rp_cash") == 0 )
+			machine++;
+		if( StrContains(tmp, "rp_bigcash") == 0 )
+			machine+=15;
+	}
+}
+void TeleportCT(int zone) {
+	char tmp[64], tmp2[64];
+	rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
+	
+	for (int i = 1; i <= MaxClients; i++) {
+		if( !IsValidClient(i) || !IsPlayerAlive(i) )
+			continue;
+		if( GetClientTeam(i) == CS_TEAM_T )
+			continue;
+		rp_GetZoneData(rp_GetPlayerZone(i), zone_type_type, tmp2, sizeof(tmp2));
+		
+		if( StrEqual(tmp, tmp2) ) {
+			rp_ClientSendToSpawn(i);
+		}
+	}
+}
+void DoorLock(int zone) {
+	char tmp[64], tmp2[64];
+	rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
+	
+	for (int i = MaxClients; i <= MAX_ENTITIES; i++) {
+		if( !rp_IsValidDoor(i) )
+			continue;
+		
+		rp_GetZoneData(rp_GetPlayerZone(i), zone_type_type, tmp2, sizeof(tmp2));
+		
+		if( StrEqual(tmp, tmp2) ) {
+			AcceptEntityInput(i, "Close");
+			AcceptEntityInput(i, "Lock");
+		}
+	}
 }
