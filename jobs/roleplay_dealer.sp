@@ -656,15 +656,15 @@ public Action fwdOnPlayerUse(int client) {
 	GetClientAbsOrigin(client, vecOrigin);
 	
 	for(int i=MaxClients; i<=2048; i++) {
-		if( !IsValidEdict(i) )
-			continue;
-		if( !IsValidEntity(i) )
+		if( !IsValidEdict(i) || !IsValidEntity(i) )
 			continue;
 		
 		GetEdictClassname(i, tmp, sizeof(tmp));
 		if( !StrEqual(tmp, tmp2) )
 			continue;
 		if( rp_GetBuildingData(i, BD_count) <= 0 )
+			continue;
+		if( rp_GetZoneBit(rp_GetPlayerZone(i)) & BITZONE_PERQUIZ )
 			continue;
 		
 		float vecOrigin2[3];
