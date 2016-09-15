@@ -175,7 +175,7 @@ void START_PERQUIZ(int client, int zone, int type, int responsable) {
 	dp.WriteCell(responsable);
 	dp.WriteCell(0);
 }
-void END_PERQUIZ(int client, int zone, int type, int responsable) {
+void END_PERQUIZ(int client, int zone, int type, int responsable, bool remboursement) {
 	changeZoneState(zone, false);
 }
 
@@ -200,6 +200,7 @@ public Action TIMER_PERQUIZ(Handle timer, DataPack dp) {
 			PrintToChatPoliceSearch(resp, "{red} ================================== {default}");
 		}
 		else if( timeout >= 30 ) {
+			END_PERQUIZ(client, zone, type, resp, false);
 		}
 	}
 	else
@@ -431,10 +432,10 @@ void changeZoneState(int zone, bool enabled) {
 		
 		bits = rp_GetZoneBit(i);
 		
-		if( enabled )
-			bits = (bits & BITZONE_PERQUIZ);
-		else
-			bits = (!(bits & BITZONE_PERQUIZ));
+		if( enabled && !(bits & BITZONE_PERQUIZ) )
+			bits |= BITZONE_PERQUIZ;
+		else if( !enabled && (bits & BITZONE_PERQUIZ) )
+			bits &= ~BITZONE_PERQUIZ;
 		
 		rp_SetZoneBit(i, bits);
 	}
