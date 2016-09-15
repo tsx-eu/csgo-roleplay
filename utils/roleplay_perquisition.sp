@@ -75,6 +75,8 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 	if( action == MenuAction_Select ) {
 		char options[64], expl[4][32], tmp[64];
 		GetMenuItem(menu, param2, options, sizeof(options));
+		PrintToChatAll(options);
+		
 		ExplodeString(options, " ", expl, sizeof(expl), sizeof(expl[]));
 		
 		float dst[3];
@@ -91,7 +93,7 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 				subMenu.SetTitle("Qui est recherché?\n ");
 				
 				for (int i = 1; i <= MaxClients; i++) {
-					if( !IsValidClient(i) || !IsPlayerAlive(i) || i == client )
+					if( !IsValidClient(i) || !IsPlayerAlive(i) /*|| i == client*/ )
 						continue;
 					
 					rp_GetZoneData(rp_GetPlayerZone(i), zone_type_type, options, sizeof(options));
@@ -99,7 +101,6 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 						continue;
 					
 					Format(options, sizeof(options), "search %s %d", expl[1], i);
-					PrintToChatAll(options);
 					Format(tmp, sizeof(tmp), "%N", i);
 					
 					subMenu.AddItem(options, tmp);
@@ -118,19 +119,21 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 				if( !IsValidEdict(i) || !IsValidEntity(i) )
 					continue;
 				
+				GetEdictClassname(i, tmp, sizeof(tmp));
+				if( StrContains(tmp, "weapon_") == -1 && StrContains(tmp, "rp_") == -1 )
+					continue;
+				
 				rp_GetZoneData(rp_GetPlayerZone(i), zone_type_type, options, sizeof(options));
 				if( !StrEqual(options, expl[1]) )
 					continue;
 				
-				GetEdictClassname(i, options, sizeof(options));
-				
-				if( StrContains(options, "weapon_") == 0 && StrContains(options, "knife") == -1 )
+				if( StrContains(tmp, "weapon_") == 0 && StrContains(tmp, "knife") == -1 )
 					weapon++;
-				if( StrContains(options, "rp_plant") == 0 )
+				if( StrContains(tmp, "rp_plant") == 0 )
 					plant++;
-				if( StrContains(options, "rp_cash") == 0 )
+				if( StrContains(tmp, "rp_cash") == 0 )
 					machine++;
-				if( StrContains(options, "rp_bigcash") == 0 )
+				if( StrContains(tmp, "rp_bigcash") == 0 )
 					machine+=15;
 			}
 			
@@ -156,7 +159,7 @@ void START_PERQUIZ(int client, int zone, int type) {
 		dp.WriteCell(type);
 		dp.WriteCell(60);
 	}
-	else if( type == 0 ) {
+	else {
 		DataPack dp = new DataPack();
 		CreateDataTimer(1.0, TIMER_PERQUIZ, dp, TIMER_REPEAT);
 		dp.WriteCell(client);
@@ -174,6 +177,7 @@ public Action TIMER_PERQUIZ(Handle timer, DataPack dp) {
 	
 	Effect_DrawPerqui(zone);
 	PrintToChatAll("%N -> %d -> %N -> %N", client, zone, type, resp);
+	return Plugin_Continue;
 }
 
 public Action TIMER_PERQUIZ_LOOKUP(Handle timer, DataPack dp) {
@@ -208,7 +212,7 @@ public Action TIMER_PERQUIZ_LOOKUP(Handle timer, DataPack dp) {
 	
 	if( canStart ) {
 		DataPack dp2 = new DataPack();
-		CreateDataTimer(1.0, TIMER_PERQUIZ, dp, TIMER_REPEAT);
+		CreateDataTimer(1.0, TIMER_PERQUIZ, dp2, TIMER_REPEAT);
 		dp2.WriteCell(client);
 		dp2.WriteCell(zone);
 		dp2.WriteCell(type);
@@ -223,7 +227,6 @@ public Action TIMER_PERQUIZ_LOOKUP(Handle timer, DataPack dp) {
 	dp.WriteCell(timeleft - 1);
 	return Plugin_Continue;
 }
-
 int GetPerquizResp(int zone) {
 	char tmp[128];
 	rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
@@ -313,7 +316,7 @@ void Effect_DrawPerqui(int zone) {
 	char tmp[128], tmp2[128];
 	rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
 	
-	for (int i = 0; i <= 310; i++) {
+	for (int i = 0; i < 310; i++) {
 		
 		rp_GetZoneData(i, zone_type_type, tmp2, sizeof(tmp2));
 		if( !StrEqual(tmp, tmp2) )
