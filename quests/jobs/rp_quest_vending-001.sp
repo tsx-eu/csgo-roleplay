@@ -129,7 +129,7 @@ public void Q1_Frame(int objectiveID, int client) {
 		char tmp[128];
 		rp_GetItemData(rnd, item_type_name, tmp, sizeof(tmp));
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez trouvé 10x%s", tmp);
-		rp_ClientGiveItem(client, rnd, 10);
+		rp_ClientGiveItem(client, MP[rnd], 10);
 		
 	}
 	else if (g_iDuration[client] <= 0) {
