@@ -16,12 +16,8 @@
 #include <smlib>		// https://github.com/bcserv/smlib
 #include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
 
-#define __LAST_REV__ 		"v:0.1.0"
-
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
-
-//#define DEBUG
 
 public Plugin myinfo = {
 	name = "Jobs: HOPITAL", author = "KoSSoLaX",
@@ -59,7 +55,7 @@ public void OnPluginStart() {
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
-	PrecacheModel("models/pg_props/pg_hospital/pg_ekg.mdl", true);
+	PrecacheModel(MODEL_HEALBOX, true);
 }
 public void OnConfigsExecuted() {
 	CreateTimer(1.0, PostConfigExecuted);
@@ -570,11 +566,11 @@ int BuildingHealBox(int client) {
 	int ent = CreateEntityByName("prop_physics");
 	
 	DispatchKeyValue(ent, "classname", classname);
-	DispatchKeyValue(ent, "model", "models/pg_props/pg_hospital/pg_ekg.mdl");
+	DispatchKeyValue(ent, "model", MODEL_HEALBOX);
 	DispatchSpawn(ent);
 	ActivateEntity(ent);
 	
-	SetEntityModel(ent,"models/pg_props/pg_hospital/pg_ekg.mdl");
+	SetEntityModel(ent,MODEL_HEALBOX);
 	SetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity", client);
 	SetEntProp( ent, Prop_Data, "m_takedamage", 2);
 	SetEntProp( ent, Prop_Data, "m_iHealth", 1000);

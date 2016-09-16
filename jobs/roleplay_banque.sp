@@ -16,14 +16,8 @@
 #include <smlib>		// https://github.com/bcserv/smlib
 #include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
 
-#define __LAST_REV__ 		"v:0.2.1"
-
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
-
-//#define DEBUG
-#define MODEL_CASH 			"models/DeadlyDesire/props/atm01.mdl"
-#define MENU_TIME_DURATION	60
 
 public Plugin myinfo = {
 	name = "Jobs: Banquier", author = "KoSSoLaX",
@@ -63,7 +57,7 @@ public void OnConfigsExecuted() {
 	g_hEVENT =  FindConVar("rp_event");
 }
 public void OnMapStart() {
-	PrecacheModel(MODEL_CASH, true);
+	PrecacheModel(MODEL_ATM, true);
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
@@ -496,11 +490,11 @@ int BuidlingATM(int client) {
 	int ent = CreateEntityByName("prop_physics_override");
 	
 	DispatchKeyValue(ent, "classname", classname);
-	DispatchKeyValue(ent, "model", MODEL_CASH);
+	DispatchKeyValue(ent, "model", MODEL_ATM);
 	DispatchSpawn(ent);
 	ActivateEntity(ent);
 	
-	SetEntityModel(ent, MODEL_CASH);
+	SetEntityModel(ent, MODEL_ATM);
 	
 	SetEntProp( ent, Prop_Data, "m_iHealth", 10000);
 	SetEntProp( ent, Prop_Data, "m_takedamage", 0);

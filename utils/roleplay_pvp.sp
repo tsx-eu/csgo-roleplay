@@ -18,27 +18,9 @@
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
 
-#define __LAST_REV__ 		"v:0.1.0"
-
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-//#define DEBUG
-#define MAX_GROUPS		150
-#define MAX_ZONES		310
-#define	MAX_ENTITIES	2048
-#define	ZONE_BUNKER		194
-#define ZONE_RESPAWN	190
-#define ZONE_VILLA		245
-#define	ZONE_VILLA2		156
-#define	FLAG_SPEED		280.0
-#define	FLAG_POINT_MAX	150
-#define FLAG_MAX		10
-#define FLAG_POINT_MIN	50
-#define ELO_FACTEUR_K	40.0
-#define MAX_ANNOUNCES	32
-#define ANNONCES_DELAY	12
-#define	ANNONCES_VOLUME 0.33
 // -----------------------------------------------------------------------------------------------------------------
 enum flag_data { data_group, data_skin, data_red, data_green, data_blue, data_time, data_owner, data_lastOwner, flag_data_max };
 int g_iClientFlag[65];

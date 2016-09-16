@@ -15,13 +15,8 @@
 #include <smlib>
 #include <colors_csgo>
 
-#define __LAST_REV__ 		"v:0.1.0"
-
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
-
-//#define DEBUG
-#define	MAX_ENTITIES	2048
 
 StringMap g_hPerquisition;
 enum perquiz_data { PQ_client, PQ_zone, PQ_type, PQ_resp, PQ_timeout, PQ_Max};

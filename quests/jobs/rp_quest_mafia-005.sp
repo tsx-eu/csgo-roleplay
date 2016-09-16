@@ -17,7 +17,7 @@
 #include <smlib>		// https://github.com/bcserv/smlib
 #include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
 
-#define __LAST_REV__ 		"v:0.1.0"
+
 
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
@@ -27,12 +27,6 @@
 #define	QUEST_NAME		"Braquage des distributeurs"
 #define	QUEST_TYPE		quest_daily
 #define	QUEST_JOBID		91
-
-#define	METRO_PAIX		80
-#define METRO_STATION	81
-#define METRO_INNO		82
-#define METRO_BELMON	242
-#define MAX_ZONES		310
 
 public Plugin myinfo = {
 	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX",

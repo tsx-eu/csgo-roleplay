@@ -16,13 +16,8 @@
 #include <colors_csgo>
 #include <basecomm>
 
-#define __LAST_REV__ 		"v:0.1.0"
-
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
-
-//#define DEBUG
-#define	MAX_ENTITIES	2048
 
 public Plugin myinfo = {
 	name = "Utils: HDV", author = "KoSSoLaX, Leethium",

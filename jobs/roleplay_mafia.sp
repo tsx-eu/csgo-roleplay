@@ -18,22 +18,8 @@
 #include <smlib>		// https://github.com/bcserv/smlib
 #include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
 
-#define __LAST_REV__ 		"v:0.1.0"
-
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
-
-//#define DEBUG
-#define MAX_AREA_DIST 		500
-#define STEAL_TIME			30.0
-#define ITEM_PIEDBICHE		1
-#define ITEM_KITCROCHTAGE	2
-#define ITEM_KITEXPLOSIF	3
-#define MARCHE_NOIR			view_as<float>({-144.55,520.1,-2119.96})
-#define MARCHE_PERCENT		50
-
-
-// TODO: Repensé le /vol pour fusionner doublon.
 
 public Plugin myinfo = {
 	name = "Jobs: Mafia", author = "KoSSoLaX",
@@ -226,7 +212,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		rp_ClientGiveItem(target, i, -1);
 		
 		rp_SetClientInt(client, i_LastVolTime, GetTime());
-		rp_SetClientInt(client, i_LastVolAmount, (prix * MARCHE_PERCENT) / 100);
+		rp_SetClientInt(client, i_LastVolAmount, (prix * MARCHEMAFIA_PC) / 100);
 		rp_SetClientInt(client, i_LastVolTarget, target);
 		rp_SetClientInt(target, i_LastVol, client);		
 		rp_SetClientFloat(target, fl_LastVente, GetGameTime() + 10.0);
@@ -382,7 +368,7 @@ public Action fwdOnPlayerUse(int client) {
 	
 	float vecOrigin[3];
 	GetClientAbsOrigin(client, vecOrigin);
-	if( GetVectorDistance(vecOrigin, MARCHE_NOIR) < 40.0 ) {
+	if( GetVectorDistance(vecOrigin, MARCHEMAFIA_POS) < 40.0 ) {
 		Cmd_BuyItemMenu(client, false);
 	}
 }
@@ -1106,7 +1092,7 @@ void addBuyMenu(int client, int target, int itemID) {
 	data[IM_Owner] = client;
 	data[IM_StealFrom] = target;
 	data[IM_ItemID] = itemID;
-	data[IM_Prix] = (rp_GetItemInt(itemID, item_type_prix) * MARCHE_PERCENT) / 100;
+	data[IM_Prix] = (rp_GetItemInt(itemID, item_type_prix) * MARCHEMAFIA_PC) / 100;
 	
 	g_hBuyMenu.Reset();
 	DataPackPos pos = g_hBuyMenu.ReadCell();
@@ -1184,7 +1170,7 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			float vecOrigin[3];
 			GetClientAbsOrigin(client, vecOrigin);
 			
-			if( GetVectorDistance(vecOrigin, MARCHE_NOIR) > 40.0 )
+			if( GetVectorDistance(vecOrigin, MARCHEMAFIA_POS) > 40.0 )
 				return 0;
 			
 			

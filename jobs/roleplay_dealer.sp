@@ -17,24 +17,8 @@
 #include <smlib>		// https://github.com/bcserv/smlib
 #include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
 
-#define __LAST_REV__ 		"v:0.2.0"
-
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
-
-//#define DEBUG
-#define TP_CD_DURATION 		30.0
-#define TP_CHANNEL_DURATION 5.0
-#define MAX_AREA_DIST 		500
-#define STEAL_TIME			30.0
-#define ITEM_PIEDBICHE		1
-#define ZONE_ITEMSELL		95
-#define DRUG_DURATION 		90.0
-#define MODEL_PLANT_0			"models/custom_prop/marijuana/marijuana_0.mdl"
-#define MODEL_PLANT_1			"models/custom_prop/marijuana/marijuana_1.mdl"
-#define MODEL_PLANT_2			"models/custom_prop/marijuana/marijuana_2.mdl"
-#define MODEL_PLANT_3			"models/custom_prop/marijuana/marijuana_3.mdl"
-
 
 public Plugin myinfo = {
 	name = "Jobs: DEALER", author = "KoSSoLaX",
@@ -646,7 +630,7 @@ public Action fwdOnPlayerUse(int client) {
 		}
 	}
 	
-	if( rp_GetPlayerZone(client) == ZONE_ITEMSELL ) {
+	if( rp_GetPlayerZone(client) == ZONE_HALLDEALER ) {
 		openMarketMenu(client);
 	}
 		
@@ -1544,7 +1528,7 @@ void getItemFromMarket(int itemID, int amount) {
 	}
 }
 void openMarketMenu(int client, int itemID = 0) {
-	if( rp_GetPlayerZone(client) != ZONE_ITEMSELL )
+	if( rp_GetPlayerZone(client) != ZONE_HALLDEALER )
 		return;
 	
 	char tmp[128], tmp2[32], tmp3[64];

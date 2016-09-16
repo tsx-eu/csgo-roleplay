@@ -14,16 +14,11 @@
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
 
-#define __LAST_REV__ 		"v:0.1.0"
-
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-//#define DEBUG
 //#define	INSTANT
-#define ITEM_TICKETID	76
-#define	ITEM_JETONROUGE	276
-#define ITEM_JETONBLEU	286
+
 #define getWheel(%1,%2,%3,%4) (g_iJoker[%1][%3] == %4 ? 6 : wheel[%2][%3][%4])
 
 public Plugin myinfo = {

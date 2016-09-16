@@ -1,0 +1,100 @@
+/*
+ * Cette oeuvre, création, site ou texte est sous licence Creative Commons Attribution
+ * - Pas d’Utilisation Commerciale 
+ * - Partage dans les Mêmes Conditions 4.0 International. 
+ * Pour accéder à une copie de cette licence, merci de vous rendre à l'adresse suivante
+ * http://creativecommons.org/licenses/by-nc-sa/4.0/ .
+ *
+ * Merci de respecter le travail fourni par le ou les auteurs 
+ * https://www.ts-x.eu/ - kossolax@ts-x.eu
+ */
+#if defined _rp_const_included_
+  #endinput
+#endif
+#define _rp_const_included_
+
+#include <rp_version>
+
+#define __LAST_REV__			"6.5 - Phoénix"
+
+//#define DEBUG
+#define MAX_LOCATIONS			150
+#define MAX_ZONES				310
+#define MAX_GROUPS				150
+#define MAX_AREA_DIST			500
+#define CONTACT_DIST			150
+#define STEAL_MAX				500
+#define STEAL_TIME				30.0
+#define RESPAWN_TIME			20.0
+#define DRUG_DURATION			90.0
+#define MENU_TIME_DURATION		60
+#define TP_CD_DURATION 			30.0
+#define TP_CHANNEL_DURATION		5.0
+#define	MARCHEMAFIA_PC			50
+#define MARCHEMAFIA_POS			view_as<float>({-144.55,520.1,-2119.96})
+
+// DO NOT EDIT BELLOW.
+#define WORLDINDEX				0				
+#define MAX_ENTITIES			2049
+#define EF_NODRAW 				32
+
+// Maths:
+#define PI		3.1415926
+#define FLT_MAX 99999999.9
+#define FLT_MIN -FLT_MAX
+
+// Models:
+#define MODEL_ATM 			"models/DeadlyDesire/props/atm01.mdl"
+#define MODEL_CASH			"models/props_mall/cash_register.mdl"
+#define MODEL_CASHBIG		"models/props_interiors/copymachine01.mdl"
+#define MODEL_KNIFE			"models/weapons/w_knife_flip.mdl"
+#define MODEL_GRAVE 		"models/props/de_inferno/church_ornament_01.mdl"
+#define MODEL_PRISONNIER	"models/player/custom_player/legacy/sprisioner/sprisioner.mdl"
+#define MODEL_BARRIERE		"models/props_fortifications/police_barrier001_128_reference.mdl"
+#define MODEL_TABLE1 		"models/props/de_boathouse/table_drafting01.mdl"
+#define MODEL_TABLE2		"models/props/de_boathouse/table_drafting02.mdl"
+#define	MODEL_PANNEAU		"models/props/de_cbble/cobble_sign02.mdl"
+#define MODEL_PLANT_0		"models/custom_prop/marijuana/marijuana_0.mdl"
+#define MODEL_PLANT_1		"models/custom_prop/marijuana/marijuana_1.mdl"
+#define MODEL_PLANT_2		"models/custom_prop/marijuana/marijuana_2.mdl"
+#define MODEL_PLANT_3		"models/custom_prop/marijuana/marijuana_3.mdl"
+#define MODEL_HEALBOX		"models/pg_props/pg_hospital/pg_ekg.mdl"
+#define MODEL_KEVLARBOX 	"models/props/cs_office/box_office_indoor_32.mdl"
+#define MODEL_GRAVE 		"models/props/de_inferno/church_ornament_01.mdl"
+
+// Items:
+#define ITEM_PIEDBICHE		1
+#define ITEM_KITCROCHTAGE	2
+#define ITEM_KITEXPLOSIF	3
+#define ITEM_MANDAT			4
+#define ITEM_TICKETID		76
+#define	ITEM_GPS			144
+#define	ITEM_REPAIR			176
+#define	ITEM_PARTICULES		181
+#define	ITEM_NEONS			193
+#define	ITEM_JETONROUGE		276
+#define ITEM_JETONBLEU		286
+#define ITEM_CHEQUE			304
+
+// Zone:
+#define	METRO_PAIX		80
+#define METRO_STATION	81
+#define METRO_INNO		82
+#define ZONE_HALLDEALER	95
+#define	ZONE_VILLA2		156
+#define	ZONE_CABINE 	173
+#define ZONE_RESPAWN	190
+#define	ZONE_BUNKER		194
+#define METRO_BELMON	242
+#define ZONE_VILLA		245
+
+// PvP:
+#define	FLAG_SPEED		280.0
+#define	FLAG_POINT_MAX	150
+#define FLAG_POINT_MIN	50
+#define FLAG_MAX		10
+
+#define ELO_FACTEUR_K	40.0
+#define MAX_ANNOUNCES	32
+#define ANNONCES_DELAY	12
+#define	ANNONCES_VOLUME 0.33

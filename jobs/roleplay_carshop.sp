@@ -16,18 +16,8 @@
 #include <smlib>		// https://github.com/bcserv/smlib
 #include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
 
-#define __LAST_REV__ 		"v:0.1.1"
-
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
-
-#define DEBUG
-#define MENU_TIME_DURATION 	30
-#define CONTACT_DIST		500
-#define	ITEM_REPAIR			176
-#define	ITEM_NEONS			193
-#define	ITEM_PARTICULES		181
-
 
 public Plugin myinfo = {
 	name = "Jobs: CARSHOP", author = "KoSSoLaX",
@@ -36,7 +26,7 @@ public Plugin myinfo = {
 };
 
 Handle g_hMAX_CAR, g_hCarJump, g_hCarUnstuck, g_hCarHeal;
-int g_cExplode, g_cModel;
+int g_cExplode;
 int g_iBlockedTime[65][65];
 float g_lastpos[2049][3];
 bool g_bVehicleCanJump;
@@ -135,7 +125,6 @@ public Action Cmd_VehicleExit(int client, int args) {
 }
 public void OnMapStart() {
 	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt", true);
-	g_cModel = PrecacheModel("materials/sprites/laserbeam.vmt");
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);

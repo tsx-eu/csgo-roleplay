@@ -17,14 +17,10 @@
 #include <smlib>		// https://github.com/bcserv/smlib
 #include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
 
-#define __LAST_REV__ 		"v:0.2.0"
-
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-//#define DEBUG
-#define MAX_AREA_DIST		500.0
-#define MODEL_BAGAGE 		"models/props/cs_office/box_office_indoor_32.mdl"
+
 public Plugin myinfo = {
 	name = "Jobs: Sexshop", author = "KoSSoLaX",
 	description = "RolePlay - Jobs: Sexshop",
@@ -62,7 +58,7 @@ public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt", true);
 	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt", true);
-	PrecacheModel(MODEL_BAGAGE, true);
+	PrecacheModel(MODEL_KEVLARBOX, true);
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
@@ -514,11 +510,11 @@ int BuildingKevlarBox(int client) {
 	int ent = CreateEntityByName("prop_physics");
 	
 	DispatchKeyValue(ent, "classname", classname);
-	DispatchKeyValue(ent, "model", MODEL_BAGAGE);
+	DispatchKeyValue(ent, "model", MODEL_KEVLARBOX);
 	DispatchSpawn(ent);
 	ActivateEntity(ent);
 	
-	SetEntityModel(ent, MODEL_BAGAGE);
+	SetEntityModel(ent, MODEL_KEVLARBOX);
 	SetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity", client);
 	SetEntProp( ent, Prop_Data, "m_takedamage", 2);
 	SetEntProp( ent, Prop_Data, "m_iHealth", 1000);

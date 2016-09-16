@@ -19,22 +19,9 @@
 #include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
 #include <csgo_items>   // https://forums.alliedmods.net/showthread.php?t=243009
 #include <advanced_motd>// https://forums.alliedmods.net/showthread.php?t=232476
-#define __LAST_REV__ 		"v:0.1.0"
 
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
-
-//#define DEBUG
-#define ITEM_MANDAT			4
-#define	ITEM_GPS			144
-
-#define	MENU_TIME_DURATION	60
-#define MAX_AREA_DIST		500
-#define	MAX_LOCATIONS		150
-#define	MAX_ZONES			300
-#define MODEL_PRISONNIER	"models/player/custom_player/legacy/sprisioner/sprisioner.mdl"
-#define MODEL_BARRIERE		"models/props_fortifications/police_barrier001_128_reference.mdl"
-
 
 public Plugin myinfo = {
 	name = "Jobs: Police", author = "KoSSoLaX",

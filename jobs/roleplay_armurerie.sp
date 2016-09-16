@@ -15,13 +15,9 @@
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
 
-#define __LAST_REV__ 		"v:0.1.1"
-
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-//#define DEBUG
-#define MAX_GROUPS				150
 
 public Plugin myinfo = {
 	name = "Jobs: Armurerier", author = "KoSSoLaX",

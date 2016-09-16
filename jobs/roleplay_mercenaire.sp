@@ -16,15 +16,8 @@
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
 
-#define __LAST_REV__ 		"v:0.2.0"
-
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
-
-//#define DEBUG
-#define MENU_TIME_DURATION 60
-
-// TODO: Trouver astuce pour bypass menu vente et définir les types de contrat ici.
 
 public Plugin myinfo = {
 	name = "Jobs: Mercenaire", author = "KoSSoLaX",

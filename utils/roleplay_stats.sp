@@ -16,12 +16,9 @@
 #include <colors_csgo>
 #include <basecomm>
 
-#define __LAST_REV__ 		"v:0.1.0"
-
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-//#define DEBUG
 bool g_dataloaded[MAXPLAYERS];
 int g_iStat_LastSave[MAXPLAYERS][i_uStat_nosavemax];
 int_stat_data g_Sassoc[] = { // Fait le lien entre une stat et sa valeur sauvegardée

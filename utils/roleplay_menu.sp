@@ -14,16 +14,10 @@
 #include <sdkhooks>
 #include <smlib>
 #include <colors_csgo>
-#include <basecomm>
-#include <topmenus>
-
-#define __LAST_REV__ 		"v:0.1.0"
 
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-//#define DEBUG
-#define	MAX_ENTITIES	2048
 float g_flPressUse[MAXPLAYERS + 1];
 bool g_bPressedUse[MAXPLAYERS + 1];
 bool g_bClosed[MAXPLAYERS + 1];

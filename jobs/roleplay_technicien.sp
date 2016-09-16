@@ -16,14 +16,8 @@
 #include <smlib>		// https://github.com/bcserv/smlib
 #include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
 
-#define __LAST_REV__ 		"v:0.1.0"
-
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
-
-//#define DEBUG
-#define MODEL_CASH		"models/props_mall/cash_register.mdl"
-#define MODEL_CASHBIG	"models/props_interiors/copymachine01.mdl"
 
 public Plugin myinfo = {
 	name = "Jobs: Technicien", author = "KoSSoLaX",

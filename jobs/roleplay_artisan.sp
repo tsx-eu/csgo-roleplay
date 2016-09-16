@@ -16,8 +16,6 @@
 #include <smlib>		// https://github.com/bcserv/smlib
 #include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
 
-#define __LAST_REV__ 		"v:0.1.0"
-
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
@@ -46,9 +44,6 @@ int g_iSignPermission[2049];
 ArrayList g_hSignData[2049];
 
 //#define DEBUG
-#define MODEL_TABLE1 	"models/props/de_boathouse/table_drafting01.mdl"
-#define MODEL_TABLE2	"models/props/de_boathouse/table_drafting02.mdl"
-#define	MODEL_PANNEAU	"models/props/de_cbble/cobble_sign02.mdl"
 
 int lstJOB[] =  { 11, 21, 31, 41, 51, 61, 71, 81, 111, 131, 171, 191, 211, 221 };
 

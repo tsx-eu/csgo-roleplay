@@ -16,15 +16,8 @@
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
 
-#define __LAST_REV__ 		"v:0.1.0"
-
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
-
-//#define DEBUG
-#define MODEL_KNIFE	"models/weapons/w_knife_flip.mdl"
-#define	ZONE_CABINE 173
-#define MENU_TIME_DURATION 60
 
 public Plugin myinfo = {
 	name = "Jobs: Coach", author = "KoSSoLaX",
@@ -788,7 +781,6 @@ public Action Cmd_ItemLessive(int args) {
 	
 	if( rp_GetZoneBit(rp_GetPlayerZone(client)) & BITZONE_PERQUIZ ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Une perquisition est en cours, impossible d'utiliser cet objet pour le moment.");
-		int item_id = GetCmdArgInt(args);
 		ITEM_CANCEL(client, item_id);
 		return Plugin_Handled;
 	}

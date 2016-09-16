@@ -13,6 +13,8 @@
 #endif
 #define _tsxrp_included_
 
+#include <rp_const.inc>
+
 // ----------------------------------------------------------------------------
 // Artisan:
 //forward int RP_CanClientCraftForFree(int client, int itemID);
