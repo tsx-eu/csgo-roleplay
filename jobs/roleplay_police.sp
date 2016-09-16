@@ -146,7 +146,7 @@ public Action Cmd_SendToJail(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_SendToJail");
 	#endif
-	SendPlayerToJail(GetCmdArgInt(1));
+	SendPlayerToJail(GetCmdArgInt(1), GetCmdArgInt(2));
 }
 public void OnMapStart() {
 	PrecacheModel(MODEL_PRISONNIER, true);
