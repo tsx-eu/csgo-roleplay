@@ -693,8 +693,12 @@ public void Q14_Frame(int objectiveID, int client) {
 		AddMenuItem(menu, "", "vous-même et être recruté par le chef d'un job.\n ", ITEMDRAW_DISABLED);
 			
 		char tmp[128], tmp2[8];
-	
-		for( int i=0; i<sizeof(g_iJob) - 2; i++) {
+		int limit = 2;
+		ArrayList dbl = rp_GetClientDouble(client);
+		if( dbl.Length > 1 )
+			limit = 8;
+		
+		for( int i=0; i<sizeof(g_iJob) - limit; i++) {
 			
 			rp_GetJobData(g_iJob[i], job_type_name, tmp, sizeof(tmp));
 			Format(tmp, sizeof(tmp), "%s: %s", qualif[g_iRecom[g_iJob[i]]], tmp);
