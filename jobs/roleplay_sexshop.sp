@@ -193,7 +193,7 @@ public Action Cmd_ItemMenottes(int args){
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N vous glisse entre les mains.", target);
 		return;
 	}
-	rp_ClientFloodIncrement(client, target, fd_menotte, 5.0);
+	rp_ClientFloodIncrement(client, target, fd_menotte, 11.0);
 	rp_ClientAggroIncrement(client, target, 250);
 					
 	rp_SetClientInt(client, i_LastAgression, GetTime());
