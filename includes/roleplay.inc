@@ -657,6 +657,8 @@ enum bool_user_data {
 	b_GameModePassive,
 	b_IsFirstSpawn,
 	b_Debuging,
+	b_isFemale,
+	b_ShouldGoToMairie,
 	b_udata_max
 };
 enum int_user_data {
@@ -756,6 +758,9 @@ enum int_user_data {
 	i_PlayerPrestige,
 	i_GiveAmountTime,
 	
+	i_BirthDay,
+	i_BirthMonth,
+	
 	i_udata_max
 };
 enum float_user_data {
@@ -791,6 +796,8 @@ enum float_user_data {
 };
 enum sz_user_data {
 	String:sz_Skin,
+	String:sz_FirstName,
+	String:sz_LastName,
 
 	sz_udata_max
 };

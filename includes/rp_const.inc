@@ -13,8 +13,6 @@
 #endif
 #define _rp_const_included_
 
-#include <rp_version>
-
 #define __LAST_REV__			"6.5 - Phoénix"
 
 //#define DEBUG
@@ -32,6 +30,8 @@
 #define TP_CHANNEL_DURATION		5.0
 #define	MARCHEMAFIA_PC			50
 #define MARCHEMAFIA_POS			view_as<float>({-144.55,520.1,-2119.96})
+#define MAIRIE_ZONE				54
+#define MAIRIE_POS				view_as<float>({5595.0, -822.0, -1895.0})
 
 // DO NOT EDIT BELLOW.
 #define WORLDINDEX				0				
