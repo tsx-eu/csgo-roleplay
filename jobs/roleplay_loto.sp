@@ -246,7 +246,7 @@ public Action Cmd_ItemLoto(int args) {
 	
 	if( g_hTimer[client] ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes déjà entrain de gratter des tickets.");
-		CANCEL_ITME(client, itemID);
+		ITEM_CANCEL(client, itemID);
 		return Plugin_Handled;
 	}
 	
