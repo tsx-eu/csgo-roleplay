@@ -246,6 +246,7 @@ public Action Cmd_ItemLoto(int args) {
 	
 	if( g_hTimer[client] ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes déjà entrain de gratter des tickets.");
+		CANCEL_ITME(client, itemID);
 		return Plugin_Handled;
 	}
 	
@@ -307,7 +308,7 @@ public Action TIMER_Grattage(Handle timer, Handle dp) {
 	int itemID = ReadPackCell(dp);
 	int amount = ReadPackCell(dp);
 	
-	if( rp_GetClientItem(client, itemID) == 0 ) {
+	if( rp_GetClientItem(client, itemID) <= 0 ) {
 		delete g_hTimer[client];
 		return Plugin_Stop;
 	}
