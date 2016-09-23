@@ -37,6 +37,8 @@
 #define WORLDINDEX				0				
 #define MAX_ENTITIES			2049
 #define EF_NODRAW 				32
+#define ITEMDRAW_SPACER_NOSLOT ((1<<1)|(1<<3))
+
 
 // Maths:
 #define PI		3.1415926

@@ -35,6 +35,59 @@ public void String_WordWrap(char[] s, int wrapline) {
 		}
 	}
 }
+
+void String_CleanupName(char[] name, char[] output, int length) {
+	int a, b, c, d;
+	
+	for (int i = 0; i < length; i++)
+		output[i] = 0;
+	
+	while( name[c] != 0 || c > length ) {
+		
+		if( (b=GetCharBytes(name[c])) == 1 ) {
+			a = view_as<int>(name[c]);
+			if( (a >= 65 && a <= 90) || (a >= 97 && a <=122) || a == 32 || a == 39 || a == 45 ) {
+				Format(output, length, "%s%c", output, name[c]);
+			}
+		}
+		else {
+			char[] tmp = new char[b+1];
+			for (d = 0; d < b; d++)
+				tmp[d] = name[c + d];
+			
+			if( StrEqual(tmp, "é") || StrEqual(tmp, "ê") ||  StrEqual(tmp, "è") || StrEqual(tmp, "à") || StrEqual(tmp, "ç") || StrEqual(tmp, "ù") ) {
+				Format(output, length, "%s%s", output, tmp);
+			}
+		}
+		
+		c += b;
+	}
+	
+	while( ReplaceString(output, length, "  ", " ") ) { }
+	
+	TrimString(output);	
+	String_ToLower(output, output, length);
+	
+	a = b = c = d = 0;
+	while( output[c] != 0 || c > length ) {
+		
+		if( (b=GetCharBytes(name[c])) == 1 ) {
+			
+			if( c == 0 ) {
+				output[c] = CharToUpper(output[c]);
+			}
+			else {
+				a = view_as<int>(output[c-1]);
+				
+				if( a == 32 || a == 39 || a == 45 ) {
+					output[c] = CharToUpper(output[c]);
+				}
+			}
+		}
+		
+		c += b;
+	}
+}
 public void String_NumberFormat(int value, char[] buffer, int size) {
 	
     char[] helper = new char[size];
