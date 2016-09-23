@@ -46,6 +46,12 @@ bool shouldGoToMairie(int client) {
 	if( rp_GetClientInt(client, i_PlayerLVL) >= 6 && rp_GetClientInt(client, i_BirthDay) <= 0 ) {
 		return true;
 	}
+	if( rp_GetClientInt(client, i_PlayerLVL) >= 20 && !rp_GetClientBool(client, b_PassedRulesTest) ) {
+		return true;
+	}
+	
+	
+	
 	return false;
 }
 
@@ -108,11 +114,11 @@ public void fwdCompleteLastname_Query(Handle owner, Handle handle, const char[] 
 	Draw_Mairie(client, 4);
 }
 stock void Draw_Mairie(int client, int step=0) {
-	Menu menu = new Menu(Handle_Mairie);
-	char title[1024], tmp[128], tmp2[128], tmp3[2][32];
-	Format(title, sizeof(title), "Mairie de Princeton\n ");
 	
 	if( rp_GetClientInt(client, i_PlayerLVL) >= 6 && rp_GetClientInt(client, i_BirthDay) <= 0 ) {
+		Menu menu = new Menu(Handle_Mairie);
+		char title[1024], tmp[128], tmp2[128], tmp3[2][32];
+		Format(title, sizeof(title), "Mairie de Princeton\n ");
 		
 		Format(title, sizeof(title), "%s\nLes nouveaux citoyens de Princeton", title);
 		Format(title, sizeof(title), "%s\ndoivent s'enregistrer auprès de l'administration.\n ", title);
@@ -209,6 +215,10 @@ stock void Draw_Mairie(int client, int step=0) {
 		
 		menu.SetTitle(title);
 		menu.Display(client, MENU_TIME_FOREVER);
+		return;
+	}
+	if( rp_GetClientInt(client, i_PlayerLVL) >= 20 && !rp_GetClientBool(client, b_PassedRulesTest) ) {
+		
 		return;
 	}
 }

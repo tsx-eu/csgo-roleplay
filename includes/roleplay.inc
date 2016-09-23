@@ -659,6 +659,7 @@ enum bool_user_data {
 	b_Debuging,
 	b_isFemale,
 	b_ShouldGoToMairie,
+	b_PassedRulesTest,
 	b_udata_max
 };
 enum int_user_data {

@@ -16,10 +16,10 @@
 #include <sdkhooks>
 #include <cstrike>
 // ----------------------------------------------------------------------------
-public int Math_GetRandomPow(int min, int max) {
+stock int Math_GetRandomPow(int min, int max) {
 	return RoundToFloor(float(max - min) * Pow(GetURandomFloat(), 2.0)) + min;
 }
-public void String_WordWrap(char[] s, int wrapline) {
+stock void String_WordWrap(char[] s, int wrapline) {
 	int i, k, wraploc, lastwrap;
 	
 	for (i = 0; s[i] != '\0'; ++i, ++wraploc) {
@@ -35,8 +35,7 @@ public void String_WordWrap(char[] s, int wrapline) {
 		}
 	}
 }
-
-void String_CleanupName(char[] name, char[] output, int length) {
+stock void String_CleanupName(char[] name, char[] output, int length) {
 	int a, b, c, d;
 	
 	for (int i = 0; i < length; i++)
@@ -88,7 +87,7 @@ void String_CleanupName(char[] name, char[] output, int length) {
 		c += b;
 	}
 }
-public void String_NumberFormat(int value, char[] buffer, int size) {
+stock void String_NumberFormat(int value, char[] buffer, int size) {
 	
     char[] helper = new char[size];
     IntToString(value, helper, size);
@@ -123,7 +122,7 @@ public void String_NumberFormat(int value, char[] buffer, int size) {
         n_helper += 3;
     }
 }
-public void String_ColorsToHTML(char[] text, int length) {
+stock void String_ColorsToHTML(char[] text, int length) {
 	ReplaceString(text, length, "{darkred}",	"<font color='#bb0000'>");
 	ReplaceString(text, length, "{red}",		"<font color='#ff0000'>");
 	ReplaceString(text, length, "{pink}", 		"<font color='#ffc0cc'>");
@@ -140,7 +139,7 @@ public void String_ColorsToHTML(char[] text, int length) {
 	ReplaceString(text, length, "{default}",	"<font color='#ffffff'>");
 }
 // ----------------------------------------------------------------------------
-public void PrintToChatClientArea(int client, const char[] message, any ...) {
+stock void PrintToChatClientArea(int client, const char[] message, any ...) {
 	char buffer[250];
 	VFormat(buffer, sizeof(buffer), message, 3);
 	
@@ -155,7 +154,7 @@ public void PrintToChatClientArea(int client, const char[] message, any ...) {
 		}
 	}
 }
-public void PrintToChatZone(int zoneID, const char[] message, any ...) {
+stock void PrintToChatZone(int zoneID, const char[] message, any ...) {
 	char buffer[MAX_MESSAGE_LENGTH];
 	VFormat(buffer, sizeof(buffer), message, 3);
 	
@@ -170,7 +169,7 @@ public void PrintToChatZone(int zoneID, const char[] message, any ...) {
 		}
 	}
 }
-public void PrintToChatPoliceSearch(int target, const char[] message, any ...) {
+stock void PrintToChatPoliceSearch(int target, const char[] message, any ...) {
 	char buffer[MAX_MESSAGE_LENGTH];
 	VFormat(buffer, sizeof(buffer), message, 3);
 	
@@ -183,7 +182,7 @@ public void PrintToChatPoliceSearch(int target, const char[] message, any ...) {
 		}
 	}
 }
-public void PrintToChatPoliceJob(int target, const char[] message, any ...) {
+stock void PrintToChatPoliceJob(int target, const char[] message, any ...) {
 	char buffer[MAX_MESSAGE_LENGTH];
 	VFormat(buffer, sizeof(buffer), message, 3);
 	
@@ -199,17 +198,17 @@ public void PrintToChatPoliceJob(int target, const char[] message, any ...) {
 	}
 }
 // ----------------------------------------------------------------------------
-public float GetCmdArgFloat(int index) {
+stock float GetCmdArgFloat(int index) {
 	char arg[32];
 	GetCmdArg(index, arg, sizeof(arg));
 	return StringToFloat(arg);
 }
-public int GetCmdArgInt(int index) {
+stock int GetCmdArgInt(int index) {
 	char arg[32];
 	GetCmdArg(index, arg, sizeof(arg));
 	return StringToInt(arg);
 }
-public bool IsValidClient(int client) {
+stock bool IsValidClient(int client) {
 	if( client <= 0 || client > MaxClients )
 		return false;
 	
@@ -236,48 +235,48 @@ public void SQL_QueryCallBack(Handle owner, Handle handle, const char[] error, a
 		LogError("[SQL] [ERROR] %s - %f - %i", error, data, data);
 	}
 }
-public int rp_GetItemInt(int itemID, int typeID) {
+stock int rp_GetItemInt(int itemID, int typeID) {
 	char tmp[32];
 	rp_GetItemData(itemID, view_as<rp_item_type>(typeID), tmp, sizeof(tmp));
 	return StringToInt(tmp);
 }
-public float rp_GetItemFloat(int itemID, int typeID) {
+stock float rp_GetItemFloat(int itemID, int typeID) {
 	char tmp[32];
 	rp_GetItemData(itemID, view_as<rp_item_type>(typeID), tmp, sizeof(tmp));
 	return StringToFloat(tmp);
 }
-public int rp_GetJobInt(int jobID, int typeID) {
+stock int rp_GetJobInt(int jobID, int typeID) {
 	char tmp[32];
 	rp_GetJobData(jobID, view_as<rp_job_type>(typeID), tmp, sizeof(tmp));
 	return StringToInt(tmp);
 }
-public int rp_GetGroupInt(int groupID, int typeID) {
+stock int rp_GetGroupInt(int groupID, int typeID) {
 	char tmp[32];
 	rp_GetGroupData(groupID, view_as<rp_group_type>(typeID), tmp, sizeof(tmp));
 	return StringToInt(tmp);
 }
-public int rp_GetZoneInt(int zoneID, int typeID) {
+stock int rp_GetZoneInt(int zoneID, int typeID) {
 	char tmp[32];
 	rp_GetZoneData(zoneID, view_as<zone_type>(typeID), tmp, sizeof(tmp));
 	return StringToInt(tmp);
 }
-public float rp_GetZoneFloat(int zoneID, int typeID) {
+stock float rp_GetZoneFloat(int zoneID, int typeID) {
 	char tmp[32];
 	rp_GetZoneData(zoneID, view_as<zone_type>(typeID), tmp, sizeof(tmp));
 	return StringToFloat(tmp);
 }
-public int rp_GetLocationInt(int zoneID, int typeID) {
+stock int rp_GetLocationInt(int zoneID, int typeID) {
 	char tmp[32];
 	rp_GetLocationData(zoneID, view_as<location_type>(typeID), tmp, sizeof(tmp));
 	return StringToInt(tmp);
 }
-public int rp_GetServerInt(rp_serv typeID) {
+stock int rp_GetServerInt(rp_serv typeID) {
 	char tmp[64];
 	rp_GetServerString(typeID, tmp, sizeof(tmp));
 	return StringToInt(tmp);
 }
 
-public bool rp_IsRemoveAble(int target) {
+stock bool rp_IsRemoveAble(int target) {
 	#if defined DEBUG
 	PrintToServer("IsRemoveAble");
 	#endif
@@ -322,7 +321,7 @@ public bool rp_IsRemoveAble(int target) {
 	
 	return false;
 }
-public bool rp_IsMoveAble(int ent) {
+stock bool rp_IsMoveAble(int ent) {
 	static char classname[64];
 	
 	if( ent <= 0 )
@@ -503,7 +502,7 @@ stock int rp_GetWeaponPrice(int weaponID) {
 	// fallback:
 	return 500; 
 }
-public int rp_GetWeaponPriceCartouche(int weaponID) {
+stock int rp_GetWeaponPriceCartouche(int weaponID) {
 	int prix;
 	if(rp_GetWeaponGroupID(weaponID) > 0)
 		prix += 250;
@@ -523,7 +522,7 @@ public int rp_GetWeaponPriceCartouche(int weaponID) {
 	}
 	return prix;
 }
-public int rp_CountPoliceNear(int client) {
+stock int rp_CountPoliceNear(int client) {
 	static float g_flLastCheck[65];
 	static int g_iLastData[65];
 	
