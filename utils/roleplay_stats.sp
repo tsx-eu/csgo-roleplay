@@ -278,9 +278,9 @@ public void DisplayRTStats(int client){
 	AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
 	Format(tmp, sizeof(tmp), "Précision de tir: %.2f", rp_GetClientFloat(client, fl_WeaponTrain));
 	AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
-	Format(tmp, sizeof(tmp), "Dans le job depuis: %.2f heures ",  Float(rp_GetClientPlaytimeJob(client, rp_GetClientJobID(client), true))/3600.0);
+	Format(tmp, sizeof(tmp), "Dans le job depuis: %.2f heures ",  float(rp_GetClientPlaytimeJob(client, rp_GetClientJobID(client), true))/3600.0);
 	AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
-	Format(tmp, sizeof(tmp), "Au même grade depuis: %.2f heures", Float(rp_GetClientPlaytimeJob(client, rp_GetClientInt(client, i_Job), false))/3600.0);
+	Format(tmp, sizeof(tmp), "Au même grade depuis: %.2f heures", float(rp_GetClientPlaytimeJob(client, rp_GetClientInt(client, i_Job), false))/3600.0);
 	AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
 
 	GetEdictClassname(wep_id, tmp, sizeof(tmp));
