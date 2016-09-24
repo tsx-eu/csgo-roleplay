@@ -390,6 +390,8 @@ public Action gasShot(Handle timer, any ent) {
 		GetClientEyePosition(i, vecOrigin);
 		if( GetVectorDistance(vecOrigin, vecCenter) >= 200.0 )
 			continue;
+		if( rp_GetZoneBit(rp_GetPlayerZone(i)) & BITZONE_PEACEFULL )
+			continue;
 		
 		rp_ClientDamage(i, Math_GetRandomInt(2, 6), attacker, "ctf_nade_gas");
 		rp_SetClientFloat(i, fl_HallucinationTime, time);				
@@ -427,6 +429,8 @@ public Action EMPExplode_Task(Handle timer, any ent) {
 			StrContains(classname, "rp_cashmachine") == 0 || StrContains(classname, "rp_bigcashmachine") == 0 || StrContains(classname, "rp_mine") == 0 ) {
 			
 			if( StrContains(classname, "weapon_knife") == 0 )
+				continue;
+			if( rp_GetZoneBit(rp_GetPlayerZone(i)) & BITZONE_PEACEFULL )
 				continue;
 			
 			

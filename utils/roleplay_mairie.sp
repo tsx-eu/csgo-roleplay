@@ -39,24 +39,9 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse, fwdPlayerUse);
 }
 public Action fwdPlayerUse(int client) {
-	if (shouldGoToMairie(client) && rp_GetPlayerZone(client) == MAIRIE_ZONE)
+	if( rp_GetPlayerZone(client) == MAIRIE_ZONE )
 		Draw_Mairie_Main(client);
 }
-
-bool shouldGoToMairie(int client) {
-	
-	if (rp_GetClientInt(client, i_PlayerLVL) >= 6 && rp_GetClientInt(client, i_BirthDay) <= 0) {
-		return true;
-	}
-	if (rp_GetClientInt(client, i_PlayerLVL) >= 20 && !rp_GetClientBool(client, b_PassedRulesTest)) {
-		return true;
-	}
-	
-	
-	
-	return false;
-}
-
 public void fwdCompleteFirstname(int client, any data, char[] message) {
 	char tmp[128];
 	String_CleanupName(message, tmp, sizeof(tmp));
@@ -125,6 +110,8 @@ void Draw_Mairie_Main(int client) {
 		Draw_Mairie_Questionnaire(client, 0, g_iMairieQuestionID[client]);
 		return;
 	}
+	
+	//	PrintToChat(client, "%d --> %d", rp_GetClientPlaytimeJob(client, rp_GetClientJobID(client), true), rp_GetClientPlaytimeJob(client, rp_GetClientInt(client, i_Job), false));
 }
 void Draw_Mairie_Questionnaire(int client, int step, int qid) {
 	char query[1024];

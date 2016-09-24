@@ -186,6 +186,13 @@ native void rp_GetClientString(int client, sz_user_data prop, char[] value, int 
  */
 native int rp_GetClientStat(int client, int_stat_data prop);
 /**
+ * Récupère le temps de jeu dans un job d'un joueur
+ * @param  int           client        Le joueur
+ * @param  int			 jobID       Le job
+ * @return int               La valeur
+ */
+native int rp_GetClientPlaytimeJob(int client, int jobID, bool parent);
+/**
  * Modifie la propriétée entier d'un joueur
  * @param  int           client        Le joueur
  * @param  int_user_data prop          La variable
