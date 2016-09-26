@@ -297,10 +297,17 @@ public void Q3_Frame(int objectiveID, int client) {
 			}
 		}
 		
+		int jobToDeny = -1;
+		if( rp_GetServerRules(rules_Braquages, rules_Enabled) == 1 ) {
+			jobToDeny = rp_GetServerRules(rules_Braquages, rules_Target);
+		}
+		
 		for (int i = 1; i < MAX_JOBS; i+=10) {
 			if( g_iJobs[i] == 0 )
 				continue;
 			if( i == g_iLastPlanque[0] || i == g_iLastPlanque[1] || i == g_iLastPlanque[2] )
+				continue;
+			if( i == jobToDeny )
 				continue;
 			
 			rp_GetZoneData(g_iJobs[i], zone_type_name, tmp, sizeof(tmp));

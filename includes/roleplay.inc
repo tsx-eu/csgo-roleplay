@@ -519,7 +519,7 @@ native void rp_GetDate(char[] str, int length);
 native void rp_GetTime(int& hour, int& minutes);
 native void rp_GetServerString(rp_serv typeID, char[] str, int length);
 native void rp_SetServerString(rp_serv typeID, char[] str, int length);
-native void rp_GetServerRules(serverRules rulesID, rulesData data);
+native int rp_GetServerRules(serverRules rulesID, rulesData data);
 native void rp_SetServerRules(serverRules rulesID, rulesData data, int value);
 native void rp_StoreServerRules();
 // ----------------------------------------------------------------------------
@@ -1184,7 +1184,6 @@ enum serverRules {
 	rules_reductions,
 	rules_Productions,
 	rules_Braquages,
-	rules_JailDistance,
 	rules_ItemsDisabled,
 	rules_Payes,
 	

@@ -1143,12 +1143,25 @@ public Action Frame_BuildingPlant(Handle timer, any ent) {
 	}
 	
 	float time = Math_GetRandomFloat(80.0, 100.0);
+	if( rp_GetServerRules(rules_Productions, rules_Enabled) == 1 ) {
+		int target = rp_GetServerRules(rules_Productions, rules_Target);
+		
+		if( rp_GetClientJobID(client) == target || rp_GetClientGroupID(client) == (target-1000) ) {
+			
+			if( rp_GetServerRules(rules_Productions, rules_Arg) == 1 )
+				time += 10.0;
+			else
+				time -= 10.0;
+		}
+	}
+	
 	if( rp_GetBuildingData(ent, BD_FromBuild) == 1 )
 		time /= 10.0;
 	if( !rp_IsTutorialOver(client) )
 		time /= 10.0;
 	if( rp_GetClientInt(client, i_PlayerLVL) >= 812 )
 		time *= 0.75;
+	
 	
 	CreateTimer(time, Frame_BuildingPlant, EntIndexToEntRef(ent));
 	
