@@ -2072,6 +2072,18 @@ void amendeCalculation(int client, int& amende) {
 		ratio = 0.25;
 	
 	amende =  RoundFloat(float(amende) * ratio);
+	
+	if( rp_GetServerRules(rules_Amendes, rules_Enabled) == 1 ) {
+		int target = rp_GetServerRules(rules_Amendes, rules_Target);
+		
+		if( rp_GetClientJobID(client) == target || rp_GetClientGroupID(client) == (target-1000) ) {
+			
+			if( rp_GetServerRules(rules_Amendes, rules_Arg) == 1 )
+				amende = RoundFloat(float(amende) * 1.05);
+			else
+				amende = RoundFloat(float(amende) * 0.90);
+		}
+	}
 }
 // ----------------------------------------------------------------------------
 public Action AllowStealing(Handle timer, any client) {
