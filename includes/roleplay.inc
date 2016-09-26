@@ -473,6 +473,7 @@ native void rp_ClientResetSkin(int client);									/* Remet le skin classique d
 native void rp_ClientGiveKnife(int client);									/* Retire, et remet le couteau d'un joueur. Utile pour rafraichir son écran, ou quand il sort d'une voiture... */
 native void rp_ClientReveal(int client);										/* Si le joueur est invisible, le rend visible */
 native void rp_ClientDrawWeaponMenu(int client, int ent, bool steal);					/* Affiche le menu de selection d'arme. Pour police, justice, ou crochetage mafia */
+native void rp_ClientGetName(int client, char[] name, int length);
 // ----------------------------------------------------------------------------
 native int rp_GetPlayerZoneAppart(int client); 									/* Numéro de l'appartement: Uniquement si on se trouve dedans... */
 native int rp_GetPlayerZone(int client, float cache = 0.25); 						/* Numéro de la zone actuelle. */
@@ -518,6 +519,9 @@ native void rp_GetDate(char[] str, int length);
 native void rp_GetTime(int& hour, int& minutes);
 native void rp_GetServerString(rp_serv typeID, char[] str, int length);
 native void rp_SetServerString(rp_serv typeID, char[] str, int length);
+native void rp_GetServerRules(serverRules rulesID, rulesData data);
+native void rp_SetServerRules(serverRules rulesID, rulesData data, int value);
+native void rp_StoreServerRules();
 // ----------------------------------------------------------------------------
 native int rp_SetCaptureInt(rp_capture_zone zoneID, int value);
 native int rp_GetCaptureInt(rp_capture_zone zoneID);
@@ -1173,6 +1177,25 @@ enum rankType {
 	rank_type_description,
 	
 	rank_type_max
+};
+enum serverRules {
+	rules_Amendes,
+	rules_ItemsPrice,
+	rules_reductions,
+	rules_Productions,
+	rules_Braquages,
+	rules_JailDistance,
+	rules_ItemsDisabled,
+	rules_Payes,
+	
+	server_rules_max
+};
+enum rulesData {
+	rules_Enabled,
+	rules_Target,
+	rules_Arg,
+	
+	rules_data_max
 };
 
 #include <rp_tools.inc>
