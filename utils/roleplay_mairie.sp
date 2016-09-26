@@ -180,7 +180,51 @@ void Draw_Mairie_Rules(int client) {
 	}
 	
 	
-	menu.AddItem("4 0 0", "Ajouter une nouvelle règle", cpt < 3 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );
+	menu.AddItem("4 -1 -1 -1", "Ajouter une nouvelle règle", cpt < 3 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );
+	menu.Display(client, MENU_TIME_FOREVER);
+}
+
+void Draw_Mairie_AddRules(int client, int rulesID=-1, int target=-1, int arg=-1) {
+	char tmp[64], tmp2[64], optionsBuff[4][32];
+	Menu menu = new Menu(Handle_Mairie);
+	
+	if( rulesID == -1 ) {
+		menu.AddItem("4 0 -1 -1", "Modifier les amendes");
+		menu.AddItem("4 1 -1 -1", "Modifier les prix des ventes");
+		menu.AddItem("4 3 -1 -1", "Modifier les productions illégales");
+		menu.AddItem("4 6 -1 -1", "Modifier les payes");
+		
+		menu.AddItem("4 2 0 -1", "Interdir les réductions");
+		menu.AddItem("4 4 0 -1", "Interdir les braquages");
+		menu.AddItem("4 5 0 -1", "Interdir un item en pvp");
+	}
+	else if( arg == -1 ) {
+		Format(tmp, sizeof(tmp), "4 %d 1 -1", rulesID); menu.AddItem(tmp, "Augmenter");
+		Format(tmp, sizeof(tmp), "4 %d 0 -1", rulesID); menu.AddItem(tmp, "Réduire");
+	}
+	else if( target == -1 ) {
+		for (int i = 1; i <= MAX_JOBS; i+=10) {
+			
+			rp_GetJobData(i, job_type_name, tmp, sizeof(tmp));
+			ExplodeString(tmp, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
+			
+			Format(tmp, sizeof(tmp), "4 %d %d %d", rulesID, arg, i);
+			Format(tmp2, sizeof(tmp2), "Job: %s", optionsBuff[1]);
+			
+			menu.AddItem(tmp, tmp2);
+		}
+		for (int i = 1; i <= MAX_GROUPS; i+=10) {
+			
+			rp_GetGroupData(i, group_type_name, tmp, sizeof(tmp));
+			ExplodeString(tmp, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
+			
+			Format(tmp, sizeof(tmp), "4 %d %d %d", rulesID, arg, i+1000);
+			Format(tmp2, sizeof(tmp2), "Gang: %s", optionsBuff[1]);
+			
+			menu.AddItem(tmp, tmp2);
+		}
+	}
+	
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 void Draw_Mairie_Questionnaire(int client, int step, int qid) {
@@ -352,7 +396,7 @@ public int Handle_Mairie(Handle menu, MenuAction action, int client, int param2)
 	PrintToServer("Handle_Mairie");
 	#endif
 	if (action == MenuAction_Select) {
-		char options[64], explo[3][32];
+		char options[64], explo[4][32];
 		GetMenuItem(menu, param2, options, sizeof(options));
 		ExplodeString(options, " ", explo, sizeof(explo), sizeof(explo[]));
 		PrintToChatAll(options);
@@ -360,6 +404,8 @@ public int Handle_Mairie(Handle menu, MenuAction action, int client, int param2)
 		int a = StringToInt(explo[0]);
 		int b = StringToInt(explo[1]);
 		int c = StringToInt(explo[2]);
+		int d = StringToInt(explo[3]);
+		
 		
 		if (a == 1) {
 			switch (b) {
@@ -416,6 +462,9 @@ public int Handle_Mairie(Handle menu, MenuAction action, int client, int param2)
 		}
 		if (a == 3) {
 			Draw_Mairie_Rules(client);
+		}
+		if (a == 4) {
+			Draw_Mairie_AddRules(client, b, c, d);
 		}
 	}
 	else if (action == MenuAction_End) {
