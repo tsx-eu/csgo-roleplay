@@ -111,7 +111,77 @@ void Draw_Mairie_Main(int client) {
 		return;
 	}
 	
+	Menu menu = new Menu(Handle_Mairie);
+	menu.AddItem("3 0 0", "Règlement communal");
+	menu.Display(client, MENU_TIME_FOREVER);
+	
 	//	PrintToChat(client, "%d --> %d", rp_GetClientPlaytimeJob(client, rp_GetClientJobID(client), true), rp_GetClientPlaytimeJob(client, rp_GetClientInt(client, i_Job), false));
+}
+void Draw_Mairie_Rules(int client) {
+	char tmp[255], tmp2[64], optionsBuff[4][32];
+	Menu menu = new Menu(Handle_Mairie);
+	
+	int cpt;
+	
+	for (serverRules i = rules_Amendes; i < server_rules_max; i++) {
+		if( rp_GetServerRules(i, rules_Enabled) == 0 )
+			continue;
+		
+		if( rp_GetServerRules(i, rules_Arg) == 1 ) {
+			switch(i) {
+				case rules_Amendes:			{	Format(tmp, sizeof(tmp), "Les amendes sont augmentée de 5%");						}
+				case rules_ItemsPrice:		{	Format(tmp, sizeof(tmp), "Les prix des items sont augmentés de 10%");				}
+				case rules_reductions:		{	Format(tmp, sizeof(tmp), "Les réductions sont interdite");							}
+				case rules_Productions:		{	Format(tmp, sizeof(tmp), "La production des machines et plants est accéléré");		}
+				case rules_Braquages:		{	Format(tmp, sizeof(tmp), "Il est interdit de braquer");								}
+				case rules_ItemsDisabled:	{	Format(tmp, sizeof(tmp), "Lors des captures du bunker, il est interdit d'utiliser");}
+				case rules_Payes:			{	Format(tmp, sizeof(tmp), "Les payes sont augmenté de 5%");							}
+			}
+		}
+		else {
+			switch(i) {
+				case rules_Amendes:			{	Format(tmp, sizeof(tmp), "Les amendes sont réduites de 10%");						}
+				case rules_ItemsPrice:		{	Format(tmp, sizeof(tmp), "Les prix des items sont réduits de 5%");					}
+				case rules_reductions:		{	Format(tmp, sizeof(tmp), "Les réductions sont interdite");							}
+				case rules_Productions:		{	Format(tmp, sizeof(tmp), "La production des machines et plants est ralenti");		}
+				case rules_Braquages:		{	Format(tmp, sizeof(tmp), "Il est interdit de braquer ");							}
+				case rules_ItemsDisabled:	{	Format(tmp, sizeof(tmp), "Lors des captures du bunker, il est interdit d'utiliser");}
+				case rules_Payes:			{	Format(tmp, sizeof(tmp), "Les payes sont réduites de 10%");							}
+			}
+		}
+		
+		
+		if( i == rules_ItemsDisabled )  {
+			rp_GetItemData(rp_GetServerRules(i, rules_Target), item_type_name, tmp2, sizeof(tmp2));
+			Format(tmp, sizeof(tmp), "%s: %s.", tmp, tmp2);
+		}
+		else if( i == rules_Braquages )  {
+			rp_GetJobData(rp_GetServerRules(i, rules_Target), job_type_name, tmp2, sizeof(tmp2));
+			ExplodeString(tmp2, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
+			
+			Format(tmp, sizeof(tmp), "%s la planque de %s.", tmp, optionsBuff[1]);
+		}
+		else if( rp_GetServerRules(i, rules_Target) < 1000 ) {
+			rp_GetJobData(rp_GetServerRules(i, rules_Target), job_type_name, tmp2, sizeof(tmp2));
+			ExplodeString(tmp2, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
+			
+			Format(tmp, sizeof(tmp), "%s pour tous les membres du job %s.", tmp, optionsBuff[1]);
+		}
+		else {
+			rp_GetGroupData(rp_GetServerRules(i, rules_Target) - 1000, group_type_name, tmp2, sizeof(tmp2));
+			ExplodeString(tmp2, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
+			
+			Format(tmp, sizeof(tmp), "%s pour tous les membres du groupe %s.", tmp, optionsBuff[1]);
+		}
+		
+		String_WordWrap(tmp, 60);
+		menu.AddItem("_", tmp, ITEMDRAW_DISABLED);
+		cpt++;
+	}
+	
+	
+	menu.AddItem("4 0 0", "Ajouter une nouvelle règle", cpt < 3 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );
+	menu.Display(client, MENU_TIME_FOREVER);
 }
 void Draw_Mairie_Questionnaire(int client, int step, int qid) {
 	char query[1024];
@@ -343,6 +413,9 @@ public int Handle_Mairie(Handle menu, MenuAction action, int client, int param2)
 				Draw_Mairie_Questionnaire(client, 1, g_iMairieQuestionID[client]);
 			}
 			return;
+		}
+		if (a == 3) {
+			Draw_Mairie_Rules(client);
 		}
 	}
 	else if (action == MenuAction_End) {
