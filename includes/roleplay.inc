@@ -967,6 +967,7 @@ enum rp_serv {
 	villaOwnerID = 0,
 	villaOwnerName,
 	lotoCagnotte,
+	mairieID,
 
 	rp_serv_max
 };

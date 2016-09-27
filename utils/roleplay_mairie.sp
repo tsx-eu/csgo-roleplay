@@ -112,98 +112,141 @@ void Draw_Mairie_Main(int client) {
 	}
 	
 	Menu menu = new Menu(Handle_Mairie);
+	menu.SetTitle("Mairie de Princeton\n ");
 	menu.AddItem("3 0 0", "Règlement communal");
 	menu.Display(client, MENU_TIME_FOREVER);
 	
 	//	PrintToChat(client, "%d --> %d", rp_GetClientPlaytimeJob(client, rp_GetClientJobID(client), true), rp_GetClientPlaytimeJob(client, rp_GetClientInt(client, i_Job), false));
 }
-void Draw_Mairie_Rules(int client) {
-	char tmp[255], tmp2[64], optionsBuff[4][32];
-	Menu menu = new Menu(Handle_Mairie);
+void getRulesName(serverRules rulesID, int target, int arg, char[] tmp, int length) {
+	char tmp2[64], optionsBuff[4][32];
+	if( arg == 1 ) {
+		switch(rulesID) {
+			case rules_Amendes:			{	Format(tmp, length, "Les amendes sont augmentée de 5%");						}
+			case rules_ItemsPrice:		{	Format(tmp, length, "Les prix des items sont augmentés de 10%");				}
+			case rules_reductions:		{	Format(tmp, length, "Les réductions sont interdite");							}
+			case rules_Productions:		{	Format(tmp, length, "La production des machines et plants est accéléré");		}
+			case rules_Braquages:		{	Format(tmp, length, "Il est interdit de braquer");								}
+			case rules_ItemsDisabled:	{	Format(tmp, length, "Lors des captures du bunker, il est interdit d'utiliser");}
+			case rules_Payes:			{	Format(tmp, length, "Les payes sont augmenté de 5%");							}
+		}
+	}
+	else {
+		switch(rulesID) {
+			case rules_Amendes:			{	Format(tmp, length, "Les amendes sont réduites de 10%");						}
+			case rules_ItemsPrice:		{	Format(tmp, length, "Les prix des items sont réduits de 5%");					}
+			case rules_reductions:		{	Format(tmp, length, "Les réductions sont interdite");							}
+			case rules_Productions:		{	Format(tmp, length, "La production des machines et plants est ralenti");		}
+			case rules_Braquages:		{	Format(tmp, length, "Il est interdit de braquer ");							}
+			case rules_ItemsDisabled:	{	Format(tmp, length, "Lors des captures du bunker, il est interdit d'utiliser");}
+			case rules_Payes:			{	Format(tmp, length, "Les payes sont réduites de 10%");							}
+		}
+	}
 	
+	
+	if( rulesID == rules_ItemsDisabled )  {
+		rp_GetItemData(target, item_type_name, tmp2, sizeof(tmp2));
+		Format(tmp, length, "%s: %s", tmp, tmp2);
+	}
+	else if( rulesID == rules_Braquages )  {
+		rp_GetJobData(target, job_type_name, tmp2, sizeof(tmp2));
+		ExplodeString(tmp2, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
+		
+		Format(tmp, length, "%s la planque de %s", tmp, optionsBuff[1]);
+	}
+	else if( target < 1000 ) {
+		rp_GetJobData(target, job_type_name, tmp2, sizeof(tmp2));
+		ExplodeString(tmp2, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
+		
+		Format(tmp, length, "%s pour tous les membres du job %s", tmp, optionsBuff[1]);
+	}
+	else {
+		rp_GetGroupData(target - 1000, group_type_name, tmp2, sizeof(tmp2));
+		ExplodeString(tmp2, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
+		
+		Format(tmp, length, "%s pour tous les membres du groupe %s", tmp, optionsBuff[1]);
+	}
+}
+void Draw_Mairie_Rules(int client) {
+	char tmp[255], tmp2[255];
+	Menu menu = new Menu(Handle_Mairie);
 	int cpt;
+	
+	menu.SetTitle("Mairie de Princeton, règlement communal\n ");
 	
 	for (serverRules i = rules_Amendes; i < server_rules_max; i++) {
 		if( rp_GetServerRules(i, rules_Enabled) == 0 )
 			continue;
 		
-		if( rp_GetServerRules(i, rules_Arg) == 1 ) {
-			switch(i) {
-				case rules_Amendes:			{	Format(tmp, sizeof(tmp), "Les amendes sont augmentée de 5%");						}
-				case rules_ItemsPrice:		{	Format(tmp, sizeof(tmp), "Les prix des items sont augmentés de 10%");				}
-				case rules_reductions:		{	Format(tmp, sizeof(tmp), "Les réductions sont interdite");							}
-				case rules_Productions:		{	Format(tmp, sizeof(tmp), "La production des machines et plants est accéléré");		}
-				case rules_Braquages:		{	Format(tmp, sizeof(tmp), "Il est interdit de braquer");								}
-				case rules_ItemsDisabled:	{	Format(tmp, sizeof(tmp), "Lors des captures du bunker, il est interdit d'utiliser");}
-				case rules_Payes:			{	Format(tmp, sizeof(tmp), "Les payes sont augmenté de 5%");							}
-			}
-		}
-		else {
-			switch(i) {
-				case rules_Amendes:			{	Format(tmp, sizeof(tmp), "Les amendes sont réduites de 10%");						}
-				case rules_ItemsPrice:		{	Format(tmp, sizeof(tmp), "Les prix des items sont réduits de 5%");					}
-				case rules_reductions:		{	Format(tmp, sizeof(tmp), "Les réductions sont interdite");							}
-				case rules_Productions:		{	Format(tmp, sizeof(tmp), "La production des machines et plants est ralenti");		}
-				case rules_Braquages:		{	Format(tmp, sizeof(tmp), "Il est interdit de braquer ");							}
-				case rules_ItemsDisabled:	{	Format(tmp, sizeof(tmp), "Lors des captures du bunker, il est interdit d'utiliser");}
-				case rules_Payes:			{	Format(tmp, sizeof(tmp), "Les payes sont réduites de 10%");							}
-			}
-		}
 		
+		getRulesName(i, rp_GetServerRules(i, rules_Target), rp_GetServerRules(i, rules_Arg), tmp, sizeof(tmp));
 		
-		if( i == rules_ItemsDisabled )  {
-			rp_GetItemData(rp_GetServerRules(i, rules_Target), item_type_name, tmp2, sizeof(tmp2));
-			Format(tmp, sizeof(tmp), "%s: %s.", tmp, tmp2);
-		}
-		else if( i == rules_Braquages )  {
-			rp_GetJobData(rp_GetServerRules(i, rules_Target), job_type_name, tmp2, sizeof(tmp2));
-			ExplodeString(tmp2, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
-			
-			Format(tmp, sizeof(tmp), "%s la planque de %s.", tmp, optionsBuff[1]);
-		}
-		else if( rp_GetServerRules(i, rules_Target) < 1000 ) {
-			rp_GetJobData(rp_GetServerRules(i, rules_Target), job_type_name, tmp2, sizeof(tmp2));
-			ExplodeString(tmp2, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
-			
-			Format(tmp, sizeof(tmp), "%s pour tous les membres du job %s.", tmp, optionsBuff[1]);
-		}
-		else {
-			rp_GetGroupData(rp_GetServerRules(i, rules_Target) - 1000, group_type_name, tmp2, sizeof(tmp2));
-			ExplodeString(tmp2, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
-			
-			Format(tmp, sizeof(tmp), "%s pour tous les membres du groupe %s.", tmp, optionsBuff[1]);
-		}
-		
-		String_WordWrap(tmp, 60);
+		String_WordWrap(tmp, 50);
 		menu.AddItem("_", tmp, ITEMDRAW_DISABLED);
 		cpt++;
 	}
 	
+	rp_GetServerString(mairieID, tmp2, sizeof(tmp2));
+	GetClientAuthId(client, AuthId_Engine, tmp, sizeof(tmp));
 	
-	menu.AddItem("4 -1 -1 -1", "Ajouter une nouvelle règle", cpt < 3 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );
+	if( cpt < 4 && StrEqual(tmp, tmp2) )
+		menu.AddItem("4 -1 -1 -1", "Ajouter une nouvelle règle");
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
-void Draw_Mairie_AddRules(int client, int rulesID=-1, int target=-1, int arg=-1) {
-	char tmp[64], tmp2[64], optionsBuff[4][32];
+void Draw_Mairie_AddRules(int client, int rulesID=-1, int arg=-1, int target=-1) {
+	char tmp[255], tmp2[64], optionsBuff[4][32];
 	Menu menu = new Menu(Handle_Mairie);
+	menu.SetTitle("Mairie de Princeton, règlement communal\n ");
 	
 	if( rulesID == -1 ) {
-		menu.AddItem("4 0 -1 -1", "Modifier les amendes");
-		menu.AddItem("4 1 -1 -1", "Modifier les prix des ventes");
-		menu.AddItem("4 3 -1 -1", "Modifier les productions illégales");
-		menu.AddItem("4 6 -1 -1", "Modifier les payes");
 		
-		menu.AddItem("4 2 0 -1", "Interdir les réductions");
-		menu.AddItem("4 4 0 -1", "Interdir les braquages");
-		menu.AddItem("4 5 0 -1", "Interdir un item en pvp");
+		menu.AddItem("4 0 -1 -1", "Modifier les amendes", rp_GetServerRules(rules_Amendes, rules_Enabled) ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
+		menu.AddItem("4 1 -1 -1", "Modifier les prix des ventes", rp_GetServerRules(rules_ItemsPrice, rules_Enabled) ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
+		menu.AddItem("4 3 -1 -1", "Modifier les productions illégales", rp_GetServerRules(rules_Productions, rules_Enabled) ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
+		menu.AddItem("4 6 -1 -1", "Modifier les payes", rp_GetServerRules(rules_Payes, rules_Enabled) ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
+		
+		menu.AddItem("4 2 0 -1", "Interdir les réductions", rp_GetServerRules(rules_reductions, rules_Enabled) ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
+		menu.AddItem("4 4 0 -1", "Interdir les braquages", rp_GetServerRules(rules_Braquages, rules_Enabled) ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
+		menu.AddItem("4 5 0 -1", "Interdir un item en pvp", rp_GetServerRules(rules_ItemsDisabled, rules_Enabled) ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
+		
+		menu.Pagination = MENU_NO_PAGINATION;
 	}
 	else if( arg == -1 ) {
 		Format(tmp, sizeof(tmp), "4 %d 1 -1", rulesID); menu.AddItem(tmp, "Augmenter");
 		Format(tmp, sizeof(tmp), "4 %d 0 -1", rulesID); menu.AddItem(tmp, "Réduire");
 	}
+	else if( target == -1 && rulesID == 5 ) {
+		for (int i = 5; i < MAX_ITEMS; i++) {
+			if( rp_GetItemInt(i, item_type_auto) > 0 ) 
+				continue;
+			
+			Format(tmp, sizeof(tmp), "4 %d %d %d", rulesID, arg, i);
+			rp_GetItemData(i, item_type_name, tmp2, sizeof(tmp2));
+			
+			menu.AddItem(tmp, tmp2);
+		}
+	}
 	else if( target == -1 ) {
-		for (int i = 1; i <= MAX_JOBS; i+=10) {
+		
+		if( rulesID != 4 ) {
+			for (int i = 1; i < MAX_GROUPS; i+=10) {
+				if( rp_GetGroupInt(i, group_type_chef) <= 0 ) 
+					continue;
+				
+				rp_GetGroupData(i, group_type_name, tmp, sizeof(tmp));
+				ExplodeString(tmp, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
+				
+				Format(tmp, sizeof(tmp), "4 %d %d %d", rulesID, arg, i+1000);
+				Format(tmp2, sizeof(tmp2), "Gang: %s", optionsBuff[1]);
+				
+				menu.AddItem(tmp, tmp2);
+			}
+		}
+		
+		for (int i = 1; i < MAX_JOBS; i+=10) {
+			if( rp_GetJobInt(i, job_type_quota) <= 0 ) 
+				continue;
 			
 			rp_GetJobData(i, job_type_name, tmp, sizeof(tmp));
 			ExplodeString(tmp, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
@@ -213,16 +256,30 @@ void Draw_Mairie_AddRules(int client, int rulesID=-1, int target=-1, int arg=-1)
 			
 			menu.AddItem(tmp, tmp2);
 		}
-		for (int i = 1; i <= MAX_GROUPS; i+=10) {
-			
-			rp_GetGroupData(i, group_type_name, tmp, sizeof(tmp));
-			ExplodeString(tmp, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
-			
-			Format(tmp, sizeof(tmp), "4 %d %d %d", rulesID, arg, i+1000);
-			Format(tmp2, sizeof(tmp2), "Gang: %s", optionsBuff[1]);
-			
-			menu.AddItem(tmp, tmp2);
-		}
+		
+	}
+	else if( rulesID < 1000 ) {
+		
+		getRulesName(view_as<serverRules>(rulesID), target, arg, tmp, sizeof(tmp));
+		String_WordWrap(tmp, 60);
+		
+		Format(tmp2, sizeof(tmp2), "4 %d %d %d", rulesID+1000, arg, target);
+		
+		menu.AddItem("_", tmp, ITEMDRAW_DISABLED);
+		menu.AddItem("4 -1 -1 -1", "Créer une autre règle");
+		menu.AddItem(tmp2, "Je confirme la règle");
+	}
+	else {
+		rp_SetServerRules(view_as<serverRules>(rulesID - 1000), rules_Enabled, 1);
+		rp_SetServerRules(view_as<serverRules>(rulesID - 1000), rules_Target, target);
+		rp_SetServerRules(view_as<serverRules>(rulesID - 1000), rules_Arg, arg);
+		rp_StoreServerRules();		
+		
+		getRulesName(view_as<serverRules>(rulesID-1000), target, arg, tmp, sizeof(tmp));
+		
+		CPrintToChatAll("{lightblue}[TSX-RP]{default} Le maire vient de décréter une nouvelle règle: %s.", tmp);
+		delete menu;
+		return;
 	}
 	
 	menu.Display(client, MENU_TIME_FOREVER);
