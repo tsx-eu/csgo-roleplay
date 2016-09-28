@@ -38,10 +38,12 @@ public void OnClientPostAdminCheck(int client) {
 	g_bWaitingMairieCommand[client] = false;
 	rp_HookEvent(client, RP_OnPlayerUse, fwdPlayerUse);
 }
+
 public Action fwdPlayerUse(int client) {
 	if( rp_GetPlayerZone(client) == MAIRIE_ZONE )
 		Draw_Mairie_Main(client);
 }
+
 public void fwdCompleteFirstname(int client, any data, char[] message) {
 	char tmp[128];
 	String_CleanupName(message, tmp, sizeof(tmp));
@@ -100,6 +102,7 @@ public void fwdCompleteLastname_Query(Handle owner, Handle handle, const char[] 
 	
 	Draw_Mairie_Register(client, 4);
 }
+
 void Draw_Mairie_Main(int client) {
 	
 	if (rp_GetClientInt(client, i_PlayerLVL) >= 6 && rp_GetClientInt(client, i_BirthDay) <= 0) {
@@ -114,58 +117,79 @@ void Draw_Mairie_Main(int client) {
 	Menu menu = new Menu(Handle_Mairie);
 	menu.SetTitle("Mairie de Princeton\n ");
 	menu.AddItem("3 0 0", "Règlement communal");
+	menu.AddItem("5 0 0", "Candidature pour la Mairie");
+	
 	menu.Display(client, MENU_TIME_FOREVER);
 	
 	//	PrintToChat(client, "%d --> %d", rp_GetClientPlaytimeJob(client, rp_GetClientJobID(client), true), rp_GetClientPlaytimeJob(client, rp_GetClientInt(client, i_Job), false));
 }
-void getRulesName(serverRules rulesID, int target, int arg, char[] tmp, int length) {
-	char tmp2[64], optionsBuff[4][32];
-	if( arg == 1 ) {
-		switch(rulesID) {
-			case rules_Amendes:			{	Format(tmp, length, "Les amendes sont augmentée de 5%");						}
-			case rules_ItemsPrice:		{	Format(tmp, length, "Les prix des items sont augmentés de 10%");				}
-			case rules_reductions:		{	Format(tmp, length, "Les réductions sont interdite");							}
-			case rules_Productions:		{	Format(tmp, length, "La production des machines et plants est accéléré");		}
-			case rules_Braquages:		{	Format(tmp, length, "Il est interdit de braquer");								}
-			case rules_ItemsDisabled:	{	Format(tmp, length, "Lors des captures du bunker, il est interdit d'utiliser");}
-			case rules_Payes:			{	Format(tmp, length, "Les payes sont augmenté de 5%");							}
+void Draw_Mairie_Candidate(int client, int target, int arg) {
+	char tmp[255], szSteamID[32];
+	
+	if( target == 0 ) {
+		SQL_TQuery(rp_GetDatabase(), QUERY_MairieCandidate, "SELECT `id`, `name` FROM `rp_mairie` M INNER JOIN `rp_users` U ON U.`steamid`=M.`steamid` ORDER BY RAND();", client);
+		return;
+	}
+	else if( target == -1 ) {
+		if( arg == 0 ) {
+			Menu menu = new Menu(Handle_Mairie);
+			Format(tmp, sizeof(tmp), "Vous souhaitez poster votre candidature pour devenir Maire? Celà vous coûtera 50.000$, vous ne serrez pas remboursé si vous perdez les élections.");
+			String_WordWrap(tmp, 60);
+			
+			menu.SetTitle("Candidature pour la Mairie\n \n%s\n ", tmp);
+			
+			menu.AddItem("5 0 0", "Annuler, ne pas participer aux élections");
+			menu.AddItem("5 -1 1", "Je confirme ma candidature, je paye 50.000$");
+			
+			menu.Display(client, MENU_TIME_FOREVER);
+		}
+		if( arg == 1 ) {
+			
+			if( (rp_GetClientInt(client, i_Money)+rp_GetClientInt(client, i_Bank)) >= 50000 ) {
+				rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - 50000);
+				
+				GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
+				
+				Format(tmp, sizeof(tmp), "INSERT INTO `rp_maire` (`id`, `steamid`) VALUES (NULL, '%s');", szSteamID);
+				SQL_TQuery(rp_GetDatabase(), QUERY_PostCandidate, tmp, client);
+			}
 		}
 	}
-	else {
-		switch(rulesID) {
-			case rules_Amendes:			{	Format(tmp, length, "Les amendes sont réduites de 10%");						}
-			case rules_ItemsPrice:		{	Format(tmp, length, "Les prix des items sont réduits de 5%");					}
-			case rules_reductions:		{	Format(tmp, length, "Les réductions sont interdite");							}
-			case rules_Productions:		{	Format(tmp, length, "La production des machines et plants est ralenti");		}
-			case rules_Braquages:		{	Format(tmp, length, "Il est interdit de braquer ");							}
-			case rules_ItemsDisabled:	{	Format(tmp, length, "Lors des captures du bunker, il est interdit d'utiliser");}
-			case rules_Payes:			{	Format(tmp, length, "Les payes sont réduites de 10%");							}
-		}
-	}
-	
-	
-	if( rulesID == rules_ItemsDisabled )  {
-		rp_GetItemData(target, item_type_name, tmp2, sizeof(tmp2));
-		Format(tmp, length, "%s: %s", tmp, tmp2);
-	}
-	else if( rulesID == rules_Braquages )  {
-		rp_GetJobData(target, job_type_name, tmp2, sizeof(tmp2));
-		ExplodeString(tmp2, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
-		
-		Format(tmp, length, "%s la planque de %s", tmp, optionsBuff[1]);
-	}
-	else if( target < 1000 ) {
-		rp_GetJobData(target, job_type_name, tmp2, sizeof(tmp2));
-		ExplodeString(tmp2, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
-		
-		Format(tmp, length, "%s pour tous les membres du job %s", tmp, optionsBuff[1]);
+}
+public void QUERY_PostCandidate(Handle owner, Handle handle, const char[] error, any client) {
+	if( strlen(error) >= 1  ) {
+		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) + 50000);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà posté une candidature, vous avez donc été remboursé.");
 	}
 	else {
-		rp_GetGroupData(target - 1000, group_type_name, tmp2, sizeof(tmp2));
-		ExplodeString(tmp2, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
-		
-		Format(tmp, length, "%s pour tous les membres du groupe %s", tmp, optionsBuff[1]);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre candidature a été validée.");
 	}
+}
+
+public void QUERY_MairieCandidate(Handle owner, Handle handle, const char[] error, any client) {
+	char tmp[64], tmp2[64], szSteamID[64];
+	
+	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
+	bool myself = false;
+	
+	Menu menu = new Menu(Handle_Mairie);
+	menu.SetTitle("Candidature pour la Mairie\n ");
+	
+	while( SQL_FetchRow(handle) ) {
+		int id = SQL_FetchInt(handle, 0);
+		SQL_FetchString(handle, 1, tmp, sizeof(tmp));
+		
+		if( StrEqual(tmp, szSteamID) )
+			myself = true;
+		
+		Format(tmp2, sizeof(tmp2), "5 %d 0", id);
+		menu.AddItem(tmp2, tmp);
+	}
+	
+	if( !myself )
+		menu.AddItem("5 -1 0", "Poster ma candidature (50 000$)", (rp_GetClientInt(client, i_Money)+rp_GetClientInt(client, i_Bank)) >= 50000 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );
+	
+	menu.Display(client, MENU_TIME_FOREVER);
 }
 void Draw_Mairie_Rules(int client) {
 	char tmp[255], tmp2[255];
@@ -193,7 +217,6 @@ void Draw_Mairie_Rules(int client) {
 		menu.AddItem("4 -1 -1 -1", "Ajouter une nouvelle règle");
 	menu.Display(client, MENU_TIME_FOREVER);
 }
-
 void Draw_Mairie_AddRules(int client, int rulesID=-1, int arg=-1, int target=-1) {
 	char tmp[255], tmp2[64], optionsBuff[4][32];
 	Menu menu = new Menu(Handle_Mairie);
@@ -317,36 +340,6 @@ void Draw_Mairie_Questionnaire(int client, int step, int qid) {
 		SQL_TQuery(rp_GetDatabase(), QUERY_MairieQuestionnaire, query, client + step*1000);
 	}
 }
-public void QUERY_MairieQuestionnaire(Handle owner, Handle handle, const char[] error, any data) {
-	
-	int client = data % 1000;
-	int step = (data - client) / 1000;
-	char question[256], response[256], tmp[256], title[1024];
-	int estVraie;
-	
-	Menu menu = new Menu(Handle_Mairie);
-	
-	while( SQL_FetchRow(handle) ) {
-		g_iMairieQuestionID[client] = SQL_FetchInt(handle, 0);
-		SQL_FetchString(handle, 1, question, sizeof(question));
-		SQL_FetchString(handle, 2, response, sizeof(response));
-		estVraie = SQL_FetchInt(handle, 3);
-		
-		Format(tmp, sizeof(tmp), "2 %d %d", step, estVraie);
-		menu.AddItem(tmp, response);
-	}
-	
-	Format(title, sizeof(title), "Mairie de Princeton\n ");
-	Format(title, sizeof(title), "%s\nLes citoyens de Princeton doivent passer un test", title);
-	Format(title, sizeof(title), "%s\nsur les connaissances du règlement communal.", title);
-	
-	Format(question, sizeof(question), "Question %d: %s", step, question);
-	String_WordWrap(question, 65);
-	Format(title, sizeof(title), "%s\n%s\n ", title, question);
-	menu.SetTitle(title);
-	
-	menu.Display(client, MENU_TIME_FOREVER);
-}
 void Draw_Mairie_Register(int client, int step) {
 	Menu menu = new Menu(Handle_Mairie);
 	char title[1024], tmp[128], tmp2[128], tmp3[2][32];
@@ -448,6 +441,39 @@ void Draw_Mairie_Register(int client, int step) {
 	menu.SetTitle(title);
 	menu.Display(client, MENU_TIME_FOREVER);
 }
+
+public void QUERY_MairieQuestionnaire(Handle owner, Handle handle, const char[] error, any data) {
+	
+	int client = data % 1000;
+	int step = (data - client) / 1000;
+	char question[256], response[256], tmp[256], title[1024];
+	int estVraie;
+	
+	Menu menu = new Menu(Handle_Mairie);
+	
+	while( SQL_FetchRow(handle) ) {
+		g_iMairieQuestionID[client] = SQL_FetchInt(handle, 0);
+		SQL_FetchString(handle, 1, question, sizeof(question));
+		SQL_FetchString(handle, 2, response, sizeof(response));
+		estVraie = SQL_FetchInt(handle, 3);
+		
+		Format(tmp, sizeof(tmp), "2 %d %d", step, estVraie);
+		menu.AddItem(tmp, response);
+	}
+	
+	ReplaceString(question, sizeof(question), " ?", "?");
+	
+	Format(title, sizeof(title), "Mairie de Princeton\n ");
+	Format(title, sizeof(title), "%s\nLes citoyens de Princeton doivent passer un test", title);
+	Format(title, sizeof(title), "%s\nsur les connaissances du règlement communal.", title);
+	
+	Format(question, sizeof(question), "Question %d: %s", step, question);
+	String_WordWrap(question, 65);
+	Format(title, sizeof(title), "%s\n%s\n ", title, question);
+	menu.SetTitle(title);
+	
+	menu.Display(client, MENU_TIME_FOREVER);
+}
 public int Handle_Mairie(Handle menu, MenuAction action, int client, int param2) {
 	#if defined DEBUG
 	PrintToServer("Handle_Mairie");
@@ -456,7 +482,6 @@ public int Handle_Mairie(Handle menu, MenuAction action, int client, int param2)
 		char options[64], explo[4][32];
 		GetMenuItem(menu, param2, options, sizeof(options));
 		ExplodeString(options, " ", explo, sizeof(explo), sizeof(explo[]));
-		PrintToChatAll(options);
 		
 		int a = StringToInt(explo[0]);
 		int b = StringToInt(explo[1]);
@@ -523,8 +548,61 @@ public int Handle_Mairie(Handle menu, MenuAction action, int client, int param2)
 		if (a == 4) {
 			Draw_Mairie_AddRules(client, b, c, d);
 		}
+		if( a == 5 ) {
+			Draw_Mairie_Candidate(client, b, c);
+		}
 	}
 	else if (action == MenuAction_End) {
 		CloseHandle(menu);
+	}
+}
+
+void getRulesName(serverRules rulesID, int target, int arg, char[] tmp, int length) {
+	char tmp2[64], optionsBuff[4][32];
+	if( arg == 1 ) {
+		switch(rulesID) {
+			case rules_Amendes:			{	Format(tmp, length, "Les amendes sont augmentée de 5%");						}
+			case rules_ItemsPrice:		{	Format(tmp, length, "Les prix des items sont augmentés de 10%");				}
+			case rules_reductions:		{	Format(tmp, length, "Les réductions sont interdite");							}
+			case rules_Productions:		{	Format(tmp, length, "La production des machines et plants est accéléré");		}
+			case rules_Braquages:		{	Format(tmp, length, "Il est interdit de braquer");								}
+			case rules_ItemsDisabled:	{	Format(tmp, length, "Lors des captures du bunker, il est interdit d'utiliser");}
+			case rules_Payes:			{	Format(tmp, length, "Les payes sont augmenté de 5%");							}
+		}
+	}
+	else {
+		switch(rulesID) {
+			case rules_Amendes:			{	Format(tmp, length, "Les amendes sont réduites de 10%");						}
+			case rules_ItemsPrice:		{	Format(tmp, length, "Les prix des items sont réduits de 5%");					}
+			case rules_reductions:		{	Format(tmp, length, "Les réductions sont interdite");							}
+			case rules_Productions:		{	Format(tmp, length, "La production des machines et plants est ralenti");		}
+			case rules_Braquages:		{	Format(tmp, length, "Il est interdit de braquer ");							}
+			case rules_ItemsDisabled:	{	Format(tmp, length, "Lors des captures du bunker, il est interdit d'utiliser");}
+			case rules_Payes:			{	Format(tmp, length, "Les payes sont réduites de 10%");							}
+		}
+	}
+	
+	
+	if( rulesID == rules_ItemsDisabled )  {
+		rp_GetItemData(target, item_type_name, tmp2, sizeof(tmp2));
+		Format(tmp, length, "%s: %s", tmp, tmp2);
+	}
+	else if( rulesID == rules_Braquages )  {
+		rp_GetJobData(target, job_type_name, tmp2, sizeof(tmp2));
+		ExplodeString(tmp2, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
+		
+		Format(tmp, length, "%s la planque de %s", tmp, optionsBuff[1]);
+	}
+	else if( target < 1000 ) {
+		rp_GetJobData(target, job_type_name, tmp2, sizeof(tmp2));
+		ExplodeString(tmp2, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
+		
+		Format(tmp, length, "%s pour tous les membres du job %s", tmp, optionsBuff[1]);
+	}
+	else {
+		rp_GetGroupData(target - 1000, group_type_name, tmp2, sizeof(tmp2));
+		ExplodeString(tmp2, " - ", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
+		
+		Format(tmp, length, "%s pour tous les membres du groupe %s", tmp, optionsBuff[1]);
 	}
 }
