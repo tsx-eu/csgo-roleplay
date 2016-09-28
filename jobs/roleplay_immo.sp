@@ -999,7 +999,8 @@ public int bedVillaMenu_BED(Handle p_hItemMenu, MenuAction p_oAction, int client
 	#endif
 
 	if( p_oAction == MenuAction_Select) {
-		char szMenuItem[32];
+		char szMenuItem[32], szDayOfWeek[12], szHours[12], sql[256];
+		
 		if( GetMenuItem(p_hItemMenu, p_iParam2, szMenuItem, sizeof(szMenuItem)) ) {
 			if( StrEqual(szMenuItem, "back") ) {
 				Cmd_BedVilla(client);
@@ -1011,12 +1012,17 @@ public int bedVillaMenu_BED(Handle p_hItemMenu, MenuAction p_oAction, int client
 				OpenBedMenu(client);
 				return;
 			}
+	
+			FormatTime(szDayOfWeek, 11, "%w");
+			FormatTime(szHours, 11, "%H");
 			
-			char sql[256];
-			GetClientAuthId(client, AuthId_Engine, sql, sizeof(sql));
-			Format(sql, sizeof(sql), "INSERT INTO `rp_bid` (`steamid`, `amount`) VALUES ('%s', '%d') ON DUPLICATE KEY UPDATE `amount`=`amount`+%d;", sql, amount, amount);
-			SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, sql);
-			rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - amount);
+			if( StringToInt(szDayOfWeek) == 0 && StringToInt(szHours) < 21 ) {	// Dimanche avant 21h
+			
+				GetClientAuthId(client, AuthId_Engine, sql, sizeof(sql));
+				Format(sql, sizeof(sql), "INSERT INTO `rp_bid` (`steamid`, `amount`) VALUES ('%s', '%d') ON DUPLICATE KEY UPDATE `amount`=`amount`+%d;", sql, amount, amount);
+				SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, sql);
+				rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - amount);
+			}
 			
 			OpenBedMenu(client);
 		}
