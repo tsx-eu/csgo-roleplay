@@ -246,7 +246,7 @@ public Action Cmd_ItemDrugs(int args) {
 		if( g_hDrugTimer[client] ) {
 			delete g_hDrugTimer[client];
 			
-			if( Math_GetRandomInt(1, 100) >= 80 && !rp_GetClientBool(client, b_HasProtImmu)) {
+			if( Math_GetRandomInt(1, 100) >= 85 && !rp_GetClientBool(client, b_HasProtImmu)) {
 				
 				if( !(rp_GetClientJobID(client) == 11 && rp_GetClientBool(client, b_GameModePassive) == false) ) {
 					rp_IncrementSuccess(client, success_list_dealer);
