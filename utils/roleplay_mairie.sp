@@ -29,10 +29,42 @@ public Plugin myinfo =  {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 public void OnPluginStart() {
+	
+	RegAdminCmd("rp_force_maire", 		CmdForceMaire, 			ADMFLAG_ROOT);
+	
+	
 	for (int i = 1; i <= MaxClients; i++)
-	if (IsValidClient(i))
-		OnClientPostAdminCheck(i);
+		if( IsValidClient(i) )
+			OnClientPostAdminCheck(i);
 }
+public Action CmdForceMaire(int client, int args) {
+	SQL_TQuery(rp_GetDatabase(), QUERY_SetMaire, "SELECT `name`, M.`steamid` FROM `rp_maire` M INNER JOIN `rp_users` U ON U.`steamid`=M.`steamid` INNER JOIN `rp_maire_vote` V ON V.`target`=M.`id` GROUP BY M.`id` HAVING COUNT(*)=( SELECT COUNT(*) as `a` FROM `rp_maire` M INNER JOIN `rp_maire_vote` V ON V.`target`=M.`id` GROUP BY M.`id` ORDER BY `a` DESC LIMIT 1) ORDER BY RAND() LIMIT 1;");	
+}
+public void QUERY_SetMaire(Handle owner, Handle handle, const char[] error, any client) {
+	char tmp[64], tmp2[32], query[1024];
+	
+	if( SQL_FetchRow(handle) ) {
+		SQL_FetchString(handle, 0, tmp, sizeof(tmp));
+		SQL_FetchString(handle, 1, tmp2, sizeof(tmp2));
+		
+		CPrintToChatAll("{lightblue} ================================== {default}");
+		CPrintToChatAll("{lightblue}[TSX-RP]{default} Félicitation à %s, qui devient notre nouveau maire!", tmp);
+		CPrintToChatAll("{lightblue} ================================== {default}");
+		
+		rp_SetServerString(mairieID, tmp2, sizeof(tmp2));
+		Format(query, sizeof(query), "UPDATE `rp_servers` SET `maire`='%s';", tmp2);
+		
+		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, "TRUNCATE `rp_maire`;");
+		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, "TRUNCATE `rp_maire_vote`;");
+		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
+		
+		
+		for (serverRules i = rules_Amendes; i < server_rules_max; i++)
+			rp_SetServerRules(i, rules_Enabled, 0);
+		rp_StoreServerRules();
+	}
+}
+
 public void OnClientPostAdminCheck(int client) {
 	g_iMairieQuestionID[client] = 0;
 	g_bWaitingMairieCommand[client] = false;
@@ -127,7 +159,7 @@ void Draw_Mairie_Candidate(int client, int target, int arg) {
 	char tmp[255], szSteamID[32];
 	
 	if( target == 0 ) {
-		SQL_TQuery(rp_GetDatabase(), QUERY_MairieCandidate, "SELECT `id`, `name` FROM `rp_mairie` M INNER JOIN `rp_users` U ON U.`steamid`=M.`steamid` ORDER BY RAND();", client);
+		SQL_TQuery(rp_GetDatabase(), QUERY_MairieCandidate, "SELECT `id`, `name`, M.`steamid`, SUM(CASE WHEN `target` IS NULL THEN 0 ELSE 1 END) AS `cpt` FROM `rp_maire` M INNER JOIN `rp_users` U ON U.`steamid`=M.`steamid` LEFT JOIN `rp_maire_vote` V ON V.`target`=M.`id` GROUP BY M.`id` ORDER BY RAND();", client);
 		return;
 	}
 	else if( target == -1 ) {
@@ -155,6 +187,13 @@ void Draw_Mairie_Candidate(int client, int target, int arg) {
 			}
 		}
 	}
+	else {
+		
+		GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
+		Format(tmp, sizeof(tmp), "INSERT INTO `rp_maire_vote` (`steamid`, `target`) VALUES ('%s', '%d') ON DUPLICATE KEY UPDATE `target`=VALUES(`target`);", szSteamID, target);
+		SQL_TQuery(rp_GetDatabase(), QUERY_VoteCandidate, tmp, client);
+		
+	}
 }
 public void QUERY_PostCandidate(Handle owner, Handle handle, const char[] error, any client) {
 	if( strlen(error) >= 1  ) {
@@ -165,7 +204,9 @@ public void QUERY_PostCandidate(Handle owner, Handle handle, const char[] error,
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre candidature a été validée.");
 	}
 }
-
+public void QUERY_VoteCandidate(Handle owner, Handle handle, const char[] error, any client) {
+	Draw_Mairie_Candidate(client, 0, 0);
+}
 public void QUERY_MairieCandidate(Handle owner, Handle handle, const char[] error, any client) {
 	char tmp[64], tmp2[64], szSteamID[64];
 	
@@ -174,19 +215,26 @@ public void QUERY_MairieCandidate(Handle owner, Handle handle, const char[] erro
 	
 	Menu menu = new Menu(Handle_Mairie);
 	menu.SetTitle("Candidature pour la Mairie\n ");
-	
+
 	while( SQL_FetchRow(handle) ) {
 		int id = SQL_FetchInt(handle, 0);
 		SQL_FetchString(handle, 1, tmp, sizeof(tmp));
+		SQL_FetchString(handle, 2, tmp2, sizeof(tmp2));
+		int cpt = SQL_FetchInt(handle, 3);
 		
-		if( StrEqual(tmp, szSteamID) )
+		if( StrEqual(tmp2, szSteamID) )
 			myself = true;
 		
+		Format(tmp, sizeof(tmp), "%s [%d]", tmp, cpt);
 		Format(tmp2, sizeof(tmp2), "5 %d 0", id);
+		
 		menu.AddItem(tmp2, tmp);
 	}
 	
-	if( !myself )
+	char szDayOfWeek[12];
+	FormatTime(szDayOfWeek, 11, "%w");
+	
+	if( !myself && StringToInt(szDayOfWeek) != 1)
 		menu.AddItem("5 -1 0", "Poster ma candidature (50 000$)", (rp_GetClientInt(client, i_Money)+rp_GetClientInt(client, i_Bank)) >= 50000 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );
 	
 	menu.Display(client, MENU_TIME_FOREVER);
@@ -300,7 +348,10 @@ void Draw_Mairie_AddRules(int client, int rulesID=-1, int arg=-1, int target=-1)
 		
 		getRulesName(view_as<serverRules>(rulesID-1000), target, arg, tmp, sizeof(tmp));
 		
+		CPrintToChatAll("{lightblue} ================================== {default}");
 		CPrintToChatAll("{lightblue}[TSX-RP]{default} Le maire vient de décréter une nouvelle règle: %s.", tmp);
+		CPrintToChatAll("{lightblue} ================================== {default}");
+		
 		delete menu;
 		return;
 	}
