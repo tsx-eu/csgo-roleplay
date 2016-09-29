@@ -1,16 +1,26 @@
+/*
+ * Cette oeuvre, création, site ou texte est sous licence Creative Commons Attribution
+ * - Pas d’Utilisation Commerciale
+ * - Partage dans les Mêmes Conditions 4.0 International. 
+ * Pour accéder à une copie de cette licence, merci de vous rendre à l'adresse suivante
+ * http://creativecommons.org/licenses/by-nc-sa/4.0/ .
+ *
+ * Merci de respecter le travail fourni par le ou les auteurs 
+ * https://www.ts-x.eu/ - kossolax@ts-x.eu
+ */
 #pragma semicolon 1
 
 #include <sourcemod>
 #include <sdktools>
 #include <cstrike>
-#include <colors_csgo>
-#include <smlib>
-#include <roleplay>
-#include <smjansson>
-#include <SteamWorks>
 #include <basecomm>
+#include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
+#include <smlib>		// https://github.com/bcserv/smlib
+#include <smjansson>	// https://forums.alliedmods.net/showthread.php?t=184604
+#include <SteamWorks>	// https://forums.alliedmods.net/showthread.php?t=229556
 
 #pragma newdecls required
+#include <roleplay.inc>	// https://www.ts-x.eu
 
 public Plugin myinfo =  {
 	name = "Sanction manager", author = "KoSSoLaX`",
