@@ -57,12 +57,39 @@ char g_szPunition[bc_max][] = {"Irrespect", "Spam", "Perturbation d'event", "Uti
 
 
 public void OnPluginStart() {	
-	
+	RegConsoleCmd("sm_getsanction", Cmd_GetSanctions);
 	RegAdminCmd("sm_sanction", Cmd_Sanction, ADMFLAG_KICK);
 	for(int i=1; i<=MaxClients; i++) {
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
 	}
+}
+public Action Cmd_GetSanctions(int client, int args) {
+	char tmp[128];
+	
+	Menu menu = new Menu(Handle_SanctionMenu);
+	menu.SetTitle("Que risquez-vous en cas de sanction?\n ");
+	
+	int j = 0;
+	
+	for (int i = 0; i < view_as<int>(bc_max); i++) {
+		if( g_iUserData[client][i] == 0 )
+			continue;
+		
+		
+		j++;
+		Format(tmp, sizeof(tmp), "%s: %d minutes", g_szPunition[i], i == view_as<int>(bc_irrespect) ? " (micro)" : (i == view_as<int>(bc_spam) ? " (chat)" : ""), Math_Abs(getSanctionDuration(client, view_as<banCause>(i))));
+		menu.AddItem("_", tmp, ITEMDRAW_DISABLED);
+	}
+	
+	if( j == 0 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre casier judiciaire est vierge, bravo!");
+		delete menu;
+		return Plugin_Handled;
+	}
+	menu.Display(client, MENU_TIME_FOREVER);
+	
+	return Plugin_Handled;
 }
 public Action Cmd_Sanction(int client, int args) {
 	Draw_SanctionMenu(client, 0, -1);
