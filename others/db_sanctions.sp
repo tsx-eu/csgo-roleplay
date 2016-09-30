@@ -65,7 +65,7 @@ public void OnPluginStart() {
 	}
 }
 public Action Cmd_Sanction(int client, int args) {
-	Draw_SanctionMenu(client, -1, 0);
+	Draw_SanctionMenu(client, 0, -1);
 	return Plugin_Handled;
 }
 public void OnClientPostAdminCheck(int client) {
@@ -126,11 +126,12 @@ void Draw_SanctionMenu(int client, int target, int sanction) {
 		
 		for (int i = 0; i < view_as<int>(bc_max); i++) {
 			
-			if( !(GetUserFlagBits(i) & ADMFLAG_BAN) && i >= 3 )
+			if( !(GetUserFlagBits(client) & ADMFLAG_BAN) && i >= 3 )
 				break;
 			
 			Format(tmp, sizeof(tmp), "%d %d", target, i);
-			Format(tmp2, sizeof(tmp2), "%s%s", g_szPunition[i], i == view_as<int>(bc_irrespect) ? "(micro)" : (i == view_as<int>(bc_spam) ? "(chat)" : ""));
+			Format(tmp2, sizeof(tmp2), "%s%s", g_szPunition[i], i == view_as<int>(bc_irrespect) ? " (micro)" : (i == view_as<int>(bc_spam) ? " (chat)" : ""));
+			menu.AddItem(tmp, tmp2);
 		}
 		
 		menu.Display(client, MENU_TIME_FOREVER);
@@ -146,7 +147,7 @@ void Draw_SanctionMenu(int client, int target, int sanction) {
 					SQL_Insert(client, target, -dur, g_szPunition[c], "rp-vocal");
 					rp_SetClientBool(target, b_IsMuteVocal, true);
 					CreateTimer((-dur) * 60.0, MUTE_TIMER2, target);
-					CPrintToChat(target, "[{red}MUTE{default}] A titre {green}préventif{default}, vous avez été {red}interdit d'utiliser votre micro pour %d minutes{default} en raison de votre comportement.", dur);
+					CPrintToChat(target, "[{red}MUTE{default}] A titre {green}préventif{default}, vous avez été {red}interdit d'utiliser votre micro pour %d minutes{default} en raison de votre comportement.", -dur);
 				}
 				else {
 					SQL_Insert(client, target, dur, g_szPunition[c], "csgo");
@@ -168,6 +169,7 @@ void Draw_SanctionMenu(int client, int target, int sanction) {
 			case bc_event: {
 				SQL_Insert(client, target, dur, g_szPunition[c], "rp-event");
 				rp_SetClientBool(target, b_IsMuteEvent, true);
+				CPrintToChat(client, "[{red}EVENT{default}] Vous avez été {red}interdit d'aller en event pour %d minutes{default} en raison de votre comportement.", dur);
 			}
 			case bc_usebug: {
 				SQL_Insert(client, target, dur, g_szPunition[c], "csgo");
@@ -176,6 +178,7 @@ void Draw_SanctionMenu(int client, int target, int sanction) {
 			case bc_cheat: {
 				SQL_Insert(client, target, dur, g_szPunition[c], "rp-pvp");
 				rp_SetClientBool(target, b_IsMutePvP, true);
+				CPrintToChat(client, "[{red}EVENT{default}] Vous avez été {red}interdit d'aller en PvP pour %d minutes{default} en raison de votre comportement.", dur);
 			}
 			case bc_double: {
 				SQL_Insert(client, target, dur, g_szPunition[c], "csgo");
@@ -188,11 +191,9 @@ void Draw_SanctionMenu(int client, int target, int sanction) {
 			case bc_freekill: {
 				SQL_Insert(client, target, dur, g_szPunition[c], "rp-kill");
 				rp_SetClientBool(target, b_IsMuteKILL, true);
+				CPrintToChat(client, "[{red}EVENT{default}] Vous avez été {red}interdit d'effectuer des meurtres pour %d minutes{default} en raison de votre comportement.", dur);
 			}
-			case bc_other: {
-				SQL_Insert(client, target, dur, g_szPunition[c], "csgo");
-				KickClient(target, g_szPunition[c]);
-				
+			case bc_other: {			
 				rp_GetClientNextMessage(client, target, fwdMessage);
 			}
 		}
@@ -200,7 +201,7 @@ void Draw_SanctionMenu(int client, int target, int sanction) {
 }
 public void fwdMessage(int client, any target, char[] message) {
 	SQL_Insert(client, target, getSanctionDuration(target, bc_other), message, "csgo");
-	KickClient(client, g_szPunition[bc_other]);
+	KickClient(client, message);
 }
 public int Handle_SanctionMenu(Handle menu, MenuAction action, int client, int param2) {
 	#if defined DEBUG
