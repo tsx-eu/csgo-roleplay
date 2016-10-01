@@ -144,6 +144,9 @@ void openMenuInteractif(int client) {
 			
 			optionCount++;
 		}
+		
+		if( jobID == 1 && rp_GetClientInt(client, i_Job) <= 7 )
+			menu.AddItem("perquiz", "Perquisitionner");
 	}
 	
 	if( optionCount == 0 ) {
