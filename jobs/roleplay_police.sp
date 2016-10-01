@@ -462,19 +462,20 @@ public Action Cmd_Tazer(int client) {
 		}
 		
 		float maxDist = MAX_AREA_DIST * 3.0;
-		if( rp_GetZoneBit(rp_GetPlayerZone(client)) & BITZONE_PERQUIZ || rp_GetZoneBit(rp_GetPlayerZone(target)) & BITZONE_PERQUIZ )
-			maxDist = 255.0;
+		if( rp_GetZoneBit(rp_GetPlayerZone(client)) & BITZONE_PERQUIZ || rp_GetZoneBit(rp_GetPlayerZone(target)) & BITZONE_PERQUIZ ) {
+			maxDist = 128.0;
+		}
 		
 		if( Entity_GetDistance(client, target) > maxDist ) {
 			ACCESS_DENIED(client);
 		}
 		
-		if( rp_GetClientBool(target, b_Lube) && Math_GetRandomInt(1, 5) != 5) {
+		if( !(rp_GetZoneBit(rp_GetPlayerZone(client)) & BITZONE_PERQUIZ || rp_GetZoneBit(rp_GetPlayerZone(target)) & BITZONE_PERQUIZ) && rp_GetClientBool(target, b_Lube) && Math_GetRandomInt(1, 5) != 5) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N vous glisse entre les mains.", target);
 			return Plugin_Handled;
 		}
 		
-		if( !CanSendToJail(client, target) ) {
+		if( !(rp_GetZoneBit(rp_GetPlayerZone(client)) & BITZONE_PERQUIZ || rp_GetZoneBit(rp_GetPlayerZone(target)) & BITZONE_PERQUIZ) && !CanSendToJail(client, target) ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N vous glisse entre les mains.", target);
 			return Plugin_Handled;
 		}
@@ -738,7 +739,7 @@ public Action Cmd_Jail(int client) {
 	float maxDist = MAX_AREA_DIST * 2.0;
 	
 	if( Cbit & BITZONE_PERQUIZ || Tbit & BITZONE_PERQUIZ )
-		maxDist = 255.0;
+		maxDist = 128.0;
 	
 	if( Entity_GetDistance(client, target) > maxDist ) {
 		ACCESS_DENIED(client);

@@ -157,7 +157,6 @@ void INIT_PERQUIZ(int client, int zone, int type) {
 	int array[PQ_Max];
 	
 	if( g_hPerquisition.GetArray(tmp, array, sizeof(array)) ) {
-		PrintToChatAll("une autre perquiz est déjà en cours, annulation 1");
 		return;
 	}
 	
@@ -173,7 +172,6 @@ public void VERIF_PERQUIZ(Handle owner, Handle row, const char[] error, any zone
 	int array[PQ_Max];
 	
 	if( !g_hPerquisition.GetArray(tmp, array, sizeof(array)) ) {	
-		PrintToChatAll("une autre perquiz est déjà en cours, annulation 2");
 		return;
 	}
 	
@@ -203,7 +201,6 @@ void START_PERQUIZ(int zone) {
 	rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
 	
 	if( !g_hPerquisition.GetArray(tmp, array, sizeof(array)) ) {
-		PrintToChatAll("une autre perquiz est déjà en cours, annulation 3");
 		return;
 	}
 	
@@ -567,10 +564,12 @@ void changeZoneState(int zone, bool enabled) {
 		
 		bits = rp_GetZoneBit(i);
 		
-		if( enabled && !(bits & BITZONE_PERQUIZ) )
+		if( enabled && !(bits & BITZONE_PERQUIZ) ) {
 			bits |= BITZONE_PERQUIZ;
-		else if( !enabled && (bits & BITZONE_PERQUIZ) )
+		}
+		else if( !enabled && (bits & BITZONE_PERQUIZ) ) {
 			bits &= ~BITZONE_PERQUIZ;
+		}
 		
 		rp_SetZoneBit(i, bits);
 	}
