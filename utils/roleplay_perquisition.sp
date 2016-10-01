@@ -91,7 +91,6 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 	if( action == MenuAction_Select ) {
 		char options[64], expl[4][32], tmp[64];
 		GetMenuItem(menu, param2, options, sizeof(options));
-		PrintToChatAll(options);
 		
 		ExplodeString(options, " ", expl, sizeof(expl), sizeof(expl[]));
 		
@@ -109,7 +108,7 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 				subMenu.SetTitle("Qui est recherché?\n ");
 				
 				for (int i = 1; i <= MaxClients; i++) {
-					if( !IsValidClient(i) || !IsPlayerAlive(i) /*|| i == client*/ )
+					if( !IsValidClient(i) || !IsPlayerAlive(i) || i == client )
 						continue;
 					
 					rp_GetZoneData(rp_GetPlayerZone(i), zone_type_type, options, sizeof(options));
@@ -157,7 +156,8 @@ void INIT_PERQUIZ(int client, int zone, int type) {
 	rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
 	int array[PQ_Max];
 	
-	if( g_hPerquisition.GetArray(tmp, array, sizeof(array)) ) {	
+	if( g_hPerquisition.GetArray(tmp, array, sizeof(array)) ) {
+		PrintToChatAll("une autre perquiz est déjà en cours, annulation 1");
 		return;
 	}
 	
@@ -172,7 +172,8 @@ public void VERIF_PERQUIZ(Handle owner, Handle row, const char[] error, any zone
 	rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
 	int array[PQ_Max];
 	
-	if( g_hPerquisition.GetArray(tmp, array, sizeof(array)) ) {	
+	if( !g_hPerquisition.GetArray(tmp, array, sizeof(array)) ) {	
+		PrintToChatAll("une autre perquiz est déjà en cours, annulation 2");
 		return;
 	}
 	
@@ -202,6 +203,7 @@ void START_PERQUIZ(int zone) {
 	rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
 	
 	if( !g_hPerquisition.GetArray(tmp, array, sizeof(array)) ) {
+		PrintToChatAll("une autre perquiz est déjà en cours, annulation 3");
 		return;
 	}
 	
@@ -228,6 +230,7 @@ void END_PERQUIZ(int zone, bool abort) {
 	if( !g_hPerquisition.GetArray(tmp, array, sizeof(array)) ) {
 		return;
 	}
+	g_hPerquisition.Remove(tmp);
 	changeZoneState(zone, false);
 	TeleportCT(zone);
 	DoorLock(zone);
@@ -238,8 +241,6 @@ void END_PERQUIZ(int zone, bool abort) {
 	}
 	
 	rp_GetDate(date, sizeof(date));
-	
-	g_hPerquisition.Remove(tmp);
 	
 	rp_GetZoneData(zone, zone_type_name, tmp, sizeof(tmp));
 	PrintToChatPoliceSearch(array[PQ_resp], "{red} ================================== {default}");
@@ -255,7 +256,8 @@ void END_PERQUIZ(int zone, bool abort) {
 	}
 }
 // ----------------------------------------------------------------------------
-public Action fwdHookJail(int victim, int attacker) {
+public Action fwdHookJail(int attacker, int victim) {
+	
 	char tmp[64];
 	int zone = rp_GetZoneFromPoint(g_flLastPos[victim]);
 	int array[PQ_Max];
@@ -315,6 +317,7 @@ public Action TIMER_PERQUIZ(Handle timer, any zone) {
 		countBadThing(tmp, weapon, plant, machine);
 		if( (weapon + plant + machine) == 0 ) {
 			END_PERQUIZ(zone, false);
+			return Plugin_Stop;
 		}
 	}
 	
