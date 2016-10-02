@@ -30,8 +30,8 @@
 #define TP_CHANNEL_DURATION		5.0
 #define	MARCHEMAFIA_PC			50
 #define MARCHEMAFIA_POS			view_as<float>({-144.55,520.1,-2119.96})
-#define MAIRIE_ZONE				54
-#define MAIRIE_POS				view_as<float>({5595.0, -822.0, -1895.0})
+#define MAIRIE_ZONE				259
+#define MAIRIE_POS				{522.0, 2002.0, -2135.0}
 
 // DO NOT EDIT BELLOW.
 #define WORLDINDEX				0				
@@ -69,6 +69,7 @@
 #define ITEM_KITCROCHTAGE	2
 #define ITEM_KITEXPLOSIF	3
 #define ITEM_MANDAT			4
+#define ITEM_FITNESS		30
 #define ITEM_TICKETID		76
 #define	ITEM_GPS			144
 #define	ITEM_REPAIR			176

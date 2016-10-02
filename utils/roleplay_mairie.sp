@@ -69,8 +69,27 @@ public void OnClientPostAdminCheck(int client) {
 	g_iMairieQuestionID[client] = 0;
 	g_bWaitingMairieCommand[client] = false;
 	rp_HookEvent(client, RP_OnPlayerUse, fwdPlayerUse);
+	rp_HookEvent(client, RP_OnFrameSeconde, fwdPlayerFrame);
 }
-
+public Action fwdPlayerFrame(int client) {
+	if( rp_GetPlayerZone(client) != MAIRIE_ZONE ) {
+		
+		bool shouldGo;
+		float dst[3] = MAIRIE_POS;
+		
+		if (rp_GetClientInt(client, i_PlayerLVL) >= 6 && rp_GetClientInt(client, i_BirthDay) <= 0) {
+			shouldGo = true;
+		}
+		if (rp_GetClientInt(client, i_PlayerLVL) >= 20 && !rp_GetClientBool(client, b_PassedRulesTest) ) {
+			shouldGo = true;
+		}
+		
+		if( shouldGo ) {
+			PrintHintText(client, "Vous êtes attendu à la mairie");
+			ServerCommand("sm_effect_gps %d %f %f %f", client, dst[0], dst[1], dst[2]);
+		}
+	}
+}
 public Action fwdPlayerUse(int client) {
 	if( rp_GetPlayerZone(client) == MAIRIE_ZONE )
 		Draw_Mairie_Main(client);
@@ -152,8 +171,6 @@ void Draw_Mairie_Main(int client) {
 	menu.AddItem("5 0 0", "Candidature pour la Mairie");
 	
 	menu.Display(client, MENU_TIME_FOREVER);
-	
-	//	PrintToChat(client, "%d --> %d", rp_GetClientPlaytimeJob(client, rp_GetClientJobID(client), true), rp_GetClientPlaytimeJob(client, rp_GetClientInt(client, i_Job), false));
 }
 void Draw_Mairie_Candidate(int client, int target, int arg) {
 	char tmp[255], szSteamID[32];
@@ -215,7 +232,8 @@ public void QUERY_MairieCandidate(Handle owner, Handle handle, const char[] erro
 	
 	Menu menu = new Menu(Handle_Mairie);
 	menu.SetTitle("Candidature pour la Mairie\n ");
-
+	PrintToChatAll(error);
+	
 	while( SQL_FetchRow(handle) ) {
 		int id = SQL_FetchInt(handle, 0);
 		SQL_FetchString(handle, 1, tmp, sizeof(tmp));

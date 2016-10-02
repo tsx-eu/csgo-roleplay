@@ -765,7 +765,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		rp_SetClientInt(client, i_LastVolVehicleTime, GetTime());
 		rp_SetClientInt(client, i_LastVolAmount, 100);
 		rp_SetClientInt(client, i_LastVolTarget, target);
-		ServerCommand("sm_effect_particles %d Aura1 %d", client, RoundToCeil(StealTime));
+		CashFlow(client, price / 4);
 		
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, StealTime);
 		rp_HookEvent(client, RP_PreTakeDamage, fwdDamage, StealTime);

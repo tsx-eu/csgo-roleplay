@@ -1770,6 +1770,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			LogToGame("[TSX-RP] [JAIL] [LIBERATION] %L a liberé %L", client, target);
 			
 			rp_ClientResetSkin(target);
+			
 			int bit = rp_GetZoneBit(rp_GetZoneFromPoint(g_flLastPos[target]));
 			if( bit & BITZONE_JAIL || bit & BITZONE_HAUTESECU || bit & BITZONE_LACOURS )
 				rp_ClientSendToSpawn(target, true);
@@ -2697,40 +2698,40 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 void explainJail(int client, int jailReason) {
 	
 	if( StrContains(g_szJailRaison[jailReason][jail_raison], "Garde ") == 0 ) {
-		rp_ClientOverlays(client, o_Jail_GAV, 20.0);
+		rp_ClientOverlays(client, o_Jail_GAV, 10.0);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Meurtre") == 0 ) {
-		rp_ClientOverlays(client, o_Jail_Meurtre, 20.0);
+		rp_ClientOverlays(client, o_Jail_Meurtre, 10.0);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Agression ") == 0 ) {
-		rp_ClientOverlays(client, o_Jail_Agression, 20.0);
+		rp_ClientOverlays(client, o_Jail_Agression, 10.0);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Intrusion ") == 0 ) {
-		rp_ClientOverlays(client, o_Jail_Intrusion, 20.0);
+		rp_ClientOverlays(client, o_Jail_Intrusion, 10.0);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Vol, ") == 0 ) {
-		rp_ClientOverlays(client, o_Jail_Vol, 20.0);
+		rp_ClientOverlays(client, o_Jail_Vol, 10.0);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Fuite, ") == 0 ) {
-		rp_ClientOverlays(client, o_Jail_Refus, 20.0);
+		rp_ClientOverlays(client, o_Jail_Refus, 10.0);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Insultes, ") == 0 ) {
-		rp_ClientOverlays(client, o_Jail_Insultes, 20.0);
+		rp_ClientOverlays(client, o_Jail_Insultes, 10.0);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Trafique ") == 0 ) {
-		rp_ClientOverlays(client, o_Jail_Traffic, 20.0);
+		rp_ClientOverlays(client, o_Jail_Traffic, 10.0);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Nuisance ") == 0 ) {
-		rp_ClientOverlays(client, o_Jail_Nuisance, 20.0);
+		rp_ClientOverlays(client, o_Jail_Nuisance, 10.0);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Tir dans ") == 0 ) {
-		rp_ClientOverlays(client, o_Jail_Tir, 20.0);
+		rp_ClientOverlays(client, o_Jail_Tir, 10.0);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Conduite ") == 0 ) {
-		rp_ClientOverlays(client, o_Jail_Conduite, 20.0);
+		rp_ClientOverlays(client, o_Jail_Conduite, 10.0);
 	}
 	else if( StrContains(g_szJailRaison[jailReason][jail_raison], "Mutinerie, ") == 0 ) {
-		rp_ClientOverlays(client, o_Jail_Evasion, 20.0);
+		rp_ClientOverlays(client, o_Jail_Evasion, 10.0);
 	}
 }
 bool canWeaponBeAddedInPoliceStore(int weaponID) {

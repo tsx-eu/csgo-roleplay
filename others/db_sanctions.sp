@@ -78,7 +78,7 @@ public Action Cmd_GetSanctions(int client, int args) {
 		
 		
 		j++;
-		Format(tmp, sizeof(tmp), "%s: %d minutes", g_szPunition[i], i == view_as<int>(bc_irrespect) ? " (micro)" : (i == view_as<int>(bc_spam) ? " (chat)" : ""), Math_Abs(getSanctionDuration(client, view_as<banCause>(i))));
+		Format(tmp, sizeof(tmp), "%s: %d minutes", g_szPunition[i], i == view_as<int>(bc_irrespect) ? " (micro)" : (i == view_as<int>(bc_spam) ? " (chat)" : ""), getSanctionDuration(client, view_as<banCause>(i)));
 		menu.AddItem("_", tmp, ITEMDRAW_DISABLED);
 	}
 	
@@ -186,7 +186,7 @@ void Draw_SanctionMenu(int client, int target, int sanction) {
 					SQL_Insert(client, target, -dur, g_szPunition[c], "rp-global");
 					rp_SetClientBool(target, b_IsMuteGlobal, true);
 					CreateTimer((-dur) * 60.0, GAG_TIMER2, target);
-					CPrintToChat(client, "[{red}GAG{default}] A titre {green}préventif{default}, vous avez été {red}interdit du chat général pour %d minutes{default} en raison de votre comportement.", -dur);
+					CPrintToChat(target, "[{red}GAG{default}] A titre {green}préventif{default}, vous avez été {red}interdit du chat général pour %d minutes{default} en raison de votre comportement.", -dur);
 				}
 				else {
 					SQL_Insert(client, target, dur, g_szPunition[c], "csgo");

@@ -122,9 +122,9 @@ public void Q_Done(int objectiveID, int client) {
 	int MP[] =  { 128, 129, 234, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256, 257 };
 	int rnd = Math_GetRandomInt(0, sizeof(MP) - 1);
 	char tmp[128];
-	rp_GetItemData(rnd, item_type_name, tmp, sizeof(tmp));
+	rp_GetItemData(MP[rnd], item_type_name, tmp, sizeof(tmp));
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez trouvé 25x%s", tmp);
-	rp_ClientGiveItem(client, rnd, 25);
+	rp_ClientGiveItem(client, MP[rnd], 25);
 }
 public Action fwdPreClientCraft(int client, int itemID, int& free) {
 	if( g_bDoingQuest[client] && g_iCraftItem[client] == itemID && g_iCraftLeft[client] > 0 ) {

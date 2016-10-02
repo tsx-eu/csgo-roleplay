@@ -25,6 +25,67 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
+char g_szSkinsList[][][] = {
+	{"models/player/custom_player/legacy/lara/lara.mdl", 				"Lara", 			"1", "5"},
+	{"models/player/custom_player/legacy/swagirl/swagirl.mdl", 			"Désirée",			"1", "5"},
+	{"models/player/custom_player/legacy/eva/eva.mdl", 					"Eva", 				"1", "5"},
+	{"models/player/custom/zoey/zoey.mdl", 								"Zoey", 			"1", "5"},
+	{"models/player/custom_player/legacy/misty/misty.mdl", 				"Misty", 			"1", "5"},
+	
+	{"models/player/custom_player/legacy/redfield/redfield.mdl",		"Redfield",			"0", "5"},
+	{"models/player/custom_player/legacy/vmaff/vmaff.mdl", 				"Marco", 			"0", "5"},
+	{"models/player/custom_player/legacy/wuzimu/wuzimu.mdl", 			"Pong", 			"0", "5"},
+	{"models/player/custom_player/legacy/50cent/50cent.mdl", 			"50cent", 			"0", "5"},
+	{"models/player/custom_player/legacy/lloyd/lloyd.mdl", 				"Loyd", 			"0", "5"},
+	{"models/player/custom_player/legacy/bzsoap/bzsoap.mdl", 			"BZ-Soap", 			"0", "5"},
+	{"models/player/custom_player/legacy/leon/leon.mdl", 				"Leon", 			"0", "5"},
+	{"models/player/custom/hitman/hitman.mdl", 							"Hitman", 			"0", "5"},
+	{"models/player/custom_player/legacy/duke/duke_v3.mdl", 			"Duke Nukem", 		"0", "5"},
+	{"models/player/custom/nick/nick.mdl", 								"Nick", 			"0", "5"},
+	
+	{"models/player/custom_player/legacy/tm_anarchist.mdl", 			"Anarchist", 		"0", "1"},
+	{"models/player/custom_player/legacy/tm_anarchist_varianta.mdl", 	"Anarchist - A", 	"0", "1"},
+	{"models/player/custom_player/legacy/tm_anarchist_variantb.mdl", 	"Anarchist - B", 	"0", "1"},
+	{"models/player/custom_player/legacy/tm_anarchist_variantc.mdl", 	"Anarchist - C", 	"0", "1"},
+	{"models/player/custom_player/legacy/tm_anarchist_variantd.mdl", 	"Anarchist - D", 	"0", "1"},
+	
+	{"models/player/custom_player/legacy/tm_balkan_varianta.mdl", 		"Balkan", 			"0", "1"},
+	{"models/player/custom_player/legacy/tm_balkan_variantb.mdl", 		"Balkan - A", 		"0", "1"},
+	{"models/player/custom_player/legacy/tm_balkan_variantc.mdl", 		"Balkan - B", 		"0", "1"},
+	{"models/player/custom_player/legacy/tm_balkan_variantd.mdl", 		"Balkan - C", 		"0", "1"},
+	{"models/player/custom_player/legacy/tm_balkan_variante.mdl", 		"Balkan - D", 		"0", "1"},
+	
+	{"models/player/custom_player/legacy/tm_leet_varianta.mdl", 		"Leet", 			"0", "1"},
+	{"models/player/custom_player/legacy/tm_leet_variantb.mdl", 		"Leet - A", 		"0", "1"},
+	{"models/player/custom_player/legacy/tm_leet_variantc.mdl", 		"Leet - B", 		"0", "1"},
+	{"models/player/custom_player/legacy/tm_leet_variantd.mdl", 		"Leet - C", 		"0", "1"},
+	{"models/player/custom_player/legacy/tm_leet_variante.mdl", 		"Leet - D", 		"0", "1"},
+	
+	{"models/player/custom_player/legacy/tm_phoenix.mdl",				"Phoenix", 			"0", "1"},
+	{"models/player/custom_player/legacy/tm_phoenix_varianta.mdl", 		"Phoenix - A", 		"0", "1"},
+	{"models/player/custom_player/legacy/tm_phoenix_variantb.mdl", 		"Phoenix - B", 		"0", "1"},
+	{"models/player/custom_player/legacy/tm_phoenix_variantc.mdl", 		"Phoenix - C", 		"0", "1"},
+	{"models/player/custom_player/legacy/tm_phoenix_variantd.mdl", 		"Phoenix - D", 		"0", "1"},
+	
+	{"models/player/custom_player/legacy/tm_pirate.mdl", 				"Pirate", 			"0", "1"},
+	{"models/player/custom_player/legacy/tm_pirate_varianta.mdl", 		"Pirate - A", 		"0", "1"},
+	{"models/player/custom_player/legacy/tm_pirate_variantb.mdl", 		"Pirate - B", 		"0", "1"},
+	{"models/player/custom_player/legacy/tm_pirate_variantc.mdl", 		"Pirate - C", 		"0", "1"},
+	{"models/player/custom_player/legacy/tm_pirate_variantd.mdl", 		"Pirate - D", 		"0", "1"},
+	
+	{"models/player/custom_player/legacy/tm_professional.mdl", 			"Professional", 	"0", "1"},
+	{"models/player/custom_player/legacy/tm_professional_var1.mdl", 	"Professional - A", "0", "1"},
+	{"models/player/custom_player/legacy/tm_professional_var2.mdl", 	"Professional - B", "0", "1"},
+	{"models/player/custom_player/legacy/tm_professional_var3.mdl", 	"Professional - C", "0", "1"},
+	{"models/player/custom_player/legacy/tm_professional_var4.mdl", 	"Professional - D", "0", "1"},
+	
+	{"models/player/custom_player/legacy/tm_separatist.mdl", 			"Séparatist", 		"0", "1"},
+	{"models/player/custom_player/legacy/tm_separatist_varianta.mdl", 	"Séparatist - A", 	"0", "1"},
+	{"models/player/custom_player/legacy/tm_separatist_variantb.mdl", 	"Séparatist - B", 	"0", "1"},
+	{"models/player/custom_player/legacy/tm_separatist_variantc.mdl", 	"Séparatist - C", 	"0", "1"},
+	{"models/player/custom_player/legacy/tm_separatist_variantd.mdl", 	"Séparatist - D", 	"0", "1"}
+};
+
 int g_cBeam;
 int g_iKnifeThrowID = -1;
 int g_iRiotShield[65];
@@ -50,15 +111,8 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_lessive",		Cmd_ItemLessive,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_cafe",		Cmd_ItemCafe,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_crayons",		Cmd_ItemCrayons,		"RP-ITEM",	FCVAR_UNREGISTERED);
-	RegServerCmd("rp_item_mask", CmdItemMask, "RP-ITEM", FCVAR_UNREGISTERED);
-	RegServerCmd("rp_giveskin", Cmd_ItemGiveSkin, "RP-ITEM", FCVAR_UNREGISTERED);	
-	RegServerCmd("rp_skin_separatist", Cmd_ItemSeparatist);
-	RegServerCmd("rp_skin_professional", Cmd_ItemProfessional);
-	RegServerCmd("rp_skin_pirate", Cmd_ItemPirate);
-	RegServerCmd("rp_skin_phoenix", Cmd_ItemPhoenix);
-	RegServerCmd("rp_skin_leet", Cmd_ItemLeet);
-	RegServerCmd("rp_skin_balkan", Cmd_ItemBalkan);
-	RegServerCmd("rp_skin_anarchist", Cmd_ItemAnarchist);
+	RegServerCmd("rp_item_mask", 		CmdItemMask, 			"RP-ITEM", FCVAR_UNREGISTERED);
+	RegServerCmd("rp_giveskin", 		Cmd_ItemGiveSkin, 		"RP-ITEM", FCVAR_UNREGISTERED);	
 	
 	for (int i = 1; i <= MaxClients; i++) 
 		if( IsValidClient(i) )
@@ -967,197 +1021,9 @@ public Action fwdKill(int client, int victim, char weapon[64]) {
 	return Plugin_Continue;
 }
 public Action fwdAssuranceMask(int client, int& amount) {
-		amount += 500;
+	amount += 500;
 }
-public Action Cmd_ItemAnarchist(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemLeet");
-	#endif
-	int client = GetCmdArgInt(1);
-	
-	CreateTimer(0.25, task_ItemAnarchist, client);
-}
-public Action task_ItemAnarchist(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("task_ItemAnarchist");
-	#endif
-	
-	Handle menu = CreateMenu(MenuSetSkin);
-	SetMenuTitle(menu, "Choisissez un skin\n ");
-	
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_anarchist.mdl", "Anarchist");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_anarchist_varianta.mdl", "Anarchist - A");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_anarchist_variantb.mdl", "Anarchist - B");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_anarchist_variantc.mdl", "Anarchist - C");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_anarchist_variantd.mdl", "Anarchist - D");
-	
-	SetMenuExitButton(menu, true);
-	DisplayMenu(menu, client, MENU_TIME_DURATION);
-	
-	return Plugin_Handled;
-}
-public Action Cmd_ItemBalkan(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemLeet");
-	#endif
-	int client = GetCmdArgInt(1);
-	
-	CreateTimer(0.25, task_ItemBalkan, client);
-}
-public Action task_ItemBalkan(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("task_ItemBalkan");
-	#endif
-	
-	Handle menu = CreateMenu(MenuSetSkin);
-	SetMenuTitle(menu, "Choisissez un skin\n ");
-	
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_balkan_varianta.mdl", "Balkan");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_balkan_variantb.mdl", "Balkan - A");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_balkan_variantc.mdl", "Balkan - B");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_balkan_variantd.mdl", "Balkan - C");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_balkan_variante.mdl", "Balkan - D");
-	
-	SetMenuExitButton(menu, true);
-	DisplayMenu(menu, client, MENU_TIME_DURATION);
-	
-	return Plugin_Handled;
-}
-public Action Cmd_ItemLeet(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemLeet");
-	#endif
-	int client = GetCmdArgInt(1);
-	
-	CreateTimer(0.25, task_ItemLeet, client);
-}
-public Action task_ItemLeet(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("task_ItemLeet");
-	#endif
-	
-	Handle menu = CreateMenu(MenuSetSkin);
-	SetMenuTitle(menu, "Choisissez un skin\n ");
-	
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_leet_varianta.mdl", "Leet");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_leet_variantb.mdl", "Leet - A");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_leet_variantc.mdl", "Leet - B");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_leet_variantd.mdl", "Leet - C");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_leet_variante.mdl", "Leet - D");
-	
-	SetMenuExitButton(menu, true);
-	DisplayMenu(menu, client, MENU_TIME_DURATION);
-	
-	return Plugin_Handled;
-}
-public Action Cmd_ItemPhoenix(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemPhoenix");
-	#endif
-	int client = GetCmdArgInt(1);
-	
-	CreateTimer(0.25, task_ItemPhoenix, client);
-}
-public Action task_ItemPhoenix(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("task_ItemPhoenix");
-	#endif
-	
-	Handle menu = CreateMenu(MenuSetSkin);
-	SetMenuTitle(menu, "Choisissez un skin\n ");
-	
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_phoenix.mdl", "Phoenix");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_phoenix_varianta.mdl", "Phoenix - A");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_phoenix_variantb.mdl", "Phoenix - B");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_phoenix_variantc.mdl", "Phoenix - C");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_phoenix_variantd.mdl", "Phoenix - D");
-	
-	SetMenuExitButton(menu, true);
-	DisplayMenu(menu, client, MENU_TIME_DURATION);
-	
-	return Plugin_Handled;
-}
-public Action Cmd_ItemPirate(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemPirate");
-	#endif
-	int client = GetCmdArgInt(1);
-	
-	CreateTimer(0.25, task_ItemPirate, client);
-}
-public Action task_ItemPirate(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("task_ItemPirate");
-	#endif
-	
-	Handle menu = CreateMenu(MenuSetSkin);
-	SetMenuTitle(menu, "Choisissez un skin\n ");
-	
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_pirate.mdl", "Pirate");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_pirate_varianta.mdl", "Pirate - A");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_pirate_variantb.mdl", "Pirate - B");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_pirate_variantc.mdl", "Pirate - C");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_pirate_variantd.mdl", "Pirate - D");
-	
-	SetMenuExitButton(menu, true);
-	DisplayMenu(menu, client, MENU_TIME_DURATION);
-	
-	return Plugin_Handled;
-}
-public Action Cmd_ItemProfessional(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemProfessional");
-	#endif
-	int client = GetCmdArgInt(1);
-	
-	CreateTimer(0.25, task_ItemProfessional, client);
-}
-public Action task_ItemProfessional(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("task_Cmd_ItemSeparatist");
-	#endif
-	
-	Handle menu = CreateMenu(MenuSetSkin);
-	SetMenuTitle(menu, "Choisissez un skin\n ");
-	
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_professional.mdl", "Professional");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_professional_var1.mdl", "Professional - A");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_professional_var2.mdl", "Professional - B");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_professional_var3.mdl", "Professional - C");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_professional_var4.mdl", "Professional - D");
-	
-	SetMenuExitButton(menu, true);
-	DisplayMenu(menu, client, MENU_TIME_DURATION);
-	
-	return Plugin_Handled;
-}
-public Action Cmd_ItemSeparatist(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemSeparatist");
-	#endif
-	int client = GetCmdArgInt(1);
-	
-	CreateTimer(0.25, task_ItemSeparatist, client);
-}
-public Action task_ItemSeparatist(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("task_Cmd_ItemSeparatist");
-	#endif
-	
-	Handle menu = CreateMenu(MenuSetSkin);
-	SetMenuTitle(menu, "Choisissez un skin\n ");
-	
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_separatist.mdl", "Séparatist");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_separatist_varianta.mdl", "Séparatist - A");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_separatist_variantb.mdl", "Séparatist - B");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_separatist_variantc.mdl", "Séparatist - C");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_separatist_variantd.mdl", "Séparatist - D");
-	
-	SetMenuExitButton(menu, true);
-	DisplayMenu(menu, client, MENU_TIME_DURATION);
-	
-	return Plugin_Handled;
-}
+
 public int MenuSetSkin(Handle menu, MenuAction action, int client, int param2) {
 	#if defined DEBUG
 	PrintToServer("MenuSetSkin");
@@ -1223,119 +1089,107 @@ public Action fwdUse(int client) {
 	if (zoneid != ZONE_CABINE)
 		return Plugin_Continue;
 	
-	Handle menu = CreateMenu(MenuTrySkin);
-	SetMenuTitle(menu, "Selection du skin à essayer\n ");
+	Draw_SkinList(client, -1, -1);
 	
-	AddMenuItem(menu, "models/player/custom_player/legacy/lara/lara.mdl", "Lara");
-	AddMenuItem(menu, "models/player/custom_player/legacy/swagirl/swagirl.mdl", "Désirée");
-	AddMenuItem(menu, "models/player/custom_player/legacy/vmaff/vmaff.mdl", "Marco");
-	AddMenuItem(menu, "models/player/custom_player/legacy/wuzimu/wuzimu.mdl", "Pong");
-	
-	AddMenuItem(menu, "models/player/custom_player/legacy/50cent/50cent.mdl", "50cent");
-	AddMenuItem(menu, "models/player/custom_player/legacy/lloyd/lloyd.mdl", "Loyd");
-	AddMenuItem(menu, "models/player/custom_player/legacy/misty/misty.mdl", "Misty");
-	AddMenuItem(menu, "models/player/custom_player/legacy/bzsoap/bzsoap.mdl", "BZ-Soap");
-	AddMenuItem(menu, "models/player/custom_player/legacy/eva/eva.mdl", "Eva");
-	AddMenuItem(menu, "models/player/custom_player/legacy/leon/leon.mdl", "Leon");
-	AddMenuItem(menu, "models/player/custom/hitman/hitman.mdl", "Hitman");
-	AddMenuItem(menu, "models/player/custom_player/legacy/duke/duke_v3.mdl", "Duke Nukem");
-	AddMenuItem(menu, "models/player/custom/zoey/zoey.mdl", "Zoey");
-	AddMenuItem(menu, "models/player/custom/nick/nick.mdl", "Nick");
-	
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_anarchist.mdl", "Anarchist");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_anarchist_varianta.mdl", "Anarchist - A");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_anarchist_variantb.mdl", "Anarchist - B");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_anarchist_variantc.mdl", "Anarchist - C");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_anarchist_variantd.mdl", "Anarchist - D");
-	
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_balkan_varianta.mdl", "Balkan");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_balkan_variantb.mdl", "Balkan - A");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_balkan_variantc.mdl", "Balkan - B");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_balkan_variantd.mdl", "Balkan - C");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_balkan_variante.mdl", "Balkan - D");
-	
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_leet_varianta.mdl", "Leet");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_leet_variantb.mdl", "Leet - A");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_leet_variantc.mdl", "Leet - B");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_leet_variantd.mdl", "Leet - C");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_leet_variante.mdl", "Leet - D");
-	
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_phoenix.mdl", "Phoenix");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_phoenix_varianta.mdl", "Phoenix - A");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_phoenix_variantb.mdl", "Phoenix - B");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_phoenix_variantc.mdl", "Phoenix - C");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_phoenix_variantd.mdl", "Phoenix - D");
-	
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_pirate.mdl", "Pirate");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_pirate_varianta.mdl", "Pirate - A");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_pirate_variantb.mdl", "Pirate - B");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_pirate_variantc.mdl", "Pirate - C");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_pirate_variantd.mdl", "Pirate - D");
-	
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_professional.mdl", "Professional");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_professional_var1.mdl", "Professional - A");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_professional_var2.mdl", "Professional - B");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_professional_var3.mdl", "Professional - C");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_professional_var4.mdl", "Professional - D");
-	
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_separatist.mdl", "Séparatist");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_separatist_varianta.mdl", "Séparatist - A");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_separatist_variantb.mdl", "Séparatist - B");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_separatist_variantc.mdl", "Séparatist - C");
-	AddMenuItem(menu, "models/player/custom_player/legacy/tm_separatist_variantd.mdl", "Séparatist - D");
-	
-	SetMenuExitButton(menu, true);
-	DisplayMenu(menu, client, 60);
 	return Plugin_Handled;
 }
-
+void Draw_SkinList(int client, int test, int skinID) {
+	int female, prix;
+	bool isfemale = rp_GetClientBool(client, b_isFemale);
+	char tmp[128], tmp2[128];
+	
+	if (rp_GetPlayerZone(client) != ZONE_CABINE) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes sorti des cabines d'essayage.");
+		return;
+	}
+	if (GetClientTeam(client) == CS_TEAM_CT) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas essayer cela en CT.");
+		return;
+	}
+	GetClientModel(client, tmp, sizeof(tmp));
+	if( StrEqual(tmp, "models/player/custom_player/legacy/sprisioner/sprisioner.mdl") ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas essayer cela en tant qu'évadé.");
+		return;
+	}
+	
+	
+	
+	if( test == -1 ) {
+		Menu menu = new Menu(MenuTrySkin);
+		menu.SetTitle("Cabine d'essayage\n ");
+		
+		menu.AddItem("1 -1", "Essayer un skin");
+		menu.AddItem("0 -1", "Acheter un skin");
+		
+		menu.Display(client, 60);
+		return;
+	}
+	if( skinID == -1 ) {
+		Menu menu = new Menu(MenuTrySkin);
+		menu.SetTitle("Selection du skin à %s\n ", test ? "essayer" : "acheter");
+		
+		for (int i = 0; i < sizeof(g_szSkinsList); i++) {
+			female = StringToInt(g_szSkinsList[i][2]);
+			
+			Format(tmp, sizeof(tmp), "%d %d", test, i);
+			if( test )
+				Format(tmp2, sizeof(tmp2), "%s", g_szSkinsList[i][1]);
+			else
+				Format(tmp2, sizeof(tmp2), "%s - %d points de fitness", g_szSkinsList[i][1], StringToInt(g_szSkinsList[i][3]));
+			
+			if( (female==1) && isfemale ) {
+				menu.AddItem(tmp, tmp2);
+			}
+			if( (female==0) && !isfemale ) {
+				menu.AddItem(tmp, tmp2);
+			}
+		}
+		menu.Display(client, 60);
+		return;
+	}
+	else {
+		
+		if( !IsModelPrecached(g_szSkinsList[skinID][0]) ) 
+			if( !PrecacheModel(g_szSkinsList[skinID][0]) )
+				return;
+		
+		if( test ) {
+			rp_HookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);
+		}
+		else {
+			prix = StringToInt(g_szSkinsList[skinID][3]);
+			
+			if( rp_GetClientItem(client, ITEM_FITNESS ) < prix ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas assez de point de fitness pour ce skin.");
+				return;
+			}
+			
+			rp_ClientGiveItem(client, ITEM_FITNESS, -prix);
+			rp_SetClientString(client, sz_Skin, g_szSkinsList[skinID][0], strlen(g_szSkinsList[skinID][0])+1);
+			rp_IncrementSuccess(client, success_list_vetement);
+		}
+		
+		ServerCommand("sm_effect_setmodel \"%i\" \"%s\"", client, g_szSkinsList[skinID][0]);
+		
+		
+	}
+}
 public int MenuTrySkin(Handle menu, MenuAction action, int client, int param2) {
 	#if defined DEBUG
 	PrintToServer("MenuTrySkin");
 	#endif
 	
 	if (action == MenuAction_Select) {
-		char szMenuItem[128];
-		if (GetMenuItem(menu, param2, szMenuItem, sizeof(szMenuItem))) {
-			if (rp_GetPlayerZone(client) != ZONE_CABINE) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes sorti des cabines d'essayage.");
-				return;
-			}
-			if (GetClientTeam(client) == CS_TEAM_CT) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas essayer cela en CT.");
-				return;
-			}
-			char clientModel[128];
-			GetClientModel(client, clientModel, sizeof(clientModel));
-			if (StrEqual(clientModel, "models/player/custom_player/legacy/sprisioner/sprisioner.mdl")) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas essayer cela en tant qu'évadé.");
-				return;
-			}
-			if (!IsModelPrecached(szMenuItem)) {
-				if (PrecacheModel(szMenuItem) == 0) {
-					return;
-				}
-			}
-			ServerCommand("sm_effect_setmodel \"%i\" \"%s\"", client, szMenuItem);
-			rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);
-			CreateTimer(3.0, CheckTrySkin, client);
-		}
+		char szMenuItem[128], explo[2][32];
+		
+		GetMenuItem(menu, param2, szMenuItem, sizeof(szMenuItem));
+		ExplodeString(szMenuItem, " ", explo, sizeof(explo), sizeof(explo[]));
+		Draw_SkinList(client, StringToInt(explo[0]), StringToInt(explo[1]));
 	}
 	else if (action == MenuAction_End) {
 		CloseHandle(menu);
 	}
 }
-public Action CheckTrySkin(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("CheckTrySkin");
-	#endif
-	if (rp_GetPlayerZone(client) != ZONE_CABINE)
-		rp_ClientResetSkin(client);
-	else
-		rp_HookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);
-	
-}
-
 public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 	rp_ClientResetSkin(client);
 	rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);

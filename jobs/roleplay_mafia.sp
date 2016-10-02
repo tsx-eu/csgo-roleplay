@@ -220,6 +220,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		rp_GetItemData(i, item_type_name, tmp, sizeof(tmp));
 		
 		addBuyMenu(client, target, i);
+		amount = rp_GetItemInt(i, item_type_prix);
 		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez volé %s à %N, il a été envoyé au marché noir.", tmp, target);
 		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Quelqu'un vous a volé: %s.", tmp);
@@ -253,8 +254,8 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		
 		float vecTarget[3];
 		GetClientAbsOrigin(client, vecTarget);
-
-		ServerCommand("sm_effect_particles %d Aura2 3", client);
+		CashFlow(client, amount/2);
+		
 		rp_ClientAggroIncrement(client, target, 1000);
 		if( rp_GetClientBool(client, b_GameModePassive) == false ) {
 			rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, 5.0);
