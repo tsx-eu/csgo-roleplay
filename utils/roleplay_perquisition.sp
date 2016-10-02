@@ -52,14 +52,20 @@ public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 	}
 }
 public Action fwdCommand(int client, char[] command, char[] arg) {
-	if( StrContains(command, "perqui") == 0 ) {
+	if( StrContains(command, "perqui") == 0 || StrContains(command, "perquiz") == 0 ) {
 		return Cmd_Perquiz(client);
 	}
 	return Plugin_Continue;
 }
 public Action Cmd_Perquiz(int client) {
 	
-	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 && GetClientTeam(client) != CS_TEAM_CT ) {
+	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
+		ACCESS_DENIED(client);
+	}
+	if( rp_GetClientInt(client, i_Job) == 9 || rp_GetClientInt(client, i_Job) == 8 ) {
+		ACCESS_DENIED(client);
+	}
+	if( GetClientTeam(client) != CS_TEAM_CT ) {
 		ACCESS_DENIED(client);
 	}
 	
@@ -175,7 +181,7 @@ public void VERIF_PERQUIZ(Handle owner, Handle row, const char[] error, any zone
 		return;
 	}
 	
-	int cd = getCooldown(zone);
+	int cd = getCooldown(array[PQ_client], zone);
 	if( row != INVALID_HANDLE && SQL_FetchRow(row) ) {
 		if( SQL_FetchInt(row, 0) + cd > GetTime() ) {
 			
@@ -250,6 +256,8 @@ void END_PERQUIZ(int zone, bool abort) {
 		rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
 		Format(query, sizeof(query), "INSERT INTO `rp_perquiz` (`id`, `zone`, `time`, `steamid`, `type`, `job_id`) VALUES (NULL, '%s', UNIX_TIMESTAMP(), '%s', '%s', '%d');", tmp, date, array[PQ_type] > 0 ? "search" : "trafic", rp_GetClientJobID(array[PQ_client]));
 		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
+		
+		rp_SetClientInt(array[PQ_client], i_AddToPay, rp_GetClientInt(array[PQ_client], i_AddToPay) + 500);
 	}
 }
 // ----------------------------------------------------------------------------
@@ -279,11 +287,15 @@ public Action fwdHookDead(int victim, int attacker) {
 	}
 	
 	ServerCommand("rp_SendToJail %d %d", victim, array[PQ_client]);
+	CreateTimer(0.1, respawn, victim);
 	rp_SetClientInt(victim, i_JailTime, (rp_GetClientInt(victim, i_JailTime) + 6 * 60));
 	
 	END_PERQUIZ(zone, false);
 	
 	return Plugin_Continue;
+}
+public Action respawn(Handle timer, any client) {
+	rp_ClientRespawn(client);
 }
 public Action TIMER_PERQUIZ(Handle timer, any zone) {
 	int array[PQ_Max];
@@ -637,12 +649,14 @@ void TeleportCT(int zone) {
 		}
 	}
 }
-int getCooldown(int zone) {
+int getCooldown(int client, int zone) {
 	char tmp[64];
 	rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
 	
-	if( StrEqual(tmp, "bunker") || StrEqual(tmp, "villa") || StrEqual(tmp, "appart_50") )
+	if( rp_GetClientJobID(client) == 1 && (StrEqual(tmp, "bunker") || StrEqual(tmp, "villa") || StrEqual(tmp, "appart_50") )
 		return 6 * 60 * 60;
+	else if( rp_GetClientJobID(client) == 101 && (StrEqual(tmp, "bunker") || StrEqual(tmp, "villa") || StrEqual(tmp, "appart_50") )
+		return 1 * 60 * 60;
 	else
 		return 24 * 60;
 }

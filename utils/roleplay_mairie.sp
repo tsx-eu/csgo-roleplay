@@ -91,10 +91,13 @@ public Action fwdPlayerFrame(int client) {
 	}
 }
 public Action fwdPlayerUse(int client) {
-	if( rp_GetPlayerZone(client) == MAIRIE_ZONE )
+	if( rp_GetPlayerZone(client) == MAIRIE_ZONE || rp_GetPlayerZone(client) == MAIRIE_BUR_ZONE )
+		CreateTimer(0.1, PostOpen, client);
+}
+public Action PostOpen(Handle timer, any client) {
+	if( rp_ClientCanDrawPanel(client) )
 		Draw_Mairie_Main(client);
 }
-
 public void fwdCompleteFirstname(int client, any data, char[] message) {
 	char tmp[128];
 	String_CleanupName(message, tmp, sizeof(tmp));
@@ -251,6 +254,10 @@ public void QUERY_MairieCandidate(Handle owner, Handle handle, const char[] erro
 	
 	char szDayOfWeek[12];
 	FormatTime(szDayOfWeek, 11, "%w");
+	
+	rp_GetServerString(mairieID, tmp2, sizeof(tmp2));
+	if( StrEqual(tmp2, szSteamID) )
+		myself = true;
 	
 	if( !myself && StringToInt(szDayOfWeek) != 1)
 		menu.AddItem("5 -1 0", "Poster ma candidature (50 000$)", (rp_GetClientInt(client, i_Money)+rp_GetClientInt(client, i_Bank)) >= 50000 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );

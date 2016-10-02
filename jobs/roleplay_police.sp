@@ -1765,7 +1765,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			rp_SetClientInt(target, i_JailledBy, 0);
 			
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez libéré %N{default}.", target);
-			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N {default}vous a liberé.", client);
+			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N {default}vous a libéré.", client);
 			
 			LogToGame("[TSX-RP] [JAIL] [LIBERATION] %L a liberé %L", client, target);
 			

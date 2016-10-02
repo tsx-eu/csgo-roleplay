@@ -59,6 +59,7 @@ public void OnMapStart() {
 	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt", true);
 	g_cExplode = PrecacheModel("materials/sprites/muzzleflash4.vmt", true);
 	PrecacheModel(MODEL_KEVLARBOX, true);
+	PrecacheSoundAny("tsx/roleplay/fouet.mp3");
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
@@ -387,8 +388,7 @@ public Action Cmd_ItemFouet(int args) {
 	
 	SlapPlayer(target, 0, true);
 	SlapPlayer(target, 0, true);
-	EmitSoundToAll("tsx/roleplay/fouet.mp3", target);
-
+	EmitSoundToAllAny("tsx/roleplay/fouet.mp3", target);
 	
 	rp_HookEvent(target, RP_PreHUDColorize, fwdSlowTime, 5.0);
 	
