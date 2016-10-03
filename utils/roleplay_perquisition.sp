@@ -653,9 +653,9 @@ int getCooldown(int client, int zone) {
 	char tmp[64];
 	rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
 	
-	if( rp_GetClientJobID(client) == 1 && (StrEqual(tmp, "bunker") || StrEqual(tmp, "villa") || StrEqual(tmp, "appart_50") )
+	if( rp_GetClientJobID(client) == 1 && (StrEqual(tmp, "bunker") || StrEqual(tmp, "villa") || StrEqual(tmp, "appart_50") ) )
 		return 6 * 60 * 60;
-	else if( rp_GetClientJobID(client) == 101 && (StrEqual(tmp, "bunker") || StrEqual(tmp, "villa") || StrEqual(tmp, "appart_50") )
+	else if( rp_GetClientJobID(client) == 101 && (StrEqual(tmp, "bunker") || StrEqual(tmp, "villa") || StrEqual(tmp, "appart_50") ) )
 		return 1 * 60 * 60;
 	else
 		return 24 * 60;
