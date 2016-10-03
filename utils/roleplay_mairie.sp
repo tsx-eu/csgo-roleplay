@@ -171,9 +171,56 @@ void Draw_Mairie_Main(int client) {
 	Menu menu = new Menu(Handle_Mairie);
 	menu.SetTitle("Mairie de Princeton\n ");
 	menu.AddItem("3 0 0", "Règlement communal");
-	menu.AddItem("5 0 0", "Candidature pour la Mairie");
-	
+	if( rp_GetClientInt(client, i_PlayerLVL) >= 30 )
+		menu.AddItem("5 0 0", "Candidature pour la Mairie");
+	if( rp_GetClientInt(client, i_PlayerLVL) >= 600 && rp_GetClientInt(client, i_PlayerLVL) < 1000 )
+		menu.AddItem("6 0 0", "Prestige niveau 600");
+	if( rp_GetClientInt(client, i_PlayerLVL) >= 1000 )
+		menu.AddItem("6 0 0", "Prestige niveau 1000");
+		
 	menu.Display(client, MENU_TIME_FOREVER);
+}
+void Draw_Mairie_Prestige(int client, int target) {
+	if( target == 0 ) {
+		Menu menu = new Menu(Handle_Mairie);
+		menu.SetTitle("Mairie de Princeton, Prestige\n \nAcceptez-vous d'augmenter votre prestige?\n ");
+		
+		menu.AddItem("_", "Avantage: 10% de paye supplémentaire, pour toujours", ITEMDRAW_DISABLED);
+		
+		if( rp_GetClientInt(client, i_PlayerLVL) >= 600 && rp_GetClientInt(client, i_PlayerLVL) < 1000 ) {
+			menu.AddItem("_", "Avantage: 1 000 000$ cash", ITEMDRAW_DISABLED);
+			menu.AddItem("_", "Avantage: 50 cadeaux\n ", ITEMDRAW_DISABLED);
+		}
+		else {
+			menu.AddItem("_", "Avantage: 2 500 000$ cash", ITEMDRAW_DISABLED);
+			menu.AddItem("_", "Avantage: 100 cadeaux\n ", ITEMDRAW_DISABLED);
+		}
+		
+		menu.AddItem("_", "Incovéniant: Vous recommencez au niveau 100\n ", ITEMDRAW_DISABLED);
+		
+		menu.AddItem("6 1", "Je accepte");
+		menu.Display(client, MENU_TIME_FOREVER);
+	}
+	else if( target == 1 ) {
+		if( rp_GetClientInt(client, i_PlayerLVL) >= 600 && rp_GetClientInt(client, i_PlayerLVL) < 1000 ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu 50 cadeaux dans votre banque.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu 1 000 000$.");
+			rp_ClientGiveItem(client, ITEM_CADEAU, 50, true);
+			rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) + 1000000);
+		}
+		else {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu 100 cadeaux dans votre banque.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu 2 500 000$.");
+			rp_ClientGiveItem(client, ITEM_CADEAU, 100, true);
+			rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) + 2500000);
+		}
+		
+		rp_SetClientInt(client, i_PlayerXP, (3600 * 100) - 10);
+		rp_SetClientInt(client, i_PlayerLVL, 99);
+		rp_SetClientInt(client, i_PlayerPrestige, rp_GetClientInt(client, i_PlayerPrestige) + 1);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes maintenant prestige %d. Votre paye est augmentée de %d%%.", rp_GetClientInt(client, i_PlayerPrestige), rp_GetClientInt(client, i_PlayerPrestige)*10);
+		rp_ClientXPIncrement(client, 10);
+	}
 }
 void Draw_Mairie_Candidate(int client, int target, int arg) {
 	char tmp[255], szSteamID[32];
@@ -259,7 +306,7 @@ public void QUERY_MairieCandidate(Handle owner, Handle handle, const char[] erro
 	if( StrEqual(tmp2, szSteamID) )
 		myself = true;
 	
-	if( !myself && StringToInt(szDayOfWeek) != 1)
+	if( rp_GetClientInt(client, i_PlayerLVL) >= 90 && !myself && StringToInt(szDayOfWeek) != 1)
 		menu.AddItem("5 -1 0", "Poster ma candidature (50 000$)", (rp_GetClientInt(client, i_Money)+rp_GetClientInt(client, i_Bank)) >= 50000 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );
 	
 	menu.Display(client, MENU_TIME_FOREVER);
@@ -596,6 +643,8 @@ public int Handle_Mairie(Handle menu, MenuAction action, int client, int param2)
 					}
 					rp_SetClientInt(client, i_BirthDay, -rp_GetClientInt(client, i_BirthDay));
 					PrintHintText(client, "Vous êtes enregistré à la mairie, merci !");
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu 10 cadeaux dans votre banque.");
+					rp_ClientGiveItem(client, ITEM_CADEAU, 10, true);
 				}
 				
 			}
@@ -606,6 +655,8 @@ public int Handle_Mairie(Handle menu, MenuAction action, int client, int param2)
 			if( c == 1 && b == 5 ) {
 				PrintHintText(client, " \n Bravo !");
 				rp_SetClientBool(client, b_PassedRulesTest, true);
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu 10 cadeaux dans votre banque.");
+				rp_ClientGiveItem(client, ITEM_CADEAU, 10, true);
 			}
 			else if( c == 1 ) {
 				if( b != 0 )
@@ -626,6 +677,9 @@ public int Handle_Mairie(Handle menu, MenuAction action, int client, int param2)
 		}
 		if( a == 5 ) {
 			Draw_Mairie_Candidate(client, b, c);
+		}
+		if( a == 6 ) {
+			Draw_Mairie_Prestige(client, b);
 		}
 	}
 	else if (action == MenuAction_End) {

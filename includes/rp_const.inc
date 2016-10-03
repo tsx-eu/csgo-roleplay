@@ -72,6 +72,7 @@
 #define ITEM_MANDAT			4
 #define ITEM_FITNESS		30
 #define ITEM_TICKETID		76
+#define ITEM_CADEAU			132
 #define	ITEM_GPS			144
 #define	ITEM_REPAIR			176
 #define	ITEM_PARTICULES		181
