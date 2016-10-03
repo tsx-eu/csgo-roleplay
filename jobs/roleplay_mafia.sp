@@ -254,7 +254,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		
 		float vecTarget[3];
 		GetClientAbsOrigin(client, vecTarget);
-		CashFlow(client, amount/2);
+		rp_Effect_Cashflow(client, amount / 2);
 		
 		rp_ClientAggroIncrement(client, target, 1000);
 		if( rp_GetClientBool(client, b_GameModePassive) == false ) {
@@ -301,8 +301,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 			rp_SetClientFloat(client, fl_LastVente, GetGameTime() + 30.0);
 		
 		rp_ClientFloodIncrement(client, target, fd_vol, cooldown);
-		
-		CashFlow(client, amount);
+		rp_Effect_Cashflow(client, amount);
 		
 		int cpt = rp_GetRandomCapital(91);
 		rp_SetJobCapital(91, rp_GetJobCapital(91) + (amount/4));
@@ -326,19 +325,7 @@ public Action fwdAccelerate(int client, float& speed, float& gravity) {
 	speed += 0.5;
 	return Plugin_Changed;
 }
-void CashFlow(int client, int amount) {
-	if( amount <= 10 ) {
-		ServerCommand("sm_effect_particles %d trail_money %d knife", client, amount);	
-	}
-	else {
-		for (int i = 0; i <= amount; i+=100) {
-			CreateTimer( i / 100.0, CashFlow_TASK, client);
-		}
-	}
-}
-public Action CashFlow_TASK(Handle timer, any client) {
-	ServerCommand("sm_effect_particles %d trail_money 10 knife", client);
-}
+
 public Action fwdOnPlayerUse(int client) {
 	#if defined DEBUG
 	PrintToServer("fwdOnPlayerUse");

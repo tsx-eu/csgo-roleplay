@@ -765,7 +765,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		rp_SetClientInt(client, i_LastVolVehicleTime, GetTime());
 		rp_SetClientInt(client, i_LastVolAmount, 100);
 		rp_SetClientInt(client, i_LastVolTarget, target);
-		CashFlow(client, price / 4);
+		rp_Effect_Cashflow(client, price / 4);
 		
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, StealTime);
 		rp_HookEvent(client, RP_PreTakeDamage, fwdDamage, StealTime);
@@ -824,8 +824,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 			rp_SetClientFloat(client, fl_LastVente, GetGameTime() + 30.0);
 		
 		rp_ClientFloodIncrement(client, target, fd_vol, cooldown);
-		
-		CashFlow(client, amount);
+		rp_Effect_Cashflow(client, amount);
 		
 		int cpt = rp_GetRandomCapital(81);
 		rp_SetJobCapital(81, rp_GetJobCapital(81) + (amount/4));
@@ -843,19 +842,6 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	}
 	
 	return Plugin_Stop;
-}
-void CashFlow(int client, int amount) {
-	if( amount <= 10 ) {
-		ServerCommand("sm_effect_particles %d trail_money %d knife", client, amount);	
-	}
-	else {
-		for (int i = 0; i <= amount; i+=100) {
-			CreateTimer( i / 100.0, CashFlow_TASK, client);
-		}
-	}
-}
-public Action CashFlow_TASK(Handle timer, any client) {
-	ServerCommand("sm_effect_particles %d trail_money 10 knife", client);
 }
 // ----------------------------------------------------------------------------
 public Action fwdDamage(int client, int attacker, float& damage) {
