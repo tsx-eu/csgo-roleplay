@@ -132,7 +132,7 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 				}
 				if(nbRecherche <= 0) {
 					delete subMenu;
-					CPrintToChat(array[PQ_client], "{lightblue}[TSX-RP]{default} Il n'y a pas de personne recherchée dans cette planque.");
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a pas de personne recherchée dans cette planque.");
 				} else {
 					subMenu.Display(client, MENU_TIME_FOREVER);
 				}
@@ -152,7 +152,7 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 			if( weapon > 3 || machine > 2 || plant > 2 )
 				INIT_PERQUIZ(client, zone, 0);
 			else
-				CPrintToChat(array[PQ_client], "{lightblue}[TSX-RP]{default} Il n'y a pas de trafic illégal dans cette planque.");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a pas de trafic illégal dans cette planque.");
 				
 		}
 		else if( StrEqual(expl[0], "cancel") ) {
