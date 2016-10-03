@@ -83,6 +83,8 @@ public Action fwdPlayerFrame(int client) {
 		if (rp_GetClientInt(client, i_PlayerLVL) >= 20 && !rp_GetClientBool(client, b_PassedRulesTest) ) {
 			shouldGo = true;
 		}
+		if (rp_GetClientInt(client, i_PlayerLVL) >= 1000 )
+			shouldGo = true;
 		
 		if( shouldGo ) {
 			PrintHintText(client, "Vous êtes attendu à la mairie");
@@ -140,7 +142,7 @@ public void fwdCompleteLastname(int client, any data, char[] message) {
 	}
 }
 public void fwdCompleteLastname_Query(Handle owner, Handle handle, const char[] error, any client) {
-	if (SQL_FetchRow(handle)) {
+	if( handle && SQL_FetchRow(handle) ) {
 		int res = SQL_FetchInt(handle, 0);
 		if (res > 0) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre nom/prénom correspond à un autre citoyen, veuillez en entrer un autre.");
@@ -199,6 +201,9 @@ void Draw_Mairie_Prestige(int client, int target) {
 		menu.AddItem("_", "inconvénient : Vous recommencez au niveau 100\n ", ITEMDRAW_DISABLED);
 		
 		menu.AddItem("6 1", "Je accepte");
+		if( rp_GetClientInt(client, i_PlayerLVL) >= 600 && rp_GetClientInt(client, i_PlayerLVL) < 1000 )
+			menu.AddItem("_", "J'attends le niveau 1000 pour plus de bonus!");
+		
 		menu.Display(client, MENU_TIME_FOREVER);
 	}
 	else if( target == 1 ) {
@@ -215,7 +220,7 @@ void Draw_Mairie_Prestige(int client, int target) {
 			rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) + 2500000);
 		}
 		
-		rp_SetClientInt(client, i_PlayerXP, (3600 * 100) - 10);
+		rp_SetClientInt(client, i_PlayerXP, (3600 * 99) - 10);
 		rp_SetClientInt(client, i_PlayerLVL, 99);
 		rp_SetClientInt(client, i_PlayerPrestige, rp_GetClientInt(client, i_PlayerPrestige) + 1);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes maintenant prestige %d. Votre paye est augmentée de %d%%.", rp_GetClientInt(client, i_PlayerPrestige), rp_GetClientInt(client, i_PlayerPrestige)*10);
