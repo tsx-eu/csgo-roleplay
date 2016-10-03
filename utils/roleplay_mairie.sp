@@ -698,8 +698,8 @@ void getRulesName(serverRules rulesID, int target, int arg, char[] tmp, int leng
 		switch(rulesID) {
 			case rules_Amendes:			{	Format(tmp, length, "Les amendes sont augmentée de 5%");						}
 			case rules_ItemsPrice:		{	Format(tmp, length, "Les prix des items sont augmentés de 10%");				}
-			case rules_reductions:		{	Format(tmp, length, "Les réductions sont interdite");							}
-			case rules_Productions:		{	Format(tmp, length, "La production des machines et plants est accéléré");		}
+			case rules_reductions:		{	Format(tmp, length, "Les réductions sont interdites");							}
+			case rules_Productions:		{	Format(tmp, length, "La production des machines et plants est accélérée");		}
 			case rules_Braquages:		{	Format(tmp, length, "Il est interdit de braquer");								}
 			case rules_ItemsDisabled:	{	Format(tmp, length, "Lors des captures du bunker, il est interdit d'utiliser");}
 			case rules_Payes:			{	Format(tmp, length, "Les payes sont augmenté de 5%");							}
@@ -709,8 +709,8 @@ void getRulesName(serverRules rulesID, int target, int arg, char[] tmp, int leng
 		switch(rulesID) {
 			case rules_Amendes:			{	Format(tmp, length, "Les amendes sont réduites de 10%");						}
 			case rules_ItemsPrice:		{	Format(tmp, length, "Les prix des items sont réduits de 5%");					}
-			case rules_reductions:		{	Format(tmp, length, "Les réductions sont interdite");							}
-			case rules_Productions:		{	Format(tmp, length, "La production des machines et plants est ralenti");		}
+			case rules_reductions:		{	Format(tmp, length, "Les réductions sont interdites");							}
+			case rules_Productions:		{	Format(tmp, length, "La production des machines et plants est ralentie");		}
 			case rules_Braquages:		{	Format(tmp, length, "Il est interdit de braquer ");							}
 			case rules_ItemsDisabled:	{	Format(tmp, length, "Lors des captures du bunker, il est interdit d'utiliser");}
 			case rules_Payes:			{	Format(tmp, length, "Les payes sont réduites de 10%");							}
