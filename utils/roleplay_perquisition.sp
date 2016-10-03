@@ -103,6 +103,7 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 		float dst[3];
 		rp_GetClientTarget(client, dst);
 		int zone = rp_GetZoneFromPoint(dst);
+		int nbRecherche = 0;
 		rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
 		if( !StrEqual(tmp, expl[1]) )
 			return 0;
@@ -127,9 +128,14 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 					GetClientAbsOrigin(i, g_flLastPos[i]);
 					
 					subMenu.AddItem(options, tmp);
+					nbRecherche++;
 				}
-				
-				subMenu.Display(client, MENU_TIME_FOREVER);
+				if(nbRecherche <= 0) {
+					delete subMenu;
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a pas de personne recherchée dans cette planque.");
+				} else {
+					subMenu.Display(client, MENU_TIME_FOREVER);
+				}
 				g_bCanPerquiz[client] = false;
 			}
 			else {
@@ -145,6 +151,9 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 			
 			if( weapon > 3 || machine > 2 || plant > 2 )
 				INIT_PERQUIZ(client, zone, 0);
+			else
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a pas de trafic illégal dans cette planque.");
+				
 		}
 		else if( StrEqual(expl[0], "cancel") ) {
 			END_PERQUIZ(zone, true);
