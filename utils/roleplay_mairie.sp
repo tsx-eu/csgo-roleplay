@@ -196,7 +196,7 @@ void Draw_Mairie_Prestige(int client, int target) {
 			menu.AddItem("_", "Avantage: 100 cadeaux\n ", ITEMDRAW_DISABLED);
 		}
 		
-		menu.AddItem("_", "Incovéniant: Vous recommencez au niveau 100\n ", ITEMDRAW_DISABLED);
+		menu.AddItem("_", "inconvénient : Vous recommencez au niveau 100\n ", ITEMDRAW_DISABLED);
 		
 		menu.AddItem("6 1", "Je accepte");
 		menu.Display(client, MENU_TIME_FOREVER);
