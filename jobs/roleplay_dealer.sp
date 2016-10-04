@@ -1141,6 +1141,7 @@ public Action Frame_BuildingPlant(Handle timer, any ent) {
 		}
 	}
 	
+	
 	if( rp_GetBuildingData(ent, BD_FromBuild) == 1 )
 		time /= 10.0;
 	if( !rp_IsTutorialOver(client) )
@@ -1148,6 +1149,9 @@ public Action Frame_BuildingPlant(Handle timer, any ent) {
 	if( rp_GetClientInt(client, i_PlayerLVL) >= 812 )
 		time *= 0.75;
 	
+	int heal = Entity_GetHealth(ent) + RoundFloat(time);
+	if (heal > 250) heal = 250;
+	Entity_SetHealth(ent, heal, true);
 	
 	CreateTimer(time, Frame_BuildingPlant, EntIndexToEntRef(ent));
 	

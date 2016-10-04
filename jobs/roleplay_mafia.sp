@@ -356,7 +356,7 @@ public Action fwdOnPlayerUse(int client) {
 	
 	float vecOrigin[3];
 	GetClientAbsOrigin(client, vecOrigin);
-	if( GetVectorDistance(vecOrigin, MARCHEMAFIA_POS) < 40.0 ) {
+	if( GetVectorDistance(vecOrigin, MARCHEMAFIA_POS) < 150.0 ) {
 		Cmd_BuyItemMenu(client, false);
 	}
 }
@@ -850,7 +850,7 @@ int getDistrib(int client, int& type) {
 		type = 5;
 	if( StrEqual(classname, "rp_phone") )
 		type = 6;
-	if( (StrEqual(classname, "rp_plant") ) && rp_GetClientJobID(owner) != 91 &&
+	if( (StrEqual(classname, "rp_plant") ) && rp_GetClientJobID(owner) != 91 && Entity_GetHealth(target) == 250 && 
 		!rp_IsClientNew(owner) && !rp_GetClientBool(owner, b_IsAFK) && rp_GetBuildingData(target, BD_count) > 0 )
 		type = 7;
 		
@@ -984,7 +984,8 @@ bool disapear(int client) {
 	}
 	else {
 		for (int i = 1; i <= MaxClients; i++) {
-			if( IsValidClient(i) && GetClientTeam(i) != CS_TEAM_CT && rp_GetClientJobID(i) != 91 && i != client ) {
+			
+			if( IsValidClient(i) && GetClientTeam(i) != CS_TEAM_CT && !IsFakeClient(i) && rp_GetClientJobID(i) != 91 && i != client ) {
 				rndClient[rndCount++] = i;
 			}
 		}
