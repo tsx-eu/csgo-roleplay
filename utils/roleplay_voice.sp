@@ -240,9 +240,10 @@ void Cmd_job(int client) {
 	Handle jobmenu = CreateMenu(MenuJobs);
 	SetMenuTitle(jobmenu, "Liste des jobs disponibles\n ");
 	AddMenuItem(jobmenu, "-1", "Tout afficher");
-	AddMenuItem(jobmenu, "-2", "Avocats");
+	
 	char tmp[12], tmp2[64];
 	bool bJob[MAX_JOBS];
+	bool hasAvocat;
 
 	for(int i = 1; i <= MaxClients; i++) {
 
@@ -261,7 +262,12 @@ void Cmd_job(int client) {
 			continue;
 
 		bJob[job] = true;
+		
+		if (!hasAvocat) hasAvocat = ( rp_GetClientInt(client, i_Avocat) > 0 );
 	}
+	
+	if( hasAvocat )
+		AddMenuItem(jobmenu, "-2", "Avocats");
 	
 	char tmp3[2][64];
 
