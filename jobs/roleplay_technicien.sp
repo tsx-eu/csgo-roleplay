@@ -613,7 +613,8 @@ void CashMachine_Destroy(int entity) {
 			CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre photocopieuse à faux-billets a été détruite.");
 		else
 			CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos machines à faux-billets a été détruite.");
-		rp_ClientOverlays(owner, o_Action_DestroyPlant, 10.0);
+		rp_ClientOverlays(owner, o_Action_DestroyMachine, 10.0);
+		
 		if( rp_GetBuildingData(entity, BD_started)+120 < GetTime() ) {
 			rp_SetClientInt(owner, i_Bank, rp_GetClientInt(owner, i_Bank)-25);
 		}
