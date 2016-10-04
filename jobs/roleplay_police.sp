@@ -1660,8 +1660,8 @@ void SendPlayerToJail(int target, int client = 0) {
 	CreateTimer(MENU_TIME_DURATION.0, AllowWeaponDrop, target);
 	
 	Call_StartForward(rp_GetForwardHandle(target, RP_PostClientSendToJail));
-	Call_PushCell(client);
 	Call_PushCell(target);
+	Call_PushCell(client);
 	Call_Finish();
 }
 public Action AllowWeaponDrop(Handle timer, any client) {
