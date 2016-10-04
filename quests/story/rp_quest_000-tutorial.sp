@@ -318,7 +318,7 @@ public void Q6_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "un policier est en droit de vous arrêter.");
 		DrawPanelText(panel, " Restez discret, rangez la dans votre poche!");
 		DrawPanelText(panel, " Une arme a été ajoutée dans votre inventaire.");
-		DrawPanelText(panel, "→ Entrez la commande /item dans le chat général,");
+		DrawPanelText(panel, "→ Entrez la commande /rp (ou /item) dans le chat général,");
 		DrawPanelText(panel, "Appuyez sur la touche 1 afin de l'utiliser");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " Notez que votre inventaire disparaît en cas");
@@ -389,7 +389,7 @@ public void Q8_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "inventaire.");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " Trouvez-vous une cachette, et utilisez");
-		DrawPanelText(panel, "ces objets (/item). Si vous êtes mal");
+		DrawPanelText(panel, "ces objets (/rp ou /item). Si vous êtes mal");
 		DrawPanelText(panel, "caché, un policier est en droit de vous");
 		DrawPanelText(panel, "arrêter ! ");
 		DrawPanelText(panel, " ");
@@ -444,6 +444,7 @@ public void Q9_Abort(int objectiveID, int client) {
 public Action OnPlayerTalk(int client, char[] szSayText, int length, bool local) {
 	if( local ) {
 		rp_QuestStepComplete(client, g_iQ9);
+		FakeClientCommand(client, "say /actif");
 	}
 }
 // ----------------------------------------------------------------------------
