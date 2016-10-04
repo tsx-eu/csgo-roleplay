@@ -222,6 +222,8 @@ void Draw_Mairie_Prestige(int client, int target) {
 		
 		rp_SetClientInt(client, i_PlayerXP, (3600 * 99) - 10);
 		rp_SetClientInt(client, i_PlayerLVL, 99);
+		rp_SetClientInt(client, i_PlayerRank, 10);
+		
 		rp_SetClientInt(client, i_PlayerPrestige, rp_GetClientInt(client, i_PlayerPrestige) + 1);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes maintenant prestige %d. Votre paye est augmentée de %d%%.", rp_GetClientInt(client, i_PlayerPrestige), rp_GetClientInt(client, i_PlayerPrestige)*10);
 		rp_ClientXPIncrement(client, 10);
