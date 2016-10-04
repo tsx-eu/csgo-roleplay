@@ -316,6 +316,6 @@ void SQL_Insert(int client, int target, int duration, const char[] reason, const
 	SQL_EscapeString(rp_GetDatabase(), reason, eReason, size);
 	
 	Format(query, sizeof(query), "INSERT INTO `ts-x`.`srv_bans` (`id`, `SteamID`, `StartTime`, `EndTime`, `Length`, `adminSteamID`, `BanReason`, `game`) ");
-	Format(query, sizeof(query), "%s VALUES(NULL, '%s', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+%d, '%d', '%s', '%s', '%s'); ", query, szClient, duration*60, duration*60, szTarget, eReason, type);
+	Format(query, sizeof(query), "%s VALUES(NULL, '%s', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+%d, '%d', '%s', '%s', '%s'); ", query, szTarget, duration*60, duration*60, szClient, eReason, type);
 	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
 }
