@@ -29,7 +29,7 @@
 #define TP_CD_DURATION 			30.0
 #define TP_CHANNEL_DURATION		5.0
 #define	MARCHEMAFIA_PC			50
-#define MARCHEMAFIA_POS			view_as<float>({-144.55,520.1,-2119.96})
+#define MARCHEMAFIA_POS			view_as<float>({-400.0, 835.0, -2120.0})
 #define MAIRIE_ZONE				259
 #define MAIRIE_BUR_ZONE			308
 #define MAIRIE_POS				{522.0, 2002.0, -2135.0}
