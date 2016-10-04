@@ -61,6 +61,8 @@ void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) 
 				continue;
 			if( rp_GetItemInt(itemID, item_type_prix) == 0 )
 				continue;
+			if( rp_GetItemInt(itemID, item_type_job_id) == 0 )
+				continue;
 			if( rp_GetItemInt(itemID, item_type_auto) == 1 )
 				continue;
 			
@@ -164,22 +166,17 @@ void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) 
 }
 void HDV_Buy(int client, int jobID, int itemID, int transactID, int confirm, int dataQte, int dataPrix) {
 	
-	char tmp[32], tmp2[64];
+	char tmp[32];
 	Menu menu = CreateMenu(Handler_MainHDV);
 
 	if( jobID == 0 ) {
-		menu.SetTitle("Hotel des ventes: Acheter\n ");
-		char tmp3[2][32];
-		for (jobID = 11; jobID <= MAX_JOBS; jobID+=10) {
-			if(jobID == 101 || jobID == 81 || jobID == 91 )
-				continue;
-			Format(tmp, sizeof(tmp), "buy %d", jobID);
-			rp_GetJobData(jobID, job_type_name, tmp2, sizeof(tmp2));
-			if(strlen(tmp2) < 2)
-				continue;
-			ExplodeString(tmp2, "-", tmp3, sizeof(tmp3), sizeof(tmp3[]));
-			menu.AddItem(tmp, tmp3[1]);
-		}
+		
+		char szQuery[256];
+		Format(szQuery, sizeof(szQuery), "SELECT COUNT(`itemID`), `job_id` FROM `rp_trade` T INNER JOIN `rp_items` I ON T.`itemID`=I.`id` WHERE T.`done`=0 GROUP BY `job_id` ORDER BY `job_id`");
+		SQL_TQuery(rp_GetDatabase(), SQL_ListJobCB, szQuery, client);
+		delete menu;
+		return;
+		
 	}
 	else if(itemID == 0){
 		
@@ -323,6 +320,38 @@ public void SQL_DepositCB(Handle owner, Handle handle, const char[] error, any d
 	}
 }
 
+public void SQL_ListJobCB(Handle owner, Handle row, const char[] error, any client) {
+	#if defined DEBUG
+	PrintToServer("SQL_ListJobCB");
+	#endif
+	if( strlen(error) >= 1  ) {
+		LogError("[SQL] [ERROR] %s", error);
+		return;
+	}
+	char tmp[64], tmp2[64], tmp3[2][32];
+	int jobID;
+	if(row != INVALID_HANDLE){
+		Menu menu = CreateMenu(Handler_MainHDV);
+		menu.SetTitle("Hotel des ventes: Acheter\n ");
+		while( SQL_FetchRow(row) ) {
+			jobID = SQL_FetchInt(row, 1);
+			if( jobID == 0 )
+				continue;
+			
+			rp_GetJobData(jobID, job_type_name, tmp2, sizeof(tmp2));
+			ExplodeString(tmp2, "-", tmp3, sizeof(tmp3), sizeof(tmp3[]));
+			
+			Format(tmp, sizeof(tmp), "buy %d", jobID);
+			Format(tmp2, sizeof(tmp2), "%s (%d lots)", tmp3[1], SQL_FetchInt(row, 0));
+			menu.AddItem(tmp, tmp2);
+		}
+		menu.Display(client, 30);
+	}
+	else{
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Aucun objet ne peut être acheté pour le moment.");
+		return;
+	}
+}
 public void SQL_ListJobItemsCB(Handle owner, Handle row, const char[] error, any client) {
 	#if defined DEBUG
 	PrintToServer("CallBackHDVListJobItems");
@@ -403,12 +432,12 @@ public void SQL_AchatCB(Handle owner, Handle handle, const char[] error, any dat
 		return;
 	}
 	char szQuery[256], tmp[64];
-	rp_ClientGiveItem(client, itemID, dataQte, true);
+	rp_ClientGiveItem(client, itemID, dataQte);
 	rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money)-dataPrix);
 	Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_users2`(`steamid`, `bank`, `pseudo`) VALUES ((SELECT `steamid` FROM `rp_trade` WHERE `id`=%d), %d, 'vente HDV')", transactID, dataPrix);
 	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
 	rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez acheté %d %s à %d$. Les objets sont disponibles dans votre banque.", dataQte, tmp, dataPrix);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez acheté %d %s à %d$.", dataQte, tmp, dataPrix);
 }
 
 public void SQL_HistoryCB(Handle owner, Handle row, const char[] error, any data) {
@@ -471,7 +500,7 @@ public void SQL_CancelCB(Handle owner, Handle handle, const char[] error, any da
 		return;
 	}
 	char tmp[64];
-	rp_ClientGiveItem(client, itemID, dataQte, true);
+	rp_ClientGiveItem(client, itemID, dataQte);
 	rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez récupéré vos %d %s. Ils sont disponibles dans votre banque.", dataQte, tmp);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez récupéré vos %d %s.", dataQte, tmp);
 }
