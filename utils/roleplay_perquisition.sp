@@ -424,19 +424,20 @@ int GetPerquizRespByAppart(int appartID) {
 	int res = 0;
 	int owner = rp_GetAppartementInt(appartID, appart_proprio);
 	
+	
 	for(int i=1; i<=MaxClients; i++) {
 		if( !IsValidClient(i) )
 			continue;
 		zone = rp_GetZoneBit(rp_GetPlayerZone(i));
+		
+		if( owner == i )
+			return i;
+		
 		if( zone & (BITZONE_JAIL|BITZONE_LACOURS|BITZONE_HAUTESECU) )
 			continue;
 		
-		if( owner == i )
-			return res;
-		
-		if( rp_GetClientKeyAppartement(i, appartID)  ) {
+		if( rp_GetClientKeyAppartement(i, appartID)  )
 			res = i;
-		}
 	}
 	return res;
 }
@@ -452,6 +453,7 @@ int GetPerquizRespByJob(int job_id) {
 		if( !IsValidClient(i) )
 			continue;
 		zone = rp_GetZoneBit(rp_GetPlayerZone(i));
+		
 		if( zone & (BITZONE_JAIL|BITZONE_LACOURS|BITZONE_HAUTESECU) )
 			continue;
 		
@@ -476,6 +478,7 @@ int GetPerquizRespByGroup(int gang_id) {
 		if( !IsValidClient(i) )
 			continue;
 		zone = rp_GetZoneBit(rp_GetPlayerZone(i));
+		
 		if( zone & (BITZONE_JAIL|BITZONE_LACOURS|BITZONE_HAUTESECU) )
 			continue;
 		
