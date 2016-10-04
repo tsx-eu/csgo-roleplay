@@ -40,9 +40,6 @@ bool g_bCanCraft[65][MAX_ITEMS];
 bool g_bInCraft[65];
 float g_flClientBook[65][book_max];
 
-int g_iSignPermission[2049];
-ArrayList g_hSignData[2049];
-
 //#define DEBUG
 
 int lstJOB[] =  { 11, 21, 31, 41, 51, 61, 71, 81, 111, 131, 171, 191, 211, 221 };
@@ -70,7 +67,6 @@ public Action Cmd_Reload(int args) {
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);	
 	RegServerCmd("rp_item_crafttable",		Cmd_ItemCraftTable,		"RP-ITEM", 	FCVAR_UNREGISTERED);
-	RegServerCmd("rp_item_sign",			Cmd_ItemCraftSign,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_craftbook",		Cmd_ItemCraftBook,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 	
 	RegAdminCmd("rp_fatigue", CmdSetFatigue, ADMFLAG_ROOT);
@@ -98,19 +94,6 @@ public Action Cmd_ItemCraftTable(int args) {
 	int item_id = GetCmdArgInt(args);
 	
 	if( BuidlingTABLE(client) == 0 ) {
-		ITEM_CANCEL(client, item_id);
-	}
-	
-	return Plugin_Handled;
-}
-public Action Cmd_ItemCraftSign(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemCraftTable");
-	#endif
-	int client = GetCmdArgInt(1);
-	int item_id = GetCmdArgInt(args);
-	
-	if( BuidlingSIGN(client) == 0 ) {
 		ITEM_CANCEL(client, item_id);
 	}
 	
@@ -190,7 +173,6 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse, 	fwdUse);
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
 	rp_HookEvent(client, RP_PreClientStealItem, fwdCanStealItem);
-	rp_HookEvent(client, RP_OnPlayerHINT, fwdPlayerHINT);
 	
 	
 	for(int i = 0; i < view_as<int>(book_max); i++)
@@ -219,11 +201,6 @@ public Action fwdUse(int client) {
 	if( isNearTable(client) && !g_bInCraft[client] ) {
 		displayArtisanMenu(client);
 		return Plugin_Handled;
-	}
-	
-	int sign = isNearSign(client);
-	if( sign > 0 ) { 
-		displaySignMenu(client, sign);
 	}
 	
 	return Plugin_Continue;
@@ -699,7 +676,7 @@ public Action stopBuilding(Handle timer, Handle dp) {
 			for (int j = 0; j < data[craft_amount]; j++) { // Pour chaque quantité nécessaire de la recette
 			
 				if( (float(data[craft_rate]) + (float(level) / 100.0 * float(data[craft_rate])) + float(focus)) >= Math_GetRandomFloat(0.0, 100.0) ) { // De facon aléatoire
-					ClientGiveXP(client, rp_GetItemInt(data[craft_raw], item_type_prix));
+					//ClientGiveXP(client, rp_GetItemInt(data[craft_raw], item_type_prix));
 					rp_ClientGiveItem(client, data[craft_raw]);
 				}
 			}	
@@ -800,16 +777,7 @@ bool isNearTable(int client) {
 	}
 	return false;
 }
-int isNearSign(int client) {
-	char classname[65];
-	int target = rp_GetClientTarget(client);
-	if( IsValidEdict(target) && IsValidEntity(target) && g_iSignPermission[target] > 0 ) {
-		GetEdictClassname(target, classname, sizeof(classname));
-		if( StrContains(classname, "rp_sign") == 0 && rp_IsEntitiesNear(client, target) )
-			return target;
-	}
-	return -1;
-}
+
 void addStatsToMenu(int client, Handle menu) {
 	char tmp[128], tmp2[32];
 	Format(tmp, sizeof(tmp), "Niveau: %d", rp_GetClientInt(client, i_ArtisanLevel));
@@ -905,7 +873,6 @@ public Action BuildingTABLE_post(Handle timer, any entity) {
 	SetEntityMoveType(client, MOVETYPE_WALK);
 	
 	rp_Effect_BeamBox(client, entity, NULL_VECTOR, 255, 255, 0);
-	
 	SetEntProp(entity, Prop_Data, "m_takedamage", 2);
 	HookSingleEntityOutput(entity, "OnBreak", BuildingTABLE_break);
 	return Plugin_Handled;
@@ -918,226 +885,5 @@ public void BuildingTABLE_break(const char[] output, int caller, int activator, 
 	int owner = GetEntPropEnt(caller, Prop_Send, "m_hOwnerEntity");
 	if( IsValidClient(owner) ) {
 		CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre table de craft a été détruite.");
-	}
-}
-
-int BuidlingSIGN(int client) {
-	#if defined DEBUG
-	PrintToServer("BuidlingTABLE");
-	#endif
-	
-	if( !rp_IsBuildingAllowed(client) )
-		return 0;	
-	
-	char classname[64], tmp[64];
-	float vecOrigin[3];
-	
-	Format(classname, sizeof(classname), "rp_sign");
-	GetClientAbsOrigin(client, vecOrigin);
-	int count;
-	
-	for(int i=1; i<=2048; i++) {
-		if( !IsValidEdict(i) )
-			continue;
-		if( !IsValidEntity(i) )
-			continue;
-		
-		GetEdictClassname(i, tmp, sizeof(tmp));
-		
-		if( StrEqual(classname, tmp) && rp_GetBuildingData(i, BD_owner) == client ) {
-			count++;
-			if( count >= 1 ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez panneau indicateur de placé.");
-				return 0;
-			}
-		}
-	}
-	
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Construction en cours...");
-
-	EmitSoundToAllAny("player/ammo_pack_use.wav", client);
-	
-	int ent = CreateEntityByName("prop_physics_override");
-	DispatchKeyValue(ent, "classname", classname);
-	DispatchKeyValue(ent, "model", MODEL_PANNEAU);
-	DispatchSpawn(ent);
-	ActivateEntity(ent);
-	
-	SetEntProp( ent, Prop_Data, "m_iHealth", 10000);
-	SetEntProp( ent, Prop_Data, "m_takedamage", 0);
-	
-	SetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity", client);
-	
-	float vecAngles[3]; GetClientEyeAngles(client, vecAngles); vecAngles[0] = vecAngles[2] = 0.0;
-	TeleportEntity(ent, vecOrigin, vecAngles, NULL_VECTOR);
-	
-	SetEntityRenderMode(ent, RENDER_NONE);
-	ServerCommand("sm_effect_fading \"%i\" \"3.0\" \"0\"", ent);
-	
-	SetEntityMoveType(client, MOVETYPE_NONE);
-	SetEntityMoveType(ent, MOVETYPE_NONE);
-	
-	CreateTimer(3.0, BuildingSIGN_post, ent);
-	rp_SetBuildingData(ent, BD_owner, client);
-	return ent;
-}
-public Action BuildingSIGN_post(Handle timer, any entity) {
-	#if defined DEBUG
-	PrintToServer("BuildingTABLE_post");
-	#endif
-	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
-	SetEntityMoveType(client, MOVETYPE_WALK);
-	
-	rp_Effect_BeamBox(client, entity, NULL_VECTOR, 255, 255, 0);
-	
-	SetEntProp(entity, Prop_Data, "m_takedamage", 2);
-	HookSingleEntityOutput(entity, "OnBreak", BuildingSIGN_break);
-	
-	g_iSignPermission[entity] = 1;
-	g_hSignData[entity] = new ArrayList(255);
-	g_hSignData[entity].PushString("Appuyez sur E pour modifier le panneau");
-	
-	
-	return Plugin_Handled;
-}
-public void OnEntityDestroyed(int entity) {
-	if( g_hSignData[entity] ) {
-		g_hSignData[entity].Clear();
-		delete g_hSignData[entity];
-		g_iSignPermission[entity] = 0;
-	}
-}
-public void BuildingSIGN_break(const char[] output, int caller, int activator, float delay) {
-	#if defined DEBUG
-	PrintToServer("BuildingTABLE_break");
-	#endif
-	
-	int owner = GetEntPropEnt(caller, Prop_Send, "m_hOwnerEntity");
-	if( IsValidClient(owner) ) {
-		CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre panneau a été détruit.");
-	}
-}
-public Action fwdPlayerHINT(int client, int entity) {
-	static char tmp[255];
-	if( g_iSignPermission[entity] > 0 ) {
-		g_hSignData[entity].GetString(0, tmp, sizeof(tmp));
-		
-		String_ColorsToHTML(tmp, sizeof(tmp));
-		ReplaceString(tmp, sizeof(tmp), "%", "%%");
-		
-		PrintHintText(client, tmp);
-		return Plugin_Stop;
-	}
-	return Plugin_Continue;
-}
-void displaySignMenu(int client, int entity) {
-	Menu menu = new Menu(Menu_displayMenu);
-	char tmp[128], tmp2[32];
-	
-	int owner = rp_GetBuildingData(entity, BD_owner);
-	menu.SetTitle("Panneau de %N\n ", owner);
-	
-	bool hasPerm = false;
-	if( owner == client )
-		hasPerm = true;
-	if( g_iSignPermission[entity] == 2 && rp_GetClientJobID(owner) == rp_GetClientJobID(client) ) {
-		int jobID = rp_GetClientJobID(client);
-		int job = rp_GetClientInt(client, i_Job);
-		if( job == jobID || job-1 == jobID )
-			hasPerm = true;
-	}
-	if( g_iSignPermission[entity] == 3 && rp_GetClientJobID(owner) == rp_GetClientJobID(client) )
-		hasPerm = true;
-	if( g_iSignPermission[entity] == 4 && rp_GetClientGroupID(owner) == rp_GetClientGroupID(client) )
-		hasPerm = true;
-	if( g_iSignPermission[entity] == 5 )
-		hasPerm = true;
-	
-	for (int i = 0; i < g_hSignData[entity].Length; i++) {
-		g_hSignData[entity].GetString(i, tmp, sizeof(tmp));
-		
-		Format(tmp2, sizeof(tmp2), "%d %d", i, entity);
-		CRemoveTags(tmp, sizeof(tmp));
-		
-		if( strlen(tmp) > 40 )
-			String_WordWrap(tmp, 40);
-		
-		
-		menu.AddItem(tmp2, tmp, hasPerm ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
-	}
-	
-	if( hasPerm ) {
-		Format(tmp2, sizeof(tmp2), "%d %d", -1, entity);
-		menu.AddItem(tmp2, "Ajouter une ligne");
-	}
-	
-	if( client == rp_GetBuildingData(entity, BD_owner) ) {
-		Format(tmp2, sizeof(tmp2), "%d %d", -2, entity);
-		menu.AddItem(tmp2, "Modifier les permissions");
-	}
-	
-	
-	menu.Display(client, MENU_TIME_FOREVER);
-}
-
-public int Menu_displayMenu(Handle menu, MenuAction action, int client, int param2) {
-	#if defined DEBUG
-	PrintToServer("Menu_displayMenu");
-	#endif
-	
-	if( action == MenuAction_Select ) {
-		char options[64], explo[2][32];
-		GetMenuItem(menu, param2, options, sizeof(options));
-		ExplodeString(options, " ", explo, sizeof(explo), sizeof(explo[]));
-		int i = StringToInt(explo[0]);
-		int entity = StringToInt(explo[1]);
-		
-		if( i <= -100 ) {
-			g_iSignPermission[entity] = i + 1000;
-		}
-		else if( i == -2 ) {
-			Menu menu2 = new Menu(Menu_displayMenu);
-			menu2.SetTitle("Qui peut modifier ce panneau?\n ");
-			Format(options, sizeof(options), "%d %d", -1000+1, entity);	menu2.AddItem(options, "Uniquement moi");
-			Format(options, sizeof(options), "%d %d", -1000+2, entity);	menu2.AddItem(options, "Tous les chefs de mon job");
-			Format(options, sizeof(options), "%d %d", -1000+3, entity);	menu2.AddItem(options, "Toutes les personnes de mon job");
-			Format(options, sizeof(options), "%d %d", -1000+4, entity); menu2.AddItem(options, "Toutes les personnes de mon gang");
-			Format(options, sizeof(options), "%d %d", -1000+5, entity); menu2.AddItem(options, "Tous le monde");
-			
-			menu2.Display(client, MENU_TIME_FOREVER);
-		}
-		else {
-			DataPack dp = new DataPack();
-			dp.WriteCell(i);
-			dp.WriteCell(entity);
-			rp_GetClientNextMessage(client, dp, cbTest);
-			
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Entrez une phrase dans le chat pour remplacer cette ligne. Entrez \".\" pour la supprimer. ");
-		}
-	}
-	else if( action == MenuAction_End ) {
-		CloseHandle(menu);
-	}
-}
-public void cbTest(int client, any data, char[] message) {
-	DataPack dp = view_as<DataPack>(data);
-	dp.Reset();
-	int i = dp.ReadCell();
-	int entity = dp.ReadCell();
-	
-	delete dp;
-	
-	if( i >= 0 ) {
-		if( strlen(message) > 1 ) {
-			g_hSignData[entity].SetString(i, message);
-		}
-		else {
-			g_hSignData[entity].Erase(i);
-			if( g_hSignData[entity].Length <= 0 ) 
-				g_hSignData[entity].PushString("Appuyez sur E pour modifier le panneau");
-		}
-	}
-	else if( i == -1 ) {
-		g_hSignData[entity].PushString(message);
 	}
 }
