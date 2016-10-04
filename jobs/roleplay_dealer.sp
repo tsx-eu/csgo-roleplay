@@ -1697,7 +1697,7 @@ int getDistrib(int client, int& type) {
 		else if( GetVectorDistance(vecOrigin, view_as<float>({ 2550.8, 1663.1, -2015.96 })) < 64.0 ) {
 			type = 6;
 		}
-		else if( GetVectorDistance(vecOrigin, view_as<float>({-144.55,  520.1, -2119.96 })) < 40.0 ) {
+		else if( GetVectorDistance(vecOrigin, MARCHEMAFIA_POS) < 150.0 ) {
 			type = 7;
 		}
 	}
