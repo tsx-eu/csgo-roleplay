@@ -72,6 +72,7 @@ float g_flLastPos[65][3];
 int g_TribunalSearch[MAXPLAYERS+1][tribunal_search_max];
 char g_szTribunal_DATA[65][tribunal_max][64];
 DataPack g_hBuyMenu;
+int g_cBeam;
 
 bool CanSendToJail(int client, int target) {
 	Action a;
@@ -132,6 +133,7 @@ public Action Cmd_SendToJail(int args) {
 public void OnMapStart() {
 	PrecacheModel(MODEL_PRISONNIER, true);
 	PrecacheModel(MODEL_BARRIERE, true);
+	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 }
 // ----------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
@@ -1656,6 +1658,11 @@ void SendPlayerToJail(int target, int client = 0) {
 	
 	SDKHook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 	CreateTimer(MENU_TIME_DURATION.0, AllowWeaponDrop, target);
+	
+	Call_StartForward(rp_GetForwardHandle(target, RP_PostClientSendToJail));
+	Call_PushCell(client);
+	Call_PushCell(target);
+	Call_Finish();
 }
 public Action AllowWeaponDrop(Handle timer, any client) {
 	SDKUnhook(client, SDKHook_WeaponDrop, OnWeaponDrop);
@@ -1772,12 +1779,15 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			rp_ClientResetSkin(target);
 			
 			int bit = rp_GetZoneBit(rp_GetZoneFromPoint(g_flLastPos[target]));
-			if( bit & BITZONE_JAIL || bit & BITZONE_HAUTESECU || bit & BITZONE_LACOURS )
-				rp_ClientSendToSpawn(target, true);
-			else
-				TeleportEntity(target, g_flLastPos[target], NULL_VECTOR, NULL_VECTOR);
 			
-			FakeClientCommand(target, "sm_stuck");
+			if( bit & BITZONE_JAIL || bit & BITZONE_HAUTESECU || bit & BITZONE_LACOURS ) {
+				rp_ClientSendToSpawn(target, true);
+			}
+			else {
+				TeleportEntity(target, g_flLastPos[target], NULL_VECTOR, NULL_VECTOR);
+				ServerCommand("sm_stuck3 %d %f %f %f", target, g_flLastPos[target][0], g_flLastPos[target][1], g_flLastPos[target][2]);
+			}
+			
 			return;
 		}
 		if( type == -2 || type == -3 ) {
