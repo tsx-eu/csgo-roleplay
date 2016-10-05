@@ -52,6 +52,8 @@ int_stat_data g_Sassoc[] = { // Fait le lien entre une stat et sa valeur sauvega
 	i_nostat,
 };
 
+char g_szLevelData[64][3][256];
+
 public Plugin myinfo = {
 	name = "Utils: Stats", author = "Leethium",
 	description = "RolePlay - Utils: Stats",
@@ -65,6 +67,7 @@ public void OnPluginStart() {
 			fwdDataLoaded(i);
 		}
 	}
+	SQL_TQuery(rp_GetDatabase(), SQL_loadLevelData, "SELECT `level`, `rank`, `description` FROM `rp_level`", _, DBPrio_High);
 	CreateTimer(120.0, saveStats, _, TIMER_REPEAT);
 }
 
@@ -85,13 +88,14 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	#if defined DEBUG
 	PrintToServer("fwdCommand");
 	#endif
-	if( StrEqual(command, "compteur") || StrEqual(command, "count") || StrEqual(command, "stats") || StrEqual(command, "stat") || StrEqual(command, "statistics") ) {
+	if( StrEqual(command, "compteur") || StrEqual(command, "count") || StrEqual(command, "stats") || StrEqual(command, "stat") || StrEqual(command, "statistics") || StrEqual(command, "level") ) {
 		Handle menu = CreateMenu(MenuViewStats);
 		SetMenuTitle(menu, "Quelles stats afficher ?\n ");
 		AddMenuItem(menu, "sess", "Sur la connexion");
 		//AddMenuItem(menu, "full", "Le total");
 		AddMenuItem(menu, "real", "En temps réel");
 		AddMenuItem(menu, "coloc", "Infos appartement");
+		AddMenuItem(menu, "level", "Mon niveau");
 		AddMenuItem(menu, "succes", "Mes succès");
 		DisplayMenu(menu, client, 60);
 		return Plugin_Handled;
@@ -137,6 +141,8 @@ public int MenuViewStats(Handle menu, MenuAction action, int client, int param )
 				FakeClientCommand(client, "say /succes");
 			else if(StrEqual(szMenuItem, "real"))
 				DisplayRTStats(client);
+			else if(StrEqual(szMenuItem, "level"))
+				DisplayLevelStats(client);
 
 		}
 	}
@@ -293,6 +299,19 @@ public void DisplayRTStats(int client){
 
 	DisplayMenu(menu, client, 60);
 }
+public void DisplayLevelStats(int client){
+	char tmp[512];
+	Handle menu = CreateMenu(MenuNothing);
+
+	Format(tmp, sizeof(tmp), "Vous êtes niveau %d, prochain niveau: %d/3600 \nListe des bonus:\n", rp_GetClientInt(client, i_PlayerLVL), rp_GetClientInt(client, i_PlayerXP)%3600);
+	SetMenuTitle(menu, tmp);
+	for(int i=0; i<sizeof(g_szLevelData); i++){
+		Format(tmp, sizeof(tmp), "Au niveau %s: %s - %s", g_szLevelData[i][0], g_szLevelData[i][1], g_szLevelData[i][2]);
+		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
+	}
+
+	DisplayMenu(menu, client, 60);
+}
 
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
 	#if defined DEBUG
@@ -391,4 +410,15 @@ int CountPlants(int client){
 		}
 	}
 	return count;
+}
+
+public void SQL_loadLevelData(Handle owner, Handle row, const char[] error, any data) {
+	if(row != INVALID_HANDLE){
+		int j=0;
+		while( SQL_FetchRow(row) ) {
+			for(int i=0; i<=3; i++)
+				SQL_FetchString(row, i, g_szLevelData[j][i], sizeof(g_szLevelData[][]));
+			j++;
+	    }
+	}
 }
