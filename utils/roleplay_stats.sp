@@ -96,6 +96,7 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 		AddMenuItem(menu, "real", "En temps réel");
 		AddMenuItem(menu, "coloc", "Infos appartement");
 		AddMenuItem(menu, "level", "Mon niveau");
+		AddMenuItem(menu, "succes", "Mes succès");
 		DisplayMenu(menu, client, 60);
 		return Plugin_Handled;
 	}
@@ -136,6 +137,8 @@ public int MenuViewStats(Handle menu, MenuAction action, int client, int param )
 				DisplayStats(client, false);
 			else if(StrEqual(szMenuItem, "coloc"))
 				FakeClientCommand(client, "say /infocoloc");
+			else if(StrEqual(szMenuItem, "coloc"))
+				FakeClientCommand(client, "say /succes");
 			else if(StrEqual(szMenuItem, "real"))
 				DisplayRTStats(client);
 			else if(StrEqual(szMenuItem, "level"))
