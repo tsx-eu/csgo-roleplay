@@ -202,7 +202,7 @@ public void VERIF_PERQUIZ(Handle owner, Handle row, const char[] error, any zone
 	if( row != INVALID_HANDLE && SQL_FetchRow(row) ) {
 		
 		if( SQL_FetchInt(row, 0) + cd > GetTime() ) {
-			g_bCanPerquiz[client] = true;
+			g_bCanPerquiz[array[PQ_client]] = true;
 			
 			CPrintToChat(array[PQ_client], "{lightblue}[TSX-RP]{default} Impossible de perquisitionner ici avant %d minutes.", ((SQL_FetchInt(row, 0) + cd - GetTime())/60) + 1);
 			g_hPerquisition.Remove(tmp);
@@ -285,8 +285,9 @@ void END_PERQUIZ(int zone, bool abort) {
 }
 // ----------------------------------------------------------------------------
 public Action fwdHookJail(int attacker, int victim) {
-	
-zd	int array[PQ_Max];
+	char tmp[64];
+	int zone = rp_GetZoneFromPoint(g_flLastPos[victim]);
+	int array[PQ_Max];
 	rp_GetZoneData( zone, zone_type_type, tmp, sizeof(tmp));
 	
 	if( !g_hPerquisition.GetArray(tmp, array, sizeof(array)) ) {
