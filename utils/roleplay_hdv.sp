@@ -39,6 +39,15 @@ public Action Cmd_Hdv(int client, int args) {
 	return Plugin_Handled;
 }
 void HDV_Main(int client) {
+	
+	
+	if( rp_GetServerRules(rules_HDV, rules_Enabled) == 1 ) {
+		if( rp_GetClientJobID(client) == rp_GetServerRules(rules_HDV, rules_Target) || rp_GetClientGroupID(client) == (rp_GetServerRules(rules_HDV, rules_Target)-1000) ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le maire vous a interdit l'HDV.");
+			return;
+		}
+	}
+	
 	Menu menu = CreateMenu(Handler_MainHDV);
 	menu.SetTitle("Hotel des ventes\n ");
 	menu.AddItem("sell", "Vendre", rp_GetClientInt(client, i_ItemCount) > 0 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);

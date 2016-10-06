@@ -1191,6 +1191,7 @@ enum serverRules {
 	rules_Braquages,
 	rules_ItemsDisabled,
 	rules_Payes,
+	rules_HDV,
 	
 	server_rules_max
 };
