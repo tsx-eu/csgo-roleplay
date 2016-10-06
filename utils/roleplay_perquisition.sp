@@ -184,7 +184,8 @@ void INIT_PERQUIZ(int client, int zone, int type) {
 	
 	setPerquizData(client, zone, type, 0, 0);
 	
-	Format(query, sizeof(query), "SELECT `time` FROM `rp_perquiz` WHERE `type`='%s', `job_id`='%d', `zone`='%s' ORDER BY `time` DESC;", type > 0 ? "search" : "trafic", rp_GetClientJobID(client), tmp);
+	Format(query, sizeof(query), "SELECT `time` FROM `rp_perquiz` WHERE `type`='%s' AND `job_id`='%d' AND `zone`='%s' ORDER BY `time` DESC;", type > 0 ? "search" : "trafic", rp_GetClientJobID(client), tmp);
+	
 	SQL_TQuery(rp_GetDatabase(), VERIF_PERQUIZ, query, zone);
 }
 public void VERIF_PERQUIZ(Handle owner, Handle row, const char[] error, any zone) {
@@ -199,11 +200,11 @@ public void VERIF_PERQUIZ(Handle owner, Handle row, const char[] error, any zone
 	
 	int cd = getCooldown(array[PQ_client], zone);
 	if( row != INVALID_HANDLE && SQL_FetchRow(row) ) {
+		
 		if( SQL_FetchInt(row, 0) + cd > GetTime() ) {
-			
+			g_bCanPerquiz[client] = true;
 			
 			CPrintToChat(array[PQ_client], "{lightblue}[TSX-RP]{default} Impossible de perquisitionner ici avant %d minutes.", ((SQL_FetchInt(row, 0) + cd - GetTime())/60) + 1);
-			
 			g_hPerquisition.Remove(tmp);
 			return;
 		}
@@ -275,6 +276,7 @@ void END_PERQUIZ(int zone, bool abort) {
 		FakeClientCommand(array[PQ_client], "say /addnote %s - %s - %s", tmp, date, array[PQ_type] > 0 ? "recherché" : "traffic");
 		
 		rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
+		GetClientAuthId(array[PQ_client], AuthId_Engine, date, sizeof(date));
 		Format(query, sizeof(query), "INSERT INTO `rp_perquiz` (`id`, `zone`, `time`, `steamid`, `type`, `job_id`) VALUES (NULL, '%s', UNIX_TIMESTAMP(), '%s', '%s', '%d');", tmp, date, array[PQ_type] > 0 ? "search" : "trafic", rp_GetClientJobID(array[PQ_client]));
 		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
 		
@@ -284,9 +286,7 @@ void END_PERQUIZ(int zone, bool abort) {
 // ----------------------------------------------------------------------------
 public Action fwdHookJail(int attacker, int victim) {
 	
-	char tmp[64];
-	int zone = rp_GetZoneFromPoint(g_flLastPos[victim]);
-	int array[PQ_Max];
+zd	int array[PQ_Max];
 	rp_GetZoneData( zone, zone_type_type, tmp, sizeof(tmp));
 	
 	if( !g_hPerquisition.GetArray(tmp, array, sizeof(array)) ) {
