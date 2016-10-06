@@ -46,9 +46,12 @@ public void OnClientPostAdminCheck(int client) {
 // ----------------------------------------------------------------------------
 public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 	
-	if( rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101 ) {
-		if( GetClientTeam(client) == CS_TEAM_CT && rp_GetZoneInt(newZone, zone_type_type) == rp_GetClientJobID(client) )
+	if( !g_bCanPerquiz[client] && (rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101) ) {
+		if( GetClientTeam(client) == CS_TEAM_CT && rp_GetZoneInt(newZone, zone_type_type) == rp_GetClientJobID(client) ) {
 			g_bCanPerquiz[client] = true;
+			if( rp_GetClientInt(client, i_Job) != 9 && rp_GetClientInt(client, i_Job) != 8 )
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez maintenant effectuer une perquisition");
+		}
 	}
 }
 public Action fwdCommand(int client, char[] command, char[] arg) {
@@ -77,6 +80,10 @@ public Action Cmd_Perquiz(int client) {
 	if( strlen(tmp) == 0 )
 		return Plugin_Handled;
 	
+	if( !g_bCanPerquiz[client] && !g_hPerquisition.GetArray(tmp, array, sizeof(array))) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez retourner à votre lieu de travail, avant de pouvoir faire une autre perquisition.");
+		return Plugin_Handled;
+	}
 	
 	Menu menu = new Menu(MenuPerquiz);
 	menu.SetTitle("Quel est le motif de perquisition?\n ");
@@ -86,8 +93,8 @@ public Action Cmd_Perquiz(int client) {
 		Format(tmp2, sizeof(tmp2), "cancel %s", tmp);	menu.AddItem(tmp2, "Annuler la perquisition");
 	}
 	else {
-		Format(tmp2, sizeof(tmp2), "search %s", tmp);	menu.AddItem(tmp2, "Un recherché", g_bCanPerquiz[client] ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
-		Format(tmp2, sizeof(tmp2), "trafic %s", tmp);	menu.AddItem(tmp2, "Du traffic illégal", g_bCanPerquiz[client] && rp_GetClientJobID(client) == 1 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );
+		Format(tmp2, sizeof(tmp2), "search %s", tmp);	menu.AddItem(tmp2, "Un recherché");
+		Format(tmp2, sizeof(tmp2), "trafic %s", tmp);	menu.AddItem(tmp2, "Du traffic illégal", rp_GetClientJobID(client) == 1 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );
 	}
 	menu.Display(client, MENU_TIME_FOREVER);
 	
@@ -205,8 +212,7 @@ public void VERIF_PERQUIZ(Handle owner, Handle row, const char[] error, any zone
 	if( array[PQ_type] == 0 ) {
 		CreateTimer(1.0, TIMER_PERQUIZ_LOOKUP, zone, TIMER_REPEAT);
 	}
-	else {
-	
+	else {	
 		START_PERQUIZ(zone);
 	}
 }
@@ -219,13 +225,19 @@ void START_PERQUIZ(int zone) {
 		return;
 	}
 	
+	if( array[PQ_resp] == 0 && IsValidClient(array[PQ_type]) )
+		array[PQ_resp] = array[PQ_type];
+		
 	array[PQ_timeout] = 0;
 	updatePerquizData(zone, array);
 	changeZoneState(zone, true);
 	
 	rp_GetZoneData(zone, zone_type_name, tmp, sizeof(tmp));
 	PrintToChatPoliceSearch(array[PQ_resp], "{red} ================================== {default}");
-	PrintToChatPoliceSearch(array[PQ_resp], "{red}[TSX-RP] [POLICE]{default} La perquisition dans %s pour %s commence.", tmp, array[PQ_type] > 0 ? "un recherché" : "du traffic illégal");
+	if( IsValidClient(array[PQ_type]) )
+		PrintToChatPoliceSearch(array[PQ_resp], "{red}[TSX-RP] [POLICE]{default} La perquisition dans %s pour rechercher %N commence.", tmp, array[PQ_resp]);
+	else
+		PrintToChatPoliceSearch(array[PQ_resp], "{red}[TSX-RP] [POLICE]{default} La perquisition dans %s pour du traffic illégal commence, %N est le responsable.", tmp, array[PQ_resp]);
 	PrintToChatPoliceSearch(array[PQ_resp], "{red} ================================== {default}");	
 	
 	if( IsValidClient(array[PQ_type]) ) {
@@ -412,6 +424,8 @@ int GetPerquizResp(int zone) {
 		return GetPerquizRespByGroup( rp_GetCaptureInt(cap_bunker) );
 	else if( StrEqual(tmp, "villa") )
 		return GetPerquizRespByGroup( rp_GetCaptureInt(cap_villa) );
+	else if( StrEqual(tmp, "mairie") )
+		return GetPerquizRespMaire();
 	else if( StrContains(tmp, "appart_") == 0 ) {
 		ReplaceString(tmp, sizeof(tmp), "appart_", "");
 		return GetPerquizRespByAppart(StringToInt(tmp));
@@ -490,6 +504,21 @@ int GetPerquizRespByGroup(int gang_id) {
 	
 	
 	return res;
+}
+int GetPerquizRespMaire() {
+	char tmp[32], tmp2[32];
+	rp_GetServerString(mairieID, tmp, sizeof(tmp));
+	
+	for(int i=1; i<=MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		
+		GetClientAuthId(i, AuthId_Engine, tmp2, sizeof(tmp2));
+		if( StrEqual(tmp, tmp2) )
+			return i;
+	}
+	
+	return 0;
 }
 // ----------------------------------------------------------------------------
 void Effect_DrawPerqui(int zone) {
@@ -657,7 +686,7 @@ void TeleportCT(int zone) {
 		rp_GetZoneData(rp_GetPlayerZone(i), zone_type_type, tmp2, sizeof(tmp2));
 		
 		if( StrEqual(tmp, tmp2) ) {
-			rp_ClientSendToSpawn(i);
+			rp_ClientSendToSpawn(i, true);
 		}
 	}
 }
