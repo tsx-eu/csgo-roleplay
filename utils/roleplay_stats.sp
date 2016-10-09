@@ -306,10 +306,12 @@ public void DisplayLevelStats(int client){
 	Format(tmp, sizeof(tmp), "Vous êtes niveau %d, prochain niveau: %d/3600 \nListe des bonus:\n", rp_GetClientInt(client, i_PlayerLVL), rp_GetClientInt(client, i_PlayerXP)%3600);
 	SetMenuTitle(menu, tmp);
 	for(int i=0; i<sizeof(g_szLevelData); i++){
+		if(strlen(g_szLevelData[i][0]) == 0)
+			break;
 		Format(tmp, sizeof(tmp), "Au niveau %s: %s - %s", g_szLevelData[i][0], g_szLevelData[i][1], g_szLevelData[i][2]);
 		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
 	}
-
+	SetMenuPagination(menu, 3);
 	DisplayMenu(menu, client, 60);
 }
 
@@ -414,9 +416,9 @@ int CountPlants(int client){
 
 public void SQL_loadLevelData(Handle owner, Handle row, const char[] error, any data) {
 	if(row != INVALID_HANDLE){
-		int j=0;
+		int j,i;
 		while( SQL_FetchRow(row) ) {
-			for(int i=0; i<=3; i++)
+			for(i=0; i<3; i++)
 				SQL_FetchString(row, i, g_szLevelData[j][i], sizeof(g_szLevelData[][]));
 			j++;
 	    }
