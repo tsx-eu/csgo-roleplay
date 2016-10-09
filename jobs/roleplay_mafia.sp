@@ -1177,9 +1177,9 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			Call_PushCell(rp_GetItemInt(data[IM_ItemID], item_type_prix) / 2);
 			Call_Finish();
 			
-			LogToGame("[TSX-RP] [ITEM-VENDRE] %L a vendu 1 %s a %L", client, tmp, client);
+			LogToGame("[TSX-RP] [ITEM-VENDRE] %L a vendu 1 %s a %L", data[IM_Owner], tmp, client);
 			
-			CPrintToChat(data[client], "{lightblue}[TSX-RP]{default} Vous avez acheté 1 %s à au marché noir pour %d$", tmp, data[IM_Prix]);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez acheté 1 %s à au marché noir pour %d$", tmp, data[IM_Prix]);
 			
 			if( data[IM_Owner] == client ) {
 				rp_SetJobCapital(91, rp_GetJobCapital(91) + RoundToCeil(float(data[IM_Prix]*10) * 0.5));

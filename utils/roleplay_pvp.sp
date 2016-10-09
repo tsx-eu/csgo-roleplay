@@ -1427,7 +1427,7 @@ public Action fwdGod_PlayerShoot(Handle event, char[] name, bool dontBroadcast) 
 	return Plugin_Continue;
 }
 public Action GOD_Expire(Handle timer, any client) {
-	if( g_hGodTimer[client] != INVALID_HANDLE )
+	if( g_hGodTimer[client] != INVALID_HANDLE && IsValidHandle(g_hGodTimer[client]) )
 		Client_SetSpawnProtect(client, false);
 	g_hGodTimer[client] = INVALID_HANDLE;
 }

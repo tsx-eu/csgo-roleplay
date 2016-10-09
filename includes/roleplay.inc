@@ -464,6 +464,7 @@ native void rp_IncrementSuccess(int client, rp_success_list success, int amount 
 // ----------------------------------------------------------------------------
 native int rp_GetClientItem(int client, int itemID, bool fromBank = false);				/* Combien fois un joueur possède un certain item? MAX 300. */
 native void rp_ClientGiveItem(int client, int itemID, int amount=1, bool toBank = false); 	/* Donne un item à un joueur. La valeur peut être négative */
+//native void rp_ClientUpdateBank(int client);
 // ----------------------------------------------------------------------------
 native void rp_ClientRespawn(int client, float time=0.1);							/* Respawn un joueur */
 native void rp_ClientSave(int client);										/* Sauvegarde les données d'un joueur */
@@ -1190,6 +1191,7 @@ enum serverRules {
 	rules_Braquages,
 	rules_ItemsDisabled,
 	rules_Payes,
+	rules_HDV,
 	
 	server_rules_max
 };

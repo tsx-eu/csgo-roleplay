@@ -165,7 +165,7 @@ void Draw_SanctionMenu(int client, int target, int sanction) {
 	}
 	else {
 		banCause c = view_as<banCause>(sanction);
-		g_iUserData[client][c]++;
+		g_iUserData[target][c]++;
 		int dur = getSanctionDuration(target, c);
 		
 		switch(c) {

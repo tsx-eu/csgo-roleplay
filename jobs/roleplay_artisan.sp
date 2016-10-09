@@ -655,8 +655,9 @@ public Action stopBuilding(Handle timer, Handle dp) {
 		
 		for (int i = 0; i < magic.Length; i++) {  // Pour chaque items de la recette:
 			magic.GetArray(i, data);
-				
-			ClientGiveXP(client, rp_GetItemInt(data[craft_raw], item_type_prix));
+			
+			if( !failed )
+				ClientGiveXP(client, rp_GetItemInt(data[craft_raw], item_type_prix));
 			if( !free )
 				rp_ClientGiveItem(client, data[craft_raw], -data[craft_amount]);		
 		}

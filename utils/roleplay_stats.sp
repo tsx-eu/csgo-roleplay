@@ -61,14 +61,17 @@ public Plugin myinfo = {
 };
 
 public void OnPluginStart() {
+	CreateTimer(120.0, saveStats, _, TIMER_REPEAT);
+	
 	for (int i = 1; i <= MaxClients; i++) {
 		if( IsValidClient(i) ){
 			OnClientPostAdminCheck(i);
 			fwdDataLoaded(i);
 		}
 	}
-	SQL_TQuery(rp_GetDatabase(), SQL_loadLevelData, "SELECT `level`, `rank`, `description` FROM `rp_level`", _, DBPrio_High);
-	CreateTimer(120.0, saveStats, _, TIMER_REPEAT);
+}
+public void OnAllPluginsLoaded() {
+	SQL_TQuery(rp_GetDatabase(), SQL_loadLevelData, "SELECT `level`, `rank`, `description` FROM `rp_level`");
 }
 
 public void OnClientPostAdminCheck(int client) {
@@ -137,7 +140,7 @@ public int MenuViewStats(Handle menu, MenuAction action, int client, int param )
 				DisplayStats(client, false);
 			else if(StrEqual(szMenuItem, "coloc"))
 				FakeClientCommand(client, "say /infocoloc");
-			else if(StrEqual(szMenuItem, "coloc"))
+			else if(StrEqual(szMenuItem, "succes"))
 				FakeClientCommand(client, "say /succes");
 			else if(StrEqual(szMenuItem, "real"))
 				DisplayRTStats(client);

@@ -1213,7 +1213,7 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 				rp_SetClientKeyVehicle(client, target, true);
 				rp_SetClientInt(client, i_LastVolVehicle, target);
 				rp_SetClientInt(client, i_LastVolVehicleTime, GetTime());
-				rp_ClientOverlays(client, o_Action_StealVehicle, 10.0);
+				rp_ClientOverlays(target, o_Action_StealVehicle, 10.0);
 			}
 			case 2: {
 				rp_SetBuildingData(target, BD_Trapped, true);

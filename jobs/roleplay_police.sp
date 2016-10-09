@@ -721,16 +721,20 @@ public Action Cmd_Jail(int client) {
 	}
 	
 	int target = rp_GetClientTarget(client);
-
+	
+	if( target <= 0 || !IsValidEdict(target) || !IsValidEntity(target) )
+		return Plugin_Handled;
+	
 	if( IsValidClient(target) && rp_GetClientFloat(target, fl_Invincible) > GetGameTime() ) { //le target utilise une poupée gonflable
 		ACCESS_DENIED(client);
 	}
 	if( rp_GetClientFloat(client, fl_Invincible) > GetGameTime() ) { //le flic utilise une poupée gonflable
 		ACCESS_DENIED(client);
 	}
-
-	if( target <= 0 || !IsValidEdict(target) || !IsValidEntity(target) )
-		return Plugin_Handled;
+	if( IsValidClient(target) && !rp_IsTutorialOver(target) ) { //le target utilise une poupée gonflable
+		ACCESS_DENIED(client);
+	}
+	
 
 	int Czone = rp_GetPlayerZone(client);
 	int Cbit = rp_GetZoneBit(Czone);
