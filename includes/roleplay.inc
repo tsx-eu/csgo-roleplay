@@ -824,6 +824,7 @@ enum fd_user_data {
 	fd_vol,
 	fd_job,
 	fd_kidnapping,
+	fd_ruban,
 
 	fd_udata_max
 };
