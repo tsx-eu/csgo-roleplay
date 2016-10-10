@@ -52,7 +52,7 @@ int_stat_data g_Sassoc[] = { // Fait le lien entre une stat et sa valeur sauvega
 	i_nostat,
 };
 
-char g_szLevelData[64][3][256];
+char g_szLevelData[64][3][512];
 
 public Plugin myinfo = {
 	name = "Utils: Stats", author = "Leethium",
@@ -305,14 +305,16 @@ public void DisplayRTStats(int client){
 public void DisplayLevelStats(int client){
 	char tmp[512];
 	Handle menu = CreateMenu(MenuNothing);
+	
+	int level = rp_GetClientInt(client, i_PlayerLVL);
 
-	Format(tmp, sizeof(tmp), "Vous êtes niveau %d, prochain niveau: %d/3600 \nListe des bonus:\n", rp_GetClientInt(client, i_PlayerLVL), rp_GetClientInt(client, i_PlayerXP)%3600);
+	Format(tmp, sizeof(tmp), "Vous êtes niveau %d, prochain niveau: %d/3600 \nListe des bonus:\n ", rp_GetClientInt(client, i_PlayerLVL), rp_GetClientInt(client, i_PlayerXP)%3600);
 	SetMenuTitle(menu, tmp);
 	for(int i=0; i<sizeof(g_szLevelData); i++){
 		if(strlen(g_szLevelData[i][0]) == 0)
 			break;
 		Format(tmp, sizeof(tmp), "Au niveau %s: %s - %s", g_szLevelData[i][0], g_szLevelData[i][1], g_szLevelData[i][2]);
-		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
+		AddMenuItem(menu, "", tmp, level >= StringToInt(g_szLevelData[i][0]) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	}
 	SetMenuPagination(menu, 3);
 	DisplayMenu(menu, client, 60);
