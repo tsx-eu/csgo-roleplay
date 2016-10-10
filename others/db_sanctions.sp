@@ -311,6 +311,9 @@ void SQL_Insert(int client, int target, int duration, const char[] reason, const
 	GetClientAuthId(client, AuthId_Engine, szClient, sizeof(szClient));
 	GetClientAuthId(target, AuthId_Engine, szTarget, sizeof(szTarget));
 	
+	ReplaceString(szClient, sizeof(szClient), "STEAM_1", "STEAM_0");
+	ReplaceString(szTarget, sizeof(szTarget), "STEAM_1", "STEAM_0");
+	
 	int size = strlen(reason) * 2 + 1;
 	char[] eReason = new char[size];
 	SQL_EscapeString(rp_GetDatabase(), reason, eReason, size);
