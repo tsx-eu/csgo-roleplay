@@ -157,7 +157,7 @@ void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) 
 		
 		rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money)-tax);
 		rp_ClientGiveItem(client, itemID, -quantity);
-		
+		rp_IncrementSuccess(client, success_list_hdv);
 		char szQuery[256], steamid[32];
 		Handle pack = CreateDataPack();
 		WritePackCell(pack, client);
