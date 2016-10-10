@@ -1782,9 +1782,10 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			
 			rp_ClientResetSkin(target);
 			
-			int bit = rp_GetZoneBit(rp_GetZoneFromPoint(g_flLastPos[target]));
+			int zone = rp_GetZoneFromPoint(g_flLastPos[target]);
+			int bit = rp_GetZoneBit(zone);
 			
-			if( bit & BITZONE_JAIL || bit & BITZONE_HAUTESECU || bit & BITZONE_LACOURS ) {
+			if( bit & (BITZONE_JAIL|BITZONE_HAUTESECU|BITZONE_LACOURS) || rp_GetZoneInt(zone, zone_type_type) == 101 ) {
 				rp_ClientSendToSpawn(target, true);
 			}
 			else {
