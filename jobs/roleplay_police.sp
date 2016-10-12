@@ -1378,7 +1378,7 @@ public int MenuTribunal_main(Handle p_hItemMenu, MenuAction p_oAction, int clien
 			
 			Format(szQuery, sizeof(szQuery), "SELECT R.`id`, `report_steamid`, COUNT(`vote`) vote FROM `ts-x`.`site_report` R");
 			Format(szQuery, sizeof(szQuery), "%s LEFT JOIN `ts-x`.`site_report_votes` V ON V.`reportid`=R.`id`", szQuery);
-			Format(szQuery, sizeof(szQuery), "%s WHERE V.`vote`='1' AND R.`jail`=-1 AND R.`own_steamid`<>'%s' AND R.`report_steamid`<>'%s' GROUP BY R.`id` ORDER BY vote DESC;", szQuery);
+			Format(szQuery, sizeof(szQuery), "%s WHERE V.`vote`='1' AND R.`jail`=-1 AND R.`own_steamid`<>'%s' AND R.`report_steamid`<>'%s' GROUP BY R.`id` ORDER BY vote DESC;", szQuery, szSteamID, szSteamID);
 			
 			Handle hQuery = SQL_Query(DB, szQuery);
 			
