@@ -705,6 +705,8 @@ void getRulesName(serverRules rulesID, int target, int arg, char[] tmp, int leng
 			case rules_Braquages:		{	Format(tmp, length, "Il est interdit de braquer");								}
 			case rules_ItemsDisabled:	{	Format(tmp, length, "Lors des captures du bunker, il est interdit d'utiliser");}
 			case rules_Payes:			{	Format(tmp, length, "Les payes sont augmenté de 5%");							}
+			case rules_HDV:				{	Format(tmp, length, "L'hôtel des ventes est interdit");							}
+			
 		}
 	}
 	else {
@@ -716,6 +718,7 @@ void getRulesName(serverRules rulesID, int target, int arg, char[] tmp, int leng
 			case rules_Braquages:		{	Format(tmp, length, "Il est interdit de braquer ");							}
 			case rules_ItemsDisabled:	{	Format(tmp, length, "Lors des captures du bunker, il est interdit d'utiliser");}
 			case rules_Payes:			{	Format(tmp, length, "Les payes sont réduites de 10%");							}
+			case rules_HDV:				{	Format(tmp, length, "L'hôtel des ventes est interdit");							}
 		}
 	}
 	
