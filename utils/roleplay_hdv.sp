@@ -54,7 +54,7 @@ void HDV_Main(int client) {
 	menu.AddItem("buy", "Acheter");
 	menu.AddItem("history", "Votre historique");
 	
-	menu.Display(client, 30);
+	menu.Display(client, MENU_TIME_FOREVER);
 }
 void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) {
 	
@@ -171,7 +171,7 @@ void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) 
 		return;
 	}
 	
-	menu.Display(client, 30);
+	menu.Display(client, MENU_TIME_FOREVER);
 }
 void HDV_Buy(int client, int jobID, int itemID, int transactID, int confirm, int dataQte, int dataPrix) {
 	
@@ -238,7 +238,7 @@ void HDV_Buy(int client, int jobID, int itemID, int transactID, int confirm, int
 		return;
 		
 	}
-	menu.Display(client, 30);
+	menu.Display(client, MENU_TIME_FOREVER);
 }
 
 void HDV_History(int client, int action, int cancelID, int confirm, int dataAmount, int dataPrice, int dataItemID) {
@@ -249,7 +249,7 @@ void HDV_History(int client, int action, int cancelID, int confirm, int dataAmou
 		menu.AddItem("history 1", "Ventes en cours");
 		menu.AddItem("history 2", "Historique des achats");
 		menu.AddItem("history 3", "Historique des ventes");
-		menu.Display(client, 30);
+		menu.Display(client, MENU_TIME_FOREVER);
 	}
 	else if(cancelID == 0){
 		char szQuery[256];
@@ -271,7 +271,7 @@ void HDV_History(int client, int action, int cancelID, int confirm, int dataAmou
 		menu.AddItem("history", "Non, j'annule mon achat");
 		Format(tmp, sizeof(tmp), "history 1 %d 1 %d %d %d", cancelID, dataAmount, dataPrice, dataItemID);
 		menu.AddItem(tmp, "Oui, j'accepte");
-		menu.Display(client, 30);
+		menu.Display(client, MENU_TIME_FOREVER);
 	}
 	else{
 		char szQuery[128];
@@ -354,7 +354,7 @@ public void SQL_ListJobCB(Handle owner, Handle row, const char[] error, any clie
 			Format(tmp2, sizeof(tmp2), "%s (%d lots)", tmp3[1], SQL_FetchInt(row, 0));
 			menu.AddItem(tmp, tmp2);
 		}
-		menu.Display(client, 30);
+		menu.Display(client, MENU_TIME_FOREVER);
 	}
 	else{
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Aucun objet ne peut être acheté pour le moment.");
@@ -381,7 +381,7 @@ public void SQL_ListJobItemsCB(Handle owner, Handle row, const char[] error, any
 			Format(tmp2, sizeof(tmp2), "%s (%d lots)", tmp2, SQL_FetchInt(row, 0));
 			menu.AddItem(tmp, tmp2);
 		}
-		menu.Display(client, 30);
+		menu.Display(client, MENU_TIME_FOREVER);
 	}
 	else{
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Aucun objet n'est en vente pour ce job.");
@@ -413,7 +413,7 @@ public void SQL_ListItemsCB(Handle owner, Handle row, const char[] error, any cl
 		rp_GetItemData(itemID, item_type_name, tmp2, sizeof(tmp2));
 		Format(tmp2, sizeof(tmp2), "Acheter %s", tmp2);
 		menu.SetTitle(tmp2);
-		menu.Display(client, 30);
+		menu.Display(client, MENU_TIME_FOREVER);
 	}
 	else{
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Tout les objets ont déjà été achetés.");
@@ -483,7 +483,7 @@ public void SQL_HistoryCB(Handle owner, Handle row, const char[] error, any data
 			menu.SetTitle("Hotel des ventes: Historique des achats\n ");
 		else
 			menu.SetTitle("Hotel des ventes: Historique des ventes\n ");
-		menu.Display(client, 120);
+		menu.Display(client, MENU_TIME_FOREVER);
 	}
 	else{
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Pas de transactions récentes.");
