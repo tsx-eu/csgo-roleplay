@@ -832,10 +832,8 @@ public int MenuRespawnBraqueur(Handle menu, MenuAction action, int client, int p
 				CS_RespawnPlayer(target);
 			
 			OnBraqueurRespawn(target);
-			TeleportEntity(target, pos, NULL_VECTOR, NULL_VECTOR);
-			FakeClientCommand(target, "sm_stuck");
-			FakeClientCommand(client, "sm_stuck");
 			
+			rp_ClientTeleport(target, pos);			
 			
 			SetEntityHealth(target, 500);
 			rp_SetClientInt(target, i_Kevlar, 250);

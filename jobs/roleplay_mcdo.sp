@@ -524,10 +524,6 @@ public Action BuildingBanana_touch(int index, int client) {
 
 	rp_ClientDamage(client, 25, Entity_GetOwner(index));
 	
-	float vecPlayerOrigin[3];
-	vecPlayerOrigin[2] += 1.0;
-	GetClientAbsOrigin(client, vecPlayerOrigin);
-	
 	if(GetEntityFlags(client) & FL_ONGROUND) {
 		
 		int flags = GetEntityFlags(client);
@@ -539,7 +535,7 @@ public Action BuildingBanana_touch(int index, int client) {
 	vecVelocity[0] = GetRandomFloat(400.0, 500.0);
 	vecVelocity[1] = GetRandomFloat(400.0, 500.0);
 	vecVelocity[2] = GetRandomFloat(600.0, 800.0);
-	TeleportEntity(client, vecPlayerOrigin, NULL_VECTOR, vecVelocity);	
+	TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, vecVelocity);	
 	
 	AcceptEntityInput(index, "Kill");
 	SDKUnhook(index, SDKHook_Touch, BuildingBanana_touch);

@@ -779,8 +779,7 @@ public Action fwdSpawn_ToRespawn(Handle timer, any client) {
 			rand[2] = mins[2] + 32.0;
 		}
 		
-		TeleportEntity(client, rand, NULL_VECTOR, NULL_VECTOR);
-		FakeClientCommand(client, "sm_stuck");
+		rp_ClientTeleport(client, rand);
 	}
 }
 bool CanTP(float pos[3], int client) {

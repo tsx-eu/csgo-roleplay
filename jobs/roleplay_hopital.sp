@@ -374,7 +374,7 @@ public Action Cmd_ItemRespawn(int args) {
 	
 	g_iSuccess_last_faster_dead[client] = GetTime();
 	
-	TeleportEntity(client, vecOrigin, NULL_VECTOR, NULL_VECTOR);
+	rp_ClientTeleport(client, vecOrigin);
 	
 	return Plugin_Handled;
 }

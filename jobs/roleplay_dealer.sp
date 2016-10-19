@@ -545,7 +545,8 @@ public Action ItemPiluleOver(Handle timer, Handle dp) {
 			continue;
 		
 		rp_ClientColorize(client, { 255, 255, 255, 255} );
-		TeleportEntity(client, tppos, NULL_VECTOR, NULL_VECTOR);
+		
+		rp_ClientTeleport(client, tppos);
 		rp_SetClientBool(client, b_MayUseUltimate, false);
 		CreateTimer( TP_CD_DURATION, AllowUltimate, client);
 		return Plugin_Handled;

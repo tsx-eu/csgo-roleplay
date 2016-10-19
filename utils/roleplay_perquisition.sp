@@ -20,7 +20,7 @@
 
 StringMap g_hPerquisition;
 enum perquiz_data { PQ_client, PQ_zone, PQ_type, PQ_resp, PQ_timeout, PQ_Max};
-int g_cBeam;
+int g_cBeam, g_cGlow;
 float g_flLastPos[65][3];
 bool g_bCanPerquiz[65];
 
@@ -38,6 +38,8 @@ public void OnPluginStart() {
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/effects/policeline.vmt");
+//	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt");
+	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt");
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
@@ -210,6 +212,8 @@ public void VERIF_PERQUIZ(Handle owner, Handle row, const char[] error, any zone
 		}
 	}
 	
+	changeZoneState(zone, true);
+	
 	if( array[PQ_type] == 0 ) {
 		CreateTimer(1.0, TIMER_PERQUIZ_LOOKUP, zone, TIMER_REPEAT);
 	}
@@ -226,14 +230,18 @@ void START_PERQUIZ(int zone) {
 		return;
 	}
 	
+	
+	
 	if( array[PQ_resp] == 0 && IsValidClient(array[PQ_type]) )
 		array[PQ_resp] = array[PQ_type];
 		
 	array[PQ_timeout] = 0;
 	updatePerquizData(zone, array);
-	changeZoneState(zone, true);
+	
 	
 	rp_GetZoneData(zone, zone_type_name, tmp, sizeof(tmp));
+	LogToGame("[PERQUIZ] Une perquisition est lancée dans %s.", tmp);
+	
 	PrintToChatPoliceSearch(array[PQ_resp], "{red} ================================== {default}");
 	if( IsValidClient(array[PQ_type]) )
 		PrintToChatPoliceSearch(array[PQ_resp], "{red}[TSX-RP] [POLICE]{default} La perquisition dans %s pour rechercher %N commence.", tmp, array[PQ_resp]);
@@ -268,6 +276,7 @@ void END_PERQUIZ(int zone, bool abort) {
 	rp_GetDate(date, sizeof(date));
 	
 	rp_GetZoneData(zone, zone_type_name, tmp, sizeof(tmp));
+	LogToGame("[PERQUIZ] Une perquisition est terminée dans %s.", tmp);
 	PrintToChatPoliceSearch(array[PQ_resp], "{red} ================================== {default}");
 	PrintToChatPoliceSearch(array[PQ_resp], "{red}[TSX-RP] [POLICE]{default} La perquisition dans %s est %s.", tmp, abort ? "annulée" : "terminée");
 	PrintToChatPoliceSearch(array[PQ_resp], "{red} ================================== {default}");
@@ -335,9 +344,8 @@ public Action TIMER_PERQUIZ(Handle timer, any zone) {
 		}
 		
 		rp_GetZoneData( rp_GetPlayerZone(array[PQ_type]) , zone_type_type, tmp2, sizeof(tmp2));
-		if( !StrEqual(tmp, tmp2) ) {
-			TeleportEntity(array[PQ_type], g_flLastPos[array[PQ_type]], NULL_VECTOR, NULL_VECTOR);
-			FakeClientCommand(array[PQ_type], "sm_stuck");
+		if( !StrEqual(tmp, tmp2) ) {			
+			rp_ClientTeleport(array[PQ_type], g_flLastPos[array[PQ_type]]);
 		}
 		else
 			GetClientAbsOrigin(array[PQ_type], g_flLastPos[array[PQ_type]]);
@@ -541,7 +549,7 @@ void Effect_DrawPerqui(int zone) {
 		max[1] = rp_GetZoneFloat(i, zone_type_max_y) + 16.0;
 		max[2] = rp_GetZoneFloat(i, zone_type_max_z) + 16.0;
 		
-		Effect_DrawPane(min, max, RoundFloat((max[2] - min[2]) / 64.0), tmp);
+		Effect_DrawPane(min, max, RoundFloat((max[2] - min[2]) / 128.0), tmp);
 	}
 }
 void Effect_DrawPane(float bottomCorner[3], float upperCorner[3], int subDivision, char tmp[64]) {
@@ -583,8 +591,8 @@ void Effect_DrawPane(float bottomCorner[3], float upperCorner[3], int subDivisio
 			if( StrEqual(tmp, tmp2) )
 				continue;
 			
-			TE_SetupBeamPoints(end, start, g_cBeam, g_cBeam, 0, 0, 1.0, 8.0, 8.0, 0, 0.0, {255, 255, 0, 128}, 0);
-			TE_SendToAllInRange(median, RangeType_Audibility);
+			TE_SetupBeamPoints(end, start, g_cBeam, 0, 0, 0, 1.0, 8.0, 8.0, 0, 0.0, {255, 255, 0, 128}, 0);
+			TE_SendToAll();
 		}
 	}
 }
@@ -626,6 +634,22 @@ void changeZoneState(int zone, bool enabled) {
 		}
 		
 		rp_SetZoneBit(i, bits);
+	}
+	for (int i = 1; i <= 2048; i++) {
+		if( !IsValidEdict(i) )
+			continue;
+		if( !IsValidEntity(i) )
+			continue;
+		
+		GetEdictClassname(i, tmp, sizeof(tmp));
+		
+		if( StrEqual(tmp, "rp_plant") || StrEqual(tmp, "rp_cashmachine") || StrEqual(tmp, "rp_bigcashmachine") ) {
+			rp_GetZoneData( rp_GetPlayerZone(i), zone_type_type, tmp2, sizeof(tmp2));
+			if( !StrEqual(tmp, tmp2) )
+				continue;
+			
+			SetEntProp(i, Prop_Data, "m_takedamage", enabled ? 0 : 2);
+		}
 	}
 }
 // ----------------------------------------------------------------------------

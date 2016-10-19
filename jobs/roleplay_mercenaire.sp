@@ -652,9 +652,9 @@ public Action SendToTribunal(Handle timer, any client) {
 	rp_SetClientBool(client, b_SpawnToTribunal, false);
 	
 	if( Math_GetRandomInt(0, 1) )
-		TeleportEntity(client, view_as<float>({473.0, -1979.0, -1950.0}), NULL_VECTOR, NULL_VECTOR);
+		rp_ClientTeleport(client, view_as<float>({473.0, -1979.0, -1950.0}));
 	else
-		TeleportEntity(client, view_as<float>({-966.0, -570.0, -1950.0}), NULL_VECTOR, NULL_VECTOR);
+		rp_ClientTeleport(client, view_as<float>({-966.0, -570.0, -1950.0}));
 }
 // ----------------------------------------------------------------------------
 public Action SendToTueur(Handle timer, any client) {
@@ -663,7 +663,7 @@ public Action SendToTueur(Handle timer, any client) {
 	#endif
 	
 	rp_SetClientBool(client, b_SpawnToTueur, false);
-	TeleportEntity(client,  view_as<float>({-5553.0, -2818.0, -1958.0}), NULL_VECTOR, NULL_VECTOR);
+	rp_ClientTeleport(client,  view_as<float>({-5553.0, -2818.0, -1958.0}));
 	
 	char classname[64];
 	for(int i=MaxClients; i<=2048; i++) {
@@ -735,7 +735,7 @@ public Action fwdZoneChange(int client, int newZone, int oldZone) {
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N s'est échappé.", client);
 		}
 		else {
-			TeleportEntity(client,  view_as<float>({-5553.9, -2838.9, -1959.9}), NULL_VECTOR, NULL_VECTOR);
+			rp_ClientTeleport(client,  view_as<float>({-5553.9, -2838.9, -1959.9}));
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Une tentative de triche a été détectée.");
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Êtes-vous sorti correctement, sans triche, sans téléportation ?");
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Si c'est le cas, contactez KoSSoLaX --> @Kossolax@ts-x.eu ");			
@@ -762,7 +762,7 @@ public Action FreeKidnapping(Handle timer, any client) {
 	int target = rp_GetClientInt(client, i_KidnappedBy);
 	clearKidnapping(client);
 	RestoreAssassinNormal(target);
-	TeleportEntity(client,  view_as<float>({2911.0, 868.0, -1853.0}), NULL_VECTOR, NULL_VECTOR);
+	rp_ClientTeleport(client,  view_as<float>({2911.0, 868.0, -1853.0}));
 	rp_ClientSendToSpawn(client, true); // C'est proche du comico. 
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vos ravisseurs vous ont finalement libéré.");
 	CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez libéré %N.", target);
@@ -796,7 +796,7 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 			clearKidnapping(client);
 			RestoreAssassinNormal(target);
 			
-			TeleportEntity(client,  view_as<float>({2911.0, 868.0, -1853.0}), NULL_VECTOR, NULL_VECTOR);
+			rp_ClientTeleport(client,  view_as<float>({2911.0, 868.0, -1853.0}));
 			rp_ClientSendToSpawn(client, true);
 		}
 		else if( StrEqual( options, "free", false) ) {

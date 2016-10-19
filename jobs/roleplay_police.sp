@@ -342,10 +342,6 @@ public Action Cmd_Cop(int client) {
 		ACCESS_DENIED(client);
 	}
 	
-	float origin[3], vecAngles[3];
-	GetClientAbsOrigin(client, origin);
-	GetClientEyeAngles(client, vecAngles);
-	
 	if( GetClientTeam(client) == CS_TEAM_CT ) {
 		CS_SwitchTeam(client, CS_TEAM_T);
 		SetEntityHealth(client, 100);
@@ -363,7 +359,6 @@ public Action Cmd_Cop(int client) {
 	}
 		
 	rp_ClientResetSkin(client);
-	TeleportEntity(client, origin, vecAngles, NULL_VECTOR);
 	rp_SetClientBool(client, b_MaySteal, false);
 	CreateTimer(5.0, AllowStealing, client);
 	return Plugin_Handled;
@@ -1658,9 +1653,7 @@ void SendPlayerToJail(int target, int client = 0) {
 	}
 	
 	int rand = Math_GetRandomInt(0, (MaxJail-1));
-	TeleportEntity(target, fLocation[rand], NULL_VECTOR, NULL_VECTOR);
-	FakeClientCommandEx(target, "sm_stuck");
-	
+	rp_ClientTeleport(target, fLocation[rand]);
 	
 	SDKHook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 	CreateTimer(MENU_TIME_DURATION.0, AllowWeaponDrop, target);
@@ -1792,7 +1785,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			}
 			else {
 				TeleportEntity(target, g_flLastPos[target], NULL_VECTOR, NULL_VECTOR);
-				ServerCommand("sm_stuck3 %d %f %f %f", target, g_flLastPos[target][0], g_flLastPos[target][1], g_flLastPos[target][2]);
+				rp_ClientTeleport(target, g_flLastPos[target]);
 			}
 			
 			return;
@@ -1829,8 +1822,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				LogToGame("[TSX-RP] [JAIL] %L a été libéré car il n'avait pas commis d'agression", target);
 				
 				rp_ClientResetSkin(target);
-				TeleportEntity(target, g_flLastPos[target], NULL_VECTOR, NULL_VECTOR);
-				FakeClientCommand(target, "sm_stuck");
+				rp_ClientTeleport(target, g_flLastPos[target]);
 				return;
 			}
 		}
@@ -1847,8 +1839,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				LogToGame("[TSX-RP] [JAIL] %L a été libéré car il n'avait pas effectué de tir dangereux", target);
 				
 				rp_ClientResetSkin(target);
-				TeleportEntity(target, g_flLastPos[target], NULL_VECTOR, NULL_VECTOR);
-				FakeClientCommand(target, "sm_stuck");
+				rp_ClientTeleport(target, g_flLastPos[target]);
 				return;
 			}
 		}
@@ -1878,8 +1869,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				LogToGame("[TSX-RP] [JAIL] %L a été libéré car il n'avait pas commis de vol", target);
 				
 				rp_ClientResetSkin(target);
-				TeleportEntity(target, g_flLastPos[target], NULL_VECTOR, NULL_VECTOR);
-				FakeClientCommand(target, "sm_stuck");
+				rp_ClientTeleport(target, g_flLastPos[target]);
 				return;
 			}
 			if( IsValidClient( rp_GetClientInt(target, i_LastVolTarget) ) ) {
