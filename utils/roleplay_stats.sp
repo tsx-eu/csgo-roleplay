@@ -314,6 +314,8 @@ public void DisplayLevelStats(int client){
 		if(strlen(g_szLevelData[i][0]) == 0)
 			break;
 		Format(tmp, sizeof(tmp), "Au niveau %s: %s - %s", g_szLevelData[i][0], g_szLevelData[i][1], g_szLevelData[i][2]);
+		
+		String_WordWrap(tmp, 60);
 		AddMenuItem(menu, "", tmp, level >= StringToInt(g_szLevelData[i][0]) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	}
 	SetMenuPagination(menu, 3);
