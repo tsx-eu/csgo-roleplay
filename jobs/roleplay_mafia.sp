@@ -722,10 +722,10 @@ public Action ItemPickLockOver_frame(Handle timer, Handle dp) {
 			char zone[128];
  			rp_GetZoneData(rp_GetPlayerZone(door), zone_type_name, zone, sizeof(zone));
  			
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Quelqu'un a ouvert votre porte cadnacée (%s).", zone);
+			CPrintToChat(g_iDoorDefine_LOCKER[doorID], "{lightblue}[TSX-RP]{default} Quelqu'un a ouvert votre porte cadnacée (%s).", zone);
 			
 			if( Math_GetRandomInt(1, 10) == 5 ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre cadenas a été détruit.");
+				CPrintToChat(g_iDoorDefine_LOCKER[doorID], "{lightblue}[TSX-RP]{default} Votre cadenas a été détruit.");
 				g_iDoorDefine_LOCKER[doorID] = 0;
 			}
 		}
