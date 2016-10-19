@@ -263,7 +263,7 @@ void Cmd_job(int client) {
 
 		bJob[job] = true;
 		
-		if (!hasAvocat) hasAvocat = ( rp_GetClientInt(client, i_Avocat) > 0 );
+		if (!hasAvocat) hasAvocat = ( rp_GetClientInt(i, i_Avocat) > 0 );
 	}
 	
 	if( hasAvocat )
