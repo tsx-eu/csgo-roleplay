@@ -1184,8 +1184,8 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 				else if(StrContains(arg1, "Klaxon ") == 0 ) {
 					char data[2][8];
 					char tmp[255];
-					int sound = StringToInt(data[1]);
 					ExplodeString(arg1, " ", data, sizeof(data), sizeof(data[]));
+					int sound = StringToInt(data[1]);
 					rp_SetVehicleInt(target, car_klaxon, sound);
 					displayKlaxonMenu(client);
 					Format(tmp, sizeof(tmp), "vehicles/v8/beep_%i.mp3", sound);
