@@ -345,8 +345,17 @@ public Action Cmd_Cop(int client) {
 	if( GetClientTeam(client) == CS_TEAM_CT ) {
 		CS_SwitchTeam(client, CS_TEAM_T);
 		SetEntityHealth(client, 100);
-		Entity_SetMaxHealth(client, 200);
-		rp_SetClientInt(client, i_Kevlar, 100);
+		Entity_SetMaxHealth(client, 500);
+		
+		if( rp_GetClientInt(client, i_PlayerLVL) >= 156 )
+			SetEntityHealth(client, 200);
+		if( rp_GetClientInt(client, i_PlayerLVL) >= 380 )
+			SetEntityHealth(client, 500);
+		if( rp_GetClientInt(client, i_PlayerLVL) >= 272 )
+			rp_SetClientInt(client, i_Kevlar, 100);
+		if( rp_GetClientInt(client, i_PlayerLVL) >= 462 )
+			rp_SetClientInt(client, i_Kevlar, 250);
+		
 		SetEntProp(client, Prop_Send, "m_bHasHelmet", 0);
 		FakeClientCommand(client, "say /shownote");
 	}
