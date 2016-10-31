@@ -824,6 +824,9 @@ public Action Cmd_Jail(int client) {
 	if( rp_IsValidVehicle(target) ) {
 		int client2 = GetEntPropEnt(target, Prop_Send, "m_hPlayer");
 		
+		if( !IsValidClient(client2) )
+			return Plugin_Handled;
+		
 		if( !CanSendToJail(client, client2) ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N ne pas peut être mis en prison pour le moment à cause d'une quête.", client2);
 			return Plugin_Handled;
