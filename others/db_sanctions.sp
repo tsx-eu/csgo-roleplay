@@ -228,7 +228,7 @@ void Draw_SanctionMenu(int client, int target, int sanction) {
 }
 public void fwdMessage(int client, any target, char[] message) {
 	SQL_Insert(client, target, getSanctionDuration(target, bc_other), message, "csgo");
-	KickClient(client, message);
+	KickClient(target, message);
 }
 public int Handle_SanctionMenu(Handle menu, MenuAction action, int client, int param2) {
 	#if defined DEBUG
