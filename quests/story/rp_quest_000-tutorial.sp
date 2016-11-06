@@ -106,7 +106,7 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	}
 	else if( StrEqual(command, "wiki") ) {
 		QueryClientConVar(client, "cl_disablehtmlmotd", view_as<ConVarQueryFinished>(ClientConVar), client);
-		ShowMOTDPanel(client, "Role-Play: WiKi", "http://www.ts-x.eu/popup.php?url=/wiki/", MOTDPANEL_TYPE_URL);
+		ShowMOTDPanel(client, "Role-Play: WiKi", "http://www.ts-x.eu/popup.php?url=/index.php?page=aide", MOTDPANEL_TYPE_URL);
 		
 		return Plugin_Handled;
 	}
