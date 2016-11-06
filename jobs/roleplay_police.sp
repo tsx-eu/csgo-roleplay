@@ -1787,8 +1787,6 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			
 			LogToGame("[TSX-RP] [JAIL] [LIBERATION] %L a liberé %L", client, target);
 			
-			rp_ClientResetSkin(target);
-			
 			int zone = rp_GetZoneFromPoint(g_flLastPos[target]);
 			int bit = rp_GetZoneBit(zone);
 			
@@ -1796,10 +1794,10 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				rp_ClientSendToSpawn(target, true);
 			}
 			else {
-				TeleportEntity(target, g_flLastPos[target], NULL_VECTOR, NULL_VECTOR);
 				rp_ClientTeleport(target, g_flLastPos[target]);
 			}
 			
+			rp_ClientResetSkin(target);
 			return;
 		}
 		if( type == -2 || type == -3 ) {
