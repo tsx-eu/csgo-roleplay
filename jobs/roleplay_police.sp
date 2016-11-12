@@ -2200,6 +2200,7 @@ int BuildingBarriere(int client) {
 	switch( job ) {
 		case 1:	max = 7;	//Chef
 		case 2: max = 6;	//Co-chef
+		case 4: max = 5;	//RAID
 		case 5: max = 5;	//GTI
 		case 6: max = 4;	//CIA
 		case 7: max = 3;	//FBI
