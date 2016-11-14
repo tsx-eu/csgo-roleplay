@@ -20,6 +20,8 @@
 //#define	INSTANT
 
 #define getWheel(%1,%2,%3,%4) (g_iJoker[%1][%3] == %4 ? 6 : wheel[%2][%3][%4])
+#define wheelButton 330
+
 
 public Plugin myinfo = {
 	name = "Jobs: Loto", author = "KoSSoLaX",
@@ -27,6 +29,8 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
+
+int gain2[] =  { 0, 300, 400, 600, -5000, 900, 300, 500, 900, 300, 400, 550, 800, 500, 300, 500, 600, 5000, 600, 300, 700, 450, 350, 800, 0};
 char symbol[][] = {" ☘ ", "㍴", " ♥ ", "☎", " ♫ ", "♘", "☆", "☠", "♕", " ♠ ", "Δ", "§", " ♦ ", " † ", "☀", "♙ "};
 int wheel[10][3][13];
 int gain[10][7] =  {
@@ -91,6 +95,57 @@ public void OnPluginStart() {
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
+}
+public void OnMapStart() {
+	HookSingleEntityOutput(wheelButton, "OnPressed", wheelButtonPressed);
+	PrecacheSound("common/talk.wav");
+	PrecacheSound("common/stuck1.wav");
+}
+public Action wheelButtonPressed(const char[] output, int caller, int activator, float delay) {
+	
+	int jeton = getPlayerJeton(activator);
+	
+	if( jeton < 5 ) {
+		CPrintToChat(activator, "{lightblue}[TSX-RP]{default} Il faut 5 jetons pour jouer à cette machine.");
+		return Plugin_Handled;
+	}
+	if( (rp_GetClientInt(activator, i_Money)+rp_GetClientInt(activator, i_Bank)) < 10000 ) {
+		CPrintToChat(activator, "{lightblue}[TSX-RP]{default} Il faut 10.000$ pour jouer à cette machine.");
+		return Plugin_Handled;
+	}
+	
+	takePlayerJeton(activator, 5);
+	CreateTimer(0.1, wheelThink, activator);
+	return Plugin_Continue;
+}
+public Action wheelThink(Handle timer, any client) {
+	static float moveTime[2];
+	
+	moveTime[0] = GetEntPropFloat(wheelButton+1, Prop_Data, "m_flMoveDoneTime");
+	EmitSoundToAll("common/talk.wav", wheelButton);
+	
+	if( moveTime[0] == moveTime[1] ) {
+		EmitSoundToAll("common/stuck1.wav", wheelButton);
+		float ang[3];
+		
+		Entity_GetAbsAngles(wheelButton + 1, ang);
+		
+		ang[2] = ((RoundFloat((ang[2] - 5.0) * 100.0) % 36000) / 100.0) + 360.0;
+		int c = RoundFloat(ang[2] / 15.0) - 1;
+		
+		if( gain2[c] == 0 )
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez perdu un tour!");
+		else if( gain2[c] > 0 )
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez gagné %d$!", gain2[c]);
+		else
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} BANKRUPT! Vous avez perdu %d$!", gain2[c]);
+		
+		rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) + gain2[c]);
+	}
+	else {
+		moveTime[1] = moveTime[0];
+		CreateTimer(0.1, wheelThink, client);
+	}
 }
 public void OnAllPluginsLoaded() {
 	char query[1024];
@@ -544,11 +599,17 @@ void displayCasino(int client) {
 	Format(tmp, sizeof(tmp), "Machine à sous n°%d\n", n + 1, g_iJackpot);
 	Format(tmp, sizeof(tmp), "%sVous avez %d jeton%s\n----------------------------\n", tmp, jeton, jeton>1?"s":"");
 	
-	Format(tmp, sizeof(tmp), "%s1.      %4s     %d jetons\n", tmp, symbol[6], g_iJackpot);
+	if( g_iJackpot >= 100 ) {
+		Format(tmp, sizeof(tmp), "%s1.      %4s     %d jetons\n", tmp, symbol[6], g_iJackpot);
 	
-	for (int i = 0; i < sizeof(gain[])-1; i++) {
-		Format(tmp, sizeof(tmp), "%s%d.      %4s     %d jetons\n", tmp, i+2, symbol[i], gain[n][i]);
+		for (int i = 0; i < sizeof(gain[])-1; i++)
+			Format(tmp, sizeof(tmp), "%s%d.      %4s     %d jetons\n", tmp, i+2, symbol[i], gain[n][i]);
 	}
+	else {
+		for (int i = 0; i < sizeof(gain[])-1; i++)
+			Format(tmp, sizeof(tmp), "%s%d.      %4s     %d jetons\n", tmp, i+1, symbol[i], gain[n][i]);
+	}
+	
 	Format(tmp, sizeof(tmp), "%s ", tmp);
 	
 	
