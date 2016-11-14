@@ -635,6 +635,9 @@ void changeZoneState(int zone, bool enabled) {
 		
 		rp_SetZoneBit(i, bits);
 	}
+	
+	float vecOrigin[3];
+	
 	for (int i = 1; i <= 2048; i++) {
 		if( !IsValidEdict(i) )
 			continue;
@@ -644,7 +647,11 @@ void changeZoneState(int zone, bool enabled) {
 		GetEdictClassname(i, tmp, sizeof(tmp));
 		
 		if( StrEqual(tmp, "rp_plant") || StrEqual(tmp, "rp_cashmachine") || StrEqual(tmp, "rp_bigcashmachine") ) {
-			rp_GetZoneData( rp_GetPlayerZone(i), zone_type_type, tmp2, sizeof(tmp2));
+			
+			Entity_GetAbsOrigin(i, vecOrigin);
+			vecOrigin[2] += 16.0;
+			
+			rp_GetZoneData(rp_GetZoneFromPoint(vecOrigin), zone_type_type, tmp2, sizeof(tmp2));
 			if( !StrEqual(tmp, tmp2) )
 				continue;
 			
@@ -677,6 +684,8 @@ void updatePerquizData(int zone, int array[PQ_Max]) {
 void countBadThing(char[] zone, int& weapon, int& plant, int& machine) {
 	char tmp[64], tmp2[64];
 	
+	float vecOrigin[3];
+	
 	for (int i = MaxClients; i <= MAX_ENTITIES; i++) {
 		if( !IsValidEdict(i) || !IsValidEntity(i) )
 			continue;
@@ -685,7 +694,10 @@ void countBadThing(char[] zone, int& weapon, int& plant, int& machine) {
 		if( StrContains(tmp, "weapon_") == -1 && StrContains(tmp, "rp_") == -1 )
 			continue;
 		
-		rp_GetZoneData(rp_GetPlayerZone(i), zone_type_type, tmp2, sizeof(tmp2));
+		Entity_GetAbsOrigin(i, vecOrigin);
+		vecOrigin[2] += 16.0;
+		
+		rp_GetZoneData(rp_GetZoneFromPoint(vecOrigin), zone_type_type, tmp2, sizeof(tmp2));
 		if( !StrEqual(tmp2, zone) )
 			continue;
 		
