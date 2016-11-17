@@ -926,12 +926,65 @@ public Action fwdFrame(int client) {
 	
 	int vehicle = Client_GetVehicle(client);
 	if( rp_IsValidVehicle(vehicle) ) {
-		if( rp_GetPlayerZone(vehicle) == ZONE_RESPAWN ) {
-			rp_SetVehicleInt(vehicle, car_health, rp_GetVehicleInt(vehicle, car_health) - 100);
+		
+		if( rp_GetZoneBit(rp_GetPlayerZone(vehicle)) & BITZONE_PVP ) {
+			teleportVehicle(vehicle);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Les voitures ne sont pas autorisées en zone PvP lors d'une capture.");
 		}
 	}
 		
 	return Plugin_Continue;
+}
+
+int teleportVehicle(int ent) {
+	static float g_flStartPos[][3] = {
+		{672.0, -4410.0, -2000.0},
+		{822.0, -4410.0, -2000.0},
+		{977.0, -4410.0, -2000.0},
+		{1160.0, -4410.0, -2000.0},
+		{1860.0, -4410.0, -2000.0},
+		{1990.0, -4410.0, -2000.0},
+		{-2440.0, 1000.0, -2440.0},
+		{-2440.0, 1200.0, -2440.0},
+		{-2440.0, 1400.0, -2440.0},
+		{-2440.0, 1600.0, -2440.0},
+		{-2945.0, 1600.0, -2440.0},
+		{-2945.0, 1400.0, -2440.0},
+		{-2945.0, 1200.0, -2440.0},
+		{-2945.0, 1000.0, -2440.0}
+	};
+	int[] rnd = new int[sizeof(g_flStartPos)];
+	float MinHull[3], MaxHull[3];
+	Entity_GetMinSize(ent, MinHull);
+	Entity_GetMaxSize(ent, MaxHull);
+	bool found = false;
+	
+	for (int i = 0; i < sizeof(g_flStartPos); i++)
+		rnd[i] = i;
+	SortIntegers(rnd, sizeof(g_flStartPos), Sort_Random);
+	
+	for (int i = 0; i < sizeof(g_flStartPos); i++) {
+		
+		float ang[3] = { 0.0, 0.0, 0.0 };
+		if( g_flStartPos[rnd[i]][2] < -2200.0 ) 
+			ang[1] = 90.0;
+		
+		
+		Handle trace = TR_TraceHullEx(g_flStartPos[rnd[i]], g_flStartPos[rnd[i]], MinHull, MaxHull, MASK_SOLID);
+		if( TR_DidHit(trace) ) {
+			delete trace;
+			continue;
+		}
+		delete trace;
+		
+		TeleportEntity(ent, g_flStartPos[rnd[i]], ang, NULL_VECTOR);
+		found = true;
+		break;
+	}
+	
+	if( !found ) {
+		TeleportEntity(ent, view_as<float>({ 0.0, 0.0, 0.0}), view_as<float>({ 0.0, 0.0, 0.0}), NULL_VECTOR);
+	}
 }
 public Action Event_PlayerShoot(Handle event, char[] name, bool dontBroadcast) {
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
