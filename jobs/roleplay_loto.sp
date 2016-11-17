@@ -62,6 +62,7 @@ int g_iLastMachine[65], g_iRotation[65][2][3], g_iJettonInMachine[65], g_iJoker[
 bool g_bPlaying[65];
 float g_flNext[65][3];
 int g_iJackpot = 1000;
+bool canPlay = true;
 Handle g_hTimer[65];
 
 // ----------------------------------------------------------------------------
@@ -104,6 +105,11 @@ public void OnMapStart() {
 public Action wheelButtonPressed(const char[] output, int caller, int activator, float delay) {
 	
 	int jeton = getPlayerJeton(activator);
+	SetEntPropFloat(caller, Prop_Data, "m_flWait", 0.25);
+	
+	if( !canPlay ) {
+		return Plugin_Handled;
+	}
 	
 	if( jeton < 5 ) {
 		CPrintToChat(activator, "{lightblue}[TSX-RP]{default} Il faut 5 jetons pour jouer à cette machine.");
@@ -114,6 +120,8 @@ public Action wheelButtonPressed(const char[] output, int caller, int activator,
 		return Plugin_Handled;
 	}
 	
+	SetEntProp(caller, Prop_Data, "m_bLocked", 1);
+	canPlay = false;
 	takePlayerJeton(activator, 5);
 	CreateTimer(0.1, wheelThink, activator);
 	return Plugin_Continue;
@@ -122,16 +130,27 @@ public Action wheelThink(Handle timer, any client) {
 	static float moveTime[2];
 	
 	moveTime[0] = GetEntPropFloat(wheelButton+1, Prop_Data, "m_flMoveDoneTime");
-	EmitSoundToAll("common/talk.wav", wheelButton);
+	EmitSoundToAll("common/talk.wav", wheelButton, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, 0.33);
+	EmitSoundToAll("common/talk.wav", wheelButton, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, 0.33);
+	
 	
 	if( moveTime[0] == moveTime[1] ) {
-		EmitSoundToAll("common/stuck1.wav", wheelButton);
+		EmitSoundToAll("common/stuck1.wav", wheelButton, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, 0.33);
+		EmitSoundToAll("common/stuck1.wav", wheelButton, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, 0.33);
+		
 		float ang[3];
 		
 		Entity_GetAbsAngles(wheelButton + 1, ang);
+		for(int j; j < 3; j++) {
+			if(ang[j] < -360.0 || ang[j] > 360.0)
+			ang[j] = float(RoundFloat(ang[j]*1000) % 360000) / 1000.0;
+			Entity_SetAbsAngles(wheelButton + 1, ang);
+		}
 		
-		ang[2] = ((RoundFloat((ang[2] - 5.0) * 100.0) % 36000) / 100.0) + 360.0;
+		ang[2] = ((RoundFloat((ang[2] - 5.0) * 1000.0) % 360000) / 1000.0) + 360.0;
 		int c = RoundFloat(ang[2] / 15.0) - 1;
+		if( c < 0 || c > sizeof(gain2) )
+			c = 0;
 		
 		if( gain2[c] == 0 )
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez perdu un tour!");
@@ -140,7 +159,16 @@ public Action wheelThink(Handle timer, any client) {
 		else
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} BANKRUPT! Vous avez perdu %d$!", gain2[c]);
 		
-		rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) + gain2[c]);
+		if( Math_Abs(gain2[c]) >= 5000 )
+			rp_ClientXPIncrement(client, 100);
+			
+		if( gain2[c] >= 0 )
+			rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + gain2[c]);
+		else
+			rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) + gain2[c]);
+		
+		SetEntProp(wheelButton, Prop_Data, "m_bLocked", 0);
+		canPlay = true;
 	}
 	else {
 		moveTime[1] = moveTime[0];
