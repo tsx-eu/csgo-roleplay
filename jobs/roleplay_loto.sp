@@ -105,7 +105,7 @@ public void OnMapStart() {
 public Action wheelButtonPressed(const char[] output, int caller, int activator, float delay) {
 	
 	int jeton = getPlayerJeton(activator);
-	SetEntPropFloat(caller, Prop_Data, "m_flWait", 0.25);
+	SetEntPropFloat(caller, Prop_Data, "m_flWait", 5.0);
 	
 	if( !canPlay ) {
 		return Plugin_Handled;
