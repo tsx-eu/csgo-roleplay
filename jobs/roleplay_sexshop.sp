@@ -869,6 +869,13 @@ public int MenuRubanColor(Handle menu, MenuAction action, int client, int param2
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre cible a disparue.");
 			return;
 		}
+		
+		if( rp_ClientFloodTriggered(client, target, fd_ruban) ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N vous glisse entre les mains.", target);
+			return;
+		}
+		rp_ClientFloodIncrement(client, target, fd_ruban, 31.0);
+		
 		if(rp_GetClientItem(client, item_id)==0){
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez plus l'item ruban.");
 			return;

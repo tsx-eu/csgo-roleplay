@@ -97,7 +97,7 @@ public void OnPluginStart() {
 	}
 	for (int i = MaxClients; i <= 2048; i++) {
 		if( rp_IsValidVehicle(i) ) {
-			SDKHook(i, SDKHook_Touch, VehicleTouch);
+//			SDKHook(i, SDKHook_Touch, VehicleTouch);
 			SDKHook(i, SDKHook_Think, OnThink);	
 			CreateTimer(3.5, Timer_VehicleRemoveCheck, EntIndexToEntRef(i));
 		}
@@ -130,8 +130,15 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);
 	rp_HookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
 	
+	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
+	
 	for (int i = 1; i < 65; i++)
 		g_iBlockedTime[client][i] = 0;
+}
+public Action OnTakeDamage(int victim, int& attacker, int& inflictor, float& damage, int& damagetype, int& weapon, float damageForce[3], float damagePosition[3]) {
+	if( Client_GetVehicle(victim) > 0 )
+		return Plugin_Handled;
+	return Plugin_Continue;
 }
 public void OnClientDisconnect(int client) {
 	for (int i = MaxClients+1; i <= 2048; i++) {
@@ -179,8 +186,9 @@ public Action fwdUse(int client) {
 		int speed = GetEntProp(vehicle, Prop_Data, "m_nSpeed");
 		int buttons = GetClientButtons(client);
 			
-		if( speed <= 20 && !(buttons & IN_DUCK) )
+		if( speed <= 20 && !(buttons & IN_DUCK) ) {
 			rp_ClientVehicleExit(client, vehicle);
+		}
 	}
 	else if( passager > 0 ) {
 		rp_ClientVehiclePassagerExit(client, passager);
@@ -556,7 +564,7 @@ public int Native_rp_CreateVehicle(Handle plugin, int numParams) {
 		WritePackCell(dp, ent);
 	}
 	
-	SDKHook(ent, SDKHook_Touch, VehicleTouch);
+//	SDKHook(ent, SDKHook_Touch, VehicleTouch);
 	CreateTimer(3.5, Timer_VehicleRemoveCheck, EntIndexToEntRef(ent));
 	return ent;
 }
@@ -1176,11 +1184,11 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 				else if(StrContains(arg1, "Klaxon ") == 0 ) {
 					char data[2][8];
 					char tmp[255];
-					int sound = StringToInt(data[1]);
 					ExplodeString(arg1, " ", data, sizeof(data), sizeof(data[]));
+					int sound = StringToInt(data[1]);
 					rp_SetVehicleInt(target, car_klaxon, sound);
 					displayKlaxonMenu(client);
-					Format(tmp, sizeof(tmp), "*vehicles/v8/beep_%i.mp3", sound);
+					Format(tmp, sizeof(tmp), "vehicles/v8/beep_%i.mp3", sound);
 					EmitSoundToClientAny(client, tmp, target, 6, SNDLEVEL_CAR, SND_NOFLAGS, SNDVOL_NORMAL);
 				}
 				else if( StrEqual(arg1, "to_bank") ) {

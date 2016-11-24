@@ -1155,6 +1155,11 @@ void Draw_SkinList(int client, int test, int skinID) {
 		
 		if( test ) {
 			rp_HookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);
+			
+			if( rp_GetPlayerZone(client) != ZONE_CABINE) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez quitté les cabines d'essayage.");
+				return;
+			}
 		}
 		else {
 			prix = StringToInt(g_szSkinsList[skinID][3]);

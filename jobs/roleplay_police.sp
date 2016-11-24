@@ -342,15 +342,20 @@ public Action Cmd_Cop(int client) {
 		ACCESS_DENIED(client);
 	}
 	
-	float origin[3], vecAngles[3];
-	GetClientAbsOrigin(client, origin);
-	GetClientEyeAngles(client, vecAngles);
-	
 	if( GetClientTeam(client) == CS_TEAM_CT ) {
 		CS_SwitchTeam(client, CS_TEAM_T);
 		SetEntityHealth(client, 100);
-		Entity_SetMaxHealth(client, 200);
-		rp_SetClientInt(client, i_Kevlar, 100);
+		Entity_SetMaxHealth(client, 500);
+		
+		if( rp_GetClientInt(client, i_PlayerLVL) >= 156 )
+			SetEntityHealth(client, 200);
+		if( rp_GetClientInt(client, i_PlayerLVL) >= 380 )
+			SetEntityHealth(client, 500);
+		if( rp_GetClientInt(client, i_PlayerLVL) >= 272 )
+			rp_SetClientInt(client, i_Kevlar, 100);
+		if( rp_GetClientInt(client, i_PlayerLVL) >= 462 )
+			rp_SetClientInt(client, i_Kevlar, 250);
+		
 		SetEntProp(client, Prop_Send, "m_bHasHelmet", 0);
 		FakeClientCommand(client, "say /shownote");
 	}
@@ -363,7 +368,6 @@ public Action Cmd_Cop(int client) {
 	}
 		
 	rp_ClientResetSkin(client);
-	TeleportEntity(client, origin, vecAngles, NULL_VECTOR);
 	rp_SetClientBool(client, b_MaySteal, false);
 	CreateTimer(5.0, AllowStealing, client);
 	return Plugin_Handled;
@@ -721,16 +725,20 @@ public Action Cmd_Jail(int client) {
 	}
 	
 	int target = rp_GetClientTarget(client);
-
+	
+	if( target <= 0 || !IsValidEdict(target) || !IsValidEntity(target) )
+		return Plugin_Handled;
+	
 	if( IsValidClient(target) && rp_GetClientFloat(target, fl_Invincible) > GetGameTime() ) { //le target utilise une poupée gonflable
 		ACCESS_DENIED(client);
 	}
 	if( rp_GetClientFloat(client, fl_Invincible) > GetGameTime() ) { //le flic utilise une poupée gonflable
 		ACCESS_DENIED(client);
 	}
-
-	if( target <= 0 || !IsValidEdict(target) || !IsValidEntity(target) )
-		return Plugin_Handled;
+	if( IsValidClient(target) && !rp_IsTutorialOver(target) ) { //le target utilise une poupée gonflable
+		ACCESS_DENIED(client);
+	}
+	
 
 	int Czone = rp_GetPlayerZone(client);
 	int Cbit = rp_GetZoneBit(Czone);
@@ -815,6 +823,9 @@ public Action Cmd_Jail(int client) {
 
 	if( rp_IsValidVehicle(target) ) {
 		int client2 = GetEntPropEnt(target, Prop_Send, "m_hPlayer");
+		
+		if( !IsValidClient(client2) )
+			return Plugin_Handled;
 		
 		if( !CanSendToJail(client, client2) ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N ne pas peut être mis en prison pour le moment à cause d'une quête.", client2);
@@ -1369,10 +1380,12 @@ public int MenuTribunal_main(Handle p_hItemMenu, MenuAction p_oAction, int clien
 			PrintToServer("LOCK-2");
 			SQL_LockDatabase(DB);
 			
-			char szQuery[1024];
+			char szQuery[1024], szSteamID[32];
+			GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
+			
 			Format(szQuery, sizeof(szQuery), "SELECT R.`id`, `report_steamid`, COUNT(`vote`) vote FROM `ts-x`.`site_report` R");
 			Format(szQuery, sizeof(szQuery), "%s LEFT JOIN `ts-x`.`site_report_votes` V ON V.`reportid`=R.`id`", szQuery);
-			Format(szQuery, sizeof(szQuery), "%s WHERE V.`vote`='1' AND R.`jail`=-1 GROUP BY R.`id` ORDER BY vote DESC;", szQuery);
+			Format(szQuery, sizeof(szQuery), "%s WHERE V.`vote`='1' AND R.`jail`=-1 AND R.`own_steamid`<>'%s' AND R.`report_steamid`<>'%s' GROUP BY R.`id` ORDER BY vote DESC;", szQuery, szSteamID, szSteamID);
 			
 			Handle hQuery = SQL_Query(DB, szQuery);
 			
@@ -1652,9 +1665,7 @@ void SendPlayerToJail(int target, int client = 0) {
 	}
 	
 	int rand = Math_GetRandomInt(0, (MaxJail-1));
-	TeleportEntity(target, fLocation[rand], NULL_VECTOR, NULL_VECTOR);
-	FakeClientCommandEx(target, "sm_stuck");
-	
+	rp_ClientTeleport(target, fLocation[rand]);
 	
 	SDKHook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 	CreateTimer(MENU_TIME_DURATION.0, AllowWeaponDrop, target);
@@ -1776,18 +1787,17 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			
 			LogToGame("[TSX-RP] [JAIL] [LIBERATION] %L a liberé %L", client, target);
 			
-			rp_ClientResetSkin(target);
+			int zone = rp_GetZoneFromPoint(g_flLastPos[target]);
+			int bit = rp_GetZoneBit(zone);
 			
-			int bit = rp_GetZoneBit(rp_GetZoneFromPoint(g_flLastPos[target]));
-			
-			if( bit & BITZONE_JAIL || bit & BITZONE_HAUTESECU || bit & BITZONE_LACOURS ) {
+			if( bit & (BITZONE_JAIL|BITZONE_HAUTESECU|BITZONE_LACOURS) || rp_GetZoneInt(zone, zone_type_type) == 101 ) {
 				rp_ClientSendToSpawn(target, true);
 			}
 			else {
-				TeleportEntity(target, g_flLastPos[target], NULL_VECTOR, NULL_VECTOR);
-				ServerCommand("sm_stuck3 %d %f %f %f", target, g_flLastPos[target][0], g_flLastPos[target][1], g_flLastPos[target][2]);
+				rp_ClientTeleport(target, g_flLastPos[target]);
 			}
 			
+			rp_ClientResetSkin(target);
 			return;
 		}
 		if( type == -2 || type == -3 ) {
@@ -1822,8 +1832,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				LogToGame("[TSX-RP] [JAIL] %L a été libéré car il n'avait pas commis d'agression", target);
 				
 				rp_ClientResetSkin(target);
-				TeleportEntity(target, g_flLastPos[target], NULL_VECTOR, NULL_VECTOR);
-				FakeClientCommand(target, "sm_stuck");
+				rp_ClientTeleport(target, g_flLastPos[target]);
 				return;
 			}
 		}
@@ -1840,8 +1849,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				LogToGame("[TSX-RP] [JAIL] %L a été libéré car il n'avait pas effectué de tir dangereux", target);
 				
 				rp_ClientResetSkin(target);
-				TeleportEntity(target, g_flLastPos[target], NULL_VECTOR, NULL_VECTOR);
-				FakeClientCommand(target, "sm_stuck");
+				rp_ClientTeleport(target, g_flLastPos[target]);
 				return;
 			}
 		}
@@ -1871,8 +1879,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				LogToGame("[TSX-RP] [JAIL] %L a été libéré car il n'avait pas commis de vol", target);
 				
 				rp_ClientResetSkin(target);
-				TeleportEntity(target, g_flLastPos[target], NULL_VECTOR, NULL_VECTOR);
-				FakeClientCommand(target, "sm_stuck");
+				rp_ClientTeleport(target, g_flLastPos[target]);
 				return;
 			}
 			if( IsValidClient( rp_GetClientInt(target, i_LastVolTarget) ) ) {
@@ -2193,6 +2200,7 @@ int BuildingBarriere(int client) {
 	switch( job ) {
 		case 1:	max = 7;	//Chef
 		case 2: max = 6;	//Co-chef
+		case 4: max = 5;	//RAID
 		case 5: max = 5;	//GTI
 		case 6: max = 4;	//CIA
 		case 7: max = 3;	//FBI

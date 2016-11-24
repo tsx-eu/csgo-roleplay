@@ -165,7 +165,7 @@ void Draw_SanctionMenu(int client, int target, int sanction) {
 	}
 	else {
 		banCause c = view_as<banCause>(sanction);
-		g_iUserData[client][c]++;
+		g_iUserData[target][c]++;
 		int dur = getSanctionDuration(target, c);
 		
 		switch(c) {
@@ -228,7 +228,7 @@ void Draw_SanctionMenu(int client, int target, int sanction) {
 }
 public void fwdMessage(int client, any target, char[] message) {
 	SQL_Insert(client, target, getSanctionDuration(target, bc_other), message, "csgo");
-	KickClient(client, message);
+	KickClient(target, message);
 }
 public int Handle_SanctionMenu(Handle menu, MenuAction action, int client, int param2) {
 	#if defined DEBUG
@@ -310,6 +310,9 @@ void SQL_Insert(int client, int target, int duration, const char[] reason, const
 	
 	GetClientAuthId(client, AuthId_Engine, szClient, sizeof(szClient));
 	GetClientAuthId(target, AuthId_Engine, szTarget, sizeof(szTarget));
+	
+	ReplaceString(szClient, sizeof(szClient), "STEAM_1", "STEAM_0");
+	ReplaceString(szTarget, sizeof(szTarget), "STEAM_1", "STEAM_0");
 	
 	int size = strlen(reason) * 2 + 1;
 	char[] eReason = new char[size];

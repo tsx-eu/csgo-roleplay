@@ -77,6 +77,7 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.Display(client, 60);
 	
 	g_iDuration[client] = 12 * 60;
+	g_iCurrent[client] = 0;
 }
 public void Q1_Frame(int objectiveID, int client) {
 	g_iDuration[client]--;

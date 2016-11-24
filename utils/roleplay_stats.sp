@@ -52,7 +52,7 @@ int_stat_data g_Sassoc[] = { // Fait le lien entre une stat et sa valeur sauvega
 	i_nostat,
 };
 
-char g_szLevelData[64][3][256];
+char g_szLevelData[64][3][512];
 
 public Plugin myinfo = {
 	name = "Utils: Stats", author = "Leethium",
@@ -61,14 +61,17 @@ public Plugin myinfo = {
 };
 
 public void OnPluginStart() {
+	CreateTimer(120.0, saveStats, _, TIMER_REPEAT);
+	
 	for (int i = 1; i <= MaxClients; i++) {
 		if( IsValidClient(i) ){
 			OnClientPostAdminCheck(i);
 			fwdDataLoaded(i);
 		}
 	}
-	SQL_TQuery(rp_GetDatabase(), SQL_loadLevelData, "SELECT `level`, `rank`, `description` FROM `rp_level`", _, DBPrio_High);
-	CreateTimer(120.0, saveStats, _, TIMER_REPEAT);
+}
+public void OnAllPluginsLoaded() {
+	SQL_TQuery(rp_GetDatabase(), SQL_loadLevelData, "SELECT `level`, `rank`, `description` FROM `rp_level`");
 }
 
 public void OnClientPostAdminCheck(int client) {
@@ -137,7 +140,7 @@ public int MenuViewStats(Handle menu, MenuAction action, int client, int param )
 				DisplayStats(client, false);
 			else if(StrEqual(szMenuItem, "coloc"))
 				FakeClientCommand(client, "say /infocoloc");
-			else if(StrEqual(szMenuItem, "coloc"))
+			else if(StrEqual(szMenuItem, "succes"))
 				FakeClientCommand(client, "say /succes");
 			else if(StrEqual(szMenuItem, "real"))
 				DisplayRTStats(client);
@@ -302,14 +305,20 @@ public void DisplayRTStats(int client){
 public void DisplayLevelStats(int client){
 	char tmp[512];
 	Handle menu = CreateMenu(MenuNothing);
+	
+	int level = rp_GetClientInt(client, i_PlayerLVL);
 
-	Format(tmp, sizeof(tmp), "Vous êtes niveau %d, prochain niveau: %d/3600 \nListe des bonus:\n", rp_GetClientInt(client, i_PlayerLVL), rp_GetClientInt(client, i_PlayerXP)%3600);
+	Format(tmp, sizeof(tmp), "Vous êtes niveau %d, prochain niveau: %d/3600 \nListe des bonus:\n ", rp_GetClientInt(client, i_PlayerLVL), rp_GetClientInt(client, i_PlayerXP)%3600);
 	SetMenuTitle(menu, tmp);
 	for(int i=0; i<sizeof(g_szLevelData); i++){
+		if(strlen(g_szLevelData[i][0]) == 0)
+			break;
 		Format(tmp, sizeof(tmp), "Au niveau %s: %s - %s", g_szLevelData[i][0], g_szLevelData[i][1], g_szLevelData[i][2]);
-		AddMenuItem(menu, "", tmp, ITEMDRAW_DISABLED);
+		
+		String_WordWrap(tmp, 60);
+		AddMenuItem(menu, "", tmp, level >= StringToInt(g_szLevelData[i][0]) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	}
-
+	SetMenuPagination(menu, 3);
 	DisplayMenu(menu, client, 60);
 }
 
@@ -414,9 +423,9 @@ int CountPlants(int client){
 
 public void SQL_loadLevelData(Handle owner, Handle row, const char[] error, any data) {
 	if(row != INVALID_HANDLE){
-		int j=0;
+		int j,i;
 		while( SQL_FetchRow(row) ) {
-			for(int i=0; i<=3; i++)
+			for(i=0; i<3; i++)
 				SQL_FetchString(row, i, g_szLevelData[j][i], sizeof(g_szLevelData[][]));
 			j++;
 	    }

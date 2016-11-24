@@ -478,6 +478,7 @@ native void rp_ClientGiveKnife(int client);									/* Retire, et remet le coute
 native void rp_ClientReveal(int client);										/* Si le joueur est invisible, le rend visible */
 native void rp_ClientDrawWeaponMenu(int client, int ent, bool steal);					/* Affiche le menu de selection d'arme. Pour police, justice, ou crochetage mafia */
 native void rp_ClientGetName(int client, char[] name, int length);
+native void rp_ClientTeleport(int client, float dst[3]);
 // ----------------------------------------------------------------------------
 native int rp_GetPlayerZoneAppart(int client); 									/* Numéro de l'appartement: Uniquement si on se trouve dedans... */
 native int rp_GetPlayerZone(int client, float cache = 0.25); 						/* Numéro de la zone actuelle. */
@@ -824,6 +825,7 @@ enum fd_user_data {
 	fd_vol,
 	fd_job,
 	fd_kidnapping,
+	fd_ruban,
 
 	fd_udata_max
 };
@@ -1191,6 +1193,7 @@ enum serverRules {
 	rules_Braquages,
 	rules_ItemsDisabled,
 	rules_Payes,
+	rules_HDV,
 	
 	server_rules_max
 };

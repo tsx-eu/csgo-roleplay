@@ -700,17 +700,12 @@ public Action metroTeleport(Handle timer, any client) {
 	}
 	
 	if( paid  ) {
-		float pos[3], vel[3];
+		float pos[3];
 		pos[0] = float(rp_GetLocationInt(tp, location_type_origin_x));
 		pos[1] = float(rp_GetLocationInt(tp, location_type_origin_y));
 		pos[2] = float(rp_GetLocationInt(tp, location_type_origin_z))+8.0;
 		
-		vel[0] = Math_GetRandomFloat(-300.0, 300.0);
-		vel[1] = Math_GetRandomFloat(-300.0, 300.0);
-		vel[2] = 100.0;
-						
-		TeleportEntity(client, pos, NULL_VECTOR, vel);
-		FakeClientCommandEx(client, "sm_stuck");
+		rp_ClientTeleport(client, pos);
 	}
 	
 	
