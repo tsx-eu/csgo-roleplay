@@ -828,7 +828,7 @@ public Action Cmd_Jail(int client) {
 			return Plugin_Handled;
 		
 		if( !CanSendToJail(client, client2) ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N ne pas peut être mis en prison pour le moment à cause d'une quête.", client2);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N ne peut être mis en prison pour le moment à cause d'une quête.", client2);
 			return Plugin_Handled;
 		}
 		if( IsValidClient(client2) ) {
@@ -844,7 +844,7 @@ public Action Cmd_Jail(int client) {
 	if ( Client_GetVehicle(target) > 0 ) {
 		if( IsValidClient(target) ) {
 			if( !CanSendToJail(client, target) ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N ne pas peut être mis en prison pour le moment à cause d'une quête.", target);
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N ne peut être mis en prison pour le moment à cause d'une quête.", target);
 				return Plugin_Handled;
 			}
 			rp_ClientVehicleExit(target, Client_GetVehicle(target), true);
@@ -858,7 +858,7 @@ public Action Cmd_Jail(int client) {
 	}
 	
 	if( !CanSendToJail(client, target) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N ne pas peut être mis en prison pour le moment à cause d'une quête.", target);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N ne peut être mis en prison pour le moment à cause d'une quête.", target);
 		return Plugin_Handled;
 	}
 	
