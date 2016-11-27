@@ -350,12 +350,30 @@ public Action Cmd_ItemRespawn(int args) {
 	#endif
 	
 	int client = GetCmdArgInt(1);
+	int vendeur = GetCmdArgInt(2);
+	int item_id = GetCmdArgInt(args);
 	
 	if( IsPlayerAlive(client) ) {
 		return Plugin_Handled;
 	}
 	if( IsClientSourceTV(client) )
 		return Plugin_Handled;
+		
+	if( !rp_GetClientBool(client, b_MayUseUltimate) ) {
+		
+		float prix = float(rp_GetItemInt(item_id, item_type_prix));
+		float reduc = prix / 100.0 * float(rp_GetClientInt(vendeur, i_Reduction));
+		float taxe = rp_GetItemFloat(item_id, item_type_taxes);
+		
+		rp_SetClientInt(vendeur, i_AddToPay, rp_GetClientInt(vendeur, i_AddToPay) - RoundFloat((prix * taxe) - reduc));
+		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) + RoundFloat(prix - reduc));
+		rp_SetJobCapital(11, rp_GetJobCapital(11) - RoundFloat(prix * (1.0 - taxe)));
+		
+		rp_SetClientStat(vendeur, i_MoneyEarned_Sales, rp_GetClientStat(vendeur, i_MoneyEarned_Sales) - RoundFloat((prix * taxe) - reduc));
+		
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas utiliser cet objet pour le moment.");
+		return Plugin_Handled;
+	}
 	
 	int ragdoll = GetEntPropEnt(client, Prop_Send, "m_hRagdoll");
 	
@@ -375,6 +393,9 @@ public Action Cmd_ItemRespawn(int args) {
 	g_iSuccess_last_faster_dead[client] = GetTime();
 	
 	rp_ClientTeleport(client, vecOrigin);
+	
+	rp_SetClientBool(client, b_MayUseUltimate, false);
+	CreateTimer(15.0, AllowUltimate, client);
 	
 	return Plugin_Handled;
 }
