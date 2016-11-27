@@ -236,7 +236,7 @@ public Action Cmd_Amende(int client, const char[] arg) {
 	#endif
 	int job = rp_GetClientInt(client, i_Job);
 		
-	if( job != 101 && job != 102 && job != 103 && job != 104 && job != 105 && job != 106 ) {
+	if( job < 101 || job > 106 ) {
 		ACCESS_DENIED(client);
 	}
 	
@@ -876,7 +876,7 @@ public Action Cmd_Mandat(int client) {
 	#endif
 	int job = rp_GetClientInt(client, i_Job);
 		
-	if( job != 101 && job != 102 && job != 103 && job != 104 && job != 105 && job != 106 ) {
+	if( job < 101 || job > 106 ) {
 		ACCESS_DENIED(client);
 	}
 	int target = rp_GetClientTarget(client);
@@ -958,7 +958,7 @@ public Action Cmd_Audience(int client) {
 	#endif
 	int job = rp_GetClientInt(client, i_Job);
 		
-	if( job != 101 && job != 102 && job != 103 && job != 104 && job != 105 && job != 106 ) {
+	if( job < 101 || job > 106 ) {
 		ACCESS_DENIED(client);
 	}
 	
@@ -1001,7 +1001,7 @@ public Action Cmd_Jugement(int client, int args) {
 	int job = rp_GetClientInt(client, i_Job);
 	char random[6];
 	
-	if( job != 101 && job != 102 && job != 103 && job != 104 ) {
+	if( job < 101 || job > 104 ) {
 		ACCESS_DENIED(client);
 	}
 	
