@@ -204,6 +204,11 @@ public Action fwdHear(int client, int target, float& dist) {
 		dist = 1.0;
 		return Plugin_Continue;
 	}
+	if( (Czone==290 && Tzone==290) || (Czone==289&&Tzone==289) ) {
+		dist = 1.0;
+		return Plugin_Continue;
+	}
+	
 	if( (Tbit & BITZONE_JAIL || Tbit & BITZONE_HAUTESECU) ) {
 		return Plugin_Stop;
 	}
