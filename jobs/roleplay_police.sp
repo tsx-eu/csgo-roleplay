@@ -1803,9 +1803,9 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 		if( type == -2 || type == -3 ) {
 			
 			if( type == -3 )
-				rp_ClientTeleport(target, view_as<float>({-966.1, -570.6, -2007.9}), NULL_VECTOR, NULL_VECTOR);
+				rp_ClientTeleport(target, view_as<float>({-966.1, -570.6, -2007.9}));
 			else
-				rp_ClientTeleport(target, view_as<float>({473.7, -1979.5, -2007.9}), NULL_VECTOR, NULL_VECTOR);
+				rp_ClientTeleport(target, view_as<float>({473.7, -1979.5, -2007.9}));
 			
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été mis en prison, en attente de jugement par: %N", client);
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez mis: %N {default}dans la prison du Tribunal.", target);
