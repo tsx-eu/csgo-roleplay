@@ -778,6 +778,10 @@ enum int_user_data {
 	i_BirthDay,
 	i_BirthMonth,
 	
+	i_SearchLVL,
+	i_GiveXP,
+	i_Dette,
+	
 	i_udata_max
 };
 enum float_user_data {
