@@ -99,8 +99,35 @@ public void OnPluginStart() {
 }
 public void OnMapStart() {
 	HookSingleEntityOutput(wheelButton, "OnPressed", wheelButtonPressed);
+	SDKHook(wheelButton, SDKHook_Touch, touch);
+	SDKHook(wheelButton+1, SDKHook_Touch, touch);
+	
 	PrecacheSound("common/talk.wav");
 	PrecacheSound("common/stuck1.wav");
+}
+public Action touch(int entity, int target) {
+	
+	if( IsValidClient(rp_IsGrabbed(target)) ) {
+		CPrintToChat(rp_IsGrabbed(target), "{lightblue}[TSX-RP]{default} Ne touchez pas la roue.");
+		rp_ClientDamage(rp_IsGrabbed(target), 50000, rp_IsGrabbed(target));
+	}
+		
+	if( IsValidClient(target) ) {
+		rp_ClientDamage(target, 5, target);
+		
+		float pos[3];
+		Entity_GetAbsOrigin(target, pos);
+		pos[0] -= 255.0;
+		pos[2] += 8.0;
+		
+		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Ne touchez pas la roue.");
+		rp_ClientTeleport(target, pos);
+	
+	}
+	else if( rp_IsMoveAble(target) )
+		AcceptEntityInput(target, "Kill");
+	
+	return Plugin_Continue;
 }
 public Action wheelButtonPressed(const char[] output, int caller, int activator, float delay) {
 	

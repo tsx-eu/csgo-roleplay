@@ -444,6 +444,7 @@ native void rp_SetClientKeyAppartement(int client, int appartID, bool status=fal
  */
 native bool rp_GetClientKeyAppartement(int client, int appartID);
 // ----------------------------------------------------------------------------
+native void rp_ClientForceRelease(int client);
 native void rp_Effect_PropExplode(int entityID, bool tazer = false);					/* Explose un props, s'il est piégé */
 native void rp_Effect_Smoke(int client, float duration = 30.0);						/* Petit effect de fumée de cigarette */
 native void rp_Effect_VisionTrouble(int client, float duration = 30.0);					/* Trouble la vision d'un joueur */
