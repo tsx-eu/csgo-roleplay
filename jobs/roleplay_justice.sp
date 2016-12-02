@@ -573,7 +573,7 @@ public Action Timer_MERCENAIRE(Handle timer, any type) {
 			if( rp_GetPlayerZone(i) == GetTribunalZone(type) )
 				return Plugin_Stop;
 			
-			PrintHintText(i, "Vos services d'enquêteur sont recquis au Tribunal %d.", type);
+			PrintHintText(i, "Vos services d'enquêteur sont requis au Tribunal %d.", type);
 		}
 	}
 	
@@ -661,7 +661,7 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 	else if( rp_GetClientInt(client, i_Avocat) > 0 ) {
 		for (int i = 1; i <= 2; i++) {
 			if( g_iTribunalData[i][td_AvocatPlaignant] == client || g_iTribunalData[i][td_AvocatSuspect] == client )
-				PrintHintText(client, "Vos services d'avocat sont recquis au Tribunal %d", i);
+				PrintHintText(client, "Vos services d'avocat sont requis au Tribunal %d", i);
 		}
 	}
 	return Plugin_Continue;
