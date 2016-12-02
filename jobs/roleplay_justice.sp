@@ -84,15 +84,17 @@ float g_flCoords[3][2][3];
 int g_iArticles[3][28];
 int g_iTribunalData[3][td_Max];
 
-#define TRIBUJAIL_1 287
-#define TRIBUJAIL_2 288
-#define TRIBUNAL_1 289
-#define TRIBUNAL_2 290
+#define TRIBUJAIL_1	287
+#define TRIBUJAIL_2	288
+#define TRIBUNAL_1	289
+#define TRIBUNAL_2	290
+#define BUREAU_1   	291
+#define BUREAU_2	292
 
 #define isTribunalDisponible(%1) (g_iTribunalData[%1][td_Owner]<=0?true:false)
 #define GetTribunalZone(%1) (%1==1?TRIBUNAL_1:TRIBUNAL_2)
 #define GetTribunalJail(%1) (%1==1?TRIBUJAIL_1:TRIBUJAIL_2)
-#define GetTribunalType(%1) ((%1 == TRIBUNAL_1 || %1 == TRIBUJAIL_1) ? 1 : (%1 == TRIBUNAL_2 || %1 == TRIBUJAIL_2) ? 2 : 0)
+#define GetTribunalType(%1) ((%1 == TRIBUNAL_1 || %1 == TRIBUJAIL_1 || %1 == BUREAU_1) ? 1 : (%1 == TRIBUNAL_2 || %1 == TRIBUJAIL_2 || %1 == BUREAU_2) ? 2 : 0)
 
 public void OnPluginStart() {
 	
@@ -109,18 +111,16 @@ public void OnPluginStart() {
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
 }
-
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt");
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 	
-	if( !isTribunalDisponible(1) )
-		rp_HookEvent(client, RP_OnPlayerHUD, fwdHUD);
-	// Doublon volontaire. Ne pas toucher.
-	if( !isTribunalDisponible(2) )
-		rp_HookEvent(client, RP_OnPlayerHUD, fwdHUD);
+	for (int i = 1; i <= 2; i++) {
+		if( !isTribunalDisponible(i) )
+			rp_HookEvent(client, RP_OnPlayerHUD, fwdHUD);
+	}
 }
 public void OnClientDisconnect(int client) {
 	for (int type = 1; type <= 2; type++) {
@@ -201,10 +201,11 @@ Action Draw_Menu(int client) {
 			menu.AddItem("enquete", "Enquêter", (injail) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 			
 			menu.AddItem("condamner -1", "Condamner", (injail) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );
-			menu.AddItem("dedomager -1", "Dédommager", (injail && (g_iTribunalData[type][td_AvocatPlaignant] > 0 || g_iTribunalData[type][td_AvocatSuspect] > 0)) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );
+			menu.AddItem("dedomager -1", "Dédommager", (g_iTribunalData[type][td_DoneDedommagement] == 0 && injail && (g_iTribunalData[type][td_AvocatPlaignant] > 0 || g_iTribunalData[type][td_AvocatSuspect] > 0)) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );
 			menu.AddItem("acquitter -1", "Acquitter", (injail) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );
 			menu.AddItem("stop", "Annuler l'audience", (!injail) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
-			
+			menu.AddItem("inverser", "Inverser plaignant-suspect", (injail) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+			menu.AddItem("forward", "Changer de juge");
 		}
 		menu.Display(client, MENU_TIME_FOREVER);
 	}
@@ -270,8 +271,10 @@ Menu AUDIENCE_Start(int client, int type, int plaignant, int suspect) {
 }
 Menu AUDIENCE_Stop(int type) {
 	
-	if( IsValidClient(g_iTribunalData[type][td_Suspect]) )
+	if( IsValidClient(g_iTribunalData[type][td_Suspect]) ) {
 		rp_SetClientInt(g_iTribunalData[type][td_Suspect], i_SearchLVL, 0);
+		rp_SetClientBool(g_iTribunalData[type][td_Suspect], b_IsSearchByTribunal, false);
+	}
 	
 	for (int i = 0; i < view_as<int>(td_Max); i++)
 		g_iTribunalData[type][i] = 0;
@@ -349,18 +352,22 @@ Menu AUDIENCE_Articles(int type, int a, int b, int c) {
 }
 Menu AUDIENCE_Condamner(int type, int articles) {
 	Menu subMenu = null;
-	char tmp[64];
+	char tmp[64], tmp2[64];
+	
 	if( articles == -1 ) {
 		int severity = timeToSeverity(g_iTribunalData[type][td_Time]) - g_iTribunalData[type][td_DoneDedommagement];
 		
 		subMenu = new Menu(MenuTribunal);
 		subMenu.SetTitle("Quel est votre verdict?\n ");
 		
+		int heure, amende;
+		calculerJail(type, heure, amende);
 		
 		for (int i = 0; i < sizeof(g_szCondamnation); i++) {
 			Format(tmp, sizeof(tmp), "condamner %d", i);
+			Format(tmp2, sizeof(tmp2), "%s %dh %d$", g_szCondamnation[i], RoundFloat(float(heure) * g_flCondamnation[i]),  RoundFloat(float(amende) * g_flCondamnation[i]));
 			
-			subMenu.AddItem(tmp, g_szCondamnation[i], (i>=severity-1&&i<=severity+1) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );
+			subMenu.AddItem(tmp, tmp2, (i>=severity-1&&i<=severity+1) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );
 		}
 	}
 	else {
@@ -515,6 +522,51 @@ Menu AUDIENCE_Enquete(int type, int a, int b) {
 	
 	return subMenu;
 }
+Menu AUDIENCE_Inverser(int type) {
+	int p = g_iTribunalData[type][td_Plaignant];
+	int q = g_iTribunalData[type][td_Suspect];
+	int r = g_iTribunalData[type][td_AvocatPlaignant];
+	int s = g_iTribunalData[type][td_AvocatSuspect];
+	
+	g_iTribunalData[type][td_Plaignant] = q;
+	g_iTribunalData[type][td_Suspect] = p;
+	g_iTribunalData[type][td_AvocatPlaignant] = s;
+	g_iTribunalData[type][td_AvocatSuspect] = r;
+
+	rp_SetClientInt(q, i_SearchLVL, rp_GetClientInt(p, i_SearchLVL));
+	rp_SetClientInt(p, i_SearchLVL, 0);
+	rp_SetClientBool(q, b_IsSearchByTribunal, rp_GetClientBool(p, b_IsSearchByTribunal));
+	rp_SetClientBool(p, b_IsSearchByTribunal, false);
+	
+	return null;
+}
+Menu AUDIENCE_Forward(int type, int a) {
+	Menu subMenu;
+	char tmp[64], tmp2[64];
+	
+	if( a == 0 ) {
+		subMenu = new Menu(MenuTribunal);
+		subMenu.SetTitle("Qui mettre comme nouveau juge?\n ");
+		
+		for (int i = 1; i <= MaxClients; i++) {
+			if( !IsValidClient(i) )
+				continue;
+			if( rp_GetClientJobID(i) != 101 )
+				continue;
+			if( i == g_iTribunalData[type][td_Owner] )
+				continue;
+			
+			Format(tmp, sizeof(tmp), "forward %d", i);
+			Format(tmp2, sizeof(tmp2), "%N", i);
+			subMenu.AddItem(tmp, tmp2);
+		}
+	}
+	else {
+		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N cède sa place de juge à %N.", g_iTribunalData[type][td_Owner], a);
+		g_iTribunalData[type][td_Owner] = a;
+	}
+	return subMenu;
+}
 // ----------------------------------------------------------------------------
 public int MenuTribunal(Handle menu, MenuAction action, int client, int param2) {
 	if( action == MenuAction_Select ) {
@@ -525,7 +577,6 @@ public int MenuTribunal(Handle menu, MenuAction action, int client, int param2) 
 		int a = StringToInt(expl[1]);
 		int b = StringToInt(expl[2]);
 		int c = StringToInt(expl[3]);
-		
 		
 		int type = GetTribunalType(rp_GetPlayerZone(client));
 		Menu subMenu = null;
@@ -547,6 +598,10 @@ public int MenuTribunal(Handle menu, MenuAction action, int client, int param2) 
 			subMenu = AUDIENCE_Enquete(type, a, b);
 		else if( StrEqual(expl[0], "dedomager") )
 			subMenu = AUDIENCE_Dedommagement(type);
+		else if( StrEqual(expl[0], "inverser") )
+			subMenu = AUDIENCE_Inverser(type);
+		else if( StrEqual(expl[0], "forward") )
+			subMenu = AUDIENCE_Forward(type, a);
 		else
 			subCommand = true;
 		
@@ -602,11 +657,13 @@ public Action Timer_AUDIENCE(Handle timer, any type) {
 	else if( time % 60 == 0 ) {
 		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est recherché par le {green}Tribunal %d{default} de Princeton depuis %d minutes.", target, type, time/60);
 		rp_SetClientInt(target, i_SearchLVL, timeToSeverity(time));
+		rp_SetClientBool(target, b_IsSearchByTribunal, true);
 	}
 	
 	if( zone == jail ) {
 		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est arrivé après %d minutes.", target, time/60);
 		g_iTribunalData[type][td_SuspectArrive] = 1;
+		rp_SetClientBool(target, b_IsSearchByTribunal, false);
 		Draw_Menu(g_iTribunalData[type][td_Owner]);
 		return Plugin_Stop;
 	}
@@ -702,8 +759,10 @@ stock void CPrintToChatSearch(int type, const char[] message, any...) {
 		if (!IsValidClient(i))
 			continue;
 		
-		if( i == g_iTribunalData[type][td_Suspect] || GetTribunalType(rp_GetPlayerZone(i)) == type ) {
+		if( i == g_iTribunalData[type][td_Suspect] || GetTribunalType(rp_GetPlayerZone(i)) == type || rp_GetClientJobID(i) == 1 || rp_GetClientJobID(i) == 101 ) {
+			CPrintToChat(i, "{lightblue} ================================ ");
 			CPrintToChat(i, buffer);
+			CPrintToChat(i, "{lightblue} ================================ ");
 		}
 	}
 }
