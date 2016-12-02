@@ -225,7 +225,26 @@ public void SQL_GetJackpot(Handle owner, Handle hQuery, const char[] error, any 
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
 	rp_HookEvent(client, RP_OnPlayerUse, fwdOnPlayerUse);
+	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
+}
+// ----------------------------------------------------------------------------
+public Action fwdCommand(int client, char[] command, char[] arg) {
+	if( StrEqual(command, "dé") ) {
+		return Cmd_de(client);
+	}
+	return Plugin_Continue;
+}
+public Action Cmd_de(int client) {
 	
+	if( rp_GetClientFloat(client, fl_CoolDown) > GetGameTime() ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez rien utiliser pour encore %.2f seconde(s).", rp_GetClientFloat(client, fl_CoolDown)-GetGameTime() );
+		return Plugin_Handled;
+	}
+	
+	rp_SetClientFloat(client, fl_CoolDown, GetGameTime() + 2.0);
+	
+	PrintToChatClientArea(client, "%N lance un dé et fait {green}%d{default}!", client, Math_GetRandomInt(1, 6));
+	return Plugin_Handled;
 }
 public Action fwdOnPlayerBuild(int client, float& cooldown) {
 	if( rp_GetClientJobID(client) != 171 )
