@@ -13,6 +13,7 @@
 #include <sourcemod>
 #include <cstrike>
 #include <sdkhooks>
+
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
 
@@ -905,6 +906,12 @@ public Action Cmd_ItemCryptage(int args) {
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
+	
+	if( rp_GetClientInt(client, i_SearchLVL) >= 3 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le Tribunal de princeton a gelé vos achats de pot de vin car vous êtes recherché depuis trop longtemps.");
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
 	
 	if(rp_GetClientJobID(client) == 1 || rp_GetClientJobID(client) == 101){
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cet objet est interdit aux forces de l'ordre.");
