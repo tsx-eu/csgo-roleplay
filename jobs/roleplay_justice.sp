@@ -38,6 +38,8 @@ enum TribunalData {
 	td_EnqueteSuspect,
 	td_DoneDedommagement,
 	td_Dedommagement,
+	td_Dedommagement2,
+	td_SuspectArrive,
 	
 	td_Max
 };
@@ -77,6 +79,7 @@ char g_szArticles[28][6][512] = {
 char g_szAcquittement[3][32] = { "Non coupable", "Conciliation", "Impossible de prouver les faits"};
 char g_szCondamnation[5][32] = { "très indulgent", "indulgent", "juste", "sévère", "très sévère" };
 float g_flCondamnation[5] = {0.2, 0.4, 0.6, 0.8, 1.0};
+float g_flCoords[3][2][3];
 
 int g_iArticles[3][28];
 int g_iTribunalData[3][td_Max];
@@ -92,6 +95,12 @@ int g_iTribunalData[3][td_Max];
 #define GetTribunalType(%1) ((%1 == TRIBUNAL_1 || %1 == TRIBUJAIL_1) ? 1 : (%1 == TRIBUNAL_2 || %1 == TRIBUJAIL_2) ? 2 : 0)
 
 public void OnPluginStart() {
+	
+	g_flCoords[1][0] = view_as<float>( { -508.0, -818.0, -1870.0 } );
+	g_flCoords[1][1] = view_as<float>( { -508.0, -712.0, -1870.0 } );
+	
+	g_flCoords[2][0] = view_as<float>( { 308.0, -1530.0, -1870.0 } );
+	g_flCoords[2][1] = view_as<float>( { 200.0, -1530.0, -1870.0 } );
 	
 	RegServerCmd("rp_item_enquete",		Cmd_ItemEnquete,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	CreateTimer(1.0, Timer_Light, _, TIMER_REPEAT);
@@ -113,17 +122,43 @@ public void OnClientPostAdminCheck(int client) {
 	if( !isTribunalDisponible(2) )
 		rp_HookEvent(client, RP_OnPlayerHUD, fwdHUD);
 }
+public void OnClientDisconnect(int client) {
+	for (int type = 1; type <= 2; type++) {
+		
+		if( g_iTribunalData[type][td_AvocatPlaignant] == client )
+			g_iTribunalData[type][td_AvocatPlaignant] = 0;
+		if( g_iTribunalData[type][td_AvocatSuspect] == client )
+			g_iTribunalData[type][td_AvocatSuspect] = 0;
+		
+		if( g_iTribunalData[type][td_Owner] == client || g_iTribunalData[type][td_Plaignant] == client )
+			AUDIENCE_Stop(type);
+		
+		if( g_iTribunalData[type][td_Suspect] == client ) {
+			AUDIENCE_Condamner(type, 4);
+		}
+	}
+}
 public Action Timer_Light(Handle timer, any none) {
 	
-	TE_SetupBeamPoints(view_as<float>({308.0, -1530.0, -1870.0}), view_as<float>({200.0, -1530.0, -1870.0}), g_cBeam, g_cBeam, 0, 0, 1.1, 4.0, 4.0, 0, 0.0, tribunalColor(2), 0);
-	TE_SendToAll();
+	for (int i = 1; i <= 2; i++) {
+		TE_SetupBeamPoints(g_flCoords[i][0], g_flCoords[i][1], g_cBeam, g_cBeam, 0, 0, 1.1, 4.0, 4.0, 0, 0.0, tribunalColor(i), 0);
+		TE_SendToAll();
+		
+		
+		if( g_iTribunalData[i][td_Suspect] > 0 && g_iTribunalData[i][td_SuspectArrive] == 1 ) {
+			int zone = rp_GetPlayerZone(g_iTribunalData[i][td_Suspect]);
+			if( GetTribunalType(zone) != i ) {
+				float pos[3];
+				pos = getZoneMiddle(GetTribunalJail(i));
+				rp_ClientTeleport(g_iTribunalData[i][td_Suspect], pos);
+			}
+		}
+	}
 	
-	TE_SetupBeamPoints(view_as<float>({-508.0, -818.0, -1870.0}), view_as<float>({-508.0, -712.0, -1870.0}), g_cBeam, g_cBeam, 0, 0, 1.1, 4.0, 4.0, 0, 0.0, tribunalColor(1), 0);
-	TE_SendToAll();
 }
 // ----------------------------------------------------------------------------
 public Action fwdCommand(int client, char[] command, char[] arg) {
-	if( StrContains(command, "tb2") == 0 ) {
+	if( StrContains(command, "tb") == 0 ) {
 		return Draw_Menu(client);
 	}
 	return Plugin_Continue;
@@ -157,8 +192,7 @@ Action Draw_Menu(int client) {
 		menu.SetTitle(title);
 		
 		int admin = (g_iTribunalData[type][td_Owner] == client) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED;
-		bool injail = rp_GetPlayerZone(g_iTribunalData[type][td_Suspect]) == GetTribunalJail(type);
-		
+		bool injail = (g_iTribunalData[type][td_SuspectArrive] == 1 ? true:false);
 		
 		if( admin == ITEMDRAW_DEFAULT ) {
 						
@@ -189,8 +223,8 @@ Menu AUDIENCE_Start(int client, int type, int plaignant, int suspect) {
 		for (int i = 1; i<=MaxClients; i++) {
 			if( !IsValidClient(i) )
 				continue;
-			//if( i == client )
-			//	continue;
+			if( i == client )
+				continue;
 			if( GetTribunalZone(type) != rp_GetPlayerZone(i) )
 				continue;
 			
@@ -207,11 +241,11 @@ Menu AUDIENCE_Start(int client, int type, int plaignant, int suspect) {
 		for (int i = 1; i<=MaxClients; i++) {
 			if( !IsValidClient(i) )
 				continue;
-/*			if( i == client )
+			if( i == client )
 				continue;
 			if( i == plaignant )
 				continue;
-*/			
+			
 			Format(tmp, sizeof(tmp), "start %d %d", plaignant, i);
 			Format(tmp2, sizeof(tmp2), "%N", i);
 			
@@ -236,6 +270,9 @@ Menu AUDIENCE_Start(int client, int type, int plaignant, int suspect) {
 }
 Menu AUDIENCE_Stop(int type) {
 	
+	if( IsValidClient(g_iTribunalData[type][td_Suspect]) )
+		rp_SetClientInt(g_iTribunalData[type][td_Suspect], i_SearchLVL, 0);
+	
 	for (int i = 0; i < view_as<int>(td_Max); i++)
 		g_iTribunalData[type][i] = 0;
 	
@@ -249,7 +286,7 @@ Menu AUDIENCE_Stop(int type) {
 	}
 	return null;
 }
-Menu AUDIENCE_Articles(int type, int a, int b) {
+Menu AUDIENCE_Articles(int type, int a, int b, int c) {
 	Menu subMenu = null;
 	char tmp[64];
 	
@@ -281,8 +318,27 @@ Menu AUDIENCE_Articles(int type, int a, int b) {
 		}
 	}
 	else if( a == 1 && b >= 0 ) {
-		g_iArticles[type][b]++;
-		g_iTribunalData[type][td_ArticlesCount]++;
+		
+		if( StringToInt(g_szArticles[b][4]) == -1 && c != 42 ) {
+			
+			g_iTribunalData[type][td_Dedommagement2] += c;
+			if( g_iTribunalData[type][td_Dedommagement2] < 0 )
+				g_iTribunalData[type][td_Dedommagement2] = 0;
+			
+			subMenu = new Menu(MenuTribunal);
+			subMenu.SetTitle("Quel est la valeur de %s?\n   %d$\n ", g_szArticles[b][1], g_iTribunalData[type][td_Dedommagement2]);
+			
+			Format(tmp, sizeof(tmp), "articles 1 %d %d", b, 50); subMenu.AddItem(tmp, "Ajouter 50$");
+			Format(tmp, sizeof(tmp), "articles 1 %d %d", b, 500); subMenu.AddItem(tmp, "Ajouter 500$\n ");
+			Format(tmp, sizeof(tmp), "articles 1 %d %d", b, -50); subMenu.AddItem(tmp, "Retirer 50$");
+			Format(tmp, sizeof(tmp), "articles 1 %d %d", b, -500); subMenu.AddItem(tmp, "Retirer 500$");
+			
+			Format(tmp, sizeof(tmp), "articles 1 %d %d", b, 42); subMenu.AddItem(tmp, "Valider");
+		}
+		else {
+			g_iArticles[type][b]++;
+			g_iTribunalData[type][td_ArticlesCount]++;
+		}
 	}
 	else if( a == 2 && b >= 0 ) {
 		g_iArticles[type][b]--;
@@ -295,10 +351,12 @@ Menu AUDIENCE_Condamner(int type, int articles) {
 	Menu subMenu = null;
 	char tmp[64];
 	if( articles == -1 ) {
-		int severity = timeToSeverity(g_iTribunalData[type][td_Time]);
+		int severity = timeToSeverity(g_iTribunalData[type][td_Time]) - g_iTribunalData[type][td_DoneDedommagement];
 		
 		subMenu = new Menu(MenuTribunal);
 		subMenu.SetTitle("Quel est votre verdict?\n ");
+		
+		
 		for (int i = 0; i < sizeof(g_szCondamnation); i++) {
 			Format(tmp, sizeof(tmp), "condamner %d", i);
 			
@@ -307,15 +365,14 @@ Menu AUDIENCE_Condamner(int type, int articles) {
 	}
 	else {
 		
-		int heure, amende, target;
+		int heure, amende;
 		calculerJail(type, heure, amende);
 		
 		heure = RoundFloat(float(heure) * g_flCondamnation[articles]);
 		amende = RoundFloat(float(amende) * g_flCondamnation[articles]);
-		target = g_iTribunalData[type][td_Suspect];
 		
 		SQL_Insert(type, true, articles, heure, amende);
-		PrintToChatSearch(GetTribunalZone(type), target, "{lightblue}[TSX-RP]{default} %N a été condamné à %d heures et %d$ d'amende. Le juge a été %s.", target, heure, amende, g_szCondamnation[articles]);
+		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N a été condamné à %d heures et %d$ d'amende. Le juge a été %s.", g_iTribunalData[type][td_Suspect], heure, amende, g_szCondamnation[articles]);
 		
 		AUDIENCE_Stop(type);
 	}
@@ -335,7 +392,10 @@ Menu AUDIENCE_Acquitter(int type, int articles) {
 		}
 	}
 	else {
-		PrintToChatSearch(GetTribunalZone(type), g_iTribunalData[type][td_Suspect], "{lightblue}[TSX-RP]{default} %N a été acquitté: %s.", g_iTribunalData[type][td_Suspect], g_szAcquittement[articles]);
+		
+		SQL_Insert(type, false, articles, 0, 0);
+		
+		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N a été acquitté: %s.", g_iTribunalData[type][td_Suspect], g_szAcquittement[articles]);
 		AUDIENCE_Stop(type);
 	}
 	
@@ -385,6 +445,17 @@ Menu AUDIENCE_Avocat(int type, int a, int b) {
 Menu AUDIENCE_Dedommagement(int type) {
 	
 	if( g_iTribunalData[type][td_DoneDedommagement] == 0 ) {
+		g_iTribunalData[type][td_DoneDedommagement] = 1;
+		
+		int money = calculerDedo(type);
+		int client = g_iTribunalData[type][td_Plaignant];
+		int target = g_iTribunalData[type][td_Suspect];
+		
+		
+		rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - money);
+		rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) + money);
+		
+		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N a dédommagé %N de %d$", target, client, money);
 	}
 	
 	return null;
@@ -453,6 +524,8 @@ public int MenuTribunal(Handle menu, MenuAction action, int client, int param2) 
 		ExplodeString(options, " ", expl, sizeof(expl), sizeof(expl[]));
 		int a = StringToInt(expl[1]);
 		int b = StringToInt(expl[2]);
+		int c = StringToInt(expl[3]);
+		
 		
 		int type = GetTribunalType(rp_GetPlayerZone(client));
 		Menu subMenu = null;
@@ -463,7 +536,7 @@ public int MenuTribunal(Handle menu, MenuAction action, int client, int param2) 
 		else if( StrEqual(expl[0], "stop") )
 			subMenu = AUDIENCE_Stop(type);
 		else if( StrEqual(expl[0], "articles") )
-			subMenu = AUDIENCE_Articles(type, a, b);
+			subMenu = AUDIENCE_Articles(type, a, b, c);
 		else if( StrEqual(expl[0], "acquitter") )
 			subMenu = AUDIENCE_Acquitter(type, a);
 		else if( StrEqual(expl[0], "condamner") )
@@ -512,7 +585,6 @@ public Action Timer_AUDIENCE(Handle timer, any type) {
 	int target = g_iTribunalData[type][td_Suspect];
 	int time = g_iTribunalData[type][td_Time];
 	int zone = rp_GetPlayerZone(target);
-	int tzone = GetTribunalZone(type);
 	int jail = GetTribunalJail(type);
 	
 	if( !IsValidClient(target) ) {
@@ -526,12 +598,15 @@ public Action Timer_AUDIENCE(Handle timer, any type) {
 	}
 		
 	if( time < 60 && time % 20 == 0 )
-		PrintToChatSearch(tzone, target, "{lightblue}[TSX-RP]{default} %N est convoqué par le {green}Tribunal %d{default} de Princeton [%d/3].", target, type, time/20 + 1);
-	else if( time % 60 == 0 )
-		PrintToChatSearch(tzone, target, "{lightblue}[TSX-RP]{default} %N est recherché par le {green}Tribunal %d{default} de Princeton depuis %d minutes.", target, type, time/60);
+		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est convoqué par le {green}Tribunal %d{default} de Princeton [%d/3].", target, type, time/20 + 1);
+	else if( time % 60 == 0 ) {
+		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est recherché par le {green}Tribunal %d{default} de Princeton depuis %d minutes.", target, type, time/60);
+		rp_SetClientInt(target, i_SearchLVL, timeToSeverity(time));
+	}
 	
 	if( zone == jail ) {
-		PrintToChatSearch(tzone, target, "{lightblue}[TSX-RP]{default} %N est arrivé après %d minutes.", target, time/60);
+		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est arrivé après %d minutes.", target, time/60);
+		g_iTribunalData[type][td_SuspectArrive] = 1;
 		Draw_Menu(g_iTribunalData[type][td_Owner]);
 		return Plugin_Stop;
 	}
@@ -583,7 +658,7 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 		Format(szHUD, size, "%s\n ", szHUD);
 		return Plugin_Changed;
 	}
-	else if( rp_GetClientInt(client, i_Avocat) ) {
+	else if( rp_GetClientInt(client, i_Avocat) > 0 ) {
 		for (int i = 1; i <= 2; i++) {
 			if( g_iTribunalData[i][td_AvocatPlaignant] == client || g_iTribunalData[i][td_AvocatSuspect] == client )
 				PrintHintText(client, "Vos services d'avocat sont recquis au Tribunal %d", i);
@@ -619,15 +694,15 @@ int[] tribunalColor(int type) {
 	
 	return color;
 }
-stock void PrintToChatSearch(int zone, int target, const char[] message, any...) {
+stock void CPrintToChatSearch(int type, const char[] message, any...) {
 	char buffer[MAX_MESSAGE_LENGTH];
-	VFormat(buffer, sizeof(buffer), message, 4);
+	VFormat(buffer, sizeof(buffer), message, 3);
 	
 	for (int i = 1; i <= MaxClients; i++) {
 		if (!IsValidClient(i))
 			continue;
 		
-		if (i == target || rp_GetPlayerZone(i) == zone ) {
+		if( i == g_iTribunalData[type][td_Suspect] || GetTribunalType(rp_GetPlayerZone(i)) == type ) {
 			CPrintToChat(i, buffer);
 		}
 	}
@@ -636,7 +711,7 @@ float[] getZoneMiddle(int zone) {
 	float middle[3];
 	middle[0] = (rp_GetZoneFloat(zone, zone_type_min_x) + rp_GetZoneFloat(zone, zone_type_max_x)) / 2.0;
 	middle[1] = (rp_GetZoneFloat(zone, zone_type_min_y) + rp_GetZoneFloat(zone, zone_type_max_y)) / 2.0;
-	middle[2] = (rp_GetZoneFloat(zone, zone_type_min_z) + rp_GetZoneFloat(zone, zone_type_max_z)) / 2.0;
+	middle[2] = (rp_GetZoneFloat(zone, zone_type_min_z) + rp_GetZoneFloat(zone, zone_type_max_z)) / 2.0 - 64.0;
 	return middle;
 }
 int timeToSeverity(int time) {
@@ -658,8 +733,12 @@ int getMaxArticles(int client) {
 	}
 	return 0;
 }
-void SQL_Insert(int type, int avoue, int condamnation, int heure, int amende) {
-	char query[1024], szSteamID[5][32], charges[128];
+void SQL_Insert(int type, int condamne, int condamnation, int heure, int amende) {
+	char query[1024], szSteamID[5][32], charges[128], nick[64], pseudo[ sizeof(nick)*2+1 ];
+	
+	int dedommage = 0;
+	if( g_iTribunalData[type][td_DoneDedommagement] == 1 )
+		dedommage = calculerDedo(type);
 	
 	for (int i = 0; i < sizeof(g_szArticles); i++) {
 		if( g_iArticles[type][i] <= 0 )
@@ -680,12 +759,20 @@ void SQL_Insert(int type, int avoue, int condamnation, int heure, int amende) {
 	if( IsValidClient(g_iTribunalData[type][td_AvocatSuspect]) )
 		GetClientAuthId(g_iTribunalData[type][td_AvocatSuspect], AuthId_Engine, szSteamID[4], sizeof(szSteamID[]));
 	
-	Format(query, sizeof(query), "INSERT INTO `rp_audiences` (`id`, `juge`, `plaignant`, `suspect`, `avocat-plaignant`, `avocat-suspect`, `temps`, `avoue`, `charges`, `condamnation`, `heure`, `amende`) VALUES(NULL,");
-	Format(query, sizeof(query), "%s '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%d', '%d', '%d');", query, szSteamID[0], szSteamID[1], szSteamID[2], szSteamID[3], szSteamID[4],
-	g_iTribunalData[type][td_Time], avoue, charges, condamnation, heure, amende);
-	
-	
+	Format(query, sizeof(query), "INSERT INTO `rp_audiences` (`id`, `juge`, `plaignant`, `suspect`, `avocat-plaignant`, `avocat-suspect`, `temps`, `condamne`, `charges`, `condamnation`, `heure`, `amende`, `dedommage`) VALUES(NULL,");
+	Format(query, sizeof(query), "%s '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%d', '%d', '%d', '%d');", query, szSteamID[0], szSteamID[1], szSteamID[2], szSteamID[3], szSteamID[4],
+	g_iTribunalData[type][td_Time], condamne, charges, condamnation, heure, amende, dedommage);	
 	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
+	
+	if( condamne ) {
+		
+		GetClientName(g_iTribunalData[type][td_Owner], nick, sizeof(nick));
+		SQL_EscapeString(rp_GetDatabase(), nick, pseudo, sizeof(pseudo));
+		
+		Format(query, sizeof(query), "INSERT INTO `rp_users2` (`id`, `steamid`, `money`, `jail`, `pseudo`, `steamid2`, `raison`) VALUES (NULL,");
+		Format(query, sizeof(query), "%s '%s', '%d', '%d', '%s', '%s', '%s');", query, szSteamID[2], -amende, heure * 60, pseudo, szSteamID[0], "condamné par le Tribunal"); 
+		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
+	}
 }
 bool hasMercenaire() {
 	for (int i = 1; i <= MaxClients; i++) {
@@ -707,7 +794,7 @@ int calculerDedo(int type) {
 		
 		amende += (g_iArticles[type][i] * StringToInt(g_szArticles[i][4]));
 	}
-	return RoundFloat(float(amende) * getAvocatRatio(g_iTribunalData[type][td_AvocatPlaignant]));
+	return RoundFloat(float(amende) * getAvocatRatio(g_iTribunalData[type][td_AvocatPlaignant])) + g_iTribunalData[type][td_Dedommagement2];
 }
 void calculerJail(int type, int& heure, int& amende) {
 	for (int i = 0; i < sizeof(g_szArticles); i++) {
@@ -743,6 +830,7 @@ public Action Cmd_ItemEnquete(int args) {
 	}
 	
 	
+	
 	rp_IncrementSuccess(client, success_list_detective);
 	Handle menu = CreateMenu(MenuNothing);
 	SetMenuTitle(menu, "Information sur %N\n ", target);
@@ -755,6 +843,11 @@ public Action Cmd_ItemEnquete(int args) {
 	
 	int killedBy = rp_GetClientInt(target, i_LastKilled_Reverse);
 	if( IsValidClient(killedBy) ) {
+		
+		if( rp_GetClientInt(target, i_SearchLVL) >= 4 ) {
+			rp_SetClientInt(target, i_Cryptage, 0);
+		}
+		
 		if( Math_GetRandomInt(1, 100) < rp_GetClientInt(target, i_Cryptage)*20 ) {
 			
 			String_GetRandom(tmp, sizeof(tmp), 24);
@@ -777,6 +870,10 @@ public Action Cmd_ItemEnquete(int args) {
 	
 	int killed = rp_GetClientInt(target, i_LastKilled);
 	if( IsValidClient(killed) ) {
+		
+		if( rp_GetClientInt(killed, i_SearchLVL) >= 4 ) {
+			rp_SetClientInt(killed, i_Cryptage, 0);
+		}
 		
 		if( Math_GetRandomInt(1, 100) < rp_GetClientInt(killed, i_Cryptage)*20 ) {	
 			
