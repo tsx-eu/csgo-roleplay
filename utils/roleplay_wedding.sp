@@ -29,6 +29,7 @@ public Plugin myinfo = {
 
 int g_cBeam, g_cGlow;
 
+
 // TODO: Partage auto des clés voiture / appart
 // TODO: Rajouter personnalité / sexe aux conjoints
 // TODO: Bonus s'ils sont proches differents si homme ou femme du coup ?
@@ -199,7 +200,7 @@ public int eventMariage_2(Handle menu, MenuAction action, int client, int param2
 		Handle menu2 = CreateMenu(eventMariage_3);
 		
 		// S'il n'y a pas d'erreurs, on envoie un menu de choix a la premiere personne
-		Format(options, sizeof(options), "Voulez-vous prendre %N pour époux et l'aimer jusqu'à ce que la mort vous sépare ? (2000$)", target_1); 
+		Format(options, sizeof(options), "Voulez-vous prendre %N pour époux et l'aimer jusqu'à ce que la mort vous sépare ? (1000$)", target_1); 
 		SetMenuTitle(menu2, options);
 		
 		Format(options, sizeof(options), "%i_%i_1_0_%i", target_1, client, zoneJuge); // le dernier 0 signifie que c'est la premiere personne
@@ -246,7 +247,7 @@ public int eventMariage_3(Handle menu, MenuAction action, int client, int param2
 			// Setup menu
 			Handle menu2 = CreateMenu(eventMariage_3);
 			
-			Format(options, sizeof(options), "Voulez-vous prendre %N pour épouse et l'aimer jusqu'à ce que la mort vous sépare(2000$)", client);
+			Format(options, sizeof(options), "Voulez-vous prendre %N pour épouse et l'aimer jusqu'à ce que la mort vous sépare(1000$)", client);
 			SetMenuTitle(menu2, options);
 			
 			Format(options, sizeof(options), "%i_%i_1_1_%i", client, juge, zoneJuge);
@@ -268,7 +269,7 @@ public int eventMariage_3(Handle menu, MenuAction action, int client, int param2
 }
 public Action Marier(int epoux, int epouse, int juge, int zoneJuge){
 	
-	int prix = 4000;
+	int prix = 2000;
 
 	if( (rp_GetClientInt(epoux, i_Bank)+rp_GetClientInt(epoux, i_Money)) < (prix/2) || (rp_GetClientInt(epouse, i_Bank)+rp_GetClientInt(epouse, i_Money)) < (prix/2) ) {
 		PrintToChatZone(zoneJuge, "{lightblue}[TSX-RP]{default} L'un des mariés est en fait un SDF refoulé et n'a pas assez d'argent pour s'aquitter des frais du mariage, Vous pouvez huer les pauvres !");
