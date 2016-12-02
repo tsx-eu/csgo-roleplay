@@ -224,6 +224,9 @@ public void Q3_Frame(int objectiveID, int client) {
 	if( GetVectorDistance(target, origin) < 64.0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu 2500$.");
 		rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money)+ 2500);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu en récompense 1 Carte bancaire et 1 clé de coffre.");
+		rp_ClientGiveItem(client, 69);
+		rp_ClientGiveItem(client, 70);
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else {
@@ -245,14 +248,19 @@ public void Q4_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, " Pour cela, positionnez-vous devant un");
 		DrawPanelText(panel, "distributeur, utilisez votre touche action (E).");
-		DrawPanelText(panel, "Selectionnez l'action déposer argent.");
+		DrawPanelText(panel, " Selectionnez l'action déposer argent.");
 		DrawPanelText(panel, "Déposez-y le montant que vous souhaitez");
 		DrawPanelText(panel, " ");
-		DrawPanelText(panel, " Sachez tout de même que les banquiers vendent");
-		DrawPanelText(panel, "des cartes et des comptes bancaires qui vous");
-		DrawPanelText(panel, "faciliterons la vie plus tard sur le serveur.");
-		DrawPanelText(panel, " ");
 		DrawPanelText(panel, "→ Déposez tout votre argent en banque.");
+		DrawPanelText(panel, " ");
+		DrawPanelText(panel, " Pour vous souhaitez la bienvenue, nous vous");
+		DrawPanelText(panel, "avons offert une carte bancaire et une clé de coffre");
+		DrawPanelText(panel, "→ Entrez la commande /item dans le chat général,");
+		DrawPanelText(panel, " Appuyez sur la touche 1 deux fois afin de les activer");
+		DrawPanelText(panel, " ");
+		DrawPanelText(panel, " Sachez tout de même que les banquiers vendent");
+		DrawPanelText(panel, "des cartes bancaires et des RIB qui vous");
+		DrawPanelText(panel, "faciliterons la vie plus tard sur le serveur.");
 		
 		rp_SendPanelToClient(panel, client, 1.1);
 		CreateTimer(1.1, PostKillHandle, panel);
