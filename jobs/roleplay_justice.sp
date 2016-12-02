@@ -43,30 +43,30 @@ enum TribunalData {
 };
 int g_cBeam;
 
-// Numéro, Résumé, heure, amende, dédo, détail
+// Numéro, Résumé, Heures, Amende, Dédo, Détails
 char g_szArticles[28][6][512] = {
 	{"221-1-a",		"Meurtre d'un civil",							"18",	"1250",		"1000",	"Toutes atteintes volontaires à la vie d’un citoyen sont condamnées à une peine maximale de 18h de prison et 1250$ d’amende." },
 	{"221-1-b",		"Meurtre d'un policier",						"24",	"5500",		"1500",	"Toutes atteintes volontaires à la vie d’un officier des forces de l’ordre sont condamnées à une peine maximale de 24h de prison et 5 500$ d’amende." },
 	{"221-2",		"Vol",											"6",	"450",		"-1",	"Le vol est un acte punis d’une peine maximale de 6h de prison et 450$ d’amende." },
 	{"221-3",		"Manquement convocation",						"18",	"4000",		"0",	"Le manquement à une convocation devant les tribunaux sans motif valable est puni d’une peine maximale de 18h de prison et 4.000$ d'amende." },
-	{"221-4",		"Faux aveux / Dénonciation calomnieuses",		"6",	"1500",		"0",	"Les faux aveux ou les dénonciations calomnieuses sont punis d’une peine maximale de 6h de prison et 1500$ d’amende." },
+	{"221-4",		"Faux aveux / Dénonciations calomnieuses",		"6",	"1500",		"0",	"Les faux aveux ou les dénonciations calomnieuses sont punis d’une peine maximale de 6h de prison et 1500$ d’amende." },
 	{"221-5-a",		"Nuisances sonores", 							"6",	"1500", 	"0",	"Les nuisances sonores sont punies d’une peine maximale de 6h de prison et 1 500$ d'amende." },
-	{"221-5-b",		"Insultes / irrespects", 						"6",	"1000", 	"1250",	"Les insultes sont passibles d’une peine maximale de 6h de prison et 1000$ d’amende." },
+	{"221-5-b",		"Insultes / irrespect", 						"6",	"1000", 	"1250",	"Les insultes sont passibles d’une peine maximale de 6h de prison et 1000$ d’amende." },
 	{"221-5-c",		"Harcèlements / Menaces", 						"6",	"800",		"300",	"Les actes de harcèlement et/ou menaces sont passibles d'une peine maximale de 6h de prison et 800$ d'amende." },
-	{"221-6",		"Récidive",										"6",	"15000",	"0",	"Toute personne condamnée pour une récidive vis-à-vis de meurtre ou d'une infraction déjà jugée sera condamnée à une peine plus lourde, l'amende peut être augmentée progressivement de 15 000$ et la peine de prison de 6h." },
-	{"221-7",		"Obstruction ",									"6",	"650",		"0",	"Tous actes obstruant les forces de l’ordre (Masque/Suicide/Pilules/Pots de vins que ce soit avant ou pendant l’audience/Changement de pseudo délibéré, pendant la recherche du criminel et GHB), ou la fuite délibérée, ou mutinerie, sont passible d’une peine maximale de 6h de prison et 650$ d'amende. " },
-	{"221-8",		"Bavure policière",								"24",	"3000",		"0",	"Toute acte de maltraitance policière (taser, balle perdue, jail/déjail répétitif...) pourra être rapporté devant les tribunaux. La maltraitance est passible de 24h de prison au maximum, et d'une amende de 3 000$ au maximum" },
+	{"221-6",		"Récidive",										"6",	"15000",	"0",	"Toute personne condamnée pour une récidive vis-à-vis de meurtre ou d'une infraction déjà jugée sera condamnée à une peine plus lourde, l'amende peut-être augmentée progressivement de 15 000$ et la peine de prison de 6h." },
+	{"221-7",		"Obstruction ",									"6",	"650",		"0",	"Tout acte obstruant les forces de l’ordre (Masque/Suicide/Pilule/Pots de vins, que ce soit avant ou pendant l’audience/Changement de pseudo délibéré, pendant la recherche du criminel et GHB), ou la fuite délibérée, ou mutinerie, sont passibles d’une peine maximale de 6h de prison et 650$ d'amende. " },
+	{"221-8",		"Bavure policière",								"24",	"3000",		"0",	"Tout acte de maltraitance policière (taser, balle perdue, jail/déjail répétitif...) pourra être rapporté devant les tribunaux. La maltraitance est passible de 24h de prison au maximum, et d'une amende de 3 000$ au maximum" },
 	{"221-9",		"Abus de métier",								"6",	"1000",		"500",	"Tout abus d’un métier est passible d’une peine maximale de 6h de prison et 1 000$ d'amende, ainsi qu’un remboursement intégral de la caution prélevée (si abus Justice/Police)." },
 	{"221-10-a",	"Fraude",										"24",	"5000",		"0",	"Tout acte de fraude (transaction d'argent) pour éviter des sanctions juridiques peut être rapporté et signalé. Les personnes étant complices de cette fraude peuvent encourir une peine maximale de 24h de prison et 5000$ d'amende." },
 	{"221-10-b",	"Association de malfaiteurs",					"6",	"500",		"0",	"Toute association de malfaiteurs (Défense lors de perquisitions notamment) est punissable d’une peine maximale de 6h de prison et 500$ d’amende." },
 	{"221-11-a",	"Vente forcée",									"12",	"5000",		"-1",	"Toute personne essayant de vendre sans le consentement libre et éclairé d'une personne peut-être condamnée à une peine maximale de 12h de prison et 5.000$ d’amende, ainsi qu'un remboursement de la totalité de ce dernier. (Le remboursement n’est pas un dédommagement est n’est donc pas soumis aux avocats)." },
 	{"221-11-b",	"Refus de vente",								"6",	"1500",		"0",	"Tout refus de vente est punissable par 6h de prison et une amende de 1.500$ au maximum." },
 	{"221-12",		"Profiter de la vulnérabilité d’une personne",	"18",	"3000",		"1500",	"Le fait de soumettre une personne à un acte criminel en abusant de sa vulnérabilité ou de sa dépendance à son travail est punis d’une peine maximale de 18h de prison et 3 000$ d’amende en plus de la peine du crime commis" },
-	{"221-13-a",	"Destruction de bien d’autrui",					"6",	"1500",		"1000",	"Tout acte volontaire ou involontaire de destruction de bien d'autrui et ce quel que soit les méthodes de destruction utilisées, peut-être condamné par 6h de prison et 1500$ au maximum" },
+	{"221-13-a",	"Destruction de biens d’autrui",					"6",	"1500",		"1000",	"Tout acte volontaire ou involontaire de destruction de biens d'autrui et ce quelque soit les méthodes de destruction utilisées, peut-être condamné par 6h de prison et 1500$ au maximum" },
 	{"221-13-b",	"Atteinte à la vie privée",						"6",	"950",		"500",	"Les atteintes à la vie privée telles que l’espionnage, ou l’enregistrement d’une conversation intime, sont punies d’une peine maximale de 6h de prison et 950$ d'amende" },
 	{"221-13-c",	"Intrusion dans une propriété privée",			"6",	"800",		"500",	"La violation d’une propriété privée est punie d’une peine maximale de 6h de prison et 800$ d’amende." },
 	{"221-13-d",	"Intrusion dans un batiment fédéral",			"18",	"5000",		"500",	"La violation d’un batiment fédéral est punie d’une peine maximale de 18h de prison et 5000$ d’amende." },
-	{"221-14-a",	"Usage produit illicite",						"6",	"1000",		"250",	"Droguer ou alcooliser une personne à son insu est un acte punis d’une peine maximale de 6h de prison et 1000$ d’amende. " },
+	{"221-14-a",	"Usage de produits illicites",						"6",	"1000",		"250",	"Droguer ou alcooliser une personne à son insu est un acte punis d’une peine maximale de 6h de prison et 1000$ d’amende. " },
 	{"221-14-b",	"Trafic d’armes",								"6",	"750",		"0",	"La vente ou la possession illégale d’armes est passible d’une peine maximale de 6h de prison et 750$ d'amende." },
 	{"221-15-a",	"Tentative de corruption",						"24",	"10000",	"0",	"Tout acte de corruption ou de tentative de corruption, est puni d’une peine maximale de 24h de prison et 10 000$ d’amende." },
 	{"221-15-b",	"Escroquerie",									"18",	"5000",		"-1",	"Tout acte d’escroquerie est puni d’une peine maximale de 24h de prison et 5 000$ d’amende." },
@@ -75,7 +75,7 @@ char g_szArticles[28][6][512] = {
 	{"221-18",		"Asile politique",								"24",	"1500",		"1000",	"Le tribunal est une zone internationale indépendante des lois de la police, tout citoyen y est protégé par asile juridique. De ce fait, tout policier mettant une personne étant dans le tribunal en prison encourt une peine maximale de 24h de prison et 1 500$ d'amende." }
 };
 char g_szAcquittement[3][32] = { "Non coupable", "Conciliation", "Impossible de prouver les faits"};
-char g_szCondamnation[5][32] = { "très indulgent", "indulgent", "juste", "sévère", "très sévère" };
+char g_szCondamnation[5][32] = { "Très indulgent", "Indulgent", "Juste", "Sévère", "Très sévère" };
 float g_flCondamnation[5] = {0.2, 0.4, 0.6, 0.8, 1.0};
 
 int g_iArticles[3][28];
@@ -151,7 +151,7 @@ Action Draw_Menu(int client) {
 		
 		char title[512];
 		Menu menu = new Menu(MenuTribunal);
-		g_iTribunalData[type][td_Dedommagement] = calculerDedo(type);
+		g_iTribunalData[type][td_Dédommagement] = calculerDedo(type);
 		
 		fwdHUD(client, title, sizeof(title));		
 		menu.SetTitle(title);
@@ -298,7 +298,7 @@ Menu AUDIENCE_Condamner(int type, int articles) {
 		int severity = timeToSeverity(g_iTribunalData[type][td_Time]);
 		
 		subMenu = new Menu(MenuTribunal);
-		subMenu.SetTitle("Quel est votre verdicte?\n ");
+		subMenu.SetTitle("Quel est votre verdict?\n ");
 		for (int i = 0; i < sizeof(g_szCondamnation); i++) {
 			Format(tmp, sizeof(tmp), "condamner %d", i);
 			
@@ -327,7 +327,7 @@ Menu AUDIENCE_Acquitter(int type, int articles) {
 	char tmp[64];
 	if( articles == -1 ) {
 		subMenu = new Menu(MenuTribunal);
-		subMenu.SetTitle("Pour quel raison doit-il être acquitté?\n ");
+		subMenu.SetTitle("Pour quelle raison doit-il être acquitté?\n ");
 		for (int i = 0; i < sizeof(g_szAcquittement); i++) {
 			Format(tmp, sizeof(tmp), "acquitter %d", i);
 			
@@ -382,7 +382,7 @@ Menu AUDIENCE_Avocat(int type, int a, int b) {
 	
 	return subMenu;
 }
-Menu AUDIENCE_Dedommage(int type) {
+Menu AUDIENCE_Dedommagement(int type) {
 	
 	if( g_iTribunalData[type][td_DoneDedommagement] == 0 ) {
 	}
@@ -471,9 +471,9 @@ public int MenuTribunal(Handle menu, MenuAction action, int client, int param2) 
 		else if( StrEqual(expl[0], "avocat") )
 			subMenu = AUDIENCE_Avocat(type, a, b);
 		else if( StrEqual(expl[0], "enquete") )
-			subMenu = AUDIENCE_Enquete(type, a, b);
+			subMenu = AUDIENCE_Enquête(type, a, b);
 		else if( StrEqual(expl[0], "dedomager") )
-			subMenu = AUDIENCE_Dedommage(type);
+			subMenu = AUDIENCE_Dedommagement(type);
 		else
 			subCommand = true;
 		
@@ -521,7 +521,7 @@ public Action Timer_AUDIENCE(Handle timer, any type) {
 	}
 	
 	if( g_iTribunalData[type][td_ArticlesCount] == 0 ) {
-		PrintHintText(g_iTribunalData[type][td_Owner], "La convocation commencera dés que vous aurez ajouter le premier article.");
+		PrintHintText(g_iTribunalData[type][td_Owner], "La convocation commencera dès que vous aurez ajoutez le premier article.");
 		return Plugin_Continue;
 	}
 		
