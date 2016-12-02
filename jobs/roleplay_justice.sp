@@ -62,11 +62,11 @@ char g_szArticles[28][6][512] = {
 	{"221-11-a",	"Vente forcée",									"12",	"5000",		"-1",	"Toute personne essayant de vendre sans le consentement libre et éclairé d'une personne peut-être condamnée à une peine maximale de 12h de prison et 5.000$ d’amende, ainsi qu'un remboursement de la totalité de ce dernier. (Le remboursement n’est pas un dédommagement est n’est donc pas soumis aux avocats)." },
 	{"221-11-b",	"Refus de vente",								"6",	"1500",		"0",	"Tout refus de vente est punissable par 6h de prison et une amende de 1.500$ au maximum." },
 	{"221-12",		"Profiter de la vulnérabilité d’une personne",	"18",	"3000",		"1500",	"Le fait de soumettre une personne à un acte criminel en abusant de sa vulnérabilité ou de sa dépendance à son travail est punis d’une peine maximale de 18h de prison et 3 000$ d’amende en plus de la peine du crime commis" },
-	{"221-13-a",	"Destruction de biens d’autrui",					"6",	"1500",		"1000",	"Tout acte volontaire ou involontaire de destruction de biens d'autrui et ce quelque soit les méthodes de destruction utilisées, peut-être condamné par 6h de prison et 1500$ au maximum" },
+	{"221-13-a",	"Destruction de biens d’autrui",				"6",	"1500",		"1000",	"Tout acte volontaire ou involontaire de destruction de biens d'autrui et ce quelque soit les méthodes de destruction utilisées, peut-être condamné par 6h de prison et 1500$ au maximum" },
 	{"221-13-b",	"Atteinte à la vie privée",						"6",	"950",		"500",	"Les atteintes à la vie privée telles que l’espionnage, ou l’enregistrement d’une conversation intime, sont punies d’une peine maximale de 6h de prison et 950$ d'amende" },
 	{"221-13-c",	"Intrusion dans une propriété privée",			"6",	"800",		"500",	"La violation d’une propriété privée est punie d’une peine maximale de 6h de prison et 800$ d’amende." },
 	{"221-13-d",	"Intrusion dans un batiment fédéral",			"18",	"5000",		"500",	"La violation d’un batiment fédéral est punie d’une peine maximale de 18h de prison et 5000$ d’amende." },
-	{"221-14-a",	"Usage de produits illicites",						"6",	"1000",		"250",	"Droguer ou alcooliser une personne à son insu est un acte punis d’une peine maximale de 6h de prison et 1000$ d’amende. " },
+	{"221-14-a",	"Usage de produits illicites",					"6",	"1000",		"250",	"Droguer ou alcooliser une personne à son insu est un acte punis d’une peine maximale de 6h de prison et 1000$ d’amende. " },
 	{"221-14-b",	"Trafic d’armes",								"6",	"750",		"0",	"La vente ou la possession illégale d’armes est passible d’une peine maximale de 6h de prison et 750$ d'amende." },
 	{"221-15-a",	"Tentative de corruption",						"24",	"10000",	"0",	"Tout acte de corruption ou de tentative de corruption, est puni d’une peine maximale de 24h de prison et 10 000$ d’amende." },
 	{"221-15-b",	"Escroquerie",									"18",	"5000",		"-1",	"Tout acte d’escroquerie est puni d’une peine maximale de 24h de prison et 5 000$ d’amende." },
@@ -75,7 +75,7 @@ char g_szArticles[28][6][512] = {
 	{"221-18",		"Asile politique",								"24",	"1500",		"1000",	"Le tribunal est une zone internationale indépendante des lois de la police, tout citoyen y est protégé par asile juridique. De ce fait, tout policier mettant une personne étant dans le tribunal en prison encourt une peine maximale de 24h de prison et 1 500$ d'amende." }
 };
 char g_szAcquittement[3][32] = { "Non coupable", "Conciliation", "Impossible de prouver les faits"};
-char g_szCondamnation[5][32] = { "Très indulgent", "Indulgent", "Juste", "Sévère", "Très sévère" };
+char g_szCondamnation[5][32] = { "très indulgent", "indulgent", "juste", "sévère", "très sévère" };
 float g_flCondamnation[5] = {0.2, 0.4, 0.6, 0.8, 1.0};
 
 int g_iArticles[3][28];
@@ -151,7 +151,7 @@ Action Draw_Menu(int client) {
 		
 		char title[512];
 		Menu menu = new Menu(MenuTribunal);
-		g_iTribunalData[type][td_Dédommagement] = calculerDedo(type);
+		g_iTribunalData[type][td_Dedommagement] = calculerDedo(type);
 		
 		fwdHUD(client, title, sizeof(title));		
 		menu.SetTitle(title);
@@ -471,7 +471,7 @@ public int MenuTribunal(Handle menu, MenuAction action, int client, int param2) 
 		else if( StrEqual(expl[0], "avocat") )
 			subMenu = AUDIENCE_Avocat(type, a, b);
 		else if( StrEqual(expl[0], "enquete") )
-			subMenu = AUDIENCE_Enquête(type, a, b);
+			subMenu = AUDIENCE_Enquete(type, a, b);
 		else if( StrEqual(expl[0], "dedomager") )
 			subMenu = AUDIENCE_Dedommagement(type);
 		else
