@@ -230,11 +230,17 @@ public void OnClientPostAdminCheck(int client) {
 // ----------------------------------------------------------------------------
 public Action fwdCommand(int client, char[] command, char[] arg) {
 	if( StrEqual(command, "dé") ) {
-		return Cmd_de(client);
+		return Cmd_de(client, arg);
 	}
 	return Plugin_Continue;
 }
-public Action Cmd_de(int client) {
+public Action Cmd_de(int client, char[] arg) {
+	
+	int count = StringToInt(arg);
+	if( count <= 0 )
+		count = 1;
+	if( count >= 5 )
+		count = 5;
 	
 	if( rp_GetClientFloat(client, fl_CoolDown) > GetGameTime() ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez rien utiliser pour encore %.2f seconde(s).", rp_GetClientFloat(client, fl_CoolDown)-GetGameTime() );
@@ -243,7 +249,20 @@ public Action Cmd_de(int client) {
 	
 	rp_SetClientFloat(client, fl_CoolDown, GetGameTime() + 2.0);
 	
-	PrintToChatClientArea(client, "%N lance un dé et fait {green}%d{default}!", client, Math_GetRandomInt(1, 6));
+	char tmp[128];
+	int k, j;
+	
+	for (int i = 1; i <= count; i++) {
+		j = Math_GetRandomInt(1, 6);
+		k += j;
+		Format(tmp, sizeof(tmp), "%s{purple}%d{default}, ", tmp, j);
+	}
+	tmp[strlen(tmp) - 2] = 0;
+	
+	if( count == 1 )
+		PrintToChatClientArea(client, "%N lance un dé et fait {green}%d{default}!", client, k);
+	else
+		PrintToChatClientArea(client, "%N lance %d dé%s et fait %s ... soit un total de {green}%d{default}!", client, count, count>1 ? "s" : "", tmp, k);
 	return Plugin_Handled;
 }
 public Action fwdOnPlayerBuild(int client, float& cooldown) {
