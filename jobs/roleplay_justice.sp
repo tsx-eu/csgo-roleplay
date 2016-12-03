@@ -12,8 +12,9 @@
 
 #include <sourcemod>
 #include <sdkhooks>
-#include <smlib>
-#include <colors_csgo>
+#include <smlib>		// https://github.com/bcserv/smlib
+#include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
+#include <advanced_motd>// https://forums.alliedmods.net/showthread.php?t=232476
 
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
@@ -83,6 +84,7 @@ float g_flCoords[3][2][3];
 
 int g_iArticles[3][28];
 int g_iTribunalData[3][td_Max];
+char g_szJugementDATA[65][3][32];
 
 #define TRIBUJAIL_1	287
 #define TRIBUJAIL_2	288
@@ -90,11 +92,12 @@ int g_iTribunalData[3][td_Max];
 #define TRIBUNAL_2	290
 #define BUREAU_1   	291
 #define BUREAU_2	292
+#define JURRY_2		293
+//#define DEBUG
 
 #define isTribunalDisponible(%1) (g_iTribunalData[%1][td_Owner]<=0?true:false)
 #define GetTribunalZone(%1) (%1==1?TRIBUNAL_1:TRIBUNAL_2)
 #define GetTribunalJail(%1) (%1==1?TRIBUJAIL_1:TRIBUJAIL_2)
-#define GetTribunalType(%1) ((%1 == TRIBUNAL_1 || %1 == TRIBUJAIL_1 || %1 == BUREAU_1) ? 1 : (%1 == TRIBUNAL_2 || %1 == TRIBUJAIL_2 || %1 == BUREAU_2) ? 2 : 0)
 
 public void OnPluginStart() {
 	
@@ -161,7 +164,65 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	if( StrContains(command, "tb") == 0 ) {
 		return Draw_Menu(client);
 	}
+	else if( StrContains(command, "jgmt") == 0 ) {
+		return Cmd_Jugement(client, arg);
+	}
 	return Plugin_Continue;
+}
+public Action Cmd_Jugement(int client, char[] arg) {
+	
+	int size, heure, amende, p;
+	int id = StringToInt(g_szJugementDATA[client][1]);
+	int type = StringToInt(g_szJugementDATA[client][2]);
+	int length = strlen(arg);
+	char buffers[4][32], nick[64], pseudo[sizeof(nick) * 2 + 1];
+	
+	if( type == 1 )
+		size = 4;
+	if( type == 2 )
+		size = 2;
+	
+	if( size == 0 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Veuillez selectionner une plainte du Tribunal forum en premier.");
+		return Plugin_Handled;
+	}
+	
+	for (int i = 0; i < size; i++) {
+		p = SplitString(arg, " ", buffers[i], sizeof(buffers[]));
+		if( p > 0 ) {
+			for (int j = 0; j <= (length - p); j++)
+				arg[j] = arg[j + p];
+		}
+	}
+	
+	heure = StringToInt(buffers[2]);
+	amende = StringToInt(buffers[3]);
+	
+	if( !StrEqual(buffers[1], g_szJugementDATA[client][0]) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le code de confirmation est incorrect.");
+		return Plugin_Handled;
+	}
+	
+	char query[1024], szSteamID[32];
+	char[] escape = new char[length * 2 + 1];
+	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
+	SQL_EscapeString(rp_GetDatabase(), arg, escape, length*2 + 1);
+	
+	Format(query, sizeof(query), "UPDATE `ts-x`.`site_report` SET `jail`='%d', `amende`='%d', `juge`='%s', `reason`='%s' WHERE `id`='%d' LIMIT 1;", heure, amende, szSteamID, escape, id);
+	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
+	
+	Format(query, sizeof(query), "INSERT INTO `rp_csgo`.`rp_users2` (`steamid`, `xp`, `pseudo`) (SELECT `steamid`, '100', 'Tribunal Forum' FROM `ts-x`.`site_report_votes` WHERE `reportid`=%d AND `vote`=%d GROUP BY `steamid`)", id, type == 1 ? 1 : 0);
+	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
+	
+	if( type == 1 ) {
+		GetClientName(client, nick, sizeof(nick));
+		SQL_EscapeString(rp_GetDatabase(), nick, pseudo, sizeof(pseudo));
+		
+		Format(query, sizeof(query), "INSERT INTO `rp_csgo`.`rp_users2` (`steamid`, `money`, `jail`, `pseudo`, `steamid2`, `raison`) ( SELECT `report_steamid`, '%d', '%d', '%s', '%s', '%s' FROM `ts-x`.`site_report` WHERE `id`='%d' )", -amende, heure*60, pseudo, szSteamID, escape, id); 
+		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
+	}
+	
+	return Plugin_Handled;
 }
 Action Draw_Menu(int client) {
 	
@@ -179,6 +240,8 @@ Action Draw_Menu(int client) {
 		menu.SetTitle("Tribunal de Princeton\n ");
 		menu.AddItem("start -1", "Débuter une audience");
 		menu.AddItem("mariage", "Marier des joueurs");
+		if( rp_GetClientInt(client, i_Job) <= 104 && GetConVarInt(FindConVar("hostport")) == 27015 )
+			menu.AddItem("forum", "Traiter les plaintes forum");
 		
 		menu.Display(client, MENU_TIME_FOREVER);
 	}
@@ -224,8 +287,10 @@ Menu AUDIENCE_Start(int client, int type, int plaignant, int suspect) {
 		for (int i = 1; i<=MaxClients; i++) {
 			if( !IsValidClient(i) )
 				continue;
+#if !defined DEBUG
 			if( i == client )
 				continue;
+#endif
 			if( GetTribunalZone(type) != rp_GetPlayerZone(i) )
 				continue;
 			
@@ -242,11 +307,12 @@ Menu AUDIENCE_Start(int client, int type, int plaignant, int suspect) {
 		for (int i = 1; i<=MaxClients; i++) {
 			if( !IsValidClient(i) )
 				continue;
+#if !defined DEBUG
 			if( i == client )
 				continue;
 			if( i == plaignant )
 				continue;
-			
+#endif
 			Format(tmp, sizeof(tmp), "start %d %d", plaignant, i);
 			Format(tmp2, sizeof(tmp2), "%N", i);
 			
@@ -257,6 +323,10 @@ Menu AUDIENCE_Start(int client, int type, int plaignant, int suspect) {
 		g_iTribunalData[type][td_Suspect] = suspect;
 		g_iTribunalData[type][td_Plaignant] = plaignant;		
 		g_iTribunalData[type][td_Owner] = client;
+		
+		if( GetClientTeam(client) == CS_TEAM_T ) {
+			FakeClientCommand(client, "say /cop");
+		}
 		
 		CreateTimer(1.0, Timer_AUDIENCE, type, TIMER_REPEAT);
 		
@@ -279,7 +349,7 @@ Menu AUDIENCE_Stop(int type) {
 	for (int i = 0; i < view_as<int>(td_Max); i++)
 		g_iTribunalData[type][i] = 0;
 	
-	for (int i = 0; i < sizeof(g_szArticles[]); i++)
+	for (int i = 0; i < sizeof(g_iArticles[]); i++)
 		g_iArticles[type][i] = 0;
 	
 	for (int i = 1; i <= MaxClients; i++) {
@@ -378,7 +448,7 @@ Menu AUDIENCE_Condamner(int type, int articles) {
 		heure = RoundFloat(float(heure) * g_flCondamnation[articles]);
 		amende = RoundFloat(float(amende) * g_flCondamnation[articles]);
 		
-		SQL_Insert(type, true, articles, heure, amende);
+		SQL_Insert(type, 1, articles, heure, amende);
 		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N a été condamné à %d heures et %d$ d'amende. Le juge a été %s.", g_iTribunalData[type][td_Suspect], heure, amende, g_szCondamnation[articles]);
 		
 		AUDIENCE_Stop(type);
@@ -400,7 +470,7 @@ Menu AUDIENCE_Acquitter(int type, int articles) {
 	}
 	else {
 		
-		SQL_Insert(type, false, articles, 0, 0);
+		SQL_Insert(type, 0, articles, 0, 0);
 		
 		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N a été acquitté: %s.", g_iTribunalData[type][td_Suspect], g_szAcquittement[articles]);
 		AUDIENCE_Stop(type);
@@ -480,7 +550,7 @@ Menu AUDIENCE_Enquete(int type, int a, int b) {
 		subMenu = new Menu(MenuTribunal);
 		subMenu.SetTitle("Enquêter\n ");
 		subMenu.AddItem("enquete 1", "Convoquer les mercenaires", g_iTribunalData[type][td_TimeMercenaire] < 60 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
-		subMenu.AddItem("enquete 2", "Enquêter sans mercenaire", g_iTribunalData[type][td_TimeMercenaire] >= 60 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+		subMenu.AddItem("enquete 2", "Enquêter sans mercenaire (100$)", g_iTribunalData[type][td_TimeMercenaire] >= 60 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 		subMenu.AddItem("enquete 3", "Enquêter dans les logs", (g_iTribunalData[type][td_EnquetePlaignant] + g_iTribunalData[type][td_EnqueteSuspect]) >= 2 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );
 		
 	}
@@ -488,15 +558,30 @@ Menu AUDIENCE_Enquete(int type, int a, int b) {
 		if( g_iTribunalData[type][td_TimeMercenaire] < 60 ) {
 			CreateTimer(1.0, Timer_MERCENAIRE, type, TIMER_REPEAT);
 		}
+		
+		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} Les mercenaires ont été convoqués au Tribunal %d.", type);
 	}
-	else if( a == 2 ) {
-		if( b > 0 ) {
+	else if( a == 2 || a == 3 ) {
+		if( a == 2 &&  b > 0 ) {
 			ServerCommand("rp_item_enquete \"%i\" \"%i\"", g_iTribunalData[type][td_Owner], b);
 			
 			if( b == g_iTribunalData[type][td_Plaignant] )
 				g_iTribunalData[type][td_EnquetePlaignant] = 1;
 			if( b == g_iTribunalData[type][td_Suspect] )
-				g_iTribunalData[type][td_EnqueteSuspect] = 1;			
+				g_iTribunalData[type][td_EnqueteSuspect] = 1;
+			
+			rp_SetClientInt(g_iTribunalData[type][td_Owner], i_Money, rp_GetClientInt(g_iTribunalData[type][td_Owner], i_Money) - 100);
+		}
+		else if( a == 3 &&  b > 0 ) {
+			
+			char szURL[512];
+			rp_GetClientSSO(g_iTribunalData[type][td_Owner], tmp, sizeof(tmp));
+			GetClientAuthId(b, AuthId_Engine, tmp2, sizeof(tmp2));
+			
+			Format(szURL, sizeof(szURL), "https://www.ts-x.eu/popup.php?&url=/index.php?page=roleplay2%s&hashh=/tribunal/case/%s", tmp, tmp2);
+			PrintToConsole(g_iTribunalData[type][td_Owner], "https://www.ts-x.eu/index.php?page=roleplay2#/tribunal/case/%s", tmp2);
+			
+			AdvMOTD_ShowMOTDPanel(g_iTribunalData[type][td_Owner], "Tribunal", szURL, MOTDPANEL_TYPE_URL);
 		}
 		else {
 			subMenu = new Menu(MenuTribunal);
@@ -512,7 +597,7 @@ Menu AUDIENCE_Enquete(int type, int a, int b) {
 					continue;
 				zone = rp_GetPlayerZone(i);
 				if( zone == tribu || zone == jail ) {
-					Format(tmp, sizeof(tmp), "enquete 2 %d", i);
+					Format(tmp, sizeof(tmp), "enquete %d %d", a, i);
 					Format(tmp2, sizeof(tmp2), "%N", i);
 					subMenu.AddItem(tmp, tmp2);
 				}
@@ -567,6 +652,68 @@ Menu AUDIENCE_Forward(int type, int a) {
 	}
 	return subMenu;
 }
+Menu AUDIENCE_Forum(int client, int a, int b) {
+	char query[1024], tmp[64];
+	Menu subMenu;
+	
+	if( a == 0 ) {
+		GetClientAuthId(client, AuthId_Engine, tmp, sizeof(tmp));
+		tmp[0] = 0;
+		
+		Format(query, sizeof(query), "SELECT R.`id`, `report_steamid`, COUNT(`vote`) cpt, `name`, SUM(IF(`vote`=1,1,0)) as cpt2 FROM `ts-x`.`site_report` R INNER JOIN `ts-x`.`site_report_votes` V ON V.`reportid`=R.`id` INNER JOIN `rp_csgo`.`rp_users` U ON U.`steamid`=R.`report_steamid` WHERE V.`vote`<>'2' AND R.`jail`=-1 AND R.`own_steamid`<>'%s' AND R.`report_steamid`<>'%s' GROUP BY R.`id` HAVING cpt>=5 ORDER BY cpt DESC;", tmp, tmp);
+		SQL_TQuery(rp_GetDatabase(), SQL_AUDIENCE_Forum, query, client);
+	}
+	else if( b == 0 ) {
+	 	subMenu = new Menu(MenuTribunal);
+		subMenu.SetTitle("Que faire?\n ");
+		
+		Format(tmp, sizeof(tmp), "forum %d 1", a); subMenu.AddItem(tmp, "Condamner");
+		Format(tmp, sizeof(tmp), "forum %d 2", a); subMenu.AddItem(tmp, "Acquitter");
+	}
+	else {
+		
+		String_GetRandom(g_szJugementDATA[client][0], sizeof(g_szJugementDATA[][]), 4, "23456789abcdefgpqrstuvxyz");
+		Format(g_szJugementDATA[client][1], sizeof(g_szJugementDATA[][]), "%d", a);
+		Format(g_szJugementDATA[client][2], sizeof(g_szJugementDATA[][]), "%d", b);
+		
+		
+		if( b == 1 )
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Afin de confirmer votre jugement, tappez maintenant /jgmt %s heure amende raison", g_szJugementDATA[client][0]);
+		else if( b == 2 )
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Afin de confirmer votre jugement, tappez maintenant /jgmt %s raison", g_szJugementDATA[client][0]);
+	}
+	
+	return subMenu;
+}
+public void SQL_AUDIENCE_Forum(Handle owner, Handle handle, const char[] error, any client) {
+	
+	if( !SQL_HasResultSet(handle) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a aucun cas à traiter pour le moment.");
+		return;
+	}
+	
+	Menu subMenu = new Menu(MenuTribunal);
+	subMenu.SetTitle("Plainte du Tribunal Forum\n ");
+	int id, vote, cond;
+	char tmp[4][64];
+	
+	while( SQL_FetchRow(handle) ) {
+		id = SQL_FetchInt(handle, 0);
+		vote = SQL_FetchInt(handle, 2);
+		cond = SQL_FetchInt(handle, 4);
+		SQL_FetchString(handle, 1, tmp[0], sizeof(tmp[]));
+		SQL_FetchString(handle, 3, tmp[1], sizeof(tmp[]));
+		
+		Format(tmp[2], sizeof(tmp[]), "forum %d", id);
+		Format(tmp[3], sizeof(tmp[]), "%s - %d/%d", tmp[1], cond, vote);
+		
+		subMenu.AddItem(tmp[2], tmp[3]);
+	}
+	
+	subMenu.Display(client, MENU_TIME_FOREVER);
+	
+	return;
+}
 // ----------------------------------------------------------------------------
 public int MenuTribunal(Handle menu, MenuAction action, int client, int param2) {
 	if( action == MenuAction_Select ) {
@@ -584,6 +731,8 @@ public int MenuTribunal(Handle menu, MenuAction action, int client, int param2) 
 		
 		if( StrEqual(expl[0], "start") )
 			subMenu = AUDIENCE_Start(client, type, a, b);
+		else if( StrEqual(expl[0], "forum") )
+			subMenu = AUDIENCE_Forum(client, a, b);
 		else if( StrEqual(expl[0], "stop") )
 			subMenu = AUDIENCE_Stop(type);
 		else if( StrEqual(expl[0], "articles") )
@@ -792,6 +941,14 @@ int getMaxArticles(int client) {
 	}
 	return 0;
 }
+int GetTribunalType(int zone) {
+	if( zone == TRIBUNAL_1 || zone == TRIBUJAIL_1 || zone == BUREAU_1 )
+		return 1;
+	if( zone == TRIBUNAL_2 || zone == TRIBUJAIL_2 || zone == BUREAU_2 || zone == JURRY_2 )
+		return 2;
+	
+	return 0;
+}
 void SQL_Insert(int type, int condamne, int condamnation, int heure, int amende) {
 	char query[1024], szSteamID[5][32], charges[128], nick[64], pseudo[ sizeof(nick)*2+1 ];
 	
@@ -808,6 +965,20 @@ void SQL_Insert(int type, int condamne, int condamnation, int heure, int amende)
 	
 	charges[strlen(charges) - 2] = 0;
 	
+	
+	rp_SetClientInt(g_iTribunalData[type][td_Owner], i_AddToPay, rp_GetClientInt(g_iTribunalData[type][td_Owner], i_AddToPay) + 500);
+	rp_SetJobCapital(101, rp_GetJobCapital(101) - 500);
+	
+	if( g_iTribunalData[type][td_EnquetePlaignant] ) {
+		rp_SetClientInt(g_iTribunalData[type][td_Owner], i_AddToPay, rp_GetClientInt(g_iTribunalData[type][td_Owner], i_AddToPay) + 100);
+		rp_SetJobCapital(101, rp_GetJobCapital(101) - 100);
+	}
+	if( g_iTribunalData[type][td_EnqueteSuspect] ) {
+		rp_SetClientInt(g_iTribunalData[type][td_Owner], i_AddToPay, rp_GetClientInt(g_iTribunalData[type][td_Owner], i_AddToPay) + 100);
+		rp_SetJobCapital(101, rp_GetJobCapital(101) - 100);
+	}
+	
+	rp_ClientXPIncrement(g_iTribunalData[type][td_Owner], 250);
 	
 	GetClientAuthId(g_iTribunalData[type][td_Owner], AuthId_Engine, szSteamID[0], sizeof(szSteamID[]));
 	GetClientAuthId(g_iTribunalData[type][td_Plaignant], AuthId_Engine, szSteamID[1], sizeof(szSteamID[]));
