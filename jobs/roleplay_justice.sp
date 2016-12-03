@@ -287,10 +287,7 @@ Menu AUDIENCE_Start(int client, int type, int plaignant, int suspect) {
 		for (int i = 1; i<=MaxClients; i++) {
 			if( !IsValidClient(i) )
 				continue;
-#if !defined DEBUG
-			if( i == client )
-				continue;
-#endif
+			
 			if( GetTribunalZone(type) != rp_GetPlayerZone(i) )
 				continue;
 			
