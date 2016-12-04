@@ -979,10 +979,14 @@ void SQL_Insert(int type, int condamne, int condamnation, int heure, int amende)
 	GetClientAuthId(g_iTribunalData[type][td_Plaignant], AuthId_Engine, szSteamID[1], sizeof(szSteamID[]));
 	GetClientAuthId(g_iTribunalData[type][td_Suspect], AuthId_Engine, szSteamID[2], sizeof(szSteamID[]));
 	
-	if( IsValidClient(g_iTribunalData[type][td_AvocatPlaignant]) )
+	if( IsValidClient(g_iTribunalData[type][td_AvocatPlaignant]) ) {
 		GetClientAuthId(g_iTribunalData[type][td_AvocatPlaignant], AuthId_Engine, szSteamID[3], sizeof(szSteamID[]));
-	if( IsValidClient(g_iTribunalData[type][td_AvocatSuspect]) )
+		rp_ClientXPIncrement(g_iTribunalData[type][td_AvocatPlaignant], 100);
+	}
+	if( IsValidClient(g_iTribunalData[type][td_AvocatSuspect]) ) {
 		GetClientAuthId(g_iTribunalData[type][td_AvocatSuspect], AuthId_Engine, szSteamID[4], sizeof(szSteamID[]));
+		rp_ClientXPIncrement(g_iTribunalData[type][td_AvocatSuspect], 100);
+	}
 	
 	Format(query, sizeof(query), "INSERT INTO `rp_audiences` (`id`, `juge`, `plaignant`, `suspect`, `avocat-plaignant`, `avocat-suspect`, `temps`, `condamne`, `charges`, `condamnation`, `heure`, `amende`, `dedommage`) VALUES(NULL,");
 	Format(query, sizeof(query), "%s '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%d', '%d', '%d', '%d');", query, szSteamID[0], szSteamID[1], szSteamID[2], szSteamID[3], szSteamID[4],
