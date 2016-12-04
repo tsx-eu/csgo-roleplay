@@ -223,7 +223,7 @@ public void Q3_Frame(int objectiveID, int client) {
 	
 	if( GetVectorDistance(target, origin) < 64.0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu 2500$.");
-		rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money)+ 2500);
+		rp_ClientMoney(client, i_Money, 2500);
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else {
@@ -673,7 +673,7 @@ public int MenuSelectParrain(Handle menu, MenuAction action, int client, int par
 		}
 		
 		rp_QuestStepComplete(client, g_iQ12);
-		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) + 7500);
+		rp_ClientMoney(client, i_Bank, 7500);
 		
 		
 	}
@@ -744,7 +744,7 @@ public int MenuSelectJob(Handle menu, MenuAction action, int client, int param2)
 			rp_SetClientInt(client, i_Tutorial, 20);
 			rp_ClientGiveItem(client, 223);
 			rp_QuestStepComplete(client, g_iQ14);
-			rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) + 15000);
+			rp_ClientMoney(client, i_Bank, 15000);
 			
 			rp_ClientXPIncrement(client, 5000);
 			

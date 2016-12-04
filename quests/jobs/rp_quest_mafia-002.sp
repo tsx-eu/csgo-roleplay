@@ -134,7 +134,7 @@ public void Q1_Frame(int objectiveID, int client) {
 		
 		int cap = rp_GetRandomCapital(91);
 		rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 600);
-		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 500);
+		rp_ClientMoney(client, i_AddToPay, 500);
 		rp_SetJobCapital(91, rp_GetJobCapital(91) + 100);
 		
 		rp_ClientXPIncrement(client, 500);

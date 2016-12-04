@@ -792,8 +792,8 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 			amount = money;
 			
 		rp_SetClientStat(target, i_MoneySpent_Stolen, rp_GetClientStat(target, i_MoneySpent_Stolen) + amount);
-		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + amount);
-		rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amount);
+		rp_ClientMoney(client, i_AddToPay, amount);
+		rp_ClientMoney(target, i_Money, -amount);
 		rp_SetClientInt(client, i_LastVolTime, GetTime());
 		rp_SetClientInt(client, i_LastVolAmount, amount);
 		rp_SetClientInt(client, i_LastVolTarget, target);
@@ -1085,7 +1085,7 @@ void Plant_Destroy(int entity) {
 		CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Une de vos plantations a été detruite.");
 		rp_ClientOverlays(owner, o_Action_DestroyPlant, 10.0);
 		if( rp_GetBuildingData(entity, BD_started)+120 < GetTime() ) {
-			rp_SetClientInt(owner, i_Bank, rp_GetClientInt(owner, i_Bank)-125);
+			rp_ClientMoney(owner, i_Bank, -125);
 		}
 	}
 }
@@ -1223,7 +1223,7 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 				
 				stealAMount = 100;
 				
-				rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 100 ); 
+				rp_ClientMoney(client, i_AddToPay, 100);
 			}
 			case 5: { // Place de l'indé
 				g_bCanSearchPlant[client] = false;
@@ -1366,9 +1366,8 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 					amount = rp_GetClientInt(target, i_Money) + rp_GetClientInt(target, i_Bank);
 				}
 				
-				
-				rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + amount);
-				rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amount);
+				rp_ClientMoney(client, i_AddToPay, amount);
+				rp_ClientMoney(target, i_Money, -amount);
 			}
 			
 			int cpt = rp_GetRandomCapital(81);
@@ -1466,7 +1465,7 @@ public int Menu_Market(Handle menu, MenuAction action, int client, int param2) {
 			if( (rp_GetClientInt(client, i_Money)+rp_GetClientInt(client, i_Bank)) < prix )
 				return;
 			
-			rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - prix);
+			rp_ClientMoney(client, i_Money, -prix);
 			getItemFromMarket(itemID, amount);
 			
 			rp_ClientGiveItem(client, itemID, amount);
@@ -1515,7 +1514,7 @@ void getItemFromMarket(int itemID, int amount) {
 		ratio = getTaxe(stackClient[rnd]);
 		
 		g_iMarketClient[itemID][stackClient[rnd]]--;
-		rp_SetClientInt(stackClient[rnd], i_AddToPay, rp_GetClientInt(stackClient[rnd], i_AddToPay) + RoundFloat(prix*(1.0-ratio)));
+		rp_ClientMoney(stackClient[rnd], i_AddToPay, RoundFloat(prix*(1.0-ratio)) );
 		rp_SetJobCapital(81, rp_GetJobCapital(81) + RoundFloat(prix*ratio) );
 		
 		if( g_iMarketClient[itemID][stackClient[rnd]] == 0 ) {

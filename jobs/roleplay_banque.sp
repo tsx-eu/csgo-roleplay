@@ -693,7 +693,7 @@ public Action metroTeleport(Handle timer, any client) {
 		rp_ClientGiveItem(client, 42, -1, true);
 	}
 	if( !paid && (rp_GetClientInt(client, i_Money)+rp_GetClientInt(client, i_Bank)) >= 100 ) {
-		rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - 100);
+		rp_ClientMoney(client, i_Money, -100);
 		rp_SetJobCapital(31, rp_GetJobCapital(31) + 100);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le métro vous a couté 100$. Pensez à acheter des tickets à un banquier pour obtenir une réduction.");
 		paid = true;

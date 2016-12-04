@@ -272,7 +272,7 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 			}
 			else{
 				if((rp_GetClientInt(client, i_Bank)+rp_GetClientInt(client, i_Money)) >= price){
-					rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money)-price);
+					rp_ClientMoney(client, i_Money, -price);
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} La modification a été appliquée à votre arme.");	
 					rp_SetClientStat(client, i_TotalBuild, rp_GetClientStat(client, i_TotalBuild)+1);
 				}
@@ -376,7 +376,7 @@ public int ModifyWeaponPVP(Handle p_hItemMenu, MenuAction p_oAction, int client,
 			}
 
 			if((rp_GetClientInt(client, i_Bank)+rp_GetClientInt(client, i_Money)) >= price){
-				rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money)-price);
+				rp_ClientMoney(client, i_Money, -price);
 				rp_SetJobCapital( 111, rp_GetJobCapital(111)+price );
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} La modification a été appliquée à votre arme.");	
 			}

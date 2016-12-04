@@ -365,8 +365,9 @@ public Action Cmd_ItemRespawn(int args) {
 		float reduc = prix / 100.0 * float(rp_GetClientInt(vendeur, i_Reduction));
 		float taxe = rp_GetItemFloat(item_id, item_type_taxes);
 		
-		rp_SetClientInt(vendeur, i_AddToPay, rp_GetClientInt(vendeur, i_AddToPay) - RoundFloat((prix * taxe) - reduc));
-		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) + RoundFloat(prix - reduc));
+		rp_ClientMoney(vendeur, i_AddToPay, -RoundFloat((prix * taxe) - reduc));
+		rp_ClientMoney(client, i_Bank, RoundFloat(prix - reduc));
+		
 		rp_SetJobCapital(11, rp_GetJobCapital(11) - RoundFloat(prix * (1.0 - taxe)));
 		
 		rp_SetClientStat(vendeur, i_MoneyEarned_Sales, rp_GetClientStat(vendeur, i_MoneyEarned_Sales) - RoundFloat((prix * taxe) - reduc));

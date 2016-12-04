@@ -546,7 +546,7 @@ public Action Frame_CashMachine(Handle timer, any ent) {
 	if( !rp_GetClientBool(client, b_IsAFK) && rp_GetClientInt(client, i_TimeAFK) <= 60 && g_bProps_trapped[ent] == false ) {
 		EmitSoundToAllAny("ambient/tones/equip3.wav", ent, _, _, _, 0.66);
 		
-		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank)+1);
+		rp_ClientMoney(client, i_Bank, 1);
 		rp_SetClientStat(client, i_MoneyEarned_CashMachine, rp_GetClientStat(client, i_MoneyEarned_CashMachine)+1);
 		
 		int capital_id = rp_GetRandomCapital( rp_GetClientJobID(client) );
@@ -616,7 +616,7 @@ void CashMachine_Destroy(int entity) {
 		rp_ClientOverlays(owner, o_Action_DestroyMachine, 10.0);
 		
 		if( rp_GetBuildingData(entity, BD_started)+120 < GetTime() ) {
-			rp_SetClientInt(owner, i_Bank, rp_GetClientInt(owner, i_Bank)-25);
+			rp_ClientMoney(owner, i_Bank, -25);
 		}
 	}
 }
@@ -797,7 +797,7 @@ public Action Frame_BigCashMachine(Handle timer, any ent) {
 	if( !rp_GetClientBool(client, b_IsAFK) && rp_GetClientInt(client, i_TimeAFK) <= 60 && g_bProps_trapped[ent] == false ) {
 		EmitSoundToAllAny("ambient/tones/equip3.wav", ent, _, _, _, 1.0);
 		
-		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank)+2);
+		rp_ClientMoney(client, i_Bank, 2);
 		rp_SetClientStat(client, i_MoneyEarned_CashMachine, rp_GetClientStat(client, i_MoneyEarned_CashMachine)+2);
 		
 		int capital_id = rp_GetRandomCapital( rp_GetClientJobID(client) );

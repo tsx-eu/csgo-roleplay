@@ -163,7 +163,7 @@ public void Q1_End(int objectiveID, int client) {
 	int cap = rp_GetClientJobID(client);
 	int win = g_iCurrent[client] * QUEST_RATIO;
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - win);
-	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + win); 
+	rp_ClientMoney(client, i_AddToPay, win); 
 	rp_ClientGiveItem(client, QUEST_ITEM);
 	rp_ClientXPIncrement(client, win / 2);
 }

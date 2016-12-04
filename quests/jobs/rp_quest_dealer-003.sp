@@ -183,7 +183,7 @@ public void Q3_End(int objectiveID, int client) {
 	
 	int cap = rp_GetRandomCapital(181);
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 2500);
-	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 2500);
+	rp_ClientMoney(client, i_AddToPay, 2500);
 	rp_ClientXPIncrement(client, 1250);
 	
 	Menu menu = new Menu(MenuNothing);

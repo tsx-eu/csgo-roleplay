@@ -97,7 +97,7 @@ public void Q1_Frame(int objectiveID, int client) {
 		if( wasAFK[client] == false && rp_GetClientBool(client, b_IsAFK) ) {
 			int mnt = RoundToFloor(2.5 * 3.0 * 60.0);
 			rp_SetJobCapital(1, rp_GetJobCapital(1) + mnt);
-			rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) - mnt);
+			rp_ClientMoney(client, i_AddToPay, - mnt);
 		}
 		
 		wasAFK[client] = rp_GetClientBool(client, b_IsAFK);
@@ -105,7 +105,7 @@ public void Q1_Frame(int objectiveID, int client) {
 			int cap = rp_GetRandomCapital(1);
 			int mnt = Math_GetRandomInt(2, 3);
 			rp_SetJobCapital(cap, rp_GetJobCapital(cap) - mnt);
-			rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + mnt);
+			rp_ClientMoney(client, i_AddToPay, mnt);
 		}
 	}
 	

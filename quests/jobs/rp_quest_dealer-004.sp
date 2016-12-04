@@ -121,7 +121,7 @@ public void Q1_Abort(int objectiveID, int client) {
 public Action fwdResellWeapon(int client, int weaponID, int realPrice) {
 	int cap = rp_GetRandomCapital(QUEST_JOBID);
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - realPrice);
-	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + realPrice);
+	rp_ClientMoney(client, i_AddToPay, realPrice);
 	rp_SetClientInt(client, i_Disposed, rp_GetClientInt(client, i_Disposed) + 1);
 	g_iCount[client]++;
 }
@@ -131,7 +131,7 @@ public Action fwdBlackMarket(int client, int jobID, int target, int victim, int&
 		if( jobID == 1 || (jobID == 91 && victim != client ) ) {
 			int cap = rp_GetRandomCapital(QUEST_JOBID);
 			rp_SetJobCapital(cap, rp_GetJobCapital(cap) - arg);
-			rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + arg);
+			rp_ClientMoney(client, i_AddToPay, arg);
 			g_iCount[client]++;
 		}
 	}

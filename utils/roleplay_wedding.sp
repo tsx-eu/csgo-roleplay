@@ -283,10 +283,10 @@ public Action Marier(int epoux, int epouse, int juge, int zoneJuge){
 	CPrintToChat(epouse, "{lightblue}[TSX-RP]{default} Vous et %N êtes unis par les liens du mariage, félicitations !", epoux);
 	
 	// On paye le gentil juge et on preleve aux heureux élus
-	rp_SetClientInt(epoux, i_Money, rp_GetClientInt(epoux, i_Money) - (prix / 2));
-	rp_SetClientInt(epouse, i_Money, rp_GetClientInt(epouse, i_Money) - (prix / 2));
-	rp_SetClientInt(juge, i_AddToPay, rp_GetClientInt(juge, i_AddToPay) + (prix / 4));
-	rp_SetJobCapital(101, ( rp_GetJobCapital(101) + (prix/4)*3 ) );
+	rp_ClientMoney(epoux, i_Money, -(prix / 2));
+	rp_ClientMoney(epouse, i_Money, -(prix / 2));
+	rp_ClientMoney(juge, i_AddToPay, prix / 2);
+	rp_SetJobCapital(101, rp_GetJobCapital(101) + (prix/2) );
 	
 	rp_SetClientInt(epoux, i_MarriedTo, epouse);
 	rp_SetClientInt(epouse, i_MarriedTo, epoux);

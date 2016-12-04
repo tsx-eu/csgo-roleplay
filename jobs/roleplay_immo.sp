@@ -1021,7 +1021,7 @@ public int bedVillaMenu_BED(Handle p_hItemMenu, MenuAction p_oAction, int client
 				GetClientAuthId(client, AuthId_Engine, sql, sizeof(sql));
 				Format(sql, sizeof(sql), "INSERT INTO `rp_bid` (`steamid`, `amount`) VALUES ('%s', '%d') ON DUPLICATE KEY UPDATE `amount`=`amount`+%d;", sql, amount, amount);
 				SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, sql);
-				rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - amount);
+				rp_ClientMoney(client, i_Money, -amount);
 			}
 			
 			OpenBedMenu(client);

@@ -211,13 +211,13 @@ void Draw_Mairie_Prestige(int client, int target) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu 50 cadeaux dans votre banque.");
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu 1 000 000$.");
 			rp_ClientGiveItem(client, ITEM_CADEAU, 50, true);
-			rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) + 1000000);
+			rp_ClientMoney(client, i_Bank, 1000000);
 		}
 		else {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu 100 cadeaux dans votre banque.");
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu 2 500 000$.");
 			rp_ClientGiveItem(client, ITEM_CADEAU, 100, true);
-			rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) + 2500000);
+			rp_ClientMoney(client, i_Bank, 2500000);
 		}
 		
 		rp_SetClientInt(client, i_PlayerXP, (3600 * 99) - 10);
@@ -252,7 +252,7 @@ void Draw_Mairie_Candidate(int client, int target, int arg) {
 		if( arg == 1 ) {
 			
 			if( (rp_GetClientInt(client, i_Money)+rp_GetClientInt(client, i_Bank)) >= 50000 ) {
-				rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - 50000);
+				rp_ClientMoney(client, i_Money, -50000);
 				
 				GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
 				
@@ -271,7 +271,7 @@ void Draw_Mairie_Candidate(int client, int target, int arg) {
 }
 public void QUERY_PostCandidate(Handle owner, Handle handle, const char[] error, any client) {
 	if( strlen(error) >= 1  ) {
-		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) + 50000);
+		rp_ClientMoney(client, i_Bank, 50000);
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà posté une candidature, vous avez donc été remboursé.");
 	}
 	else {

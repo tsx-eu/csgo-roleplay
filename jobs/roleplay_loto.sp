@@ -187,12 +187,8 @@ public Action wheelThink(Handle timer, any client) {
 		
 		if( Math_Abs(gain2[c]) >= 5000 )
 			rp_ClientXPIncrement(client, 100);
-			
-		if( gain2[c] >= 0 )
-			rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + gain2[c]);
-		else
-			rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) + gain2[c]);
 		
+		rp_ClientMoney(client, i_AddToPay, gain2[c]);
 		CreateTimer(1.0, allowPlay);
 	}
 	else {
@@ -529,7 +525,7 @@ bool gratterTicket(int client, int amount, int itemID) {
 	if( Math_GetRandomInt(1, luck) == 42 && itemID ) {
 		
 		rp_SetClientStat(client, i_LotoWon, rp_GetClientStat(client, i_LotoWon) + (amount*100));
-		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) + (amount * 100));
+		rp_ClientMoney(client, i_Bank, amount * 100);
 		
 		rp_SetJobCapital(171, rp_GetJobCapital(171) - (amount*100));
 		
@@ -1078,7 +1074,7 @@ public int MenuTrade(Handle menu, MenuAction action, int client, int param2) {
 			rp_ClientGiveItem(client, ITEM_JETONBLEU, -jetons);
 			
 			if( jobID == 0 ) {
-				rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) + itemID);
+				rp_ClientMoney(client, i_Bank, itemID);
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu: %d$!", itemID);
 			}
 			else {

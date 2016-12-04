@@ -144,7 +144,7 @@ public void Q1_Done(int objectiveID, int client) {
 	
 	int cap = rp_GetRandomCapital(101);
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 1000);
-	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 1000);
+	rp_ClientMoney(client, i_AddToPay, 1000);
 	
 	rp_ClientXPIncrement(client, 500);
 }
@@ -153,7 +153,7 @@ public void Q2_Done(int objectiveID, int client) {
 	
 	int cap = rp_GetRandomCapital(101);
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 2000);
-	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 2000);
+	rp_ClientMoney(client, i_AddToPay, 2000);
 	
 	rp_ClientXPIncrement(client, 1000);
 }
@@ -162,7 +162,7 @@ public void Q3_Done(int objectiveID, int client) {
 	
 	int cap = rp_GetRandomCapital(101);
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 3000);
-	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 3000);
+	rp_ClientMoney(client, i_AddToPay, 3000);
 	
 	rp_ClientXPIncrement(client, 1500);
 }

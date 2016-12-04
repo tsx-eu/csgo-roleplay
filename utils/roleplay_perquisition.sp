@@ -289,7 +289,7 @@ void END_PERQUIZ(int zone, bool abort) {
 		Format(query, sizeof(query), "INSERT INTO `rp_perquiz` (`id`, `zone`, `time`, `steamid`, `type`, `job_id`) VALUES (NULL, '%s', UNIX_TIMESTAMP(), '%s', '%s', '%d');", tmp, date, array[PQ_type] > 0 ? "search" : "trafic", rp_GetClientJobID(array[PQ_client]));
 		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
 		
-		rp_SetClientInt(array[PQ_client], i_AddToPay, rp_GetClientInt(array[PQ_client], i_AddToPay) + 500);
+		rp_ClientMoney(array[PQ_client], i_AddToPay, 500);
 	}
 }
 // ----------------------------------------------------------------------------

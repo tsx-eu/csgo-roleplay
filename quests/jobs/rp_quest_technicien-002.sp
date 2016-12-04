@@ -149,7 +149,7 @@ public void Q2_Done(int objectiveID, int client) {
 	int amount = cpt * 250;
 	
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - amount);
-	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + amount);
+	rp_ClientMoney(client, i_AddToPay, amount);
 	
 	rp_ClientXPIncrement(client, cpt * 150);
 }

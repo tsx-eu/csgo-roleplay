@@ -231,12 +231,15 @@ public Action fwdTueurKill(int client, int attacker, float& respawn) {
 		rp_SetClientStat(attacker, i_JobSucess, rp_GetClientStat(client, i_JobSucess) + 1);
 		rp_SetClientStat(attacker, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
 		CPrintToChat(attacker, "{lightblue}[TSX-RP]{default} Vous avez rempli votre contrat pour avoir tué %N.", client);
-		rp_SetClientInt(attacker, i_AddToPay, rp_GetClientInt(attacker, i_AddToPay) + 100);
 		
 		int from = rp_GetClientInt(attacker, i_ContratFor);
 		bool kidnapping = false;
 		
 		if( IsValidClient(from) ) {
+			
+			if( rp_GetClientJobID(from) != 41 )
+				rp_ClientXPIncrement(attacker, 100);
+			
 			CPrintToChat(from, "{lightblue}[TSX-RP]{default} %N a rempli son contrat en tuant %N.", attacker, client);
 			rp_IncrementSuccess(from, success_list_tueur);
 			
@@ -277,8 +280,8 @@ public Action fwdTueurKill(int client, int attacker, float& respawn) {
 			}
 			else if( g_iKillerPoint[attacker][competance_type] == 1006 ) {
 				if((rp_GetClientInt(client, i_Money)+rp_GetClientInt(client, i_Bank)) > 1000){
-					rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - 100);
-					rp_SetClientInt(from, i_Money, rp_GetClientInt(from, i_Money) + 100);
+					rp_ClientMoney(client, i_Money, -100);
+					rp_ClientMoney(from, i_Money, 100);
 				}
 				respawn *= 1.25;			
 			}
@@ -622,8 +625,8 @@ void SetContratFail(int client, bool time = false) { // time = retro-compatibili
 			int prix = rp_GetClientInt(client, i_ContratPay);
 			int reduction = rp_GetClientInt(client, i_Reduction);
 			
-			rp_SetClientInt(target, i_Bank, rp_GetClientInt(target, i_Bank) + prix - (RoundFloat((float(prix) / 100.0) * float(reduction)) / 2));
-			rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) - (prix - RoundFloat( (float(prix) / 100.0) * float(reduction))) / 2);
+			rp_ClientMoney(target, i_Bank, prix - (RoundFloat((float(prix) / 100.0) * float(reduction)) / 2));
+			rp_ClientMoney(client, i_AddToPay, -(prix - RoundFloat((float(prix) / 100.0) * float(reduction))) / 2);
 			rp_SetJobCapital(41, rp_GetJobCapital(41) - (prix / 2));
 			
 			Call_StartForward(rp_GetForwardHandle(client, RP_OnPlayerSell));
@@ -785,8 +788,8 @@ public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client,
 			int from = rp_GetClientInt(client, i_ToPay);
 			int target = rp_GetClientInt(client, i_KidnappedBy);
 			
-			rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) - 2500);
-			rp_SetClientInt(from, i_Bank, rp_GetClientInt(from, i_Bank) + 2500);			
+			rp_ClientMoney(client, i_Bank, -2500);
+			rp_ClientMoney(from, i_Bank, 2500);		
 			
 			CPrintToChat(from, "{lightblue}[TSX-RP]{default} %N a payé la rançon de 2500$.", client);
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N a payé la rançon de 2500$.", client);

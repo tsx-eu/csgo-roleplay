@@ -153,7 +153,7 @@ public void Q1_Done(int objectiveID, int client) {
 	int cap = rp_GetRandomCapital(QUEST_JOBID);
 	
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 1000);
-	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 1000);
+	rp_ClientMoney(client, i_AddToPay, 1000);
 	rp_ClientXPIncrement(client, 750);
 }
 

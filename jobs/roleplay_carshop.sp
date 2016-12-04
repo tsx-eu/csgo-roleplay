@@ -310,12 +310,8 @@ public void VehicleTouch(int car, int entity) {
 		}
 	}
 }
-public void CAR_CANCEL(int client,int item_id){
-	if(item_id == -1){
-		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank)+500);
-		rp_SetJobCapital( 51, rp_GetJobCapital(51)-500 );
-	}
-	else{
+public void CAR_CANCEL(int client, int item_id){
+	if( item_id != -1) {
 		ITEM_CANCEL(client, item_id);
 	}
 }
@@ -1239,7 +1235,7 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 						continue;
 
 					if(rp_GetVehicleInt(target, car_battery) >= 420){
-						rp_SetClientInt( client, i_AddToPay, rp_GetClientInt(client, i_AddToPay)+2000);
+						rp_ClientMoney(client, i_AddToPay, 2000);
 						
 						int capital_id = rp_GetRandomCapital( rp_GetClientJobID(client)  );
 						rp_SetJobCapital( capital_id, rp_GetJobCapital(capital_id)-2000 );

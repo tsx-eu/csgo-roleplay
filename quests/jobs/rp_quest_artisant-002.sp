@@ -116,7 +116,7 @@ public void Q_Done(int objectiveID, int client) {
 	Q_Abort(objectiveID, client);
 	
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Merci pour votre aide, voici 2500$ !");
-	rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 2500);
+	rp_ClientMoney(client, i_AddToPay, 2500);
 	rp_ClientXPIncrement(client, 1000);
 	
 	int MP[] =  { 128, 129, 234, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256, 257 };

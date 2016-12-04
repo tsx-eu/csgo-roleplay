@@ -155,7 +155,7 @@ void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) 
 			return;
 		}
 		
-		rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money)-tax);
+		rp_ClientMoney(client, i_Money, -tax);
 		rp_ClientGiveItem(client, itemID, -quantity);
 		rp_IncrementSuccess(client, success_list_hdv);
 		char szQuery[256], steamid[32];
@@ -320,7 +320,7 @@ public void SQL_DepositCB(Handle owner, Handle handle, const char[] error, any d
 		quantity = ReadPackCell(data);
 		tax = ReadPackCell(data);
 		
-		rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank)+tax);
+		rp_ClientMoney(client, i_Bank, tax);
 		rp_ClientGiveItem(client, itemID, quantity);
 		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Une erreur s'est produite lors de la mise en vente, vos objets ainsi que la taxe de mise en vente vous ont été restitués.");
@@ -442,7 +442,7 @@ public void SQL_AchatCB(Handle owner, Handle handle, const char[] error, any dat
 	}
 	char szQuery[256], tmp[64];
 	rp_ClientGiveItem(client, itemID, dataQte);
-	rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money)-dataPrix);
+	rp_ClientMoney(client, i_Money, -dataPrix);
 	Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_users2`(`steamid`, `bank`, `pseudo`) VALUES ((SELECT `steamid` FROM `rp_trade` WHERE `id`=%d), %d, 'vente HDV')", transactID, dataPrix);
 	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, szQuery);
 	rp_GetItemData(itemID, item_type_name, tmp, sizeof(tmp));

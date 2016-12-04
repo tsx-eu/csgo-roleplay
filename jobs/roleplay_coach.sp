@@ -736,7 +736,7 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 			if(StrEqual(szMenuItem, "full")){
 				price = (100 - rp_GetClientInt(client, i_KnifeTrain))*10;
 				if((rp_GetClientInt(client, i_Bank)+rp_GetClientInt(client, i_Money)) >= price){
-					rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money)-price);
+					rp_ClientMoney(client, i_Money, -price);
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre entrainement au couteau est maintenant maximal.");
 					rp_SetClientInt(client, i_KnifeTrain, 100);
 				}
@@ -748,7 +748,7 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 			else if(StrEqual(szMenuItem, "esquive")){
 				price = (100 - rp_GetClientInt(client, i_Esquive))*10;
 				if((rp_GetClientInt(client, i_Bank)+rp_GetClientInt(client, i_Money)) >= price){
-					rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money)-price);
+					rp_ClientMoney(client, i_Money, -price);
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre esquive est maintenant maximale.");
 					rp_SetClientInt(client, i_Esquive, 100);
 				}
@@ -758,7 +758,7 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 				}
 			}
 			else if((rp_GetClientInt(client, i_Bank)+rp_GetClientInt(client, i_Money)) >= price){
-				rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money)-price);
+				rp_ClientMoney(client, i_Money, -price);
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} La modification à été appliquée à votre couteau.");
 				if(StrEqual(szMenuItem, "fire")){
 					rp_SetClientKnifeType(client, ball_type_fire);

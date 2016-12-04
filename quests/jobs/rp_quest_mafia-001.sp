@@ -159,7 +159,7 @@ public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 						
 						int cap = rp_GetRandomCapital(91);
 						rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 600);
-						rp_SetClientInt(target, i_AddToPay, rp_GetClientInt(target, i_AddToPay) + 500);
+						rp_ClientMoney(target, i_AddToPay, 500);
 						rp_SetJobCapital(91, rp_GetJobCapital(91) + 100);
 						
 						rp_ClientXPIncrement(client, 250);

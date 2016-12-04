@@ -441,7 +441,7 @@ public void Q6_Frame(int objectiveID, int client) {
 			
 			for (int j = 0; j < g_stkTeamCount[TEAM_POLICE]; j++) { 
 				CPrintToChat(g_stkTeam[TEAM_POLICE][j], "{lightblue}[TSX-RP]{default} Vous avez gagné %d$ pour avoir tué tous les braqueurs de %s", gainPolice, tmp2[0]);
-				rp_SetClientInt(g_stkTeam[TEAM_POLICE][j], i_AddToPay, rp_GetClientInt(g_stkTeam[TEAM_POLICE][j], i_AddToPay) + gainPolice);
+				rp_ClientMoney(g_stkTeam[TEAM_POLICE][j], i_AddToPay, gainPolice);
 				
 				rp_ClientXPIncrement(g_stkTeam[TEAM_POLICE][j], gainPolice / 10);
 			}
@@ -537,7 +537,7 @@ public void Q7_Frame(int objectiveID, int client) {
 			
 			for (int j = 0; j < g_stkTeamCount[TEAM_POLICE]; j++) { 
 				CPrintToChat(g_stkTeam[TEAM_POLICE][j], "{lightblue}[TSX-RP]{default} Vous avez gagné %d$ pour avoir tué tous les braqueurs de %s", gainPolice, tmp2[0]);
-				rp_SetClientInt(g_stkTeam[TEAM_POLICE][j], i_AddToPay, rp_GetClientInt(g_stkTeam[TEAM_POLICE][j], i_AddToPay) + gainPolice);
+				rp_ClientMoney(g_stkTeam[TEAM_POLICE][j], i_AddToPay, gainPolice);
 				
 				rp_ClientXPIncrement(g_stkTeam[TEAM_POLICE][j], gainPolice / 10);
 			}
@@ -578,7 +578,7 @@ public void Q_Complete(int objectiveID, int client) {
 	
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
 		CPrintToChat(g_stkTeam[TEAM_BRAQUEUR][i], "{lightblue}[TSX-RP]{default} Vous avez gagné %d$ pour votre braquage de %s.", gain, tmp2[0]);
-		rp_SetClientInt(g_stkTeam[TEAM_BRAQUEUR][i], i_AddToPay, rp_GetClientInt(g_stkTeam[TEAM_BRAQUEUR][i], i_AddToPay) + gain);
+		rp_ClientMoney(g_stkTeam[TEAM_BRAQUEUR][i], i_AddToPay, gain);
 		
 		rp_ClientXPIncrement(g_stkTeam[TEAM_BRAQUEUR][i], gain / 10);
 		
@@ -605,7 +605,7 @@ public void Q_Complete(int objectiveID, int client) {
 		
 		for (int i = 0; i < g_stkTeamCount[TEAM_POLICE]; i++) {
 			CPrintToChat(g_stkTeam[TEAM_POLICE][i], "{lightblue}[TSX-RP]{default} Vous avez payé une amende de %d$ à cause du braquage de %s.", amendePolice, tmp2[0]);
-			rp_SetClientInt(g_stkTeam[TEAM_POLICE][i], i_Money, rp_GetClientInt(g_stkTeam[TEAM_POLICE][i], i_Money) - amendePolice);
+			rp_ClientMoney(g_stkTeam[TEAM_POLICE][i], i_Money, -amendePolice);
 		}
 	}
 	Q_Clean();
@@ -631,7 +631,7 @@ public Action EV_RescuseHostage(Handle ev, const char[] name, bool broadcast) {
 		ExplodeString(tmp, ": ", tmp2, sizeof(tmp2), sizeof(tmp2[]));
 		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez gagné %d$ pour avoir libéré un otage de %s.", 1000, tmp2[0]);
-		rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + 1000);
+		rp_ClientMoney(client, i_AddToPay, 1000);
 		
 		rp_ClientXPIncrement(client, 100);
 		

@@ -546,9 +546,8 @@ public Action Cmd_Tazer(int client) {
 			rp_Effect_PropExplode(target, true);
 			AcceptEntityInput(target, "Kill");
 			
-			rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + reward);
+			rp_ClientMoney(client, i_AddToPay, reward);
 			rp_SetJobCapital(1, rp_GetJobCapital(1) + reward*2);
-						
 				
 			GetClientAuthId(client, AuthId_Engine, tmp, sizeof(tmp), false);
 			Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_sell` (`id`, `steamid`, `job_id`, `timestamp`, `item_type`, `item_id`, `item_name`, `amount`) VALUES (NULL, '%s', '%i', '%i', '3', '%i', '%s', '%i');",
@@ -939,7 +938,7 @@ public Action Cmd_Jugement(int client, int args) {
 				}
 
 				rp_SetJobCapital(101, rp_GetJobCapital(101) + (amende/4 * 3));
-				rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + (amende / 4));
+				rp_ClientMoney(client, i_AddToPay, amende / 4);
 			}
 			else{
 				amende = 0;
@@ -1564,8 +1563,8 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			}
 			if( IsValidClient( rp_GetClientInt(target, i_LastVolTarget) ) ) {
 				int tg = rp_GetClientInt(target, i_LastVolTarget);
-				rp_SetClientInt(tg, i_Money, rp_GetClientInt(tg, i_Money) + rp_GetClientInt(target, i_LastVolAmount));
-				rp_SetClientInt(target, i_AddToPay, rp_GetClientInt(target, i_AddToPay) - rp_GetClientInt(target, i_LastVolAmount));
+				rp_ClientMoney(tg, i_Money, rp_GetClientInt(target, i_LastVolAmount));
+				rp_ClientMoney(target, i_AddToPay, -rp_GetClientInt(target, i_LastVolAmount));
 				
 				CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez remboursé votre victime de %d$.", rp_GetClientInt(target, i_LastVolAmount));
 				CPrintToChat(tg, "{lightblue}[TSX-RP]{default} Le voleur a été mis en prison. Vous avez été remboursé de %d$.", rp_GetClientInt(target, i_LastVolAmount));
@@ -1582,14 +1581,14 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			(rp_GetClientInt(target, i_Money)+rp_GetClientInt(target, i_Bank)) >= amende*250 && amende <= 2500) ) {
 			
 			rp_SetClientStat(target, i_MoneySpent_Fines, rp_GetClientStat(target, i_MoneySpent_Fines) + amende);
-			rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - amende);
+			rp_ClientMoney(target, i_Money, -amende);
 			
 			if( rp_GetClientBool(client, b_GameModePassive) ) {
-				rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + (amende / 4));
+				rp_ClientMoney(client, i_AddToPay, amende / 4);
 				rp_SetJobCapital(jobID, rp_GetJobCapital(jobID) + (amende/4 * 3));
 			}
 			else {
-				rp_SetClientInt(client, i_AddToPay, rp_GetClientInt(client, i_AddToPay) + (amende / 2));
+				rp_ClientMoney(client, i_AddToPay, amende / 2);
 				rp_SetJobCapital(jobID, rp_GetJobCapital(jobID) + (amende / 2));
 			}
 			
@@ -1729,8 +1728,8 @@ public int eventPayForLeaving(Handle menu, MenuAction action, int client, int pa
 		
 		int time_to_spend = 0;
 		rp_SetClientStat(client, i_MoneySpent_Fines, rp_GetClientStat(client, i_MoneySpent_Fines) + amende);
-		rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) - amende);
-		rp_SetClientInt(target, i_AddToPay, rp_GetClientInt(target, i_AddToPay) + (amende / 4));
+		rp_ClientMoney(client, i_Money, -amende);
+		rp_ClientMoney(target, i_AddToPay, (amende / 4));
 		rp_SetJobCapital(jobID, rp_GetJobCapital(jobID) + (amende/4 * 3));
 			
 		GetClientAuthId(client, AuthId_Engine, options, sizeof(options), false);
@@ -2368,7 +2367,7 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			}
 			
 			rp_WeaponMenu_Delete(g_hBuyMenu, position);
-			rp_SetClientInt(client, i_Bank, rp_GetClientInt(client, i_Bank) - data[BM_Prix]);
+			rp_ClientMoney(client, i_Money, -data[BM_Prix]);
 			
 			int rnd = rp_GetRandomCapital(1);			
 			rp_SetJobCapital(1, RoundFloat(float(rp_GetJobCapital(1)) + float(data[BM_Prix]) * 0.75));

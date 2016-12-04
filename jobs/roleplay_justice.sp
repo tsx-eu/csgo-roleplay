@@ -525,9 +525,8 @@ Menu AUDIENCE_Dedommagement(int type) {
 		int client = g_iTribunalData[type][td_Plaignant];
 		int target = g_iTribunalData[type][td_Suspect];
 		
-		
-		rp_SetClientInt(target, i_Money, rp_GetClientInt(target, i_Money) - money);
-		rp_SetClientInt(client, i_Money, rp_GetClientInt(client, i_Money) + money);
+		rp_ClientMoney(target, i_Money, -money);
+		rp_ClientMoney(client, i_Money, money);
 		
 		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N a dédommagé %N de %d$", target, client, money);
 	}
@@ -567,7 +566,7 @@ Menu AUDIENCE_Enquete(int type, int a, int b) {
 			if( b == g_iTribunalData[type][td_Suspect] )
 				g_iTribunalData[type][td_EnqueteSuspect] = 1;
 			
-			rp_SetClientInt(g_iTribunalData[type][td_Owner], i_Money, rp_GetClientInt(g_iTribunalData[type][td_Owner], i_Money) - 100);
+			rp_ClientMoney(g_iTribunalData[type][td_Owner], i_Money, -100);
 		}
 		else if( a == 3 &&  b > 0 ) {
 			
@@ -962,16 +961,15 @@ void SQL_Insert(int type, int condamne, int condamnation, int heure, int amende)
 	
 	charges[strlen(charges) - 2] = 0;
 	
-	
-	rp_SetClientInt(g_iTribunalData[type][td_Owner], i_AddToPay, rp_GetClientInt(g_iTribunalData[type][td_Owner], i_AddToPay) + 500);
+	rp_ClientMoney(g_iTribunalData[type][td_Owner], i_AddToPay, 500);
 	rp_SetJobCapital(101, rp_GetJobCapital(101) - 500);
 	
 	if( g_iTribunalData[type][td_EnquetePlaignant] ) {
-		rp_SetClientInt(g_iTribunalData[type][td_Owner], i_AddToPay, rp_GetClientInt(g_iTribunalData[type][td_Owner], i_AddToPay) + 100);
+		rp_ClientMoney(g_iTribunalData[type][td_Owner], i_AddToPay, 100);
 		rp_SetJobCapital(101, rp_GetJobCapital(101) - 100);
 	}
 	if( g_iTribunalData[type][td_EnqueteSuspect] ) {
-		rp_SetClientInt(g_iTribunalData[type][td_Owner], i_AddToPay, rp_GetClientInt(g_iTribunalData[type][td_Owner], i_AddToPay) + 100);
+		rp_ClientMoney(g_iTribunalData[type][td_Owner], i_AddToPay, 100);
 		rp_SetJobCapital(101, rp_GetJobCapital(101) - 100);
 	}
 	
