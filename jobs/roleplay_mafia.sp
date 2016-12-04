@@ -708,10 +708,11 @@ public Action ItemPickLockOver_frame(Handle timer, Handle dp) {
 	}
 	
 	int difficulte = 1;
+	int tzone = rp_GetPlayerZone(door);
 	
-	if( rp_IsInPVP(client) )
+	if( rp_IsInPVP(client) || rp_GetZoneInt(tzone, zone_type_type) == 101 )
 		difficulte += 1;
-	if( rp_GetZoneBit( rp_GetPlayerZone(door)) & BITZONE_HAUTESECU )
+	if( rp_GetZoneBit( tzone ) & BITZONE_HAUTESECU || rp_GetZoneInt(tzone, zone_type_type) == 101 )
 		difficulte += 1;
 	if( g_iDoorDefine_LOCKER[doorID] )
 		difficulte += 2;
@@ -910,6 +911,7 @@ void MENU_ShowPickLock(int client, float percent, int difficulte, int type) {
 		case 2: AddMenuItem(menu, ".", "Difficulté: Moyenne", ITEMDRAW_DISABLED);
 		case 3: AddMenuItem(menu, ".", "Difficulté: Difficile", ITEMDRAW_DISABLED);
 		case 4: AddMenuItem(menu, ".", "Difficulté: Très difficile", ITEMDRAW_DISABLED);
+		case 5: AddMenuItem(menu, ".", "Difficulté: Impossible", ITEMDRAW_DISABLED);
 	}
 	
 	Format(tmp, sizeof(tmp), "Policier proche: %d", rp_CountPoliceNear(client));
