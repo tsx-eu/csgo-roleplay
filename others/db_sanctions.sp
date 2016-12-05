@@ -53,7 +53,7 @@ int g_iPunition[bc_max][16] = {
 	{ 24*60 },
 	{ 24*60 }
 };
-char g_szPunition[bc_max][] = {"Irrespect", "Spam", "Perturbation d'event", "Utilisation de bug", "CHEAT", "Double compte", "Refus de vente", "FREEKILL", "Autre, préciser:"};
+char g_szPunition[bc_max][] = {"Irrespect", "Irrespect", "Perturbation d'event", "Utilisation de bug", "CHEAT", "Double compte", "Refus de vente", "FREEKILL", "Autre, préciser:"};
 
 
 public void OnPluginStart() {	
@@ -196,7 +196,7 @@ void Draw_SanctionMenu(int client, int target, int sanction) {
 			case bc_event: {
 				SQL_Insert(client, target, dur, g_szPunition[c], "rp-event");
 				rp_SetClientBool(target, b_IsMuteEvent, true);
-				CPrintToChat(client, "[{red}EVENT{default}] Vous avez été {red}interdit d'aller en event pour %d minutes{default} en raison de votre comportement.", dur);
+				CPrintToChat(target, "[{red}EVENT{default}] Vous avez été {red}interdit d'aller en event pour %d minutes{default} en raison de votre comportement.", dur);
 			}
 			case bc_usebug: {
 				SQL_Insert(client, target, dur, g_szPunition[c], "csgo");
@@ -205,7 +205,7 @@ void Draw_SanctionMenu(int client, int target, int sanction) {
 			case bc_cheat: {
 				SQL_Insert(client, target, dur, g_szPunition[c], "rp-pvp");
 				rp_SetClientBool(target, b_IsMutePvP, true);
-				CPrintToChat(client, "[{red}EVENT{default}] Vous avez été {red}interdit d'aller en PvP pour %d minutes{default} en raison de votre comportement.", dur);
+				CPrintToChat(target, "[{red}EVENT{default}] Vous avez été {red}interdit d'aller en PvP pour %d minutes{default} en raison de votre comportement.", dur);
 			}
 			case bc_double: {
 				SQL_Insert(client, target, dur, g_szPunition[c], "csgo");
@@ -218,7 +218,7 @@ void Draw_SanctionMenu(int client, int target, int sanction) {
 			case bc_freekill: {
 				SQL_Insert(client, target, dur, g_szPunition[c], "rp-kill");
 				rp_SetClientBool(target, b_IsMuteKILL, true);
-				CPrintToChat(client, "[{red}EVENT{default}] Vous avez été {red}interdit d'effectuer des meurtres pour %d minutes{default} en raison de votre comportement.", dur);
+				CPrintToChat(target, "[{red}EVENT{default}] Vous avez été {red}interdit d'effectuer des meurtres pour %d minutes{default} en raison de votre comportement.", dur);
 			}
 			case bc_other: {			
 				rp_GetClientNextMessage(client, target, fwdMessage);
