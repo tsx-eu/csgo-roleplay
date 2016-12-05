@@ -77,7 +77,7 @@ char g_szArticles[28][6][512] = {
 	{"221-17",		"Acte de proxénétisme / prostitution",			"6",	"450",		"0",	"Tout acte de proxénétisme ou de prostitution est passible d'une peine maximale de 6h de prison et 450$ d’amende." },
 	{"221-18",		"Asile politique",								"24",	"1500",		"1000",	"Le tribunal est une zone internationale indépendante des lois de la police, tout citoyen y est protégé par asile juridique. De ce fait, tout policier mettant une personne étant dans le tribunal en prison encourt une peine maximale de 24h de prison et 1 500$ d'amende." }
 };
-char g_szAcquittement[3][32] = { "Non coupable", "Conciliation", "Impossible de prouver les faits"};
+char g_szAcquittement[4][32] = { "Non coupable", "Conciliation", "Impossible de prouver les faits", "Déjà condamné"};
 char g_szCondamnation[5][32] = { "très indulgent", "indulgent", "juste", "sévère", "très sévère" };
 float g_flCondamnation[5] = {0.2, 0.4, 0.6, 0.8, 1.0};
 float g_flCoords[3][2][3];
@@ -179,7 +179,7 @@ public Action Cmd_Jugement(int client, char[] arg) {
 	
 	if( type == 1 )
 		size = 4;
-	if( type == 2 )
+	if( type == 2 || type == 3 )
 		size = 2;
 	
 	if( size == 0 ) {
@@ -211,8 +211,10 @@ public Action Cmd_Jugement(int client, char[] arg) {
 	Format(query, sizeof(query), "UPDATE `ts-x`.`site_report` SET `jail`='%d', `amende`='%d', `juge`='%s', `reason`='%s' WHERE `id`='%d' LIMIT 1;", heure, amende, szSteamID, escape, id);
 	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
 	
-	Format(query, sizeof(query), "INSERT INTO `rp_csgo`.`rp_users2` (`steamid`, `xp`, `pseudo`) (SELECT `steamid`, '100', 'Tribunal Forum' FROM `ts-x`.`site_report_votes` WHERE `reportid`=%d AND `vote`=%d GROUP BY `steamid`)", id, type == 1 ? 1 : 0);
-	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
+	if( type != 3 ) {
+		Format(query, sizeof(query), "INSERT INTO `rp_csgo`.`rp_users2` (`steamid`, `xp`, `pseudo`) (SELECT `steamid`, '100', 'Tribunal Forum' FROM `ts-x`.`site_report_votes` WHERE `reportid`=%d AND `vote`=%d GROUP BY `steamid`)", id, type == 1 ? 1 : 0);
+		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
+	}
 	
 	if( type == 1 ) {
 		GetClientName(client, nick, sizeof(nick));
@@ -665,6 +667,8 @@ Menu AUDIENCE_Forum(int client, int a, int b) {
 		
 		Format(tmp, sizeof(tmp), "forum %d 1", a); subMenu.AddItem(tmp, "Condamner");
 		Format(tmp, sizeof(tmp), "forum %d 2", a); subMenu.AddItem(tmp, "Acquitter");
+		Format(tmp, sizeof(tmp), "forum %d 3", a); subMenu.AddItem(tmp, "Plainte troll");
+		
 	}
 	else {
 		
@@ -672,10 +676,9 @@ Menu AUDIENCE_Forum(int client, int a, int b) {
 		Format(g_szJugementDATA[client][1], sizeof(g_szJugementDATA[][]), "%d", a);
 		Format(g_szJugementDATA[client][2], sizeof(g_szJugementDATA[][]), "%d", b);
 		
-		
 		if( b == 1 )
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Afin de confirmer votre jugement, tappez maintenant /jgmt %s heure amende raison", g_szJugementDATA[client][0]);
-		else if( b == 2 )
+		else if( b == 2 || b == 3 )
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Afin de confirmer votre jugement, tappez maintenant /jgmt %s raison", g_szJugementDATA[client][0]);
 	}
 	
@@ -960,6 +963,8 @@ void SQL_Insert(int type, int condamne, int condamnation, int heure, int amende)
 	}
 	
 	charges[strlen(charges) - 2] = 0;
+	
+	rp_SetJobCapital(101, rp_GetJobCapital(101) + amende);
 	
 	rp_ClientMoney(g_iTribunalData[type][td_Owner], i_AddToPay, 500);
 	rp_SetJobCapital(101, rp_GetJobCapital(101) - 500);
