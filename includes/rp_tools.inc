@@ -550,15 +550,23 @@ stock int rp_CountPoliceNear(int client) {
 }
 stock void rp_ClientMoney(int client, int_user_data type, int amount) {
 	
+	PrintToChat(client, "transaction de %d$", amount);
+	
 	int dette = rp_GetClientInt(client, i_Dette);
 	if( dette > 0 && amount > 0 ) {
 		
+		PrintToChat(client, "une dette de %d$ doit être remboursée", dette);
+		
 		if( amount > 100 )
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas %d$ afin de rembourser votre dette de %d$.", (amount > dette ? amount : dette), dette);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas reçu %d$ afin de rembourser votre dette de %d$.", (amount < dette ? amount : dette), dette);
 		
 		dette -= amount;
-		if (dette < 0) { amount = -dette; dette = 0;	}
+		if (dette < 0) {
+			amount = -dette;
+			dette = 0;
+		}
 		
+		PrintToChat(client, "il reste %d$ à rembourser", dette);
 		rp_SetClientInt(client, i_Dette, dette);
 	}
 	
@@ -572,13 +580,32 @@ stock void rp_ClientMoney(int client, int_user_data type, int amount) {
 		dette = rp_GetClientInt(client, i_Dette);
 		
 		money += give;
-		if( money < 0 ) {	give = money;	money = 0;	}
+		if( money < 0 ) {
+			PrintToChat(client, "argent négatif (%d)", money);
+			give = money;
+			money = 0;
+		}
+		
 		pay += give;
-		if( pay < 0 ) {		give = pay;		pay = 0;	}
+		if( pay < 0 ) {	
+			PrintToChat(client, "pay négatif (%d)", pay);
+			give = pay;	
+			pay = 0;
+		}
+		
 		bank += give;
-		if( bank < 0 ) {	give = bank;	bank = 0;	}
-		dette -= give;
-		give = 0;
+		if( bank < 0 ) {
+			PrintToChat(client, "bank négatif (%d)", bank);
+			give = bank;
+			bank = 0;
+		}
+		
+		if( give < 0 ) {
+			PrintToChat(client, "La dette était de %d$", dette);
+			dette -= give;
+			PrintToChat(client, "elle est maintenant de %d$", dette);
+			give = 0;
+		}
 		
 		rp_SetClientInt(client, i_Money, money);
 		rp_SetClientInt(client, i_Bank, bank);
