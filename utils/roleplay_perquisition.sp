@@ -291,6 +291,14 @@ void END_PERQUIZ(int zone, bool abort) {
 		
 		rp_ClientMoney(array[PQ_client], i_AddToPay, 500);
 	}
+	else if( !abort ) {
+		FakeClientCommand(array[PQ_client], "say /addnote %s - %s - %s",  tmp, date, array[PQ_type] > 0 ? "annulée");
+		
+		rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
+		GetClientAuthId(array[PQ_client], AuthId_Engine, date, sizeof(date));
+		Format(query, sizeof(query), "INSERT INTO `rp_perquiz` (`id`, `zone`, `time`, `steamid`, `type`, `job_id`) VALUES (NULL, '%s', UNIX_TIMESTAMP(), '%s', '%s', '%d');", tmp, date, array[PQ_type] > 0 ? "search" : "trafic", rp_GetClientJobID(array[PQ_client]));
+		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
+	}
 }
 // ----------------------------------------------------------------------------
 public Action fwdHookJail(int attacker, int victim) {
