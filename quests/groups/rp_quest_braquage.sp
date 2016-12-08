@@ -200,7 +200,7 @@ public void Q1_Start(int objectiveID, int client) {
 	g_bDoingQuest = true;
 	g_bCanMakeQuest = false;
 	addClientToTeam(client, TEAM_BRAQUEUR);
-	LogToGame("[BRAQUAGE] %N a lancé un braquage", client);
+	LogToGame("[BRAQUAGE] %L a lancé un braquage", client);
 }
 public void Q1_Frame(int objectiveID, int client) {
 	if( g_stkTeamCount[TEAM_BRAQUEUR] >= REQUIRED_T ) {
@@ -369,12 +369,16 @@ public void Q5_Start(int objectiveID, int client) {
 		if( Client_GetWeaponBySlot(g_stkTeam[TEAM_BRAQUEUR][i], CS_SLOT_SECONDARY) < 0 )
 			GivePlayerItem(g_stkTeam[TEAM_BRAQUEUR][i], "weapon_revolver");
 		
+		LogToGame("[BRAQUAGE] [DEBUT] %L est dans l'équipe des braqueurs.", g_stkTeam[TEAM_BRAQUEUR][i]);
 		
 		SetEntityHealth(g_stkTeam[TEAM_BRAQUEUR][i], 500);
 		rp_SetClientInt(g_stkTeam[TEAM_BRAQUEUR][i], i_Kevlar, 250);
 		SetEntProp(g_stkTeam[TEAM_BRAQUEUR][i], Prop_Send, "m_bHasHelmet", 1);
 		rp_HookEvent(g_stkTeam[TEAM_BRAQUEUR][i], RP_OnPlayerUse, fwdPressUse);
 		attachMask(g_stkTeam[TEAM_BRAQUEUR][i]);
+	}
+	for (int i = 0; i < g_stkTeamCount[TEAM_POLICE]; i++) {
+		LogToGame("[BRAQUAGE] [DEBUT] %L est dans l'équipe de la police.", g_stkTeam[TEAM_POLICE][i]);
 	}
 	
 	for (int i = 1; i <= MaxClients; i++) {
@@ -535,7 +539,9 @@ public void Q7_Frame(int objectiveID, int client) {
 			amendePolice = amendePolice < 1000 ? amendePolice : 1000;
 			int gainPolice = ((GainMax-(g_iQuestGain / 4)) / g_stkTeamCount[TEAM_POLICE]) - amendePolice;
 			
-			for (int j = 0; j < g_stkTeamCount[TEAM_POLICE]; j++) { 
+			for (int j = 0; j < g_stkTeamCount[TEAM_POLICE]; j++) {
+				LogToGame("[BRAQUAGE] [FIN] %L est policier et a gagné à la fin.", g_stkTeam[TEAM_POLICE][j]);
+				
 				CPrintToChat(g_stkTeam[TEAM_POLICE][j], "{lightblue}[TSX-RP]{default} Vous avez gagné %d$ pour avoir tué tous les braqueurs de %s", gainPolice, tmp2[0]);
 				rp_ClientMoney(g_stkTeam[TEAM_POLICE][j], i_AddToPay, gainPolice);
 				
@@ -577,6 +583,7 @@ public void Q_Complete(int objectiveID, int client) {
 	int gain = g_iQuestGain / g_stkTeamCount[TEAM_BRAQUEUR];
 	
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
+		LogToGame("[BRAQUAGE] [FIN] %L est braqueur et a gagné", g_stkTeam[TEAM_BRAQUEUR][i]);
 		CPrintToChat(g_stkTeam[TEAM_BRAQUEUR][i], "{lightblue}[TSX-RP]{default} Vous avez gagné %d$ pour votre braquage de %s.", gain, tmp2[0]);
 		rp_ClientMoney(g_stkTeam[TEAM_BRAQUEUR][i], i_AddToPay, gain);
 		
@@ -586,11 +593,15 @@ public void Q_Complete(int objectiveID, int client) {
 			rp_QuestComplete(g_stkTeam[TEAM_BRAQUEUR][i], QUEST_UNIQID, true);
 	}
 	
-	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR_DEAD]; i++) {		
+	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR_DEAD]; i++) {
+		LogToGame("[BRAQUAGE] [FIN] %L est braqueur mais il était mort à la fin.", g_stkTeam[TEAM_BRAQUEUR_DEAD][i]);
+		
 		if( client != g_stkTeam[TEAM_BRAQUEUR_DEAD][i] )
 			rp_QuestComplete(g_stkTeam[TEAM_BRAQUEUR_DEAD][i], QUEST_UNIQID, true);
 	}
 	for (int i = 0; i < g_stkTeamCount[TEAM_POLICE]; i++) {
+		LogToGame("[BRAQUAGE] [FIN] %L est policier mais a perdu à la fin.", g_stkTeam[TEAM_POLICE][i]);
+		
 		if( client != g_stkTeam[TEAM_POLICE][i] )
 			rp_QuestComplete(g_stkTeam[TEAM_POLICE][i], QUEST_UNIQID, false);
 	}
@@ -862,10 +873,12 @@ public int MenuInviterBraqueur(Handle menu, MenuAction action, int client, int p
 		else if( StrEqual(options, "oui") ) {
 			if( g_stkTeamCount[TEAM_BRAQUEUR] < REQUIRED_T && g_iPlayerTeam[client] == TEAM_INVITATION ) {
 				addClientToTeam(client, TEAM_BRAQUEUR);
-				LogToGame("[BRAQUAGE] %N a accepté l'invitation", client);
+				LogToGame("[BRAQUAGE] %L a accepté l'invitation", client);
 			}
-			else
+			else {
 				removeClientTeam(client);
+				LogToGame("[BRAQUAGE] %L a été dégagé du braquage", client);
+			}
 		}
 		else if( StrEqual(options, "non") ) {
 			removeClientTeam(client);
@@ -1067,6 +1080,8 @@ void OnBraqueurKilled(int client) {
 	addClientToTeam(client, TEAM_BRAQUEUR_DEAD);
 	
 	if( g_bHasHelmet ) {
+		LogToGame("[BRAQUAGE] [MORT] %L est un braqueur et a été tué.", client);
+		
 		SetEntProp(client, Prop_Send, "m_bHasHelmet", 0);
 		rp_UnhookEvent(client, RP_OnPlayerUse, fwdPressUse);
 		
@@ -1078,6 +1093,8 @@ void OnBraqueurKilled(int client) {
 void OnBraqueurRespawn(int client) {
 	addClientToTeam(client, TEAM_BRAQUEUR);
 	if( g_bHasHelmet ) {
+		LogToGame("[BRAQUAGE] [MORT] %L est un braqueur et a été respawn.", client);
+		
 		SetEntProp(client, Prop_Send, "m_bHasHelmet", 1);
 		rp_HookEvent(client, RP_OnPlayerUse, fwdPressUse);
 		attachMask(client);
