@@ -291,7 +291,7 @@ void END_PERQUIZ(int zone, bool abort) {
 		
 		rp_ClientMoney(array[PQ_client], i_AddToPay, 500);
 	}
-	else if( !abort ) {
+	else if( abort ) {
 		FakeClientCommand(array[PQ_client], "say /addnote %s - %s - %s",  tmp, date, array[PQ_type] > 0 ? "annulée");
 		
 		rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
