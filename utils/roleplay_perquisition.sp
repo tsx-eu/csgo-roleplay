@@ -352,7 +352,7 @@ public Action TIMER_PERQUIZ(Handle timer, any zone) {
 		}
 		
 		rp_GetZoneData( rp_GetPlayerZone(array[PQ_type]) , zone_type_type, tmp2, sizeof(tmp2));
-		if( !StrEqual(tmp, tmp2) ) {			
+		if( !StrEqual(tmp, tmp2) && rp_GetClientInt(array[PQ_type],i_KidnappedBy) == 0 ) {			
 			rp_ClientTeleport(array[PQ_type], g_flLastPos[array[PQ_type]]);
 		}
 		else
