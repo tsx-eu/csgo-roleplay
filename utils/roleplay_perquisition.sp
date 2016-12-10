@@ -296,7 +296,7 @@ void END_PERQUIZ(int zone, bool abort) {
 		
 		rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
 		GetClientAuthId(array[PQ_client], AuthId_Engine, date, sizeof(date));
-		Format(query, sizeof(query), "INSERT INTO `rp_perquiz` (`id`, `zone`, `time`, `steamid`, `type`, `job_id`) VALUES (NULL, '%s', UNIX_TIMESTAMP(), '%s', '%s', '%d');", tmp, date, array[PQ_type] > 0 ? "search" : "trafic", rp_GetClientJobID(array[PQ_client]));
+		Format(query, sizeof(query), "INSERT INTO `rp_perquiz` (`id`, `zone`, `time`, `steamid`, `type`, `job_id`) VALUES (NULL, '%s', UNIX_TIMESTAMP()-getCooldown(zone,array[PQ_client])*60+6*60, '%s', '%s', '%d');", tmp, date, array[PQ_type] > 0 ? "search" : "trafic", rp_GetClientJobID(array[PQ_client]));
 		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
 	}
 }
