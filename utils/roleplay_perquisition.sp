@@ -291,12 +291,12 @@ void END_PERQUIZ(int zone, bool abort) {
 		
 		rp_ClientMoney(array[PQ_client], i_AddToPay, 500);
 	}
-	else if( !abort ) {
-		FakeClientCommand(array[PQ_client], "say /addnote %s - %s - %s",  tmp, date, array[PQ_type] > 0 ? "annulée");
+	else if( abort ) {
+		FakeClientCommand(array[PQ_client], "say /addnote %s - %s - %s",  tmp, date,"annulée");
 		
 		rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
 		GetClientAuthId(array[PQ_client], AuthId_Engine, date, sizeof(date));
-		Format(query, sizeof(query), "INSERT INTO `rp_perquiz` (`id`, `zone`, `time`, `steamid`, `type`, `job_id`) VALUES (NULL, '%s', UNIX_TIMESTAMP(), '%s', '%s', '%d');", tmp, date, array[PQ_type] > 0 ? "search" : "trafic", rp_GetClientJobID(array[PQ_client]));
+		Format(query, sizeof(query), "INSERT INTO `rp_perquiz` (`id`, `zone`, `time`, `steamid`, `type`, `job_id`) VALUES (NULL, '%s', UNIX_TIMESTAMP()-getCooldown(zone,array[PQ_client])*60+6*60, '%s', '%s', '%d');", tmp, date, array[PQ_type] > 0 ? "search" : "trafic", rp_GetClientJobID(array[PQ_client]));
 		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
 	}
 }
@@ -352,7 +352,7 @@ public Action TIMER_PERQUIZ(Handle timer, any zone) {
 		}
 		
 		rp_GetZoneData( rp_GetPlayerZone(array[PQ_type]) , zone_type_type, tmp2, sizeof(tmp2));
-		if( !StrEqual(tmp, tmp2) ) {			
+		if( !StrEqual(tmp, tmp2) && rp_GetClientInt(array[PQ_type],i_KidnappedBy) == 0 ) {			
 			rp_ClientTeleport(array[PQ_type], g_flLastPos[array[PQ_type]]);
 		}
 		else

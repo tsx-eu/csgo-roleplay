@@ -279,7 +279,7 @@ public Action Cmd_Vis(int client) {
 	int zone = rp_GetPlayerZone(client);
 	int bit = rp_GetZoneBit(zone);
 		
-	if( bit & (BITZONE_BLOCKJAIL|BITZONE_JAIL|BITZONE_HAUTESECU|BITZONE_LACOURS) ) { // Flic ripoux
+	if( bit & (BITZONE_BLOCKJAIL|BITZONE_JAIL|BITZONE_HAUTESECU|BITZONE_LACOURS|BITZONE_PERQUIZ) ) { // Flic ripoux
 		ACCESS_DENIED(client);
 	}
 	if( rp_GetClientVehiclePassager(client) > 0 || Client_GetVehicle(client) > 0 || rp_GetClientInt(client, i_Sickness) ) { // En voiture, ou très malade
