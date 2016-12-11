@@ -413,32 +413,17 @@ void OpenSelectSkill(int client) {
 	
 	AddMenuItem(menu, "annule", "Annuler mon contrat");
 	
-	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_cut] ) {
-		AddMenuItem(menu, "cut", "Cut Maximum");
-	}
-	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_tir] ) {
-		AddMenuItem(menu, "tir", "Precision Maximum");
-	}
-	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_usp] && ( !g_iKillerPoint[client][competance_awp] && !g_iKillerPoint[client][competance_pompe] )) { //On ne peut pas selectionner une arme si on en déjà choisi une auparavant
-		AddMenuItem(menu, "usp", "M4 / Usp");
-	}
-	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_awp] && ( !g_iKillerPoint[client][competance_usp] && !g_iKillerPoint[client][competance_pompe] )) {
-		AddMenuItem(menu, "awp", "AWP / Cz75");
-	}
-	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_pompe] && ( !g_iKillerPoint[client][competance_awp] && !g_iKillerPoint[client][competance_usp] )) {
-		AddMenuItem(menu, "pompe", "Nova / Deagle");
-	}
-	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_invis] ) {
-		AddMenuItem(menu, "inv", "Invisibilité");
-	}
-	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_hp] ) {
-		AddMenuItem(menu, "vie", "Vie");
-	}
-	if( g_iKillerPoint[client][competance_left] > 0 && !g_iKillerPoint[client][competance_vitesse] ) {
-		AddMenuItem(menu, "vit", "Vitesse");
+	if( g_iKillerPoint[client][competance_left] > 0 ) {
+		AddMenuItem(menu, "cut", "Cut Maximum", g_iKillerPoint[client][competance_cut] ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
+		AddMenuItem(menu, "tir", "Precision Maximum", g_iKillerPoint[client][competance_tir]);
+		AddMenuItem(menu, "usp", "M4 / Usp", (g_iKillerPoint[client][competance_usp] || g_iKillerPoint[client][competance_pompe] || g_iKillerPoint[client][competance_awp]) ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
+		AddMenuItem(menu, "awp", "AWP / Cz75", (g_iKillerPoint[client][competance_usp] || g_iKillerPoint[client][competance_pompe] || g_iKillerPoint[client][competance_awp]) ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
+		AddMenuItem(menu, "pompe", "Nova / Deagle", (g_iKillerPoint[client][competance_usp] || g_iKillerPoint[client][competance_pompe] || g_iKillerPoint[client][competance_awp]) ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
+		AddMenuItem(menu, "inv", "Invisibilité", g_iKillerPoint[client][competance_invis] ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
+		AddMenuItem(menu, "vie", "Vie", g_iKillerPoint[client][competance_hp] ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
+		AddMenuItem(menu, "vit", "Vitesse", g_iKillerPoint[client][competance_vitesse] ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
 	}
 	
-	SetMenuExitButton(menu, false);
 	DisplayMenu(menu, client, MENU_TIME_DURATION);
 }
 public int AddCompetanceToAssassin(Handle menu, MenuAction action, int client, int param2) {
