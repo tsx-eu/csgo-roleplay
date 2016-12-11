@@ -181,12 +181,14 @@ public Action wheelThink(Handle timer, any client) {
 		
 		if( gain2[c] == 0 )
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez perdu un tour!");
-		else if( gain2[c] > 0 )
+		else if( gain2[c] > 0 ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez gagné %d$!", gain2[c]);
 			rp_SetClientStat(client, i_LotoWon, rp_GetClientStat(client, i_LotoWon) + (gain2[c]));
-		else
+		}
+		else {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} BANKRUPT! Vous avez perdu %d$!", gain2[c]);
 			rp_SetClientStat(client, i_LotoSpent, rp_GetClientStat(client, i_LotoSpent) + gain2[c]);
+		}
 		
 		if( Math_Abs(gain2[c]) >= 5000 )
 			rp_ClientXPIncrement(client, 100);
