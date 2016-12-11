@@ -151,7 +151,7 @@ public Action wheelButtonPressed(const char[] output, int caller, int activator,
 	SetEntProp(caller, Prop_Data, "m_bLocked", 1);
 	canPlay = false;
 	takePlayerJeton(activator, 5);
-	rp_SetClientStat(client, i_LotoSpent, rp_GetClientStat(client, i_LotoSpent) + 5*100); // 5 jetons * prix du jeton
+	rp_SetClientStat(activator, i_LotoSpent, rp_GetClientStat(activator, i_LotoSpent) + 5*100); // 5 jetons * prix du jeton
 	CreateTimer(0.25, wheelThink, activator);
 	return Plugin_Continue;
 }
