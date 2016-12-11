@@ -151,6 +151,7 @@ public Action wheelButtonPressed(const char[] output, int caller, int activator,
 	SetEntProp(caller, Prop_Data, "m_bLocked", 1);
 	canPlay = false;
 	takePlayerJeton(activator, 5);
+	rp_SetClientStat(client, i_LotoSpent, rp_GetClientStat(client, i_LotoSpent) + 5*100); // 5 jetons * prix du jeton
 	CreateTimer(0.25, wheelThink, activator);
 	return Plugin_Continue;
 }
@@ -182,8 +183,10 @@ public Action wheelThink(Handle timer, any client) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez perdu un tour!");
 		else if( gain2[c] > 0 )
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez gagné %d$!", gain2[c]);
+			rp_SetClientStat(client, i_LotoWon, rp_GetClientStat(client, i_LotoWon) + (gain2[c]));
 		else
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} BANKRUPT! Vous avez perdu %d$!", gain2[c]);
+			rp_SetClientStat(client, i_LotoSpent, rp_GetClientStat(client, i_LotoSpent) + gain2[c]);
 		
 		if( Math_Abs(gain2[c]) >= 5000 )
 			rp_ClientXPIncrement(client, 100);
@@ -813,6 +816,7 @@ void displayWheel(int client, int n, int l[3], int k[3], bool last) {
 	
 	if( last && won>0 ) {
 		givePlayerJeton(client, won);
+		rp_SetClientStat(client, i_LotoWon, rp_GetClientStat(client, i_LotoWon) + (won*100));
 		
 		if( (g_iJackpot-won) == 0 && won > 1000 ) {
 			LogToGame("[CASINO] %L a remporté un jackpot de %d$.", client, won);
@@ -1000,6 +1004,7 @@ bool takePlayerJeton(int client, int amount) {
 		rp_ClientGiveItem(client, ITEM_JETONROUGE, -rouge);
 		rp_ClientGiveItem(client, ITEM_JETONBLEU, -amount);
 	}
+	rp_SetClientStat(client, i_LotoSpent, rp_GetClientStat(client, i_LotoSpent) + amount*100);
 	return true;
 }
 void givePlayerJeton(int client, int amount) {
