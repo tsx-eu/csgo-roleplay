@@ -82,9 +82,9 @@
 #define ITEM_CHEQUE			304
 
 // Zone:
-#define	METRO_PAIX		80
-#define METRO_STATION	81
-#define METRO_INNO		82
+#define	METRO_PAIX		60
+#define METRO_STATION	61
+#define METRO_INNO		62
 #define ZONE_HALLDEALER	95
 #define	ZONE_VILLA2		156
 #define	ZONE_CABINE 	173
