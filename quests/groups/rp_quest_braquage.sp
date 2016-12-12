@@ -580,7 +580,7 @@ public void Q_Complete(int objectiveID, int client) {
 	char tmp[64], tmp2[2][64];
 	rp_GetZoneData(g_iPlanqueZone, zone_type_name, tmp, sizeof(tmp));
 	ExplodeString(tmp, ": ", tmp2, sizeof(tmp2), sizeof(tmp2[]));
-	int gain = g_iQuestGain / g_stkTeamCount[TEAM_BRAQUEUR];
+	int gain = g_iQuestGain / (g_stkTeamCount[TEAM_BRAQUEUR]+g_stkTeamCount[TEAM_BRAQUEUR_DEAD]);
 	
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
 		LogToGame("[BRAQUAGE] [FIN] %L est braqueur et a gagné", g_stkTeam[TEAM_BRAQUEUR][i]);
@@ -594,7 +594,11 @@ public void Q_Complete(int objectiveID, int client) {
 	}
 	
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR_DEAD]; i++) {
-		LogToGame("[BRAQUAGE] [FIN] %L est braqueur mais il était mort à la fin.", g_stkTeam[TEAM_BRAQUEUR_DEAD][i]);
+		LogToGame("[BRAQUAGE] [FIN] %L est braqueur et a gagné", g_stkTeam[TEAM_BRAQUEUR_DEAD][i]);
+		CPrintToChat(g_stkTeam[TEAM_BRAQUEUR_DEAD][i], "{lightblue}[TSX-RP]{default} Vous avez gagné %d$ pour votre braquage de %s.", gain, tmp2[0]);
+		rp_ClientMoney(g_stkTeam[TEAM_BRAQUEUR_DEAD][i], i_AddToPay, gain);
+		
+		rp_ClientXPIncrement(g_stkTeam[TEAM_BRAQUEUR_DEAD][i], gain / 10);
 		
 		if( client != g_stkTeam[TEAM_BRAQUEUR_DEAD][i] )
 			rp_QuestComplete(g_stkTeam[TEAM_BRAQUEUR_DEAD][i], QUEST_UNIQID, true);
