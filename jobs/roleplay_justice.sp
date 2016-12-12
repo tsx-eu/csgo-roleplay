@@ -158,7 +158,7 @@ public Action Timer_Light(Handle timer, any none) {
 }
 // ----------------------------------------------------------------------------
 public Action fwdCommand(int client, char[] command, char[] arg) {
-	if( StrContains(command, "tb") == 0 ) {
+	if( StrContains(command, "tb") == 0 || StrEqual(command, "tribunal") ) {
 		return Draw_Menu(client);
 	}
 	else if( StrContains(command, "jgmt") == 0 ) {
@@ -661,6 +661,14 @@ Menu AUDIENCE_Forum(int client, int a, int b) {
 		SQL_TQuery(rp_GetDatabase(), SQL_AUDIENCE_Forum, query, client);
 	}
 	else if( b == 0 ) {
+		
+		rp_GetClientSSO(client, tmp, sizeof(tmp));
+			
+		Format(query, sizeof(query), "https://www.ts-x.eu/popup.php?&url=/index.php?page=roleplay2%s&hashh=/tribunal/case/%d", tmp, a);
+		PrintToConsole(client, "https://www.ts-x.eu/index.php?page=roleplay2#/tribunal/case/%d", a);
+		
+		AdvMOTD_ShowMOTDPanel(client, "Tribunal", query, MOTDPANEL_TYPE_URL);
+		
 	 	subMenu = new Menu(MenuTribunal);
 		subMenu.SetTitle("Que faire?\n ");
 		
