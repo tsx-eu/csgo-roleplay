@@ -128,6 +128,8 @@ public Action Cmd_SendToJail(int args) {
 	PrintToServer("Cmd_SendToJail");
 	#endif
 	SendPlayerToJail(GetCmdArgInt(1), GetCmdArgInt(2));
+	
+	StripWeapons(GetCmdArgInt(1));
 }
 public void OnMapStart() {
 	PrecacheModel(MODEL_PRISONNIER, true);
@@ -1342,6 +1344,8 @@ void SendPlayerToJail(int target, int client = 0) {
 		LogToGame("[TSX-RP] [JAIL-0] %L (%d) a mis %L (%d) en prison.", client, rp_GetPlayerZone(client, 1.0), target, rp_GetPlayerZone(target, 1.0));
 		
 	}
+	
+	
 	
 	int rand = Math_GetRandomInt(0, (MaxJail-1));
 	rp_ClientTeleport(target, fLocation[rand]);

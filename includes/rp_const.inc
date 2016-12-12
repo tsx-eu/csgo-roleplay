@@ -93,6 +93,14 @@
 #define METRO_BELMON	242
 #define ZONE_VILLA		245
 
+#define TRIBUJAIL_1	287
+#define TRIBUJAIL_2	288
+#define TRIBUNAL_1	289
+#define TRIBUNAL_2	290
+#define BUREAU_1   	291
+#define BUREAU_2	292
+#define JURRY_2		293
+
 // PvP:
 #define	FLAG_SPEED		280.0
 #define	FLAG_POINT_MAX	150

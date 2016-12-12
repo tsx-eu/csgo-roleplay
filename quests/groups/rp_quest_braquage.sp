@@ -116,7 +116,7 @@ public bool fwdCanStart(int client) {
 			continue;
 		if( i == client )
 			continue;
-		if( rp_GetClientJobID(i) == 1 || rp_GetClientJobID(i) == 101 )
+		if( policeMatch(i) )
 			ct++;
 		if( rp_GetClientInt(i, i_PlayerLVL) >= 132 )
 			t++;
@@ -1170,20 +1170,25 @@ public Action tskAlarm(Handle timer, any client) {
 	}
 }
 void updateTeamPolice() {
-	bool isAfk;
 	for (int i = 1; i <= MaxClients; i++) {
 		if( !IsValidClient(i) )
 			continue;
-			
-		isAfk = rp_GetClientBool(i, b_IsAFK);
 		
-		if( g_iPlayerTeam[i] != TEAM_POLICE && (rp_GetClientJobID(i) == 1 || rp_GetClientJobID(i) == 101) && !isAfk) {
+		if( g_iPlayerTeam[i] != TEAM_POLICE && policeMatch(i) )
 			addClientToTeam(i, TEAM_POLICE);
-		}
-		if( g_iPlayerTeam[i] == TEAM_POLICE && ((rp_GetClientJobID(i) != 1 && rp_GetClientJobID(i) != 101) || isAfk) ) {
+		else if( g_iPlayerTeam[i] == TEAM_POLICE && !policeMatch(i) )
 			removeClientTeam(i);
-		}
 	}
+}
+bool policeMatch(int client) {
+	int jobID = rp_GetClientJobID(client);	
+	if( jobID == 101 && GetClientTeam(client) == CS_TEAM_CT && (rp_GetPlayerZone(client) == TRIBUNAL_1 || rp_GetPlayerZone(client) == TRIBUNAL_2) )
+		return false;
+	
+	if( jobID == 1 || jobID == 101 )
+		return true;
+	
+	return false;
 }
 void EmitSoundToAllRangedAny(const char[] sound, float origin[3]) {
 	float pos[3], angle;

@@ -374,17 +374,17 @@ public int MenuJobs2(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 				AddMenuItem(menu, tmp2, "Acheter / Vendre une arme");
 				amount++;
 			}
-			if(rp_GetClientInt(target, i_Avocat) > 0){
+			if(rp_GetClientInt(target, i_Avocat) > 0) {
 				Format(tmp2, sizeof(tmp2), "%i_-5", target);
 				AddMenuItem(menu, tmp2, "Demander ses services d'avocat");
 				amount++;
 			}
-			if(jobid == 101 && (jobid == 103 || jobid == 104 || jobid == 105 || jobid == 106)){
+			if(jobid == 101) {
 				Format(tmp2, sizeof(tmp2), "%i_-4", target);
 				AddMenuItem(menu, tmp2, "Demander pour une audience");
 				amount++;
 			}
-			if(jobid == 61){
+			if(jobid == 61) {
 				Format(tmp2, sizeof(tmp2), "%i_-6", target);
 				AddMenuItem(menu, tmp2, "Demander un Appartement");
 				amount++;
@@ -438,10 +438,13 @@ public int MenuJobs3(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 				case -1: CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N aimerait être recruté, il est actuellement: %s", client, zoneName);
 				case -2: CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin d'un crochetage de porte, il est actuellement: %s", client, zoneName);
 				case -3: CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N aimerait acheter ou vendre une arme, il est actuellement: %s", client, zoneName);
-				case -4: CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin d'un juge, il est actuellement: %s", client, zoneName);
+				case -4: {
+					CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin d'un juge, il est actuellement: %s", client, zoneName);
+					LogToGame("[TSX-RP] [CALL] %L a demandé les services de juge de %L", client, target);
+				}
 				case -5: CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin d'un avocat, il est actuellement: %s", client, zoneName);
 				case -6: CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N souhaiterait acheter un appartement, merci de le contacter pour plus de renseignement. Il est actuellement: %s", client, zoneName);
-				default:{
+				default: {
 					rp_GetItemData(item_id, item_type_name, tmp, sizeof(tmp));
 					CPrintToChat(target, "{lightblue}[TSX-RP]{default} Le joueur %N a besoin de {lime}%s{default}, il est actuellement: %s", client, tmp, zoneName);
 					LogToGame("[TSX-RP] [CALL] %L a demandé %s à %L", client, tmp, target);

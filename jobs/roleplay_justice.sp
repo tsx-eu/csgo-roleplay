@@ -85,14 +85,8 @@ float g_flCoords[3][2][3];
 int g_iArticles[3][28];
 int g_iTribunalData[3][td_Max];
 char g_szJugementDATA[65][3][32];
+bool g_bClientDisconnected[65];
 
-#define TRIBUJAIL_1	287
-#define TRIBUJAIL_2	288
-#define TRIBUNAL_1	289
-#define TRIBUNAL_2	290
-#define BUREAU_1   	291
-#define BUREAU_2	292
-#define JURRY_2		293
 //#define DEBUG
 
 #define isTribunalDisponible(%1) (g_iTribunalData[%1][td_Owner]<=0?true:false)
@@ -118,6 +112,7 @@ public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt");
 }
 public void OnClientPostAdminCheck(int client) {
+	g_bClientDisconnected[client] = false;
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 	
 	for (int i = 1; i <= 2; i++) {
@@ -126,6 +121,8 @@ public void OnClientPostAdminCheck(int client) {
 	}
 }
 public void OnClientDisconnect(int client) {
+	g_bClientDisconnected[client] = true;
+	
 	for (int type = 1; type <= 2; type++) {
 		
 		if( g_iTribunalData[type][td_AvocatPlaignant] == client )
@@ -326,6 +323,8 @@ Menu AUDIENCE_Start(int client, int type, int plaignant, int suspect) {
 		if( GetClientTeam(client) == CS_TEAM_T ) {
 			FakeClientCommand(client, "say /cop");
 		}
+		
+		LogToGame("[TRIBUNAL] [AUDIENCE] Le juge %L convoque %L dans l'affaire l'opposant à %L.", client, suspect, plaignant);
 		
 		CreateTimer(1.0, Timer_AUDIENCE, type, TIMER_REPEAT);
 		
@@ -800,16 +799,20 @@ public Action Timer_AUDIENCE(Handle timer, any type) {
 		return Plugin_Continue;
 	}
 		
-	if( time < 60 && time % 20 == 0 )
+	if( time < 60 && time % 20 == 0 ) {
 		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est convoqué par le {green}Tribunal %d{default} de Princeton [%d/3].", target, type, time/20 + 1);
+		LogToGame("[TRIBUNAL] [AUDIENCE] Le juge %L a convoque %L [%d/3].", g_iTribunalData[type][td_Owner], target, time/20 + 1);
+	}
 	else if( time % 60 == 0 ) {
 		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est recherché par le {green}Tribunal %d{default} de Princeton depuis %d minutes.", target, type, time/60);
+		LogToGame("[TRIBUNAL] [AUDIENCE] Le juge %L recherche %L depuis %d minutes.", g_iTribunalData[type][td_Owner], target, time/60);
 		rp_SetClientInt(target, i_SearchLVL, timeToSeverity(time));
 		rp_SetClientBool(target, b_IsSearchByTribunal, true);
 	}
 	
 	if( zone == jail ) {
 		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est arrivé après %d minutes.", target, time/60);
+		LogToGame("[TRIBUNAL] [AUDIENCE] Le juge %L termine la convocation de %L après %d minutes.", g_iTribunalData[type][td_Owner], target, time/60);
 		g_iTribunalData[type][td_SuspectArrive] = 1;
 		rp_SetClientBool(target, b_IsSearchByTribunal, false);
 		Draw_Menu(g_iTribunalData[type][td_Owner]);
@@ -1000,12 +1003,24 @@ void SQL_Insert(int type, int condamne, int condamnation, int heure, int amende)
 	
 	if( condamne ) {
 		
-		GetClientName(g_iTribunalData[type][td_Owner], nick, sizeof(nick));
-		SQL_EscapeString(rp_GetDatabase(), nick, pseudo, sizeof(pseudo));
+		if( IsValidClient(g_iTribunalData[type][td_Suspect]) && !g_bClientDisconnected[ g_iTribunalData[type][td_Suspect] ] ) {
+			rp_ClientMoney(g_iTribunalData[type][td_Suspect], i_Bank, -amende);
+			rp_SetClientInt(g_iTribunalData[type][td_Suspect], i_JailTime, rp_GetClientInt(g_iTribunalData[type][td_Suspect], i_JailTime) + (heure * 60));
+			
+			rp_SetClientInt(g_iTribunalData[type][td_Suspect], i_JailledBy, g_iTribunalData[type][td_Owner]);
+			
+			ServerCommand("rp_SendToJail %d", g_iTribunalData[type][td_Suspect]);
+		}
+		else {
 		
-		Format(query, sizeof(query), "INSERT INTO `rp_users2` (`id`, `steamid`, `money`, `jail`, `pseudo`, `steamid2`, `raison`) VALUES (NULL,");
-		Format(query, sizeof(query), "%s '%s', '%d', '%d', '%s', '%s', '%s');", query, szSteamID[2], -amende, heure * 60, pseudo, szSteamID[0], "condamné par le Tribunal"); 
-		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
+			GetClientName(g_iTribunalData[type][td_Owner], nick, sizeof(nick));
+			SQL_EscapeString(rp_GetDatabase(), nick, pseudo, sizeof(pseudo));
+			
+			Format(query, sizeof(query), "INSERT INTO `rp_users2` (`id`, `steamid`, `money`, `jail`, `pseudo`, `steamid2`, `raison`) VALUES (NULL,");
+			Format(query, sizeof(query), "%s '%s', '%d', '%d', '%s', '%s', '%s');", query, szSteamID[2], -amende, heure * 60, pseudo, szSteamID[0], "condamné par le Tribunal"); 
+			SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
+			
+		}
 	}
 }
 bool hasMercenaire() {
