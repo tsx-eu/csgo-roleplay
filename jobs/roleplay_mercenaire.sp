@@ -63,7 +63,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_cryptage",	Cmd_ItemCryptage,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_map",			Cmd_ItemMaps,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	
-	g_vConfigTueur = CreateConVar("rp_config_kidnapping", "149,150,151,152,160,161-162");
+	g_vConfigTueur = CreateConVar("rp_config_kidnapping", "163,164,165,166,174,175-176");
 	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
