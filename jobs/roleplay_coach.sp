@@ -127,11 +127,38 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_PostTakeDamageKnife, fwdWeapon);
 	rp_HookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
 	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);
+	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
+	
 	if( rp_GetClientBool(client, b_Crayon) )
 		rp_HookEvent(client, RP_PrePlayerTalk, fwdTalkCrayon);
 }
 public void OnClientDisconnect(int client) {
 	removeShield(client);
+}
+public Action fwdCommand(int client, char[] command, char[] arg) {
+	if( StrContains(command, "cutinfo") == 0 ) {
+		return Cmd_CutInfo(client);
+	}
+	return Plugin_Continue;
+}
+public Action Cmd_CutInfo(int client) {
+	
+	if( rp_GetClientJobID(client) != 71 ) {
+		ACCESS_DENIED(client);
+	}
+	
+	int target = rp_GetClientTarget(client);
+	
+	if( !IsValidClient(target) )
+		target = client;
+
+	if( !IsPlayerAlive(target) )
+		return Plugin_Handled;
+	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N a %i%% d'entrainnement au couteau,  %i%% d'esquive et %i%% de précision de tir.", target,
+	rp_GetClientInt(target, i_KnifeTrain), rp_GetClientInt(target, i_Esquive), RoundToFloor(rp_GetClientFloat(target, fl_WeaponTrain)/5.0*100.0));
+	
+	return Plugin_Handled;
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemPackEquipement(int args){
