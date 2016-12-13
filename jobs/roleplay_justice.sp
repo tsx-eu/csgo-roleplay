@@ -265,7 +265,7 @@ Action Draw_Menu(int client) {
 			menu.AddItem("condamner -1", "Condamner", (injail) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );
 			menu.AddItem("dedomager -1", "Dédommager", (g_iTribunalData[type][td_DoneDedommagement] == 0 && injail && (g_iTribunalData[type][td_AvocatPlaignant] > 0 || g_iTribunalData[type][td_AvocatSuspect] > 0)) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );
 			menu.AddItem("acquitter -1", "Acquitter", (injail) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );
-			menu.AddItem("stop", "Annuler l'audience", (!injail) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+			menu.AddItem("stop 1", "Annuler l'audience", (!injail) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 			menu.AddItem("inverser", "Inverser plaignant-suspect", (injail) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 			menu.AddItem("forward", "Changer de juge");
 		}
@@ -337,7 +337,20 @@ Menu AUDIENCE_Start(int client, int type, int plaignant, int suspect) {
 	
 	return subMenu;
 }
-Menu AUDIENCE_Stop(int type) {
+Menu AUDIENCE_Stop(int type, int needConfirmation = 0) {
+	
+	if( needConfirmation == 1 ) {
+		
+		bool injail = (g_iTribunalData[type][td_SuspectArrive] == 1 ? true:false);
+		
+		Menu subMenu = new Menu(MenuTribunal);
+		subMenu.SetTitle("Êtes vous sur d'annuler l'audience?\n ");
+		
+		subMenu.AddItem("tb", "Ne pas annuler l'audience");
+		subMenu.AddItem("stop 0", "Annuler l'audience", (!injail) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+		
+		return subMenu;
+	}
 	
 	if( IsValidClient(g_iTribunalData[type][td_Suspect]) ) {
 		rp_SetClientInt(g_iTribunalData[type][td_Suspect], i_SearchLVL, 0);
@@ -740,7 +753,7 @@ public int MenuTribunal(Handle menu, MenuAction action, int client, int param2) 
 		else if( StrEqual(expl[0], "forum") )
 			subMenu = AUDIENCE_Forum(client, a, b);
 		else if( StrEqual(expl[0], "stop") )
-			subMenu = AUDIENCE_Stop(type);
+			subMenu = AUDIENCE_Stop(type, a);
 		else if( StrEqual(expl[0], "articles") )
 			subMenu = AUDIENCE_Articles(type, a, b, c);
 		else if( StrEqual(expl[0], "acquitter") )
