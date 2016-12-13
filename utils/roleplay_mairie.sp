@@ -22,6 +22,7 @@
 char g_szMonthLong[12][16] =  { "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre" };
 bool g_bWaitingMairieCommand[65];
 int g_iMairieQuestionID[65];
+char g_szMaireName[65];
 
 public Plugin myinfo =  {
 	name = "Utils: Mairie", author = "KoSSoLaX", 
@@ -29,13 +30,20 @@ public Plugin myinfo =  {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 public void OnPluginStart() {
-	
 	RegAdminCmd("rp_force_maire", 		CmdForceMaire, 			ADMFLAG_ROOT);
 	
 	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
+}
+public void OnAllPluginsLoaded() {
+	SQL_TQuery(rp_GetDatabase(), QUERY_SetMaireName, "SELECT `name` FROM `rp_servers` S INNER JOIN `rp_users` U ON S.`maire`=U.`steamid` LIMIT 1");
+}
+public void QUERY_SetMaireName(Handle owner, Handle handle, const char[] error, any client) {
+	if( SQL_FetchRow(handle) ) {
+		SQL_FetchString(handle, 0, g_szMaireName, sizeof(g_szMaireName));
+	}
 }
 public Action CmdForceMaire(int client, int args) {
 	SQL_TQuery(rp_GetDatabase(), QUERY_SetMaire, "SELECT `name`, M.`steamid` FROM `rp_maire` M INNER JOIN `rp_users` U ON U.`steamid`=M.`steamid` INNER JOIN `rp_maire_vote` V ON V.`target`=M.`id` GROUP BY M.`id` HAVING COUNT(*)=( SELECT COUNT(*) as `a` FROM `rp_maire` M INNER JOIN `rp_maire_vote` V ON V.`target`=M.`id` GROUP BY M.`id` ORDER BY `a` DESC LIMIT 1) ORDER BY RAND() LIMIT 1;");	
@@ -45,6 +53,7 @@ public void QUERY_SetMaire(Handle owner, Handle handle, const char[] error, any 
 	
 	if( SQL_FetchRow(handle) ) {
 		SQL_FetchString(handle, 0, tmp, sizeof(tmp));
+		SQL_FetchString(handle, 0, g_szMaireName, sizeof(g_szMaireName));
 		SQL_FetchString(handle, 1, tmp2, sizeof(tmp2));
 		
 		CPrintToChatAll("{lightblue} ================================== {default}");
@@ -171,7 +180,7 @@ void Draw_Mairie_Main(int client) {
 	}
 	
 	Menu menu = new Menu(Handle_Mairie);
-	menu.SetTitle("Mairie de Princeton\n ");
+	menu.SetTitle("Mairie de Princeton.\nMaire: %s \n ", g_szMaireName);
 	menu.AddItem("3 0 0", "Règlement communal");
 	if( rp_GetClientInt(client, i_PlayerLVL) >= 30 )
 		menu.AddItem("5 0 0", "Candidature pour la Mairie");
