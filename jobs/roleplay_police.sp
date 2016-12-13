@@ -1432,7 +1432,7 @@ int BuildingBarriere(int client) {
 		
 		GetEdictClassname(i, tmp, sizeof(tmp));
 		
-		if( StrEqual(classname, tmp) ) {
+		if( StrEqual(classname, tmp) && rp_GetBuildingData(i, BD_owner) == client ) {
 			count++;
 			if( count >= max ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez posé trop de barrières.");
