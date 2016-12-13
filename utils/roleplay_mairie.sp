@@ -276,6 +276,7 @@ public void QUERY_PostCandidate(Handle owner, Handle handle, const char[] error,
 	}
 	else {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre candidature a été validée.");
+		CPrintToChatAll("{lightblue}[TSX-RP]{default} %N s'est présenté comme candidat à la mairie.", client);
 	}
 }
 public void QUERY_VoteCandidate(Handle owner, Handle handle, const char[] error, any client) {
