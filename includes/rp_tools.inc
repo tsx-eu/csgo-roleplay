@@ -398,7 +398,7 @@ stock void rp_ClientSwitchWeapon(int client, int wepid, int target = -1) {
 public Action rp_ClientRemoveProp(int client, int target, int item_id) {
 	
 	if (target > 0 && Entity_GetDistance(client, target) < 300.0) {
-		if (rp_IsRemoveAble(target)) {
+		if( rp_IsRemoveAble(target) && GetEntProp(target, Prop_Data, "m_takedamage") > 0 ) {
 			
 			char name[128];
 			GetEdictClassname(target, name, sizeof(name));
