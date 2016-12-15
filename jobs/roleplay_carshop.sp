@@ -1197,7 +1197,8 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 						continue;
 					}
 					
-					if( rp_GetVehicleInt(target, car_donateur) == 1 && rp_GetVehicleInt(target, car_battery) == 0 ) {
+					if( rp_GetVehicleInt(target, car_donateur) == 1 && rp_GetVehicleInt(target, car_battery) == -1 ) {
+						LogToGame("[CHEATING] %L a tenté de ranger sa voiture donateur, sans batterie.", client);
 						CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre mustang sportive n'a plus sa batterie.");
 						continue;
 					}		
