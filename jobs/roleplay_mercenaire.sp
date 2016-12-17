@@ -592,7 +592,7 @@ void SetContratFail(int client, bool time = false, bool annule = false) { // tim
 	else if( jobClient != 41 ) // si le tueur a démissionné entre temps
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes plus mercenaire, vous ne pouvez plus remplir votre contrat.");
 	else if(annule)
-		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous venez d'annuler votre contrat.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous venez d'annuler votre contrat.");
 	else
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes mort et n'avez pas rempli votre contrat.");
 	
