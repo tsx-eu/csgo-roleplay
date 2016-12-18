@@ -769,6 +769,9 @@ public Action fwdPressUse(int client) {
 public Action fwdDead(int client, int attacker) {
 		
 	if( g_iQuestGain > 0 && g_iPlayerTeam[client] == TEAM_BRAQUEUR ) {
+		if (g_iPlayerTeam[attacker] == TEAM_POLICE) {
+			rp_ClientXPIncrement(attacker, 500);
+		}
 		OnBraqueurKilled(client);
 		return Plugin_Handled;
 	}
