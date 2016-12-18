@@ -441,7 +441,7 @@ public int AddCompetanceToAssassin(Handle menu, MenuAction action, int client, i
 		
 		if( StrEqual(options, "annule", false) ) {
 			LogToGame("[CONTRAT] %L a annulé son contrat.", client);
-			SetContratFail(client);
+			SetContratFail(client, false, true);
 		}
 		else if( g_iKillerPoint[client][competance_left] <= 0 ) {
 			return;
@@ -580,7 +580,7 @@ void RestoreAssassinNormal(int client) {
 	
 	rp_ClientColorize(client);
 }
-void SetContratFail(int client, bool time = false) { // time = retro-compatibilité. 
+void SetContratFail(int client, bool time = false, bool annule = false) { // time = retro-compatibilité. 
 	#if defined DEBUG
 	PrintToServer("SetContratFail");
 	#endif
@@ -591,6 +591,8 @@ void SetContratFail(int client, bool time = false) { // time = retro-compatibili
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas rempli votre contrat à temps.");
 	else if( jobClient != 41 ) // si le tueur a démissionné entre temps
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes plus mercenaire, vous ne pouvez plus remplir votre contrat.");
+	else if(annule)
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous venez d'annuler votre contrat.");
 	else
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes mort et n'avez pas rempli votre contrat.");
 	
@@ -602,9 +604,10 @@ void SetContratFail(int client, bool time = false) { // time = retro-compatibili
 				CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N n'a pas rempli son contrat à temps.", client);
 			else if( jobClient != 41 ) // si le tueur a démissionné entre temps
 				CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N n'est plus mercenaire et ne peut plus remplir votre contrat.", client);
+			else if(annule)
+				CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N a annulé son contrat.", client);
 			else
 				CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N a été tué et n'a pas pu remplir son contrat.", client);
-			
 			
 			
 			int prix = rp_GetClientInt(client, i_ContratPay);
