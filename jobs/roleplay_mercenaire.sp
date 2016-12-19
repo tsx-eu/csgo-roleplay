@@ -516,7 +516,8 @@ public int AddCompetanceToAssassin(Handle menu, MenuAction action, int client, i
 	}
 }
 public void OnPostThinkPost(int client) {
-	SetEntProp(client, Prop_Send, "m_iAddonBits", 0);
+	if( IsPlayerAlive(client) )
+		SetEntProp(client, Prop_Send, "m_iAddonBits", 0);
 }
 // ----------------------------------------------------------------------------
 void RestoreAssassinNormal(int client) {
