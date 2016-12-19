@@ -412,12 +412,15 @@ Menu AUDIENCE_Articles(int type, int a, int b, int c) {
 			subMenu = new Menu(MenuTribunal);
 			subMenu.SetTitle("Quel est la valeur de %s?\n   %d$\n ", g_szArticles[b][1], g_iTribunalData[type][td_Dedommagement2]);
 			
-			Format(tmp, sizeof(tmp), "articles 1 %d %d", b, 50); subMenu.AddItem(tmp, "Ajouter 50$");
-			Format(tmp, sizeof(tmp), "articles 1 %d %d", b, 500); subMenu.AddItem(tmp, "Ajouter 500$\n ");
-			Format(tmp, sizeof(tmp), "articles 1 %d %d", b, -50); subMenu.AddItem(tmp, "Retirer 50$");
-			Format(tmp, sizeof(tmp), "articles 1 %d %d", b, -500); subMenu.AddItem(tmp, "Retirer 500$");
+			Format(tmp, sizeof(tmp), "articles 1 %d %d", b, 5);		subMenu.AddItem(tmp, "Ajouter 5$");
+			Format(tmp, sizeof(tmp), "articles 1 %d %d", b, 50);	subMenu.AddItem(tmp, "Ajouter 50$");
+			Format(tmp, sizeof(tmp), "articles 1 %d %d", b, 500);	subMenu.AddItem(tmp, "Ajouter 500$\n ");
 			
-			Format(tmp, sizeof(tmp), "articles 1 %d %d", b, 42); subMenu.AddItem(tmp, "Valider");
+			Format(tmp, sizeof(tmp), "articles 1 %d %d", b, -5);	subMenu.AddItem(tmp, "Retirer 5$");
+			Format(tmp, sizeof(tmp), "articles 1 %d %d", b, -50);	subMenu.AddItem(tmp, "Retirer 50$");
+			Format(tmp, sizeof(tmp), "articles 1 %d %d", b, -500);	subMenu.AddItem(tmp, "Retirer 500$");
+			
+			Format(tmp, sizeof(tmp), "articles 1 %d %d", b, 42);	subMenu.AddItem(tmp, "Valider");
 		}
 		else {
 			g_iArticles[type][b]++;
@@ -706,7 +709,8 @@ Menu AUDIENCE_Forum(int client, int a, int b) {
 }
 public void SQL_AUDIENCE_Forum(Handle owner, Handle handle, const char[] error, any client) {
 	
-	if( !SQL_HasResultSet(handle) ) {
+	
+	if( SQL_GetRowCount(handle) == 0 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a aucun cas à traiter pour le moment.");
 		return;
 	}
