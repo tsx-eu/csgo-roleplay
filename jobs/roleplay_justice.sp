@@ -831,7 +831,12 @@ public Action Timer_AUDIENCE(Handle timer, any type) {
 	else if( time % 60 == 0 ) {
 		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est recherché par le {green}Tribunal %d{default} de Princeton depuis %d minutes.", target, type, time/60);
 		LogToGame("[TRIBUNAL] [AUDIENCE] Le juge %L recherche %L depuis %d minutes.", g_iTribunalData[type][td_Owner], target, time/60);
-		rp_SetClientInt(target, i_SearchLVL, timeToSeverity(time));
+		
+		if( time >= 24*60 )
+			rp_SetClientInt(target, i_SearchLVL, 5);
+		else
+			rp_SetClientInt(target, i_SearchLVL, timeToSeverity(time));
+		
 		rp_SetClientBool(target, b_IsSearchByTribunal, true);
 	}
 	

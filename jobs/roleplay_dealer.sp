@@ -1101,7 +1101,7 @@ public Action Frame_BuildingPlant(Handle timer, any ent) {
 		return Plugin_Handled;
 	}
 	
-	if( !rp_GetClientBool(client, b_IsAFK) && rp_GetClientInt(client, i_TimeAFK) <= 60 ) {
+	if( !rp_GetClientBool(client, b_IsAFK) && rp_GetClientInt(client, i_TimeAFK) <= 60 && rp_GetClientInt(client, i_SearchLVL) < 5 ) {
 		
 		int cpt = rp_GetBuildingData(ent, BD_count);
 		
