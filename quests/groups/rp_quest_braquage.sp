@@ -771,6 +771,7 @@ public Action fwdDead(int client, int attacker) {
 	if( g_iQuestGain > 0 && g_iPlayerTeam[client] == TEAM_BRAQUEUR ) {
 		if (g_iPlayerTeam[attacker] == TEAM_POLICE) {
 			rp_ClientXPIncrement(attacker, 500);
+			LogToGame("[BRAQUAGE] [MORT] %L est un braqueur et a été tué par %L.", client, attacker);
 		}
 		OnBraqueurKilled(client);
 		return Plugin_Handled;
