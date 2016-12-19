@@ -661,7 +661,8 @@ public Action fwdOnPlayerUse(int client) {
 		if( sub < 0 && sub > MAX_ITEMS )
 			continue;
 		
-		rp_IncrementSuccess(client, success_list_trafiquant, rp_GetBuildingData(i, BD_count) );
+		if( rp_GetBuildingData(i, BD_owner) == client)
+			rp_IncrementSuccess(client, success_list_trafiquant, rp_GetBuildingData(i, BD_count) );
 		
 		if( rp_GetBuildingData(i, BD_FromBuild) == 0 ) {
 			if( rp_GetBuildingData(i, BD_owner) != client )
