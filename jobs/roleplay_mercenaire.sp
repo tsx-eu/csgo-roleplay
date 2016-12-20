@@ -757,7 +757,7 @@ public Action FreeKidnapping(Handle timer, any client) {
 	rp_ClientTeleport(client,  view_as<float>({2911.0, 868.0, -1853.0}));
 	rp_ClientSendToSpawn(client, true); // C'est proche du comico. 
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vos ravisseurs vous ont finalement libéré.");
-	CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez libéré %N.", target);
+	CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez libéré %N.", client);
 	
 	return Plugin_Continue;
 }
