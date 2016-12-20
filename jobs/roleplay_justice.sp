@@ -221,6 +221,13 @@ public Action Cmd_Jugement(int client, char[] arg) {
 		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
 	}
 	
+	switch(type) {
+		case 1: CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le joueur a été condamné.");
+		case 2: CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le joueur a été acquitté.");
+		case 3: CPrintToChat(client, "{lightblue}[TSX-RP]{default} La plainte troll a été supprimée.");
+		
+	}
+	
 	return Plugin_Handled;
 }
 Action Draw_Menu(int client) {
@@ -671,7 +678,6 @@ Menu AUDIENCE_Forum(int client, int a, int b) {
 	
 	if( a == 0 ) {
 		GetClientAuthId(client, AuthId_Engine, tmp, sizeof(tmp));
-		tmp[0] = 0;
 		
 		Format(query, sizeof(query), "SELECT R.`id`, `report_steamid`, COUNT(`vote`) cpt, `name`, SUM(IF(`vote`=1,1,0)) as cpt2 FROM `ts-x`.`site_report` R INNER JOIN `ts-x`.`site_report_votes` V ON V.`reportid`=R.`id` INNER JOIN `rp_csgo`.`rp_users` U ON U.`steamid`=R.`report_steamid` WHERE V.`vote`<>'2' AND R.`jail`=-1 AND R.`own_steamid`<>'%s' AND R.`report_steamid`<>'%s' GROUP BY R.`id` HAVING cpt>=5 ORDER BY cpt DESC;", tmp, tmp);
 		SQL_TQuery(rp_GetDatabase(), SQL_AUDIENCE_Forum, query, client);
