@@ -22,36 +22,57 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 public Plugin myinfo = {
-	name = "Utils: Wedding", author = "Medzila",
+	name = "Utils: Wedding", author = "Medzila/KoSSoLaX",
 	description = "RolePlay - Utils: Wedding",
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
-
-int g_cBeam, g_cGlow;
-
-
-// TODO: Partage auto des clés voiture / appart
-// TODO: Rajouter personnalité / sexe aux conjoints
-// TODO: Bonus s'ils sont proches differents si homme ou femme du coup ?
 
 public void OnPluginStart() {
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
 }
-public void OnMapStart() {
-	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
-	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt", true);
-}
 // ----------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
+	rp_SetClientInt(client, i_MarriedTo, 0);
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
+	
+	char steamid[32], query[512];
+	GetClientAuthId(client, AuthId_Engine, steamid, sizeof(steamid));
+	Format(query, sizeof(query), "SELECT `steamid` FROM `rp_wedding` WHERE `steamid2`='%s' AND `time`>=UNIX_TIMESTAMP() UNION SELECT `steamid2` FROM `rp_wedding` WHERE `steamid`='%s' AND `time`>=UNIX_TIMESTAMP();", steamid, steamid);
+	
+	SQL_TQuery(rp_GetDatabase(), SQL_CheckWedding, query, client);
+}
+public void SQL_CheckWedding(Handle owner, Handle handle, const char[] error, any client) {
+	char steamid[32], target[32];
+	if( SQL_FetchRow(handle) ) {
+		SQL_FetchString(handle, 0, steamid, sizeof(steamid));
+		
+		for (int i = 1; i <= MaxClients; i++) {
+			if( !IsValidClient(i) || i == client )
+				continue;
+			
+			GetClientAuthId(i, AuthId_Engine, target, sizeof(target));
+			
+			if( StrEqual(steamid, target) ) {
+				CPrintToChat(i, "{lightblue}[TSX-RP]{default} Votre conjoint %N a rejoint la ville.", client);
+				
+				rp_SetClientInt(i, i_MarriedTo, client);
+				rp_SetClientInt(client, i_MarriedTo, i);
+				
+				rp_HookEvent(client, RP_OnFrameSeconde, fwdFrame);
+				rp_HookEvent(i, RP_OnFrameSeconde, fwdFrame);
+				
+				break;
+			}
+		}
+	}
 }
 public void OnClientDisconnect(int client) {
 	// Un mariage est terminé si un des deux mariés déco
 	int mari = rp_GetClientInt(client, i_MarriedTo);
 	if( mari > 0 ) {
-		CPrintToChat(mari, "{lightblue}[TSX-RP]{default} Votre conjoint a quitté la ville précipitamment, vous n'êtes plus mariés.");
+		CPrintToChat(mari, "{lightblue}[TSX-RP]{default} Votre conjoint a quitté la ville précipitamment.");
 		rp_UnhookEvent(mari, RP_OnFrameSeconde, fwdFrame);
 		rp_SetClientInt(mari, i_MarriedTo, 0);
 		rp_SetClientInt(client, i_MarriedTo, 0);
@@ -72,212 +93,34 @@ public Action Cmd_Mariage(int client) {
 	PrintToServer("Cmd_Mariage");
 	#endif
 	
-	int job = rp_GetClientInt(client, i_Job);
-	int zoneJuge = rp_GetPlayerZone(client);
-	
-	if( job != 101 && job != 102 && job != 103 && job != 104 && job != 105 && job != 106) { // Au dessus de HJ1 seulement
+	if( rp_GetClientJobID(client) != 101 ) { // Au dessus de HJ1 seulement
 		ACCESS_DENIED(client);
 	}
+	
+	int zoneJuge = rp_GetPlayerZone(client);
 	
 	if( rp_GetZoneInt( zoneJuge, zone_type_type) != 101 ) { // N'ouvre pas le menu en dehors du tribu
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Cette commande ne peut être utilisée qu'au tribunal.");
 		ACCESS_DENIED(client);
 	}
 	
-	Handle menu = CreateMenu(eventMariage_1);
-	SetMenuTitle(menu, "Qui voulez-vous marier ?"); // Le juge choisi la première personne à marier 
-	char tmp[24], tmp2[64];
-
-
-	for(int i=1; i<=MaxClients; i++) {
-		if( !IsValidClient(i) )
-			continue;
-		if( rp_GetPlayerZone(i) != zoneJuge )
-			continue;
-		if( rp_GetClientInt(i, i_MarriedTo) > 0 )
-			continue;
-		if( i == client )
-			continue;
-
-		Format(tmp, sizeof(tmp), "%i_%i", i, zoneJuge);
-		Format(tmp2, sizeof(tmp2), "%N", i);
-
-		AddMenuItem(menu, tmp, tmp2);
-	}
-
-	SetMenuExitButton(menu, true);
-	DisplayMenu(menu, client, MENU_TIME_DURATION*6);
-
+	Menu menu = Menu_Main();
+	menu.Display(client, MENU_TIME_FOREVER);
+	
 	return Plugin_Handled;
 }
-public int eventMariage_1(Handle menu, MenuAction action, int client, int param2) {
-	#if defined DEBUG
-	PrintToServer("eventMariage_1");
-	#endif
+public Action Marier(int juge, int epoux, int epouse) {
 	
-	if( action == MenuAction_Select ) {
-		char options[64], optionsBuff[2][64];
-		GetMenuItem(menu, param2, options, sizeof(options));
-		ExplodeString(options, "_", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
-		
-		int target = StringToInt(optionsBuff[0]); // On choppe la premiere personne a marier
-		int zoneJuge = StringToInt(optionsBuff[1]); // Salle du juge
-		
-		// Setup menu
-		Handle menu2 = CreateMenu(eventMariage_2);
-		Format(options, sizeof(options), "À qui voulez-vous vous marier %N ?", target); // On choisi la seconde personne
-		SetMenuTitle(menu2, options);
-		char tmp[24], tmp2[64];
-		
-		for(int i=1; i<=MaxClients; i++) {
-			if( !IsValidClient(i) )
-				continue;
-			if( i == target || i == client )
-				continue;
-			if( rp_GetClientInt(i, i_MarriedTo) > 0 )
-				continue;
-			if( rp_GetPlayerZone(i) != zoneJuge )
-				continue;
-
-			Format(tmp, sizeof(tmp), "%i_%i_%i", i, target, zoneJuge); // On relie les deux personne a marier
-			Format(tmp2, sizeof(tmp2), "%N", i);
-			
-			AddMenuItem(menu2, tmp, tmp2);
-		}
-		
-		SetMenuExitButton(menu2, true);
-		DisplayMenu(menu2, client, MENU_TIME_DURATION*6);
-	}
-	else if( action == MenuAction_End ) {
-		CloseHandle(menu);
-	}
-}
-public int eventMariage_2(Handle menu, MenuAction action, int client, int param2) {
-	#if defined DEBUG
-	PrintToServer("eventMariage_2");
-	#endif
-	
-	if( action == MenuAction_Select ) {
-		char options[64], optionsBuff[3][64];
-		GetMenuItem(menu, param2, options, sizeof(options));
-		
-		ExplodeString(options, "_", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
-		
-		int target_1 = StringToInt(optionsBuff[0]); // premiere personne à marier
-		int target_2 = StringToInt(optionsBuff[1]); // seconde
-		int zoneJuge = StringToInt(optionsBuff[2]);	// salle du juge
-		
-		int pos_1 = rp_GetPlayerZone(target_1);
-		int pos_2 = rp_GetPlayerZone(target_2);
-		int pos_3 = rp_GetPlayerZone(client);
-		
-		// Messages d'erreurs double check
-		if( rp_GetZoneInt(pos_3, zone_type_type) != 101 ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'êtes pas au tribunal, le mariage ne peut pas se dérouler.");
-			CloseHandle(menu);
-			return;
-		}
-		if( pos_1 != pos_3 ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'est pas dans la même salle de tribunal que vous, le mariage ne peut pas se dérouler", target_1);
-			CloseHandle(menu);
-			return;
-		}
-		if( pos_2 != pos_3 ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'est pas dans la même salle de tribunal que vous, le mariage ne peut pas se dérouler", target_1);
-			CloseHandle(menu);
-			return;
-		}
-		if( rp_GetClientInt(target_1, i_MarriedTo) > 0 || rp_GetClientInt(target_2, i_MarriedTo) > 0 ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous essayez d'unir quelqu'un déjà marié, le mariage ne peut pas se dérouler.");
-			CloseHandle(menu);
-			return;
-		}
-		
-		// Message à toute la salle
-		PrintToChatZone(zoneJuge, "{lightblue}[TSX-RP]{default} Le juge %N s'exclame: %N, voulez-vous prendre pour époux %N et l'aimer jusqu'à ce que la mort vous sépare?", client, target_2, target_1);
-		
-		// Setup menu
-		Handle menu2 = CreateMenu(eventMariage_3);
-		
-		// S'il n'y a pas d'erreurs, on envoie un menu de choix a la premiere personne
-		Format(options, sizeof(options), "Voulez-vous prendre %N pour époux et l'aimer jusqu'à ce que la mort vous sépare ? (1000$)", target_1); 
-		SetMenuTitle(menu2, options);
-		
-		Format(options, sizeof(options), "%i_%i_1_0_%i", target_1, client, zoneJuge); // le dernier 0 signifie que c'est la premiere personne
-		AddMenuItem(menu2, options, "Oui!");
-		
-		Format(options, sizeof(options), "%i_%i_0_0_%i", target_1, client, zoneJuge);
-		AddMenuItem(menu2, options, "Non...");
-		
-		SetMenuExitButton(menu2, false);
-		DisplayMenu(menu2, target_2, MENU_TIME_DURATION);
-	}
-	else if( action == MenuAction_End ) {
-		CloseHandle(menu);
-	}
-}
-public int eventMariage_3(Handle menu, MenuAction action, int client, int param2) {
-	#if defined DEBUG
-	PrintToServer("eventMariage_3");
-	#endif
-	
-	if( action == MenuAction_Select ) {
-		char options[64], optionsBuff[5][64];
-		GetMenuItem(menu, param2, options, sizeof(options));
-		
-		ExplodeString(options, "_", optionsBuff, sizeof(optionsBuff), sizeof(optionsBuff[]));
-		
-		int fiance = StringToInt(optionsBuff[0]);
-		int juge = StringToInt(optionsBuff[1]);
-		int reponse = StringToInt(optionsBuff[2]);
-		int flag = StringToInt(optionsBuff[3]); // Pour savoir si c'est la premiere ou la seconde personne a qui on demande
-		int zoneJuge = StringToInt(optionsBuff[4]);
-		
-		if( !reponse ) {
-		// Message à toute la salle
-			PrintToChatZone(zoneJuge, "{lightblue}[TSX-RP]{default} %N répond: NON, %N fond en pleurs... Stupéfaction dans la salle .", client, fiance);
-			CloseHandle(menu);
-		}
-		else if( !flag ) { // Le premier a dit oui, on ouvre le même menu au second
-			
-			// Messages à toute la salle
-			PrintToChatZone(zoneJuge, "{lightblue}[TSX-RP]{default} %N répond: OUI, les invités et %N sourient .", client, fiance);
-			PrintToChatZone(zoneJuge, "{lightblue}[TSX-RP]{default} Le juge %N s'exclame: %N, voulez-vous prendre pour époux %N et l'aimer jusqu'à que la mort vous sépare?", juge, fiance, client);
-			
-			// Setup menu
-			Handle menu2 = CreateMenu(eventMariage_3);
-			
-			Format(options, sizeof(options), "Voulez-vous prendre %N pour épouse et l'aimer jusqu'à ce que la mort vous sépare(1000$)", client);
-			SetMenuTitle(menu2, options);
-			
-			Format(options, sizeof(options), "%i_%i_1_1_%i", client, juge, zoneJuge);
-			AddMenuItem(menu2, options, "Oui!");
-			
-			Format(options, sizeof(options), "%i_%i_0_1_%i", client, juge, zoneJuge);
-			AddMenuItem(menu2, options, "Non...");
-			
-			SetMenuExitButton(menu2, false);
-			DisplayMenu(menu2, fiance, MENU_TIME_DURATION);
-		}
-		else{ // Les deux sont d'accord, on les marie
-			Marier(client, fiance, juge, zoneJuge);
-		}
-	}
-	else if( action == MenuAction_End ) {
-		CloseHandle(menu);
-	}
-}
-public Action Marier(int epoux, int epouse, int juge, int zoneJuge){
-	
-	int prix = 2000;
+	int pos_1 = rp_GetPlayerZone(juge);
+	int prix = 10000;
 
 	if( (rp_GetClientInt(epoux, i_Bank)+rp_GetClientInt(epoux, i_Money)) < (prix/2) || (rp_GetClientInt(epouse, i_Bank)+rp_GetClientInt(epouse, i_Money)) < (prix/2) ) {
-		PrintToChatZone(zoneJuge, "{lightblue}[TSX-RP]{default} L'un des mariés est en fait un SDF refoulé et n'a pas assez d'argent pour s'aquitter des frais du mariage, Vous pouvez huer les pauvres !");
+		PrintToChatZone(pos_1, "{lightblue}[TSX-RP]{default} L'un des mariés est en fait un SDF refoulé et n'a pas assez d'argent pour s'aquitter des frais du mariage, Vous pouvez huer les pauvres !");
 		return Plugin_Handled;
 	}
 	
-	PrintToChatZone(zoneJuge, "{lightblue}[TSX-RP]{default} %N répond: OUI !", epoux);
-	PrintToChatZone(zoneJuge, "{lightblue}[TSX-RP]{default} %N et %N sont maintenant unis par les liens du mariage, vous pouvez féliciter les mariés !", epoux, epouse);
+	PrintToChatZone(pos_1, "{lightblue}[TSX-RP]{default} %N répond: OUI !", epouse);
+	PrintToChatZone(pos_1, "{lightblue}[TSX-RP]{default} %N et %N sont maintenant unis par les liens du mariage, vous pouvez féliciter les mariés !", epoux, epouse);
 	
 	CPrintToChat(epoux, "{lightblue}[TSX-RP]{default} Vous et %N êtes unis par les liens du mariage, vous pouvez embrasser la mariée félicitations !", epouse);
 	CPrintToChat(epouse, "{lightblue}[TSX-RP]{default} Vous et %N êtes unis par les liens du mariage, félicitations !", epoux);
@@ -291,24 +134,28 @@ public Action Marier(int epoux, int epouse, int juge, int zoneJuge){
 	rp_SetClientInt(epoux, i_MarriedTo, epouse);
 	rp_SetClientInt(epouse, i_MarriedTo, epoux);
 	
-	ShareKeyAppart(epoux, epouse);
-	ShareKeyCar(epoux, epouse);
+	ShareKey(epoux, epoux);
+	ShareKey(epouse, epoux);
 	
 	rp_HookEvent(epoux, RP_OnFrameSeconde, fwdFrame);
 	rp_HookEvent(epouse, RP_OnFrameSeconde, fwdFrame);
 	
+	char query[512], szClient[32], szTarget[32];
+	GetClientAuthId(epoux, AuthId_Engine, szClient, sizeof(szClient));
+	GetClientAuthId(epouse, AuthId_Engine, szTarget, sizeof(szTarget));
+	Format(query, sizeof(query), "INSERT INTO `rp_wedding` (`steamid`, `steamid2`, `time`) VALUES ('%s', '%s', '%d');", szClient, szTarget, GetTime()+(7*24*60*60));
+	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
+	
 	return Plugin_Handled;
 }
-
 public Action fwdFrame(int client) {
 	int target = rp_GetClientInt(client, i_MarriedTo);
 	
 	// Si les amoureux sont proches, regen et affiche un beamring rose autours d'eux
 	bool areNear = rp_IsEntitiesNear(client, target, true);
-	if( areNear ){
-		if(Math_GetRandomInt(0, 10) == 6){
-			ShareKeyAppart(client, target);
-			ShareKeyCar(client, target);
+	if( areNear ) {
+		if( Math_GetRandomInt(0, 4) == 2 ) {
+			ShareKey(client, target);
 		}
 		
 		ServerCommand("sm_effect_particles %d trail_heart 3", client);
@@ -322,24 +169,16 @@ public Action fwdFrame(int client) {
 	if( target > 0  && !areNear)
 		rp_Effect_BeamBox(client, target, NULL_VECTOR, 255, 92, 205); // Crée un laser / laser cube rose sur le/la marié(e)
 }
-
-public void ShareKeyAppart(int epoux, int epouse){
+public void ShareKey(int client, int target) {
 	// Cherche les apparts dont les mariés sont proprio et les partagent
 	for (int i = 1; i < 200; i++) {
 		int proprio = rp_GetAppartementInt(i, appart_proprio);
 		
-		if( proprio == epoux && !rp_GetClientKeyAppartement(epouse, i) ){
-			rp_SetClientInt(epouse, i_AppartCount, rp_GetClientInt(epouse, i_AppartCount) + 1);
-			rp_SetClientKeyAppartement(epouse, i, true);
-		}
-		if( proprio == epouse && !rp_GetClientKeyAppartement(epoux, i) ){
-			rp_SetClientInt(epoux, i_AppartCount, rp_GetClientInt(epoux, i_AppartCount) + 1);
-			rp_SetClientKeyAppartement(epoux, i, true);
+		if( proprio == client && !rp_GetClientKeyAppartement(target, i) ) {
+			rp_SetClientInt(target, i_AppartCount, rp_GetClientInt(target, i_AppartCount) + 1);
+			rp_SetClientKeyAppartement(target, i, true);
 		}
 	}
-}
-
-public void ShareKeyCar(int epoux, int epouse){
 	// Cherche les vehicules dont les mariés sont proprio et les partagent
 	for (int i = MaxClients +1 ; i <= 2048; i++) {
 		if( !rp_IsValidVehicle(i) )
@@ -347,11 +186,208 @@ public void ShareKeyCar(int epoux, int epouse){
 			
 		int proprio = rp_GetVehicleInt(i, car_owner);
 		
-		if( proprio == epoux && !rp_GetClientKeyVehicle(epouse, i) ){
-			rp_SetClientKeyVehicle(epouse, i, true);
+		if( proprio == client && !rp_GetClientKeyVehicle(target, i) ) {
+			rp_SetClientKeyVehicle(target, i, true);
 		}
-		if( proprio == epouse && !rp_GetClientKeyVehicle(epoux, i)){
-			rp_SetClientKeyVehicle(epoux, i, true);
+	}
+}
+
+Menu Menu_Main() {
+	Menu subMenu = new Menu(eventMariage);
+	subMenu.SetTitle("Tribunal de Princeton - Mariage\n ");
+	subMenu.AddItem("0", "Marier des joueurs");
+	subMenu.AddItem("1", "Faire divorcer des joueurs (à faire)");
+	subMenu.AddItem("2", "Prolonger un mariage (à faire)");
+	return subMenu;
+}
+Menu Menu_Divorce() {
+	return null;
+}
+Menu Menu_Prolonge() {
+	return null;
+}
+Menu Menu_Mariage(int& client, int a=0, int b=0, int c=0, int d=0, int e=0, int f=0) {
+	int zone = rp_GetPlayerZone(client);
+	char tmp[64], tmp2[64], query[512];
+	
+	Menu subMenu = null;
+	if( b == 0 ) {
+		
+		subMenu = new Menu(eventMariage);
+		subMenu.SetTitle("Qui voulez-vous marier ?\n ");
+		
+		for(int i=1; i<=MaxClients; i++) {
+			if( !IsValidClient(i) || i == client || rp_GetPlayerZone(i) != zone )
+				continue;
+			if( rp_GetClientInt(i, i_MarriedTo) > 0 )
+				continue;
+	
+			Format(tmp, sizeof(tmp), "0 %d %d", client, i);
+			Format(tmp2, sizeof(tmp2), "%N", i);
+			subMenu.AddItem(tmp, tmp2);
 		}
+	}
+	else if( c == 0 ) {
+		subMenu = new Menu(eventMariage);
+		subMenu.SetTitle("À qui voulez-vous marier %N?\n ", b);
+		
+		for(int i=1; i<=MaxClients; i++) {
+			if( !IsValidClient(i) || i == client || b == i || rp_GetPlayerZone(i) != zone )
+				continue;
+			if( rp_GetClientInt(i, i_MarriedTo) > 0 )
+				continue;
+	
+			Format(tmp, sizeof(tmp), "0 %d %d %d", a, b, i);
+			Format(tmp2, sizeof(tmp2), "%N", i);
+			subMenu.AddItem(tmp, tmp2);
+		}
+	}
+	else if( d == 0 ) {
+		
+		GetClientAuthId(b, AuthId_Engine, tmp, sizeof(tmp));
+		GetClientAuthId(c, AuthId_Engine, tmp2, sizeof(tmp2));
+		
+		DataPack dp = new DataPack();
+		dp.WriteCell(a);
+		dp.WriteCell(b);
+		dp.WriteCell(c);		
+		
+		Format(query, sizeof(query), "SELECT `steamid` FROM `rp_wedding` WHERE (`steamid`='%s' OR `steamid2`='%s') AND `time`>=UNIX_TIMESTAMP() UNION SELECT `steamid2` FROM `rp_wedding` WHERE (`steamid`='%s' OR `steamid2`='%s') AND `time`>=UNIX_TIMESTAMP();", tmp, tmp, tmp2, tmp2);
+		SQL_TQuery(rp_GetDatabase(), SQL_CheckWedding2, query, dp);
+	}
+	else if( d > 0 ) {
+		if( d >= 2 ) {
+			CPrintToChat(a, "{lightblue}[TSX-RP]{default} Vous essayez d'unir quelqu'un déjà marié, le mariage ne peut pas se dérouler.");
+		}
+		else {
+			int pos_1 = rp_GetPlayerZone(a);
+			int pos_2 = rp_GetPlayerZone(b);
+			int pos_3 = rp_GetPlayerZone(c);
+			int err = 0;
+			
+			// Messages d'erreurs double check
+			if( rp_GetZoneInt(pos_1, zone_type_type) != 101 ) {
+				CPrintToChat(a, "{lightblue}[TSX-RP]{default} Vous n'êtes pas au tribunal, le mariage ne peut pas se dérouler.");
+				err++;
+			}
+			if( pos_1 != pos_3 || pos_2 != pos_3 ) {
+				CPrintToChat(a, "{lightblue}[TSX-RP]{default} Tous les prétendant ne sont pas dans la même salle du tribunal, le mariage ne peut pas se dérouler");
+				err++;
+			}
+			if( rp_GetClientInt(b, i_MarriedTo) > 0 || rp_GetClientInt(c, i_MarriedTo) > 0 ) {
+				CPrintToChat(a, "{lightblue}[TSX-RP]{default} Vous essayez d'unir quelqu'un déjà marié, le mariage ne peut pas se dérouler.");
+				err++;
+			}
+			
+			if( err == 0 ) {
+				PrintToChatZone(pos_1, "{lightblue}[TSX-RP]{default} Le juge %N s'exclame: %N, voulez-vous prendre pour époux %N et l'aimer jusqu'à ce que la mort vous sépare?", a, b, c);
+				
+				subMenu = new Menu(eventMariage);
+				
+				Format(query, sizeof(query), "Voulez-vous prendre %N pour époux\n et l'aimer jusqu'à ce que la mort vous sépare ?\nLe contrat de mariage dure 7 jours et coûte 5.000$.\n ", c); 
+				subMenu.SetTitle(query);
+				
+				Format(tmp, sizeof(tmp), "0 %d %d %d -1 1", a, b, c); subMenu.AddItem(tmp, "Oui!");
+				Format(tmp, sizeof(tmp), "0 %d %d %d -1 2", a, b, c); subMenu.AddItem(tmp, "Non...");
+				subMenu.ExitButton = false;
+				client = b;
+			}
+		}
+	}
+	else if( e > 0 ) {
+		int pos_1 = rp_GetPlayerZone(a);
+		
+		if( e == 2 ) {
+			PrintToChatZone(pos_1, "{lightblue}[TSX-RP]{default} %N répond: NON, %N fond en pleurs... Stupéfaction dans la salle .", b, c);
+		}
+		else {			
+			// Messages à toute la salle
+			PrintToChatZone(pos_1, "{lightblue}[TSX-RP]{default} %N répond: OUI, les invités et %N sourient .", b, c);
+			PrintToChatZone(pos_1, "{lightblue}[TSX-RP]{default} Le juge %N s'exclame: %N, voulez-vous prendre pour épouse %N et l'aimer jusqu'à que la mort vous sépare?", a, c, b);
+			
+			subMenu = new Menu(eventMariage);
+			
+			Format(query, sizeof(query), "Voulez-vous prendre %N pour épouse\n et l'aimer jusqu'à ce que la mort vous sépare?\nLe contrat de mariage dure 7 jours et coûte 5.000$.\n ", c);
+			subMenu.SetTitle(query);
+			
+			Format(tmp, sizeof(tmp), "0 %d %d %d -1 -1 1", a, b, c); subMenu.AddItem(tmp, "Oui!");
+			Format(tmp, sizeof(tmp), "0 %d %d %d -1 -1 2", a, b, c); subMenu.AddItem(tmp, "Non...");
+			subMenu.ExitButton = false;
+			client = c;
+		}
+	}
+	else if( f > 0 ) {
+		
+		int pos_1 = rp_GetPlayerZone(a);
+		
+		if( e == 2 ) {
+			PrintToChatZone(pos_1, "{lightblue}[TSX-RP]{default} %N répond: NON, %N fond en pleurs... Stupéfaction dans la salle .", c, b);
+		}
+		else {
+			
+			int pos_2 = rp_GetPlayerZone(b);
+			int pos_3 = rp_GetPlayerZone(c);
+			int err = 0;
+			
+			// Messages d'erreurs double check
+			if( rp_GetZoneInt(pos_1, zone_type_type) != 101 ) {
+				CPrintToChat(a, "{lightblue}[TSX-RP]{default} Vous n'êtes pas au tribunal, le mariage ne peut pas se dérouler.");
+				err++;
+			}
+			if( pos_1 != pos_3 || pos_2 != pos_3 ) {
+				CPrintToChat(a, "{lightblue}[TSX-RP]{default} Tous les prétendant ne sont pas dans la même salle du tribunal, le mariage ne peut pas se dérouler");
+				err++;
+			}
+			if( err == 0 )
+				Marier(a, b, c);
+		}
+	}
+	
+	return subMenu;
+}
+public void SQL_CheckWedding2(Handle owner, Handle handle, const char[] error, any data) {
+	DataPack dp = view_as<DataPack>(data);
+	dp.Reset();
+	int a = dp.ReadCell();
+	int b = dp.ReadCell();
+	int c = dp.ReadCell();
+	delete dp;
+	
+	Menu subMenu = Menu_Mariage(a, a, b, c, SQL_GetRowCount(handle) + 1);
+	subMenu.Display(a, MENU_TIME_FOREVER);
+}
+
+public int eventMariage(Handle menu, MenuAction action, int client, int param2) {
+	if( action == MenuAction_Select ) {
+		
+		char options[256], expl[7][12];
+		GetMenuItem(menu, param2, options, sizeof(options));
+		ExplodeString(options, " ", expl, sizeof(expl), sizeof(expl[]));
+		
+		PrintToChat(client, options);
+		
+		int t = StringToInt(expl[0]);
+		int a = StringToInt(expl[1]);
+		int b = StringToInt(expl[2]);
+		int c = StringToInt(expl[3]);
+		int d = StringToInt(expl[4]);
+		int e = StringToInt(expl[5]);
+		int f = StringToInt(expl[6]);
+		
+		Menu subMenu;
+		
+		switch(t) {
+			case 0: subMenu = Menu_Mariage(client, a, b, c, d, e, f);
+			case 1: subMenu = Menu_Divorce();
+			case 2: subMenu = Menu_Prolonge();
+			default: subMenu = Menu_Main();
+		}
+		
+		if( subMenu )
+			subMenu.Display(client, MENU_TIME_FOREVER);
+		
+	}
+	else if( action == MenuAction_End ) {
+		CloseHandle(menu);
 	}
 }
