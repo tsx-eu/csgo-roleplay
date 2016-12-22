@@ -597,11 +597,9 @@ public void SQL_CheckStatus(Handle owner, Handle handle, const char[] error, any
 public int eventMariage(Handle menu, MenuAction action, int client, int param2) {
 	if( action == MenuAction_Select ) {
 		
-		char options[256], expl[7][12];
+		char options[128], expl[7][12];
 		GetMenuItem(menu, param2, options, sizeof(options));
 		ExplodeString(options, " ", expl, sizeof(expl), sizeof(expl[]));
-		
-		PrintToChat(client, options);
 		
 		int t = StringToInt(expl[0]);
 		int a = StringToInt(expl[1]);
