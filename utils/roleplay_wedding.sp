@@ -54,8 +54,9 @@ public void SQL_CheckWedding(Handle owner, Handle handle, const char[] error, an
 			
 			GetClientAuthId(i, AuthId_Engine, target, sizeof(target));
 			
-			if( StrEqual(steamid, target) ) {
+			if( StrEqual(steamid, target) && rp_GetClientInt(i, i_MarriedTo) == 0 ) {
 				CPrintToChat(i, "{lightblue}[TSX-RP]{default} Votre conjoint %N a rejoint la ville.", client);
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre conjoint %N a rejoint la ville.", i);
 				
 				rp_SetClientInt(i, i_MarriedTo, client);
 				rp_SetClientInt(client, i_MarriedTo, i);
@@ -78,7 +79,7 @@ public void OnClientDisconnect(int client) {
 		rp_SetClientInt(client, i_MarriedTo, 0);
 	}
 }
-
+// ----------------------------------------------------------------------------
 public Action fwdCommand(int client, char[] command, char[] arg) {
 	if( StrEqual(command, "mariage") ) {
 		return Cmd_Mariage(client);
@@ -86,8 +87,6 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	
 	return Plugin_Continue;
 }
-
-// ----------------------------------------------------------------------------
 public Action Cmd_Mariage(int client) {
 	#if defined DEBUG
 	PrintToServer("Cmd_Mariage");
@@ -109,14 +108,15 @@ public Action Cmd_Mariage(int client) {
 	
 	return Plugin_Handled;
 }
-public Action Marier(int juge, int epoux, int epouse) {
+// ----------------------------------------------------------------------------
+void Marier(int juge, int epoux, int epouse) {
 	
 	int pos_1 = rp_GetPlayerZone(juge);
 	int prix = 10000;
 
 	if( (rp_GetClientInt(epoux, i_Bank)+rp_GetClientInt(epoux, i_Money)) < (prix/2) || (rp_GetClientInt(epouse, i_Bank)+rp_GetClientInt(epouse, i_Money)) < (prix/2) ) {
 		PrintToChatZone(pos_1, "{lightblue}[TSX-RP]{default} L'un des mariés est en fait un SDF refoulé et n'a pas assez d'argent pour s'aquitter des frais du mariage, Vous pouvez huer les pauvres !");
-		return Plugin_Handled;
+		return;
 	}
 	
 	PrintToChatZone(pos_1, "{lightblue}[TSX-RP]{default} %N répond: OUI !", epouse);
@@ -146,30 +146,9 @@ public Action Marier(int juge, int epoux, int epouse) {
 	Format(query, sizeof(query), "INSERT INTO `rp_wedding` (`steamid`, `steamid2`, `time`) VALUES ('%s', '%s', '%d');", szClient, szTarget, GetTime()+(7*24*60*60));
 	SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
 	
-	return Plugin_Handled;
+	return;
 }
-public Action fwdFrame(int client) {
-	int target = rp_GetClientInt(client, i_MarriedTo);
-	
-	// Si les amoureux sont proches, regen et affiche un beamring rose autours d'eux
-	bool areNear = rp_IsEntitiesNear(client, target, true);
-	if( areNear ) {
-		if( Math_GetRandomInt(0, 4) == 2 ) {
-			ShareKey(client, target);
-		}
-		
-		ServerCommand("sm_effect_particles %d trail_heart 3", client);
-		
-		
-		if( GetClientHealth(client) < 500 ) {
-			SetEntityHealth(client, GetClientHealth(client)+5);
-		}
-	}
-	
-	if( target > 0  && !areNear)
-		rp_Effect_BeamBox(client, target, NULL_VECTOR, 255, 92, 205); // Crée un laser / laser cube rose sur le/la marié(e)
-}
-public void ShareKey(int client, int target) {
+void ShareKey(int client, int target) {
 	// Cherche les apparts dont les mariés sont proprio et les partagent
 	for (int i = 1; i < 200; i++) {
 		int proprio = rp_GetAppartementInt(i, appart_proprio);
@@ -191,22 +170,40 @@ public void ShareKey(int client, int target) {
 		}
 	}
 }
-
+// ----------------------------------------------------------------------------
+public Action fwdFrame(int client) {
+	int target = rp_GetClientInt(client, i_MarriedTo);
+	
+	// Si les amoureux sont proches, regen et affiche un beamring rose autours d'eux
+	bool areNear = rp_IsEntitiesNear(client, target, true);
+	if( areNear ) {
+		if( Math_GetRandomInt(0, 10) == 2 ) {
+			ShareKey(client, target);
+		}
+		
+		ServerCommand("sm_effect_particles %d trail_heart 3", client);		
+		
+		if( GetClientHealth(client) < 500 ) {
+			SetEntityHealth(client, GetClientHealth(client)+5);
+		}
+	}
+	
+	if( target > 0  && !areNear)
+		rp_Effect_BeamBox(client, target, NULL_VECTOR, 255, 92, 205); // Crée un laser / laser cube rose sur le/la marié(e)
+}
+// ----------------------------------------------------------------------------
 Menu Menu_Main() {
 	Menu subMenu = new Menu(eventMariage);
 	subMenu.SetTitle("Tribunal de Princeton - Mariage\n ");
 	subMenu.AddItem("0", "Marier des joueurs");
-	subMenu.AddItem("1", "Faire divorcer des joueurs (à faire)");
-	subMenu.AddItem("2", "Prolonger un mariage (à faire)");
+	subMenu.AddItem("1", "Prolonger un mariage");
+	subMenu.AddItem("2", "Faire divorcer des joueurs");
+	subMenu.AddItem("3", "Voir la durée d'un contrat de mariage");
+	
 	return subMenu;
 }
-Menu Menu_Divorce() {
-	return null;
-}
-Menu Menu_Prolonge() {
-	return null;
-}
-Menu Menu_Mariage(int& client, int a=0, int b=0, int c=0, int d=0, int e=0, int f=0) {
+// ----------------------------------------------------------------------------
+Menu Menu_Mariage(int& client, int a, int b, int c, int d, int e, int f) {
 	int zone = rp_GetPlayerZone(client);
 	char tmp[64], tmp2[64], query[512];
 	
@@ -353,10 +350,250 @@ public void SQL_CheckWedding2(Handle owner, Handle handle, const char[] error, a
 	int c = dp.ReadCell();
 	delete dp;
 	
-	Menu subMenu = Menu_Mariage(a, a, b, c, SQL_GetRowCount(handle) + 1);
+	Menu subMenu = Menu_Mariage(a, a, b, c, SQL_GetRowCount(handle) + 1, 0, 0);
 	subMenu.Display(a, MENU_TIME_FOREVER);
 }
+// ----------------------------------------------------------------------------
+Menu Menu_Prolonge(int& client, int a, int b, int c, int d, int e) {
+	int zone = rp_GetPlayerZone(client);
+	char tmp[64], tmp2[64], query[512];
+	
+	Menu subMenu = null;
+	
+	if( rp_GetZoneInt(zone, zone_type_type) != 101 )
+		return null;
+	
+	if( b == 0 ) {
+		subMenu = new Menu(eventMariage);
+		subMenu.SetTitle("Qui voulez-vous prolonger le marriage ?\n ");
+		int to;
+		
+		for (int i = 1; i <= MaxClients; i++) {
+			if( !IsValidClient(i) || i == client )
+				continue;
+			
+			to = rp_GetClientInt(i, i_MarriedTo);
+			
+			if( to > 0 && i < to && rp_GetPlayerZone(i) == zone && rp_GetPlayerZone(to) == zone ) {
+				Format(tmp, sizeof(tmp), "1 %d %d %d", client, i, to);
+				Format(query, sizeof(query), "%N et %N", i, to);
+				
+				subMenu.AddItem(tmp, query);
+				PrintToChatAll("found %N et %N", i, to);
+			}
+		}
+	}
+	else if( d == 0 ) {
+		subMenu = new Menu(eventMariage);
+		subMenu.SetTitle("Souhaitez vous prolonger votre\n mariage avec %N?\n ", c);
+		
+		Format(tmp, sizeof(tmp), "1 %d %d %d 1", a, b, c); subMenu.AddItem(tmp, "Oui! (1.500$)");
+		Format(tmp, sizeof(tmp), "1 %d %d %d 2", a, b, c); subMenu.AddItem(tmp, "Non...");
+		subMenu.ExitButton = false;
+		client = b;
+	}
+	else if( d > 0 ) {
+		if( d == 1 ) {
+			subMenu = new Menu(eventMariage);
+			subMenu.SetTitle("Souhaitez vous prolonger votre\n mariage avec %N?\n ", b);
+			
+			Format(tmp, sizeof(tmp), "1 %d %d %d -1 1", a, b, c); subMenu.AddItem(tmp, "Oui! (1.500$)");
+			Format(tmp, sizeof(tmp), "1 %d %d %d -1 2", a, b, c); subMenu.AddItem(tmp, "Non...");
+			subMenu.ExitButton = false;
+			client = c;
+		}
+		else {
+			PrintToChatZone(zone, "{lightblue}[TSX-RP]{default} %N ne souhaite pas prolonger son marriage.", b);
+		}
+	}
+	else if( e > 0 ) {
+		if( e == 1 ) {
+			
+			int prix = 3000;
 
+			if( (rp_GetClientInt(b, i_Bank)+rp_GetClientInt(b, i_Money)) < (prix/2) || (rp_GetClientInt(c, i_Bank)+rp_GetClientInt(c, i_Money)) < (prix/2) ) {
+				PrintToChatZone(zone, "{lightblue}[TSX-RP]{default} L'un des mariés n'a pas assez d'argent pour prolonger son contrat de mariage.");
+				return null;
+			}
+			
+			PrintToChatZone(zone, "{lightblue}[TSX-RP]{default} Le contrat de mariage de %N et %N est prolongé de 7 jours!", b, c);
+			
+			// On paye le gentil juge et on preleve aux heureux élus
+			rp_ClientMoney(b, i_Money, -(prix / 2));
+			rp_ClientMoney(c, i_Money, -(prix / 2));
+			rp_ClientMoney(a, i_AddToPay, prix / 2);
+			rp_SetJobCapital(101, rp_GetJobCapital(101) + (prix/2) );
+			
+			GetClientAuthId(b, AuthId_Engine, tmp, sizeof(tmp));
+			GetClientAuthId(c, AuthId_Engine, tmp2, sizeof(tmp2));			
+			Format(query, sizeof(query), "UPDATE `rp_wedding` SET `time`=`time`+(7*24*60*60) WHERE (`steamid`='%s' AND `steamid2`='%s') OR (`steamid`='%s' AND `steamid2`='%s')", tmp, tmp2, tmp2, tmp);
+			SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
+		}
+		else {
+			PrintToChatZone(zone, "{lightblue}[TSX-RP]{default} %N ne souhaite pas prolonger son marriage.", c);
+		}
+	}
+	return subMenu;
+}
+// ----------------------------------------------------------------------------
+Menu Menu_Divorce(int& client, int a, int b, int c) {
+	int zone = rp_GetPlayerZone(client);
+	char tmp[64], szSteamIDs[512], query[1024];
+	
+	Menu subMenu = null;
+	
+	if( rp_GetZoneInt(zone, zone_type_type) != 101 )
+		return null;
+	
+	if( b == 0 ) {
+		for (int i = 1; i <= MaxClients; i++) {
+			if( !IsValidClient(i) || i == client )
+				continue;
+			if( rp_GetPlayerZone(i) == zone ) {
+				GetClientAuthId(i, AuthId_Engine, tmp, sizeof(tmp));
+				Format(szSteamIDs, sizeof(szSteamIDs), "%s'%s',", szSteamIDs, tmp);
+			}
+		}
+		
+		szSteamIDs[strlen(szSteamIDs) - 1] = 0;
+		Format(query, sizeof(query), "SELECT W.`steamid`, U1.`name`, W.`steamid2`, U2.`name` FROM `rp_wedding` W INNER JOIN `rp_users` U1 ON U1.`steamid`=W.`steamid` INNER JOIN `rp_users` U2 ON U2.`steamid`=W.`steamid2` WHERE`time` >= UNIX_TIMESTAMP() AND (W.`steamid` IN (%s) OR W.`steamid` IN (%s))", szSteamIDs, szSteamIDs);
+		PrintToConsole(client, query);
+		SQL_TQuery(rp_GetDatabase(), SQL_CheckDivorce, query, client);
+	}
+	else if( c == 0 ) {
+		
+		subMenu = new Menu(eventMariage);
+		subMenu.SetTitle("Souhaitez vous rompre votre contrat de mariage?\n ");
+		
+		Format(tmp, sizeof(tmp), "2 %d %d 1", a, b, c); subMenu.AddItem(tmp, "Oui! (10.000$)");
+		Format(tmp, sizeof(tmp), "2 %d %d 2", a, b, c); subMenu.AddItem(tmp, "Non...");
+		
+		client = b;
+	}
+	else {
+		if( c == 1 ) {
+			int prix = 10000;
+
+			if( (rp_GetClientInt(b, i_Bank)+rp_GetClientInt(b, i_Money)) < (prix/2) ) {
+				PrintToChatZone(zone, "{lightblue}[TSX-RP]{default} %N n'a pas assez d'argent pour prolonger son contrat de mariage.", b);
+				return null;
+			}
+			
+			PrintToChatZone(zone, "{lightblue}[TSX-RP]{default} %N a rompu son contrat de marriage!", b);
+			
+			
+			rp_ClientMoney(b, i_Money, -(prix));
+			rp_ClientMoney(a, i_AddToPay, prix / 2);
+			rp_SetJobCapital(101, rp_GetJobCapital(101) + (prix/2) );
+			
+			if( rp_GetClientInt(b, i_MarriedTo) > 0 ) {
+				CPrintToChat(rp_GetClientInt(b, i_MarriedTo), "{lightblue}[TSX-RP]{default} Votre conjoint a rompu votre contrat de mariage.");
+				
+				rp_UnhookEvent(rp_GetClientInt(b, i_MarriedTo), RP_OnFrameSeconde, fwdFrame);
+				rp_UnhookEvent(b, RP_OnFrameSeconde, fwdFrame);
+				
+				rp_SetClientInt(rp_GetClientInt(b, i_MarriedTo), i_MarriedTo, 0);
+				rp_SetClientInt(b, i_MarriedTo, 0);
+			}
+			GetClientAuthId(b, AuthId_Engine, tmp, sizeof(tmp));	
+			Format(query, sizeof(query), "UPDATE `rp_wedding` SET `time`=UNIX_TIMESTAMP() WHERE (`steamid`='%s' OR `steamid2`='%s') AND `time`>=UNIX_TIMESTAMP()", tmp, tmp);
+			SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
+		}
+		else {
+			PrintToChatZone(zone, "{lightblue}[TSX-RP]{default} %N ne veut pas rompre son contrat de mariage.", b);
+		}
+	}
+	return subMenu;
+}
+public void SQL_CheckDivorce(Handle owner, Handle handle, const char[] error, any client) {
+	char steamid[32], tmp[32], name[64];
+	Menu subMenu = new Menu(eventMariage);
+	subMenu.SetTitle("Quel couple doit divorcer?\n ");
+	
+	while( SQL_FetchRow(handle) ) {
+		
+		for (int i = 0; i <= 1; i++) {
+			
+			SQL_FetchString(handle, i * 2, steamid, sizeof(steamid));
+			SQL_FetchString(handle, i == 0 ? 3 : i, name, sizeof(name));
+			
+			for (int j = 1; j <= MaxClients; j++) {
+				if( !IsValidClient(j) )
+					continue;
+				
+				GetClientAuthId(j, AuthId_Engine, tmp, sizeof(tmp));
+				if( StrEqual(steamid, tmp) ) {
+					Format(tmp, sizeof(tmp), "2 %d %d", client, j);
+					Format(name, sizeof(name), "%N et %s", j, name);
+					subMenu.AddItem(tmp, name);
+				}
+			}
+		}
+	}
+	
+	subMenu.Display(client, MENU_TIME_DURATION);
+}
+// ----------------------------------------------------------------------------
+Menu Menu_Duration(int client, int a, int b) {
+	int zone = rp_GetPlayerZone(client);
+	char tmp[64], szSteamIDs[512], query[1024];
+	if( rp_GetZoneInt(zone, zone_type_type) != 101 )
+		return null;
+	
+	if( a == 0 ) {
+		
+		for (int i = 1; i <= MaxClients; i++) {
+			if( !IsValidClient(i) || i == client )
+				continue;
+			if( rp_GetPlayerZone(i) == zone ) {
+				GetClientAuthId(i, AuthId_Engine, tmp, sizeof(tmp));
+				Format(szSteamIDs, sizeof(szSteamIDs), "%s'%s',", szSteamIDs, tmp);
+			}
+		}
+			
+		szSteamIDs[strlen(szSteamIDs) - 1] = 0;
+		Format(query, sizeof(query), "SELECT W.`steamid`, U1.`name`, W.`steamid2`, U2.`name`, W.`time` FROM `rp_wedding` W INNER JOIN `rp_users` U1 ON U1.`steamid`=W.`steamid` INNER JOIN `rp_users` U2 ON U2.`steamid`=W.`steamid2` WHERE`time` >= UNIX_TIMESTAMP() AND (W.`steamid` IN (%s) OR W.`steamid` IN (%s))", szSteamIDs, szSteamIDs);
+		SQL_TQuery(rp_GetDatabase(), SQL_CheckStatus, query, client);
+	}
+	else {
+		float j = b / (24.0 * 60.0 * 60.0);
+		PrintToChatZone(zone, "{lightblue}[TSX-RP]{default} %N est toujours marié pour une durée de %.1f jour%s", a, j, j >= 2.0 ? "s" : "");
+	}
+	
+	return null;
+}
+public void SQL_CheckStatus(Handle owner, Handle handle, const char[] error, any client) {
+	int time;
+	char steamid[32], tmp[32], name[64];
+	Menu subMenu = new Menu(eventMariage);
+	subMenu.SetTitle("Les couples dans ce Tribunal\n ");
+	
+	while( SQL_FetchRow(handle) ) {
+		
+		for (int i = 0; i <= 1; i++) {
+			
+			SQL_FetchString(handle, i * 2, steamid, sizeof(steamid));
+			SQL_FetchString(handle, i == 0 ? 3 : i, name, sizeof(name));
+			time = SQL_FetchInt(handle, 4) - GetTime();
+			float k = time / (24.0 * 60.0 * 60.0);
+			
+			for (int j = 1; j <= MaxClients; j++) {
+				if( !IsValidClient(j) )
+					continue;
+				
+				GetClientAuthId(j, AuthId_Engine, tmp, sizeof(tmp));
+				if( StrEqual(steamid, tmp) ) {
+					Format(tmp, sizeof(tmp), "3 %d %d", j, time);
+					Format(name, sizeof(name), "%N et %s - %.1f jour%s", j, name, k, k >= 2.0 ? "s" : "");
+					subMenu.AddItem(tmp, name);
+				}
+			}
+		}
+	}
+	
+	subMenu.Display(client, MENU_TIME_DURATION);
+}
+// ----------------------------------------------------------------------------
 public int eventMariage(Handle menu, MenuAction action, int client, int param2) {
 	if( action == MenuAction_Select ) {
 		
@@ -378,8 +615,10 @@ public int eventMariage(Handle menu, MenuAction action, int client, int param2) 
 		
 		switch(t) {
 			case 0: subMenu = Menu_Mariage(client, a, b, c, d, e, f);
-			case 1: subMenu = Menu_Divorce();
-			case 2: subMenu = Menu_Prolonge();
+			case 1: subMenu = Menu_Prolonge(client, a, b, c, d, e);
+			case 2: subMenu = Menu_Divorce(client, a, b, c);
+			case 3: subMenu = Menu_Duration(client, a, b);
+			
 			default: subMenu = Menu_Main();
 		}
 		
