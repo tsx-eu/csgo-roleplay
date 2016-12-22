@@ -470,7 +470,7 @@ Menu AUDIENCE_Condamner(int type, int articles) {
 		amende = RoundFloat(float(amende) * g_flCondamnation[articles]);
 		
 		SQL_Insert(type, 1, articles, heure, amende);
-		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N a été condamné à %d heures et %d$ d'amende. Le juge a été %s.", g_iTribunalData[type][td_Suspect], heure, amende, g_szCondamnation[articles]);
+		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N a été condamné à %d heure%s et %d$ d'amende. Le juge a été %s.", g_iTribunalData[type][td_Suspect], heure, heure >= 2 ? "s" :"",amende, g_szCondamnation[articles]);
 		
 		AUDIENCE_Stop(type);
 	}
@@ -552,7 +552,7 @@ Menu AUDIENCE_Dedommagement(int type) {
 		rp_ClientMoney(target, i_Money, -money);
 		rp_ClientMoney(client, i_Money, money);
 		
-		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N a dédommagé %N de %d$", target, client, money);
+		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N a dédommagé %N de %d$.", target, client, money);
 	}
 	
 	return null;
@@ -806,7 +806,7 @@ public Action Timer_MERCENAIRE(Handle timer, any type) {
 			if( rp_GetPlayerZone(i) == GetTribunalZone(type) )
 				return Plugin_Stop;
 			
-			PrintHintText(i, "Vos services d'enquêteur sont requis au Tribunal %d.", type);
+			PrintHintText(i, "Vos services d'enquêteur sont requis au Tribunal n°%d.", type);
 		}
 	}
 	
@@ -831,11 +831,11 @@ public Action Timer_AUDIENCE(Handle timer, any type) {
 	}
 		
 	if( time < 60 && time % 20 == 0 ) {
-		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est convoqué par le {green}Tribunal %d{default} de Princeton [%d/3].", target, type, time/20 + 1);
+		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est convoqué par le {green}Tribunal n°%d{default} de Princeton [%d/3].", target, type, time/20 + 1);
 		LogToGame("[TRIBUNAL] [AUDIENCE] Le juge %L a convoque %L [%d/3].", g_iTribunalData[type][td_Owner], target, time/20 + 1);
 	}
 	else if( time % 60 == 0 ) {
-		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est recherché par le {green}Tribunal %d{default} de Princeton depuis %d minutes.", target, type, time/60);
+		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est recherché par le {green}Tribunal n°%d{default} de Princeton depuis %d minutes.", target, type, time/60);
 		LogToGame("[TRIBUNAL] [AUDIENCE] Le juge %L recherche %L depuis %d minutes.", g_iTribunalData[type][td_Owner], target, time/60);
 		
 		if( time >= 24*60 )
@@ -848,7 +848,7 @@ public Action Timer_AUDIENCE(Handle timer, any type) {
 	
 	if( zone == jail ) {
 		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est arrivé après %d minutes.", target, time/60);
-		LogToGame("[TRIBUNAL] [AUDIENCE] Le juge %L termine la convocation de %L après %d minutes.", g_iTribunalData[type][td_Owner], target, time/60);
+		LogToGame("[TRIBUNAL] [AUDIENCE] Le juge %L termine la convocation de %L après %d minute%s.", g_iTribunalData[type][td_Owner], target, time/60, time/60 >= 2 ? "s":"");
 		g_iTribunalData[type][td_SuspectArrive] = 1;
 		rp_SetClientBool(target, b_IsSearchByTribunal, false);
 		Draw_Menu(g_iTribunalData[type][td_Owner]);
@@ -859,7 +859,7 @@ public Action Timer_AUDIENCE(Handle timer, any type) {
 	mid = getZoneMiddle(jail);
 	
 	ServerCommand("sm_effect_gps %d %f %f %f", target, mid[0], mid[1], mid[2]);
-	PrintHintText(target, "Vous êtes attendu au tribunal %d de Princeton. Venez <u>immédiatement</u> pour un jugement <font color='#00cc00'>%s</font>.", type, g_szCondamnation[timeToSeverity(time)]);
+	PrintHintText(target, "Vous êtes attendu au tribunal n°%d de Princeton. Venez <u>immédiatement</u> pour un jugement <font color='#00cc00'>%s</font>.", type, g_szCondamnation[timeToSeverity(time)]);
 	
 	g_iTribunalData[type][td_Time]++;
 	return Plugin_Continue;
@@ -891,7 +891,7 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 				heure += (g_iArticles[type][i] * StringToInt(g_szArticles[i][2]));
 				amende += (g_iArticles[type][i] * StringToInt(g_szArticles[i][3]));
 			}
-			Format(szHUD, size, "%s\nPeine encourue: %d heures %d$ d'amendes", szHUD, heure, amende);
+			Format(szHUD, size, "%s\nPeine encourue: %d heure%s %d$ d'amende", szHUD, heure, heure >= 2 ? "s" : "",amende);
 			if( g_iTribunalData[type][td_Dedommagement] > 0 )
 				Format(szHUD, size, "%s\nDédommagement possible: %d$", szHUD, g_iTribunalData[type][td_Dedommagement]);
 		}
@@ -905,7 +905,7 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 	else if( rp_GetClientInt(client, i_Avocat) > 0 ) {
 		for (int i = 1; i <= 2; i++) {
 			if( g_iTribunalData[i][td_AvocatPlaignant] == client || g_iTribunalData[i][td_AvocatSuspect] == client )
-				PrintHintText(client, "Vos services d'avocat sont requis au Tribunal %d", i);
+				PrintHintText(client, "Vos services d'avocat sont requis au Tribunal n°%d", i);
 		}
 	}
 	return Plugin_Continue;
