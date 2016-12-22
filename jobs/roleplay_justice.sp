@@ -470,7 +470,7 @@ Menu AUDIENCE_Condamner(int type, int articles) {
 		amende = RoundFloat(float(amende) * g_flCondamnation[articles]);
 		
 		SQL_Insert(type, 1, articles, heure, amende);
-		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N a été condamné à %d heure(s) et %d$ d'amende. Le juge a été %s.", g_iTribunalData[type][td_Suspect], heure, amende, g_szCondamnation[articles]);
+		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N a été condamné à %d heure%s et %d$ d'amende. Le juge a été %s.", g_iTribunalData[type][td_Suspect], heure, heure >= 2 ? "s" :"",amende, g_szCondamnation[articles]);
 		
 		AUDIENCE_Stop(type);
 	}
@@ -848,7 +848,7 @@ public Action Timer_AUDIENCE(Handle timer, any type) {
 	
 	if( zone == jail ) {
 		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est arrivé après %d minutes.", target, time/60);
-		LogToGame("[TRIBUNAL] [AUDIENCE] Le juge %L termine la convocation de %L après %d minute(s).", g_iTribunalData[type][td_Owner], target, time/60);
+		LogToGame("[TRIBUNAL] [AUDIENCE] Le juge %L termine la convocation de %L après %d minute%s.", g_iTribunalData[type][td_Owner], target, time/60, time/60 >= 2 ? "s":"");
 		g_iTribunalData[type][td_SuspectArrive] = 1;
 		rp_SetClientBool(target, b_IsSearchByTribunal, false);
 		Draw_Menu(g_iTribunalData[type][td_Owner]);
@@ -891,7 +891,7 @@ public Action fwdHUD(int client, char[] szHUD, const int size) {
 				heure += (g_iArticles[type][i] * StringToInt(g_szArticles[i][2]));
 				amende += (g_iArticles[type][i] * StringToInt(g_szArticles[i][3]));
 			}
-			Format(szHUD, size, "%s\nPeine encourue: %d heure(s) %d$ d'amende", szHUD, heure, amende);
+			Format(szHUD, size, "%s\nPeine encourue: %d heure%s %d$ d'amende", szHUD, heure, heure >= 2 ? "s" : "",amende);
 			if( g_iTribunalData[type][td_Dedommagement] > 0 )
 				Format(szHUD, size, "%s\nDédommagement possible: %d$", szHUD, g_iTribunalData[type][td_Dedommagement]);
 		}
