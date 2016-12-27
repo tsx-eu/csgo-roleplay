@@ -990,6 +990,8 @@ int GetTribunalType(int zone) {
 void SQL_Insert(int type, int condamne, int condamnation, int heure, int amende) {
 	char query[1024], szSteamID[5][32], charges[128], nick[64], pseudo[ sizeof(nick)*2+1 ];
 	
+	
+	
 	int dedommage = 0;
 	if( g_iTribunalData[type][td_DoneDedommagement] == 1 )
 		dedommage = calculerDedo(type);
@@ -1000,6 +1002,18 @@ void SQL_Insert(int type, int condamne, int condamnation, int heure, int amende)
 		
 		Format(charges, sizeof(charges), "%s%dX %s, ", charges, g_iArticles[type][i], g_szArticles[i][0]);
 	}
+	
+	
+	Action a;
+	Call_StartForward(rp_GetForwardHandle(g_iTribunalData[type][td_Owner], RP_OnJugementOver));
+	Call_PushCell(g_iTribunalData[type][td_Owner]);
+	Call_PushCell(g_iTribunalData[type][td_Plaignant]);
+	Call_PushCell(g_iTribunalData[type][td_Suspect]);
+	Call_PushCell(heure);
+	Call_PushCell(amende);
+	Call_PushArray(g_iArticles[type], sizeof(g_iArticles[]) );
+	Call_Finish(a);
+	
 	
 	charges[strlen(charges) - 2] = 0;
 	

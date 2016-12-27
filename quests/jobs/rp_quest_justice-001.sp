@@ -27,8 +27,7 @@
 #define	QUEST_NAME		"La justice sournoise"
 #define	QUEST_TYPE		quest_daily
 #define	QUEST_JOBID		101
-#define	QUEST_RESUME1	"Tendez lui un piège"
-#define	QUEST_RESUME2	"Condamnez-le"
+#define	QUEST_RESUME	"Condamner un citoyen pour double homicide"
 
 // TODO: Pouvoir sélectionner un complice
 
@@ -49,9 +48,7 @@ public void OnAllPluginsLoaded() {
 		SetFailState("Erreur lors de la création de la quête %s %s", QUEST_UNIQID, QUEST_NAME);
 	
 	int i;
-	rp_QuestAddStep(g_iQuest, i++,	Q1_Start,	Q1_Frame,	Q1_Abort,	Q1_Abort);
-	rp_QuestAddStep(g_iQuest, i++,	Q2_Start,	Q2_Frame,	Q1_Abort,	Q2_Done);
-	
+	rp_QuestAddStep(g_iQuest, i++,	Q1_Start,	Q1_Frame,	Q1_Abort,	Q1_End);
 }
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -63,7 +60,7 @@ public Action Cmd_Reload(int args) {
 public bool fwdCanStart(int client) {
 	int job = rp_GetClientInt(client, i_Job);
 	if( job >= 101 && job <= 106 )
-		return (findNearestSerialKiller(client)>=1);
+		return (getSerialKillerCount(client)>=2);
 	
 	return false;
 }
@@ -74,83 +71,34 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Maître, nos informations indiquent qu'un meurtrier", ITEMDRAW_DISABLED);
 	menu.AddItem("", "en série fait rage en ville.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Nous avons besoin qu'il aille pourrir en taule.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Assurez-vous, qu'un joueur se fasse tuer par lui.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Ensuite, que ce joueur porte plainte contre ce meurtrier.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Après quoi, il vous sera possible de faire régner", ITEMDRAW_DISABLED);
-	menu.AddItem("", "la justice.", ITEMDRAW_DISABLED); 
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Vous avez 24 heures pour faire condamner ce joueur.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Il devra avoir une amende d'au moins 100$.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "ainsi que 3 heures de prison.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Veuillez condamner à citoyen pour double meutre.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 60);
 	
-	g_iDuration[client] = 24 * 60;
+	g_iDoing[client] = objectiveID;
+	rp_HookEvent(client, RP_OnJugementOver, fwdJugementOver);
+}
+public Action fwdJugementOver(int client, int plaignant, int suspect, int jail, int amende, int charges[28]) {
+	if( jail >= 1 && amende >= 1 && charges[0] >= 2 ) {
+		rp_QuestStepComplete(client, g_iDoing[client]);
+	}
 }
 public void Q1_Frame(int objectiveID, int client) {
-	
-	g_iDuration[client]--;
-	int nearest = findNearestSerialKiller(client);
-	
-	if( nearest >= 1 && rp_GetZoneInt(rp_GetPlayerZone(nearest), zone_type_type) == 101 ) {
-		g_iDoing[client] = nearest;
-		rp_QuestStepComplete(client, objectiveID);
-	}
-	else if( g_iDuration[client] <= 0 ) {
-		rp_QuestStepFail(client, objectiveID);
-	}
-	else {
-		if( nearest > 0 )
-			rp_Effect_BeamBox(client, nearest, NULL_VECTOR, 255, 255, 255);
-			
-		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s", QUEST_NAME, g_iDuration[client], QUEST_RESUME1);
-	}
+	PrintHintText(client, "<b>Quête</b>: %s\n<b>Objectif</b>: %s", QUEST_NAME, g_iDuration[client], QUEST_RESUME);
 }
 public void Q1_Abort(int objectiveID, int client) {
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
+	rp_UnhookEvent(client, RP_OnJugementOver, fwdJugementOver);
 }
-public void Q2_Start(int objectiveID, int client) {
-	
-	if( rp_ClientCanDrawPanel(client) ) {
-		Menu menu = new Menu(MenuNothing);
-		
-		menu.SetTitle("Quête: %s", QUEST_NAME);
-		menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
-		menu.AddItem("", "Il est dans le Tribunal !", ITEMDRAW_DISABLED);
-		menu.AddItem("", "Condamnez le avec au moins 100$ d'amende", ITEMDRAW_DISABLED);
-		menu.AddItem("", "et 3 heures de prison.", ITEMDRAW_DISABLED);
-		
-		menu.ExitButton = false;
-		menu.Display(client, 10);
-	}
-	
-	g_iDuration[client] = 6 * 60;
-}
-public void Q2_Frame(int objectiveID, int client) {
-	
-	g_iDuration[client]--;
-	int nearest = g_iDoing[client];
-	
-	if( rp_GetClientInt(nearest, i_LastAmende) > 100 && rp_GetClientInt(nearest, i_LastAmendeBy) == client && 
-		rp_GetClientInt(nearest, i_JailledBy) == client && rp_GetClientInt(nearest, i_JailTime) >= (3*60)-10 ) {
-		rp_QuestStepComplete(client, objectiveID);
-	}
-	else if( g_iDuration[client] <= 0 ) {
-		rp_QuestStepFail(client, objectiveID);
-	}
-	else {
-		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s", QUEST_NAME, g_iDuration[client], QUEST_RESUME1);
-	}
-}
-public void Q2_Done(int objectiveID, int client) {
-	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
+public void Q1_End(int objectiveID, int client) {
+	Q1_Abort(objectiveID, client);
 	
 	int cap = rp_GetRandomCapital(101);
-	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 5000);
-	rp_ClientMoney(client, i_AddToPay, 5000);
+	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 2500);
+	rp_ClientMoney(client, i_AddToPay, 2500);
 	
 	rp_ClientXPIncrement(client, 2500);
 }
@@ -165,42 +113,23 @@ public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
 			CloseHandle(menu);
 	}
 }
-int findNearestSerialKiller(int client) {
-	float vecOrigin[3], vecDestination[3], vecMaxDIST = 999999999.9, tmp;
-	Entity_GetAbsOrigin(client, vecOrigin);
-	
-	int val = -1;
+int getSerialKillerCount(int client) {
+	int cpt = 0;
 	
 	for (int i = 1; i <= MaxClients; i++) {
 		if( !IsValidClient(i) )
 			continue;
 		if( i == client )
 			continue;
-		if( !IsValidClient(i) )
-			continue;
-		if( i == client )
-			continue;
 		if( rp_GetClientBool(i, b_IsAFK) )
 			continue;
-		if( rp_GetZoneBit( rp_GetPlayerZone(i) ) & BITZONE_JAIL )
-			continue;
-		if( rp_GetZoneBit( rp_GetPlayerZone(i) ) & BITZONE_HAUTESECU )
-			continue;
-		if( rp_GetZoneBit( rp_GetPlayerZone(i) ) & BITZONE_LACOURS )
-			continue;
-		if( rp_GetZoneBit( rp_GetPlayerZone(i) ) & BITZONE_EVENT )
+		if( rp_GetZoneBit( rp_GetPlayerZone(i) ) & (BITZONE_JAIL|BITZONE_HAUTESECU|BITZONE_LACOURS|BITZONE_EVENT) )
 			continue;
 		
-		if( rp_GetClientInt(i, i_KillingSpread) < 5 )
-			continue;
+		if( rp_GetClientInt(i, i_KillingSpread) >= 1 )
+			cpt++;
 		
-		Entity_GetAbsOrigin(i, vecDestination);
-		tmp = GetVectorDistance(vecOrigin, vecDestination);
-		if( tmp < vecMaxDIST ) {
-			vecMaxDIST = tmp;
-			val = i;
-		}
 	}
 	
-	return val;
+	return cpt;
 }
