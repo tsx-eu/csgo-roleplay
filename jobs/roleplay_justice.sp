@@ -48,7 +48,7 @@ int g_cBeam;
 
 // Numéro, Résumé, Heures, Amende, Dédo, Détails
 char g_szArticles[28][6][512] = {
-	{"221-1-a",		"Meurtre d'un civil",							"18",	"1250",		"1000",	"Toutes atteintes volontaires à la vie d’un citoyen sont condamnées à une peine maximale de 18h de prison et 1250$ d’amende." },
+	{"221-1-a",		"Meurtre d'un civil / Agression",							"18",	"1250",		"1000",	"Toutes atteintes volontaires à la vie d’un citoyen sont condamnées à une peine maximale de 18h de prison et 1250$ d’amende." },
 	{"221-1-b",		"Meurtre d'un policier",						"24",	"5500",		"1500",	"Toutes atteintes volontaires à la vie d’un officier des forces de l’ordre sont condamnées à une peine maximale de 24h de prison et 5 500$ d’amende." },
 	{"221-2",		"Vol",											"6",	"450",		"-1",	"Le vol est un acte punis d’une peine maximale de 6h de prison et 450$ d’amende." },
 	{"221-3",		"Manquement convocation",						"18",	"4000",		"0",	"Le manquement à une convocation devant les tribunaux sans motif valable est puni d’une peine maximale de 18h de prison et 4.000$ d'amende." },
@@ -77,8 +77,8 @@ char g_szArticles[28][6][512] = {
 	{"221-17",		"Acte de proxénétisme / prostitution",			"6",	"450",		"0",	"Tout acte de proxénétisme ou de prostitution est passible d'une peine maximale de 6h de prison et 450$ d’amende." },
 	{"221-18",		"Asile politique",								"24",	"1500",		"1000",	"Le tribunal est une zone internationale indépendante des lois de la police, tout citoyen y est protégé par asile juridique. De ce fait, tout policier mettant une personne étant dans le tribunal en prison encourt une peine maximale de 24h de prison et 1 500$ d'amende." }
 };
-char g_szAcquittement[4][32] = { "Non coupable", "Conciliation", "Impossible de prouver les faits", "Déjà condamné"};
-char g_szCondamnation[5][32] = { "très indulgent", "indulgent", "juste", "sévère", "très sévère" };
+char g_szAcquittement[4][32] = { "Non coupable", "Conciliation", "Impossible de prouver les faits", "Déjà condamné", "Plainte annulée", "Test Juge"};
+char g_szCondamnation[5][32] = { "Très indulgent", "Indulgent", "Juste", "Sévère", "Très sévère" };
 float g_flCondamnation[5] = {0.2, 0.4, 0.6, 0.8, 1.0};
 float g_flCoords[3][2][3];
 
@@ -136,12 +136,12 @@ public void OnClientDisconnect(int client) {
 		if( g_iTribunalData[type][td_Suspect] == client ) {
 			AUDIENCE_Condamner(type, 4);
 		}
-	}
+	} 
 }
 public Action Timer_Light(Handle timer, any none) {
 	
 	for (int i = 1; i <= 2; i++) {
-		TE_SetupBeamPoints(g_flCoords[i][0], g_flCoords[i][1], g_cBeam, g_cBeam, 0, 0, 1.1, 4.0, 4.0, 0, 0.0, tribunalColor(i), 0);
+ 		TE_SetupBeamPoints(g_flCoords[i][0], g_flCoords[i][1], g_cBeam, g_cBeam, 0, 0, 1.1, 4.0, 4.0, 0, 0.0, tribunalColor(i), 0);
 		TE_SendToAll();
 		
 		
