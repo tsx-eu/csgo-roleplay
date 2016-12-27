@@ -45,18 +45,6 @@ int gain[10][7] =  {
 	{15,	15,		15,	15,	15,	15,	-1}, // 9
 	{0,		0,		0,	0,	0,	25,	-1}  // 10
 };
-float rows[][][] = {
-	{{2505.0, -5624.0, -1962.0}, {2545.0, -5530.0, -1882.0}},
-	{{2505.0, -5528.0, -1962.0}, {2545.0, -5434.0, -1882.0}},
-	{{2505.0, -5428.0, -1962.0}, {2545.0, -5334.0, -1882.0}},
-	{{2505.0, -5324.0, -1962.0}, {2545.0, -5190.0, -1882.0}},
-	{{2353.0, -5620.0, -1962.0}, {2393.0, -5478.0, -1882.0}},
-	{{2353.0, -5468.0, -1962.0}, {2393.0, -5326.0, -1882.0}},
-	{{2249.0, -5468.0, -1962.0}, {2289.0, -5326.0, -1882.0}},
-	{{2249.0, -5620.0, -1962.0}, {2289.0, -5478.0, -1882.0}},
-	{{1788.0, -5359.0, -1962.0}, {1938.0, -5309.0, -1882.0}},
-	{{1938.0, -5359.0, -1962.0}, {2028.0, -5309.0, -1882.0}}
-};
 int lstJOB[] =  { 11, 21, 31, 41, 51, 61, 71, 81, 111, 131, 171, 191, 211, 221 };
 int g_iLastMachine[65], g_iRotation[65][2][3], g_iJettonInMachine[65], g_iJoker[65][3];
 bool g_bPlaying[65];
@@ -288,18 +276,6 @@ public Action fwdOnPlayerUse(int client) {
 	if( rp_GetPlayerZone(client) == 278 ) {
 		displayCasino(client);
 	}
-}
-int IsPlayerInCasino(int client) {
-	float pos[3];
-	GetClientAbsOrigin(client, pos);
-	
-	for (int i = 0; i < sizeof(rows); i++) {
-		if(	pos[0] <= rows[i][1][0] && pos[1] <= rows[i][1][1] && pos[2] <= rows[i][1][2] &&
-			pos[0] >= rows[i][0][0] && pos[1] >= rows[i][0][1] && pos[2] >= rows[i][0][2] ) {
-				return i;
-		}
-	}
-	return -1;
 }
 public Action Cmd_ItemStuffPvP(int args) {
 	int client = GetCmdArgInt(1);
@@ -685,7 +661,7 @@ public Action Cmd_ShowSymbol(int client, int args) {
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 void displayCasino(int client) {
-	int n = IsPlayerInCasino(client);
+	int n = rp_PlayerIsInCasinoMachine(client);
 	if( n < 0 )
 		return;
 	
@@ -726,7 +702,7 @@ void displayCasino(int client) {
 void EffectCasino(int client, int jeton) {
 	if( g_bPlaying[client] )
 		return;
-	if( IsPlayerInCasino(client) < 0 )
+	if( rp_PlayerIsInCasinoMachine(client) < 0 )
 		return;
 	
 	if( !takePlayerJeton(client, jeton) ) {
