@@ -23,7 +23,7 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
-#define QUEST_UNIQID	"justice-001"
+#define QUEST_UNIQID	"justice-003"
 #define	QUEST_NAME		"Un homme très recherché"
 #define	QUEST_TYPE		quest_daily
 #define	QUEST_JOBID		101
