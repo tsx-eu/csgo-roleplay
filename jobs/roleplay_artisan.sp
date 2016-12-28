@@ -657,7 +657,7 @@ public Action stopBuilding(Handle timer, Handle dp) {
 			magic.GetArray(i, data);
 			
 			if( !failed )
-				ClientGiveXP(client, rp_GetItemInt(data[craft_raw], item_type_prix));
+				ClientGiveXP(client, rp_GetItemInt(data[craft_raw], item_type_prix) *  data[craft_amount]);
 			if( !free )
 				rp_ClientGiveItem(client, data[craft_raw], -data[craft_amount]);		
 		}
