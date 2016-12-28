@@ -27,9 +27,7 @@
 #define	QUEST_NAME		"La justice sournoise"
 #define	QUEST_TYPE		quest_daily
 #define	QUEST_JOBID		101
-#define	QUEST_RESUME	"Condamner un citoyen pour double homicide"
-
-// TODO: Pouvoir sélectionner un complice
+#define	QUEST_RESUME	"Condamner un citoyen pour un double homicide"
 
 public Plugin myinfo = {
 	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX",
@@ -72,8 +70,7 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.AddItem("", "Maître, nos informations indiquent qu'un meurtrier", ITEMDRAW_DISABLED);
 	menu.AddItem("", "en série fait rage en ville.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Veuillez condamner à citoyen pour double meutre.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Veuillez condamner à citoyen pour double homicide.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 60);
@@ -87,7 +84,7 @@ public Action fwdJugementOver(int client, int plaignant, int suspect, int jail, 
 	}
 }
 public void Q1_Frame(int objectiveID, int client) {
-	PrintHintText(client, "<b>Quête</b>: %s\n<b>Objectif</b>: %s", QUEST_NAME, g_iDuration[client], QUEST_RESUME);
+	PrintHintText(client, "<b>Quête</b>: %s\n<b>Objectif</b>: %s", QUEST_NAME, QUEST_RESUME);
 }
 public void Q1_Abort(int objectiveID, int client) {
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
