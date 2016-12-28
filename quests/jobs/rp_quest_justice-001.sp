@@ -46,7 +46,7 @@ public void OnAllPluginsLoaded() {
 		SetFailState("Erreur lors de la création de la quête %s %s", QUEST_UNIQID, QUEST_NAME);
 	
 	int i;
-	rp_QuestAddStep(g_iQuest, i++,	Q1_Start,	Q1_Frame,	Q1_Abort,	Q1_End);
+	rp_QuestAddStep(g_iQuest, i++,	Q_Start,	Q_Frame,	Q_Abort,	Q_End);
 }
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -62,7 +62,7 @@ public bool fwdCanStart(int client) {
 	
 	return false;
 }
-public void Q1_Start(int objectiveID, int client) {
+public void Q_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
@@ -78,20 +78,20 @@ public void Q1_Start(int objectiveID, int client) {
 	g_iDoing[client] = objectiveID;
 	rp_HookEvent(client, RP_OnJugementOver, fwdJugementOver);
 }
-public Action fwdJugementOver(int client, int plaignant, int suspect, int jail, int amende, int charges[28]) {
-	if( jail >= 1 && amende >= 1 && charges[0] >= 2 ) {
+public Action fwdJugementOver(int client, int data[6], int charges[28]) {
+	if( data[2] >= 1 && data[3] >= 1 && charges[0] >= 2 ) {
 		rp_QuestStepComplete(client, g_iDoing[client]);
 	}
 }
-public void Q1_Frame(int objectiveID, int client) {
+public void Q_Frame(int objectiveID, int client) {
 	PrintHintText(client, "<b>Quête</b>: %s\n<b>Objectif</b>: %s", QUEST_NAME, QUEST_RESUME);
 }
-public void Q1_Abort(int objectiveID, int client) {
+public void Q_Abort(int objectiveID, int client) {
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
 	rp_UnhookEvent(client, RP_OnJugementOver, fwdJugementOver);
 }
-public void Q1_End(int objectiveID, int client) {
-	Q1_Abort(objectiveID, client);
+public void Q_End(int objectiveID, int client) {
+	Q_Abort(objectiveID, client);
 	
 	int cap = rp_GetRandomCapital(101);
 	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 2500);

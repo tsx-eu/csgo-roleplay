@@ -23,11 +23,11 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 //#define DEBUG
-#define QUEST_UNIQID	"justice-003"
+#define QUEST_UNIQID	"justice-001"
 #define	QUEST_NAME		"Un homme très recherché"
 #define	QUEST_TYPE		quest_daily
-#define	QUEST_JOBID		1
-#define	QUEST_RESUME	"Arrêtez-le"
+#define	QUEST_JOBID		101
+#define	QUEST_RESUME	"Condamner un citoyen recherché pdnt au moins 10min"
 
 public Plugin myinfo = {
 	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX",
@@ -35,7 +35,7 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-int g_iQuest, g_iDuration[MAXPLAYERS + 1], g_iDoing[MAXPLAYERS + 1];
+int g_iQuest, g_iDoing[MAXPLAYERS + 1];
 
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
@@ -46,7 +46,7 @@ public void OnAllPluginsLoaded() {
 		SetFailState("Erreur lors de la création de la quête %s %s", QUEST_UNIQID, QUEST_NAME);
 	
 	int i;
-	rp_QuestAddStep(g_iQuest, i++,	Q1_Start,	Q1_Frame,	Q1_Abort,	Q1_Done);
+	rp_QuestAddStep(g_iQuest, i++,	Q_Start,	Q_Frame,	Q_Abort,	Q_End);
 }
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -57,62 +57,45 @@ public Action Cmd_Reload(int args) {
 // ----------------------------------------------------------------------------
 public bool fwdCanStart(int client) {
 	int job = rp_GetClientInt(client, i_Job);
-	if( (job == 107 || job == 108 || job == 107) || (job >= 1 && job <= 9))
-		return (playerMatch() >= 1);
+	if( job >= 101 && job <= 106 )
+		return (getSerialKillerCount(client)>=2);
 	
 	return false;
 }
-public void Q1_Start(int objectiveID, int client) {
+public void Q_Start(int objectiveID, int client) {
 	Menu menu = new Menu(MenuNothing);
 	
-	menu.SetTitle("Quête: %s", QUEST_NAME);
+	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Collègue, nous vous informons qu'un homme ", ITEMDRAW_DISABLED);
-	menu.AddItem("", "est recherché par le Tribunal.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
-	menu.AddItem("", " Vous avez 12 heures pour le trouver, et l'arrêter.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Veuillez condamner à citoyen recherché", ITEMDRAW_DISABLED);
+	menu.AddItem("", "pendant plus de 10 minutes", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 60);
 	
-	g_iDuration[client] = 12 * 60;
-	g_iDoing[client] = playerMatch();
+	g_iDoing[client] = objectiveID;
+	rp_HookEvent(client, RP_OnJugementOver, fwdJugementOver);
 }
-public void Q1_Frame(int objectiveID, int client) {
-	
-	g_iDuration[client]--;
-	int nearest = g_iDoing[client];
-	bool found = (rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) || (rp_GetZoneBit(rp_GetPlayerZone(client)) & BITZONE_JAIL));
-	
-	if( found && rp_GetClientInt(nearest, i_JailledBy) == client ) {
-		rp_QuestStepComplete(client, objectiveID);
-	}
-	else if( found ) {
-		g_iDoing[client] = playerMatch();
-		if( g_iDoing[client] == 0 ) 
-			rp_QuestStepFail(client, objectiveID);
-	}
-	else if( g_iDuration[client] <= 0 ) {
-		rp_QuestStepFail(client, objectiveID);
-	}
-	else {
-		if( nearest > 0 )
-			rp_Effect_BeamBox(client, nearest, NULL_VECTOR, 255, 255, 255);
-		
-		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s", QUEST_NAME, g_iDuration[client], QUEST_RESUME);
+public Action fwdJugementOver(int client, int data[6], int charges[28]) {
+	if( data[2] >= 1 && data[3] >= 1 && data[5] >= 10*60 ) {
+		rp_QuestStepComplete(client, g_iDoing[client]);
 	}
 }
-public void Q1_Abort(int objectiveID, int client) {
+public void Q_Frame(int objectiveID, int client) {
+	PrintHintText(client, "<b>Quête</b>: %s\n<b>Objectif</b>: %s", QUEST_NAME, QUEST_RESUME);
+}
+public void Q_Abort(int objectiveID, int client) {
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
+	rp_UnhookEvent(client, RP_OnJugementOver, fwdJugementOver);
 }
-public void Q1_Done(int objectiveID, int client) {
-	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
+public void Q_End(int objectiveID, int client) {
+	Q_Abort(objectiveID, client);
 	
 	int cap = rp_GetRandomCapital(101);
-	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 1000);
-	rp_ClientMoney(client, i_AddToPay, 1000);
+	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 2500);
+	rp_ClientMoney(client, i_AddToPay, 2500);
 	
-	rp_ClientXPIncrement(client, 750);
+	rp_ClientXPIncrement(client, 2500);
 }
 // ----------------------------------------------------------------------------
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
@@ -125,13 +108,23 @@ public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
 			CloseHandle(menu);
 	}
 }
-int playerMatch() {
+int getSerialKillerCount(int client) {
+	int cpt = 0;
+	
 	for (int i = 1; i <= MaxClients; i++) {
 		if( !IsValidClient(i) )
 			continue;
+		if( i == client )
+			continue;
+		if( rp_GetClientBool(i, b_IsAFK) )
+			continue;
+		if( rp_GetZoneBit( rp_GetPlayerZone(i) ) & (BITZONE_JAIL|BITZONE_HAUTESECU|BITZONE_LACOURS|BITZONE_EVENT) )
+			continue;
 		
-		if( rp_GetClientBool(i, b_IsSearchByTribunal) )
-			return i;
+		if( rp_GetClientInt(i, i_KillingSpread) >= 1 )
+			cpt++;
+		
 	}
-	return 0;
+	
+	return cpt;
 }

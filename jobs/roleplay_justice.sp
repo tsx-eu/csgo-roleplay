@@ -1003,14 +1003,18 @@ void SQL_Insert(int type, int condamne, int condamnation, int heure, int amende)
 		Format(charges, sizeof(charges), "%s%dX %s, ", charges, g_iArticles[type][i], g_szArticles[i][0]);
 	}
 	
+	int data[6];
+	data[0] = g_iTribunalData[type][td_Plaignant];
+	data[1] = g_iTribunalData[type][td_Suspect];
+	data[2] = heure;
+	data[3] = amende;
+	data[4] = dedommage;
+	data[5] = g_iTribunalData[type][td_Time];	
 	
 	Action a;
 	Call_StartForward(rp_GetForwardHandle(g_iTribunalData[type][td_Owner], RP_OnJugementOver));
 	Call_PushCell(g_iTribunalData[type][td_Owner]);
-	Call_PushCell(g_iTribunalData[type][td_Plaignant]);
-	Call_PushCell(g_iTribunalData[type][td_Suspect]);
-	Call_PushCell(heure);
-	Call_PushCell(amende);
+	Call_PushArray(data, sizeof(data) );
 	Call_PushArray(g_iArticles[type], sizeof(g_iArticles[]) );
 	Call_Finish(a);
 	

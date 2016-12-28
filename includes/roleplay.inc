@@ -133,7 +133,7 @@ typeset rp_event_enum {
 	function Action(int target, int client);												/* RP_PostClientSendToJail */
 	function Action(int client, int reward);												/* RP_OnClientTazedItem */
 	function Action(int client, int jobID, int target, int victim, int& prix, int arg);		/* RP_OnBlackMarket */
-	function Action(int client, int plaignant, int suspect, int jail, int amende, int charges[28]);	/* RP_OnJugementOver */
+	function Action(int client, int data[6], int charges[28]);								/* RP_OnJugementOver */
 };
 /**
  * Hook un évenement d'un joueur
