@@ -67,8 +67,10 @@ public void Q_Start(int objectiveID, int client) {
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Veuillez condamner à citoyen recherché", ITEMDRAW_DISABLED);
-	menu.AddItem("", "pendant plus de 10 minutes", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Cher collègue, afin de compenser votre temps", ITEMDRAW_DISABLED);
+	menu.AddItem("", "d'attente lors d'une longue recherche, vous", ITEMDRAW_DISABLED);
+	menu.AddItem("", "serez récompensé pour toute condamnation", ITEMDRAW_DISABLED);
+	menu.AddItem("", "d'un joueur recherché depuis au moins 10 minutes", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 60);
