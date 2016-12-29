@@ -166,7 +166,7 @@ public Action Cmd_ItemBankCard(int args) {
 	int client = GetCmdArgInt(1);
 	rp_SetClientBool(client, b_HaveCard, true);
 	
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre carte bancaire est maintenant activé.");
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre carte bancaire est maintenant activée.");
 	rp_ClientSave(client);
 }
 public Action Cmd_ItemBankSort(int args) {
