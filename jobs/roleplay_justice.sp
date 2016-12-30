@@ -466,6 +466,9 @@ Menu AUDIENCE_Condamner(int type, int articles) {
 		int heure, amende;
 		calculerJail(type, heure, amende);
 		
+		if(rp_GetClientInt(client, i_JailTime) > 0)
+			rp_SetClientInt(client, i_JailTime, 0);
+		
 		heure = RoundFloat(float(heure) * g_flCondamnation[articles]);
 		amende = RoundFloat(float(amende) * g_flCondamnation[articles]);
 		
