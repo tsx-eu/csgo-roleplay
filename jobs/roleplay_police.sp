@@ -975,6 +975,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 		int type = StringToInt(data[1]);
 		int time_to_spend;
 		int jobID = rp_GetClientJobID(client);
+		int zone = rp_GetPlayerZone(client);
 		//FORCE_Release(iTarget);
 		
 		if( type == -1 ) {
@@ -1009,7 +1010,10 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été mis en prison, en attente de jugement par: %N", client);
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez mis: %N {default}dans la prison du Tribunal.", target);
-			
+							
+			if( rp_GetClientInt(target, i_JailTime) <= 360 || rp_GetZoneInt(zone, zone_type_type) != 101 || rp_GetZoneInt(zone, zone_type_type) != 1)
+				rp_SetClientInt(target, i_JailTime, 360);
+				
 			LogToGame("[TSX-RP] [TRIBUNAL] %L a mis %L dans la prison du Tribunal.", client, target);
 			return;
 		}
