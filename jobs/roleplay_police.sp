@@ -1010,9 +1010,6 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été mis en prison, en attente de jugement par: %N", client);
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez mis: %N {default}dans la prison du Tribunal.", target);
 			
-			if( rp_GetClientInt(target, i_JailTime) <= 360 )
-				rp_SetClientInt(target, i_JailTime, 360);
-			
 			LogToGame("[TSX-RP] [TRIBUNAL] %L a mis %L dans la prison du Tribunal.", client, target);
 			return;
 		}
