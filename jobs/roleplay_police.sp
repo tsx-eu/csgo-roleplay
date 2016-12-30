@@ -975,7 +975,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 		int type = StringToInt(data[1]);
 		int time_to_spend;
 		int jobID = rp_GetClientJobID(client);
-		int zone = rp_GetPlayerZone(client);
+		int zone = rp_GetPlayerZone(target);
 		//FORCE_Release(iTarget);
 		
 		if( type == -1 ) {
