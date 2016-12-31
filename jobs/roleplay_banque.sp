@@ -50,6 +50,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_distrib",		Cmd_ItemDistrib,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_banksort",	Cmd_ItemBankSort,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_sign",		Cmd_ItemCraftSign,		"RP-ITEM", 	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_packexploita",Cmd_ItemPackExploitation,"RP-ITEM", FCVAR_UNREGISTERED);
 	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
@@ -125,6 +126,20 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 				Format(msg, 127, "%s vente", msg);
 			}
 		}
+		
+		if(rp_GetClientJobID(client) == 211) { // Les flics, mercenaires et tribu n'ont pas l'utilité de voir ça
+			if(rp_GetClientBool(target, b_HaveCard) || rp_GetClientBool(target, b_HaveAccount) || rp_GetClientBool(target, b_PayToBank)) {
+				if(rp_GetClientBool(target, b_HaveCard)) {
+					Format(msg, 127, "%s, carte bancaire", msg);
+				}
+				if(rp_GetClientBool(target, b_HaveAccount)) {
+					Format(msg, 127, "%s, coffre", msg);
+				}
+				if(rp_GetClientBool(target, b_PayToBank)) {
+					Format(msg, 127, "%s, R.I.B", msg);
+				}
+			}
+		}	
 
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %s.", msg);
 
@@ -185,7 +200,7 @@ public Action Cmd_ItemBankKey(int args) {
 	
 	int client = GetCmdArgInt(1);
 	rp_SetClientBool(client, b_HaveAccount, true);
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre compte bancaire est maintenant actif.");
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous possédez désormais un coffre à la banque.");
 	rp_ClientSave(client);
 }
 public Action Cmd_ItemBankSwap(int args) {
@@ -435,6 +450,22 @@ public Action Cmd_ItemPackDebutant(int args) { //Permet d'avoir la CB, le compte
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre carte bancaire, votre coffre et votre RIB sont maintenant actifs.");
 
 	rp_ClientSave(client);
+}
+
+public Action Cmd_ItemPackExploitation(int args) { //Permet d'avoir permis lourd, léger et vente
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemPackExploitation");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+	rp_SetClientBool(client, b_License1, true);
+	rp_SetClientBool(client, b_License2, true);
+	rp_SetClientBool(client, b_LicenseSell, true);
+	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous possédez désormais un permis de port d'arme lourd et léger, et un permis de vente.");
+	
+	rp_ClientSave(client);
+	
 }
 // ----------------------------------------------------------------------------
 public Action fwdOnPlayerBuild(int client, float& cooldown) {
