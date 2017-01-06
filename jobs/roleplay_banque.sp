@@ -763,7 +763,7 @@ int BuidlingSIGN(int client) {
 		
 		if( StrEqual(classname, tmp) && rp_GetBuildingData(i, BD_owner) == client ) {
 			count++;
-			if( count >= 1 && !IsAdmin(client) ) {
+			if( count >= 1 && GetAdminFlag(client, "b", Access_Effective) ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez placé un panneau indicateur.");
 				return 0;
 			}
