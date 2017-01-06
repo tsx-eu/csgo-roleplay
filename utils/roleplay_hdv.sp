@@ -51,7 +51,6 @@ void HDV_Main(int client) {
 	if(rp_GetClientBool(client, b_HaveAccount))
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez posséder une clé de coffre pour accéder à l'HDV.");
 	
-	if(rp_GetClientBool(client, b_HaveAccount)) {
 	Menu menu = CreateMenu(Handler_MainHDV);
 	menu.SetTitle("Hotel des ventes\n ");
 	menu.AddItem("sell", "Vendre", rp_GetClientInt(client, i_ItemCount) > 0 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED, rp_GetClientBool(client, b_HaveAccount) == true ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
