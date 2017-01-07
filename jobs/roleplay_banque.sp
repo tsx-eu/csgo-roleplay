@@ -431,8 +431,11 @@ public Action Cmd_ItemPackDebutant(int args) { //Permet d'avoir la CB, le compte
 	rp_SetClientBool(client, b_HaveCard, true);
 	rp_SetClientBool(client, b_PayToBank, true);
 	rp_SetClientBool(client, b_HaveAccount, true);
+	rp_SetClientBool(client, b_License1, true);
+ 	rp_SetClientBool(client, b_License2, true);
+ 	rp_SetClientBool(client, b_LicenseSell, true);
 	
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre carte bancaire, votre compte bancaire et votre RIB sont maintenant actifs.");
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre carte bancaire, votre compte bancaire, votre RIB et vos permis sont maintenant actifs.");
 
 	rp_ClientSave(client);
 }
