@@ -658,12 +658,14 @@ public void OnClientPostAdminCheck(int client) {
 	g_iPlayerTeam[client] = TEAM_NONE;
 	if( g_bDoingQuest )
 		rp_HookEvent(client, RP_OnPlayerDataLoaded, fwdLoaded);
+	
 	if( g_bHasHelmet ) {
 		rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
 		rp_HookEvent(client, RP_PreGiveDamage, fwdDamage);
 		rp_HookEvent(client, RP_PreClientTeleport, fwdTeleport);
 		rp_HookEvent(client, RP_PreClientSendToJail, fwdSendToJail);
 		rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZoneChangeTUTO);
+		rp_HookEvent(client, RP_PlayerCanKill, fwdCanKill);
 	}
 	
 	if( g_bByPassDoor ) {
@@ -1182,10 +1184,14 @@ void updateTeamPolice() {
 		if( !IsValidClient(i) )
 			continue;
 		
-		if( g_iPlayerTeam[i] != TEAM_POLICE && policeMatch(i) )
+		if( g_iPlayerTeam[i] != TEAM_POLICE && policeMatch(i) ) {
+			LogToGame("[BRAQUAGE] [SWITCH] %L est dans l'équipe de la police.", i);
 			addClientToTeam(i, TEAM_POLICE);
-		else if( g_iPlayerTeam[i] == TEAM_POLICE && !policeMatch(i) )
+		}
+		else if( g_iPlayerTeam[i] == TEAM_POLICE && !policeMatch(i) ) {
+			LogToGame("[BRAQUAGE] [SWITCH] %L n'est plus dans l'équipe de la police.", i);
 			removeClientTeam(i);
+		}
 	}
 }
 bool policeMatch(int client) {
