@@ -48,12 +48,17 @@ void HDV_Main(int client) {
 		}
 	}
 	
+	if(!(rp_GetClientBool(client, b_HaveAccount))) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez posséder une clé de coffre pour accéder à l'HDV.");
+		return;
+	}
+	
 	Menu menu = CreateMenu(Handler_MainHDV);
 	menu.SetTitle("Hotel des ventes\n ");
 	menu.AddItem("sell", "Vendre", rp_GetClientInt(client, i_ItemCount) > 0 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem("buy", "Acheter");
 	menu.AddItem("history", "Votre historique");
-	
+
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) {

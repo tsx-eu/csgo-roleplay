@@ -434,8 +434,8 @@ public Action Cmd_ItemPackDebutant(int args) { //Permet d'avoir la CB, le compte
 	rp_SetClientBool(client, b_License1, true);
  	rp_SetClientBool(client, b_License2, true);
  	rp_SetClientBool(client, b_LicenseSell, true);
-	
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre carte bancaire, votre compte bancaire, votre RIB et vos permis sont maintenant actifs.");
+ 	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre carte bancaire, votre coffre, votre RIB et vos permis sont maintenant actifs.");
 
 	rp_ClientSave(client);
 }
@@ -497,7 +497,7 @@ int BuidlingATM(int client) {
 		if( StrEqual(classname, tmp) && rp_GetBuildingData(i, BD_owner) == client ) {
 			count++;
 			if( count >= 2 ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà deux banques de placées.");
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà deux distributeurs portables de placés.");
 				return 0;
 			}
 		}
@@ -649,7 +649,7 @@ public int eventMetroMenu(Handle menu, MenuAction action, int client, int param2
 		min = 5 - (min % 5);
 		
 		rp_GetZoneData(rp_GetZoneFromPoint(pos), zone_type_name, tmp, sizeof(tmp));
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Restez assis à l'intérieur du métro, le prochain départ pour %s est dans %d seconde(s).", tmp, min );
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Restez assis à l'intérieur du métro, le prochain départ pour %s est dans %d seconde%s.", tmp, min, min >= 2 ? "s" : "");
 		rp_SetClientInt(client, i_TeleportTo, i);
 		CreateTimer(float(min) + Math_GetRandomFloat(0.01, 0.8), metroTeleport, client);
 	}
@@ -698,7 +698,7 @@ public Action metroTeleport(Handle timer, any client) {
 	if( !paid && (rp_GetClientInt(client, i_Money)+rp_GetClientInt(client, i_Bank)) >= 100 ) {
 		rp_ClientMoney(client, i_Money, -100);
 		rp_SetJobCapital(31, rp_GetJobCapital(31) + 100);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le métro vous a couté 100$. Pensez à acheter des tickets à un banquier pour obtenir une réduction.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le métro vous a couté 100$. Pensez à acheter des tickets à un banquier pour que le trajet vous coûte moins chère.");
 		paid = true;
 	}
 	
@@ -766,8 +766,8 @@ int BuidlingSIGN(int client) {
 		
 		if( StrEqual(classname, tmp) && rp_GetBuildingData(i, BD_owner) == client ) {
 			count++;
-			if( count >= 1 ) {
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez panneau indicateur de placé.");
+			if( count >= 1 && (GetUserAdmin(client) != INVALID_ADMIN_ID) ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez placé un panneau indicateur.");
 				return 0;
 			}
 		}
@@ -922,7 +922,7 @@ public int Menu_displayMenu(Handle menu, MenuAction action, int client, int para
 			Format(options, sizeof(options), "%d %d", -1000+2, entity);	menu2.AddItem(options, "Tous les chefs de mon job");
 			Format(options, sizeof(options), "%d %d", -1000+3, entity);	menu2.AddItem(options, "Toutes les personnes de mon job");
 			Format(options, sizeof(options), "%d %d", -1000+4, entity); menu2.AddItem(options, "Toutes les personnes de mon gang");
-			Format(options, sizeof(options), "%d %d", -1000+5, entity); menu2.AddItem(options, "Tous le monde");
+			Format(options, sizeof(options), "%d %d", -1000+5, entity); menu2.AddItem(options, "Tout le monde");
 			
 			menu2.Display(client, MENU_TIME_FOREVER);
 		}
