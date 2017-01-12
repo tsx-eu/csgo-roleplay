@@ -126,7 +126,7 @@ public Action Cmd_ItemCraftBook(int args) {
 	else if( StrEqual(arg, "focus") )
 		type = book_focus;
 	else if( StrEqual(arg, "speed") )
-		type = book_sleep;
+		type = book_speed;
 	else if( StrEqual(arg, "steal") )
 		type = book_steal;
 	else if( StrEqual(arg, "luck") )
