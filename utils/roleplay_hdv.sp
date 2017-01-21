@@ -89,7 +89,7 @@ void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) 
 		
 		quantity = rp_GetClientItem(client, itemID);
 		rp_GetItemData(itemID, item_type_name, tmp3, sizeof(tmp3));
-		menu.SetTitle("Hotel des ventes: Vendre\nCombien voulez-vous vendre de\n%s?\n ", tmp3);
+		menu.SetTitle("Hôtel des ventes: Vendre\nCombien voulez-vous vendre de\n%s?\n ", tmp3);
 		
 		
 		for (int i = 1; i <= quantity; i++) {
@@ -110,7 +110,7 @@ void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) 
 		int step = RoundToCeil(rp_GetItemFloat(itemID, item_type_prix) * 0.01);
 		int lastp = 0;
 		
-		menu.SetTitle("Hotel des ventes: Vendre\nA quel prix voulez-vous vendre\n%d %s?\n ", quantity, tmp3);
+		menu.SetTitle("Hôtel des ventes: Vendre\nA quel prix voulez-vous vendre\n%d %s?\n ", quantity, tmp3);
 		for (int p = maxPrice; p >= minPrice; p -= step) {
 			if(lastp == p)
 				continue;
@@ -133,7 +133,7 @@ void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) 
 		}
 
 		rp_GetItemData(itemID, item_type_name, tmp3, sizeof(tmp3));
-		menu.SetTitle("Hotel des ventes: Vendre\nVous allez déposer une offre pour\n%d %s pour %d$?\nCoût du dépot: %d$\n \nConfirmez-vous ?\n ", quantity, tmp3, sellPrice, tax);
+		menu.SetTitle("Hôtel des ventes: Vendre\nVous allez déposer une offre pour\n%d %s pour %d$?\nCoût du dépot: %d$\n \nConfirmez-vous ?\n ", quantity, tmp3, sellPrice, tax);
 		
 		Format(tmp, sizeof(tmp), "sell %d %d %d 1", itemID, quantity, sellPrice);
 		
@@ -149,7 +149,7 @@ void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) 
 		}
 		
 		if( rp_GetClientItem(client, itemID) < quantity ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas la quantité que vous avez spécifié.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas la quantité que vous avez spécifiée.");
 			delete menu;
 			return;
 		}
@@ -421,7 +421,7 @@ public void SQL_ListItemsCB(Handle owner, Handle row, const char[] error, any cl
 		menu.Display(client, MENU_TIME_FOREVER);
 	}
 	else{
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Tout les objets ont déjà été achetés.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Tous les objets ont déjà été achetés.");
 		return;
 	}
 }
@@ -483,11 +483,11 @@ public void SQL_HistoryCB(Handle owner, Handle row, const char[] error, any data
 				menu.AddItem(tmp, tmp2, ITEMDRAW_DISABLED);
 		}
 		if(data == 1)
-			menu.SetTitle("Hotel des ventes: Ventes en cours\n ");
+			menu.SetTitle("Hôtel des ventes: Ventes en cours\n ");
 		else if(data == 2)
-			menu.SetTitle("Hotel des ventes: Historique des achats\n ");
+			menu.SetTitle("Hôtel des ventes: Historique des achats\n ");
 		else
-			menu.SetTitle("Hotel des ventes: Historique des ventes\n ");
+			menu.SetTitle("Hôtel des ventes: Historique des ventes\n ");
 		menu.Display(client, MENU_TIME_FOREVER);
 	}
 	else{
