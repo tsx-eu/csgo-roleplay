@@ -120,10 +120,14 @@ public Action Cmd_ItemBioKev(int args) {
 	if( rp_GetClientBool(client, ch_Kevlar) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà une régénération bionique.");
 		ITEM_CANCEL(client, item_id);
+		
+		LogToGame("[CHEATING] %L a tenté de cumuler les regens bioniques.", client);
+		return Plugin_Handled;
 	}
 	
 	rp_HookEvent(client, RP_OnFrameSeconde, fwdRegenKevlar);
 	rp_SetClientBool(client, ch_Kevlar, true);
+	return Plugin_Continue;
 }
 // ------------------------------------------------------------------------------
 public Action Cmd_ItemBioYeux(int args) {
@@ -137,10 +141,12 @@ public Action Cmd_ItemBioYeux(int args) {
 	if( rp_GetClientBool(client, ch_Yeux) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez déjà des yeux bioniques.");
 		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
 	}
 	
 	rp_HookEvent(client, RP_PreHUDColorize, fwfBioYeux);
 	rp_SetClientBool(client, ch_Yeux, true);
+	return Plugin_Continue;
 }
 public Action fwfBioYeux(int client, int color[4]) {
 	#if defined DEBUG
