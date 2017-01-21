@@ -157,7 +157,7 @@ public Action Cmd_ItemDrugs(int args) {
 			return Plugin_Handled;
 		}
 		if( rp_GetClientBool(target, b_Lube) ) {
-			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N vous glisse entre les mains.", target);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N vous glisse entre les mains.", target);
 			ITEM_CANCEL(client, item_id);
 			return Plugin_Handled;
 		}
