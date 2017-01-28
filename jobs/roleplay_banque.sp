@@ -756,6 +756,8 @@ int BuidlingSIGN(int client) {
 	GetClientAbsOrigin(client, vecOrigin);
 	int count;
 	
+	bool isAdmin = view_as<bool>(GetUserFlagBits(client) & (ADMFLAG_GENERIC|ADMFLAG_ROOT));
+	
 	for(int i=1; i<=2048; i++) {
 		if( !IsValidEdict(i) )
 			continue;
@@ -766,7 +768,8 @@ int BuidlingSIGN(int client) {
 		
 		if( StrEqual(classname, tmp) && rp_GetBuildingData(i, BD_owner) == client ) {
 			count++;
-			if( count >= 1 && (GetUserAdmin(client) != INVALID_ADMIN_ID) ) {
+			
+			if( count >= 1 && !isAdmin ) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez placé un panneau indicateur.");
 				return 0;
 			}
