@@ -249,6 +249,8 @@ Action Draw_Menu(int client) {
 		if( rp_GetClientInt(client, i_Job) <= 104 && GetConVarInt(FindConVar("hostport")) == 27015 )
 			menu.AddItem("forum", "Traiter les plaintes forum");
 		
+		menu.AddItem("identity", "Changer l'identité");
+		
 		menu.Display(client, MENU_TIME_FOREVER);
 	}
 	else {
@@ -713,6 +715,56 @@ Menu AUDIENCE_Forum(int client, int a, int b) {
 	
 	return subMenu;
 }
+Menu AUDIENCE_Identity(int& client, int a, int b, int c) {
+	Menu subMenu = null;
+	char tmp[64], tmp2[64];
+	
+	if( a == 0 && b == 0 ) {
+		a = client;
+		subMenu = new Menu(MenuTribunal);
+		subMenu.SetTitle("Qui veux changer de sexe?\n ");
+		
+		for (int i = 1; i<=MaxClients; i++) {
+			if( !IsValidClient(i) )
+				continue;
+			
+			if( rp_GetPlayerZone(a) != rp_GetPlayerZone(i) )
+				continue;
+			
+			Format(tmp, sizeof(tmp), "identity %d %d", a, i);
+			Format(tmp2, sizeof(tmp2), "%N", i);
+			
+			subMenu.AddItem(tmp, tmp2);
+		}
+	}
+	else if( c == 0 ) {
+		client = b;
+		
+		subMenu = new Menu(MenuTribunal);
+		subMenu.SetTitle("Souhaitez-vous changer de sexe?\nCette opération vous coûtera 2.500$.\n ");
+		Format(tmp, sizeof(tmp), "identity %d %d 1", a, b);	subMenu.AddItem(tmp, "Non");
+		Format(tmp, sizeof(tmp), "identity %d %d 2", a, b);	subMenu.AddItem(tmp, "Oui");
+		
+	}
+	else {
+		
+		if( c == 2 ) {
+			rp_ClientMoney(client, i_Money, -2500);
+			rp_ClientMoney(a, i_Money, 1250);
+			rp_SetJobCapital(101, rp_GetJobCapital(101) + 1250);
+			
+			rp_SetClientBool(client, b_isFemale, !rp_GetClientBool(client, b_isFemale));
+			PrintToChatZone( rp_GetPlayerZone(client) , "%N est maintenant ... %s.", client, rp_GetClientBool(client, b_isFemale) ? "une femme" : "un homme");
+		}
+		else {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez refusé de changer de sexe.");
+			CPrintToChat(a, "{lightblue}[TSX-RP]{default} %N a refusé de changer de sexe.", client);
+			
+		}
+	}
+	
+	return subMenu;
+}
 public void SQL_AUDIENCE_Forum(Handle owner, Handle handle, const char[] error, any client) {
 	
 	
@@ -780,6 +832,8 @@ public int MenuTribunal(Handle menu, MenuAction action, int client, int param2) 
 			subMenu = AUDIENCE_Inverser(type);
 		else if( StrEqual(expl[0], "forward") )
 			subMenu = AUDIENCE_Forward(type, a);
+		else if( StrEqual(expl[0], "identity") )
+			subMenu = AUDIENCE_Identity(client, a, b, c);
 		else
 			subCommand = true;
 		
