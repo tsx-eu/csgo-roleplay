@@ -42,6 +42,7 @@ public void OnMapStart() {
 	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt");
 }
 public void OnClientPostAdminCheck(int client) {
+	g_bCanPerquiz[client] = true;
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 	rp_HookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);
 }
@@ -706,10 +707,13 @@ void countBadThing(char[] zone, int& weapon, int& plant, int& machine) {
 		vecOrigin[2] += 16.0;
 		
 		rp_GetZoneData(rp_GetZoneFromPoint(vecOrigin), zone_type_type, tmp2, sizeof(tmp2));
+		if( StrEqual(tmp2, "14") )
+			tmp2[1] = '1';
+		
 		if( !StrEqual(tmp2, zone) )
 			continue;
 		
-		if( StrContains(tmp, "weapon_") == 0 && StrContains(tmp, "knife") == -1 &&  Weapon_GetOwner(i) == 0 )
+		if( StrContains(tmp, "weapon_") == 0 && StrContains(tmp, "knife") == -1 &&  Weapon_GetOwner(i) <= 0 )
 			weapon++;
 		if( StrContains(tmp, "rp_plant") == 0 )
 			plant++;
@@ -718,6 +722,7 @@ void countBadThing(char[] zone, int& weapon, int& plant, int& machine) {
 		if( StrContains(tmp, "rp_bigcash") == 0 )
 			machine+=15;
 	}
+	
 }
 void TeleportCT(int zone) {
 	char tmp[64], tmp2[64];
