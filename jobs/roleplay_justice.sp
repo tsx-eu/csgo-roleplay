@@ -447,6 +447,12 @@ Menu AUDIENCE_Condamner(int type, int articles) {
 	Menu subMenu = null;
 	char tmp[64], tmp2[64];
 	
+	if( IsVolAndRecidive(type) ) {
+		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} Le juge %N a tenté de faire un abus. Cet incident a été reporté.", g_iTribunalData[type][td_Owner]);
+		LogToGame("[CHEATING] [JUGE] [CONDAMNER] %L a tenté de faire une condamnation pour récidive de vol.", g_iTribunalData[type][td_Owner]);
+		return null;
+	}
+	
 	if( articles == -1 ) {
 		int severity = timeToSeverity(g_iTribunalData[type][td_Time]) - g_iTribunalData[type][td_DoneDedommagement];
 		
@@ -545,6 +551,13 @@ Menu AUDIENCE_Avocat(int type, int a, int b) {
 Menu AUDIENCE_Dedommagement(int type) {
 	
 	if( g_iTribunalData[type][td_DoneDedommagement] == 0 ) {
+		
+		if( IsVolAndRecidive(type) ) {
+			CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} Le juge %N a tenté de faire un abus. Cet incident a été reporté.", g_iTribunalData[type][td_Owner]);
+			LogToGame("[CHEATING] [JUGE] [DEDO] %L a tenté de faire une dédo pour récidive de vol.", g_iTribunalData[type][td_Owner]);
+			return null;
+		}
+		
 		g_iTribunalData[type][td_DoneDedommagement] = 1;
 		
 		int money = calculerDedo(type);
@@ -1304,6 +1317,25 @@ public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
 		if( menu != INVALID_HANDLE )
 			CloseHandle(menu);
 	}
+}
+bool IsVolAndRecidive(int type) {
+	int vol = 0;
+	int recidive = 0;
+	int other = 0;
+	
+	for (int i = 0; i < sizeof(g_iArticles[]); i++) {
+		if( g_iArticles[type][i] <= 0 )
+			continue;
+		if( i == 2 )
+			vol++;
+		else if( i == 8 )
+			recidive++;
+		else
+			other++;
+	}
+	if( vol > 0 && recidive > 0 && other == 0 )
+		return true;
+	return false;
 }
 // ----------------------------------------------------------------------------
 void AddMenu_Blank(int client, Handle menu, const char[] myString , any ...) {
