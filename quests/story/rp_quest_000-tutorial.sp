@@ -349,7 +349,7 @@ public void Q7_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "votre paye. Lorsque vous aurez décroché");
 		DrawPanelText(panel, "votre premier emploi, il est généralement");
 		DrawPanelText(panel, "conseillé de louer un appart. Celui-ci");
-		DrawPanelText(panel, "augmentera votre paie et vous rend votre vie.");
+		DrawPanelText(panel, "vous donne de l'énergie et vous rend votre vie.");
 		DrawPanelText(panel, "Vous pouvez aussi y cacher différents objets");
 		DrawPanelText(panel, "du jeu, tel que les machines à faux-billets");
 		DrawPanelText(panel, "plants de drogue, armes, etc.");
@@ -427,7 +427,7 @@ public void Q9_Frame(int objectiveID, int client) {
 		DrawPanelText(panel, "avec les citoyens à coté de vous.");
 		DrawPanelText(panel, " ");
 		DrawPanelText(panel, "→ Faites un coucou dans le chat local");
-		DrawPanelText(panel, "(chat équipe) afin de continuer votre");
+		DrawPanelText(panel, "(Touche u) afin de continuer votre");
 		DrawPanelText(panel, "apprentissage.");
 		
 		rp_SendPanelToClient(panel, client, 1.1);
