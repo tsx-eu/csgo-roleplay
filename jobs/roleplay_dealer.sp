@@ -1137,9 +1137,9 @@ public Action Frame_BuildingPlant(Handle timer, any ent) {
 		if( rp_GetClientJobID(client) == target || rp_GetClientGroupID(client) == (target-1000) ) {
 			
 			if( rp_GetServerRules(rules_Productions, rules_Arg) == 1 )
-				time += 10.0;
-			else
 				time -= 10.0;
+			else
+				time += 10.0;
 		}
 	}
 	
