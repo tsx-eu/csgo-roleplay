@@ -131,6 +131,8 @@ public void OnClientPostAdminCheck(int client) {
 	
 	if( rp_GetClientBool(client, b_Crayon) )
 		rp_HookEvent(client, RP_PrePlayerTalk, fwdTalkCrayon);
+	if( rp_GetClientBool(client, b_HasShoes) )
+		SDKHook(client, SDKHook_OnTakeDamage, fwdNoFallDamage);
 }
 public void OnClientDisconnect(int client) {
 	removeShield(client);
@@ -380,7 +382,11 @@ public Action Cmd_ItemKnifeType(int args) {
 	return Plugin_Handled;
 }
 public Action fwdWeapon(int victim, int attacker, float &damage) {
-	bool changed = wpnCutDamage(victim, attacker, damage);
+	
+	bool changed;
+	
+	if( rp_GetClientBool(attacker, b_GameModePassive) == false)
+		changed = wpnCutDamage(victim, attacker, damage);
 	
 	if( changed )
 		return Plugin_Changed;
