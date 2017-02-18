@@ -20,7 +20,7 @@
 //#define	INSTANT
 
 #define getWheel(%1,%2,%3,%4) (g_iJoker[%1][%3] == %4 ? 6 : wheel[%2][%3][%4])
-#define wheelButton 330
+#define wheelButton 332
 
 
 public Plugin myinfo = {
