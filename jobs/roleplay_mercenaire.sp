@@ -230,6 +230,11 @@ public Action fwdTueurKill(int client, int attacker, float& respawn) {
 	if( rp_GetClientInt(attacker, i_ToKill) == client && rp_GetClientInt(client, i_KidnappedBy) != attacker ) {
 		rp_SetClientStat(attacker, i_JobSucess, rp_GetClientStat(client, i_JobSucess) + 1);
 		rp_SetClientStat(attacker, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
+		
+		int rnd = rp_GetRandomCapital(41);
+			rp_SetJobCapital(rnd, rp_GetJobCapital(rnd) - (200));
+			rp_SetJobCapital(41, rp_GetJobCapital(41) + (200));
+			
 		CPrintToChat(attacker, "{lightblue}[TSX-RP]{default} Vous avez rempli votre contrat pour avoir tué %N.", client);
 		
 		int from = rp_GetClientInt(attacker, i_ContratFor);
