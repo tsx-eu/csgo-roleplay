@@ -230,13 +230,7 @@ public Action fwdTueurKill(int client, int attacker, float& respawn) {
 	if( rp_GetClientInt(attacker, i_ToKill) == client && rp_GetClientInt(client, i_KidnappedBy) != attacker ) {
 		rp_SetClientStat(attacker, i_JobSucess, rp_GetClientStat(client, i_JobSucess) + 1);
 		rp_SetClientStat(attacker, i_JobFails, rp_GetClientStat(client, i_JobFails) - 1);
-		
-		if( rp_GetClientJobID(from) != 41 ){
-		int rnd = rp_GetRandomCapital(41);
-			rp_SetJobCapital(rnd, rp_GetJobCapital(rnd) - (200));
-			rp_SetJobCapital(41, rp_GetJobCapital(41) + (200));
-		}
-		
+
 		CPrintToChat(attacker, "{lightblue}[TSX-RP]{default} Vous avez rempli votre contrat pour avoir tué %N.", client);
 		
 		int from = rp_GetClientInt(attacker, i_ContratFor);
@@ -246,7 +240,9 @@ public Action fwdTueurKill(int client, int attacker, float& respawn) {
 			
 			if( rp_GetClientJobID(from) != 41 )
 				rp_ClientXPIncrement(attacker, 100);
-			
+				int rnd = rp_GetRandomCapital(41);
+					rp_SetJobCapital(rnd, rp_GetJobCapital(rnd) - (200));
+					rp_SetJobCapital(41, rp_GetJobCapital(41) + (200));
 			CPrintToChat(from, "{lightblue}[TSX-RP]{default} %N a rempli son contrat en tuant %N.", attacker, client);
 			rp_IncrementSuccess(from, success_list_tueur);
 			
