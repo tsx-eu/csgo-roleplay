@@ -237,7 +237,6 @@ public Action fwdTueurKill(int client, int attacker, float& respawn) {
 		bool kidnapping = false;
 		
 		if( IsValidClient(from) ) {
-			
 			if( rp_GetClientJobID(from) != 41 ){
 				rp_ClientXPIncrement(attacker, 100);
 				int rnd = rp_GetRandomCapital(41);
