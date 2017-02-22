@@ -48,7 +48,7 @@ int g_cBeam;
 
 // Numéro, Résumé, Heures, Amende, Dédo, Détails
 char g_szArticles[28][6][512] = {
-	{"221-1-a",		"Meurtre d'un civil / Agression",							"18",	"1250",		"1000",	"Toutes atteintes volontaires à la vie d’un citoyen sont condamnées à une peine maximale de 18h de prison et 1250$ d’amende." },
+	{"221-1-a",		"Meurtre d'un civil / Agression",				"18",	"1250",		"1000",	"Toutes atteintes volontaires à la vie d’un citoyen sont condamnées à une peine maximale de 18h de prison et 1250$ d’amende." },
 	{"221-1-b",		"Meurtre d'un policier",						"24",	"5500",		"1500",	"Toutes atteintes volontaires à la vie d’un officier des forces de l’ordre sont condamnées à une peine maximale de 24h de prison et 5 500$ d’amende." },
 	{"221-2",		"Vol",											"6",	"450",		"-1",	"Le vol est un acte punis d’une peine maximale de 6h de prison et 450$ d’amende." },
 	{"221-3",		"Manquement convocation",						"18",	"4000",		"0",	"Le manquement à une convocation devant les tribunaux sans motif valable est puni d’une peine maximale de 18h de prison et 4.000$ d'amende." },
@@ -77,7 +77,7 @@ char g_szArticles[28][6][512] = {
 	{"221-17",		"Acte de proxénétisme / prostitution",			"6",	"450",		"0",	"Tout acte de proxénétisme ou de prostitution est passible d'une peine maximale de 6h de prison et 450$ d’amende." },
 	{"221-18",		"Asile politique",								"24",	"1500",		"1000",	"Le tribunal est une zone internationale indépendante des lois de la police, tout citoyen y est protégé par asile juridique. De ce fait, tout policier mettant une personne étant dans le tribunal en prison encourt une peine maximale de 24h de prison et 1 500$ d'amende." }
 };
-char g_szAcquittement[6][32] = { "Non coupable", "Conciliation", "Impossible de prouver les faits", "Déjà condamné", "Plainte annulée", "Test Juge"};
+char g_szAcquittement[6][32] = { "Non coupable", "Conciliation", "Impossible de prouver les faits", "Déjà condamné", "Plainte annulée", "Nouveau"};
 char g_szCondamnation[5][32] = { "Très indulgent", "Indulgent", "Juste", "Sévère", "Très sévère" };
 float g_flCondamnation[5] = {0.2, 0.4, 0.6, 0.8, 1.0};
 float g_flCoords[3][2][3];
@@ -238,6 +238,8 @@ Action Draw_Menu(int client) {
 		return Plugin_Stop;
 	if( rp_GetClientJobID(client) != 101 )
 		return Plugin_Stop;
+	if( rp_GetClientInt(client, i_Job) == 106 && !FormationCanBeMade(type) )
+		return Plugin_Stop;
 	
 	
 	if( isTribunalDisponible(type) ) {
@@ -246,7 +248,7 @@ Action Draw_Menu(int client) {
 		menu.SetTitle("Tribunal de Princeton\n ");
 		menu.AddItem("start -1", "Débuter une audience");
 		menu.AddItem("mariage", "Marier des joueurs");
-		if( rp_GetClientInt(client, i_Job) <= 104 && GetConVarInt(FindConVar("hostport")) == 27015 )
+		if( rp_GetClientInt(client, i_Job) <= 103 && GetConVarInt(FindConVar("hostport")) == 27015 )
 			menu.AddItem("forum", "Traiter les plaintes forum");
 		
 		menu.AddItem("identity", "Changer l'identité");
@@ -1041,8 +1043,8 @@ int getMaxArticles(int client) {
 		case 102: return 15;
 		case 103: return 10;
 		case 104: return 8;
-		case 105: return 5;
-		case 106: return 3;		
+		case 105: return 3;
+		case 106: return 1;		
 	}
 	return 0;
 }
@@ -1053,6 +1055,22 @@ int GetTribunalType(int zone) {
 		return 2;
 	
 	return 0;
+}
+bool FormationCanBeMade(int type) {
+	
+	for (int i = 1; i <= MaxClients; i++) {
+		if( !IsValidClient(i) )
+			continue;
+		if( rp_GetClientJobID(i) != 101 )
+			continue;
+		if( rp_GetClientInt(i, i_Job) == 106 )
+			continue;
+		if( GetTribunalType(rp_GetPlayerZone(i)) != type )
+			continue;
+		
+		return true;
+	}
+	return false;
 }
 void SQL_Insert(int type, int condamne, int condamnation, int heure, int amende) {
 	char query[1024], szSteamID[5][32], charges[128], nick[64], pseudo[ sizeof(nick)*2+1 ];
