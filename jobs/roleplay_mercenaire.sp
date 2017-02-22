@@ -279,9 +279,9 @@ public Action fwdTueurKill(int client, int attacker, float& respawn) {
 				rp_ClientFloodIncrement(0, client, fd_kidnapping, 6.0*60.0);
 			}
 			else if( g_iKillerPoint[attacker][competance_type] == 1006 ) {
-				if( g_bUserData[Client][b_HaveCard] == 1 ) {
-				g_bUserData[Client][b_HaveCard] = 0;
-				CPrintToChat(Client, "{lightblue}[TSX-RP]{default} Un mercenaire vous a pris votre portefeuille, et vous a volé votre carte bancaire...");
+				if( rp_GetClientBool(client, b_HaveCard) == 1 ){
+				rp_SetClientBool(client, b_HaveCard, 0);
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Un mercenaire vous a pris votre portefeuille, et vous a volé votre carte bancaire...");
 				}
 				respawn *= 1.25;			
 			}
