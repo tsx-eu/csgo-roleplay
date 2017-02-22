@@ -238,9 +238,9 @@ public Action fwdTueurKill(int client, int attacker, float& respawn) {
 		
 		if( IsValidClient(from) ) {
 			
-			if( rp_GetClientJobID(from) != 41 )
+			if( rp_GetClientJobID(from) != 41 ){
 				rp_ClientXPIncrement(attacker, 100);
-				int rnd = rp_GetRandomCapital(41);{
+				int rnd = rp_GetRandomCapital(41);
 					rp_SetJobCapital(rnd, rp_GetJobCapital(rnd) - (200));
 					rp_SetJobCapital(41, rp_GetJobCapital(41) + (200));
 				}
