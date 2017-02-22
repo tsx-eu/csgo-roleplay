@@ -226,6 +226,14 @@ public Action fwdFrame(int client) {
 	
 	return Plugin_Continue;
 }
+public Action TaskResetAttacker(Handle timer, any attacker) {
+	if( IsValidClient(attacker) )
+		rp_SetClientInt(attacker, i_LastKilled_Reverse, 0);
+}
+public Action TaskResetVictim(Handle timer, any client) {
+	if( IsValidClient(client) )
+		rp_SetClientInt(client, i_LastKilled, 0);
+}
 public Action fwdTueurKill(int client, int attacker, float& respawn) {
 	if( rp_GetClientInt(attacker, i_ToKill) == client && rp_GetClientInt(client, i_KidnappedBy) != attacker ) {
 		rp_SetClientStat(attacker, i_JobSucess, rp_GetClientStat(client, i_JobSucess) + 1);
@@ -236,13 +244,19 @@ public Action fwdTueurKill(int client, int attacker, float& respawn) {
 		int from = rp_GetClientInt(attacker, i_ContratFor);
 		bool kidnapping = false;
 		
+		CreateTimer(0.1, TaskResetAttacker, attacker);
+		CreateTimer(0.1, TaskResetVictim, client);		
+		
 		if( IsValidClient(from) ) {
-			if( rp_GetClientJobID(from) != 41 ){
+			
+			if( rp_GetClientJobID(from) != 41 ) {
 				rp_ClientXPIncrement(attacker, 100);
+				
 				int rnd = rp_GetRandomCapital(41);
-					rp_SetJobCapital(rnd, rp_GetJobCapital(rnd) - (200));
-					rp_SetJobCapital(41, rp_GetJobCapital(41) + (200));
-				}
+				rp_SetJobCapital(rnd, rp_GetJobCapital(rnd) - 200);
+				rp_SetJobCapital(41, rp_GetJobCapital(41) + 200);
+			}
+			
 			CPrintToChat(from, "{lightblue}[TSX-RP]{default} %N a rempli son contrat en tuant %N.", attacker, client);
 			rp_IncrementSuccess(from, success_list_tueur);
 			
@@ -282,9 +296,9 @@ public Action fwdTueurKill(int client, int attacker, float& respawn) {
 				rp_ClientFloodIncrement(0, client, fd_kidnapping, 6.0*60.0);
 			}
 			else if( g_iKillerPoint[attacker][competance_type] == 1006 ) {
-				if( rp_GetClientBool(client, b_HaveCard) == 1 ){
-				rp_SetClientBool(client, b_HaveCard, 0);
-				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Un mercenaire vous a pris votre portefeuille, et vous a volé votre carte bancaire...");
+				if( rp_GetClientBool(client, b_HaveCard) == true ){
+					rp_SetClientBool(client, b_HaveCard, false);
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Un mercenaire vous a pris votre portefeuille, et vous a volé votre carte bancaire...");
 				}
 				respawn *= 1.25;			
 			}
