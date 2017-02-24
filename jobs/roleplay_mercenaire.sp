@@ -196,6 +196,7 @@ public Action Cmd_ItemContrat(int args) {
 	}
 	else if( StrContains(arg1, "lupin") == 0 ) {
 		g_iKillerPoint[vendeur][competance_type] = 1006;
+		rp_SetClientInt(target, i_ContratTotal, rp_GetClientInt(target, i_ContratTotal) + 10);
 	}
 	
 	
