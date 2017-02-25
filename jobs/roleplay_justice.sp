@@ -238,7 +238,7 @@ Action Draw_Menu(int client) {
 		return Plugin_Stop;
 	if( rp_GetClientJobID(client) != 101 )
 		return Plugin_Stop;
-	if( rp_GetClientInt(client, i_Job) == 106 && !FormationCanBeMade(type) )
+	if( rp_GetClientInt(client, i_Job) == 107 && !FormationCanBeMade(type) )
 		return Plugin_Stop;
 	
 	
@@ -248,7 +248,7 @@ Action Draw_Menu(int client) {
 		menu.SetTitle("Tribunal de Princeton\n ");
 		menu.AddItem("start -1", "Débuter une audience");
 		menu.AddItem("mariage", "Marier des joueurs");
-		if( rp_GetClientInt(client, i_Job) <= 103 && GetConVarInt(FindConVar("hostport")) == 27015 )
+		if( rp_GetClientInt(client, i_Job) <= 104 && GetConVarInt(FindConVar("hostport")) == 27015 )
 			menu.AddItem("forum", "Traiter les plaintes forum");
 		
 		menu.AddItem("identity", "Changer l'identité");
@@ -1040,11 +1040,12 @@ int getMaxArticles(int client) {
 	int job = rp_GetClientInt(client, i_Job);
 	switch (job) {
 		case 101: return 20;
-		case 102: return 15;
-		case 103: return 10;
-		case 104: return 8;
-		case 105: return 3;
-		case 106: return 1;		
+		case 102: return 20;
+		case 103: return 15;
+		case 104: return 10;
+		case 105: return 5;
+		case 106: return 3;
+		case 107: return 2;		
 	}
 	return 0;
 }
@@ -1063,7 +1064,7 @@ bool FormationCanBeMade(int type) {
 			continue;
 		if( rp_GetClientJobID(i) != 101 )
 			continue;
-		if( rp_GetClientInt(i, i_Job) == 106 )
+		if( rp_GetClientInt(i, i_Job) == 107 )
 			continue;
 		if( GetTribunalType(rp_GetPlayerZone(i)) != type )
 			continue;
