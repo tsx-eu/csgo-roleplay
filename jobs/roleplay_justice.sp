@@ -1066,6 +1066,8 @@ bool FormationCanBeMade(int type) {
 			continue;
 		if( rp_GetClientInt(i, i_Job) == 107 )
 			continue;
+		if( rp_GetClientBool(i, b_IsAFK) == true )
+			continue;
 		if( GetTribunalType(rp_GetPlayerZone(i)) != type )
 			continue;
 		
