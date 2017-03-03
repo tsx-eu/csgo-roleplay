@@ -36,6 +36,8 @@ enum competance {
 	competance_invis,
 	competance_hp,
 	competance_vitesse,
+	competance_cryo,
+	competance_berserk,
 	competance_type,
 	
 	competance_max
@@ -440,6 +442,8 @@ void OpenSelectSkill(int client) {
 		AddMenuItem(menu, "inv", "Invisibilité", g_iKillerPoint[client][competance_invis] ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
 		AddMenuItem(menu, "vie", "Vie", g_iKillerPoint[client][competance_hp] ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
 		AddMenuItem(menu, "vit", "Vitesse", g_iKillerPoint[client][competance_vitesse] ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
+		AddMenuItem(menu, "berserk", "seringue Berserk", g_iKillerPoint[client][competance_berserk] ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
+		AddMenuItem(menu, "nano", "Nano-Cryogénisation", g_iKillerPoint[client][competance_cryo] ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
 	}
 	
 	DisplayMenu(menu, client, MENU_TIME_DURATION);
@@ -525,6 +529,14 @@ public int AddCompetanceToAssassin(Handle menu, MenuAction action, int client, i
 			g_iKillerPoint[client][competance_vitesse] = 1;
 			rp_HookEvent(client, RP_PrePlayerPhysic, fwdSpeed);
 		}
+		else if( StrEqual(options, "nano", false) ) {
+			g_iKillerPoint[client][competance_cryo] = 1;
+			GivePlayerItem(client, "weapon_usp_silencer");
+		}
+		else if( StrEqual(options, "berzerk", false) ) {
+			g_iKillerPoint[client][competance_berserk] = 1;
+			GivePlayerItem(client, "weapon_usp_silencer");
+		}
 		
 		g_iKillerPoint[client][competance_left]--;
 		OpenSelectSkill(client);
@@ -584,6 +596,8 @@ void RestoreAssassinNormal(int client) {
 	g_iKillerPoint[client][competance_invis] = 0;
 	g_iKillerPoint[client][competance_hp] = 0;
 	g_iKillerPoint[client][competance_vitesse] = 0;
+	g_iKillerPoint[client][competance_cryo] = 0;
+	g_iKillerPoint[client][competance_berserk] = 0;
 	
 	SDKUnhook(client, SDKHook_WeaponDrop, OnWeaponDrop);
 	rp_UnhookEvent(client, RP_OnPlayerDead, fwdTueurDead);
