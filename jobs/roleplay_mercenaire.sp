@@ -533,7 +533,7 @@ public int AddCompetanceToAssassin(Handle menu, MenuAction action, int client, i
 			g_iKillerPoint[client][competance_cryo] = 1;
 			GivePlayerItem(client, "weapon_usp_silencer");
 		}
-		else if( StrEqual(options, "berzerk", false) ) {
+		else if( StrEqual(options, "berserk", false) ) {
 			g_iKillerPoint[client][competance_berserk] = 1;
 			GivePlayerItem(client, "weapon_usp_silencer");
 		}
