@@ -159,7 +159,6 @@ public Action Cmd_ItemContrat(int args) {
 		case 47: g_iKillerPoint[vendeur][competance_left] = 3;					
 		default: g_iKillerPoint[vendeur][competance_left] = 0;
 	}
-	OpenSelectSkill(vendeur);
 	
 	rp_SetClientInt(vendeur, i_ToKill, target);
 	rp_SetClientInt(vendeur, i_ContratFor, client);
@@ -201,6 +200,7 @@ public Action Cmd_ItemContrat(int args) {
 		rp_SetClientInt(target, i_ContratTotal, rp_GetClientInt(target, i_ContratTotal) + 10);
 	}
 	
+	OpenSelectSkill(vendeur);
 	
 	if( !IsValidClient(target) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre cible s'est déconnectée.");
