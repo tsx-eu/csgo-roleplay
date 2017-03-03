@@ -50,6 +50,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_distrib",		Cmd_ItemDistrib,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_banksort",	Cmd_ItemBankSort,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_sign",		Cmd_ItemCraftSign,		"RP-ITEM", 	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_assuVie",		Cmd_ItemAssuVie,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
@@ -66,6 +67,9 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 	rp_HookEvent(client, RP_OnPlayerUse, fwdUse);
 	rp_HookEvent(client, RP_OnPlayerHINT, fwdPlayerHINT);
+	
+	if( rp_GetClientBool(client, b_AssuranceVie) )
+		rp_HookEvent(client, RP_OnPlayerDead, OnPlayerDeathFastRespawn);
 }
 
 public Action Cmd_ItemCraftSign(int args) {
@@ -219,6 +223,29 @@ public Action Cmd_ItemAssurance(int args) {
 	
 	return Plugin_Handled;
 }
+
+public Action Cmd_ItemAssuVie(int args){
+	#if defined DEBUG
+	PrintToServer("Cmd_ItemAssuVie");
+	#endif
+	
+	int client = GetCmdArgInt(1);
+	
+	if( !rp_GetClientBool(client, b_AssuranceVie) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous etes maintenant couvert par l'assurance vie.");
+		rp_IncrementSuccess(client, success_list_assurance);
+	}
+	
+	rp_SetClientBool(client, b_AssuranceVie, true);
+	rp_HookEvent(client, RP_OnPlayerDead, OnPlayerDeathFastRespawn);
+	
+	return Plugin_Handled;
+}
+public Action OnPlayerDeathFastRespawn(int victim, int attacker, float& respawn) {
+	respawn /= 2.0;
+	return Plugin_Continue;
+}
+
 public Action Cmd_ItemNoAction(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemNoAction");
