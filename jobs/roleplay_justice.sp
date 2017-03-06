@@ -47,9 +47,11 @@ enum TribunalData {
 int g_cBeam;
 
 // Numéro, Résumé, Heures, Amende, Dédo, Détails
-char g_szArticles[28][6][512] = {
-	{"221-1-a",		"Meurtre d'un civil / Agression",				"18",	"1250",		"1000",	"Toutes atteintes volontaires à la vie d’un citoyen sont condamnées à une peine maximale de 18h de prison et 1250$ d’amende." },
+char g_szArticles[30][6][512] = {
+	{"221-1-a",		"Meurtre d'un civil",							"18",	"1250",		"1000",	"Toutes atteintes volontaires à la vie d’un citoyen sont condamnées à une peine maximale de 18h de prison et 1250$ d’amende." },
 	{"221-1-b",		"Meurtre d'un policier",						"24",	"5500",		"1500",	"Toutes atteintes volontaires à la vie d’un officier des forces de l’ordre sont condamnées à une peine maximale de 24h de prison et 5 500$ d’amende." },
+	{"221-1-c",		"Tentative de meurtre",							"12",	"500",		"500",	"Les coups et blessures volontaires ayant provoqué des lésions corporelles sont condamnés à une peine maximale de 12h de prison et 500$ d’amende." },
+	{"221-1-d",		"Agression physique",							"6",	"250",		"100",	"Les coups et blessures involontaires n’ayant pas provoqué des lésions corporelles sont condamnés à une peine maximale de 6h de prison et 250$ d’amende." },
 	{"221-2",		"Vol",											"6",	"450",		"-1",	"Le vol est un acte punis d’une peine maximale de 6h de prison et 450$ d’amende." },
 	{"221-3",		"Manquement convocation",						"18",	"4000",		"0",	"Le manquement à une convocation devant les tribunaux sans motif valable est puni d’une peine maximale de 18h de prison et 4.000$ d'amende." },
 	{"221-4",		"Faux aveux / Dénonciations calomnieuses",		"6",	"1500",		"300",	"Les faux aveux ou les dénonciations calomnieuses sont punis d’une peine maximale de 6h de prison et 1500$ d’amende." },
