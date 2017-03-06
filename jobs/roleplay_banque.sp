@@ -237,6 +237,7 @@ public Action Cmd_ItemAssuVie(int args){
 	}
 	
 	rp_SetClientBool(client, b_AssuranceVie, true);
+	rp_HookEvent(client, RP_OnAssurance,	fwdAssurance);
 	rp_HookEvent(client, RP_OnPlayerDead, OnPlayerDeathFastRespawn);
 	
 	return Plugin_Handled;
@@ -244,6 +245,11 @@ public Action Cmd_ItemAssuVie(int args){
 public Action OnPlayerDeathFastRespawn(int victim, int attacker, float& respawn) {
 	respawn /= 2.0;
 	return Plugin_Continue;
+}
+
+public Action fwdAssurance(int client, int& amount) {
+	amount += 2000;
+	return Plugin_Changed;
 }
 
 public Action Cmd_ItemNoAction(int args) {
@@ -1001,4 +1007,5 @@ int isNearSign(int client) {
 	}
 	return -1;
 }
+
 
