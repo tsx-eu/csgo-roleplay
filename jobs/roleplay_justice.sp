@@ -84,7 +84,7 @@ char g_szCondamnation[5][32] = { "Très indulgent", "Indulgent", "Juste", "Sév�
 float g_flCondamnation[5] = {0.2, 0.4, 0.6, 0.8, 1.0};
 float g_flCoords[3][2][3];
 
-int g_iArticles[3][28];
+int g_iArticles[3][ sizeof(g_szArticles) ];
 int g_iTribunalData[3][td_Max];
 char g_szJugementDATA[65][3][32];
 bool g_bClientDisconnected[65];
