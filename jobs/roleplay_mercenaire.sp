@@ -432,7 +432,7 @@ void OpenSelectSkill(int client) {
 	SetMenuTitle(menu, tmp);
 	
 	AddMenuItem(menu, "annule", "Annuler mon contrat");
-	
+	int target = rp_GetClientInt(client, i_ToKill);
 	if( g_iKillerPoint[client][competance_left] > 0 ) {
 		AddMenuItem(menu, "cut", "Cut Maximum", g_iKillerPoint[client][competance_cut] ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
 		AddMenuItem(menu, "tir", "Precision Maximum", g_iKillerPoint[client][competance_tir]);
