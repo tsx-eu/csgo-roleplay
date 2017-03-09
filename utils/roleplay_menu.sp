@@ -189,6 +189,7 @@ void openMenuGeneral(int client) {
 	menu.AddItem("job", "Appeler un joueur");
 	menu.AddItem("gps", "Trouver un lieu sur la carte");
 	menu.AddItem("aide", "Besoin d'aide");
+	menu.AddItem("craft", "Liste des crafts");
 	menu.AddItem("stats", "Statistiques");
 	menu.AddItem("report", "Signaler un mauvais comportement");
 	
