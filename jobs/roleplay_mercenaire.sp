@@ -432,8 +432,8 @@ void OpenSelectSkill(int client) {
 	SetMenuTitle(menu, tmp);
 	
 	AddMenuItem(menu, "annule", "Annuler mon contrat");
-	
-	if( g_iKillerPoint[client][competance_left] > 0 ) {
+	int target = rp_GetClientInt(client, i_ToKill);
+	if( IsValidClient(target) && g_iKillerPoint[client][competance_left] > 0 ) {
 		AddMenuItem(menu, "cut", "Cut Maximum", g_iKillerPoint[client][competance_cut] ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
 		AddMenuItem(menu, "tir", "Precision Maximum", g_iKillerPoint[client][competance_tir]);
 		AddMenuItem(menu, "usp", "M4 / Usp", (g_iKillerPoint[client][competance_usp] || g_iKillerPoint[client][competance_pompe] || g_iKillerPoint[client][competance_awp]) ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
@@ -442,7 +442,7 @@ void OpenSelectSkill(int client) {
 		AddMenuItem(menu, "inv", "Invisibilité", g_iKillerPoint[client][competance_invis] ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
 		AddMenuItem(menu, "vie", "Vie", g_iKillerPoint[client][competance_hp] ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
 		AddMenuItem(menu, "vit", "Vitesse", g_iKillerPoint[client][competance_vitesse] ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
-		if(g_iKillerPoint[client][competance_type] == 1002)
+		if( rp_GetClientJobID(target) == 1 || rp_GetClientJobID(target) == 101 )
 			AddMenuItem(menu, "berserk", "seringue Berserk", g_iKillerPoint[client][competance_berserk] ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
 		if(g_iKillerPoint[client][competance_type] == 1005)
 			AddMenuItem(menu, "nano", "Nano-Cryogénisation", g_iKillerPoint[client][competance_cryo] ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
