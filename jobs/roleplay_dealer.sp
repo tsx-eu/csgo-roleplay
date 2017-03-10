@@ -751,6 +751,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		}
 				
 		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Quelqu'un essaye de vous voler.");
+		LogToGame("[TSX-RP] [VOL] %L a commencé un vol d'arme sur %L.", client, target);
 		
 		char wepname[64];
 		GetEdictClassname(wepid, wepname, sizeof(wepname));
