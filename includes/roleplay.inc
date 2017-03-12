@@ -787,6 +787,7 @@ enum int_user_data {
 	i_SearchLVL,
 	i_GiveXP,
 	i_Dette,
+	i_ContratType,
 	
 	i_udata_max
 };

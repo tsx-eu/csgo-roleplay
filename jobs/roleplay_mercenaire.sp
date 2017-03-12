@@ -200,6 +200,8 @@ public Action Cmd_ItemContrat(int args) {
 		rp_SetClientInt(target, i_ContratTotal, rp_GetClientInt(target, i_ContratTotal) + 10);
 	}
 	
+	rp_SetClientInt(vendeur, i_ContratType, g_iKillerPoint[vendeur][competance_type]);
+	
 	OpenSelectSkill(vendeur);
 	
 	if( !IsValidClient(target) ) {
@@ -558,6 +560,7 @@ void RestoreAssassinNormal(int client) {
 	#endif
 	
 	g_iKillerPoint[client][competance_left] = 0;
+	rp_SetClientInt(client, i_ContratType, 0);
 	
 	if( g_iKillerPoint[client][competance_cut] ) {
 		rp_SetClientInt(client, i_KnifeTrain, g_iKillerPoint_stored[client][competance_cut]);
