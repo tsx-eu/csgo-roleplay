@@ -34,22 +34,23 @@ enum jail_raison_type {
 	jail_temps,
 	jail_temps_nopay,
 	jail_amende,
+	jail_simple,
 	
 	jail_type_max
 };
 char g_szJailRaison[][][128] = {
-	{ "Garde à vue",						"12", 	"12",	"0"},
-	{ "Meurtre",							"-1", 	"-1",	"-1"},
-	{ "Agression physique",					"1", 	"6",	"250"},
-	{ "Intrusion propriété privée",			"0", 	"3",	"100"},
-	{ "Vol, tentative de vol",				"0", 	"3",	"50"},
-	{ "Fuite, refus d'obtempérer",			"0", 	"6",	"200"},
-	{ "Insultes, Irrespect",				"1", 	"6",	"250"},
-	{ "Trafique illégal",					"0", 	"6",	"100"},
-	{ "Nuisance sonore",					"0", 	"6",	"100"},
-	{ "Tir dans la rue",					"0", 	"6",	"100"},
-	{ "Conduite dangereuse",				"0", 	"6",	"150"},
-	{ "Mutinerie, évasion",					"-2", 	"-2",	"50"}	
+	{ "Garde à vue",						"12", 	"12",	"0",	"0"},
+	{ "Meurtre",							"-1", 	"-1",	"-1",	"1"},
+	{ "Agression physique",					"1", 	"6",	"250",	"1"},
+	{ "Intrusion propriété privée",			"0", 	"3",	"100",	"0"},
+	{ "Vol, tentative de vol",				"0", 	"3",	"50",	"1"},
+	{ "Fuite, refus d'obtempérer",			"0", 	"6",	"200",	"0"},
+	{ "Insultes, Irrespect",				"1", 	"6",	"250",	"0"},
+	{ "Trafique illégal",					"0", 	"6",	"100",	"0"},
+	{ "Nuisance sonore",					"0", 	"6",	"100",	"0"},
+	{ "Tir dans la rue",					"0", 	"6",	"100",	"1"},
+	{ "Conduite dangereuse",				"0", 	"6",	"150",	"0"},
+	{ "Mutinerie, évasion",					"-2", 	"-2",	"50",	"1"}	
 };
 float g_flLastPos[65][3];
 DataPack g_hBuyMenu;
@@ -208,9 +209,6 @@ public Action Cmd_Cop(int client) {
 	if( (job == 8 || job == 9) && rp_GetZoneInt(zone, zone_type_type) != 1 ) { // Gardien, policier dans le PDP
 		ACCESS_DENIED(client);
 	}
-	if( (job == 108 || job == 109) && rp_GetZoneInt(zone, zone_type_type) != 1 && rp_GetZoneInt(zone, zone_type_type) != 101 ) { // GOS, Marshall, ONU dans Tribunal
-		ACCESS_DENIED(client);
-	}
 	if( !rp_GetClientBool(client, b_MaySteal) || rp_GetClientBool(client, b_Stealing) ) { // Pendant un vol
 		ACCESS_DENIED(client);
 	}
@@ -278,19 +276,19 @@ public Action Cmd_Vis(int client) {
 		ClientCommand(client, "r_screenoverlay effects/hsv.vmt");
 		
 		if( job  == 6 ) {
-			rp_SetClientFloat(client, fl_invisibleTime, GetGameTime() + 30.0);
+			rp_SetClientFloat(client, fl_invisibleTime, GetGameTime() + 60.0);
 			CreateTimer(120.0, AllowStealing, client);
 		}
 		else if ( job == 5 ) {
-			rp_SetClientFloat(client, fl_invisibleTime, GetGameTime() + 60.0);
+			rp_SetClientFloat(client, fl_invisibleTime, GetGameTime() + 90.0);
 			CreateTimer(120.0, AllowStealing, client);
 		}
 		else if ( job == 4 ) {
-			rp_SetClientFloat(client, fl_invisibleTime, GetGameTime() + 60.0);
+			rp_SetClientFloat(client, fl_invisibleTime, GetGameTime() + 90.0);
 			rp_SetClientBool(client, b_MaySteal, true);
 		}
 		else if (job == 1 ||  job== 2 ) {
-			rp_SetClientFloat(client, fl_invisibleTime, GetGameTime() + 90.0);
+			rp_SetClientFloat(client, fl_invisibleTime, GetGameTime() + 120.0);
 			rp_SetClientBool(client, b_MaySteal, true);
 		}
 		
@@ -385,11 +383,8 @@ public Action Cmd_Tazer(int client) {
 				case 5:		time = 6.0;
 				case 6:		time = 7.0;
 				case 7:		time = 8.0;
-				case 107:	time = 8.0;
 				case 8:		time = 9.0;
-				case 108:	time = 9.0;
 				case 9:		time = 10.0;
-				case 109:	time = 10.0;
 				
 				default: time = 10.0;
 		}
@@ -573,26 +568,32 @@ public Action Cmd_Jail(int client) {
 	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
 		ACCESS_DENIED(client);
 	}	
-	if( GetClientTeam(client) == CS_TEAM_T && ((job == 8 || job == 9) || (job >= 107 && job <= 109 )) ) {
+	if( GetClientTeam(client) == CS_TEAM_T && ((job == 8 || job == 9) || (job >= 101 && job <= 109 )) ) {
 		ACCESS_DENIED(client);
 	}
 	
 	float time = GetGameTime();
+	int ct = 0;
 		
 	for(int i=1; i<=MaxClients; i++) {
 		if( !IsValidClient(i) || IsPlayerAlive(i) )
 			continue;
 		if( IsClientSourceTV(i) )
 			continue;
-		if( rp_GetClientFloat(i, fl_RespawnTime) > time )
-			continue;
+		if( rp_GetClientJobID(i) == 1 )
+			ct++;
 		
-		int ragdoll = GetEntPropEnt(i, Prop_Send, "m_hRagdoll");
-
-		if( !IsValidEdict(ragdoll) || !IsValidEntity(ragdoll) )
-			ragdoll = i;
-		if( Entity_GetDistance(client, ragdoll) < MAX_AREA_DIST ) {
-			CS_RespawnPlayer(i);
+		if( Entity_GetDistance(client, i) < MAX_AREA_DIST ) {
+			if( rp_GetClientFloat(i, fl_RespawnTime) < time )
+				CS_RespawnPlayer(i);
+			if( rp_GetClientJobID(i) == 1 )
+				ct += 10;
+		}
+	}
+	
+	if( rp_GetClientJobID(client) == 101 ) {
+		if( ct >= 3 && rp_GetZoneInt( rp_GetPlayerZone(client), zone_type_type) ) {
+			ACCESS_DENIED(client);
 		}
 	}
 	
@@ -630,68 +631,6 @@ public Action Cmd_Jail(int client) {
 	if( Cbit & BITZONE_BLOCKJAIL || Tbit & BITZONE_BLOCKJAIL ) {
 		ACCESS_DENIED(client);
 	}
-	
-	if( (rp_GetZoneInt(Czone, zone_type_type) == 101) // On check si le CT est bien dans le tribunal
-			&& (job >= 101 && job <= 106) ) {
-
-		if (rp_GetZoneInt(Tzone, zone_type_type) != 101){ // On check si la cible est bien dans le tribunal (ticket #1029)
-			ACCESS_DENIED(client);
-		}
-
-		if(job == 106 && GetClientTeam(target) == CS_TEAM_CT ){
-			ACCESS_DENIED(client);
-		}
-		if( !IsValidClient(target) ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser un joueur.");
-			return Plugin_Handled;
-		}
-
-		int maxAmount = 0;
-		switch( job ) {
-			case 101: maxAmount = 1000;		// Président
-			case 102: maxAmount = 300;		// Vice Président
-			case 103: maxAmount = 100;		// Haut juge 2
-			case 104: maxAmount = 100;		// Haut juge 1
-			case 105: maxAmount = 36;		// Juge 2
-			case 106: maxAmount = 24;		// Juge 1
-		}
-
-		// Setup menu
-		Handle menu = CreateMenu(eventAskJail2Time);
-		char tmp[256], tmp2[256];
-		Format(tmp, 255, "Combien de temps doit rester %N?\n ", target);
-		SetMenuTitle(menu, tmp);
-
-		Format(tmp, 255, "%i_-1", target);
-		AddMenuItem(menu, tmp, "Prédéfinie");
-
-		for(int i=6; i<=600; i += 6) {
-
-			if( i > maxAmount )
-				break;
-
-			Format(tmp, 255, "%i_%i", target, i);
-			Format(tmp2, 255, "%i Heures", i);
-
-			AddMenuItem(menu, tmp, tmp2);
-		}
-
-		if(job == 104 || job == 103 || job == 101){
-			Format(tmp, 255, "%i_%i", target, maxAmount);
-			Format(tmp2, 255, "%i Heures", maxAmount);
-
-			AddMenuItem(menu, tmp, tmp2);
-		}
-
-		SetMenuExitButton(menu, true);
-		DisplayMenu(menu, client, MENU_TIME_DURATION);
-			
-		
-		return Plugin_Handled;
-	}
-	else if( (job >= 103 && job <= 106) && (rp_GetZoneInt(Czone, zone_type_type) != 101 || rp_GetZoneInt(Czone, zone_type_type) != 1)) {
-		ACCESS_DENIED(client);
-	}
 
 	if( rp_IsValidVehicle(target) ) {
 		int client2 = GetEntPropEnt(target, Prop_Send, "m_hPlayer");
@@ -725,7 +664,7 @@ public Action Cmd_Jail(int client) {
 		return Plugin_Handled;
 	}
 	
-	if( GetClientTeam(target) == CS_TEAM_CT && !(job >= 101 && job <= 103 ) ) {
+	if( GetClientTeam(target) == CS_TEAM_CT ) {
 		ACCESS_DENIED(client);
 	}
 	
@@ -904,9 +843,11 @@ void AskJailTime(int client, int target) {
 		AddMenuItem(menu, tmp, "Jail Tribunal N°2");
 	}
 	
-	if(rp_GetClientInt(target, i_JailTime) <= 6*60){
+	if(rp_GetClientInt(target, i_JailTime) <= 6*60) {
 		for(int i=0; i<sizeof(g_szJailRaison); i++) {
-
+			
+			if( rp_GetClientJobID(client) == 101 && StringToInt(g_szJailRaison[i][jail_simple]) == 0 && rp_GetClientBool(target, b_IsSearchByTribunal) == false )
+				continue;
 			Format(tmp2, sizeof(tmp2), "%d_%d", target, i);
 			AddMenuItem(menu, tmp2, g_szJailRaison[i][jail_raison]);
 		}
@@ -988,10 +929,10 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			
 			LogToGame("[TSX-RP] [JAIL] [LIBERATION] %L a liberé %L", client, target);
 			
-			int zone = rp_GetZoneFromPoint(g_flLastPos[target]);
+			int zonec = rp_GetZoneFromPoint(g_flLastPos[target]);
 			int bit = rp_GetZoneBit(zone);
 			
-			if( bit & (BITZONE_JAIL|BITZONE_HAUTESECU|BITZONE_LACOURS) || rp_GetZoneInt(zone, zone_type_type) == 101 ) {
+			if( bit & (BITZONE_JAIL|BITZONE_HAUTESECU|BITZONE_LACOURS) || rp_GetZoneInt(zonec, zone_type_type) == 101 ) {
 				rp_ClientSendToSpawn(target, true);
 			}
 			else {
@@ -1010,9 +951,6 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			
 			CPrintToChat(target, "{lightblue}[TSX-RP]{default} Vous avez été mis en prison, en attente de jugement par: %N", client);
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez mis: %N {default}dans la prison du Tribunal.", target);
-							
-			if( rp_GetClientInt(target, i_JailTime) <= 360 || rp_GetZoneInt(zone, zone_type_type) != 101 || rp_GetZoneInt(zone, zone_type_type) != 1)
-				rp_SetClientInt(target, i_JailTime, 360);
 				
 			LogToGame("[TSX-RP] [TRIBUNAL] %L a mis %L dans la prison du Tribunal.", client, target);
 			return;
