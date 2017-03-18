@@ -29,7 +29,7 @@ char g_szSkinsList[][][] = {
 	{"models/player/custom_player/legacy/lara/lara.mdl", 				"Lara", 			"1", "5"},
 	{"models/player/custom_player/legacy/swagirl/swagirl.mdl", 			"Désirée",			"1", "5"},
 	{"models/player/custom_player/legacy/eva/eva.mdl", 					"Eva", 				"1", "5"},
-	{"models/player/custom/zoey/zoey.mdl", 								"Zoey", 			"1", "5"},
+	{"models/player/custom_player/legacy/zoey/zoey.mdl", 				"Zoey", 			"1", "5"},
 	{"models/player/custom_player/legacy/misty/misty.mdl", 				"Misty", 			"1", "5"},
 	
 	{"models/player/custom_player/legacy/redfield/redfield.mdl",		"Redfield",			"0", "5"},
@@ -39,9 +39,9 @@ char g_szSkinsList[][][] = {
 	{"models/player/custom_player/legacy/lloyd/lloyd.mdl", 				"Loyd", 			"0", "5"},
 	{"models/player/custom_player/legacy/bzsoap/bzsoap.mdl", 			"BZ-Soap", 			"0", "5"},
 	{"models/player/custom_player/legacy/leon/leon.mdl", 				"Leon", 			"0", "5"},
-	{"models/player/custom/hitman/hitman.mdl", 							"Hitman", 			"0", "5"},
-	{"models/player/custom_player/legacy/duke/duke_v3.mdl", 			"Duke Nukem", 		"0", "5"},
-	{"models/player/custom/nick/nick.mdl", 								"Nick", 			"0", "5"},
+	{"models/player/custom_player/legacy/hitman/hitman.mdl", 			"Hitman", 			"0", "5"},
+	{"models/player/custom_player/legacy/duke2/duke2.mdl", 				"Duke Nukem", 		"0", "5"},
+	{"models/player/custom_player/legacy/nick/nick.mdl", 				"Nick", 			"0", "5"},
 	
 	{"models/player/custom_player/legacy/tm_anarchist.mdl", 			"Anarchist", 		"0", "1"},
 	{"models/player/custom_player/legacy/tm_anarchist_varianta.mdl", 	"Anarchist - A", 	"0", "1"},
