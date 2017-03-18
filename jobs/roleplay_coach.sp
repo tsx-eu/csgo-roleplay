@@ -464,13 +464,11 @@ public Action Cmd_ItemPermiTir(int args) {
 	#if defined DEBUG
 	PrintToServer("Cmd_ItemPermiTir");
 	#endif
-	
+
 	int client = GetCmdArgInt(1);
 	
 	float train = rp_GetClientFloat(client, fl_WeaponTrain) + 4.0;
-	train = Math_Clamp(train, 0.0, 8.0);
-	
-	rp_SetClientFloat(client, fl_WeaponTrain, train);
+	rp_SetClientFloat(client, fl_WeaponTrain, train < 8.0 ? train : 8.0);
 	
 	
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre entraînement est maintenant de %.2f%%", (train/5.0*100.0));
@@ -811,9 +809,7 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 				else if(StrEqual(szMenuItem, "precision")) {
 	
 					float train = rp_GetClientFloat(client, fl_WeaponTrain) + 4.0;
-					train = Math_Clamp(train, 0.0, 8.0);
-					
-					rp_SetClientFloat(client, fl_WeaponTrain, train);
+					rp_SetClientFloat(client, fl_WeaponTrain, train < 8.0 ? train : 8.0);
 					
 					CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre entraînement est maintenant de %.2f%%", (train/5.0*100.0));
 				}
