@@ -576,15 +576,13 @@ public Action Cmd_Jail(int client) {
 	int ct = 0;
 		
 	for(int i=1; i<=MaxClients; i++) {
-		if( !IsValidClient(i) || IsPlayerAlive(i) )
-			continue;
-		if( IsClientSourceTV(i) )
+		if( !IsValidClient(i) || IsClientSourceTV(i) )
 			continue;
 		if( rp_GetClientJobID(i) == 1 )
 			ct++;
 		
 		if( Entity_GetDistance(client, i) < MAX_AREA_DIST ) {
-			if( rp_GetClientFloat(i, fl_RespawnTime) < time )
+			if( !IsPlayerAlive(i) && rp_GetClientFloat(i, fl_RespawnTime) < time )
 				CS_RespawnPlayer(i);
 			if( rp_GetClientJobID(i) == 1 )
 				ct += 10;
@@ -592,7 +590,7 @@ public Action Cmd_Jail(int client) {
 	}
 	
 	if( rp_GetClientJobID(client) == 101 ) {
-		if( ct >= 3 && rp_GetZoneInt( rp_GetPlayerZone(client), zone_type_type) ) {
+		if( ct >= 3 && rp_GetZoneInt( rp_GetPlayerZone(client), zone_type_type) != 101 ) {
 			ACCESS_DENIED(client);
 		}
 	}
@@ -760,10 +758,7 @@ void SendPlayerToJail(int target, int client = 0) {
 	rp_ClientGiveItem(client, 2, -rp_GetClientItem(client, 2));
 	rp_ClientGiveItem(client, 3, -rp_GetClientItem(client, 3));
 	
-	int MaxJail = 0;	
-	float MinHull[3], MaxHull[3];
-	GetEntPropVector(target, Prop_Send, "m_vecMins", MinHull);
-	GetEntPropVector(target, Prop_Send, "m_vecMaxs", MaxHull);
+	int MaxJail = 0;
 	
 	for( int i=0; i<MAX_LOCATIONS; i++ ) {
 		rp_GetLocationData(i, location_type_base, tmp, sizeof(tmp));
@@ -930,7 +925,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			LogToGame("[TSX-RP] [JAIL] [LIBERATION] %L a liberé %L", client, target);
 			
 			int zonec = rp_GetZoneFromPoint(g_flLastPos[target]);
-			int bit = rp_GetZoneBit(zone);
+			int bit = rp_GetZoneBit(zonec);
 			
 			if( bit & (BITZONE_JAIL|BITZONE_HAUTESECU|BITZONE_LACOURS) || rp_GetZoneInt(zonec, zone_type_type) == 101 ) {
 				rp_ClientSendToSpawn(target, true);
@@ -958,8 +953,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 		
 		
 		
-		if( StrEqual(g_szJailRaison[type][jail_raison],"Agression physique")
-			&& ! ((rp_GetClientInt(client, i_Job) >= 101 && rp_GetClientInt(client, i_Job) <= 106) && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == 101) ) { // Agression physique
+		if( StrEqual(g_szJailRaison[type][jail_raison],"Agression physique") ) { // Agression physique
 			if(rp_GetClientInt(target, i_LastAgression)+30 < GetTime()){
 				rp_SetClientInt(target, i_JailTime, 0);
 				rp_SetClientInt(target, i_jailTime_Last, 0);
@@ -975,8 +969,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 				return;
 			}
 		}
-		if( StrEqual(g_szJailRaison[type][jail_raison], "Tir dans la rue") 
-			&& ! ((rp_GetClientInt(client, i_Job) >= 101 && rp_GetClientInt(client, i_Job) <= 106) && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == 101) ) { // Tir dans la rue
+		if( StrEqual(g_szJailRaison[type][jail_raison], "Tir dans la rue") ) { // Tir dans la rue
 			if(rp_GetClientInt(target, i_LastDangerousShot)+30 < GetTime()){
 				rp_SetClientInt(target, i_JailTime, 0);
 				rp_SetClientInt(target, i_jailTime_Last, 0);
