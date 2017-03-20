@@ -1086,6 +1086,7 @@ bool findAreaInRoom(int jobID, float pos[3]) {
 	return false;
 }
 void OnBraqueurKilled(int client) {
+	 rp_SetClientBool(client, b_SpawnToGrave, false);
 	
 	addClientToTeam(client, TEAM_BRAQUEUR_DEAD);
 	
