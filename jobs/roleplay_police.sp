@@ -56,6 +56,9 @@ float g_flLastPos[65][3];
 DataPack g_hBuyMenu;
 char g_szTribunal[65][65];
 
+#define ARMU_POLICE view_as<float>({ 2550.8, 1663.1, -2015.96 })
+
+
 bool CanSendToJail(int client, int target) {
 	Action a;
 	Call_StartForward(rp_GetForwardHandle(target, RP_PreClientSendToJail));
@@ -911,7 +914,6 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 		int type = StringToInt(data[1]);
 		int time_to_spend;
 		int jobID = rp_GetClientJobID(client);
-		int zone = rp_GetPlayerZone(target);
 		//FORCE_Release(iTarget);
 		
 		if( type == -1 ) {
@@ -1025,6 +1027,8 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			else{
 				amende += rp_GetClientInt(target, i_LastVolAmount); // Cas tentative de vol ou distrib...
 			}
+			
+			CancelClientMenu(target, true);
 		}
 		else {
 			amendeCalculation(target, amende);
@@ -1688,7 +1692,7 @@ public Action fwdOnPlayerUse(int client) {
 	
 	GetClientAbsOrigin(client, vecOrigin);
 	
-	if( GetVectorDistance(vecOrigin, view_as<float>({ 2550.8, 1663.1, -2015.96 })) < 40.0 ) {
+	if( GetVectorDistance(vecOrigin, ARMU_POLICE) < 40.0 ) {
 		Cmd_BuyWeapon(client, false);
 	}
 	return Plugin_Continue;
@@ -1762,7 +1766,7 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			float vecOrigin[3];
 			GetClientAbsOrigin(client, vecOrigin);
 			
-			if( GetVectorDistance(vecOrigin, view_as<float>({ 2550.8, 1663.1, -2015.96 })) > 40.0 )
+			if( GetVectorDistance(vecOrigin, ARMU_POLICE) > 40.0 )
 				return 0;
 			
 			if( StringToInt(buffer[1]) == 1 ) {

@@ -13,7 +13,7 @@
 #endif
 #define _rp_const_included_
 
-#define __LAST_REV__			"6.5 - Phoénix"
+#define __LAST_REV__			"6.6 - Phoénix"
 
 //#define DEBUG
 #define MAX_LOCATIONS			150
