@@ -85,9 +85,10 @@ public void Q1_Start(int objectiveID, int client) {
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Bonjour collègue, on a de nouveaux projets pour toi.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "On a 5 colis à récupérer en ville. ", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Rapporte les nous.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Bonjour citoyen,", ITEMDRAW_DISABLED);
+	menu.AddItem("", "j'ai une nouvelle mission à te confier.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "il y a 5 colis pour toi à récupérer en ville. ", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Vas les récupérer !", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 60);
@@ -143,7 +144,7 @@ public void Q2_Start(int objectiveID, int client) {
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Tu l'as ! Va chercher le colis suivant.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Tu l'as ! Va me chercher le colis suivant.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 30);
@@ -158,8 +159,8 @@ public void Q3_Start(int objectiveID, int client) {
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Bien joué !", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Va déposer tout ces colis dans notre", ITEMDRAW_DISABLED);
-	menu.AddItem("", "planque, tu recevras une récompense.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Va déposer tout ces colis dans ta", ITEMDRAW_DISABLED);
+	menu.AddItem("", "planque, tu y recevras une récompense.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 30);
@@ -189,8 +190,8 @@ public void Q3_End(int objectiveID, int client) {
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Votre chef vous remercie pour votre rapidité d'action", ITEMDRAW_DISABLED);
-	menu.AddItem("", "et vous offre : [PvP] AK-47.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Je te remercie pour ta rapidité d'action", ITEMDRAW_DISABLED);
+	menu.AddItem("", "voila un petit cadeaux : [PvP] AK-47.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 30);
