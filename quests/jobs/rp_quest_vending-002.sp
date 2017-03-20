@@ -69,8 +69,9 @@ public void Q1_Start(int objectiveID, int client) {
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Bonjour collègue, on a de nouveaux projets pour toi.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "On t'offre un bonus de 2500$", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Bonjour citoyen,", ITEMDRAW_DISABLED);
+	menu.AddItem("", "j'ai une nouvelle mission à te confier.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Je t'offre un bonus de 2500$", ITEMDRAW_DISABLED);
 	menu.AddItem("", "si tu arrives à vendre pour plus de 10 000$", ITEMDRAW_DISABLED);
 	menu.AddItem("", "en moins de 24 heures.", ITEMDRAW_DISABLED);
 	
@@ -86,7 +87,7 @@ public Action fwdSell(int client, int amount) {
 	return Plugin_Continue;
 }
 public void Q1_Abort(int objectiveID, int client) {
-	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
+	PrintHintText(client, "<b>Quête</b>: %s\nLa mission est terminée.", QUEST_NAME);
 	rp_UnhookEvent(client, RP_OnPlayerSell, fwdSell);
 }
 public void Q1_Frame(int objectiveID, int client) {
@@ -110,7 +111,8 @@ public void Q1_End(int objectiveID, int client) {
 	
 	menu.SetTitle("Quète: %s", QUEST_NAME);
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Votre chef vous remercie !", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Félicitation !", ITEMDRAW_DISABLED);
+	menu.AddItem("", "on verra si tu fais aussi bien demain !", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 10);
