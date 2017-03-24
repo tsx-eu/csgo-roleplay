@@ -841,11 +841,13 @@ void AskJailTime(int client, int target) {
 		AddMenuItem(menu, tmp, "Jail Tribunal N°2");
 	}
 	
+	
+	
 	if(rp_GetClientInt(target, i_JailTime) <= 6*60) {
 		for(int i=0; i<sizeof(g_szJailRaison); i++) {
-			
-			if( rp_GetClientJobID(client) == 101 && StringToInt(g_szJailRaison[i][jail_simple]) == 0 && rp_GetClientBool(target, b_IsSearchByTribunal) == false )
+			if( rp_GetClientJobID(client) == 101 && StringToInt(g_szJailRaison[i][jail_simple]) == 0 && rp_GetClientBool(target, b_IsSearchByTribunal) == false && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) != 101 )
 				continue;
+			
 			Format(tmp2, sizeof(tmp2), "%d_%d", target, i);
 			AddMenuItem(menu, tmp2, g_szJailRaison[i][jail_raison]);
 		}
@@ -917,6 +919,7 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 		//FORCE_Release(iTarget);
 		
 		if( type == -1 ) {
+			
 			rp_SetClientInt(target, i_JailTime, 0);
 			rp_SetClientInt(target, i_jailTime_Last, 0);
 			rp_SetClientInt(target, i_JailledBy, 0);
@@ -991,8 +994,12 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 		
 		int amende = StringToInt(g_szJailRaison[type][jail_amende]);
 		
-		if( amende == -1 )
+		if( amende == -1 ) {
 			amende = rp_GetClientInt(target, i_KillJailDuration) * 50;
+			
+			if( amende == 0 && rp_GetClientInt(target, i_LastAgression)+30 > GetTime() )
+				amende = StringToInt(g_szJailRaison[3][jail_amende]);
+		}
 		
 		if( String_StartsWith(g_szJailRaison[type][jail_raison], "Vol") ) {
 			if(rp_GetClientInt(target, i_LastVolVehicleTime)+300 > GetTime()){
@@ -1059,6 +1066,8 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			time_to_spend = StringToInt(g_szJailRaison[type][jail_temps]);
 			if( time_to_spend == -1 ) {
 				time_to_spend = rp_GetClientInt(target, i_KillJailDuration);
+				if( time_to_spend == 0 && rp_GetClientInt(target, i_LastAgression)+30 > GetTime() )
+					time_to_spend = StringToInt(g_szJailRaison[3][jail_temps]);
 				
 				for(int i=1; i<MAXPLAYERS+1; i++){
 					if(!IsValidClient(i))
@@ -1083,7 +1092,8 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 			time_to_spend = StringToInt(g_szJailRaison[type][jail_temps_nopay]);
 			if( time_to_spend == -1 ) {
 				time_to_spend = rp_GetClientInt(target, i_KillJailDuration);
-				
+				if( time_to_spend == 0 && rp_GetClientInt(target, i_LastAgression)+30 > GetTime() )
+					time_to_spend = StringToInt(g_szJailRaison[3][jail_temps_nopay]);
 				
 				for(int i=1; i<MAXPLAYERS+1; i++){
 					if(!IsValidClient(i))
