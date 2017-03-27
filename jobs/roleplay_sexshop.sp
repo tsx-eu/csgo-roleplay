@@ -279,6 +279,7 @@ public Action Cmd_ItemSucette2(int args) {
 		
 		
 		if( GetConVarInt(FindConVar("rp_braquage")) == 2 ) {
+			CreateTimer(0.1, AllowUltimate, client);
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Les sucettes sont désactivées pour ce braquage.");
 			ITEM_CANCEL(client, item_id);
 			return Plugin_Handled;
