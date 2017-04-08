@@ -249,7 +249,7 @@ Action Draw_Menu(int client) {
 		Menu menu = new Menu(MenuTribunal);
 		menu.SetTitle("Tribunal de Princeton\n ");
 		menu.AddItem("start -1", "Débuter une audience");
-		menu.AddItem("mariage", "Marier des joueurs");
+		menu.AddItem("mariage", "Gestion du mariage");
 		if( rp_GetClientInt(client, i_Job) <= 104 && GetConVarInt(FindConVar("hostport")) == 27015 )
 			menu.AddItem("forum", "Traiter les plaintes forum");
 		
