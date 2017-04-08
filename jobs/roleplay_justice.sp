@@ -80,8 +80,8 @@ char g_szArticles[30][6][512] = {
 	{"221-18",		"Asile politique",								"24",	"1500",		"1000",	"Le tribunal est une zone internationale indépendante des lois de la police, tout citoyen y est protégé par asile juridique. De ce fait, tout policier mettant une personne étant dans le tribunal en prison encourt une peine maximale de 24h de prison et 1 500$ d'amende." }
 };
 char g_szAcquittement[6][32] = { "Non coupable", "Conciliation", "Impossible de prouver les faits", "Déjà condamné", "Plainte annulée", "Nouveau"};
-char g_szCondamnation[5][32] = { "Très indulgent", "Indulgent", "Juste", "Sévère", "Très sévère" };
-float g_flCondamnation[5] = {0.2, 0.4, 0.6, 0.8, 1.0};
+char g_szCondamnation[6][32] = { "Très indulgent", "Indulgent", "Juste", "Sévère", "Très sévère", "Déconnexion"};
+float g_flCondamnation[6] = {0.2, 0.4, 0.6, 0.8, 1.0, 1.5};
 float g_flCoords[3][2][3];
 
 int g_iArticles[3][ sizeof(g_szArticles) ];
@@ -136,7 +136,7 @@ public void OnClientDisconnect(int client) {
 			AUDIENCE_Stop(type);
 		
 		if( g_iTribunalData[type][td_Suspect] == client ) {
-			AUDIENCE_Condamner(type, 4);
+			AUDIENCE_Condamner(type, 5);
 		}
 	}
 }
@@ -1160,8 +1160,14 @@ void SQL_Insert(int type, int condamne, int condamnation, int heure, int amende)
 			GetClientName(g_iTribunalData[type][td_Owner], nick, sizeof(nick));
 			SQL_EscapeString(rp_GetDatabase(), nick, pseudo, sizeof(pseudo));
 			
+			int dedo = calculerDedo(type);
+			
 			Format(query, sizeof(query), "INSERT INTO `rp_users2` (`id`, `steamid`, `money`, `jail`, `pseudo`, `steamid2`, `raison`) VALUES (NULL,");
-			Format(query, sizeof(query), "%s '%s', '%d', '%d', '%s', '%s', '%s');", query, szSteamID[2], -amende, heure * 60, pseudo, szSteamID[0], "condamné par le Tribunal"); 
+			Format(query, sizeof(query), "%s '%s', '%d', '%d', '%s', '%s', '%s');", query, szSteamID[2], - amende - dedo, heure * 60, pseudo, szSteamID[0], "condamné par le Tribunal"); 
+			SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
+			
+			Format(query, sizeof(query), "INSERT INTO `rp_users2` (`id`, `steamid`, `money`, `pseudo`, `steamid2`, `raison`) VALUES (NULL,");
+			Format(query, sizeof(query), "%s '%s', '%d', '%s', '%s', '%s');", query, szSteamID[1], dedo, pseudo, szSteamID[2], "dédommagement"); 
 			SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
 			
 		}
@@ -1177,8 +1183,6 @@ bool hasMercenaire() {
 	return false;
 }
 int calculerDedo(int type) {
-	if( g_iTribunalData[type][td_AvocatPlaignant] == 0 )
-		return 0;
 	
 	int amende;
 	for (int i = 0; i < sizeof(g_szArticles); i++) {
