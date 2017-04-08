@@ -209,7 +209,7 @@ void Draw_Mairie_Prestige(int client, int target) {
 		
 		menu.AddItem("_", "inconvénient : Vous recommencez au niveau 100\n ", ITEMDRAW_DISABLED);
 		
-		menu.AddItem("6 1", "Je accepte");
+		menu.AddItem("6 1", "J'accepte");
 		if( rp_GetClientInt(client, i_PlayerLVL) >= 600 && rp_GetClientInt(client, i_PlayerLVL) < 1000 )
 			menu.AddItem("_", "J'attends le niveau 1000 pour plus de bonus!");
 		
