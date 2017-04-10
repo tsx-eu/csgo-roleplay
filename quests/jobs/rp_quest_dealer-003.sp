@@ -100,17 +100,7 @@ public void Q1_Frame(int objectiveID, int client) {
 		rp_QuestStepFail(client, objectiveID);
 	}
 	else {
-		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s", QUEST_NAME, g_iDuration[client], QUEST_RESUME1);
-		
-		if (nearest > 0)
-			rp_Effect_BeamBox(client, nearest, NULL_VECTOR, 255, 0, 0);
-		
-		if (rp_GetClientItem(client, 2) == 0) {
-			char item[64];
-			rp_GetItemData(2, item_type_name, item, sizeof(item));
-			rp_ClientGiveItem(client, 2);
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu: %s", item);
-		}
+		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: %s", QUEST_NAME, g_iDuration[client], QUEST_RESUME1);	
 	}
 }
 public void Q2_Start(int objectiveID, int client) {
