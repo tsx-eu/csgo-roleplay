@@ -694,7 +694,7 @@ public void Q14_Frame(int objectiveID, int client) {
 		AddMenuItem(menu, "", "vous-même et être recruté par le chef d'un job.\n ", ITEMDRAW_DISABLED);
 			
 		char tmp[128], tmp2[8];
-		int limit = 2;
+		int limit = 3;
 		ArrayList dbl = rp_GetClientDouble(client);
 		if( dbl.Length > 1 )
 			limit = 8;
