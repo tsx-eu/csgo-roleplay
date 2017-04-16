@@ -444,7 +444,6 @@ public void Q9_Abort(int objectiveID, int client) {
 public Action OnPlayerTalk(int client, char[] szSayText, int length, bool local) {
 	if( local ) {
 		rp_QuestStepComplete(client, g_iQ9);
-		FakeClientCommand(client, "say /actif");
 	}
 }
 // ----------------------------------------------------------------------------
@@ -745,6 +744,7 @@ public int MenuSelectJob(Handle menu, MenuAction action, int client, int param2)
 			rp_ClientGiveItem(client, 223);
 			rp_QuestStepComplete(client, g_iQ14);
 			rp_ClientMoney(client, i_Bank, 15000);
+			rp_SetClientBool(client, b_GameModePassive, true);
 			
 			rp_ClientXPIncrement(client, 5000);
 			
