@@ -26,22 +26,26 @@ public Plugin myinfo = {
 };
 
 char g_szSkinsList[][][] = {
-	{"models/player/custom_player/legacy/lara/lara.mdl", 				"Lara", 			"1", "5"},
-	{"models/player/custom_player/legacy/swagirl/swagirl.mdl", 			"Désirée",			"1", "5"},
+	{"models/player/custom_player/legacy/lara/lara.mdl", 				"Lara", 			"1", "6"},
 	{"models/player/custom_player/legacy/eva/eva.mdl", 					"Eva", 				"1", "5"},
-	{"models/player/custom_player/legacy/zoey/zoey.mdl", 				"Zoey", 			"1", "5"},
 	{"models/player/custom_player/legacy/misty/misty.mdl", 				"Misty", 			"1", "5"},
+	{"models/player/custom_player/legacy/swagirl/swagirl.mdl", 			"Désirée",			"1", "4"},
+	{"models/player/custom_player/legacy/zoey/zoey.mdl", 				"Zoey", 			"1", "3"},
 	
-	{"models/player/custom_player/legacy/redfield/redfield.mdl",		"Redfield",			"0", "5"},
-	{"models/player/custom_player/legacy/vmaff/vmaff.mdl", 				"Marco", 			"0", "5"},
+	
+	{"models/player/custom_player/legacy/don_vito/don_vito.mdl", 		"Don Vito", 		"0", "7"},
+	{"models/player/custom_player/legacy/redfield/redfield.mdl",		"Redfield",			"0", "6"},
+	{"models/player/custom_player/legacy/hitman/hitman.mdl", 			"Hitman", 			"0", "6"},
+	{"models/player/custom_player/legacy/50cent/50cent.mdl", 			"50cent", 			"0", "6"},
 	{"models/player/custom_player/legacy/wuzimu/wuzimu.mdl", 			"Pong", 			"0", "5"},
-	{"models/player/custom_player/legacy/50cent/50cent.mdl", 			"50cent", 			"0", "5"},
 	{"models/player/custom_player/legacy/lloyd/lloyd.mdl", 				"Loyd", 			"0", "5"},
 	{"models/player/custom_player/legacy/bzsoap/bzsoap.mdl", 			"BZ-Soap", 			"0", "5"},
 	{"models/player/custom_player/legacy/leon/leon.mdl", 				"Leon", 			"0", "5"},
-	{"models/player/custom_player/legacy/hitman/hitman.mdl", 			"Hitman", 			"0", "5"},
-	{"models/player/custom_player/legacy/duke2/duke2.mdl", 				"Duke Nukem", 		"0", "5"},
+
 	{"models/player/custom_player/legacy/nick/nick.mdl", 				"Nick", 			"0", "5"},
+	{"models/player/custom_player/legacy/vmaff/vmaff.mdl", 				"Marco", 			"0", "4"},
+	{"models/player/custom_player/legacy/duke2/duke2.mdl", 				"Duke Nukem", 		"0", "3"},
+	
 	
 	{"models/player/custom_player/legacy/tm_anarchist.mdl", 			"Anarchist", 		"0", "1"},
 	{"models/player/custom_player/legacy/tm_anarchist_varianta.mdl", 	"Anarchist - A", 	"0", "1"},
@@ -1010,6 +1014,7 @@ public Action CmdItemMask(int args) {
 	
 	rp_SetClientInt(client, i_MaskCount, rp_GetClientInt(client, i_MaskCount) - 1);
 	int ent = CreateEntityByName("prop_dynamic");
+	DispatchKeyValue(ent, "classname", "notsolid");
 	DispatchKeyValue(ent, "model", model);
 	DispatchSpawn(ent);
 	
@@ -1226,5 +1231,9 @@ public int MenuTrySkin(Handle menu, MenuAction action, int client, int param2) {
 }
 public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 	rp_ClientResetSkin(client);
+	CreateTimer(1.0, POST_Reset, client);
 	rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdOnZoneChange);
+}
+public Action POST_Reset(Handle timer, any client) {
+	rp_ClientResetSkin(client);
 }
