@@ -147,12 +147,12 @@ public Action Cmd_ItemDrugs(int args) {
 			return Plugin_Handled;
 		}
 		if( !rp_IsTutorialOver(target) ) {
-			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N n'a pas terminé le tutoriel.", target);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'a pas terminé le tutoriel.", target);
 			ITEM_CANCEL(client, item_id);
 			return Plugin_Handled;
 		}
 		if( rp_IsClientNew(target) ) {
-			CPrintToChat(target, "{lightblue}[TSX-RP]{default} %N est un nouveau joueur.", target);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N est un nouveau joueur.", target);
 			ITEM_CANCEL(client, item_id);
 			return Plugin_Handled;
 		}
