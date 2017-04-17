@@ -434,7 +434,7 @@ public Action Cmd_Tazer(int client) {
 				rp_WeaponMenu_Add(g_hBuyMenu, target, GetEntProp(target, Prop_Send, "m_OriginalOwnerXuidHigh"));
 			int prix = rp_GetWeaponPrice(target); 
 			
-			reward = prix / 10;
+			reward = RoundToCeil( prix / 10 );
 				
 			if( rp_GetWeaponBallType(target) != ball_type_none ) {
 				reward += 150;
