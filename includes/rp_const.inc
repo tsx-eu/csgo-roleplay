@@ -85,12 +85,13 @@
 #define	METRO_PAIX		60
 #define METRO_STATION	61
 #define METRO_INNO		62
+#define METRO_BELMON	201
+
 #define ZONE_HALLDEALER	95
 #define	ZONE_VILLA2		156
 #define	ZONE_CABINE 	173
 #define ZONE_RESPAWN	190
 #define	ZONE_BUNKER		194
-#define METRO_BELMON	242
 #define ZONE_VILLA		245
 
 #define TRIBUJAIL_1	287
