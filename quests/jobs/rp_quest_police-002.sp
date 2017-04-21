@@ -132,7 +132,17 @@ public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
 }
 bool zoneJail(int client) {
 	int zone = rp_GetPlayerZone(client);
-	if( zone == 13 || zone == 158 || zone == 180 )
+	if( zone == 13 || zone == 16 || zone == 17 || zone == 18 || zone == 93 || zone == 158 || zone == 180 || zone == 199)
 		return true;
 	return false;
 }
+/* 
+Zone 13 : Jail
+Zone 16 : escalier
+Zone 17 : conduit
+Zone 18 : conduit
+Zone 93 : cours
+Zone 158 : QHS
+Zone 180 : couloir cour
+Zone 199 : conduit
+*/
