@@ -172,7 +172,7 @@ void openMenuGeneral(int client) {
 	menu.AddItem("passif", "Changer le mode de jeu");
 	
 	if( jobID == 101 && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == 101 ) {
-		menu.AddItem("conv", "Convoquer un joueur");
+		menu.AddItem("tb", "Gestion des audiences");
 	}
 	
 	
