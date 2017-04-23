@@ -641,9 +641,10 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	rp_SetClientFloat(client, fl_ArtisanFatigue, flFatigue);
 	
 	if( positive > 0 ) { // Craft
-		if( !failed ) { // Si on échoue pas on give l'item
+		if( !failed ) { // Si on échoue pas on give l'item et l'xp
 			rp_ClientGiveItem(client, itemID, positive);
-
+			rp_ClientXPIncrement(client, 2);
+			
 			Call_StartForward(rp_GetForwardHandle(client, RP_PostClientCraft));
 			Call_PushCell(client);
 			Call_PushCell(itemID);
