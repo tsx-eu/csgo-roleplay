@@ -43,8 +43,12 @@
 
 // Maths:
 #define PI		3.1415926
-#define FLT_MAX 99999999.9
+#if defined FLT_MAX
+#else
+	#define FLT_MAX	2147483647.0
+#endif
 #define FLT_MIN -FLT_MAX
+
 
 // Models:
 #define MODEL_ATM 			"models/DeadlyDesire/props/atm01.mdl"
