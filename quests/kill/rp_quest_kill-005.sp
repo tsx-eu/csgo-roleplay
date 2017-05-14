@@ -90,7 +90,7 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.AddItem("", "Tuer des policier faisant fonction.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Si tu arrives à le faire en moins de 24 heures", ITEMDRAW_DISABLED);
-	menu.AddItem("", "nous t'offrons 500$ par meurtre et une arme.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "nous t'offrons 250$ par meurtre et une arme.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 60);
