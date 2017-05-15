@@ -730,7 +730,10 @@ public Action Cmd_ItemCigarette(int args) {
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdCigSpeed, 30.0);
 	}
 	
-	ServerCommand("sm_effect_particles %d shacks_exhaust 30 forward", client);
+	if( StrEqual(Arg1, "flame") )
+		ServerCommand("sm_effect_particles %d shacks_exhaust 30 c4", client);
+	else
+		ServerCommand("sm_effect_particles %d shacks_exhaust 30 facemask", client);
 	
 	if( g_hCigarette[client] )
 		delete g_hCigarette[client];

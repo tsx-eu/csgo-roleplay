@@ -607,8 +607,8 @@ public Action Cmd_ItemHighJump(int args) {
 	
 	TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, velocity);
 	
-	ServerCommand("sm_effect_particles %d Trail5 1 lfoot", client);
-	ServerCommand("sm_effect_particles %d Trail5 1 rfoot", client);
+	ServerCommand("sm_effect_particles %d Trail5 1 footplant_L", client);
+	ServerCommand("sm_effect_particles %d Trail5 1 footplant_R", client);
 	
 	return Plugin_Handled;
 }
