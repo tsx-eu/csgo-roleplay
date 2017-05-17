@@ -735,7 +735,7 @@ public Action Cmd_ItemCigarette(int args) {
 	else
 		ServerCommand("sm_effect_particles %d shacks_exhaust 30 facemask", client);
 	
-	if( g_hCigarette[client] )
+	if( g_hCigarette[client] && IsValidHandle(g_hCigarette[client]) )
 		delete g_hCigarette[client];
 	
 	g_hCigarette[client] = CreateTimer( 30.0, ItemStopCig, client);
