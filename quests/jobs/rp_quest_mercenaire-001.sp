@@ -95,7 +95,7 @@ public void Q1_Start(int objectiveID, int client) {
 	PushArrayCell(g_hDoing, client);
 
 	CreateTimer(5.0, timerStartQuest, client); 
-	PrintToChat(client, "Cible 1/: %L", getFreekiller(client));
+
 }
 
 public Action timerStartQuest(Handle timer, any client) {
@@ -103,7 +103,7 @@ public Action timerStartQuest(Handle timer, any client) {
 	PrintToServer("timerStartQuest");
 	#endif
 	int tokill = getFreekiller(client);
-	PrintToChat(client, "Cible 2/: %L", getFreekiller(client));
+
 	if(tokill == -1){
 		rp_QuestStepFail(client, g_ObjectiveID);
 	}
@@ -170,6 +170,8 @@ public int getFreekiller(int client){
 		if( !IsValidClient(i) )
 			continue;
 		if( i == client )
+			continue;
+		if( IsClientSourceTV(i) )
 			continue;
 		if( rp_GetClientBool(i, b_IsAFK) )
 			continue;
