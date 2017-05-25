@@ -1,5 +1,5 @@
 /*
- * Cette oeuvre, création, site ou texte est sous licence Creative Commons Attribution
+ * Cette oeuvre, creation, site ou texte est sous licence Creative Commons Attribution
  * - Pas d’Utilisation Commerciale
  * - Partage dans les Mêmes Conditions 4.0 International. 
  * Pour accéder à une copie de cette licence, merci de vous rendre à l'adresse suivante
@@ -19,6 +19,8 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
+#define HUD_FRAMERATE 10.1
+
 char g_szMonthLong[12][16] =  { "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre" };
 bool g_bWaitingMairieCommand[65];
 int g_iMairieQuestionID[65];
@@ -32,10 +34,35 @@ public Plugin myinfo =  {
 public void OnPluginStart() {
 	RegAdminCmd("rp_force_maire", 		CmdForceMaire, 			ADMFLAG_ROOT);
 	
+	CreateTimer(HUD_FRAMERATE, Timer_HUD, _, TIMER_REPEAT);
 	
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
+}
+public Action Timer_HUD(Handle timer, any none) {
+	float pos[3] = { 1006.0, 2140.0, -2026.0 };
+	float ang[3] = { 0.0, 0.0, 0.0 };
+	int color[3] = { 255, 255, 255 };
+	char tmp[255];
+	int size = 12;
+	int cpt = 0;
+	
+	
+	ServerCommand("sm_effect_text %f %f %f %f %d %d %d %d \"Reglement communal:\" %f", pos[0], pos[1], pos[2] + float(size*3), ang[1], color[0], color[1], color[2], size * 2, HUD_FRAMERATE);
+	
+	
+	for (serverRules i = rules_Amendes; i < server_rules_max; i++) {
+		if( rp_GetServerRules(i, rules_Enabled) == 0 )
+			continue;
+		
+		getRulesName(i, rp_GetServerRules(i, rules_Target), rp_GetServerRules(i, rules_Arg), tmp, sizeof(tmp));
+		
+		ServerCommand("sm_effect_text %f %f %f %f %d %d %d %d \"    - %s.\" %f", pos[0], pos[1], pos[2] - float(size*cpt), ang[1], color[0], color[1], color[2], size, tmp, HUD_FRAMERATE);
+		cpt++;
+	}
+	
+	ServerCommand("sm_effect_text 150 2318 -1980 90 %d %d %d 50 \"Maire: %s\" %f", color[0], color[1], color[2], g_szMaireName, HUD_FRAMERATE);
 }
 public void OnAllPluginsLoaded() {
 	SQL_TQuery(rp_GetDatabase(), QUERY_SetMaireName, "SELECT `name` FROM `rp_servers` S INNER JOIN `rp_users` U ON S.`maire`=U.`steamid` LIMIT 1");
@@ -710,27 +737,27 @@ void getRulesName(serverRules rulesID, int target, int arg, char[] tmp, int leng
 	char tmp2[64], optionsBuff[4][32];
 	if( arg == 1 ) {
 		switch(rulesID) {
-			case rules_Amendes:			{	Format(tmp, length, "Les amendes sont augmentée de 5%");						}
-			case rules_ItemsPrice:		{	Format(tmp, length, "Les prix des items sont augmentés de 10%");				}
-			case rules_reductions:		{	Format(tmp, length, "Les réductions sont interdites");							}
-			case rules_Productions:		{	Format(tmp, length, "La production des machines et plants est accélérée");		}
+			case rules_Amendes:			{	Format(tmp, length, "Les amendes sont augmentee de 5 pourcent");				}
+			case rules_ItemsPrice:		{	Format(tmp, length, "Les prix des items sont augmentés de 10 pourcent");		}
+			case rules_reductions:		{	Format(tmp, length, "Les reductions sont interdites");							}
+			case rules_Productions:		{	Format(tmp, length, "La production des machines et plants est acceleree");		}
 			case rules_Braquages:		{	Format(tmp, length, "Il est interdit de braquer");								}
-			case rules_ItemsDisabled:	{	Format(tmp, length, "Lors des captures du bunker, il est interdit d'utiliser");}
-			case rules_Payes:			{	Format(tmp, length, "Les payes sont augmenté de 5%");							}
-			case rules_HDV:				{	Format(tmp, length, "L'hôtel des ventes est interdit");							}
+			case rules_ItemsDisabled:	{	Format(tmp, length, "Lors des captures du bunker, il est interdit d'utiliser"); }
+			case rules_Payes:			{	Format(tmp, length, "Les payes sont augmentees de 5 pourcent");					}
+			case rules_HDV:				{	Format(tmp, length, "L'hotel des ventes est interdit");							}
 			
 		}
 	}
 	else {
 		switch(rulesID) {
-			case rules_Amendes:			{	Format(tmp, length, "Les amendes sont réduites de 10%");						}
-			case rules_ItemsPrice:		{	Format(tmp, length, "Les prix des items sont réduits de 5%");					}
-			case rules_reductions:		{	Format(tmp, length, "Les réductions sont interdites");							}
+			case rules_Amendes:			{	Format(tmp, length, "Les amendes sont reduites de 10 pourcent");				}
+			case rules_ItemsPrice:		{	Format(tmp, length, "Les prix des items sont reduits de 5 pourcent");			}
+			case rules_reductions:		{	Format(tmp, length, "Les reductions sont interdites");							}
 			case rules_Productions:		{	Format(tmp, length, "La production des machines et plants est ralentie");		}
-			case rules_Braquages:		{	Format(tmp, length, "Il est interdit de braquer ");							}
-			case rules_ItemsDisabled:	{	Format(tmp, length, "Lors des captures du bunker, il est interdit d'utiliser");}
-			case rules_Payes:			{	Format(tmp, length, "Les payes sont réduites de 10%");							}
-			case rules_HDV:				{	Format(tmp, length, "L'hôtel des ventes est interdit");							}
+			case rules_Braquages:		{	Format(tmp, length, "Il est interdit de braquer ");								}
+			case rules_ItemsDisabled:	{	Format(tmp, length, "Lors des captures du bunker, il est interdit d'utiliser");	}
+			case rules_Payes:			{	Format(tmp, length, "Les payes sont reduites de 10 pourcent");					}
+			case rules_HDV:				{	Format(tmp, length, "L'hotel des ventes est interdit");							}
 		}
 	}
 	
