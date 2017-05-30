@@ -857,7 +857,7 @@ public Action fwdDamage(int client, int attacker, float& damage) {
 }
 public Action OnWeaponDrop(int client, int weapon) {
 	
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas lâcher votre arme pendant qu'un 18th vous vol, tirez lui dessus ou fuyez !");
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas lâcher votre arme pendant qu'un dealer vous vol, tirez lui dessus ou fuyez !");
 	return Plugin_Handled;
 }
 public Action fwdZoneChange(int client, int newZone, int oldZone) {
