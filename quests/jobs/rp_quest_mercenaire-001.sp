@@ -118,7 +118,10 @@ public Action timerStartQuest(Handle timer, any client) {
 		rp_QuestStepFail(client, g_ObjectiveID);
 }
 public Action fwdTueurDead(int client, int attacker, float& respawn) {
+    int target = rp_GetClientInt(client, i_ToKill);
+    if( target > 0  && attacker == target) {
 	rp_QuestStepFail(client, g_ObjectiveID);
+    }
 }
 public Action fwdTueurKill(int client, int attacker, float& respawn) {
 	
