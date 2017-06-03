@@ -443,7 +443,11 @@ public void Q9_Abort(int objectiveID, int client) {
 }
 public Action OnPlayerTalk(int client, char[] szSayText, int length, bool local) {
 	if( local ) {
-		if( StrEqual(szSayText, ".") || StrEqual(szSayText, " .") || StrEqual(szSayText, ". ") || StrEqual(szSayText, " . ") ) {
+		char tmp[256];
+		Format(tmp, sizeof(tmp), "%s", szSayText);
+		TrimString(tmp);
+		
+		if( StrEqual(tmp, ".") ) {
 			LogToGame("[CHEATING-MARK] %L", client);
 		}
 		rp_QuestStepComplete(client, g_iQ9);
