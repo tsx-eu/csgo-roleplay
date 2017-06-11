@@ -252,9 +252,11 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		
 		rp_ClientFloodIncrement(client, target, fd_vol, cooldown);
 		
+		
+		
 		float vecTarget[3];
 		GetClientAbsOrigin(client, vecTarget);
-		rp_Effect_Cashflow(client, amount / 2);
+		rp_Effect_Cashflow(client, Math_Clamp(RoundToNearest(Pow(amount*2.0, 0.85)), 1, 1000)  );
 		
 		rp_ClientAggroIncrement(client, target, 1000);
 		if( rp_GetClientBool(client, b_GameModePassive) == false ) {
