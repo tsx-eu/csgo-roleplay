@@ -1212,11 +1212,13 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} %d billets ont été sorti de la boite à gant.", rand);
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez maintenant les clés de cette voiture.");
 				
-				
 				rp_SetClientKeyVehicle(client, target, true);
 				rp_SetClientInt(client, i_LastVolVehicle, target);
 				rp_SetClientInt(client, i_LastVolVehicleTime, GetTime());
-				rp_ClientOverlays(target, o_Action_StealVehicle, 10.0);
+				if( IsValidClient(rp_GetVehicleInt(target, car_owner)) ) {
+					rp_ClientOverlays(rp_GetVehicleInt(target, car_owner), o_Action_StealVehicle, 10.0);
+					CPrintToChat(rp_GetVehicleInt(target, car_owner), "{lightblue}[TSX-RP]{default} Quelqu'un vous a volé votre voiture. Pensez à la garer sur un parking.");
+				}
 			}
 			case 2: {
 				rp_SetBuildingData(target, BD_Trapped, true);
