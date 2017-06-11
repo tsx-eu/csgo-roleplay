@@ -19,7 +19,7 @@
 #include <roleplay.inc>	// https://www.ts-x.eu
 
 StringMap g_hPerquisition;
-enum perquiz_data { PQ_client, PQ_zone, PQ_type, PQ_resp, PQ_timeout, PQ_Max};
+enum perquiz_data { PQ_client, PQ_zone, PQ_target, PQ_resp, PQ_type, PQ_timeout, PQ_Max};
 int g_cBeam, g_cGlow;
 float g_flLastPos[65][3];
 bool g_bCanPerquiz[65];
@@ -98,6 +98,7 @@ public Action Cmd_Perquiz(int client) {
 	else {
 		Format(tmp2, sizeof(tmp2), "search %s", tmp);	menu.AddItem(tmp2, "Un recherché");
 		Format(tmp2, sizeof(tmp2), "trafic %s", tmp);	menu.AddItem(tmp2, "Du traffic illégal", rp_GetClientJobID(client) == 1 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );
+		Format(tmp2, sizeof(tmp2), "kidnap %s", tmp);	menu.AddItem(tmp2, "Un kidnappé");
 	}
 	menu.Display(client, MENU_TIME_FOREVER);
 	
@@ -118,7 +119,7 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 		if( !StrEqual(tmp, expl[1]) )
 			return 0;
 		
-		if( StrEqual(expl[0], "search") ) {
+		if( StrEqual(expl[0], "search") || StrEqual(expl[0], "kidnap") ) {
 			
 			if( StringToInt(expl[2]) == 0 ) {
 				Menu subMenu = new Menu(MenuPerquiz);
@@ -127,12 +128,14 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 				for (int i = 1; i <= MaxClients; i++) {
 					if( !IsValidClient(i) || !IsPlayerAlive(i) || i == client )
 						continue;
+					if( StrEqual(expl[0], "kidnap") && rp_GetClientInt(i, i_KidnappedBy) == 0 )
+						continue;
 					
 					rp_GetZoneData(rp_GetPlayerZone(i), zone_type_type, options, sizeof(options));
 					if( !StrEqual(options, expl[1]) )
 						continue;
 					
-					Format(options, sizeof(options), "search %s %d", expl[1], i);
+					Format(options, sizeof(options), "%s %s %d", expl[0], expl[1], i);
 					Format(tmp, sizeof(tmp), "%N", i);
 					
 					GetClientAbsOrigin(i, g_flLastPos[i]);
@@ -149,7 +152,7 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 				g_bCanPerquiz[client] = false;
 			}
 			else {
-				INIT_PERQUIZ(client, zone, StringToInt(expl[2]));
+				INIT_PERQUIZ(client, zone, StringToInt(expl[2]), StrEqual(expl[0], "search") ? 1 : 2 );
 			}
 		}
 		else if( StrEqual(expl[0], "trafic") ) {
@@ -160,7 +163,7 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 			g_bCanPerquiz[client] = false;
 			
 			if( weapon > 3 || machine > 2 || plant > 2 )
-				INIT_PERQUIZ(client, zone, 0);
+				INIT_PERQUIZ(client, zone, 0, 0);
 			else
 				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a pas de trafic illégal dans cette planque.");
 				
@@ -175,7 +178,7 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 	return 0;
 }
 // ----------------------------------------------------------------------------
-void INIT_PERQUIZ(int client, int zone, int type) {	
+void INIT_PERQUIZ(int client, int zone, int target, int type) {	
 	
 	char tmp[64], query[512];
 	rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
@@ -185,9 +188,9 @@ void INIT_PERQUIZ(int client, int zone, int type) {
 		return;
 	}
 	
-	setPerquizData(client, zone, type, 0, 0);
+	setPerquizData(client, zone, target, 0, type, 0);
 	
-	Format(query, sizeof(query), "SELECT `time` FROM `rp_perquiz` WHERE `type`='%s' AND `job_id`='%d' AND `zone`='%s' ORDER BY `time` DESC;", type > 0 ? "search" : "trafic", rp_GetClientJobID(client), tmp);
+	Format(query, sizeof(query), "SELECT `time` FROM `rp_perquiz` WHERE `type`='%s' AND `job_id`='%d' AND `zone`='%s' ORDER BY `time` DESC;", target > 0 ? "search" : "trafic", rp_GetClientJobID(client), tmp);
 	
 	SQL_TQuery(rp_GetDatabase(), VERIF_PERQUIZ, query, zone);
 }
@@ -215,7 +218,7 @@ public void VERIF_PERQUIZ(Handle owner, Handle row, const char[] error, any zone
 	
 	changeZoneState(zone, true);
 	
-	if( array[PQ_type] == 0 ) {
+	if( array[PQ_target] == 0 ) {
 		CreateTimer(1.0, TIMER_PERQUIZ_LOOKUP, zone, TIMER_REPEAT);
 	}
 	else {	
@@ -233,8 +236,8 @@ void START_PERQUIZ(int zone) {
 	
 	
 	
-	if( array[PQ_resp] == 0 && IsValidClient(array[PQ_type]) )
-		array[PQ_resp] = array[PQ_type];
+	if( array[PQ_resp] == 0 && IsValidClient(array[PQ_target]) )
+		array[PQ_resp] = array[PQ_target];
 		
 	array[PQ_timeout] = 0;
 	updatePerquizData(zone, array);
@@ -244,15 +247,15 @@ void START_PERQUIZ(int zone) {
 	LogToGame("[PERQUIZ] Une perquisition est lancée dans %s.", tmp);
 	
 	PrintToChatPoliceSearch(array[PQ_resp], "{red} ================================== {default}");
-	if( IsValidClient(array[PQ_type]) )
-		PrintToChatPoliceSearch(array[PQ_resp], "{red}[TSX-RP] [POLICE]{default} La perquisition dans %s pour rechercher %N commence.", tmp, array[PQ_resp]);
+	if( IsValidClient(array[PQ_target]) )
+		PrintToChatPoliceSearch(array[PQ_resp], "{red}[TSX-RP] [POLICE]{default} La perquisition dans %s pour un recherché %N commence.", tmp, array[PQ_resp]);
 	else
 		PrintToChatPoliceSearch(array[PQ_resp], "{red}[TSX-RP] [POLICE]{default} La perquisition dans %s pour du traffic illégal commence, %N est le responsable.", tmp, array[PQ_resp]);
 	PrintToChatPoliceSearch(array[PQ_resp], "{red} ================================== {default}");	
 	
-	if( IsValidClient(array[PQ_type]) ) {
-		rp_HookEvent(array[PQ_type], RP_OnPlayerDead, fwdHookDead);
-		rp_HookEvent(array[PQ_type], RP_PreClientSendToJail, fwdHookJail);
+	if( IsValidClient(array[PQ_target]) ) {
+		rp_HookEvent(array[PQ_target], RP_OnPlayerDead, fwdHookDead);
+		rp_HookEvent(array[PQ_target], RP_PreClientSendToJail, fwdHookJail);
 	}
 	CreateTimer(1.0, TIMER_PERQUIZ, zone, TIMER_REPEAT);
 }
@@ -269,9 +272,9 @@ void END_PERQUIZ(int zone, bool abort) {
 	TeleportCT(zone);
 	DoorLock(zone);
 	
-	if( IsValidClient(array[PQ_type]) ) {
-		rp_UnhookEvent(array[PQ_type], RP_OnPlayerDead, fwdHookDead);
-		rp_UnhookEvent(array[PQ_type], RP_PreClientSendToJail, fwdHookJail);
+	if( IsValidClient(array[PQ_target]) ) {
+		rp_UnhookEvent(array[PQ_target], RP_OnPlayerDead, fwdHookDead);
+		rp_UnhookEvent(array[PQ_target], RP_PreClientSendToJail, fwdHookJail);
 	}
 	
 	rp_GetDate(date, sizeof(date));
@@ -283,11 +286,11 @@ void END_PERQUIZ(int zone, bool abort) {
 	PrintToChatPoliceSearch(array[PQ_resp], "{red} ================================== {default}");
 	
 	if( !abort ) {
-		FakeClientCommand(array[PQ_client], "say /addnote %s - %s - %s", tmp, date, array[PQ_type] > 0 ? "recherché" : "traffic");
+		FakeClientCommand(array[PQ_client], "say /addnote %s - %s - %s", tmp, date, array[PQ_target] > 0 ? "recherché" : "traffic");
 		
 		rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
 		GetClientAuthId(array[PQ_client], AuthId_Engine, date, sizeof(date));
-		Format(query, sizeof(query), "INSERT INTO `rp_perquiz` (`id`, `zone`, `time`, `steamid`, `type`, `job_id`) VALUES (NULL, '%s', UNIX_TIMESTAMP(), '%s', '%s', '%d');", tmp, date, array[PQ_type] > 0 ? "search" : "trafic", rp_GetClientJobID(array[PQ_client]));
+		Format(query, sizeof(query), "INSERT INTO `rp_perquiz` (`id`, `zone`, `time`, `steamid`, `type`, `job_id`) VALUES (NULL, '%s', UNIX_TIMESTAMP(), '%s', '%s', '%d');", tmp, date, array[PQ_target] > 0 ? "search" : "trafic", rp_GetClientJobID(array[PQ_client]));
 		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
 		
 		rp_ClientMoney(array[PQ_client], i_AddToPay, 500);
@@ -297,7 +300,7 @@ void END_PERQUIZ(int zone, bool abort) {
 		
 		rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
 		GetClientAuthId(array[PQ_client], AuthId_Engine, date, sizeof(date));
-		Format(query, sizeof(query), "INSERT INTO `rp_perquiz` (`id`, `zone`, `time`, `steamid`, `type`, `job_id`) VALUES (NULL, '%s', UNIX_TIMESTAMP()-%d, '%s', '%s', '%d');", tmp, getCooldown(array[PQ_client], zone)*60+6*60, date, array[PQ_type] > 0 ? "search" : "trafic", rp_GetClientJobID(array[PQ_client]));
+		Format(query, sizeof(query), "INSERT INTO `rp_perquiz` (`id`, `zone`, `time`, `steamid`, `type`, `job_id`) VALUES (NULL, '%s', UNIX_TIMESTAMP()-%d, '%s', '%s', '%d');", tmp, getCooldown(array[PQ_client], zone)*60+6*60, date, array[PQ_target] > 0 ? "search" : "trafic", rp_GetClientJobID(array[PQ_client]));
 		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query);
 	}
 }
@@ -346,18 +349,23 @@ public Action TIMER_PERQUIZ(Handle timer, any zone) {
 		return Plugin_Stop;
 	}
 	
-	if( array[PQ_type] > 0 ) {
-		if( !IsValidClient(array[PQ_type]) ) {
+	if( array[PQ_target] > 0 ) {
+		if( !IsValidClient(array[PQ_target]) ) {
 			END_PERQUIZ(zone, true);
 			return Plugin_Stop;
 		}
 		
-		rp_GetZoneData( rp_GetPlayerZone(array[PQ_type]) , zone_type_type, tmp2, sizeof(tmp2));
-		if( !StrEqual(tmp, tmp2) && rp_GetClientInt(array[PQ_type], i_KidnappedBy) == 0 ) {			
-			rp_ClientTeleport(array[PQ_type], g_flLastPos[array[PQ_type]]);
+		if( array[PQ_type] == 2 && rp_GetClientInt(array[PQ_target], i_KidnappedBy) == 0 ) {
+			END_PERQUIZ(zone, false);
+			return Plugin_Stop;
+		}
+		
+		rp_GetZoneData( rp_GetPlayerZone(array[PQ_target]) , zone_type_type, tmp2, sizeof(tmp2));
+		if( !StrEqual(tmp, tmp2) ) {		
+			rp_ClientTeleport(array[PQ_target], g_flLastPos[array[PQ_target]]);
 		}
 		else
-			GetClientAbsOrigin(array[PQ_type], g_flLastPos[array[PQ_type]]);
+			GetClientAbsOrigin(array[PQ_target], g_flLastPos[array[PQ_target]]);
 	}
 	else {
 		int weapon, machine, plant;
@@ -669,7 +677,7 @@ void changeZoneState(int zone, bool enabled) {
 	}
 }
 // ----------------------------------------------------------------------------
-void setPerquizData(int client, int zone, int type, int resp, int timeout) {
+void setPerquizData(int client, int zone, int target, int resp, int type, int timeout) {
 	char tmp[64];
 	rp_GetZoneData(zone, zone_type_type, tmp, sizeof(tmp));
 	
@@ -677,8 +685,9 @@ void setPerquizData(int client, int zone, int type, int resp, int timeout) {
 	
 	array[PQ_client] = client;
 	array[PQ_zone] = zone;
-	array[PQ_type] = type;
+	array[PQ_target] = target;
 	array[PQ_resp] = resp;
+	array[PQ_type] = type;
 	array[PQ_timeout] = timeout;
 	
 	g_hPerquisition.SetArray(tmp, array, sizeof(array));
