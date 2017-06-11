@@ -1097,14 +1097,26 @@ public void SQL_GetAppartWiner(Handle owner, Handle hQuery, const char[] error, 
 }
 void dispatchToJob(int gain) {
 	int jobCount = 0;
+	int capitalTotal = 0;
+	
+
 	for (int i = 1; i <= 221; i+=10) {
 		if( rp_GetJobInt(i, job_type_isboss) == 1 ) {
+			capitalTotal += rp_GetJobCapital(i);
 			jobCount++;
 		}
 	}
+	
+	int fraction = capitalTotal / jobCount;
+	jobCount = 0;
+	
 	for (int i = 1; i <= 221; i+=10) {
-		if( rp_GetJobInt(i, job_type_isboss) == 1 ) {
+		if( rp_GetJobInt(i, job_type_isboss) == 1 && rp_GetJobCapital(i) <= fraction )
+			jobCount++;
+	}
+	
+	for (int i = 1; i <= 221; i+=10) {
+		if( rp_GetJobInt(i, job_type_isboss) == 1 && rp_GetJobCapital(i) <= fraction )
 			rp_SetJobCapital(i, rp_GetJobCapital(i) + (gain / jobCount));
-		}
 	}
 }
