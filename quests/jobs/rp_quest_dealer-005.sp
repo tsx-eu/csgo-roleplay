@@ -49,6 +49,8 @@ public void OnAllPluginsLoaded() {
 	int i;
 	rp_QuestAddStep(g_iQuest, i++,	Q1_Start,	Q1_Frame,	Q1_Abort,	QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++,	Q2_Start,	Q1_Frame,	Q1_Abort,	QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++,	Q2_Start,	Q1_Frame,	Q1_Abort,	QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++,	Q2_Start,	Q1_Frame,	Q1_Abort,	QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++,	Q2_Start,	Q1_Frame,	Q1_Abort,	Q2_End);
 }
 public Action Cmd_Reload(int args) {
@@ -81,7 +83,7 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.AddItem("", "Mon frère, Nous avons une mission de toi.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Nous voulons faire plier les banquiers", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Pour ça, vandalise les distributeurs", ITEMDRAW_DISABLED);
-	menu.AddItem("", "présent dans les métros de la ville.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "présent dans la ville.", ITEMDRAW_DISABLED);
 	
 	menu.ExitButton = false;
 	menu.Display(client, 60);
@@ -90,9 +92,8 @@ public void Q1_Start(int objectiveID, int client) {
 	g_iStep[client] = 0;
 	g_iDoing[client] = objectiveID;
 	for (int i = 0; i < MAX_ZONES; i++)
-		g_iDoneDistrib[client][i] = 1;
+		g_iDoneDistrib[client][i] = 0;
 	
-	g_iDoneDistrib[client][METRO_STATION] = g_iDoneDistrib[client][METRO_PAIX] = g_iDoneDistrib[client][METRO_INNO] = 0;
 	rp_HookEvent(client, RP_PostPiedBiche, fwdPiedDeBiche);
 }
 public void Q1_Frame(int objectiveID, int client) {
@@ -102,7 +103,7 @@ public void Q1_Frame(int objectiveID, int client) {
 		rp_QuestStepFail(client, objectiveID);
 	}
 	else {
-		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: Vandaliser les métros: %d/3", QUEST_NAME, g_iDuration[client], g_iStep[client]);
+		PrintHintText(client, "<b>Quête</b>: %s\n<b>Temps restant</b>: %dsec\n<b>Objectif</b>: Vandaliser les distributeurs: %d/5", QUEST_NAME, g_iDuration[client], g_iStep[client]);
 	}
 }
 public void Q2_Start(int objectiveID, int client) {
