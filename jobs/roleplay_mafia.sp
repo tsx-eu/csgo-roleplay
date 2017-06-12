@@ -303,16 +303,17 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 			rp_SetClientFloat(client, fl_LastVente, GetGameTime() + 30.0);
 		
 		rp_ClientFloodIncrement(client, target, fd_vol, cooldown);
-		rp_Effect_Cashflow(client, amount);
+		rp_Effect_Cashflow(client, Math_Clamp(RoundToNearest(Pow(amount*2.0, 0.85)), 1, 1000)  );
 		
 		int cpt = rp_GetRandomCapital(91);
 		rp_SetJobCapital(91, rp_GetJobCapital(91) + (amount/4));
 		rp_SetJobCapital(cpt, rp_GetJobCapital(cpt) - (amount/4));
 		
 		rp_ClientAggroIncrement(client, target, 1000);
-		if( rp_GetClientBool(client, b_GameModePassive) == false ) {
+		
+		rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, 10.0);
+		if( rp_GetClientBool(client, b_GameModePassive) == false )
 			rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, 5.0);
-		}
 		
 		rp_ClientOverlays(target, o_Action_StealMoney, 10.0);
 	}
@@ -976,6 +977,10 @@ bool disapear(int client) {
 	if( StrEqual(model, "active") ) {
 		return false;
 	}
+	Entity_GetModel(client, model, sizeof(model));
+	if( StrContains(model, "sprisioner", false) != -1 )
+		return false;
+
 	int zoneJob = rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type);
 	
 	int rndClient[65], rndCount;
@@ -988,9 +993,10 @@ bool disapear(int client) {
 	}
 	else {
 		for (int i = 1; i <= MaxClients; i++) {
-			
 			if( IsValidClient(i) && GetClientTeam(i) != CS_TEAM_CT && !IsFakeClient(i) && rp_GetClientJobID(i) != 91 && i != client ) {
-				rndClient[rndCount++] = i;
+				Entity_GetModel(i, model, sizeof(model));
+				if( StrContains(model, "sprisioner", false) != -1 )
+					rndClient[rndCount++] = i;
 			}
 		}
 	}
@@ -1004,7 +1010,7 @@ bool disapear(int client) {
 	
 	rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZoneChange);
 	rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
-	CreateTimer(10.0, appear, client);
+	CreateTimer(zoneJob == 1 ? 20.0 : 10.0, appear, client);
 	
 	float vecCenter[3];
 	Entity_GetAbsOrigin(client, vecCenter);
