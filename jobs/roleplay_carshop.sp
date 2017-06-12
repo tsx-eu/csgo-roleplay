@@ -1083,6 +1083,8 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 					continue;
 				if( rp_GetPlayerZone(target) != zone )
 					continue;
+				if( rp_GetVehicleInt(target, car_owner) != client)
+					continue;
 				
 				if( StrEqual(arg1, "red") ||  StrEqual(arg1, "green") ||  StrEqual(arg1, "bleue") ||  StrEqual(arg1, "white") ||  StrEqual(arg1, "black") || StrContains(arg1, "color ") == 0 ) {
 
