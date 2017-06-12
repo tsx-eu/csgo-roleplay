@@ -772,6 +772,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, StealTime);
 		rp_HookEvent(client, RP_PreTakeDamage, fwdDamage, StealTime);
+		rp_HookEvent(client, RP_OnPlayerDead, fwdOnDeadSuccess, StealTime);
 		
 		Handle dp;
 		CreateDataTimer(StealTime, ItemPickLockOver_18th, dp, TIMER_DATA_HNDL_CLOSE);
@@ -845,6 +846,9 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	}
 	
 	return Plugin_Stop;
+}
+public Action fwdOnDeadSuccess(int client, int attacker) {
+	rp_IncrementSuccess(attacker, success_list_no_18th);
 }
 // ----------------------------------------------------------------------------
 public Action fwdDamage(int client, int attacker, float& damage) {
