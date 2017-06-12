@@ -322,6 +322,9 @@ public Action Cmd_Tazer(int client) {
 	if( !rp_GetClientBool(client, b_MaySteal) ) {
 		ACCESS_DENIED(client);
 	}
+	if( rp_GetClientFloat(client, fl_Invincible) > GetGameTime() ) { //le flic utilise une poupée gonflable
+		ACCESS_DENIED(client);
+	}
 	
 	int target = rp_GetClientTarget(client);
 	if( target <= 0 || !IsValidEdict(target) || !IsValidEntity(target) )
@@ -609,7 +612,7 @@ public Action Cmd_Jail(int client) {
 	if( rp_GetClientFloat(client, fl_Invincible) > GetGameTime() ) { //le flic utilise une poupée gonflable
 		ACCESS_DENIED(client);
 	}
-	if( IsValidClient(target) && !rp_IsTutorialOver(target) ) { //le target utilise une poupée gonflable
+	if( IsValidClient(target) && !rp_IsTutorialOver(target) ) {
 		ACCESS_DENIED(client);
 	}
 	
