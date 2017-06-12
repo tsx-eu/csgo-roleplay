@@ -329,11 +329,17 @@ public Action fwdHookDead(int victim, int attacker) {
 		rp_UnhookEvent(victim, RP_OnPlayerDead, fwdHookDead);
 	}
 	
-	ServerCommand("rp_SendToJail %d %d", victim, array[PQ_client]);
-	CreateTimer(0.1, respawn, victim);
-	rp_SetClientInt(victim, i_JailTime, (rp_GetClientInt(victim, i_JailTime) + 6 * 60));
+	if( array[PQ_type] != 2 ) {
+		ServerCommand("rp_SendToJail %d %d", victim, array[PQ_client]);
+		rp_SetClientInt(victim, i_JailTime, (rp_GetClientInt(victim, i_JailTime) + 6 * 60));
+		END_PERQUIZ(zone, false);
+	}
+	else
+		END_PERQUIZ(zone, true);
 	
-	END_PERQUIZ(zone, false);
+	CreateTimer(0.1, respawn, victim);
+	
+	
 	
 	return Plugin_Continue;
 }
