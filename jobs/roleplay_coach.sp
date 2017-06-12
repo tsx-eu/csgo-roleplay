@@ -93,6 +93,9 @@ char g_szSkinsList[][][] = {
 int g_cBeam;
 int g_iKnifeThrowID = -1;
 int g_iRiotShield[65];
+Handle g_vKnife, g_vWepaon;
+float g_vShieldPos[2][3];
+
 // ----------------------------------------------------------------------------
 public Action Cmd_Reload(int args) {
 	char name[64];
@@ -118,10 +121,29 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_mask", 		CmdItemMask, 			"RP-ITEM", FCVAR_UNREGISTERED);
 	RegServerCmd("rp_giveskin", 		Cmd_ItemGiveSkin, 		"RP-ITEM", FCVAR_UNREGISTERED);	
 	
+	g_vKnife = CreateConVar("rp_riot_knife", "240 270 0");
+	g_vWepaon = CreateConVar("rp_riot_weapon", "150 270 120");
+	
+	g_vShieldPos[0] = view_as<float>( { 240.0, 270.0, 0.0 } );
+	g_vShieldPos[1] = view_as<float>( { 150.0, 270.0, 120.0 } );
+	
+	
+	HookConVarChange(g_vKnife, OnConVarChange);
+	HookConVarChange(g_vWepaon, OnConVarChange);	
+	
 	for (int i = 1; i <= MaxClients; i++) 
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i); 
 
+}
+public void OnConVarChange(Handle cvar, const char[] oldVal, const char[] newVal) {
+	if( cvar == g_vKnife || cvar == g_vWepaon ) {
+		char buffer[3][32];
+		ExplodeString(newVal, " ", buffer, sizeof(buffer), sizeof(buffer[]));
+		
+		for (int i = 0; i < 3; i++)
+			g_vShieldPos[cvar == g_vKnife ? 0 : 1][i] = StringToFloat(buffer[i]);
+	}
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
@@ -512,7 +534,7 @@ public Action Cmd_ItemRiotShield(int args) {
 	
 	SetVariantString("weapon_hand_L");
 	AcceptEntityInput(ent, "SetParentAttachment");
-	TeleportEntity(ent, view_as<float>({ 2.0, 4.0, 0.0 }), view_as<float>({ 300.0, 90.0, 20.0}), NULL_VECTOR);
+	TeleportEntity(ent, view_as<float>({ 2.0, 4.0, 0.0 }), g_vShieldPos[0], NULL_VECTOR);
 	rp_HookEvent(client, RP_OnAssurance,	fwdAssurance2);
 	rp_HookEvent(client, RP_PostTakeDamageWeapon, fwdTakeDamage);
 	rp_HookEvent(client, RP_OnPlayerDead, fwdPlayerDead);
@@ -535,14 +557,14 @@ public Action Hook_WeaponSwitch(int client, int weapon) {
 			SetVariantString("weapon_hand_L");
 			AcceptEntityInput(g_iRiotShield[client], "SetParentAttachment");
 			
-			TeleportEntity(g_iRiotShield[client], view_as<float>({ 2.0, 4.0, 0.0 }), view_as<float>({ 300.0, 90.0, 20.0}), NULL_VECTOR);
+			TeleportEntity(g_iRiotShield[client], view_as<float>({ 2.0, 4.0, 0.0 }), g_vShieldPos[0], NULL_VECTOR);
 		}
 		else {
 			
 			SetVariantString("primary");
 			AcceptEntityInput(g_iRiotShield[client], "SetParentAttachment");
 			
-			TeleportEntity(g_iRiotShield[client], view_as<float>({ 10.0, 20.0, 0.0 }), view_as<float>({ 150.0, 270.0, 120.0 }), NULL_VECTOR);
+			TeleportEntity(g_iRiotShield[client], view_as<float>({ 5.0, 10.0, 0.0 }), g_vShieldPos[1], NULL_VECTOR);
 		}
 	}
 }
