@@ -1191,7 +1191,7 @@ int calculerDedo(int type) {
 		
 		amende += (g_iArticles[type][i] * StringToInt(g_szArticles[i][4]));
 	}
-	return RoundFloat(float(amende) * getAvocatRatio(g_iTribunalData[type][td_AvocatPlaignant])) + g_iTribunalData[type][td_Dedommagement2];
+	return RoundToCeil(float(amende) * getAvocatRatio(g_iTribunalData[type][td_AvocatPlaignant])) + g_iTribunalData[type][td_Dedommagement2];
 }
 void calculerJail(int type, int& heure, int& amende) {
 	for (int i = 0; i < sizeof(g_szArticles); i++) {
