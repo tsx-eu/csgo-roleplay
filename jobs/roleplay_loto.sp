@@ -596,6 +596,18 @@ public void SQL_GetLoteryWiner(Handle owner, Handle hQuery, const char[] error, 
 		}
 		LogToGame("[LOTO-%d] %s %s %d", place, szName, szSteamID, iGain);
 		
+		if( place == 1 ) {
+			for (int client = 1; client <= MaxClients; client++) {
+				if( !IsValidClient(client) )
+					continue;
+				GetClientAuthId(client, AuthId_Engine, szName, sizeof(szName));
+				
+				if( StrEqual(szSteamID, szName) ) {
+					rp_IncrementSuccess(client, success_list_lotto);
+				}
+			}
+		}
+		
 		
 		char szQuery[1024];
 		Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_users2` (`steamid`,  `bank`) VALUES ('%s', %d);", szSteamID, iGain);
