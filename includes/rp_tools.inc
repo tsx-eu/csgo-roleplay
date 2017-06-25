@@ -35,6 +35,11 @@ stock void String_WordWrap(char[] s, int wrapline) {
 		}
 	}
 }
+stock bool IsNaN(float a) {
+	static char tmp[12];
+	Format(tmp, sizeof(tmp), "%f", a);
+	return StrEqual(tmp, "NaN");
+}
 stock void String_CleanupName(char[] name, char[] output, int length) {
 	int a, b, c, d;
 	

@@ -79,7 +79,13 @@ public void OnAllPluginsLoaded() {
 	SQL_TQuery(rp_GetDatabase(), SQL_LoadReceipe, "SELECT `itemid`, `raw`, `amount`, REPLACE(`extra_cmd`, 'rp_item_primal ', '') `rate` FROM `rp_csgo`.`rp_craft` C INNER JOIN `rp_items` I ON C.`raw`=I.`id` ORDER BY `itemid`, `raw`", 0, DBPrio_Low);
 }
 public Action CmdSetFatigue(int client, int args) {
-	rp_SetClientFloat(GetCmdArgInt(1), fl_ArtisanFatigue, GetCmdArgFloat(2) / 100.0);
+	float f = GetCmdArgFloat(2);
+	if( f >= 100.0 )
+		f = 100.0;
+	else if ( f <= 0.0 )
+		f = 0.0;
+	
+	rp_SetClientFloat(GetCmdArgInt(1), fl_ArtisanFatigue, f / 100.0);
 }
 public void OnMapStart() {
 	PrecacheModel(MODEL_TABLE1);
@@ -185,6 +191,13 @@ public void OnClientPostAdminCheck(int client) {
 	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
 	Format(query, sizeof(query), "SELECT `itemid` FROM `rp_craft_book` WHERE `steamid`='%s' AND `itemid`>0 AND `itemid`<%d;", szSteamID, MAX_ITEMS);
 	SQL_TQuery(rp_GetDatabase(), SQL_LoadCraftbook, query, client);
+	
+	float f = rp_GetClientFloat(client, fl_ArtisanFatigue);
+	if( f >= 1.0 )
+		f = 1.0;
+	else if( f<= 0.0  || IsNaN(f) )
+		f = 0.0;
+	rp_SetClientFloat(client, fl_ArtisanFatigue, f);
 }
 public void SQL_LoadCraftbook(Handle owner, Handle hQuery, const char[] error, any client) {
 	while( SQL_FetchRow(hQuery) ) {
@@ -636,8 +649,10 @@ public Action stopBuilding(Handle timer, Handle dp) {
 	
 	flFatigue += f;
 	
-	if( flFatigue > 1.0 )
+	if( flFatigue >= 1.0 )
 		flFatigue = 1.0;
+	if( flFatigue <= 0.0 || IsNaN(f) )
+		flFatigue = 0.0;
 	rp_SetClientFloat(client, fl_ArtisanFatigue, flFatigue);
 	
 	if( positive > 0 ) { // Craft
