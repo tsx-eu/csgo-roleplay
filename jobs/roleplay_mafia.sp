@@ -995,7 +995,7 @@ bool disapear(int client) {
 		for (int i = 1; i <= MaxClients; i++) {
 			if( IsValidClient(i) && GetClientTeam(i) != CS_TEAM_CT && !IsFakeClient(i) && rp_GetClientJobID(i) != 91 && i != client ) {
 				Entity_GetModel(i, model, sizeof(model));
-				if( StrContains(model, "sprisioner", false) != -1 )
+				if( StrContains(model, "sprisioner", false) == -1 )
 					rndClient[rndCount++] = i;
 			}
 		}
