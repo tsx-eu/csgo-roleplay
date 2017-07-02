@@ -5,7 +5,7 @@
 
 #define PATHFIND_TIMER	1.0
 #define PATHFIND_STEP	5
-#define PATHFIND_RANGE	86.0
+#define PATHFIND_RANGE	64.0
 #define PATHFIND_AVOID	0.1
 #define PATHFIND_LADDER	0.95
 
@@ -24,7 +24,7 @@
 #define NPC_FOOTSTEP	0.3
 
 #define ROLEPLAY
-//#define DEBUG
+#define DEBUG
 
 native int PVE_Create(char name[PLATFORM_MAX_PATH], char model[PLATFORM_MAX_PATH]);
 native void PVE_SetFloat(int id, PVE_DataFloat data, float value);
