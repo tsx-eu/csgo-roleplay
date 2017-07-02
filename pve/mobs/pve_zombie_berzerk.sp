@@ -4,7 +4,8 @@
 #include <sdktools>
 #include <emitsoundany>
 #include <smlib>
-#include "./pve.inc"
+
+#include <pve.inc>
 
 char g_szName[PLATFORM_MAX_PATH] =	"Zombie berzerk";
 char g_szModel[PLATFORM_MAX_PATH] =	"models/npc/tsx/zombie/zombie.mdl";
