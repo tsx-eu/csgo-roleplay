@@ -4,10 +4,11 @@
 #define _pve_included
 
 #define PATHFIND_TIMER	1.0
-#define PATHFIND_STEP	5
-#define PATHFIND_RANGE	64.0
+#define PATHFIND_STEP	10
+#define PATHFIND_RANGE	82.0
 #define PATHFIND_AVOID	0.1
 #define PATHFIND_LADDER	0.95
+#define PATHFIND_LERP	2.0
 
 #define	JUMP_THRESHOLD	0.5
 #define JUMP_HEIGHT		52.0
@@ -90,6 +91,7 @@ enum PVE_DataString {
 };
 enum PVE_DataVector {
 	ESV_Origin,
+	ESV_PredictedOrigin,
 	ESV_Direction,
 	ESV_Velocity,
 	ESV_Node,
