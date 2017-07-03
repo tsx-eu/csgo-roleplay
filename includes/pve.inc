@@ -5,7 +5,7 @@
 
 #define PATHFIND_TIMER	1.0
 #define PATHFIND_STEP	10
-#define PATHFIND_RANGE	82.0
+#define PATHFIND_RANGE	32.0
 #define PATHFIND_AVOID	0.1
 #define PATHFIND_LADDER	0.95
 #define PATHFIND_LERP	2.0
@@ -54,6 +54,7 @@ enum PVE_DataInteger {
 	ESI_State,
 	ESI_Health,
 	ESI_MaxHealth,
+	ESI_MinSkin,
 	ESI_MaxSkin,
 	ESI_Target,
 	ESI_CollisionWay,
