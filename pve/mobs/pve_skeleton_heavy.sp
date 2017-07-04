@@ -37,7 +37,7 @@ public void OnAllPluginsLoaded() {
 	PVE_SetInt(id, ESI_AttackType,		view_as<int>(ESA_Melee));
 	PVE_SetInt(id, ESI_AttackDamage,	250);
 	PVE_SetInt(id, ESI_MinSkin, 		15);
-	PVE_SetInt(id, ESI_MaxSkin, 		39);
+	PVE_SetInt(id, ESI_MaxSkin, 		29);
 	
 	PVE_SetFloat(id, ESF_Speed,			280.0);
 	PVE_SetFloat(id, ESF_Gravity,		1.0);
@@ -49,7 +49,7 @@ public void OnAllPluginsLoaded() {
 	PVE_AddAnimation(id, EAA_Idle, 		44,	210, 35);
 	PVE_AddAnimation(id, EAA_Run, 		45,	 30, 35);
 	PVE_AddAnimation(id, EAA_Attack, 	46,  70, 35);
-	PVE_AddAnimation(id, EAA_Attack, 	46,  45, 35);
+	PVE_AddAnimation(id, EAA_Attack, 	47,  45, 35);
 	PVE_AddAnimation(id, EAA_Deading, 	38,	 45, 35);
 	PVE_AddAnimation(id, EAA_Dead, 		39,	  1, 35);
 	
