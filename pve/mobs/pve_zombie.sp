@@ -52,14 +52,18 @@ public void OnAllPluginsLoaded() {
 	
 	
 	PVE_RegHook(id, ESH_Spawn,			OnSpawn);
+	PVE_RegHook(id, ESH_PreAttack,			OnPreAttack);
 	PVE_RegHook(id, ESH_Attack,			OnAttack);
 	PVE_RegHook(id, ESH_Dead,			OnDead);
+}
+public Action OnPreAttack(int id, int entity, int target) {	
+	PVE_RunAnimation(entity, EAA_Attack);
+	return Plugin_Continue;
 }
 public Action OnAttack(int id, int entity, int target) {	
 	char sound[PLATFORM_MAX_PATH];
 	Format(sound, sizeof(sound), "weapons/knife/knife_hit%d.mp3", GetRandomInt(1, 3));
 	EmitSoundToAllAny(sound, entity);
-	PVE_RunAnimation(entity, EAA_Attack);
 	return Plugin_Continue;
 }
 public void OnSpawn(int id, int entity) {
