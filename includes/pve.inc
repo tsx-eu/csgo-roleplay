@@ -25,7 +25,7 @@
 #define NPC_FOOTSTEP	0.3
 
 #define ROLEPLAY
-#define DEBUG
+//#define DEBUG
 
 native int PVE_Create(char name[PLATFORM_MAX_PATH], char model[PLATFORM_MAX_PATH]);
 native void PVE_SetFloat(int id, PVE_DataFloat data, float value);
@@ -74,6 +74,7 @@ enum PVE_DataFloat {
 	Float:ESF_Gravity,
 	Float:ESF_FeetSize,
 	Float:ESF_ScaleSize,
+	Float:ESF_Attack,
 	Float:ESF_NextAttack,
 	Float:ESF_AttackSpeed,
 	Float:ESF_AttackRange,
@@ -109,7 +110,8 @@ enum PVE_EntityState {
 	ESM_Collision	= 13,
 	ESM_Chase 		= 14,
 
-	ESM_Attack		= 20,
+	ESM_PreAttack		= 20,
+	ESM_Attack		= 21,
 	
 	ESM_Max 		= 100
 };
@@ -122,6 +124,7 @@ enum PVE_AttackType {
 };
 enum PVE_HookType {
 	ESH_Spawn,
+	ESH_PreAttack,
 	ESH_Attack,
 	ESH_Dead,
 	
@@ -129,11 +132,10 @@ enum PVE_HookType {
 };
 typeset PVE_HookTypeForward {
 	function void(int id, int entity);					// ESH_Spawn
-	function Action(int id, int entity, int target); 	// ESH_Attack // Continue = attack, handled = pas d'attaque mais cooldown, stop = pas d'attaque ni de cooldown
+	function Action(int id, int entity, int target); 			// ESH_PreAttack // Continue = attack, handled = pas d'attaque mais cooldown, stop = pas d'attaque ni de cooldown
+	function Action(int id, int entity, int target); 			// ESH_Attack 	 // Continue = attack, handled = pas d'attaque mais cooldown, stop = pas d'attaque ni de cooldown
 	function void(int id, int entity);					// ESH_Dead
 }
-
-
 stock void AddModelToDownloadsTable(char file[PLATFORM_MAX_PATH]) {
 	char tmp[PLATFORM_MAX_PATH], tmp2[PLATFORM_MAX_PATH];
 	int len = strlen(file);
@@ -151,3 +153,4 @@ stock void AddSoundToDownloadsTable(char file[PLATFORM_MAX_PATH]) {
 	if( FileExists(tmp, true) )
 		AddFileToDownloadsTable(tmp);
 }
+
