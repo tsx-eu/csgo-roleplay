@@ -44,12 +44,12 @@ public void OnAllPluginsLoaded() {
 	PVE_SetFloat(id, ESF_ScaleSize,		1.0);
 	PVE_SetFloat(id, ESF_FeetSize,  	0.0);
 	PVE_SetFloat(id, ESF_AttackSpeed,	70/35.0);
-	PVE_SetFloat(id, ESF_AttackRange,	RANGE_MELEE + 16.0);
+	PVE_SetFloat(id, ESF_AttackRange,	RANGE_MELEE * 2.0);
 	
 	PVE_AddAnimation(id, EAA_Idle, 		44,	210, 35);
 	PVE_AddAnimation(id, EAA_Run, 		45,	 30, 35);
 	PVE_AddAnimation(id, EAA_Attack, 	46,  70, 35);
-	PVE_AddAnimation(id, EAA_Attack, 	47,  45, 35);
+	PVE_AddAnimation(id, EAA_Attack, 	47,  70, 35);
 	PVE_AddAnimation(id, EAA_Deading, 	38,	 45, 35);
 	PVE_AddAnimation(id, EAA_Dead, 		39,	  1, 35);
 	
