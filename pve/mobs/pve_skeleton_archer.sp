@@ -9,6 +9,8 @@
 
 char g_szName[PLATFORM_MAX_PATH] =	"Squelette arché";
 char g_szModel[PLATFORM_MAX_PATH] =	"models/npc/tsx/skeleton/skeleton.mdl";
+char g_szModel2[PLATFORM_MAX_PATH] =	"models/npc/tsx/skeleton/skeleton_arrow.mdl";
+
 char g_szMaterials[][PLATFORM_MAX_PATH] = {
 	"materials/models/npc/tsx/skeleton/DS_equipment_standard.vtf",
 	"materials/models/npc/tsx/skeleton/DS_equipment_standard.vmt",
@@ -35,7 +37,7 @@ public void OnAllPluginsLoaded() {
 	
 	PVE_SetInt(id, ESI_MaxHealth, 		1000);
 	PVE_SetInt(id, ESI_AttackType,		view_as<int>(ESA_Weapon));
-	PVE_SetInt(id, ESI_AttackDamage,	250);
+	PVE_SetInt(id, ESI_AttackDamage,	100);
 	PVE_SetInt(id, ESI_MinSkin, 		0);
 	PVE_SetInt(id, ESI_MaxSkin, 		14);
 	
@@ -44,7 +46,7 @@ public void OnAllPluginsLoaded() {
 	PVE_SetFloat(id, ESF_ScaleSize,		1.0);
 	PVE_SetFloat(id, ESF_FeetSize,  	0.0);
 	PVE_SetFloat(id, ESF_AttackSpeed,	50/35.0);
-	PVE_SetFloat(id, ESF_AttackRange,	512.0);
+	PVE_SetFloat(id, ESF_AttackRange,	1024.0);
 	
 	PVE_AddAnimation(id, EAA_Idle, 		48,	100, 35);
 	PVE_AddAnimation(id, EAA_Run, 		49,	 30, 35);
@@ -53,7 +55,7 @@ public void OnAllPluginsLoaded() {
 	PVE_AddAnimation(id, EAA_Dead, 		39,	  1, 35);
 	
 	PVE_RegHook(id, ESH_Spawn,			OnSpawn);
-	PVE_RegHook(id, ESH_PreAttack,			OnPreAttack);
+	PVE_RegHook(id, ESH_PreAttack,		OnPreAttack);
 	PVE_RegHook(id, ESH_Attack,			OnAttack);
 	PVE_RegHook(id, ESH_Dead,			OnDead);
 }
@@ -62,10 +64,8 @@ public Action OnPreAttack(int id, int entity, int target) {
 	return Plugin_Continue;
 }
 public Action OnAttack(int id, int entity, int target) {	
-	char sound[PLATFORM_MAX_PATH];
-	Format(sound, sizeof(sound), "weapons/knife/knife_hit%d.mp3", GetRandomInt(1, 3));
-	EmitSoundToAllAny(sound, entity);
-	return Plugin_Continue;
+	int ent = PVE_ShootProjectile(entity, g_szModel2, "skeleton_arrow", 0.0, 2000.0);
+	return Plugin_Handled;
 }
 public void OnSpawn(int id, int entity) {
 	char sound[PLATFORM_MAX_PATH];
@@ -86,6 +86,9 @@ public void OnDead(int id, int entity) {
 public void OnMapStart() {
 	PrecacheModel(g_szModel);
 	AddModelToDownloadsTable(g_szModel);
+	PrecacheModel(g_szModel2);
+	AddModelToDownloadsTable(g_szModel2);
+	
 	for (int i = 0; i < sizeof(g_szSounds); i++) {
 		AddSoundToDownloadsTable(g_szSounds[i]);
 		PrecacheSoundAny(g_szSounds[i]);
