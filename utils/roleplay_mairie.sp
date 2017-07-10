@@ -269,7 +269,7 @@ void Draw_Mairie_Candidate(int client, int target, int arg) {
 	char tmp[255], szSteamID[32];
 	
 	if( target == 0 ) {
-		SQL_TQuery(rp_GetDatabase(), QUERY_MairieCandidate, "SELECT `id`, `name`, M.`steamid`, SUM(CASE WHEN `target` IS NULL THEN 0 ELSE 1 END) AS `cpt` FROM `rp_maire` M INNER JOIN `rp_users` U ON U.`steamid`=M.`steamid` LEFT JOIN `rp_maire_vote` V ON V.`target`=M.`id` GROUP BY M.`id` ORDER BY RAND();", client);
+		SQL_TQuery(rp_GetDatabase(), QUERY_MairieCandidate, "SELECT `id`, `name`, M.`steamid`, SUM(`target`) AS `cpt` FROM `rp_maire` M INNER JOIN `rp_users` U ON U.`steamid`=M.`steamid` INNER JOIN `rp_maire_vote` V ON V.`target`=M.`id` GROUP BY M.`id` ORDER BY RAND();", client);
 		return;
 	}
 	else if( target == -1 ) {
