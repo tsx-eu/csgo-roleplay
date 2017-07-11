@@ -65,7 +65,7 @@ public Action OnPreAttack(int id, int entity, int target) {
 }
 public Action OnAttack(int id, int entity, int target) {	
 	int ent = PVE_ShootProjectile(entity, g_szModel2, "skeleton_arrow", 0.0, 2000.0);
-	return Plugin_Handled;
+	return Plugin_Continue;
 }
 public void OnSpawn(int id, int entity) {
 	char sound[PLATFORM_MAX_PATH];
