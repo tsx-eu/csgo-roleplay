@@ -31,9 +31,7 @@ public void OnAllPluginsLoaded() {
 	CWM_SetInt(id, WSI_AttackType,		view_as<int>(WSA_Automatic));
 	CWM_SetInt(id, WSI_AttackDamage, 	10);
 	CWM_SetInt(id, WSI_AttackBullet, 	0);
-	CWM_SetInt(id, WSI_Bullet, 			0);
 	CWM_SetInt(id, WSI_MaxBullet, 		0);
-	CWM_SetInt(id, WSI_Ammunition,		0);
 	CWM_SetInt(id, WSI_MaxAmmunition, 	0);
 	
 	CWM_SetFloat(id, WSF_Speed,			300.0);
@@ -42,9 +40,9 @@ public void OnAllPluginsLoaded() {
 	CWM_SetFloat(id, WSF_AttackRange,	RANGE_MELEE + 16.0);
 	CWM_SetFloat(id, WSF_Spread, 		0.0);
 	
-	CWM_AddAnimation(id, WAA_Idle, 		3,	100, 35);
-	CWM_AddAnimation(id, WAA_Draw, 		7,	 30, 35);
-	CWM_AddAnimation(id, WAA_Attack, 	1,  45, 35);
+	CWM_AddAnimation(id, WAA_Idle, 		3,	64, 30);
+	CWM_AddAnimation(id, WAA_Draw, 		7,	65, 30);
+	CWM_AddAnimation(id, WAA_Attack, 	1,  30, 60);
 	
 	CWM_RegHook(id, WSH_Draw,			OnDraw);
 	CWM_RegHook(id, WSH_Attack,			OnAttack);
