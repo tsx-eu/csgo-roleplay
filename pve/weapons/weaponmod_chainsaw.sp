@@ -54,22 +54,34 @@ public void OnDraw(int client, int entity) {
 public void OnIdle(int client, int entity) {
 	CWM_RunAnimation(entity, WAA_Idle);
 }
-public Action OnAttack(int client, int entity, int target, float hit[3]) {
+public Action OnAttack(int client, int entity) {
+
+	float hit[3], src[3];
 	CWM_RunAnimation(entity, WAA_Attack);
-	EmitSoundToAll("physics/metal/metal_solid_strain5.wav", client, _, _, _, 0.1);
+	EmitSoundToAllAny("physics/metal/metal_solid_strain5.wav", entity, _, _, _, 0.1);
 	
-	float src[3];
-	GetClientEyePosition(client, src);
-	for (int i = 0; i <= 2; i++)
-		src[i] = hit[i] - src[i];
+	int target = CWM_ShootDamage(client, entity, hit);
+	if( target >= 0 ) {
+		
+		GetClientEyePosition(client, src);
+		for (int i = 0; i <= 2; i++)
+			src[i] = hit[i] - src[i];
+		
+		// NormalizeVector(src, src);	// Si on normalise pas, on peut pousser plus fort si on est "loin" de la tronco
+		ScaleVector(src, 10.0);			// Ca a du sens, car quand on est "en plein dedans" c'est plus dur de s'en retirer :-)
+		src[2] += 50.0;
+		
+		if( target > 0)
+			TeleportEntity(target, NULL_VECTOR, NULL_VECTOR, src);
+		
+		NegateVector(src);
+		NormalizeVector(src, src);
+		TE_SetupSparks(hit, src, 1, 0);
+		TE_SendToAll();
+		return Plugin_Continue;
+	}
 	
-	// NormalizeVector(src, src);	// Si on normalise pas, on peut pousser plus fort si on est "loin" de la tronco
-	ScaleVector(src, 10.0);			// Ca a du sens, car quand on est "en plein dedans" c'est plus dur de s'en retirer :-)
-	src[2] += 50.0;
-	
-	TeleportEntity(target, NULL_VECTOR, NULL_VECTOR, src);
-	
-	return Plugin_Continue;
+	return Plugin_Handled;
 }
 public void OnMapStart() {
 	

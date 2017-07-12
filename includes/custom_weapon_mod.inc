@@ -27,8 +27,8 @@ native void CWM_RunAnimation(int entity, CWM_DataAnimation data, float time = -1
 
 native int CWM_Spawn(int id, int client, float pos[3], float ang[3]);
 
-native int CWM_ShootProjectile(int entity, char model[PLATFORM_MAX_PATH], char name[32], float spreadAngle = 0.0, float speed = FLT_MAX);
-
+native int CWM_ShootProjectile(int client, int entity, char model[PLATFORM_MAX_PATH], char name[32], float spreadAngle = 0.0, float speed = FLT_MAX);
+native int CWM_ShootDamage(int client, int entity, float hit[3]);
 
 enum CWM_DataAnimation {
 	WAA_Idle,
@@ -91,10 +91,10 @@ enum CWM_HookType {
 	WSH_Max
 };
 typeset CWM_HookTypeForward {
-	function void(int client, int entity);								// WSH_Draw
-	function Action(int client, int entity, int target, float hit[3]); 	// WSH_Attack 	 // Continue = attack, handled = pas d'attaque mais cooldown, stop = pas d'attaque ni de cooldown
-	function void(int client, int entity);								// WSH_Reload
-	function void(int client, int entity);								// WSH_Idle
+	function void(int client, int entity);					// WSH_Draw
+	function Action(int client, int entity); 				// WSH_Attack 	 // Continue = attack, handled = pas d'attaque mais cooldown, stop = pas d'attaque ni de cooldown
+	function void(int client, int entity);					// WSH_Reload
+	function void(int client, int entity);					// WSH_Idle
 }
 stock void AddModelToDownloadsTable(char file[PLATFORM_MAX_PATH]) {
 	char tmp[PLATFORM_MAX_PATH], tmp2[PLATFORM_MAX_PATH];
