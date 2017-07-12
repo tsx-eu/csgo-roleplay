@@ -11,6 +11,7 @@
 #define RANGE_NONE		-FLT_MAX
 #define RANGE_MELEE		52.0
 #define RANGE_WEAPON	8192.0
+#define NULL_MODEL		""
 
 #define ROLEPLAY
 //#define DEBUG
@@ -25,6 +26,9 @@ native void CWM_AddAnimation(int id, CWM_DataAnimation data, int sequence, int f
 native void CWM_RunAnimation(int entity, CWM_DataAnimation data, float time = -1.0);
 
 native int CWM_Spawn(int id, int client, float pos[3], float ang[3]);
+
+native int CWM_ShootProjectile(int entity, char model[PLATFORM_MAX_PATH], char name[32], float spreadAngle = 0.0, float speed = FLT_MAX);
+
 
 enum CWM_DataAnimation {
 	WAA_Idle,
