@@ -3,7 +3,9 @@
 #include <sourcemod>
 #include <sdktools>
 #include <emitsoundany>
+#include <phun>
 #include <smlib>
+
 
 #include <custom_weapon_mod.inc>
 
@@ -37,7 +39,7 @@ public void OnAllPluginsLoaded() {
 	
 	CWM_SetFloat(id, WSF_Speed,			240.0);
 	CWM_SetFloat(id, WSF_ReloadSpeed,	1.0);
-	CWM_SetFloat(id, WSF_AttackSpeed,	0.1);
+	CWM_SetFloat(id, WSF_AttackSpeed,	0.01);
 	CWM_SetFloat(id, WSF_AttackRange,	RANGE_MELEE * 2.0);
 	CWM_SetFloat(id, WSF_Spread, 		0.0);
 	
@@ -55,12 +57,20 @@ public void OnDraw(int client, int entity) {
 public void OnIdle(int client, int entity) {
 	CWM_RunAnimation(entity, WAA_Idle);
 }
-public Action OnAttack(int client, int entity, int target, float hit[3]) {
+public Action OnAttack(int client, int entity) {
 	CWM_RunAnimation(entity, WAA_Attack);
-	int ent = CWM_ShootProjectile(entity, NULL_MODEL, "flame", 0.0, 800.0);
+	int ent = CWM_ShootProjectile(client, entity, NULL_MODEL, "flame", 10.0, 800.0, OnProjectileHit);
 	Entity_SetMinMaxSize(ent, view_as<float>({-8.0, -8.0, -8.0}), view_as<float>({8.0, 8.0, 8.0}));
+	DispatchKeyValue(ent, "OnUser1", "!self,Kill,,5.0,-1");
+	AcceptEntityInput(ent, "FireUser1");
 	// TODO: Attacher une particule qui ressemble à une flamme
+	// TODO: Utiliser un TempEnt. Ca semble plus sur qu'une entité.
+	AttachParticle(ent, "burning_gib_01", 5.1);
 	return Plugin_Continue;
+}
+public void OnProjectileHit(int client, int wpnid, int entity, int target) {
+	if( target > 0 && target < MaxClients )
+		IgniteEntity(target, 5.0);
 }
 public void OnMapStart() {
 	

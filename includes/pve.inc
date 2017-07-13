@@ -34,7 +34,7 @@ native int PVE_Spawn(int id, float position[3], float angles[3]);
 native void PVE_RegHook(int id, PVE_HookType data, PVE_HookTypeForward fonction);
 native void PVE_AddAnimation(int id, PVE_DataAnimation data, int sequence, int frames, int fps);
 native void PVE_RunAnimation(int entity, PVE_DataAnimation data, float time = -1.0);
-native int PVE_ShootProjectile(int entity, char model[PLATFORM_MAX_PATH], char name[32], float spreadAngle = 0.0, float speed = FLT_MAX);
+native int PVE_ShootProjectile(int entity, char model[PLATFORM_MAX_PATH], char name[32], float spreadAngle = 0.0, float speed = FLT_MAX, PVE_HitCallback fonction);
 
 enum PVE_DataAnimation {
 	EAA_Idle,
@@ -136,6 +136,9 @@ typeset PVE_HookTypeForward {
 	function Action(int id, int entity, int target); 			// ESH_PreAttack // Continue = attack, handled = pas d'attaque mais cooldown, stop = pas d'attaque ni de cooldown
 	function Action(int id, int entity, int target); 			// ESH_Attack 	 // Continue = attack, handled = pas d'attaque mais cooldown, stop = pas d'attaque ni de cooldown
 	function void(int id, int entity);					// ESH_Dead
+}
+typeset PVE_HitCallback {
+	function void(int id, int entity, int ent, int target);
 }
 stock void AddModelToDownloadsTable(char file[PLATFORM_MAX_PATH]) {
 	char tmp[PLATFORM_MAX_PATH], tmp2[PLATFORM_MAX_PATH];

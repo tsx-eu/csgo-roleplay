@@ -32,6 +32,8 @@ char g_szSounds[][PLATFORM_MAX_PATH] = {
 	"DeadlyDesire/halloween/zombie/die3.mp3"
 };
 
+int g_cBeam;
+
 public void OnAllPluginsLoaded() {
 	int id = PVE_Create(g_szName, g_szModel);
 	
@@ -63,8 +65,10 @@ public Action OnPreAttack(int id, int entity, int target) {
 	PVE_RunAnimation(entity, EAA_Attack);
 	return Plugin_Continue;
 }
-public Action OnAttack(int id, int entity, int target) {	
-	int ent = PVE_ShootProjectile(entity, g_szModel2, "skeleton_arrow", 0.0, 2000.0);
+public Action OnAttack(int id, int entity, int target) {
+	int ent = PVE_ShootProjectile(entity, g_szModel2, "skeleton_arrow", 0.0, 2000.0, OnProjectileHit);
+	TE_SetupBeamFollow(ent, g_cBeam, g_cBeam, 1.0, 1.0, 0.0, 1, {200, 200, 200, 50} );
+	TE_SendToAll();
 	return Plugin_Continue;
 }
 public void OnSpawn(int id, int entity) {
@@ -82,8 +86,12 @@ public void OnDead(int id, int entity) {
 	pos[2] += 8.0;
 	ServerCommand("rp_zombie_die %f %f %f", pos[0], pos[1], pos[2]);
 }
-
+public void OnProjectileHit(int id, int entity, int ent, int target) {
+	if( target > 0 && target < MaxClients )
+		SlapPlayer(target, 0, true);
+}
 public void OnMapStart() {
+	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt");
 	PrecacheModel(g_szModel);
 	AddModelToDownloadsTable(g_szModel);
 	PrecacheModel(g_szModel2);
