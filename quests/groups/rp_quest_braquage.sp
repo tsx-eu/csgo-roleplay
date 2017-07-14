@@ -496,7 +496,6 @@ public void Q6_Frame(int objectiveID, int client) {
 		int gainPolice = ((GainMax-(g_iQuestGain / 4)) / g_stkTeamCount[TEAM_POLICE]) - amendePolice;
 		
 		for (int j = 0; j < g_stkTeamCount[TEAM_POLICE]; j++) {
-			rp_SetClientInt(g_stkTeam[TEAM_POLICE][j], i_Perquiz, GetTime());
 			
 			PrintHintText(g_stkTeam[TEAM_POLICE][j], "<b>Alerte</b>: Un braquage est en cours dans %s, tuez les braqueurs. <b>Gain</b>: %d$, <b>Amende</b>: %d$.", tmp2[0], gainPolice, amendePolice);
 			
@@ -559,7 +558,6 @@ public void Q7_Frame(int objectiveID, int client) {
 		int gainPolice = ((GainMax-(g_iQuestGain / 4)) / g_stkTeamCount[TEAM_POLICE]) - amendePolice;
 		
 		for (int j = 0; j < g_stkTeamCount[TEAM_POLICE]; j++) {
-			rp_SetClientInt(g_stkTeam[TEAM_POLICE][j], i_Perquiz, GetTime());
 			
 			PrintHintText(g_stkTeam[TEAM_POLICE][j], "<b>Alerte</b>: Un braquage est en cours dans %s, tuez les braqueurs. <b>Gain</b>: %d$, <b>Amende</b>: %d$.", tmp2[0], gainPolice, amendePolice);
 			
