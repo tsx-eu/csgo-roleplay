@@ -219,7 +219,6 @@ public Action Cmd_Cop(int client) {
 	if( GetClientTeam(client) == CS_TEAM_CT ) {
 		CS_SwitchTeam(client, CS_TEAM_T);
 		SetEntityHealth(client, 100);
-		Entity_SetMaxHealth(client, 500);
 		
 		if( rp_GetClientInt(client, i_PlayerLVL) >= 156 )
 			SetEntityHealth(client, 200);
@@ -231,16 +230,15 @@ public Action Cmd_Cop(int client) {
 			rp_SetClientInt(client, i_Kevlar, 250);
 		
 		SetEntProp(client, Prop_Send, "m_bHasHelmet", 0);
-		FakeClientCommand(client, "say /shownote");
 	}
 	else if( GetClientTeam(client) == CS_TEAM_T ) {
 		CS_SwitchTeam(client, CS_TEAM_CT);
 		SetEntityHealth(client, 500);
-		Entity_SetMaxHealth(client, 500);
 		rp_SetClientInt(client, i_Kevlar, 250);
 		SetEntProp(client, Prop_Send, "m_bHasHelmet", 1);
+		FakeClientCommand(client, "say /shownote");
 	}
-		
+	Entity_SetMaxHealth(client, 500);		
 	rp_ClientResetSkin(client);
 	rp_SetClientBool(client, b_MaySteal, false);
 	CreateTimer(5.0, AllowStealing, client);
@@ -595,14 +593,7 @@ public Action Cmd_Jail(int client) {
 		}
 	}
 	
-	if( rp_GetClientJobID(client) == 101 ) {
-		if( ct >= 3 && rp_GetZoneInt( rp_GetPlayerZone(client), zone_type_type) != 101 ) {
-			ACCESS_DENIED(client);
-		}
-	}
-	
 	int target = rp_GetClientTarget(client);
-	
 	if( target <= 0 || !IsValidEdict(target) || !IsValidEntity(target) )
 		return Plugin_Handled;
 	
@@ -614,6 +605,12 @@ public Action Cmd_Jail(int client) {
 	}
 	if( IsValidClient(target) && !rp_IsTutorialOver(target) ) {
 		ACCESS_DENIED(client);
+	}
+	
+	if( rp_GetClientJobID(client) == 101 && rp_GetClientBool(target, b_IsSearchByTribunal) == false ) { // Jail dans la rue sur non recherché.
+		if( ct >= 3 && rp_GetZoneInt( rp_GetPlayerZone(client), zone_type_type) != 101 ) {
+			ACCESS_DENIED(client);
+		}
 	}
 	
 

@@ -21,8 +21,8 @@
 
 public Plugin myinfo = {
 	
-	name = "Utils: Tribunal", author = "KoSSoLaX",
-	description = "RolePlay - Utils: Tribunal",
+	name = "Jobs: Tribunal", author = "KoSSoLaX",
+	description = "RolePlay - Jobs: Tribunal",
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
