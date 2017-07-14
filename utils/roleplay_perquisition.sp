@@ -138,7 +138,8 @@ public int MenuPerquiz(Handle menu, MenuAction action, int client, int param2) {
 					Format(options, sizeof(options), "%s %s %d", expl[0], expl[1], i);
 					Format(tmp, sizeof(tmp), "%N", i);
 					
-					GetClientAbsOrigin(i, g_flLastPos[i]);
+					int vehicle = Client_GetVehicle(i);
+					Entity_GetAbsOrigin(vehicle > 0 ? vehicle : i, g_flLastPos[i]);
 					
 					subMenu.AddItem(options, tmp);
 					nbRecherche++;
@@ -370,8 +371,10 @@ public Action TIMER_PERQUIZ(Handle timer, any zone) {
 		if( !StrEqual(tmp, tmp2) ) {		
 			rp_ClientTeleport(array[PQ_target], g_flLastPos[array[PQ_target]]);
 		}
-		else
-			GetClientAbsOrigin(array[PQ_target], g_flLastPos[array[PQ_target]]);
+		else {
+			int vehicle = Client_GetVehicle(array[PQ_target]);
+			Entity_GetAbsOrigin(vehicle > 0 ? vehicle : array[PQ_target], g_flLastPos[array[PQ_target]]);
+		}
 	}
 	else {
 		int weapon, machine, plant;
