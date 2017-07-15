@@ -33,7 +33,7 @@ public void OnAllPluginsLoaded() {
 	int id = CWM_Create(g_szFullName, g_szName, g_szReplace, g_szVModel, g_szWModel);
 	
 	CWM_SetInt(id, WSI_AttackType,		view_as<int>(WSA_Automatic));
-	CWM_SetInt(id, WSI_AttackDamage, 	10);
+	CWM_SetInt(id, WSI_AttackDamage, 	25);
 	CWM_SetInt(id, WSI_AttackBullet, 	1);
 	CWM_SetInt(id, WSI_MaxBullet, 		100);
 	CWM_SetInt(id, WSI_MaxAmmunition, 	100);
@@ -60,7 +60,7 @@ public void OnIdle(int client, int entity) {
 }
 public Action OnAttack(int client, int entity) {
 	CWM_RunAnimation(entity, WAA_Attack);
-	int ent = CWM_ShootProjectile(client, entity, NULL_MODEL, "flame", 1.0, 800.0, OnProjectileHit);
+	int ent = CWM_ShootProjectile(client, entity, NULL_MODEL, "flame", 3.0, 800.0, OnProjectileHit);
 	SetEntityGravity(ent, 0.5);
 	Entity_SetMinMaxSize(ent, view_as<float>({-16.0, -16.0, -16.0}), view_as<float>({16.0, 16.0, 16.0}));
 	DispatchKeyValue(ent, "OnUser1", "!self,Kill,,0.5,-1");
