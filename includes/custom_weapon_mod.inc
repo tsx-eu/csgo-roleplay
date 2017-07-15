@@ -29,6 +29,7 @@ native int CWM_Spawn(int id, int client, float pos[3], float ang[3]);
 
 native int CWM_ShootProjectile(int client, int entity, char model[PLATFORM_MAX_PATH], char name[32], float spreadAngle = 0.0, float speed = FLT_MAX, CWM_HitCallback fonction);
 native int CWM_ShootDamage(int client, int entity, float hit[3]);
+native int CWM_ShootExplode(int client, int wpnid, int entity, float radius);
 
 enum CWM_DataAnimation {
 	WAA_Idle,
