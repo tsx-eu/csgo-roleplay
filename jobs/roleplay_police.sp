@@ -1868,7 +1868,12 @@ bool canWeaponBeAddedInPoliceStore(int weaponID) {
 	
 	char classname[64];
 	GetEdictClassname(weaponID, classname, sizeof(classname));
-	if( StrContains(classname, "weapon_default") == 0 || StrContains(classname, "weapon_knife") == 0 )
+	if( StrContains(classname, "default") >= 0 || StrContains(classname, "knife") >= 0 )
+		return false;
+	
+	int index = GetEntProp(weaponID, Prop_Send, "m_iItemDefinitionIndex");
+	CSGO_GetItemDefinitionNameByIndex(index, classname, sizeof(classname));
+	if( StrContains(classname, "default") >= 0 || StrContains(classname, "knife") >= 0 )
 		return false;
 	
 	int owner = GetEntPropEnt(weaponID, Prop_Send, "m_hPrevOwner");
