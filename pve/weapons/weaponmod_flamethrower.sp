@@ -3,11 +3,15 @@
 #include <sourcemod>
 #include <sdktools>
 #include <emitsoundany>
-#include <phun>
 #include <smlib>
 
-
 #include <custom_weapon_mod.inc>
+
+#define ROLEPLAY
+#if defined ROLEPLAY
+#include <colors_csgo>
+#include <roleplay>
+#endif
 
 char g_szFullName[PLATFORM_MAX_PATH] =	"Lance-flammes";
 char g_szName[PLATFORM_MAX_PATH] 	 =	"flamethrower";
@@ -78,8 +82,13 @@ public Action OnAttack(int client, int entity) {
 	return Plugin_Continue;
 }
 public void OnProjectileHit(int client, int wpnid, int entity, int target) {
-	if( target > 0 && target < MaxClients )
-		IgniteEntity(target, 5.0);
+	if( target > 0 && target < MaxClients ) {
+#if defined ROLEPLAY
+		rp_ClientIgnite(target, 10.0, client);
+#else
+		IgniteEntity(target, 10.0);
+#endif
+	}
 }
 public void OnMapStart() {
 
