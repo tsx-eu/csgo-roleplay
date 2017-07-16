@@ -23,17 +23,21 @@ char g_szTModel[PLATFORM_MAX_PATH] =	"models/weapons/w_eq_fraggrenade_thrown.mdl
 
 int g_cModel; 
 char g_szMaterials[][PLATFORM_MAX_PATH] = {
-	"models/v_models/weapons/grenade_launcher/grenade_launcher.vtf",
-	"models/v_models/weapons/grenade_launcher/grenade_launcher.vmt"
+	"materials/models/v_models/weapons/grenade_launcher/grenade_launcher.vtf",
+	"materials/models/v_models/weapons/grenade_launcher/grenade_launcher.vmt"
 };
 char g_szSounds[][PLATFORM_MAX_PATH] = {
 };
 
+#define MAX_PROJECTILES	8
+#define REMOVE_AFTER	30.0
+int g_iStack[MAX_ENTITIES][MAX_PROJECTILES];
+
 public void OnAllPluginsLoaded() {
 	int id = CWM_Create(g_szFullName, g_szName, g_szReplace, g_szVModel, g_szWModel);
 	
-	CWM_SetInt(id, WSI_AttackType,		view_as<int>(WSA_Automatic));
-	CWM_SetInt(id, WSI_AttackDamage, 	250);
+	CWM_SetInt(id, WSI_AttackType,		view_as<int>(WSA_SemiAutomatic));
+	CWM_SetInt(id, WSI_AttackDamage, 	500);
 	CWM_SetInt(id, WSI_AttackBullet, 	1);
 	CWM_SetInt(id, WSI_MaxBullet, 		4);
 	CWM_SetInt(id, WSI_MaxAmmunition, 	20);
@@ -50,6 +54,7 @@ public void OnAllPluginsLoaded() {
 	
 	CWM_RegHook(id, WSH_Draw,			OnDraw);
 	CWM_RegHook(id, WSH_Attack,			OnAttack);
+	CWM_RegHook(id, WSH_Attack2,		OnAttack2);
 	CWM_RegHook(id, WSH_Idle,			OnIdle);
 }
 public void OnDraw(int client, int entity) {
@@ -59,17 +64,50 @@ public void OnIdle(int client, int entity) {
 	CWM_RunAnimation(entity, WAA_Idle);
 }
 public Action OnAttack(int client, int entity) {
+	
+	if( !_IsStackEmpty(entity) ) {
+		return OnExplode(client, entity);
+	}
+	
 	CWM_RunAnimation(entity, WAA_Attack);
 	int ent = CWM_ShootProjectile(client, entity, g_szTModel, "rocket", 0.0, 1600.0, OnProjectileHit);
 	TE_SetupBeamFollow(ent, g_cModel, 0, 1.0, 1.0, 0.0, 1, {255, 255, 255, 100});
 	TE_SendToAll();
 	return Plugin_Continue;
 }
+public Action OnAttack2(int client, int entity) {
+	
+	if( _IsStackFull(entity) )
+		return Plugin_Stop;
+	
+	CWM_RunAnimation(entity, WAA_Attack);
+	int ent = CWM_ShootProjectile(client, entity, g_szTModel, "grenade", 0.0, 1600.0, OnProjectileHit, false);
+	_pushStack(entity, ent);
+	
+	TE_SetupBeamFollow(ent, g_cModel, 0, 1.0, 1.0, 0.0, 1, {255, 0, 0, 100});
+	TE_SendToAll();
+	return Plugin_Continue;
+}
+
+public Action OnExplode(int client, int entity) {
+	int ent;
+	for (int i = 0; i < MAX_PROJECTILES; i++) {
+		ent = EntRefToEntIndex(g_iStack[entity][i]);
+		if( ent > 0 && IsValidEdict(ent) && IsValidEntity(ent) ) {
+			OnProjectileHit(client, entity, ent, 0);
+			g_iStack[entity][i] = INVALID_ENT_REFERENCE;
+			AcceptEntityInput(ent, "Kill");
+		}
+	}
+	
+	return Plugin_Handled;
+}
+
 public void OnProjectileHit(int client, int wpnid, int entity, int target) {
-	CWM_ShootExplode(client, wpnid, entity, 250.0);
+	CWM_ShootExplode(client, wpnid, entity, 300.0);
 	float pos[3];
 	Entity_GetAbsOrigin(entity, pos);
-	TE_SetupExplosion(pos, 0, 250.0, 0, 0, 250, 50);
+	TE_SetupExplosion(pos, 0, 300.0, 0, 0, 200, 50);
 	TE_SendToAll();
 }
 public void OnMapStart() {
@@ -88,4 +126,55 @@ public void OnMapStart() {
 	
 	g_cModel = PrecacheModel("materials/sprites/laserbeam.vmt");
 
+}
+
+
+bool _IsStackFull(int entity) {
+	int ent;
+	for (int i = 0; i < MAX_PROJECTILES; i++) {
+		ent = EntRefToEntIndex(g_iStack[entity][i]);
+		if( ent <= 0 || !IsValidEdict(ent) || !IsValidEntity(ent) )
+			return false;
+	}
+	
+	return true;
+}
+bool _IsStackEmpty(int entity) {
+	int ent;
+	for (int i = 0; i < MAX_PROJECTILES; i++) {
+		ent = EntRefToEntIndex(g_iStack[entity][i]);
+		if( ent > 0 && IsValidEdict(ent) && IsValidEntity(ent) )
+			return false;
+	}
+	
+	return true;
+}
+void _pushStack(int entity, int projectile) {
+	int ent;
+	for (int i = 0; i < MAX_PROJECTILES; i++) {
+		ent = EntRefToEntIndex(g_iStack[entity][i]);
+		if( ent <= 0 || !IsValidEdict(ent) || !IsValidEntity(ent) ) {
+			g_iStack[entity][i] = EntIndexToEntRef(projectile);
+			
+			Handle dp;
+			CreateDataTimer(REMOVE_AFTER, _popStack, dp, TIMER_DATA_HNDL_CLOSE);
+			WritePackCell(dp, entity);
+			WritePackCell(dp, g_iStack[entity][i]);
+			WritePackCell(dp, i);
+			return;
+		}
+	}
+}
+public Action _popStack(Handle timer, Handle dp) {
+	ResetPack(dp);
+	int entity = ReadPackCell(dp);
+	int ent = EntRefToEntIndex(ReadPackCell(dp));
+	int i = ReadPackCell(dp);
+	
+	if( ent > 0 && IsValidEdict(ent) && IsValidEntity(ent) ) {
+		g_iStack[entity][i] = INVALID_ENT_REFERENCE;
+		AcceptEntityInput(ent, "Kill");
+	}
+	
+	return Plugin_Stop;
 }
