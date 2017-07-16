@@ -30,29 +30,34 @@ public void OnAllPluginsLoaded() {
 	
 	CWM_SetInt(id, WSI_AttackType,		view_as<int>(WSA_Automatic));
 	CWM_SetInt(id, WSI_AttackDamage, 	10);
-	CWM_SetInt(id, WSI_AttackBullet, 	0);
-	CWM_SetInt(id, WSI_MaxBullet, 		0);
-	CWM_SetInt(id, WSI_MaxAmmunition, 	0);
+	CWM_SetInt(id, WSI_AttackBullet, 	1);
+	CWM_SetInt(id, WSI_MaxBullet, 		250);
+	CWM_SetInt(id, WSI_MaxAmmunition, 	500);
 	
 	CWM_SetFloat(id, WSF_Speed,			300.0);
-	CWM_SetFloat(id, WSF_ReloadSpeed,	0.0);
+	CWM_SetFloat(id, WSF_ReloadSpeed,	65/30.0);
 	CWM_SetFloat(id, WSF_AttackSpeed,	0.1);
 	CWM_SetFloat(id, WSF_AttackRange,	RANGE_MELEE + 16.0);
 	CWM_SetFloat(id, WSF_Spread, 		0.0);
 	
 	CWM_AddAnimation(id, WAA_Idle, 		3,	64, 30);
 	CWM_AddAnimation(id, WAA_Draw, 		7,	65, 30);
+	CWM_AddAnimation(id, WAA_Reload, 	7,	65, 30);
 	CWM_AddAnimation(id, WAA_Attack, 	1,  30, 60);
 	
 	CWM_RegHook(id, WSH_Draw,			OnDraw);
 	CWM_RegHook(id, WSH_Attack,			OnAttack);
 	CWM_RegHook(id, WSH_Idle,			OnIdle);
+	CWM_RegHook(id, WSH_Reload,			OnReload);
 }
 public void OnDraw(int client, int entity) {
 	CWM_RunAnimation(entity, WAA_Draw);
 }
 public void OnIdle(int client, int entity) {
 	CWM_RunAnimation(entity, WAA_Idle);
+}
+public void OnReload(int client, int entity) {
+	CWM_RunAnimation(entity, WAA_Reload);
 }
 public Action OnAttack(int client, int entity) {
 

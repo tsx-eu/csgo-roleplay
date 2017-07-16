@@ -90,6 +90,7 @@ enum CWM_HookType {
 	WSH_Attack2,
 	WSH_Reload,
 	WSH_Idle,
+	WSH_Empty,
 	WSH_Max
 };
 typeset CWM_HookTypeForward {
@@ -97,9 +98,10 @@ typeset CWM_HookTypeForward {
 	function Action(int client, int entity); 				// WSH_Attack 	 // Continue = attack, handled = pas d'attaque mais cooldown, stop = pas d'attaque ni de cooldown
 	function void(int client, int entity);					// WSH_Reload
 	function void(int client, int entity);					// WSH_Idle
+	function void(int client, int entity);					// WSH_Empty
 }
 typeset CWM_HitCallback {
-	function void(int client, int wpnid, int entity, int target);
+	function Action(int client, int wpnid, int entity, int target);	// Continue = subit les dégats, handle/stop = pas de dégat
 }
 stock void AddModelToDownloadsTable(char file[PLATFORM_MAX_PATH]) {
 	char tmp[PLATFORM_MAX_PATH], tmp2[PLATFORM_MAX_PATH];

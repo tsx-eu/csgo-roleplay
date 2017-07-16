@@ -47,23 +47,29 @@ public void OnAllPluginsLoaded() {
 	CWM_SetInt(id, WSI_AttackType,		view_as<int>(WSA_SemiAutomatic));
 	CWM_SetInt(id, WSI_AttackDamage, 	500);
 	CWM_SetInt(id, WSI_AttackBullet, 	1);
-	CWM_SetInt(id, WSI_MaxBullet, 		4);
-	CWM_SetInt(id, WSI_MaxAmmunition, 	20);
+	CWM_SetInt(id, WSI_MaxBullet, 		5);
+	CWM_SetInt(id, WSI_MaxAmmunition, 	25);
 	
 	CWM_SetFloat(id, WSF_Speed,			240.0);
-	CWM_SetFloat(id, WSF_ReloadSpeed,	1.0);
-	CWM_SetFloat(id, WSF_AttackSpeed,	2.0);
+	CWM_SetFloat(id, WSF_ReloadSpeed,	100/30.0);
+	CWM_SetFloat(id, WSF_AttackSpeed,	1.0);
 	CWM_SetFloat(id, WSF_AttackRange,	RANGE_MELEE * 4.0);
 	CWM_SetFloat(id, WSF_Spread, 		0.0);
 	
-	CWM_AddAnimation(id, WAA_Idle, 		3,	60, 30);
+	CWM_AddAnimation(id, WAA_Idle, 		2,	60, 30);
 	CWM_AddAnimation(id, WAA_Draw, 		3,	29, 30);
 	CWM_AddAnimation(id, WAA_Attack, 	5,  30, 30);
+	CWM_AddAnimation(id, WAA_Reload, 	8,  100, 30);
 	
 	CWM_RegHook(id, WSH_Draw,			OnDraw);
 	CWM_RegHook(id, WSH_Attack,			OnAttack);
 	CWM_RegHook(id, WSH_Attack2,		OnAttack2);
 	CWM_RegHook(id, WSH_Idle,			OnIdle);
+	CWM_RegHook(id, WSH_Reload,			OnReload);
+	CWM_RegHook(id, WSH_Empty,			OnEmpty);
+}
+public void OnReload(int client, int entity) {
+	CWM_RunAnimation(entity, WAA_Reload);
 }
 public void OnDraw(int client, int entity) {
 	CWM_RunAnimation(entity, WAA_Draw);
@@ -71,11 +77,13 @@ public void OnDraw(int client, int entity) {
 public void OnIdle(int client, int entity) {
 	CWM_RunAnimation(entity, WAA_Idle);
 }
+public void OnEmpty(int client, int entity) {
+	OnExplode(client, entity);
+}
 public Action OnAttack(int client, int entity) {
 	
-	if( !_IsStackEmpty(entity) ) {
+	if( !_IsStackEmpty(entity) )
 		return OnExplode(client, entity);
-	}
 	
 	CWM_RunAnimation(entity, WAA_Attack);
 	int ent = CWM_ShootProjectile(client, entity, g_szTModel, "rocket", 0.0, 2000.0, OnProjectileHit);
@@ -115,13 +123,14 @@ public Action OnExplode(int client, int entity) {
 	return Plugin_Handled;
 }
 
-public void OnProjectileHit(int client, int wpnid, int entity, int target) {
+public Action OnProjectileHit(int client, int wpnid, int entity, int target) {
 	CWM_ShootExplode(client, wpnid, entity, 300.0);
 	float pos[3];
 	Entity_GetAbsOrigin(entity, pos);
 	TE_SetupExplosion(pos, 0, 300.0, 0, 0, 200, 50);
 	TE_SendToAll();
 	StopSoundAny(entity, SNDCHAN_WEAPON, g_szSounds[0]);
+	return Plugin_Stop;
 }
 public void OnMapStart() {
 

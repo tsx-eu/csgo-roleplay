@@ -39,8 +39,8 @@ public void OnAllPluginsLoaded() {
 	CWM_SetInt(id, WSI_AttackType,		view_as<int>(WSA_Automatic));
 	CWM_SetInt(id, WSI_AttackDamage, 	25);
 	CWM_SetInt(id, WSI_AttackBullet, 	1);
-	CWM_SetInt(id, WSI_MaxBullet, 		100);
-	CWM_SetInt(id, WSI_MaxAmmunition, 	100);
+	CWM_SetInt(id, WSI_MaxBullet, 		250);
+	CWM_SetInt(id, WSI_MaxAmmunition, 	500);
 	
 	CWM_SetFloat(id, WSF_Speed,			240.0);
 	CWM_SetFloat(id, WSF_ReloadSpeed,	1.0);
@@ -81,7 +81,7 @@ public Action OnAttack(int client, int entity) {
 	TE_SendToAll();
 	return Plugin_Continue;
 }
-public void OnProjectileHit(int client, int wpnid, int entity, int target) {
+public Action OnProjectileHit(int client, int wpnid, int entity, int target) {
 	if( target > 0 && target < MaxClients ) {
 #if defined ROLEPLAY
 		rp_ClientIgnite(target, 10.0, client);
@@ -89,6 +89,8 @@ public void OnProjectileHit(int client, int wpnid, int entity, int target) {
 		IgniteEntity(target, 10.0);
 #endif
 	}
+	
+	return Plugin_Continue;
 }
 public void OnMapStart() {
 
