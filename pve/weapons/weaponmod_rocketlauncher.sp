@@ -27,6 +27,14 @@ char g_szMaterials[][PLATFORM_MAX_PATH] = {
 	"materials/models/v_models/weapons/grenade_launcher/grenade_launcher.vmt"
 };
 char g_szSounds[][PLATFORM_MAX_PATH] = {
+	"physics/metal/metal_box_scrape_rough_loop2.wav",
+	"physics/concrete/boulder_impact_hard1.wav",
+	"physics/concrete/boulder_impact_hard2.wav",
+	"physics/concrete/boulder_impact_hard3.wav",
+	"physics/concrete/boulder_impact_hard4.wav",
+	"physics/glass/glass_sheet_impact_hard1.wav",
+	"physics/glass/glass_sheet_impact_hard2.wav",
+	"physics/glass/glass_sheet_impact_hard3.wav"	
 };
 
 #define MAX_PROJECTILES	8
@@ -70,7 +78,10 @@ public Action OnAttack(int client, int entity) {
 	}
 	
 	CWM_RunAnimation(entity, WAA_Attack);
-	int ent = CWM_ShootProjectile(client, entity, g_szTModel, "rocket", 0.0, 1600.0, OnProjectileHit);
+	int ent = CWM_ShootProjectile(client, entity, g_szTModel, "rocket", 0.0, 2000.0, OnProjectileHit);
+	SetEntityGravity(ent, 0.25);
+	EmitSoundToAllAny(g_szSounds[0], ent, SNDCHAN_WEAPON);
+	EmitSoundToAllAny(g_szSounds[GetRandomInt(1, 4)], entity, SNDCHAN_WEAPON);
 	TE_SetupBeamFollow(ent, g_cModel, 0, 1.0, 1.0, 0.0, 1, {255, 255, 255, 100});
 	TE_SendToAll();
 	return Plugin_Continue;
@@ -81,7 +92,8 @@ public Action OnAttack2(int client, int entity) {
 		return Plugin_Stop;
 	
 	CWM_RunAnimation(entity, WAA_Attack);
-	int ent = CWM_ShootProjectile(client, entity, g_szTModel, "grenade", 0.0, 1600.0, OnProjectileHit, false);
+	int ent = CWM_ShootProjectile(client, entity, g_szTModel, "grenade", 2.5, 1200.0, OnProjectileHit, false);
+	EmitSoundToAllAny(g_szSounds[GetRandomInt(5, 7)], entity, SNDCHAN_WEAPON);
 	_pushStack(entity, ent);
 	
 	TE_SetupBeamFollow(ent, g_cModel, 0, 1.0, 1.0, 0.0, 1, {255, 0, 0, 100});
@@ -109,6 +121,7 @@ public void OnProjectileHit(int client, int wpnid, int entity, int target) {
 	Entity_GetAbsOrigin(entity, pos);
 	TE_SetupExplosion(pos, 0, 300.0, 0, 0, 200, 50);
 	TE_SendToAll();
+	StopSoundAny(entity, SNDCHAN_WEAPON, g_szSounds[0]);
 }
 public void OnMapStart() {
 

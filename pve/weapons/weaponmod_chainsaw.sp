@@ -58,7 +58,7 @@ public Action OnAttack(int client, int entity) {
 
 	float hit[3], src[3];
 	CWM_RunAnimation(entity, WAA_Attack);
-	EmitSoundToAllAny("physics/metal/metal_solid_strain5.wav", entity, _, _, _, 0.1);
+	EmitSoundToAllAny("physics/metal/metal_solid_strain5.wav", entity, _, _, _, 0.2);
 	
 	int target = CWM_ShootDamage(client, entity, hit);
 	if( target >= 0 ) {
