@@ -48,8 +48,9 @@ enum rp_event {
 	RP_PrePlayerPhysic,        /* Permet de modifier la physique d'un joueur. Utiliser return Plugin_Stop pour forcer les valeurs et ignorer toutes les autres. */
 	RP_PostPlayerPhysic,       /* By-pass les zones en BITZONE_BLOCKCHIRU */
 	
-	RP_PlayerCanKill,
-
+	RP_PlayerCanKill,			/* Un joueur peut-il en tuer un autre? by-pass le passif */
+	RP_PlayerCanUseItem,		/* Un joueur peut-il utiliser un item? */
+	
 	RP_PreHUDColorize,		     /* Modifie la couleur de l'écran */
 	RP_OnFrameSeconde,		     /* Appelé chaque seconde */
 	RP_OnAssurance,			       /* Modifie l'assurance, est appelé à chaques fois que le serveur la recalcule */
@@ -84,6 +85,7 @@ enum rp_event {
 	RP_OnBlackMarket,			/* Lorsqu'un joueur achète quelque chose au marché noire */
 	
 	RP_OnJugementOver,			/* Lorsqu'un jugement est prononcé */
+
 	
 	RP_EventMax
 }
@@ -100,6 +102,7 @@ typeset rp_event_enum {
 	function Action(int client, float& speed, float& gravity); 	                       		/* RP_PostPlayerPhysic */
 	
 	function Action(int attacker, int victim);												/* RP_PlayerCanKill */
+	function Action(int client, int itemID);												/* RP_PlayerCanUseItem */
 	
 	function Action(int client, int color[4]); 					                            /* RP_PreHUDColorize == idem */
 	function Action(int client);								                            /* RP_OnFrameSeconde */
@@ -540,7 +543,7 @@ native bool rp_ClientCanDrawPanel(int client);
 native void rp_SendPanelToClient(Handle& panel, int client, float duration);
 typedef QuestFctInit = function bool (int client);
 typedef QuestFct = function void (int objectiveID, int client);
-public void QUEST_NULL(int objectiveID, int client) { }
+#define QUEST_NULL INVALID_FUNCTION
 native void rp_QuestStepComplete(int client, int objectiveID);
 native void rp_QuestStepFail(int client, int objectiveID);
 native int rp_RegisterQuest(char uniqID[32], char name[64], quest_type_type type, QuestFctInit CanStart);
