@@ -40,6 +40,7 @@ char g_szSpawnQueue[][] = {
 	{"2", "skeleton_arrow"},
 	{"1", "skeleton_heavy"},
 };
+ArrayList g_hQueue;
 
 public Plugin myinfo =  {
 	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX", 
@@ -63,6 +64,7 @@ public void OnAllPluginsLoaded() {
 	rp_QuestAddStep(g_iQuest, i++, Q1_Start,	Q1_Frame,	Q_Abort, QUEST_NULL);
 	
 	g_bCanMakeQuest = true;
+	g_hQueue = new ArrayList(1, 1024);
 }
 public void OnMapStart() {
 	
@@ -114,13 +116,36 @@ public Action newAttempt(Handle timer, any attempt) {
 public void Q1_Start(int objectiveID, int client) {
 	g_bCanMakeQuest = false;
 	addClientToTeam(client, TEAM_PLAYERS);
+	
+	g_hQueue.Clear();
+	for (int i = 0; i < sizeof(g_szSpawnQueue); i++) {
+		int cpt = StringToInt(g_szSpawnQueue[i][0]);
+		int id = PVE_GetId(g_szSpawnQueue[i][1]);
+		
+		if( id >= 0 ) {
+			for (int j = 0; j < cpt; j++)
+				g_hQueue.Push(id);
+		}
+	}
 }
 public void Q1_Frame(int objectiveID, int client) {
 	float pos[3];
-	if( SQ_Pop(pos) ) {
-		// TODO AIM TO PLAYER
-		int id = PVE_Spawn(PVE_GetId(g_szSpawnQueue[0][1]), pos, NULL_VECTOR);
-		addClientToTeam(id, TEAM_NPC);
+	if( g_hQueue.Length > 0 ) {
+		if( SQ_Pop(pos) ) {
+			
+			int id = g_hQueue.Get(0);
+			g_hQueue.Erase(0);
+			
+			// TODO AIM TO PLAYER
+			// TODO: THINK HOOK
+			// TODO: ATTACK FORWARD
+			// TODO: MOVETO FORWARD
+			int entity = PVE_Spawn(id, pos, NULL_VECTOR);
+			addClientToTeam(entity, TEAM_NPC);
+		}
+	}
+	else {
+		rp_QuestStepComplete(client, objectiveID);
 	}
 }
 
