@@ -27,7 +27,7 @@
 #define ROLEPLAY
 //#define DEBUG
 
-native int PVE_Create(char name[PLATFORM_MAX_PATH], char model[PLATFORM_MAX_PATH]);
+native int PVE_Create(char fullname[PLATFORM_MAX_PATH], char name[PLATFORM_MAX_PATH], char model[PLATFORM_MAX_PATH]);
 native void PVE_SetFloat(int id, PVE_DataFloat data, float value);
 native void PVE_SetInt(int id, PVE_DataInteger data, int value);
 native int PVE_Spawn(int id, float position[3], float angles[3]);
@@ -35,6 +35,7 @@ native void PVE_RegHook(int id, PVE_HookType data, PVE_HookTypeForward fonction)
 native void PVE_AddAnimation(int id, PVE_DataAnimation data, int sequence, int frames, int fps);
 native void PVE_RunAnimation(int entity, PVE_DataAnimation data, float time = -1.0);
 native int PVE_ShootProjectile(int entity, char model[PLATFORM_MAX_PATH], char name[32], float spreadAngle = 0.0, float speed = FLT_MAX, PVE_HitCallback fonction);
+native int PVE_GetId(char name[PLATFORM_MAX_PATH]);
 
 enum PVE_DataAnimation {
 	EAA_Idle,
@@ -87,6 +88,7 @@ enum PVE_DataFloat {
 	ESF_Max
 };
 enum PVE_DataString {
+	ESS_Fullname,
 	ESS_Name,
 	ESS_Model,
 	

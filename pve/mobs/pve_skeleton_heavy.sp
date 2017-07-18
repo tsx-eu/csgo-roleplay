@@ -7,7 +7,8 @@
 
 #include <pve.inc>
 
-char g_szName[PLATFORM_MAX_PATH] =	"Squelette lourd";
+char g_szFullname[PLATFORM_MAX_PATH] =	"Squelette lourd";
+char g_szName[PLATFORM_MAX_PATH] =	"skeleton_heavy";
 char g_szModel[PLATFORM_MAX_PATH] =	"models/npc/tsx/skeleton/skeleton.mdl";
 char g_szMaterials[][PLATFORM_MAX_PATH] = {
 	"materials/models/npc/tsx/skeleton/DS_equipment_standard.vtf",
@@ -31,7 +32,7 @@ char g_szSounds[][PLATFORM_MAX_PATH] = {
 };
 
 public void OnAllPluginsLoaded() {
-	int id = PVE_Create(g_szName, g_szModel);
+	int id = PVE_Create(g_szFullname, g_szName, g_szModel);
 	
 	PVE_SetInt(id, ESI_MaxHealth, 		1000);
 	PVE_SetInt(id, ESI_AttackType,		view_as<int>(ESA_Melee));
