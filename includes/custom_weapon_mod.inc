@@ -31,6 +31,8 @@ native int CWM_ShootProjectile(int client, int entity, char model[PLATFORM_MAX_P
 native int CWM_ShootDamage(int client, int entity, float hit[3]);
 native int CWM_ShootExplode(int client, int wpnid, int entity, float radius);
 
+native int CWM_GetId(char name[PLATFORM_MAX_PATH]);
+
 enum CWM_DataAnimation {
 	WAA_Idle,
 	WAA_Draw,
