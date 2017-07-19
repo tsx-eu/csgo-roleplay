@@ -89,10 +89,7 @@ public Action fwdDeath(int victim, int attacker, float& respawn) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemChirurgie(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemChirurgie");
-	#endif
-	
+		
 	char arg1[12];
 	GetCmdArg(1, arg1, sizeof(arg1));
 	
@@ -161,26 +158,21 @@ public Action fwdFrozen(int client, float& speed, float& gravity) {
 	return Plugin_Stop;
 }
 // ----------------------------------------------------------------------------
-public Action fwdChiruForce(int attacker, int victim, float &damage) {
-	#if defined DEBUG
-	PrintToServer("fwdChiruForce");
-	#endif
+public Action fwdChiruForce(int attacker, int victim, float &damage, int damagetype) {
 	
-	damage *= 1.75;
-	return Plugin_Changed;
+	if( !(damagetype & (DMG_BLAST|DMG_CRUSH)) ) {
+		damage *= 1.75;
+		return Plugin_Changed;
+	}
+	
+	return Plugin_Continue;
 }
 public Action fwdChiruSpeed(int client, float& speed, float& gravity) {
-	#if defined DEBUG
-	PrintToServer("fwdChiruSpeed");
-	#endif
 	speed += 0.30;
 	
 	return Plugin_Changed;
 }
 public Action fwdChiruJump(int client, float& speed, float& gravity) {
-	#if defined DEBUG
-	PrintToServer("fwdChiruJump");
-	#endif
 	gravity -= 0.33;
 	
 	return Plugin_Changed;
@@ -218,9 +210,6 @@ public Action fwdSpawn(int client) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemSick(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemSick");
-	#endif
 	static bool bDiag[65];
 	
 	int type = GetCmdArgInt(1);
@@ -259,9 +248,6 @@ public Action Cmd_ItemSick(int args) {
 	}
 }
 public Action Cmd_ItemPoison(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemPoison");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int target = rp_GetClientTarget(client);
@@ -293,9 +279,6 @@ public Action Cmd_ItemPoison(int args) {
 	return Plugin_Handled;
 }
 public Action Cmd_ItemAntiPoison(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemAntiPoison");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	
@@ -312,10 +295,6 @@ public Action Cmd_ItemAntiPoison(int args) {
 	rp_SetClientInt(client, i_Sickness, 0);
 }
 public Action Cmd_ItemFullHeal(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemFullHeal");
-	#endif
-	
 	int client = GetCmdArgInt(1);
 	int heal = GetClientHealth(client);
 	int max_heal = Entity_GetMaxHealth(client);
@@ -329,9 +308,6 @@ public Action Cmd_ItemFullHeal(int args) {
 	
 }
 public Action Cmd_ItemProtImmu(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemProtImmu");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	
@@ -345,9 +321,6 @@ public Action fwdAssurance2(int client, int& amount) {
 	return Plugin_Changed;
 }
 public Action Cmd_ItemRespawn(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemRespawn");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int vendeur = GetCmdArgInt(2);
@@ -401,9 +374,6 @@ public Action Cmd_ItemRespawn(int args) {
 	return Plugin_Handled;
 }
 public Action Cmd_ItemCureDesintox(int args) { //Permet de devenir sobre si on est saoul
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemCureDesintox");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 
@@ -418,9 +388,6 @@ public Action Cmd_ItemCureDesintox(int args) { //Permet de devenir sobre si on e
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemAdrenaline(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemAdrenaline");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
@@ -460,16 +427,9 @@ public Action Cmd_ItemAdrenaline(int args) {
 	return Plugin_Handled;
 }
 public Action AllowUltimate(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("AllowUltimate");
-	#endif
-
 	rp_SetClientBool(client, b_MayUseUltimate, true);
 }
 public Action fwdAdrenalineSpeed(int client, float& speed, float& gravity) {
-	#if defined DEBUG
-	PrintToServer("fwdAdrenalineSpeed");
-	#endif
 	speed -= 0.02;
 	gravity += 0.02;
 	
@@ -481,9 +441,6 @@ public Action fwdAdrenalineSpeed(int client, float& speed, float& gravity) {
 	return Plugin_Changed;
 }
 public Action fwdAdrenalineColor(int client, int color[4]) {
-	#if defined DEBUG
-	PrintToServer("fwdAdrenalineColor");
-	#endif
 	
 	color[0] += 40;
 	color[1] -= 10;
@@ -493,27 +450,14 @@ public Action fwdAdrenalineColor(int client, int color[4]) {
 	return Plugin_Changed;
 }
 public Action ItemDrugStop(Handle time, any client) {
-	#if defined DEBUG
-	PrintToServer("ItemDrugStop");
-	#endif
-
 	rp_SetClientBool(client, b_Drugged, false);
-	
-	return Plugin_Continue;
 }
 public Action fwdBerserk(int attacker, int victim, float &damage, int wepID, float pos[3]) {
-	#if defined DEBUG
-	PrintToServer("fwdGiveBerserk");
-	#endif
-	
 	damage *= 1.05;
 	
 	return Plugin_Changed;
 }
 public Action fwdBerserk2(int attacker, int victim, float &damage, int wepID, float pos[3]) {
-	#if defined DEBUG
-	PrintToServer("fwdGiveBerserk2");
-	#endif
 	
 	damage *= 1.0125;
 	
@@ -547,9 +491,6 @@ public Action fwdOnPlayerBuild(int client, float& cooldown) {
 }
 
 int BuildingHealBox(int client) {
-	#if defined DEBUG 
-	PrintToServer("BuildingHealBox");
-	#endif
 	
 	if( !rp_IsBuildingAllowed(client) )
 		return 0;
@@ -615,9 +556,7 @@ int BuildingHealBox(int client) {
 	
 }
 public Action BuildingHealBox_post(Handle timer, any entity) {
-	#if defined DEBUG
-	PrintToServer("BuildingHealBox_post");
-	#endif
+	
 	if( !IsValidEdict(entity) && !IsValidEntity(entity) )
 		return Plugin_Handled;
 	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
@@ -637,10 +576,7 @@ public Action BuildingHealBox_post(Handle timer, any entity) {
 	return Plugin_Handled;
 }
 public void BuildingHealBox_break(const char[] output, int caller, int activator, float delay) {
-	#if defined DEBUG
-	PrintToServer("BuildingHealBox_break");
-	#endif
-	
+		
 	int client = GetEntPropEnt(caller, Prop_Send, "m_hOwnerEntity");
 	CPrintToChat(client,"{lightblue}[TSX-RP]{default} Votre HealBox a été détruite");
 	
@@ -653,9 +589,6 @@ public void BuildingHealBox_break(const char[] output, int caller, int activator
 }
 public Action Frame_HealBox(Handle timer, any ent) {
 	ent = EntRefToEntIndex(ent); if( ent == -1 ) { return Plugin_Handled; }
-	#if defined DEBUG
-	PrintToServer("Frame_HealBox");
-	#endif
 	
 	float vecOrigin[3], vecOrigin2[3];
 	Entity_GetAbsOrigin(ent, vecOrigin);

@@ -851,7 +851,7 @@ public Action fwdOnDeadSuccess(int client, int attacker) {
 	rp_IncrementSuccess(attacker, success_list_no_18th);
 }
 // ----------------------------------------------------------------------------
-public Action fwdDamage(int client, int attacker, float& damage) {
+public Action fwdDamage(int client, int attacker, float& damage, int damagetype) {
 	if( Math_GetRandomInt(0, 4) == 4 && rp_GetClientBool(attacker, b_Stealing) == true ) {
 		rp_SetClientBool(attacker, b_Stealing, false);
 		rp_ClientColorize(client);

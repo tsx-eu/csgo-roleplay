@@ -85,7 +85,7 @@ public Action Cmd_ItemPreserv(int args) {
 	rp_SetClientInt(client, i_Kevlar, kevlar);
 	return Plugin_Handled;
 }
-public Action fwdInvincible(int client, int attacker, float& damage) {
+public Action fwdInvincible(int client, int attacker, float& damage, int damagetype) {
 	damage = 0.0;
 	return Plugin_Stop;
 }
@@ -303,7 +303,7 @@ public Action Cmd_ItemSucette2(int args) {
 	
 	return Plugin_Handled;
 }
-public Action fwdDamage(int attacker, int victim, float& damage, int wepID, float pos[3]) {
+public Action fwdDamage(int attacker, int victim, float& damage, int damagetype) {
 	damage *= 1.10;
 	return Plugin_Changed;
 }

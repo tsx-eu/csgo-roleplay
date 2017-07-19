@@ -17,14 +17,14 @@ char g_szFullName[PLATFORM_MAX_PATH] =	"Lance-roquettes";
 char g_szName[PLATFORM_MAX_PATH] 	 =	"rocketlauncher";
 char g_szReplace[PLATFORM_MAX_PATH]  =	"weapon_negev";
 
-char g_szVModel[PLATFORM_MAX_PATH] =	"models/v_models/v_grenade_launcher.mdl";
-char g_szWModel[PLATFORM_MAX_PATH] =	"models/w_models/weapons/w_grenade_launcher.mdl";
+char g_szVModel[PLATFORM_MAX_PATH] =	"models/weapons/v_ut2k4_rocket_launcher.mdl";
+char g_szWModel[PLATFORM_MAX_PATH] =	"models/weapons/w_ut2k4_rocket_launcher.mdl";
 char g_szTModel[PLATFORM_MAX_PATH] =	"models/weapons/w_eq_fraggrenade_thrown.mdl";
 
 int g_cModel; 
 char g_szMaterials[][PLATFORM_MAX_PATH] = {
-	"materials/models/v_models/weapons/grenade_launcher/grenade_launcher.vtf",
-	"materials/models/v_models/weapons/grenade_launcher/grenade_launcher.vmt"
+	"materials/models/HighVoltage/UT2K4/Weapons/RocketTex0.vtf",
+	"materials/models/HighVoltage/UT2K4/Weapons/RocketTex0.vmt"
 };
 char g_szSounds[][PLATFORM_MAX_PATH] = {
 	"physics/metal/metal_box_scrape_rough_loop2.wav",
@@ -100,7 +100,7 @@ public Action OnAttack2(int client, int entity) {
 		return Plugin_Stop;
 	
 	CWM_RunAnimation(entity, WAA_Attack);
-	int ent = CWM_ShootProjectile(client, entity, g_szTModel, "grenade", 2.5, 1200.0, OnProjectileHit, false);
+	int ent = CWM_ShootProjectile(client, entity, g_szTModel, "grenade", 2.5, 1200.0, INVALID_FUNCTION);
 	EmitSoundToAllAny(g_szSounds[GetRandomInt(5, 7)], entity, SNDCHAN_WEAPON);
 	_pushStack(entity, ent);
 	

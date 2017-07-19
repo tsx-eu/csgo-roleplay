@@ -784,7 +784,7 @@ public Action fwdDead(int client, int attacker) {
 	}
 	return Plugin_Continue;
 }
-public Action fwdDamage(int attacker, int victim, float& damage, int wepID, float pos[3]) {
+public Action fwdDamage(int attacker, int victim, float& damage, int damagetype) {
 	
 	if( g_iPlayerTeam[attacker] == TEAM_BRAQUEUR && g_iPlayerTeam[victim] != TEAM_POLICE && rp_GetZoneInt(rp_GetPlayerZone(victim), zone_type_type) != g_iPlanque ) {
 		return Plugin_Handled;
@@ -794,14 +794,6 @@ public Action fwdDamage(int attacker, int victim, float& damage, int wepID, floa
 	}
 	if( g_iPlayerTeam[attacker] != TEAM_POLICE && g_iPlayerTeam[victim] == TEAM_BRAQUEUR ) {
 		return Plugin_Handled;
-	}
-	
-	if( g_iPlayerTeam[attacker] == TEAM_BRAQUEUR && rp_GetWeaponBallType(wepID) == ball_type_braquage) {
-		if( g_iPlayerTeam[victim] == TEAM_POLICE )
-			damage *= 1.15;
-		else
-			damage *= 0.8;
-		return Plugin_Changed;
 	}
 	
 	return Plugin_Continue;

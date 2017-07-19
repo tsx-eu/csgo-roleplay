@@ -1007,7 +1007,7 @@ public Action Event_PlayerHurt(Handle event, char[] name, bool dontBroadcast) {
 	
 	return Plugin_Continue;
 }
-public Action fwdTakeDamage(int victim, int attacker, float& damage, int wepID, float pos[3]) {
+public Action fwdTakeDamage(int victim, int attacker, float& damage, int damagetype) {
 	
 	
 	if( rp_GetClientGroupID(attacker) > 0 && rp_GetClientGroupID(victim) > 0 ) {

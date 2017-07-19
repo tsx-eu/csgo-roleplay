@@ -358,7 +358,7 @@ public Action OnWeaponDrop(int client, int weapon) {
 
 	return Plugin_Continue;
 }
-public Action fwdDamage(int client, int victim, float& damage) {
+public Action fwdDamage(int client, int victim, float& damage, int damagetype) {
 	
 	int target = rp_GetClientInt(client, i_ToKill);
 	

@@ -90,7 +90,7 @@ enum rp_event {
 	RP_EventMax
 }
 typeset rp_event_enum {
-	function Action(int victim, int attacker, float& damage); 			                   	/* RP_PreTakeDamage  == return Plugin_Handled = aucun dégat */
+	function Action(int victim, int attacker, float& damage, int damagetype);             	/* RP_PreTakeDamage  == return Plugin_Handled = aucun dégat */
 	function Action(int victim, int attacker, float& damage, int wepID, float pos[3]); 		/* RP_PostTakeDamageWeapon */
 	function Action(int victim, int attacker, float& damage);                          		/* RP_PostTakeDamageKnife */
 
