@@ -17,8 +17,8 @@ char g_szFullName[PLATFORM_MAX_PATH] =	"Lance-roquettes";
 char g_szName[PLATFORM_MAX_PATH] 	 =	"rocketlauncher";
 char g_szReplace[PLATFORM_MAX_PATH]  =	"weapon_negev";
 
-char g_szVModel[PLATFORM_MAX_PATH] =	"models/weapons/v_ut2k4_rocket_launcher.mdl";
-char g_szWModel[PLATFORM_MAX_PATH] =	"models/weapons/w_ut2k4_rocket_launcher.mdl";
+char g_szVModel[PLATFORM_MAX_PATH] =	"models/v_models/v_grenade_launcher.mdl";
+char g_szWModel[PLATFORM_MAX_PATH] =	"models/w_models/weapons/w_grenade_launcher.mdl";
 char g_szTModel[PLATFORM_MAX_PATH] =	"models/weapons/w_eq_fraggrenade_thrown.mdl";
 
 int g_cModel; 
