@@ -100,9 +100,6 @@ public void OnClientPostAdminCheck(int client) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemDrugs(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemDrugs");
-	#endif
 	
 	char arg0[64];
 	GetCmdArg(1, arg0, sizeof(arg0));
@@ -270,9 +267,6 @@ public Action fwdGHB(int attacker, int victim, char weapon[64]) {
 	return Plugin_Handled;
 }
 public Action Cmd_ItemEngrais(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemEngrais");
-	#endif
 	int client = GetCmdArgInt(1);
 	int target = rp_GetClientTarget(client);
 	int item_id = GetCmdArgInt(args);
@@ -304,9 +298,6 @@ public Action Cmd_ItemEngrais(int args) {
 	return Plugin_Handled;
 }
 public Action Cmd_ItemMorePlant(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemMorePlant");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int amount = rp_GetClientInt(client, i_Plant);
@@ -320,9 +311,6 @@ public Action Cmd_ItemMorePlant(int args) {
 		rp_SetClientInt(client, i_Plant, amount + 1);
 }
 public Action Cmd_ItemPlant(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemPlant");
-	#endif
 	
 	int type = GetCmdArgInt(1);
 	int client = GetCmdArgInt(2);
@@ -335,9 +323,6 @@ public Action Cmd_ItemPlant(int args) {
 	return Plugin_Handled;
 }
 public Action Cmd_ItemPiedBiche(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemPiedBiche");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
@@ -393,9 +378,6 @@ public Action Cmd_ItemPiedBiche(int args) {
 	return Plugin_Handled;
 }
 public Action Cmd_ItemPilule(int args){
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemPilule");
-	#endif
 
 	int type = GetCmdArgInt(1);	// 1 Pour Appart, 2 pour planque
 	int client = GetCmdArgInt(2);
@@ -493,9 +475,6 @@ public Action Cmd_ItemPilule(int args){
 }
 // ----------------------------------------------------------------------------
 public Action ItemDrugStop(Handle time, any client) {
-	#if defined DEBUG
-	PrintToServer("ItemDrugStop");
-	#endif
 	if( !IsValidClient(client) )
 		return Plugin_Continue;
 
@@ -505,9 +484,6 @@ public Action ItemDrugStop(Handle time, any client) {
 	return Plugin_Continue;
 }
 public Action AllowUltimate(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("AllowUltimate");
-	#endif
 
 	rp_SetClientBool(client, b_MayUseUltimate, true);
 }
@@ -558,17 +534,11 @@ public Action ItemPiluleOver(Handle timer, Handle dp) {
 	return Plugin_Handled;
 }
 public Action timerAlarm(Handle timer, any door) {
-	#if defined DEBUG
-	PrintToServer("timerAlarm");
-	#endif
 	
 	EmitSoundToAllAny("UI/arm_bomb.wav", door);
 	return Plugin_Handled;
 }
 public Action AllowStealing(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("AllowStealing");
-	#endif
 	
 	rp_SetClientBool(client, b_MaySteal, true);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez à nouveau voler.");
@@ -612,9 +582,6 @@ public Action SwitchTrapped(Handle timer, any target) {
 }
 // ----------------------------------------------------------------------------
 public Action fwdOnPlayerUse(int client) {
-	#if defined DEBUG
-	PrintToServer("BuildingPlant_use");
-	#endif
 	
 	static char tmp[64], tmp2[64];
 	
@@ -873,9 +840,6 @@ public Action fwdZoneChange(int client, int newZone, int oldZone) {
 }
 // ----------------------------------------------------------------------------
 int BuildingPlant(int client, int type) {
-	#if defined DEBUG
-	PrintToServer("BuildingPlant");
-	#endif
 	
 	if( !rp_IsBuildingAllowed(client) )
 		return 0;
@@ -993,9 +957,6 @@ int BuildingPlant(int client, int type) {
 	return ent;
 }
 public Action BuildingPlant_post(Handle timer, any entity) {
-	#if defined DEBUG
-	PrintToServer("BuildingPlant_post");
-	#endif
 	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
 	SetEntityMoveType(client, MOVETYPE_WALK);
 	
@@ -1009,9 +970,6 @@ public Action BuildingPlant_post(Handle timer, any entity) {
 	return Plugin_Handled;
 }
 public Action DamagePlant(int victim, int &attacker, int &inflictor, float &damage, int &damagetype) {
-	#if defined DEBUG
-	PrintToServer("DamagePlant");
-	#endif
 	if( IsValidClient(attacker) && attacker == inflictor ) {
 		
 		char sWeapon[32];
@@ -1056,9 +1014,6 @@ public Action DamagePlant(int victim, int &attacker, int &inflictor, float &dama
 	return Plugin_Continue;
 }
 public void BuildingPlant_break(const char[] output, int caller, int activator, float delay) {
-	#if defined DEBUG
-	PrintToServer("BuildingPlant_break");
-	#endif
 	Plant_Destroy(caller);
 	
 	if( IsValidClient(activator) ) {
@@ -1073,9 +1028,6 @@ public void BuildingPlant_break(const char[] output, int caller, int activator, 
 	}
 }
 void Plant_Destroy(int entity) {
-	#if defined DEBUG
-	PrintToServer("Plant_Destroy");
-	#endif
 	float vecOrigin[3];
 	Entity_GetAbsOrigin(entity, vecOrigin);
 	
@@ -1097,9 +1049,6 @@ void Plant_Destroy(int entity) {
 }
 public Action Frame_BuildingPlant(Handle timer, any ent) {
 	ent = EntRefToEntIndex(ent); if( ent == -1 ) { return Plugin_Handled; }
-	#if defined DEBUG
-	PrintToServer("Frame_BuildingPlant");
-	#endif
 	
 	int client = GetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity");
 	if( !IsValidClient(client) ) {
@@ -1298,9 +1247,6 @@ public Action ItemPiedBiche_frame(Handle timer, Handle dp) {
 	return Plugin_Continue;
 }
 public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
-	#if defined DEBUG
-	PrintToServer("ItemPickLockOver_18th");
-	#endif
 	if( dp == INVALID_HANDLE ) {
 		return Plugin_Handled;
 	}
@@ -1431,9 +1377,6 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 }
 // ----------------------------------------------------------------------------
 public int MenuBuildingDealer(Handle menu, MenuAction action, int client, int param ) {
-	#if defined DEBUG
-	PrintToServer("MenuBuildingDealer");
-	#endif
 	
 	if( action == MenuAction_Select ) {
 		char szMenuItem[64];
@@ -1647,13 +1590,6 @@ bool CanTP(float pos[3], int client) {
 	tr = TR_TraceHullEx(pos, pos, mins, maxs, MASK_PLAYERSOLID);
 	ret = !TR_DidHit(tr);
 	CloseHandle(tr);
-    #if defined DEBUG
-		if( !ret ) {
-			TR_GetEndPosition(maxs, tr);
-			TE_SetupBeamRingPoint(maxs, 1.0, 1.5, g_cBeam, g_cBeam, 0, 30, 10.0, 1.0, 1.0, { 255, 255, 255, 255 }, 10, 0);
-			TE_SendToAll();
-		}
-	#endif
 	return ret;
 }
 bool CanStealVehicle(int client, int target) {	
@@ -1744,35 +1680,23 @@ void MENU_ShowPickLock(int client, float percent, int difficulte, int type) {
 }
 // ----------------------------------------------------------------------------
 public Action fwdCrack(int victim, int attacker, float& damage) {
-	#if defined DEBUG
-	PrintToServer("fwdCrack");
-	#endif
 	damage /= 2.0;
 	
 	return Plugin_Changed;
 }
 public Action fwdPCP(int client, float& speed, float& gravity) {
-	#if defined DEBUG
-	PrintToServer("fwdPCP");
-	#endif
 	
 	if( speed > 0.5 )
 		speed -= 0.25;
 	return Plugin_Changed;
 }
 public Action fwdHeroine(int client, float& speed, float& gravity) {
-	#if defined DEBUG
-	PrintToServer("fwdHeroine");
-	#endif
 	speed += 0.75;
 	gravity -= 0.2;
 	
 	return Plugin_Changed;
 }
 public Action fwdHeroine2(int client, int color[4]) {
-	#if defined DEBUG
-	PrintToServer("fwdHeroine2");
-	#endif
 	
 	color[0] -= 50;
 	color[1] += 100;
@@ -1781,9 +1705,6 @@ public Action fwdHeroine2(int client, int color[4]) {
 	return Plugin_Changed;
 }
 public Action fwdCocaine(int client, int color[4]) {
-	#if defined DEBUG
-	PrintToServer("fwdCocaine");
-	#endif
 	color[0] -= 50;
 	color[1] += 50;
 	color[2] += 100;
@@ -1791,27 +1712,18 @@ public Action fwdCocaine(int client, int color[4]) {
 	return Plugin_Changed;
 }
 public Action fwdChampi(int client, float& speed, float& gravity) {
-	#if defined DEBUG
-	PrintToServer("fwdChampi");
-	#endif
 	speed -= 0.2;
 	gravity -= 0.6;
 	
 	return Plugin_Changed;
 }
 public Action fwdCrystal(int client, float& speed, float& gravity) {
-	#if defined DEBUG
-	PrintToServer("fwdCrystal");
-	#endif
 	speed += 0.25;
 	gravity -= 0.4;
 	
 	return Plugin_Changed;
 }
 public Action fwdCrystal2(int client, int color[4]) {
-	#if defined DEBUG
-	PrintToServer("fwdCrystal2");
-	#endif
 	color[0] += 100;
 	color[1] += 100;
 	color[2] += 100;
@@ -1819,18 +1731,12 @@ public Action fwdCrystal2(int client, int color[4]) {
 	return Plugin_Changed;
 }
 public Action fwdEcstasy(int client, float& speed, float& gravity) {
-	#if defined DEBUG
-	PrintToServer("fwdEcstasy");
-	#endif
 	speed += 0.25;
 	gravity -= 0.2;
 	
 	return Plugin_Changed;
 }
 public Action fwdBeuh(int client, float& speed, float& gravity) {
-	#if defined DEBUG
-	PrintToServer("fwdBeuh");
-	#endif
 	gravity -= 0.4;
 	
 	return Plugin_Changed;

@@ -22,7 +22,7 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-//#define DEBUG
+
 #define QUEST_UNIQID	"mercenaire-001"
 #define	QUEST_NAME		"Le justicier masqué"
 #define	QUEST_TYPE		quest_daily
@@ -99,9 +99,6 @@ public void Q1_Start(int objectiveID, int client) {
 }
 
 public Action timerStartQuest(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("timerStartQuest");
-	#endif
 	int tokill = getFreekiller(client);
 
 	if(tokill == -1){

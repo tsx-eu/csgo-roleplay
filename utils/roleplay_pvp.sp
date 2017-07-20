@@ -139,9 +139,6 @@ public void OnMapStart() {
 	}
 }
 public void OnCvarChange(Handle cvar, const char[] oldVal, const char[] newVal) {
-	#if defined DEBUG
-	PrintToServer("OnCvarChange");
-	#endif	
 	if( cvar == g_hCapturable ) {
 		if( !g_bIsInCaptureMode && StrEqual(oldVal, "none") && StrEqual(newVal, "active") ) {
 			CAPTURE_Start();
@@ -169,9 +166,6 @@ public void OnClientPostAdminCheck(int client) {
 // -----------------------------------------------------------------------------------------------------------------
 public Action Cmd_SpawnTag(int args) {
 	static iPrecached[MAX_GROUPS];
-	#if defined DEBUG
-	PrintToServer("Cmd_SpawnTag");
-	#endif
 	
 	char gang[64], path[128];	
 	int client = GetCmdArgInt(1);
@@ -217,9 +211,6 @@ public Action Cmd_SpawnTag(int args) {
 	return Plugin_Handled;
 }
 public Action Cmd_ItemFlag(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemFlag");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
@@ -376,9 +367,6 @@ public Action SDKHideFlag(int from, int to ) {
 }
 // -----------------------------------------------------------------------------------------------------------------
 void CAPTURE_Start() {
-	#if defined DEBUG
-	PrintToServer("CAPTURE_Start");
-	#endif
 	CPrintToChatAll("{lightblue} ================================== {default}");
 	CPrintToChatAll("{lightblue} Le bunker peut maintenant être capturé! {default}");
 	
@@ -485,9 +473,6 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	return Plugin_Continue;
 }
 void CAPTURE_Stop() {
-	#if defined DEBUG
-	PrintToServer("CAPTURE_Stop");
-	#endif
 	int winner, maxPoint = 0;
 	char optionsBuff[4][32], tmp[256];
 	
@@ -581,9 +566,6 @@ void CAPTURE_UpdateLight() {
 	}
 }
 void CAPTURE_Reward(int totalPoints) {
-	#if defined DEBUG
-	PrintToServer("CAPTURE_Reward");
-	#endif
 	int amount;
 	char tmp[128], szSteamID[32], optionsBuff[4][32];
 	
@@ -797,13 +779,6 @@ bool CanTP(float pos[3], int client) {
 	tr = TR_TraceHullEx(pos, pos, mins, maxs, MASK_PLAYERSOLID);
 	ret = !TR_DidHit(tr);
 	CloseHandle(tr);
-    #if defined DEBUG
-		if( !ret ) {
-			TR_GetEndPosition(maxs, tr);
-			TE_SetupBeamRingPoint(maxs, 1.0, 1.5, g_cBeam, g_cBeam, 0, 30, 10.0, 1.0, 1.0, { 255, 255, 255, 255 }, 10, 0);
-			TE_SendToAll();
-		}
-	#endif
 	return ret;
 }
 public Action fwdDead(int victim, int attacker, float& respawn) {
@@ -1284,9 +1259,6 @@ void GDM_RegisterShoot(int client) {
 	g_hGlobalDamage.SetArray(szSteamID, array, sizeof(array));
 }
 int GDM_ELOKill(int client, int target) {
-	#if defined DEBUG
-	PrintToServer("GDM_ELOKill");
-	#endif
 	
 	char szSteamID[32], szSteamID2[32];
 	int attacker[gdm_max], victim[gdm_max], cgID, tgID, cElo, tElo;
@@ -1325,9 +1297,6 @@ int GDM_ELOKill(int client, int target) {
 	return tmp;
 }
 int GDM_ELOSuicide(int client) {
-	#if defined DEBUG
-	PrintToServer("GDM_ELOSuicide");
-	#endif
 	
 	char szSteamID[32];
 	int attacker[gdm_max], cgID, cElo;

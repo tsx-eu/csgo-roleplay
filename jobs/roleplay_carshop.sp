@@ -222,9 +222,6 @@ int countVehicle(int client) {
 	return count;
 }
 public Action Cmd_ItemVehicle(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemVehicle");
-	#endif
 	
 	char arg1[128];
 	GetCmdArg(1, arg1, sizeof(arg1));
@@ -316,9 +313,6 @@ public void CAR_CANCEL(int client, int item_id){
 	}
 }
 public Action Cmd_ItemVehicleStuff(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemVehicleStuff");
-	#endif
 	static int offset = -1;	
 	
 	char arg1[12];
@@ -601,9 +595,6 @@ public bool FilterToAll(int entity, int mask, any data) {
 	return (entity < 0);
 }
 void VehicleRemove(int vehicle, bool explode = false) {
-	#if defined DEBUG
-	PrintToServer("VehicleRemove");
-	#endif
 	if( vehicle <= 0 || !rp_IsValidVehicle(vehicle) )
 		return;
 	
@@ -645,9 +636,6 @@ void VehicleRemove(int vehicle, bool explode = false) {
 }
 // ----------------------------------------------------------------------------
 public Action rp_SetClientVehicleTask(Handle timer, Handle dp) {
-	#if defined DEBUG
-	PrintToServer("rp_SetClientVehicleTask");
-	#endif
 	
 	ResetPack(dp);
 	int client = ReadPackCell(dp);
@@ -655,9 +643,6 @@ public Action rp_SetClientVehicleTask(Handle timer, Handle dp) {
 	rp_SetClientVehicle(client, car, true);
 }
 public Action BatchLeave(Handle timer, any vehicle) {
-	#if defined DEBUG
-	PrintToServer("BatchLeave");
-	#endif
 	
 	if( vehicle <= 0 )
 		return;
@@ -836,9 +821,6 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 }
 // ----------------------------------------------------------------------------
 void AskToJoinCar(int client, int vehicle) {
-	#if defined DEBUG
-	PrintToServer("AskToJoinCar");
-	#endif
 	
 	if( rp_GetVehicleInt(vehicle, car_maxPassager) <= CountPassagerInVehicle(vehicle) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il n'y a plus de place dans cette voiture.");
@@ -867,9 +849,6 @@ void AskToJoinCar(int client, int vehicle) {
 	DisplayMenu(menu, driver, MENU_TIME_DURATION);
 }
 public int AskToJoinCar_Menu(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
-	#if defined DEBUG
-	PrintToServer("AskToJoinCar_Menu");
-	#endif
 	if (p_oAction == MenuAction_Select) {
 		char szMenuItem[32];
 		
@@ -935,9 +914,6 @@ int CountPassagerInVehicle(int vehicle) {
 }
 // ----------------------------------------------------------------------------
 void DisplayGarageMenu(int client) {
-	#if defined DEBUG
-	PrintToServer("DisplayGarageMenu");
-	#endif
 	
 	Handle menu = CreateMenu(eventGarageMenu);
 	SetMenuTitle(menu, "Menu du garage\n ");
@@ -1016,9 +992,6 @@ void displayKlaxonMenu(int client){
 	menu.Display(client, 60);
 }
 public int eventGarageMenu(Handle menu, MenuAction action, int client, int param) {
-	#if defined DEBUG
-	PrintToServer("eventGarageMenu");
-	#endif
 	static int last[65], offset;
 	
 	
@@ -1256,9 +1229,6 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 	}
 }
 public int eventGarageMenu2(Handle menu, MenuAction action, int client, int param ) {
-	#if defined DEBUG
-	PrintToServer("eventGarageMenu2");
-	#endif
 	if( action == MenuAction_Select ) {
 		char szMenuItem[128];
 		

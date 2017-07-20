@@ -20,7 +20,7 @@
 #pragma newdecls required
 #include <roleplay.inc>   // https://www.ts-x.eu
 
-//#define DEBUG
+
 #define		QUEST_UNIQID   	"braquage"
 #define		QUEST_NAME      "Braquage"
 #define		QUEST_TYPE     	quest_group
@@ -673,9 +673,6 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 }
 public Action fwdCommand(int client, char[] command, char[] arg) {
-	#if defined DEBUG
-	PrintToServer("fwdCommand");
-	#endif
 	if( StrEqual(command, "q") || StrEqual(command, "quest") ) {
 		
 		if( g_iPlayerTeam[client] != TEAM_BRAQUEUR )

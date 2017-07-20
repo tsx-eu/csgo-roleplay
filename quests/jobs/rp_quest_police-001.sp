@@ -22,7 +22,7 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-//#define DEBUG
+
 #define QUEST_UNIQID	"police-001"
 #define	QUEST_NAME		"Suivez le lapin blanc"
 #define	QUEST_TYPE		quest_daily

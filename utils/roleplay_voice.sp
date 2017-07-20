@@ -19,7 +19,7 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-//#define DEBUG
+
 Handle g_vAllTalk;
 bool g_bAllTalk = false;
 bool g_bMayTalk[65];

@@ -491,9 +491,6 @@ int GetPerquizRespByAppart(int appartID) {
 	return res;
 }
 int GetPerquizRespByJob(int job_id) {
-	#if defined DEBUG
-	PrintToServer("GetPerquizResp");
-	#endif
 	int zone;	
 	int min = 9999;
 	int res = 0;
@@ -516,9 +513,6 @@ int GetPerquizRespByJob(int job_id) {
 	return res;
 }
 int GetPerquizRespByGroup(int gang_id) {
-	#if defined DEBUG
-	PrintToServer("GetPerquizResp");
-	#endif
 	int zone;	
 	int min = 9999;
 	int res = 0;

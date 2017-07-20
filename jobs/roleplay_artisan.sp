@@ -40,7 +40,7 @@ bool g_bCanCraft[65][MAX_ITEMS];
 bool g_bInCraft[65];
 float g_flClientBook[65][book_max];
 
-//#define DEBUG
+
 
 int lstJOB[] =  { 11, 21, 31, 41, 51, 61, 71, 81, 111, 131, 171, 191, 211, 221 };
 
@@ -93,9 +93,6 @@ public void OnMapStart() {
 	PrecacheModel(MODEL_PANNEAU);
 }
 public Action Cmd_ItemCraftTable(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemCraftTable");
-	#endif
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
 	
@@ -106,9 +103,6 @@ public Action Cmd_ItemCraftTable(int args) {
 	return Plugin_Handled;
 }
 public Action Cmd_ItemCraftBook(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemCraftBook");
-	#endif
 	char arg[32];
 	GetCmdArg(1, arg, sizeof(arg));
 	int client = GetCmdArgInt(2);
@@ -172,9 +166,6 @@ public void SQL_LoadReceipe(Handle owner, Handle hQuery, const char[] error, any
 	return;
 }
 public void OnClientPostAdminCheck(int client) {
-	#if defined DEBUG
-	PrintToServer("OnClientPostAdminCheck");
-	#endif
 	
 	rp_HookEvent(client, RP_OnPlayerUse, 	fwdUse);
 	rp_HookEvent(client, RP_OnPlayerBuild,	fwdOnPlayerBuild);
@@ -241,9 +232,6 @@ public Action fwdCanStealItem(int client, int target) {
 }
 // ----------------------------------------------------------------------------
 void displayArtisanMenu(int client) {
-	#if defined DEBUG
-	PrintToServer("displayArtisanMenu");
-	#endif
 	
 	Handle menu = CreateMenu(eventArtisanMenu);
 	SetMenuTitle(menu, "== Artisanat ==\n ");
@@ -508,9 +496,6 @@ void displayStatsMenu(int client) {
 	DisplayMenu(menu, client, 30);
 }
 public int eventArtisanMenu(Handle menu, MenuAction action, int client, int param2) {
-	#if defined DEBUG
-	PrintToServer("eventArtisanMenu");
-	#endif
 	
 	if( action == MenuAction_Select ) {
 		char options[64], buffer[4][16];
@@ -814,9 +799,6 @@ void addStatsToMenu(int client, Handle menu) {
 }
 // ----------------------------------------------------------------------------
 int BuidlingTABLE(int client) {
-	#if defined DEBUG
-	PrintToServer("BuidlingTABLE");
-	#endif
 	
 	if( !rp_IsBuildingAllowed(client) )
 		return 0;	
@@ -882,9 +864,6 @@ int BuidlingTABLE(int client) {
 	return ent;
 }
 public Action BuildingTABLE_post(Handle timer, any entity) {
-	#if defined DEBUG
-	PrintToServer("BuildingTABLE_post");
-	#endif
 	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
 	SetEntityMoveType(client, MOVETYPE_WALK);
 	
@@ -894,9 +873,6 @@ public Action BuildingTABLE_post(Handle timer, any entity) {
 	return Plugin_Handled;
 }
 public void BuildingTABLE_break(const char[] output, int caller, int activator, float delay) {
-	#if defined DEBUG
-	PrintToServer("BuildingTABLE_break");
-	#endif
 	
 	int owner = GetEntPropEnt(caller, Prop_Send, "m_hOwnerEntity");
 	if( IsValidClient(owner) ) {

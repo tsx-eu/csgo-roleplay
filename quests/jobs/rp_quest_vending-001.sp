@@ -20,7 +20,7 @@
 #pragma newdecls required
 #include <roleplay.inc>   // https://www.ts-x.eu
 
-//#define DEBUG
+
 #define QUEST_UNIQID   "vending-001"
 #define   QUEST_NAME      "Collecte des matières premières"
 #define   QUEST_TYPE      quest_daily

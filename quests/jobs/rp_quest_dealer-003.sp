@@ -20,7 +20,7 @@
 #pragma newdecls required
 #include <roleplay.inc>   // https://www.ts-x.eu
 
-//#define DEBUG
+
 #define QUEST_UNIQID   "dealer-003"
 #define   QUEST_NAME      "Blanchiment d'argent"
 #define   QUEST_TYPE      quest_daily

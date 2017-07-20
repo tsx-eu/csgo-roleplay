@@ -19,7 +19,7 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-//#define DEBUG
+
 #define QUEST_UNIQID	"000-tutorial"
 #define	QUEST_NAME		"Tutorial"
 #define	QUEST_TYPE		quest_story
@@ -478,9 +478,6 @@ public Action fwdUsePhone(int client) {
 	}
 }
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
-	#if defined DEBUG
-	PrintToServer("MenuNothing");
-	#endif
 	if( action == MenuAction_Select ) {
 		if( menu != INVALID_HANDLE )
 			CloseHandle(menu);
@@ -824,9 +821,6 @@ public void SQL_OpenHelpMenu(Handle owner, Handle hQuery, const char[] error, an
 
 
 public int helpMenu(Handle hItem, MenuAction oAction, int client, int param) {
-	#if defined DEBUG
-	PrintToServer("helpMenu");
-	#endif
 	
 	if (oAction == MenuAction_Select) {
 		char options[64], tmp[2][16];

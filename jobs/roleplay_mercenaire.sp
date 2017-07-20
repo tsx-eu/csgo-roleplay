@@ -76,9 +76,6 @@ public void OnConfigsExecuted() {
 	HookConVarChange(g_vCapture, OnCvarChange);
 }
 public void OnCvarChange(Handle cvar, const char[] oldVal, const char[] newVal) {
-	#if defined DEBUG
-	PrintToServer("OnCvarChange");
-	#endif
 	
 	if( cvar == g_vCapture ) {
 		if( StrEqual(oldVal, "none") && StrEqual(newVal, "active") ) {
@@ -124,9 +121,6 @@ public void OnClientDisconnect(int client) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemContrat(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemContrat");
-	#endif
 	
 	char arg1[32];
 	GetCmdArg(1, arg1, sizeof(arg1));
@@ -384,9 +378,6 @@ public Action fwdSpeed(int client, float& speed, float& gravity) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemConProtect(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemConProtect");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int vendeur = GetCmdArgInt(2);
@@ -400,9 +391,6 @@ public Action Cmd_ItemConProtect(int args) {
 	CreateTimer(6*60.0, TimerEndProtect, client);
 }
 public Action TimerEndProtect(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("TimerEndProtect");
-	#endif
 	
 	int vendeur = rp_GetClientInt(client, i_Protect_From);
 	
@@ -424,9 +412,6 @@ public Action fwfCommand(int client, char[] command, char[] arg) {
 	return Plugin_Continue;
 }
 void OpenSelectSkill(int client) {
-	#if defined DEBUG
-	PrintToServer("OpenSelectSkill");
-	#endif
 	
 	char tmp[255];
 	Format(tmp, 254, "Sélectionner les compétences à utiliser (%i)", g_iKillerPoint[client][competance_left]);
@@ -454,9 +439,6 @@ void OpenSelectSkill(int client) {
 	DisplayMenu(menu, client, MENU_TIME_DURATION);
 }
 public int AddCompetanceToAssassin(Handle menu, MenuAction action, int client, int param2) {
-	#if defined DEBUG
-	PrintToServer("AddCompetanceToAssassin");
-	#endif
 	if( action == MenuAction_Select ) {
 		char options[64];
 		GetMenuItem(menu, param2, options, 63);
@@ -556,9 +538,6 @@ public void OnPostThinkPost(int client) {
 }
 // ----------------------------------------------------------------------------
 void RestoreAssassinNormal(int client) {
-	#if defined DEBUG
-	PrintToServer("RestoreAssassinNormal");
-	#endif
 	
 	g_iKillerPoint[client][competance_left] = 0;
 	rp_SetClientInt(client, i_ContratType, 0);
@@ -621,9 +600,6 @@ void RestoreAssassinNormal(int client) {
 	rp_ClientColorize(client);
 }
 void SetContratFail(int client, bool time = false, bool annule = false) { // time = retro-compatibilité. 
-	#if defined DEBUG
-	PrintToServer("SetContratFail");
-	#endif
 	
 	int jobClient = rp_GetClientJobID(client);
 	
@@ -676,9 +652,6 @@ void SetContratFail(int client, bool time = false, bool annule = false) { // tim
 }
 // ----------------------------------------------------------------------------
 public Action SendToTribunal(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("SendToTribunal");
-	#endif
 	
 	rp_SetClientBool(client, b_SpawnToTribunal, false);
 	
@@ -689,9 +662,6 @@ public Action SendToTribunal(Handle timer, any client) {
 }
 // ----------------------------------------------------------------------------
 public Action SendToTueur(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("SendToTueur");
-	#endif
 	
 	rp_SetClientBool(client, b_SpawnToTueur, false);
 	rp_ClientTeleport(client,  view_as<float>({-5553.0, -2818.0, -1958.0}));
@@ -801,9 +771,6 @@ public Action FreeKidnapping(Handle timer, any client) {
 	return Plugin_Continue;
 }
 public int eventKidnapping(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
-	#if defined DEBUG
-	PrintToServer("eventKidnapping");
-	#endif
 	if (p_oAction == MenuAction_Select) {
 		
 		char options[64];
@@ -931,9 +898,6 @@ public Action fwdFrameKidnap(int client) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemCryptage(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemCryptage");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
@@ -961,9 +925,6 @@ public Action Cmd_ItemCryptage(int args) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemEnqueteMenu(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemEnqueteMenu");
-	#endif
 	char arg1[12];
 	GetCmdArg(1, arg1, 11);
 	
@@ -997,9 +958,6 @@ public Action Cmd_ItemEnqueteMenu(int args) {
 	DisplayMenu(menu, client, MENU_TIME_DURATION);
 }
 public int Cmd_ItemEnqueteMenu_2(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemEnqueteMenu_2");
-	#endif
 	if (p_oAction == MenuAction_Select) {
 		
 		char szMenuItem[64];
@@ -1068,9 +1026,6 @@ public Action fwdWeapon(int victim, int attacker, float &damage, int wepID, floa
 	return Plugin_Continue;
 }
 public Action Cmd_ItemMaps(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemMaps");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	rp_SetClientBool(client, b_Map, true);

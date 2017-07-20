@@ -80,9 +80,6 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 	return Plugin_Stop;
 }
 int BuildingMicrowave(int client) {
-	#if defined DEBUG 
-	PrintToServer("BuildingMicrowave");
-	#endif
 	
 	if( !rp_IsBuildingAllowed(client) )
 		return 0;
@@ -141,9 +138,6 @@ int BuildingMicrowave(int client) {
 	
 }
 public Action BuildingMicrowave_post(Handle timer, any entity) {
-	#if defined DEBUG
-	PrintToServer("BuildingMicrowave_post");
-	#endif
 	if( !IsValidEdict(entity) && !IsValidEntity(entity) )
 		return Plugin_Handled;
 	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
@@ -177,9 +171,6 @@ public Action BuildingMicrowave_post(Handle timer, any entity) {
 	return Plugin_Handled;
 }
 public void BuildingMicrowave_break(const char[] output, int caller, int activator, float delay) {
-	#if defined DEBUG
-	PrintToServer("BuildingMicrowave_break");
-	#endif
 	
 	int client = GetEntPropEnt(caller, Prop_Send, "m_hOwnerEntity");
 	CPrintToChat(client,"{lightblue}[TSX-RP]{default} Votre micro-ondes vient d'être détruit");
@@ -192,9 +183,6 @@ public void BuildingMicrowave_break(const char[] output, int caller, int activat
 	//rp_Effect_Explode(vecOrigin, 200.0, 600.0, activator, "micro_onde");
 }
 public Action fwdOnPlayerUse(int client) {
-	#if defined DEBUG
-	PrintToServer("Microwave_use");
-	#endif
 	static char tmp[64], tmp2[64];
 	static float vecOrigin[3],vecOrigin2[3];
 	GetClientAbsOrigin(client, vecOrigin);
@@ -270,9 +258,6 @@ public void giveHamburger(int client){
 	}
 }
 public Action Cmd_ItemHamburger(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemHamburger");
-	#endif
 	
 	char arg1[12];
 	GetCmdArg(1, arg1, 11);
@@ -452,16 +437,10 @@ public Action Cmd_ItemHamburger(int args) {
 	return Plugin_Handled;
 }
 public Action AllowUltimate(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("AllowUltimate");
-	#endif
 
 	rp_SetClientBool(client, b_MayUseUltimate, true);
 }
 public Action Cmd_ItemBanane(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemBanane");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int itemID = GetCmdArgInt(args);
@@ -512,9 +491,6 @@ public Action Cmd_ItemBanane(int args) {
 	return Plugin_Handled;
 }
 public Action BuildingBanana_touch(int index, int client) {
-	#if defined DEBUG
-	PrintToServer("BuildingBanana_touch");
-	#endif
 	if( !IsValidClient(client) )
 		return Plugin_Continue;
 	

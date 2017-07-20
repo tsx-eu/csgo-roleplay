@@ -52,9 +52,6 @@ public void OnMapStart() {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_GiveItem(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_GiveItem");
-	#endif
 	
 	char Arg1[64];
 	GetCmdArg(1, Arg1, sizeof(Arg1));
@@ -70,9 +67,6 @@ public Action Cmd_GiveItem(int args) {
 	return Plugin_Handled;
 }
 public Action Cmd_GiveItemPvP(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_GiveItemPvP");
-	#endif
 	
 	char Arg1[64];
 	GetCmdArg(1, Arg1, sizeof(Arg1));
@@ -84,9 +78,6 @@ public Action Cmd_GiveItemPvP(int args) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemBallType(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemBallType");
-	#endif
 	
 	char arg1[32];
 	GetCmdArg(1, arg1, sizeof(arg1));
@@ -229,9 +220,6 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 }
 
 public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
-	#if defined DEBUG
-	PrintToServer("ModifyWeapon Menu");
-	#endif
 
 	if (p_oAction == MenuAction_Select) {
 		char szMenuItem[32];
@@ -353,9 +341,6 @@ public Action OnWeaponReload(int wepid) {
 	return Plugin_Continue;
 }
 public int ModifyWeaponPVP(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2){
-	#if defined DEBUG
-	PrintToServer("ModifyWeaponPVP");
-	#endif
 
 	if (p_oAction == MenuAction_Select) {
 		char szMenuItem[32];
@@ -512,9 +497,6 @@ public Action fwdColorize(int client, int color[4]) {
 	return Plugin_Changed;
 }
 public Action Cmd_ItemRedraw(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemRedraw");
-	#endif
 	int client = GetCmdArgInt(1);
 	
 	int wep_id = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
@@ -549,9 +531,6 @@ public Action Cmd_ItemRedraw(int args) {
 
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemSanAndreas(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemSanAndreas");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);

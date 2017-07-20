@@ -22,7 +22,7 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-//#define DEBUG
+
 #define QUEST_UNIQID	"mercenaire-002"
 #define	QUEST_NAME		"Un coup de main pour la justice"
 #define	QUEST_TYPE		quest_daily
@@ -96,9 +96,6 @@ public void Q1_Start(int objectiveID, int client) {
 }
 
 public Action timerStartQuest(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("timerStartQuest");
-	#endif
 	int tokill = getToKill(client);
 	if(tokill == -1){
 		rp_QuestStepFail(client, g_ObjectiveID);

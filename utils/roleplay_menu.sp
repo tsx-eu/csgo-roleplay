@@ -198,9 +198,6 @@ void openMenuGeneral(int client) {
 	g_bInsideMenu[client] = true;
 }
 public int menuOpenMenu(Handle hItem, MenuAction oAction, int client, int param) {
-	#if defined DEBUG
-	PrintToServer("menuOpenMenu");
-	#endif
 	if (oAction == MenuAction_Select) {
 		char options[64];
 		if( GetMenuItem(hItem, param, options, sizeof(options)) ) {

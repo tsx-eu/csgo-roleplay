@@ -73,9 +73,6 @@ public void OnClientPostAdminCheck(int client) {
 }
 
 public Action Cmd_ItemCraftSign(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemCraftSign");
-	#endif
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
 	
@@ -138,9 +135,6 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemPermi(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemPermi");
-	#endif
 	
 	char Arg1[12];
 	GetCmdArg(1, Arg1, 11);
@@ -163,9 +157,6 @@ public Action Cmd_ItemPermi(int args) {
 	rp_ClientSave(client);
 }
 public Action Cmd_ItemBankCard(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemBankCard");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	rp_SetClientBool(client, b_HaveCard, true);
@@ -174,18 +165,12 @@ public Action Cmd_ItemBankCard(int args) {
 	rp_ClientSave(client);
 }
 public Action Cmd_ItemBankSort(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemBankSort");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	rp_SetClientBool(client, b_CanSort, true);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez maintenant trier votre inventaire jusqu'à votre déconnexion.");
 }
 public Action Cmd_ItemBankKey(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemBankKey");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	rp_SetClientBool(client, b_HaveAccount, true);
@@ -193,9 +178,6 @@ public Action Cmd_ItemBankKey(int args) {
 	rp_ClientSave(client);
 }
 public Action Cmd_ItemBankSwap(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemBankSwap");
-	#endif
 	
 	
 	int client = GetCmdArgInt(1);
@@ -205,9 +187,6 @@ public Action Cmd_ItemBankSwap(int args) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemAssurance(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemAssurance");
-	#endif
 	
 	
 	int client = GetCmdArgInt(1);
@@ -225,9 +204,6 @@ public Action Cmd_ItemAssurance(int args) {
 }
 
 public Action Cmd_ItemAssuVie(int args){
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemAssuVie");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	
@@ -253,9 +229,6 @@ public Action fwdAssurance(int client, int& amount) {
 }
 
 public Action Cmd_ItemNoAction(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemNoAction");
-	#endif
 	int client = GetCmdArgInt(args-1);
 	int item_id = GetCmdArgInt(args);
 	char name[64];
@@ -270,9 +243,6 @@ public Action Cmd_ItemNoAction(int args) {
 int g_iChequeID = -1;
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemCheque(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemCheque");
-	#endif
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
 	
@@ -283,9 +253,6 @@ public Action Cmd_ItemCheque(int args) {
 	CreateTimer(0.25, task_cheque, client);
 }
 public Action task_cheque(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("task_cheque");
-	#endif
 	// Setup menu
 	Handle menu = CreateMenu(MenuCheque);
 	SetMenuTitle(menu, "Liste des jobs disponible:");
@@ -334,9 +301,6 @@ public Action task_cheque(Handle timer, any client) {
 }
 // ----------------------------------------------------------------------------
 public int MenuCheque(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
-	#if defined DEBUG
-	PrintToServer("MenuCheque");
-	#endif
 	
 	if (p_oAction == MenuAction_Select) {
 		
@@ -382,9 +346,6 @@ public int MenuCheque(Handle p_hItemMenu, MenuAction p_oAction, int client, int 
 	}
 }
 public int MenuCheque2(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
-	#if defined DEBUG
-	PrintToServer("MenuCheque2");
-	#endif
 	if (p_oAction == MenuAction_Select) {
 		
 		char szMenuItem[64];
@@ -436,9 +397,6 @@ public int MenuCheque2(Handle p_hItemMenu, MenuAction p_oAction, int client, int
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemForward(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemForward");
-	#endif
 	int client = GetCmdArgInt(args-1);
 	int item_id = GetCmdArgInt(args);
 	char tmp[64];
@@ -456,9 +414,6 @@ public Action Cmd_ItemForward(int args) {
 	return;
 }
 public Action Cmd_ItemPackDebutant(int args) { //Permet d'avoir la CB, le compte & le RIB
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemPackDebutant");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	rp_SetClientBool(client, b_HaveCard, true);
@@ -490,9 +445,6 @@ public Action fwdOnPlayerBuild(int client, float& cooldown) {
 	return Plugin_Stop;
 }
 public Action Cmd_ItemDistrib(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemDistrib");
-	#endif
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
 	
@@ -505,9 +457,6 @@ public Action Cmd_ItemDistrib(int args) {
 
 
 int BuidlingATM(int client) {
-	#if defined DEBUG
-	PrintToServer("BuildingATM");
-	#endif
 	
 	if( !rp_IsBuildingAllowed(client) )
 		return 0;	
@@ -569,9 +518,6 @@ int BuidlingATM(int client) {
 }
 
 public Action BuildingATM_post(Handle timer, any entity) {
-	#if defined DEBUG
-	PrintToServer("BuildingATM_post");
-	#endif
 	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
 	SetEntityMoveType(client, MOVETYPE_WALK);
 	
@@ -584,9 +530,6 @@ public Action BuildingATM_post(Handle timer, any entity) {
 }
 
 public void BuildingATM_break(const char[] output, int caller, int activator, float delay) {
-	#if defined DEBUG
-	PrintToServer("BuildingATM_break");
-	#endif
 	
 	int owner = GetEntPropEnt(caller, Prop_Send, "m_hOwnerEntity");
 	if( IsValidClient(owner) ) {
@@ -594,9 +537,6 @@ public void BuildingATM_break(const char[] output, int caller, int activator, fl
 	}
 }
 public Action DamageATM(int victim, int &attacker, int &inflictor, float &damage, int &damagetype) {
-	#if defined DEBUG
-	PrintToServer("DamageATM");
-	#endif
 	
 	if( rp_IsInPVP(victim) ) {
 		damage *= 25.0;
@@ -620,9 +560,6 @@ public Action fwdUse(int client) {
 }
 
 void DisplayMetroMenu(int client) {
-	#if defined DEBUG
-	PrintToServer("DisplayMetroMenu");
-	#endif
 	
 	if( !rp_IsTutorialOver(client) )
 		return;
@@ -648,9 +585,6 @@ void DisplayMetroMenu(int client) {
 }
 
 public int eventMetroMenu(Handle menu, MenuAction action, int client, int param2) {
-	#if defined DEBUG
-	PrintToServer("eventMetroMenu");
-	#endif
 	if( action == MenuAction_Select ) {
 		char options[64], tmp[64];
 		GetMenuItem(menu, param2, options, sizeof(options));
@@ -775,9 +709,6 @@ bool IsInMetro(int client) {
 
 
 int BuidlingSIGN(int client) {
-	#if defined DEBUG
-	PrintToServer("BuidlingTABLE");
-	#endif
 	
 	if( !rp_IsBuildingAllowed(client) )
 		return 0;	
@@ -838,9 +769,6 @@ int BuidlingSIGN(int client) {
 	return ent;
 }
 public Action BuildingSIGN_post(Handle timer, any entity) {
-	#if defined DEBUG
-	PrintToServer("BuildingTABLE_post");
-	#endif
 	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
 	SetEntityMoveType(client, MOVETYPE_WALK);
 	
@@ -864,9 +792,6 @@ public void OnEntityDestroyed(int entity) {
 	}
 }
 public void BuildingSIGN_break(const char[] output, int caller, int activator, float delay) {
-	#if defined DEBUG
-	PrintToServer("BuildingTABLE_break");
-	#endif
 	
 	int owner = GetEntPropEnt(caller, Prop_Send, "m_hOwnerEntity");
 	if( IsValidClient(owner) ) {
@@ -937,9 +862,6 @@ void displaySignMenu(int client, int entity) {
 }
 
 public int Menu_displayMenu(Handle menu, MenuAction action, int client, int param2) {
-	#if defined DEBUG
-	PrintToServer("Menu_displayMenu");
-	#endif
 	
 	if( action == MenuAction_Select ) {
 		char options[64], explo[2][32];

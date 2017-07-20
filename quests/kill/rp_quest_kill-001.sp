@@ -22,7 +22,7 @@
 #pragma newdecls required
 #include <roleplay.inc>   // https://www.ts-x.eu
 
-//#define DEBUG
+
 #define QUEST_UNIQID	"kill-001"
 #define QUEST_NAME      "Criminels de haut rang"
 #define QUEST_TYPE      quest_daily

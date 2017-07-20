@@ -22,7 +22,7 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-//#define DEBUG
+
 #define QUEST_UNIQID	"mafia-002"
 #define	QUEST_NAME		"Où est Charlie?"
 #define	QUEST_TYPE		quest_daily

@@ -22,7 +22,7 @@
 #include <pve.inc>
 #include <phun_nav.inc>
 
-//#define DEBUG
+
 #define		QUEST_UNIQID   	"PVE_SOLO"
 #define		QUEST_NAME      "PVE: Solo"
 #define		QUEST_TYPE     	quest_group

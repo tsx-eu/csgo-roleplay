@@ -231,9 +231,6 @@ public void fwdMessage(int client, any target, char[] message) {
 	KickClient(target, message);
 }
 public int Handle_SanctionMenu(Handle menu, MenuAction action, int client, int param2) {
-	#if defined DEBUG
-	PrintToServer("Handle_SanctionMenu");
-	#endif
 	if (action == MenuAction_Select) {
 		char options[64], explo[2][32];
 		GetMenuItem(menu, param2, options, sizeof(options));

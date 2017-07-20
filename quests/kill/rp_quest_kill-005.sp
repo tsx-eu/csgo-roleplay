@@ -22,7 +22,7 @@
 #pragma newdecls required
 #include <roleplay.inc>   // https://www.ts-x.eu
 
-//#define DEBUG
+
 #define QUEST_UNIQID	"kill-005"
 #define QUEST_NAME      "Rébellion"
 #define QUEST_TYPE      quest_daily

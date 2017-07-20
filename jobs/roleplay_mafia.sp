@@ -330,9 +330,6 @@ public Action fwdAccelerate(int client, float& speed, float& gravity) {
 }
 
 public Action fwdOnPlayerUse(int client) {
-	#if defined DEBUG
-	PrintToServer("fwdOnPlayerUse");
-	#endif
 	static char tmp[128];
 	
 	if( rp_GetClientJobID(client) == 91 && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) == 91 ) {
@@ -365,9 +362,6 @@ public Action fwdOnPlayerUse(int client) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemDoorDefine(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemDoorDefine");
-	#endif
 	char Arg1[12];	GetCmdArg(1, Arg1, 11);	
 	int client = GetCmdArgInt(2);
 	int item_id = GetCmdArgInt(args);
@@ -392,9 +386,6 @@ public Action Cmd_ItemDoorDefine(int args) {
 	return Plugin_Handled;
 }
 public Action Cmd_ItemPiedBiche(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemPiedBiche");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
@@ -635,9 +626,6 @@ public Action SpawnMoney(Handle timer, any target) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemPickLock(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemPickLock");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
@@ -691,9 +679,6 @@ public Action Cmd_ItemPickLock(int args) {
 	return Plugin_Handled;
 }
 public Action ItemPickLockOver_frame(Handle timer, Handle dp) {
-	#if defined DEBUG
-	PrintToServer("ItemPickLockOver_frame");
-	#endif	
 	ResetPack(dp);
 	int client 	 = ReadPackCell(dp);
 	int door = ReadPackCell(dp);
@@ -777,25 +762,16 @@ public Action ItemPickLockOver_frame(Handle timer, Handle dp) {
 }
 // ----------------------------------------------------------------------------
 public Action timerAlarm(Handle timer, any door) {
-	#if defined DEBUG
-	PrintToServer("timerAlarm");
-	#endif
 	
 	EmitSoundToAllAny("UI/arm_bomb.wav", door, _, _, _, 0.5);
 	return Plugin_Handled;
 }
 public Action AllowStealing(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("AllowStealing");
-	#endif
 	
 	rp_SetClientBool(client, b_MaySteal, true);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez à nouveau voler.");
 }
 int GetMaxKit(int client, int itemID) {
-	#if defined DEBUG
-	PrintToServer("GetMaxKit");
-	#endif
 	int max, job = rp_GetClientInt(client, i_Job);
 	
 	switch( job ) {
@@ -1137,9 +1113,6 @@ void Cmd_BuyItemMenu(int client, bool free) {
 	return;
 }
 public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int p_iParam2) {
-	#if defined DEBUG
-	PrintToServer("Menu_BuyWeapon");
-	#endif
 	if (p_oAction == MenuAction_Select) {
 		
 		char szMenu[64], tmp[64], buffer[2][32];

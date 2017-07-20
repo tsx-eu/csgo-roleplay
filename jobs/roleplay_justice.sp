@@ -89,7 +89,7 @@ int g_iTribunalData[3][td_Max];
 char g_szJugementDATA[65][3][32];
 bool g_bClientDisconnected[65];
 
-//#define DEBUG
+
 
 #define isTribunalDisponible(%1) (g_iTribunalData[%1][td_Owner]<=0?true:false)
 #define GetTribunalZone(%1) (%1==1?TRIBUNAL_1:TRIBUNAL_2)

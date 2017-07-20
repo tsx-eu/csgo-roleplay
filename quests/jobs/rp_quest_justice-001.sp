@@ -22,7 +22,7 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-//#define DEBUG
+
 #define QUEST_UNIQID	"justice-001"
 #define	QUEST_NAME		"La justice sournoise"
 #define	QUEST_TYPE		quest_daily

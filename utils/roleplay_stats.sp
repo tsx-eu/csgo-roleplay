@@ -88,9 +88,6 @@ public void OnClientDisconnect(int client) {
 	SaveClient(client);
 }
 public Action fwdCommand(int client, char[] command, char[] arg) {
-	#if defined DEBUG
-	PrintToServer("fwdCommand");
-	#endif
 	if( StrEqual(command, "compteur") || StrEqual(command, "count") || StrEqual(command, "stats") || StrEqual(command, "stat") || StrEqual(command, "statistics") || StrEqual(command, "level") ) {
 		Handle menu = CreateMenu(MenuViewStats);
 		SetMenuTitle(menu, "Quelles stats afficher ?\n ");
@@ -126,9 +123,6 @@ public void SQL_StatLoadCB(Handle owner, Handle row, const char[] error, any cli
 }
 
 public int MenuViewStats(Handle menu, MenuAction action, int client, int param ) {
-	#if defined DEBUG
-	PrintToServer("MenuViewStats");
-	#endif
 	
 	if( action == MenuAction_Select ) {
 		char szMenuItem[64];
@@ -323,9 +317,6 @@ public void DisplayLevelStats(int client){
 }
 
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
-	#if defined DEBUG
-	PrintToServer("MenuNothing");
-	#endif
 	if( action == MenuAction_End ) {
 		if( menu != INVALID_HANDLE )
 			CloseHandle(menu);
@@ -347,9 +338,6 @@ public void UpdateStats(int client){
 }
 char sCQuery[65536];
 public Action saveStats(Handle timer){
-	#if defined DEBUG
-	PrintToServer("saveStats");
-	#endif
 	
 	for (int i = 1; i <= MaxClients; i++){
 		if(!IsValidClient(i))

@@ -327,9 +327,6 @@ public Action Cmd_ItemStuffPvP(int args) {
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu comme cadeau: %s", tmp);
 }
 public Action Cmd_ItemLotoBonus(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemLotoBonus");
-	#endif
 	int client = GetCmdArgInt(1);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous vous sentez chanceux aujourd'hui.");
 	rp_IncrementLuck(client);
@@ -359,9 +356,6 @@ public void SQL_GetLotoCount(Handle owner, Handle hQuery, const char[] error, an
 }
 int ticketAmountType[] =  { -1, 9999999, 1, 2, 3, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000 };
 public Action Cmd_ItemLoto(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemLoto");
-	#endif
 	
 	int amount = GetCmdArgInt(1);
 	int client = GetCmdArgInt(2);
@@ -530,16 +524,10 @@ bool gratterTicket(int client, int amount, int itemID) {
 }
 // ------------------------------------------------------------------------------
 public Action CmdForceLoto(int client, int args) {
-	#if defined DEBUG
-	PrintToServer("CmdForceLoto");
-	#endif
 	CheckLotery();
 	return Plugin_Handled;
 }
 void CheckLotery() {
-	#if defined DEBUG
-	PrintToServer("CheckLotery");
-	#endif
 	
  	/* Explication du tirage:
 	10 boules dans un sac. 4 noire, 3 rouge, 2 verte, 1 jaune
@@ -566,9 +554,6 @@ void CheckLotery() {
 	SQL_TQuery( rp_GetDatabase() , SQL_GetLoteryWiner, "SELECT DISTINCT T.`steamid`,`name` FROM ( SELECT `steamid` FROM `rp_loto` ORDER BY RAND()  ) AS T INNER JOIN `rp_users` U ON U.`steamid`=T.`steamid` LIMIT 3;");
 }
 public void SQL_GetLoteryWiner(Handle owner, Handle hQuery, const char[] error, any none) {
-	#if defined DEBUG
-	PrintToServer("SQL_GetLoteryWiner");
-	#endif
 	int place = 0;
 	int iGain = 0;
 	CPrintToChatAll("{lightblue} ================================== {default}");

@@ -644,9 +644,6 @@ public void QUERY_MairieQuestionnaire(Handle owner, Handle handle, const char[] 
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 public int Handle_Mairie(Handle menu, MenuAction action, int client, int param2) {
-	#if defined DEBUG
-	PrintToServer("Handle_Mairie");
-	#endif
 	if (action == MenuAction_Select) {
 		char options[64], explo[4][32];
 		GetMenuItem(menu, param2, options, sizeof(options));

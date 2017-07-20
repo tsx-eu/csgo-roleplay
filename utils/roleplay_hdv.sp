@@ -289,9 +289,6 @@ void HDV_History(int client, int action, int cancelID, int confirm, int dataAmou
 	}
 }
 public int Handler_MainHDV(Handle hItem, MenuAction oAction, int client, int param) {
-	#if defined DEBUG
-	PrintToServer("menuOpenMenu");
-	#endif
 	if (oAction == MenuAction_Select) {
 		char options[128], exploded[8][32];
 		GetMenuItem(hItem, param, options, sizeof(options));
@@ -314,9 +311,6 @@ public int Handler_MainHDV(Handle hItem, MenuAction oAction, int client, int par
 }
 
 public void SQL_DepositCB(Handle owner, Handle handle, const char[] error, any data) {
-	#if defined DEBUG
-	PrintToServer("CallBackHDVDeposit");
-	#endif
 	if( strlen(error) >= 1  ) {
 		ResetPack(data);
 		int client, itemID ,quantity ,tax;
@@ -335,9 +329,6 @@ public void SQL_DepositCB(Handle owner, Handle handle, const char[] error, any d
 }
 
 public void SQL_ListJobCB(Handle owner, Handle row, const char[] error, any client) {
-	#if defined DEBUG
-	PrintToServer("SQL_ListJobCB");
-	#endif
 	if( strlen(error) >= 1  ) {
 		LogError("[SQL] [ERROR] %s", error);
 		return;
@@ -367,9 +358,6 @@ public void SQL_ListJobCB(Handle owner, Handle row, const char[] error, any clie
 	}
 }
 public void SQL_ListJobItemsCB(Handle owner, Handle row, const char[] error, any client) {
-	#if defined DEBUG
-	PrintToServer("CallBackHDVListJobItems");
-	#endif
 	if( strlen(error) >= 1  ) {
 		LogError("[SQL] [ERROR] %s", error);
 		return;
@@ -395,9 +383,6 @@ public void SQL_ListJobItemsCB(Handle owner, Handle row, const char[] error, any
 }
 
 public void SQL_ListItemsCB(Handle owner, Handle row, const char[] error, any client) {
-	#if defined DEBUG
-	PrintToServer("CallBackHDVListItems");
-	#endif
 	if( strlen(error) >= 1  ) {
 		LogError("[SQL] [ERROR] %s", error);
 		return;
@@ -427,9 +412,6 @@ public void SQL_ListItemsCB(Handle owner, Handle row, const char[] error, any cl
 }
 
 public void SQL_AchatCB(Handle owner, Handle handle, const char[] error, any data) {
-	#if defined DEBUG
-	PrintToServer("CallBackHDVPostAchat");
-	#endif
 	ResetPack(data);
 	int client = ReadPackCell(data);
 	int itemID = ReadPackCell(data);
@@ -455,9 +437,6 @@ public void SQL_AchatCB(Handle owner, Handle handle, const char[] error, any dat
 }
 
 public void SQL_HistoryCB(Handle owner, Handle row, const char[] error, any data) {
-	#if defined DEBUG
-	PrintToServer("CallBackHDVHistory");
-	#endif
 	int client = data%1000;
 	data = (data-client)/1000;
 	if( strlen(error) >= 1  ) {
@@ -497,9 +476,6 @@ public void SQL_HistoryCB(Handle owner, Handle row, const char[] error, any data
 }
 
 public void SQL_CancelCB(Handle owner, Handle handle, const char[] error, any data) {
-	#if defined DEBUG
-	PrintToServer("CallBackHDVPostCancel");
-	#endif
 	ResetPack(data);
 	int client = ReadPackCell(data);
 	int itemID = ReadPackCell(data);

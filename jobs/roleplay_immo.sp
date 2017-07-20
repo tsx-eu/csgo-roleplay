@@ -98,9 +98,6 @@ public void OnMapStart() {
 	PrecacheModel(MODEL_GRAVE, true);
 }
 public void OnClientPostAdminCheck(int client) {
-	#if defined DEBUG
-	PrintToServer("OnClientPostAdminCheck");
-	#endif
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 	rp_HookEvent(client, RP_OnPlayerDataLoaded, fwdLoaded);
 }
@@ -111,9 +108,6 @@ public Action fwdLoaded(int client) {
 }
 // ----------------------------------------------------------------------------
 public Action fwdCommand(int client, char[] command, char[] arg) {
-	#if defined DEBUG
-	PrintToServer("fwdCommand");
-	#endif
 	if( StrEqual(command, "infocoloc") ||  StrEqual(command, "infocolloc") ) {
 		return Cmd_InfoColoc(client);
 	}
@@ -123,9 +117,6 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	return Plugin_Continue;
 }
 public Action Cmd_ItemGiveAppart(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemGiveAppart");
-	#endif
 	char arg1[12], arg2[12];
 	
 	GetCmdArg(1, arg1, sizeof(arg1));
@@ -150,9 +141,6 @@ public Action Cmd_ItemGiveAppart(int args) {
 	}
 }
 public Action Cmd_ItemAppartSerrure(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemAppartSerrure");
-	#endif
 
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
@@ -165,9 +153,6 @@ public Action Cmd_ItemAppartSerrure(int args) {
 	return Plugin_Handled;
 }
 public Action Task_ItemAppartSerrure(Handle timer, Handle dp) {
-	#if defined DEBUG
-	PrintToServer("Task_ItemAppartSerrure");
-	#endif
 	ResetPack(dp);
 	int client = ReadPackCell(dp);
 	int item_id = ReadPackCell(dp);
@@ -225,9 +210,6 @@ public int MenuSerrureVirer(Handle menu, MenuAction action, int client, int para
 	}
 }
 public Action Cmd_ItemGiveAppartDouble(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemGiveAppartDouble");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int itemID = GetCmdArgInt(args);
@@ -263,9 +245,6 @@ public Action Cmd_ItemGiveAppartDouble(int args) {
 	return Plugin_Handled;
 }
 public Action Cmd_ItemGiveBonus(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemGiveBonus");
-	#endif
 	
 	char arg1[32];
 	GetCmdArg(1, arg1, sizeof(arg1));
@@ -531,9 +510,6 @@ public int MenuPropOutdoor(Handle menu, MenuAction action, int client, int param
 	}
 }
 public void PropBuilt_break(const char[] output, int caller, int activator, float delay) {
-	#if defined DEBUG
-	PrintToServer("PropBuilt_break");
-	#endif
 	
 	int client = rp_GetBuildingData(caller, BD_owner);
 	rp_SetBuildingData(caller, BD_owner, 0);
@@ -544,9 +520,6 @@ public void PropBuilt_break(const char[] output, int caller, int activator, floa
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemPropTrap(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemPropTrap");
-	#endif
 	int client = GetCmdArgInt(1);
 	int target = GetClientAimTarget(client, false);
 	
@@ -580,18 +553,12 @@ public Action Cmd_ItemPropTrap(int args) {
 	return Plugin_Handled;
 }
 public void PropsTouched(int touched, int toucher) {
-	#if defined DEBUG
-	PrintToServer("PropsTouched");
-	#endif
 	if( IsValidClient(toucher) && toucher != rp_GetBuildingData(touched, BD_owner) ) {
 		rp_Effect_PropExplode(touched);
 		rp_SetClientInt(rp_GetBuildingData(touched, BD_owner), i_LastAgression, GetTime());
 	}
 }
 public Action PropsDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype) {
-	#if defined DEBUG
-	PrintToServer("PropsDamage");
-	#endif
 	if( attacker == inflictor && IsValidClient(attacker) ) {
 		int wep_id = GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon");
 		char sWeapon[32];
@@ -604,9 +571,6 @@ public Action PropsDamage(int victim, int &attacker, int &inflictor, float &dama
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemGrave(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemGrave");
-	#endif
 	int client = GetCmdArgInt(1);
 	
 	if( BuildingTomb(client) == 0 ) {
@@ -620,9 +584,6 @@ public Action Cmd_ItemGrave(int args) {
 	return Plugin_Handled;
 }
 int BuildingTomb(int client) {
-	#if defined DEBUG
-	PrintToServer("BuildingTomb");
-	#endif
 	
 	if( !rp_IsBuildingAllowed(client) )
 		return 0;	
@@ -684,9 +645,6 @@ int BuildingTomb(int client) {
 	return 1;
 }
 public Action BuildingTomb_post(Handle timer, any entity) {
-	#if defined DEBUG
-	PrintToServer("BuildingTomb_post");
-	#endif
 	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
 	SetEntityMoveType(client, MOVETYPE_WALK);
 	
@@ -697,9 +655,6 @@ public Action BuildingTomb_post(Handle timer, any entity) {
 	return Plugin_Handled;
 }
 public void BuildingTomb_break(const char[] output, int caller, int activator, float delay) {
-	#if defined DEBUG
-	PrintToServer("BuildingTomb_break");
-	#endif
 	
 	int owner = GetEntPropEnt(caller, Prop_Send, "m_hOwnerEntity");
 	if( IsValidClient(owner) ) {
@@ -708,9 +663,6 @@ public void BuildingTomb_break(const char[] output, int caller, int activator, f
 	}
 }
 public Action Cmd_ItemLampe(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemLampe");
-	#endif
 	char arg1[32];
 	GetCmdArg(0, arg1, sizeof(arg1));
 	
@@ -756,9 +708,6 @@ void GetClientFrontLocationData( int client, float position[3], float angles[3],
 }
 
 public Action Cmd_InfoColoc(int client){
-	#if defined DEBUG
-	PrintToServer("Cmd_InfoColoc");
-	#endif
 	if(rp_GetClientInt(client, i_AppartCount) == 0){
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas d'appartement.");
 		return Plugin_Handled;
@@ -817,9 +766,6 @@ public Action Cmd_InfoColoc(int client){
 }
 
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
-	#if defined DEBUG
-	PrintToServer("MenuNothing");
-	#endif
 	if( action == MenuAction_Select ) {
 		if( menu != INVALID_HANDLE )
 			CloseHandle(menu);
@@ -831,9 +777,6 @@ public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_BedVilla(int client){
-	#if defined DEBUG
-	PrintToServer("Cmd_BedVilla");
-	#endif
 	
 	if( rp_GetClientInt(client, i_PlayerLVL) < 42 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être au moins de niveau 42 \"Propriétaire\", afin d'utiliser cette commande.");
@@ -892,9 +835,6 @@ public void SQL_BedVillaMenu(Handle owner, Handle hQuery, const char[] error, an
 	rp_SetClientBool(client, b_MaySteal, true);
 }
 public int bedVillaMenu(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
-	#if defined DEBUG
-	PrintToServer("bedVillaMenu");
-	#endif
 
 	if( p_oAction == MenuAction_Select) {
 		char szMenuItem[32];
@@ -939,9 +879,6 @@ public void SQL_BedVillaMenuKey(Handle owner, Handle hQuery, const char[] error,
 	
 }
 public int bedVillaMenu_KEY(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
-	#if defined DEBUG
-	PrintToServer("bedVillaMenu_BED");
-	#endif
 
 	if( p_oAction == MenuAction_Select) {
 		char szMenuItem[32], tmp[64], szQuery[1024];
@@ -994,9 +931,6 @@ void OpenBedMenu(int client) {
 	DisplayMenu(menu, client, 60);
 }
 public int bedVillaMenu_BED(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
-	#if defined DEBUG
-	PrintToServer("bedVillaMenu_BED");
-	#endif
 
 	if( p_oAction == MenuAction_Select) {
 		char szMenuItem[32], szDayOfWeek[12], szHours[12], sql[256];
@@ -1032,9 +966,6 @@ public int bedVillaMenu_BED(Handle p_hItemMenu, MenuAction p_oAction, int client
 	}
 }
 public Action CmdForceAppart(int client, int args) {
-	#if defined DEBUG
-	PrintToServer("CmdForceAppart");
-	#endif
 	
 	CheckAppart();
 	return Plugin_Handled;

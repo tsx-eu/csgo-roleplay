@@ -190,9 +190,6 @@ public Action Cmd_CutInfo(int client) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemPackEquipement(int args){
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemPackEquipement");
-	#endif									
 
 	int client = GetCmdArgInt(1);
 
@@ -206,9 +203,6 @@ public Action Cmd_ItemPackEquipement(int args){
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemCut(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemCut");
-	#endif
 
 	int amount = GetCmdArgInt(1);
 	int client = GetCmdArgInt(2);
@@ -263,9 +257,6 @@ public Action Cmd_ItemCut(int args) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemCut_Esquive(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemCut_Esquive");
-	#endif
 	
 	int amount = GetCmdArgInt(1);
 	int client = GetCmdArgInt(2);
@@ -290,9 +281,6 @@ public Action Cmd_ItemCut_Esquive(int args) {
 	return Plugin_Handled;
 }
 public Action Cmd_ItemCutRemove(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemCutRemove");
-	#endif
 
 	int client = GetCmdArgInt(1);
 	rp_SetClientInt(client, i_KnifeTrain, 5);
@@ -300,9 +288,6 @@ public Action Cmd_ItemCutRemove(int args) {
 }
 
 public Action Cmd_ItemCutThrow(int args) {	
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemCutThrow");
-	#endif
 	
 	
 	int client = GetCmdArgInt(1);
@@ -336,9 +321,6 @@ public Action Cmd_ItemCutThrow(int args) {
 	
 }
 public void Cmd_ItemCutThrow_TOUCH(int rocket, int entity) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemCutThrow_TOUCH");
-	#endif
 	
 	char classname[64];
 	int attacker = GetEntPropEnt(rocket, Prop_Send, "m_hOwnerEntity");
@@ -371,9 +353,6 @@ public void Cmd_ItemCutThrow_TOUCH(int rocket, int entity) {
 
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemKnifeType(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemKnifeType");
-	#endif
 	char arg1[12];
 	GetCmdArg(1, arg1, sizeof(arg1));
 	
@@ -487,9 +466,6 @@ bool wpnCutDamage(int victim, int attacker, float &damage) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemPermiTir(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemPermiTir");
-	#endif
 
 	int client = GetCmdArgInt(1);
 	
@@ -501,9 +477,6 @@ public Action Cmd_ItemPermiTir(int args) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemRiotShield(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemRiotShield");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
@@ -569,9 +542,6 @@ public Action Hook_WeaponSwitch(int client, int weapon) {
 	}
 }
 public Action fwdTakeDamage(int victim, int attacker, float& damage, int wepID, float pos[3]) {
-	#if defined DEBUG
-	PrintToServer("fwdTakeDamage");
-	#endif
 	float start[3];
 	GetClientEyePosition(attacker, start);
 	
@@ -584,27 +554,16 @@ public Action fwdTakeDamage(int victim, int attacker, float& damage, int wepID, 
 			damage = 0.0;
 			CloseHandle(tr);
 			
-			#if defined DEBUG
-			TE_SetupBeamPoints(start, pos, g_cBeam, g_cBeam, 0, 10, 5.0, 1.0, 1.0, 1, 0.0, { 0, 255, 0, 255 }, 5);
-			TE_SendToAll();
-			#endif
 			
 			return Plugin_Stop;
 		}
 		
-		#if defined DEBUG
-		TE_SetupBeamPoints(start, pos, g_cBeam, g_cBeam, 0, 10, 5.0, 1.0, 1.0, 1, 0.0, { 255, 0, 0, 255 }, 5);
-		TE_SendToAll();
-		#endif
 	}
 	CloseHandle(tr);
 	
 	return Plugin_Continue;
 }
 public Action fwdPlayerDead(int victim, int attacker, float& respawn) {
-	#if defined DEBUG
-	PrintToServer("fwdPlayerDead");
-	#endif
 	
 	removeShield(victim);
 }
@@ -640,9 +599,6 @@ void removeShield(int client) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemShoes(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemShoes");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
@@ -668,9 +624,6 @@ public Action fwdAssurance(int client, int& amount) {
 		amount += 250;
 }
 public Action fwdVitalite(int client) {
-	#if defined DEBUG
-	PrintToServer("fwdVitalite");
-	#endif
 	static float fLast[65][3];
 	static count[65];
 	
@@ -694,9 +647,6 @@ public Action fwdVitalite(int client) {
 		fLast[client][i] = fNow[i];
 }
 public Action fwdNoFallDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype) {
-	#if defined DEBUG
-	PrintToServer("fwdNoFallDamage");
-	#endif
 	
 	if( damagetype & DMG_FALL && !(rp_GetZoneBit(rp_GetPlayerZone(victim)) & BITZONE_EVENT)) {
 		damage = 0.0;
@@ -772,9 +722,6 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 }
 
 public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
-	#if defined DEBUG
-	PrintToServer("ModifyWeapon Menu");
-	#endif
 
 	if (p_oAction == MenuAction_Select) {
 		char szMenuItem[32];
@@ -856,9 +803,6 @@ public int ModifyWeapon(Handle p_hItemMenu, MenuAction p_oAction, int client, in
 }
 
 public Action Cmd_ItemNeedForSpeed(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemNeedForSpeed");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	
@@ -866,18 +810,12 @@ public Action Cmd_ItemNeedForSpeed(int args) {
 	rp_HookEvent(client, RP_PrePlayerPhysic, fwdCigSpeed, 10.0);
 }
 public Action fwdCigSpeed(int client, float& speed, float& gravity) {
-	#if defined DEBUG
-	PrintToServer("fwdCigSpeed");
-	#endif
 	speed += 0.15;
 	
 	return Plugin_Changed;
 }
 
 public Action Cmd_ItemLessive(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemLessive");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
@@ -901,9 +839,6 @@ public Action Cmd_ItemLessive(int args) {
 	return Plugin_Handled;
 }
 public Action Cmd_ItemCafe(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemCafe");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	
@@ -913,9 +848,6 @@ public Action Cmd_ItemCafe(int args) {
 	rp_IncrementSuccess(client, success_list_cafeine);
 }
 public Action Cmd_ItemCrayons(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemCrayons");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
@@ -997,9 +929,6 @@ public Action fwdTalkCrayon(int client, char[] szSayText, int length, bool local
 }
 
 public Action CmdItemMask(int args) {
-	#if defined DEBUG
-	PrintToServer("CmdItemMask");
-	#endif
 	char arg1[12];
 	
 	GetCmdArg(1, arg1, sizeof(arg1)); int client = StringToInt(arg1);
@@ -1081,9 +1010,6 @@ public Action fwdAssuranceMask(int client, int& amount) {
 }
 
 public int MenuSetSkin(Handle menu, MenuAction action, int client, int param2) {
-	#if defined DEBUG
-	PrintToServer("MenuSetSkin");
-	#endif
 	if (action == MenuAction_Select) {
 		char options[128];
 		GetMenuItem(menu, param2, options, sizeof(options));
@@ -1097,9 +1023,6 @@ public int MenuSetSkin(Handle menu, MenuAction action, int client, int param2) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemGiveSkin(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemGiveSkin");
-	#endif
 	
 	char arg1[128];
 	GetCmdArg(1, arg1, sizeof(arg1));
@@ -1236,9 +1159,6 @@ void Draw_SkinList(int client, int test, int skinID) {
 	}
 }
 public int MenuTrySkin(Handle menu, MenuAction action, int client, int param2) {
-	#if defined DEBUG
-	PrintToServer("MenuTrySkin");
-	#endif
 	
 	if (action == MenuAction_Select) {
 		char szMenuItem[128], explo[2][32];

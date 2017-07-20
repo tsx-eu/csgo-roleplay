@@ -110,9 +110,6 @@ public Action fwdRegenKevlar(int client) {
 	}
 }
 public Action Cmd_ItemBioKev(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemBioKev");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
@@ -131,9 +128,6 @@ public Action Cmd_ItemBioKev(int args) {
 }
 // ------------------------------------------------------------------------------
 public Action Cmd_ItemBioYeux(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemBioYeux");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
@@ -149,9 +143,6 @@ public Action Cmd_ItemBioYeux(int args) {
 	return Plugin_Continue;
 }
 public Action fwfBioYeux(int client, int color[4]) {
-	#if defined DEBUG
-	PrintToServer("fwfBioYeux");
-	#endif
 	
 	color[0] = 0;
 	color[1] = 0;
@@ -167,9 +158,6 @@ public Action fwdFrozen(int client, float& speed, float& gravity) {
 }
 // ------------------------------------------------------------------------------
 public Action Cmd_ItemKevlar(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemKevlar");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
@@ -193,9 +181,6 @@ public Action Cmd_ItemKevlar(int args) {
 	return Plugin_Continue;
 }
 public Action Cmd_ItemPropulseur(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemPropulseur");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	
@@ -213,9 +198,6 @@ public Action Cmd_ItemPropulseur(int args) {
 }
 // ------------------------------------------------------------------------------
 public Action Cmd_ItemNano(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemNano");
-	#endif
 	
 	char arg1[12];
 	GetCmdArg(1, arg1, sizeof(arg1));
@@ -314,17 +296,11 @@ public Action Cmd_ItemNano(int args) {
 	return Plugin_Handled;
 }
 public Action NanoUnfreeze(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("NanoUnfreeze");
-	#endif
 	
 	rp_ClientColorize(client);		
 }
 // ------------------------------------------------------------------------------
 public Action Cmd_ItemMoreCash(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemMoreCash");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int amount = rp_GetClientInt(client, i_Machine);
@@ -341,9 +317,6 @@ public Action Cmd_ItemMoreCash(int args) {
 }
 // ------------------------------------------------------------------------------
 public Action Cmd_ItemCash(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemCash");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	
@@ -417,9 +390,6 @@ public Action fwdOnPlayerBuild(int client, float& cooldown){
 	return Plugin_Stop;
 }
 int BuildingCashMachine(int client, bool force=false) {
-	#if defined DEBUG
-	PrintToServer("BuildingCashMachine");
-	#endif
 	if( !rp_IsBuildingAllowed(client) )
 		return 0;
 	
@@ -499,9 +469,6 @@ int BuildingCashMachine(int client, bool force=false) {
 	return ent;
 }
 public Action BuildingCashMachine_post(Handle timer, any entity) {
-	#if defined DEBUG
-	PrintToServer("BuildingCashMachine_post");
-	#endif
 	if( !IsValidEdict(entity) && !IsValidEntity(entity) )
 		return Plugin_Handled;
 
@@ -515,9 +482,6 @@ public Action BuildingCashMachine_post(Handle timer, any entity) {
 	return Plugin_Handled;
 }
 public void BuildingCashMachine_break(const char[] output, int caller, int activator, float delay) {
-	#if defined DEBUG
-	PrintToServer("BuildingCashMachine_break");
-	#endif
 	CashMachine_Destroy(caller);
 	
 	if( IsValidClient(activator) ) {
@@ -535,9 +499,6 @@ public void BuildingCashMachine_break(const char[] output, int caller, int activ
 }
 public Action Frame_CashMachine(Handle timer, any ent) {
 	ent = EntRefToEntIndex(ent); if( ent == -1 ) { return Plugin_Handled; }
-	#if defined DEBUG
-	PrintToServer("Frame_CashMachine");
-	#endif
 	
 	int client = GetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity");
 	if( !IsValidClient(client) ) {
@@ -596,9 +557,6 @@ public Action Frame_CashMachine(Handle timer, any ent) {
 	return Plugin_Handled;
 }
 void CashMachine_Destroy(int entity) {
-	#if defined DEBUG
-	PrintToServer("CashMachine_Destroy");
-	#endif
 	float vecOrigin[3];
 	Entity_GetAbsOrigin(entity, vecOrigin);
 	
@@ -631,9 +589,6 @@ void CashMachine_Destroy(int entity) {
 	}
 }
 void ExplodeProp(int ent) {
-	#if defined DEBUG
-	PrintToServer("ExplodeProp");
-	#endif
 	if( !g_bProps_trapped[ent] )
 		return;
 	
@@ -652,17 +607,11 @@ void ExplodeProp(int ent) {
 	
 }
 public void PropsTouched(int touched, int toucher) {
-	#if defined DEBUG
-	PrintToServer("PropsTouched");
-	#endif
 	if( IsValidClient(toucher) && toucher != rp_GetBuildingData(touched, BD_owner) ) {
 		ExplodeProp(touched);
 	}
 }
 public Action PropsDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype) {
-	#if defined DEBUG
-	PrintToServer("PropsDamage");
-	#endif
 	if( attacker == inflictor && IsValidClient(attacker) ) {
 		int wep_id = GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon");
 		char sWeapon[32];
@@ -675,9 +624,6 @@ public Action PropsDamage(int victim, int &attacker, int &inflictor, float &dama
 }
 // ------------------------------------------------------------------------------
 public Action Cmd_ItemCashBig(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemCashBig");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	
@@ -701,9 +647,6 @@ public Action Cmd_ItemCashBig(int args) {
 	return Plugin_Handled;
 }
 int BuildingBigCashMachine(int client) {
-	#if defined DEBUG
-	PrintToServer("BuildingBigCashMachine");
-	#endif
 	if( !rp_IsBuildingAllowed(client) )
 		return 0;
 	
@@ -773,9 +716,6 @@ int BuildingBigCashMachine(int client) {
 	return ent;
 }
 public Action BuildingBigCashMachine_post(Handle timer, any entity) {
-	#if defined DEBUG
-	PrintToServer("BuildingBigCashMachine_post");
-	#endif
 	if( !IsValidEdict(entity) && !IsValidEntity(entity) )
 		return Plugin_Handled;
 
@@ -790,9 +730,6 @@ public Action BuildingBigCashMachine_post(Handle timer, any entity) {
 }
 public Action Frame_BigCashMachine(Handle timer, any ent) {
 	ent = EntRefToEntIndex(ent); if( ent == -1 ) { return Plugin_Handled; }
-	#if defined DEBUG
-	PrintToServer("Frame_BigCashMachine");
-	#endif
 	
 	int client = GetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity");
 	if( !IsValidClient(client) ) {

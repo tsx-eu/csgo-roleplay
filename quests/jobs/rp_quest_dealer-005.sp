@@ -22,7 +22,7 @@
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
 
-//#define DEBUG
+
 #define QUEST_UNIQID	"dealer-005"
 #define	QUEST_NAME		"Vandalisme des distributeurs"
 #define	QUEST_TYPE		quest_daily

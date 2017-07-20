@@ -549,9 +549,6 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 }
 // ------------------------------------------------------------------------------
 public Action Cmd_ItemFireWork(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemFireWork");
-	#endif
 	
 	int target = GetCmdArgInt(1);
 	
@@ -562,9 +559,6 @@ public Action Cmd_ItemFireWork(int args) {
 }
 
 public Action Fire_Spriteworks01(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("Fire_Spriteworks01");
-	#endif
 	float vec[3], vec2[3];
 	GetClientAbsOrigin(client, vec);
 	vec2 = vec; // <-- CA CAY PRATIQUE
@@ -575,9 +569,6 @@ public Action Fire_Spriteworks01(Handle timer, any client) {
 	TE_SendToAll();
 }
 public Action Fire_Spriteworks02(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("Fire_Spriteworks02");
-	#endif
 	float vec[3];
 	GetClientAbsOrigin(client, vec);
 	vec[2] += 400.0;
@@ -593,9 +584,6 @@ public Action Fire_Spriteworks02(Handle timer, any client) {
 	
 }
 public Action Cmd_ItemHighJump(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemHighJump");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	
@@ -614,9 +602,6 @@ public Action Cmd_ItemHighJump(int args) {
 }
 // ------------------------------------------------------------------------------
 public Action Cmd_ItemBomb(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemBomb");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int target = rp_GetClientTarget(client);
@@ -660,9 +645,6 @@ public Action Cmd_ItemBomb(int args) {
 	return Plugin_Handled;
 }
 public Action ItemBombOver(Handle timer, Handle dp) {
-	#if defined DEBUG
-	PrintToServer("ItemBombOver");
-	#endif
 	
 	if( dp == INVALID_HANDLE ) {
 		return Plugin_Handled;

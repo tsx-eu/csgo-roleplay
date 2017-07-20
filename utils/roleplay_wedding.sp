@@ -88,9 +88,6 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	return Plugin_Continue;
 }
 public Action Cmd_Mariage(int client) {
-	#if defined DEBUG
-	PrintToServer("Cmd_Mariage");
-	#endif
 	
 	if( rp_GetClientJobID(client) != 101 ) { // Au dessus de HJ1 seulement
 		ACCESS_DENIED(client);

@@ -108,9 +108,6 @@ public Action Cmd_GetStoreWeapon(int args) {
 	Cmd_BuyWeapon(GetCmdArgInt(1), true);
 }
 public Action Cmd_SendToJail(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_SendToJail");
-	#endif
 	SendPlayerToJail(GetCmdArgInt(1), GetCmdArgInt(2));
 	
 	StripWeapons(GetCmdArgInt(1));
@@ -121,9 +118,6 @@ public void OnMapStart() {
 }
 // ----------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {
-	#if defined DEBUG
-	PrintToServer("OnClientPostAdminCheck");
-	#endif
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
 	rp_HookEvent(client, RP_OnPlayerSpawn, fwdSpawn);
 	rp_HookEvent(client, RP_OnPlayerBuild, fwdOnPlayerBuild);
@@ -152,9 +146,6 @@ public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 	}
 }
 public Action fwdSpawn(int client) {
-	#if defined DEBUG
-	PrintToServer("fwdSpawn");
-	#endif
 	if( rp_GetClientInt(client, i_JailTime) > 0 )
 		SendPlayerToJail(client, 0);
 
@@ -166,9 +157,6 @@ public Action fwdSpawn(int client) {
 	return Plugin_Continue;
 }
 public Action fwdCommand(int client, char[] command, char[] arg) {
-	#if defined DEBUG
-	PrintToServer("fwdCommand");
-	#endif
 	if( StrEqual(command, "cop") || StrEqual(command, "cops") ) {
 		return Cmd_Cop(client);
 	}
@@ -192,9 +180,6 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_Cop(int client) {
-	#if defined DEBUG
-	PrintToServer("Cmd_Cop");
-	#endif
 	int job = rp_GetClientInt(client, i_Job);
 		
 	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
@@ -245,9 +230,6 @@ public Action Cmd_Cop(int client) {
 	return Plugin_Handled;
 }
 public Action Cmd_Vis(int client) {
-	#if defined DEBUG
-	PrintToServer("Cmd_Vis");
-	#endif
 	int job = rp_GetClientInt(client, i_Job);
 		
 	if( job != 1 && job != 2 && job != 4 && job != 5 && job != 6 ) { // Chef, co chef, gti, cia
@@ -301,9 +283,6 @@ public Action Cmd_Vis(int client) {
 	return Plugin_Handled;
 }
 public Action Cmd_Tazer(int client) {
-	#if defined DEBUG
-	PrintToServer("Cmd_Tazer");
-	#endif
 	char tmp[128], tmp2[128], szQuery[1024];
 	int job = rp_GetClientInt(client, i_Job);
 	int Czone = rp_GetPlayerZone(client);
@@ -536,9 +515,6 @@ public Action Cmd_Tazer(int client) {
 	return Plugin_Handled;
 }
 public Action Cmd_InJail(int client) {
-	#if defined DEBUG
-	PrintToServer("Cmd_InJail");
-	#endif
 	char tmp[256];
 	
 	int zone;
@@ -564,9 +540,6 @@ public Action Cmd_InJail(int client) {
 	return Plugin_Handled;
 }
 public Action Cmd_Jail(int client) {
-	#if defined DEBUG
-	PrintToServer("Cmd_Jail");
-	#endif
 	int job = rp_GetClientInt(client, i_Job);
 
 	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
@@ -683,9 +656,6 @@ public Action Cmd_Jail(int client) {
 	return Plugin_Handled;
 }
 public Action Cmd_Push(int client) {
-	#if defined DEBUG
-	PrintToServer("Cmd_Push");
-	#endif
 	int job = rp_GetClientInt(client, i_Job);
 		
 	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 ) {
@@ -736,9 +706,6 @@ public Action Cmd_Push(int client) {
 	return Plugin_Handled;
 }
 public void ClientConVar(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue) {
-	#if defined DEBUG
-	PrintToServer("ClientConVar");
-	#endif
 	if( StrEqual(cvarName, "cl_disablehtmlmotd", false) ) {
 		if( StrEqual(cvarValue, "0") == false ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Des problèmes d'affichage ? Entrez cl_disablehtmlmotd 0 dans votre console puis relancez CS:GO.");
@@ -747,15 +714,9 @@ public void ClientConVar(QueryCookie cookie, int client, ConVarQueryResult resul
 }
 // ----------------------------------------------------------------------------
 void SendPlayerToJail(int target, int client = 0) {
-	#if defined DEBUG
-	PrintToServer("SendPlayerToJail");
-	#endif
 	static float fLocation[MAX_LOCATIONS][3];
 	char tmp[128];
 	
-	#if defined DEBUG
-	PrintToServer("SendPlayerToJail: %d %d", target, client);
-	#endif
 	
 	rp_ClientGiveItem(client, 1, -rp_GetClientItem(client, 1));
 	rp_ClientGiveItem(client, 2, -rp_GetClientItem(client, 2));
@@ -820,9 +781,6 @@ public Action OnWeaponDrop(int client, int weapon) {
 }
 // ----------------------------------------------------------------------------
 void AskJailTime(int client, int target) {
-	#if defined DEBUG
-	PrintToServer("AskJailTime");
-	#endif
 	char tmp[256], tmp2[12];
 	
 	GetClientAuthId(target, AuthId_Engine, g_szTribunal[client], sizeof(g_szTribunal[]), false);
@@ -862,9 +820,6 @@ void AskJailTime(int client, int target) {
 	DisplayMenu(menu, client, MENU_TIME_DURATION);	
 }
 public int eventAskJail2Time(Handle menu, MenuAction action, int client, int param2) {
-	#if defined DEBUG
-	PrintToServer("eventAskJail2Time");
-	#endif
 	if( action == MenuAction_Select ) {
 		char options[64];
 		GetMenuItem(menu, param2, options, 63);
@@ -901,9 +856,6 @@ public int eventAskJail2Time(Handle menu, MenuAction action, int client, int par
 	}
 }
 public int eventSetJailTime(Handle menu, MenuAction action, int client, int param2) {
-	#if defined DEBUG
-	PrintToServer("eventSetJailTime");
-	#endif
 	char options[64], data[2][32], szQuery[1024];
 	
 	if( action == MenuAction_Select ) {
@@ -1152,9 +1104,6 @@ public int eventSetJailTime(Handle menu, MenuAction action, int client, int para
 	}
 }
 void WantPayForLeaving(int client, int police, int type, int amende) {
-	#if defined DEBUG
-	PrintToServer("WantPayForLeaving");
-	#endif
 
 	// Setup menu
 	Handle menu = CreateMenu(eventPayForLeaving);
@@ -1174,9 +1123,6 @@ void WantPayForLeaving(int client, int police, int type, int amende) {
 	DisplayMenu(menu, client, MENU_TIME_DURATION);
 }
 public int eventPayForLeaving(Handle menu, MenuAction action, int client, int param2) {
-	#if defined DEBUG
-	PrintToServer("eventPayForLeaving");
-	#endif
 	if( action == MenuAction_Select ) {
 		char options[64], data[3][32], szQuery[2048];
 		
@@ -1229,9 +1175,6 @@ public int eventPayForLeaving(Handle menu, MenuAction action, int client, int pa
 }
 // ----------------------------------------------------------------------------
 void amendeCalculation(int client, int& amende) {
-	#if defined DEBUG
-	PrintToServer("amendeCalculation");
-	#endif
 	float ratio = float(rp_GetClientInt(client, i_Kill31Days)+1) / float(rp_GetClientInt(client, i_Death31Days)+1);
 	if( ratio < 0.25 )
 		ratio = 0.25;
@@ -1252,15 +1195,9 @@ void amendeCalculation(int client, int& amende) {
 }
 // ----------------------------------------------------------------------------
 public Action AllowStealing(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("AllowStealing");
-	#endif
 	rp_SetClientBool(client, b_MaySteal, true);
 }
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
-	#if defined DEBUG
-	PrintToServer("MenuNothing");
-	#endif
 	if( action == MenuAction_Select ) {
 		if( menu != INVALID_HANDLE )
 			CloseHandle(menu);
@@ -1271,17 +1208,11 @@ public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
 	}
 }
 public Action fwdFrozen(int client, float& speed, float& gravity) {
-	#if defined DEBUG
-	PrintToServer("fwdFrozen");
-	#endif
 	speed = 0.0;
 	
 	return Plugin_Stop;
 }
 public Action fwdTazerBlue(int client, int color[4]) {
-	#if defined DEBUG
-	PrintToServer("fwdTazerBlue");
-	#endif
 	color[0] -= 50;
 	color[1] -= 50;
 	color[2] += 255;
@@ -1289,9 +1220,6 @@ public Action fwdTazerBlue(int client, int color[4]) {
 	return Plugin_Changed;
 }
 public bool TraceRayDontHitSelf(int entity, int mask, any data) {
-	#if defined DEBUG
-	PrintToServer("TraceRayDontHitSelf");
-	#endif
 	if(entity == data) {
 		return false;
 	}
@@ -1299,9 +1227,6 @@ public bool TraceRayDontHitSelf(int entity, int mask, any data) {
 }
 // ----------------------------------------------------------------------------
 public Action fwdOnPlayerBuild(int client, float& cooldown) {
-	#if defined DEBUG
-	PrintToServer("fwdOnPlayerBuild_Barriere");
-	#endif
 	
 	if( rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101 )
 		return Plugin_Continue;
@@ -1330,9 +1255,6 @@ public Action fwdOnPlayerBuild(int client, float& cooldown) {
 	return Plugin_Stop;
 }
 int BuildingBarriere(int client) {
-	#if defined DEBUG
-	PrintToServer("BuildingBarriere");
-	#endif
 	
 	if( !rp_IsBuildingAllowed(client) )
 		return 0;	
@@ -1424,9 +1346,6 @@ public Action BuildingBarriere_client_post(Handle timer, any client) {
 	return Plugin_Handled;
 }
 public Action BuildingBarriere_post(Handle timer, any entity) {
-	#if defined DEBUG
-	PrintToServer("BuildingBarriere_post");
-	#endif
 	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
 	
 	rp_Effect_BeamBox(client, entity, NULL_VECTOR, 255, 255, 0);
@@ -1436,9 +1355,6 @@ public Action BuildingBarriere_post(Handle timer, any entity) {
 	return Plugin_Handled;
 }
 public void BuildingBarriere_break(const char[] output, int caller, int activator, float delay) {
-	#if defined DEBUG
-	PrintToServer("BuildingBarriere_break");
-	#endif
 	
 	int owner = GetEntPropEnt(caller, Prop_Send, "m_hOwnerEntity");
 	if( IsValidClient(owner) ) {
@@ -1447,9 +1363,6 @@ public void BuildingBarriere_break(const char[] output, int caller, int activato
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemRatio(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemRatio");
-	#endif
 	char arg1[12];
 	GetCmdArg(1, arg1, sizeof(arg1));
 	int client = GetCmdArgInt(2);
@@ -1465,9 +1378,6 @@ public Action Cmd_ItemRatio(int args) {
 	}
 }
 public Action task_GPS(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("task_GPS");
-	#endif
 	Handle menu = CreateMenu(MenuTribunal_GPS);
 	SetMenuTitle(menu, "  GPS\n ");
 	char tmp[255], tmp2[255];
@@ -1486,9 +1396,6 @@ public Action task_GPS(Handle timer, any client) {
 	DisplayMenu(menu, client, MENU_TIME_DURATION);
 }
 public int MenuTribunal_GPS(Handle p_hItemMenu, MenuAction p_oAction, int client, int p_iParam2) {
-	#if defined DEBUG
-	PrintToServer("MenuTribunal_GPS");
-	#endif
 	
 	if( p_oAction == MenuAction_Select && client != 0) {
 		char option[32];
@@ -1546,9 +1453,6 @@ public Action GPS_LOOP(Handle timer, any client) {
 }
 // ----------------------------------------------------------------------------
 void displayTribunal(int client, const char szSteamID[64]) {
-	#if defined DEBUG
-	PrintToServer("displayTribunal");
-	#endif
 	char szTitle[128], szURL[512], szQuery[1024], steamid[64], sso[256];
 	GetClientAuthId(client, AuthId_Engine, steamid, sizeof(steamid), false);
 	
@@ -1571,9 +1475,6 @@ void displayTribunal(int client, const char szSteamID[64]) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemPickLock(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemPickLock");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
@@ -1613,9 +1514,6 @@ public Action Cmd_ItemPickLock(int args) {
 	return Plugin_Handled;
 }
 public Action ItemPickLockOver_mandat(Handle timer, Handle dp) {
-	#if defined DEBUG
-	PrintToServer("ItemPickLockOver_mandat");
-	#endif
 	if( dp == INVALID_HANDLE ) {
 		return Plugin_Handled;
 	}
@@ -1672,9 +1570,6 @@ public void Event_Weapon_Fire(Event event, const char[] name, bool dontBroadcast
 }
 // ----------------------------------------------------------------------------
 void StripWeapons(int client ) {
-	#if defined DEBUG
-	PrintToServer("StripWeapons");
-	#endif
 	
 	int wepIdx;
 	
@@ -1695,9 +1590,6 @@ void StripWeapons(int client ) {
 }
 
 public Action fwdOnPlayerUse(int client) {
-	#if defined DEBUG
-	PrintToServer("fwdOnPlayerUse");
-	#endif
 	float vecOrigin[3];
 	
 	GetClientAbsOrigin(client, vecOrigin);
@@ -1759,9 +1651,6 @@ void Cmd_BuyWeapon(int client, bool free) {
 	return;
 }
 public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int p_iParam2) {
-	#if defined DEBUG
-	PrintToServer("Menu_BuyWeapon");
-	#endif
 	if (p_oAction == MenuAction_Select) {
 		
 		char szMenu[64], buffer[2][32];

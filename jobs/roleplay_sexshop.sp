@@ -66,9 +66,6 @@ public void OnClientPostAdminCheck(int client) {
 }
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemPreserv(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemPreserv");
-	#endif
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
 	
@@ -98,9 +95,6 @@ public Action fwdSlowTime(int client, float& speed, float& gravity) {
 	return Plugin_Changed;
 }
 public Action Cmd_ItemPoupee(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemPoupee");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
@@ -140,16 +134,10 @@ public Action Cmd_ItemPoupee(int args) {
 }
 
 public Action AllowUltimate(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("AllowUltimate");
-	#endif
 
 	rp_SetClientBool(client, b_MayUseUltimate, true);
 }
 public Action fwdTazerRose(int client, int color[4]) {
-	#if defined DEBUG
-	PrintToServer("fwdTazerRose");
-	#endif
 	color[0] += 255;
 	color[1] -= 50;
 	color[2] += 50;
@@ -157,9 +145,6 @@ public Action fwdTazerRose(int client, int color[4]) {
 	return Plugin_Changed;
 }
 public Action Cmd_ItemMenottes(int args){
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemMenottes");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
@@ -209,16 +194,10 @@ public Action Cmd_ItemMenottes(int args){
 	CreateTimer(5.0, Cmd_ItemMenottes_Over, target); // TODO: Laisser rose après 5 secondes.
 }
 public Action Cmd_ItemMenottes_Over(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemMenottes_Over");
-	#endif
 	
 	rp_ClientColorize(client);
 }
 public Action Cmd_ItemSucette(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemSucette");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 		
@@ -246,9 +225,6 @@ public Action Cmd_ItemSucette(int args) {
 	return Plugin_Handled;
 }
 public Action Cmd_ItemSucette2(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemSucette2");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
@@ -308,16 +284,10 @@ public Action fwdDamage(int attacker, int victim, float& damage, int damagetype)
 	return Plugin_Changed;
 }
 public Action Beep(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("Beep");
-	#endif
 	
 	EmitSoundToAll("UI/arm_bomb.wav", client);
 }
 public Action Cmd_ItemSucette2_task(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemSucette2_task");
-	#endif
 	
 	if( !IsValidClient(client) )
 		return Plugin_Handled;
@@ -350,9 +320,6 @@ public Action Cmd_ItemSucette2_task(Handle timer, any client) {
 
 
 public Action Cmd_ItemFouet(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemFouet");
-	#endif
 	
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
@@ -396,9 +363,6 @@ public Action Cmd_ItemFouet(int args) {
 	return Plugin_Handled;
 }
 public Action Cmd_ItemAlcool(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemAlcool");
-	#endif
 	char arg[16];
 	int client, target, item_id;
 	client = GetCmdArgInt(3);
@@ -468,9 +432,6 @@ public Action fwdOnPlayerBuild(int client, float& cooldown) {
 }
 
 int BuildingKevlarBox(int client) {
-	#if defined DEBUG 
-	PrintToServer("BuildingKevlarBox");
-	#endif
 	
 	if( !rp_IsBuildingAllowed(client) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas construire ici.");
@@ -537,9 +498,6 @@ int BuildingKevlarBox(int client) {
 	
 }
 public Action BuildingKevlarBox_post(Handle timer, any entity) {
-	#if defined DEBUG
-	PrintToServer("BuildingKevlarBox_post");
-	#endif
 	
 	if( !IsValidEdict(entity) && !IsValidEntity(entity) )
 		return Plugin_Handled;
@@ -561,9 +519,6 @@ public Action BuildingKevlarBox_post(Handle timer, any entity) {
 	return Plugin_Handled;
 }
 public void BuildingKevlarBox_break(const char[] output, int caller, int activator, float delay) {
-	#if defined DEBUG
-	PrintToServer("BuildingKevlarBox_break");
-	#endif
 	
 	int client = GetEntPropEnt(caller, Prop_Send, "m_hOwnerEntity");
 	CPrintToChat(client,"{lightblue}[TSX-RP]{default} Votre valise remplie de préservatifs a été détruite.");
@@ -577,9 +532,6 @@ public void BuildingKevlarBox_break(const char[] output, int caller, int activat
 }
 public Action Frame_KevlarBox(Handle timer, any ent) {
 	ent = EntRefToEntIndex(ent); if( ent == -1 ) { return Plugin_Handled; }
-	#if defined DEBUG
-	PrintToServer("Frame_KevlarBox");
-	#endif
 	
 	float vecOrigin[3], vecOrigin2[3];
 	Entity_GetAbsOrigin(ent, vecOrigin);
@@ -660,9 +612,6 @@ public Action Frame_KevlarBox(Handle timer, any ent) {
 	return Plugin_Handled;
 }
 public Action Cmd_ItemLube(int args){
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemLube");
-	#endif
 	int client = GetCmdArgInt(1);
 
 	rp_SetClientBool(client, b_Lube, true);
@@ -677,9 +626,6 @@ public Action fwdAssurance(int client, int& amount) {
 }
 
 public Action fwdLube(int client, int color[4]){
-	#if defined DEBUG
-	PrintToServer("fwdLube");
-	#endif
 	
 	color[0] += 255;
 	color[1] += 191;
@@ -690,9 +636,6 @@ public Action fwdLube(int client, int color[4]){
 
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemCigarette(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemCigarette");
-	#endif
 	
 	char Arg1[32];
 	GetCmdArg(1, Arg1, 31);
@@ -744,30 +687,18 @@ public Action Cmd_ItemCigarette(int args) {
 	return Plugin_Handled;
 }
 public Action Task_UningiteEntity(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("Task_UningiteEntity");
-	#endif
 	UningiteEntity(client);
 }
 public Action ItemStopCig(Handle timer, any client) {
-	#if defined DEBUG
-	PrintToServer("ItemStopCig");
-	#endif
 	
 	rp_SetClientBool(client, b_Smoking, false);
 }
 public Action fwdCigSpeed(int client, float& speed, float& gravity) {
-	#if defined DEBUG
-	PrintToServer("fwdCigSpeed");
-	#endif
 	speed += 0.15;
 	
 	return Plugin_Changed;
 }
 public Action fwdCigGravity(int client, float& speed, float& gravity) {
-	#if defined DEBUG
-	PrintToServer("fwdCigGravity");
-	#endif
 	gravity -= 0.15;
 	
 	return Plugin_Changed;
@@ -775,9 +706,6 @@ public Action fwdCigGravity(int client, float& speed, float& gravity) {
 
 
 public Action Cmd_ItemRuban(int args) {
-	#if defined DEBUG
-	PrintToServer("Cmd_ItemRuban");
-	#endif
 
 	int client = GetCmdArgInt(1);
 	int item_id = GetCmdArgInt(args);
