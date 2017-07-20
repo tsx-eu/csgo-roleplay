@@ -43,6 +43,7 @@ enum CWM_DataAnimation {
 	WAA_Idle,
 	WAA_Draw,
 	WAA_Attack,
+	WAA_AttackPost,
 	WAA_Attack2,
 	WAA_Reload,
 	WAA_Max
@@ -61,6 +62,7 @@ enum CWM_DataInteger {
 	WSI_Ammunition,
 	WSI_MaxAmmunition,
 	WSI_Skin,
+	WSI_State,
 	
 	WSI_Max
 };
@@ -90,12 +92,14 @@ enum CWM_AttackType {
 	WSA_None,
 	WSA_Automatic,
 	WSA_SemiAutomatic,
+	WSA_LockAndLoad,
 	
 	WSA_Max
 };
 enum CWM_HookType {
 	WSH_Draw,
 	WSH_Attack,
+	WSH_AttackPost,
 	WSH_Attack2,
 	WSH_Reload,
 	WSH_Idle,
