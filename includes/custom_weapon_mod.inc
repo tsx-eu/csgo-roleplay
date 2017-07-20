@@ -31,7 +31,13 @@ native int CWM_ShootProjectile(int client, int entity, char model[PLATFORM_MAX_P
 native int CWM_ShootDamage(int client, int entity, float hit[3]);
 native int CWM_ShootExplode(int client, int wpnid, int entity, float radius);
 
+native void CWM_RefreshHUD(int client, int entity);
+
 native int CWM_GetId(char name[PLATFORM_MAX_PATH]);
+native void CWM_SetEntityInt(int entity, CWM_DataInteger data, int value);
+native void CWM_SetEntityFloat(int entity, CWM_DataFloat data, float value);
+native int CWM_GetEntityInt(int entity, CWM_DataInteger data);
+native float CWM_GetEntityFloat(int entity, CWM_DataFloat data);
 
 enum CWM_DataAnimation {
 	WAA_Idle,
@@ -54,6 +60,7 @@ enum CWM_DataInteger {
 	WSI_MaxBullet,
 	WSI_Ammunition,
 	WSI_MaxAmmunition,
+	WSI_Skin,
 	
 	WSI_Max
 };
