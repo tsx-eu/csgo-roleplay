@@ -19,7 +19,7 @@ char g_szReplace[PLATFORM_MAX_PATH]  =	"weapon_negev";
 
 char g_szVModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/flak_cannon/v_flak_cannon.mdl";
 char g_szWModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/flak_cannon/w_flak_cannon.mdl";
-char g_szTModel[PLATFORM_MAX_PATH] =	"models/weapons/w_eq_fraggrenade_thrown.mdl";
+char g_szTModel[PLATFORM_MAX_PATH] =	"models/gibs/wood_gib01e.mdl";
 
 int g_cModel; 
 char g_szMaterials[][PLATFORM_MAX_PATH] = {
@@ -41,11 +41,14 @@ char g_szSounds[][PLATFORM_MAX_PATH] = {
 	"physics/glass/glass_sheet_impact_hard3.wav"	
 };
 
+#define MAX_HIT	3
+int g_iHitcount[MAX_ENTITIES];
+
 public void OnAllPluginsLoaded() {
 	int id = CWM_Create(g_szFullName, g_szName, g_szReplace, g_szVModel, g_szWModel);
 	
 	CWM_SetInt(id, WSI_AttackType,		view_as<int>(WSA_SemiAutomatic));
-	CWM_SetInt(id, WSI_AttackDamage, 	400);
+	CWM_SetInt(id, WSI_AttackDamage, 	20);
 	CWM_SetInt(id, WSI_AttackBullet, 	1);
 	CWM_SetInt(id, WSI_MaxBullet, 		25);
 	CWM_SetInt(id, WSI_MaxAmmunition, 	0);
@@ -58,12 +61,11 @@ public void OnAllPluginsLoaded() {
 	
 	CWM_AddAnimation(id, WAA_Idle, 		0,	14,	30);
 	CWM_AddAnimation(id, WAA_Draw, 		1,	7,	30);
-	CWM_AddAnimation(id, WAA_Attack, 	4,  25,	30);
+	CWM_AddAnimation(id, WAA_Attack, 	2,  25,	30);
 	CWM_AddAnimation(id, WAA_Attack2, 	3,  23,	30);
 	
 	CWM_RegHook(id, WSH_Draw,			OnDraw);
 	CWM_RegHook(id, WSH_Attack,			OnAttack);
-	CWM_RegHook(id, WSH_Attack2,		OnAttack2);
 	CWM_RegHook(id, WSH_Idle,			OnIdle);
 	CWM_RegHook(id, WSH_Reload,			OnReload);
 }
@@ -77,35 +79,30 @@ public void OnIdle(int client, int entity) {
 	CWM_RunAnimation(entity, WAA_Idle);
 }
 public Action OnAttack(int client, int entity) {
-	
+	static char tmp[32];
 	CWM_RunAnimation(entity, WAA_Attack);
-	int ent = CWM_ShootProjectile(client, entity, g_szTModel, "rocket", 0.0, 2000.0, OnProjectileHit);
-	SetEntityGravity(ent, 0.25);
-	EmitSoundToAllAny(g_szSounds[0], ent, SNDCHAN_WEAPON);
 	EmitSoundToAllAny(g_szSounds[GetRandomInt(1, 4)], entity, SNDCHAN_WEAPON);
-	TE_SetupBeamFollow(ent, g_cModel, 0, 1.0, 1.0, 0.0, 1, {255, 255, 255, 100});
-	TE_SendToAll();
+	
+	for (int i = 0; i < 8; i++) {
+		int ent = CWM_ShootProjectile(client, entity, g_szTModel, "flak", 4.0, 1600.0, OnProjectileHit);
+		g_iHitcount[ent] = GetRandomInt(-1, 1);
+		Format(tmp, sizeof(tmp), "!self,Kill,,%.1f,-1", GetRandomFloat(2.0, 3.0));
+		SetEntityGravity(ent, 0.65);
+		SetEntPropFloat(ent, Prop_Send, "m_flElasticity", 0.65);
+		DispatchKeyValue(ent, "OnUser1", tmp);
+		AcceptEntityInput(ent, "FireUser1");
+		
+		TE_SetupBeamFollow(ent, g_cModel, 0, 0.5, 0.5, 0.0, 1, {255, 255, 255, 50});
+		TE_SendToAll();
+	}
 	return Plugin_Continue;
 }
-public Action OnAttack2(int client, int entity) {
-	
-	CWM_RunAnimation(entity, WAA_Attack2);
-	int ent = CWM_ShootProjectile(client, entity, g_szTModel, "grenade", 2.5, 1200.0, OnProjectileHit);
-	EmitSoundToAllAny(g_szSounds[GetRandomInt(5, 7)], entity, SNDCHAN_WEAPON);
-	
-	TE_SetupBeamFollow(ent, g_cModel, 0, 1.0, 1.0, 0.0, 1, {255, 0, 0, 100});
-	TE_SendToAll();
-	return Plugin_Continue;
-}
-
 public Action OnProjectileHit(int client, int wpnid, int entity, int target) {
-	CWM_ShootExplode(client, wpnid, entity, 300.0);
-	float pos[3];
-	Entity_GetAbsOrigin(entity, pos);
-	TE_SetupExplosion(pos, 0, 300.0, 0, 0, 200, 50);
-	TE_SendToAll();
-	StopSoundAny(entity, SNDCHAN_WEAPON, g_szSounds[0]);
-	return Plugin_Stop;
+	g_iHitcount[entity]++;
+	if( target > 0 && target < MaxClients )
+		return Plugin_Continue;
+	
+	return g_iHitcount[entity] < MAX_HIT ? Plugin_Stop : Plugin_Continue;
 }
 public void OnMapStart() {
 
