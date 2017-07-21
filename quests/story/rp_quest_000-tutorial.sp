@@ -39,7 +39,7 @@ int g_iRecom[MAX_JOBS];
 // TODO: Déplacer les récompenses dans les fonctions appropriées
 // TODO: Trié les jobs par sous quota, ou quota "non respecté"
 
-int g_iQ9, g_iQ12, g_iQ14, g_iClientDoingQ[65];
+int g_iQ9, g_iQ12, g_iQ14;
 public void OnPluginStart() {
 	g_iRecom[116] = g_iRecom[176] = 0;
 	g_iRecom[87] = g_iRecom[96] = g_iRecom[226] = 1;
@@ -78,7 +78,6 @@ public void OnAllPluginsLoaded() {
 	rp_QuestAddStep(g_iQuest, i++, Q9_Start,	Q9_Frame,	Q9_Abort,	Q9_Abort);
 	rp_QuestAddStep(g_iQuest, i++, Q92_Start,	Q92_Frame,	Q92_Abort,	QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q10_Frame,	QUEST_NULL,	QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, i++, Q11_Start,	Q11_Frame,	Q11_Abort,	Q11_Abort);
 	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q12_Frame,	QUEST_NULL,	QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q13_Frame,	QUEST_NULL,	QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q14_Frame,	QUEST_NULL,	QUEST_NULL);
@@ -97,10 +96,6 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 	if( StrEqual(command, "aide") || StrEqual(command, "aides") || StrEqual(command, "help")  ) { // C'est pour nous !
 		
 		OpenHelpMenu(client, 1, 0);
-		
-		if( g_iClientDoingQ[client] > 0 ) {
-			rp_QuestStepComplete(client, g_iClientDoingQ[client]);
-		}
 		
 		return Plugin_Handled;
 	}
@@ -556,40 +551,6 @@ public void Q10_Frame(int objectiveID, int client) {
 	}
 }
 // ----------------------------------------------------------------------------
-public void Q11_Frame(int objectiveID, int client) {
-	
-	if( rp_ClientCanDrawPanel(client) ) {
-		
-		Handle panel = CreatePanel();
-		
-		SetPanelTitle(panel, "== Objectif 11: Le site, le forum, le WiKi");
-		DrawPanelItem(panel, "", ITEMDRAW_SPACER);
-		DrawPanelText(panel, " Le forum et notre site sont deux parties");
-		DrawPanelText(panel, "importantes du serveur. Si vous y êtes");
-		DrawPanelText(panel, "inscrit, et confirmé comme ayant 16 ans ou");
-		DrawPanelText(panel, "plus (le rang no-pyj). Vous augmentez vos");
-		DrawPanelText(panel, "chances de trouver un emploi intéressant.");
-		DrawPanelText(panel, "Besoin d'aide? Consultez notre FAQ");
-		DrawPanelText(panel, " ");
-		DrawPanelText(panel, "→ Allez faire un tour sur notre FAQ ( dites /aide ) ");
-		DrawPanelText(panel, " afin d'obtenir davantage d'aide et de");
-		DrawPanelText(panel, "continuer votre apprentissage.");
-		DrawPanelText(panel, " ");
-		DrawPanelText(panel, " Site: https://www.ts-x.eu");
-		DrawPanelText(panel, " WiKi: https://www.ts-x.eu/wiki/");
-		DrawPanelText(panel, " TeamSpeak: ts.ts-x.eu");
-		
-		rp_SendPanelToClient(panel, client, 1.1);
-		CreateTimer(1.1, PostKillHandle, panel);
-	}
-}
-public void Q11_Start(int objectiveID, int client) {
-	g_iClientDoingQ[client] = objectiveID;
-}
-public void Q11_Abort(int objectiveID, int client) {
-	g_iClientDoingQ[client] = -1;
-}
-// ----------------------------------------------------------------------------
 public void Q12_Frame(int objectiveID, int client) {
 	float origin[3], target[3] = {2472.0, -1063.0, -2144.0};
 	GetClientAbsOrigin(client, origin);
@@ -598,7 +559,7 @@ public void Q12_Frame(int objectiveID, int client) {
 		
 		Handle panel = CreatePanel();
 		
-		SetPanelTitle(panel, "== Objectif 12: Le mot de la fin");
+		SetPanelTitle(panel, "== Objectif 11: Le mot de la fin");
 		DrawPanelItem(panel, "", ITEMDRAW_SPACER);
 		DrawPanelText(panel, " Derniers conseils avant de vous laisser");
 		DrawPanelText(panel, "partir sur de bonnes bases.");
