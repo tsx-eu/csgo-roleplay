@@ -13,18 +13,18 @@
 #include <roleplay>
 #endif
 
-char g_szFullName[PLATFORM_MAX_PATH] =	"Lance-roquettes";
-char g_szName[PLATFORM_MAX_PATH] 	 =	"rocketlauncher";
+char g_szFullName[PLATFORM_MAX_PATH] =	"Lance-grenade";
+char g_szName[PLATFORM_MAX_PATH] 	 =	"grenadelauncher";
 char g_szReplace[PLATFORM_MAX_PATH]  =	"weapon_negev";
 
-char g_szVModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/rocket_launcher/v_rocket_launcher.mdl";
-char g_szWModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/rocket_launcher/w_rocket_launcher.mdl";
+char g_szVModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/grenade_launcher/v_grenade_launcher.mdl";
+char g_szWModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/grenade_launcher/w_grenade_launcher.mdl";
 char g_szTModel[PLATFORM_MAX_PATH] =	"models/weapons/w_eq_fraggrenade_thrown.mdl";
 
 int g_cModel; 
 char g_szMaterials[][PLATFORM_MAX_PATH] = {
-	"materials/models/weapons/tsx/rocket_launcher/RocketTex0.vtf",
-	"materials/models/weapons/tsx/rocket_launcher/RocketTex0.vmt"
+	"materials/models/weapons/tsx/grenade_launcher/grenade_launcher.vtf",
+	"materials/models/weapons/tsx/grenade_launcher/grenade_launcher.vmt"
 };
 char g_szSounds[][PLATFORM_MAX_PATH] = {
 	"physics/metal/metal_box_scrape_rough_loop2.wav",
@@ -45,22 +45,21 @@ public void OnAllPluginsLoaded() {
 	int id = CWM_Create(g_szFullName, g_szName, g_szReplace, g_szVModel, g_szWModel);
 	
 	CWM_SetInt(id, WSI_AttackType,		view_as<int>(WSA_SemiAutomatic));
-	CWM_SetInt(id, WSI_AttackDamage, 	500);
+	CWM_SetInt(id, WSI_AttackDamage, 	400);
 	CWM_SetInt(id, WSI_AttackBullet, 	1);
-	CWM_SetInt(id, WSI_MaxBullet, 		3);
-	CWM_SetInt(id, WSI_MaxAmmunition, 	30);
+	CWM_SetInt(id, WSI_MaxBullet, 		5);
+	CWM_SetInt(id, WSI_MaxAmmunition, 	25);
 	
 	CWM_SetFloat(id, WSF_Speed,			240.0);
-	CWM_SetFloat(id, WSF_ReloadSpeed,	30/15.0);
-	CWM_SetFloat(id, WSF_AttackSpeed,	10/15.0);
+	CWM_SetFloat(id, WSF_ReloadSpeed,	100/30.0);
+	CWM_SetFloat(id, WSF_AttackSpeed,	1.0);
 	CWM_SetFloat(id, WSF_AttackRange,	RANGE_MELEE * 4.0);
 	CWM_SetFloat(id, WSF_Spread, 		0.0);
 	
-	CWM_AddAnimation(id, WAA_Idle, 		0,	12,	15);
-	CWM_AddAnimation(id, WAA_Draw, 		1,	7,	15);
-	CWM_AddAnimation(id, WAA_Attack, 	4,  10,	15);
-	CWM_AddAnimation(id, WAA_Attack2, 	3,  9,	15);
-	CWM_AddAnimation(id, WAA_Reload, 	9,  30,	15);
+	CWM_AddAnimation(id, WAA_Idle, 		2,	60, 30);
+	CWM_AddAnimation(id, WAA_Draw, 		3,	29, 30);
+	CWM_AddAnimation(id, WAA_Attack, 	5,  30, 30);
+	CWM_AddAnimation(id, WAA_Reload, 	8,  100, 30);
 	
 	CWM_RegHook(id, WSH_Draw,			OnDraw);
 	CWM_RegHook(id, WSH_Attack,			OnAttack);
@@ -100,7 +99,7 @@ public Action OnAttack2(int client, int entity) {
 	if( _IsStackFull(entity) )
 		return Plugin_Stop;
 	
-	CWM_RunAnimation(entity, WAA_Attack2);
+	CWM_RunAnimation(entity, WAA_Attack);
 	int ent = CWM_ShootProjectile(client, entity, g_szTModel, "grenade", 2.5, 1200.0, INVALID_FUNCTION);
 	EmitSoundToAllAny(g_szSounds[GetRandomInt(5, 7)], entity, SNDCHAN_WEAPON);
 	_pushStack(entity, ent);

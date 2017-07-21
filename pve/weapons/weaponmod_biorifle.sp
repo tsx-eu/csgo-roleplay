@@ -17,12 +17,33 @@ char g_szFullName[PLATFORM_MAX_PATH] =	"Pistolet bioniques";
 char g_szName[PLATFORM_MAX_PATH] 	 =	"biorifle";
 char g_szReplace[PLATFORM_MAX_PATH]  =	"weapon_negev";
 
-char g_szVModel[PLATFORM_MAX_PATH] =	"models/v_models/v_grenade_launcher.mdl";
-char g_szWModel[PLATFORM_MAX_PATH] =	"models/w_models/weapons/w_grenade_launcher.mdl";
+char g_szVModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/bio_rifle/v_bio_rifle.mdl";
+char g_szWModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/bio_rifle/w_bio_rifle.mdl";
 
 int g_cModel; 
 char g_szMaterials[][PLATFORM_MAX_PATH] = {
-	
+	"materials/models/weapons/tsx/bio_rifle/BioRifleGlass0.vmt",
+	"materials/models/weapons/tsx/bio_rifle/BioRifleGlass0.vtf",
+	"materials/models/weapons/tsx/bio_rifle/BioRifleTex0.vmt",
+	"materials/models/weapons/tsx/bio_rifle/BioRifleTex0.vtf",
+	"materials/models/weapons/tsx/bio_rifle/BioRifleTex1.vmt",
+	"materials/models/weapons/tsx/bio_rifle/BioRifleTex1.vtf",
+	"materials/models/weapons/tsx/bio_rifle/BioRifleTex2.vmt",
+	"materials/models/weapons/tsx/bio_rifle/BioRifleTex2.vtf",
+	"materials/models/weapons/tsx/bio_rifle/BioRifleTex3.vmt",
+	"materials/models/weapons/tsx/bio_rifle/BioRifleTex3.vtf",
+	"materials/models/weapons/tsx/bio_rifle/BioRifleTex4.vmt",
+	"materials/models/weapons/tsx/bio_rifle/BioRifleTex4.vtf",
+	"materials/models/weapons/tsx/bio_rifle/BRInnerGoo.vmt",
+	"materials/models/weapons/tsx/bio_rifle/BRInnerGoo.vtf",
+	"materials/models/weapons/tsx/bio_rifle/BRInnerGoo1.vmt",
+	"materials/models/weapons/tsx/bio_rifle/BRInnerGoo1.vtf",
+	"materials/models/weapons/tsx/bio_rifle/BRInnerGoo2.vmt",
+	"materials/models/weapons/tsx/bio_rifle/BRInnerGoo2.vtf",
+	"materials/models/weapons/tsx/bio_rifle/BRInnerGoo3.vmt",
+	"materials/models/weapons/tsx/bio_rifle/BRInnerGoo3.vtf",
+	"materials/models/weapons/tsx/bio_rifle/BRInnerGoo4.vmt",
+	"materials/models/weapons/tsx/bio_rifle/BRInnerGoo4.vtf",
 };
 char g_szSounds[][PLATFORM_MAX_PATH] = {
 		
@@ -75,8 +96,10 @@ public Action OnAttack2(int client, int entity) {
 	g_iWeaponMode[entity] = (g_iWeaponMode[entity] + 1) % MAX_WMODE;
 	CWM_SetEntityInt(entity, WSI_Skin, g_iWeaponMode[entity]);
 	CWM_RefreshHUD(client, entity);
-	// TODO:
-	// int ent = CWM_ShootProjectile(client, entity, g_szTModel, "blob", 8.0, 600.0);
+	
+	return Plugin_Continue;
+}
+public Action OnProjectileHit(int client, int wpnid, int entity, int target) {
 	return Plugin_Continue;
 }
 
@@ -92,7 +115,5 @@ public void OnMapStart() {
 	for (int i = 0; i < sizeof(g_szMaterials); i++) {
 		AddFileToDownloadsTable(g_szMaterials[i]);
 	}
-	
-	g_cModel = PrecacheModel("materials/sprites/laserbeam.vmt");
 
 }

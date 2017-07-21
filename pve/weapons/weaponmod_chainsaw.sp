@@ -11,15 +11,15 @@ char g_szFullName[PLATFORM_MAX_PATH] =	"Tronçoneuse";
 char g_szName[PLATFORM_MAX_PATH] 	 =	"chainsaw";
 char g_szReplace[PLATFORM_MAX_PATH]  =	"weapon_negev";
 
-char g_szVModel[PLATFORM_MAX_PATH] =	"models/weapons/melee/v_chainsaw.mdl";
-char g_szWModel[PLATFORM_MAX_PATH] =	"models/weapons/melee/w_chainsaw.mdl";
+char g_szVModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/chainsaw/v_chainsaw.mdl";
+char g_szWModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/chainsaw/w_chainsaw.mdl";
 
 char g_szMaterials[][PLATFORM_MAX_PATH] = {
-	"materials/models/weapons/v_chainsaw/chainsaw.vmt",
-	"materials/models/weapons/v_chainsaw/chainsaw.vtf",
-	"materials/models/weapons/v_chainsaw/chainsaw_chain.vmt",
-	"materials/models/weapons/v_chainsaw/chainsaw_chain.vtf",
-	"materials/models/weapons/v_chainsaw/chainsaw_exp.vtf"
+	"materials/models/weapons/tsx/chainsaw/chainsaw.vmt",
+	"materials/models/weapons/tsx/chainsaw/chainsaw.vtf",
+	"materials/models/weapons/tsx/chainsaw/chainsaw_chain.vmt",
+	"materials/models/weapons/tsx/chainsaw/chainsaw_chain.vtf",
+	"materials/models/weapons/tsx/chainsaw/chainsaw_exp.vtf"	
 };
 char g_szSounds[][PLATFORM_MAX_PATH] = {
 	"physics/metal/metal_solid_strain5.wav"

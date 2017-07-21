@@ -17,17 +17,17 @@ char g_szFullName[PLATFORM_MAX_PATH] =	"Lance-flammes";
 char g_szName[PLATFORM_MAX_PATH] 	 =	"flamethrower";
 char g_szReplace[PLATFORM_MAX_PATH]  =	"weapon_negev";
 
-char g_szVModel[PLATFORM_MAX_PATH] =	"models/weapons/v_flamethrower.mdl";
-char g_szWModel[PLATFORM_MAX_PATH] =	"models/weapons/w_flamethrower.mdl";
+char g_szVModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/flamethrower/v_flamethrower.mdl";
+char g_szWModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/flamethrower/w_flamethrower.mdl";
 
 int g_cModel; 
 char g_szMaterials[][PLATFORM_MAX_PATH] = {
-	"materials/models/weapons/flamethrower/v_flamethrower.vmt",
-	"materials/models/weapons/flamethrower/v_flamethrower.vtf",
-	"materials/models/weapons/flamethrower/v_flamethrower_gauge.vmt",
-	"materials/models/weapons/flamethrower/v_flamethrower_gauge.vtf",
-	"materials/models/weapons/flamethrower/w_flamethrower.vmt",
-	"materials/models/weapons/flamethrower/w_flamethrower.vtf",
+	"materials/models/weapons/tsx/flamethrower/v_flamethrower.vmt",
+	"materials/models/weapons/tsx/flamethrower/v_flamethrower.vtf",
+	"materials/models/weapons/tsx/flamethrower/v_flamethrower_gauge.vmt",
+	"materials/models/weapons/tsx/flamethrower/v_flamethrower_gauge.vtf",
+	"materials/models/weapons/tsx/flamethrower/w_flamethrower.vmt",
+	"materials/models/weapons/tsx/flamethrower/w_flamethrower.vtf",
 	"materials/models/weapons/v_hand/v_hand_sheet.vmt"
 };
 char g_szSounds[][PLATFORM_MAX_PATH] = {
