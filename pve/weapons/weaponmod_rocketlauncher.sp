@@ -131,7 +131,7 @@ public Action OnProjectileHit(int client, int wpnid, int entity, int target) {
 	TE_SetupExplosion(pos, 0, 300.0, 0, 0, 200, 50);
 	TE_SendToAll();
 	StopSoundAny(entity, SNDCHAN_WEAPON, g_szSounds[0]);
-	return Plugin_Stop;
+	return Plugin_Handled;
 }
 public void OnMapStart() {
 
