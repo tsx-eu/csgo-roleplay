@@ -45,6 +45,7 @@ public void OnAllPluginsLoaded() {
 	int id = CWM_Create(g_szFullName, g_szName, g_szReplace, g_szVModel, g_szWModel);
 	
 	CWM_SetInt(id, WSI_AttackType,		view_as<int>(WSA_SemiAutomatic));
+	CWM_SetInt(id, WSI_ReloadType,		view_as<int>(WSR_Automatic));
 	CWM_SetInt(id, WSI_AttackDamage, 	400);
 	CWM_SetInt(id, WSI_AttackBullet, 	1);
 	CWM_SetInt(id, WSI_MaxBullet, 		5);

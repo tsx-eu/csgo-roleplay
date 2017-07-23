@@ -19,7 +19,13 @@ char g_szReplace[PLATFORM_MAX_PATH]  =	"weapon_negev";
 
 char g_szVModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/flak_cannon/v_flak_cannon.mdl";
 char g_szWModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/flak_cannon/w_flak_cannon.mdl";
-char g_szTModel[PLATFORM_MAX_PATH] =	"models/gibs/wood_gib01e.mdl";
+char g_szTModel[][PLATFORM_MAX_PATH] =	{
+	"models/gibs/wood_gib01a.mdl",
+	"models/gibs/wood_gib01b.mdl",
+	"models/gibs/wood_gib01c.mdl",
+	"models/gibs/wood_gib01d.mdl",
+	"models/gibs/wood_gib01e.mdl"
+};
 
 int g_cModel; 
 char g_szMaterials[][PLATFORM_MAX_PATH] = {
@@ -48,9 +54,10 @@ public void OnAllPluginsLoaded() {
 	int id = CWM_Create(g_szFullName, g_szName, g_szReplace, g_szVModel, g_szWModel);
 	
 	CWM_SetInt(id, WSI_AttackType,		view_as<int>(WSA_SemiAutomatic));
-	CWM_SetInt(id, WSI_AttackDamage, 	20);
+	CWM_SetInt(id, WSI_ReloadType,		view_as<int>(WSR_Automatic));
+	CWM_SetInt(id, WSI_AttackDamage, 	75);
 	CWM_SetInt(id, WSI_AttackBullet, 	1);
-	CWM_SetInt(id, WSI_MaxBullet, 		25);
+	CWM_SetInt(id, WSI_MaxBullet, 		50);
 	CWM_SetInt(id, WSI_MaxAmmunition, 	0);
 	
 	CWM_SetFloat(id, WSF_Speed,			240.0);
@@ -84,15 +91,17 @@ public Action OnAttack(int client, int entity) {
 	EmitSoundToAllAny(g_szSounds[GetRandomInt(1, 4)], entity, SNDCHAN_WEAPON);
 	
 	for (int i = 0; i < 8; i++) {
-		int ent = CWM_ShootProjectile(client, entity, g_szTModel, "flak", 4.0, 1600.0, OnProjectileHit);
+		
+		int ent = CWM_ShootProjectile(client, entity, g_szTModel[GetRandomInt(0, sizeof(g_szTModel)-1)], "flak", 4.0, 1600.0, OnProjectileHit);
 		g_iHitcount[ent] = GetRandomInt(-1, 1);
 		Format(tmp, sizeof(tmp), "!self,Kill,,%.1f,-1", GetRandomFloat(2.0, 3.0));
+		SetEntPropFloat(ent,  Prop_Send, "m_flModelScale", 0.1);
 		SetEntityGravity(ent, 0.65);
 		SetEntPropFloat(ent, Prop_Send, "m_flElasticity", 0.65);
 		DispatchKeyValue(ent, "OnUser1", tmp);
 		AcceptEntityInput(ent, "FireUser1");
 		
-		TE_SetupBeamFollow(ent, g_cModel, 0, 0.5, 0.5, 0.0, 1, {255, 255, 255, 50});
+		TE_SetupBeamFollow(ent, g_cModel, 0, GetRandomFloat(0.2, 0.5), 0.25, 0.0, 1, {255, 255, 255, 50});
 		TE_SendToAll();
 	}
 	return Plugin_Continue;
@@ -108,7 +117,8 @@ public void OnMapStart() {
 
 	AddModelToDownloadsTable(g_szVModel);
 	AddModelToDownloadsTable(g_szWModel);
-	AddModelToDownloadsTable(g_szTModel);
+	for (int i = 0; i < sizeof(g_szTModel); i++)
+		AddModelToDownloadsTable(g_szTModel[i]);
 	
 	for (int i = 0; i < sizeof(g_szSounds); i++) {
 		AddSoundToDownloadsTable(g_szSounds[i]);

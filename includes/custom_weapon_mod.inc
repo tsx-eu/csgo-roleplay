@@ -51,6 +51,7 @@ enum CWM_DataAnimation {
 enum CWM_DataInteger {
 	WSI_Identifier,
 	WSI_AttackType,
+	WSI_ReloadType,
 	WSI_AttackDamage,
 	WSI_AttackBullet,
 	WSI_Animation,
@@ -95,6 +96,12 @@ enum CWM_AttackType {
 	WSA_LockAndLoad,
 	
 	WSA_Max
+};
+enum CWM_ReloadType {
+	WSR_Automatic,
+	WSR_OneByOne,
+	
+	WSR_Max
 };
 enum CWM_HookType {
 	WSH_Draw,

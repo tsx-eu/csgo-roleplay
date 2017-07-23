@@ -19,7 +19,8 @@ char g_szReplace[PLATFORM_MAX_PATH]  =	"weapon_negev";
 
 char g_szVModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/rocket_launcher/v_rocket_launcher.mdl";
 char g_szWModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/rocket_launcher/w_rocket_launcher.mdl";
-char g_szTModel[PLATFORM_MAX_PATH] =	"models/weapons/w_eq_fraggrenade_thrown.mdl";
+char g_szTModel1[PLATFORM_MAX_PATH] =	"models/shells/shell_57.mdl";
+char g_szTModel2[PLATFORM_MAX_PATH] =	"models/weapons/w_eq_fraggrenade_thrown.mdl";
 
 int g_cModel; 
 char g_szMaterials[][PLATFORM_MAX_PATH] = {
@@ -34,7 +35,11 @@ char g_szSounds[][PLATFORM_MAX_PATH] = {
 	"physics/concrete/boulder_impact_hard4.wav",
 	"physics/glass/glass_sheet_impact_hard1.wav",
 	"physics/glass/glass_sheet_impact_hard2.wav",
-	"physics/glass/glass_sheet_impact_hard3.wav"	
+	"physics/glass/glass_sheet_impact_hard3.wav",
+	"weapons/nova/nova_insertshell_01.wav",
+	"weapons/nova/nova_insertshell_02.wav",
+	"weapons/nova/nova_insertshell_03.wav",
+	"weapons/sg556/sg556_draw.wav"
 };
 
 #define MAX_PROJECTILES	8
@@ -45,13 +50,14 @@ public void OnAllPluginsLoaded() {
 	int id = CWM_Create(g_szFullName, g_szName, g_szReplace, g_szVModel, g_szWModel);
 	
 	CWM_SetInt(id, WSI_AttackType,		view_as<int>(WSA_SemiAutomatic));
+	CWM_SetInt(id, WSI_ReloadType,		view_as<int>(WSR_OneByOne));
 	CWM_SetInt(id, WSI_AttackDamage, 	500);
 	CWM_SetInt(id, WSI_AttackBullet, 	1);
 	CWM_SetInt(id, WSI_MaxBullet, 		3);
 	CWM_SetInt(id, WSI_MaxAmmunition, 	30);
 	
 	CWM_SetFloat(id, WSF_Speed,			240.0);
-	CWM_SetFloat(id, WSF_ReloadSpeed,	30/15.0);
+	CWM_SetFloat(id, WSF_ReloadSpeed,	10/15.0);
 	CWM_SetFloat(id, WSF_AttackSpeed,	10/15.0);
 	CWM_SetFloat(id, WSF_AttackRange,	RANGE_MELEE * 4.0);
 	CWM_SetFloat(id, WSF_Spread, 		0.0);
@@ -60,7 +66,7 @@ public void OnAllPluginsLoaded() {
 	CWM_AddAnimation(id, WAA_Draw, 		1,	7,	15);
 	CWM_AddAnimation(id, WAA_Attack, 	4,  10,	15);
 	CWM_AddAnimation(id, WAA_Attack2, 	3,  9,	15);
-	CWM_AddAnimation(id, WAA_Reload, 	9,  30,	15);
+	CWM_AddAnimation(id, WAA_Reload, 	9,  10,	15);
 	
 	CWM_RegHook(id, WSH_Draw,			OnDraw);
 	CWM_RegHook(id, WSH_Attack,			OnAttack);
@@ -71,9 +77,11 @@ public void OnAllPluginsLoaded() {
 }
 public void OnReload(int client, int entity) {
 	CWM_RunAnimation(entity, WAA_Reload);
+	EmitSoundToAllAny(g_szSounds[GetRandomInt(8, 10)], entity, SNDCHAN_WEAPON);
 }
 public void OnDraw(int client, int entity) {
 	CWM_RunAnimation(entity, WAA_Draw);
+	EmitSoundToAllAny(g_szSounds[11], entity, SNDCHAN_WEAPON);
 }
 public void OnIdle(int client, int entity) {
 	CWM_RunAnimation(entity, WAA_Idle);
@@ -87,7 +95,8 @@ public Action OnAttack(int client, int entity) {
 		return OnExplode(client, entity);
 	
 	CWM_RunAnimation(entity, WAA_Attack);
-	int ent = CWM_ShootProjectile(client, entity, g_szTModel, "rocket", 0.0, 2000.0, OnProjectileHit);
+	int ent = CWM_ShootProjectile(client, entity, g_szTModel1, "rocket", 0.0, 2000.0, OnProjectileHit);
+	SetEntPropFloat(ent,  Prop_Send, "m_flModelScale", 10.0);
 	SetEntityGravity(ent, 0.25);
 	EmitSoundToAllAny(g_szSounds[0], ent, SNDCHAN_WEAPON);
 	EmitSoundToAllAny(g_szSounds[GetRandomInt(1, 4)], entity, SNDCHAN_WEAPON);
@@ -101,7 +110,7 @@ public Action OnAttack2(int client, int entity) {
 		return Plugin_Stop;
 	
 	CWM_RunAnimation(entity, WAA_Attack2);
-	int ent = CWM_ShootProjectile(client, entity, g_szTModel, "grenade", 2.5, 1200.0, INVALID_FUNCTION);
+	int ent = CWM_ShootProjectile(client, entity, g_szTModel2, "grenade", 2.5, 1200.0, INVALID_FUNCTION);
 	EmitSoundToAllAny(g_szSounds[GetRandomInt(5, 7)], entity, SNDCHAN_WEAPON);
 	_pushStack(entity, ent);
 	
@@ -121,14 +130,14 @@ public Action OnExplode(int client, int entity) {
 		}
 	}
 	
-	return Plugin_Handled;
+	return Plugin_Stop;
 }
 
 public Action OnProjectileHit(int client, int wpnid, int entity, int target) {
 	CWM_ShootExplode(client, wpnid, entity, 300.0);
 	float pos[3];
 	Entity_GetAbsOrigin(entity, pos);
-	TE_SetupExplosion(pos, 0, 300.0, 0, 0, 200, 50);
+	TE_SetupExplosion(pos, 0, 1.0, 0, 0, 200, 50);
 	TE_SendToAll();
 	StopSoundAny(entity, SNDCHAN_WEAPON, g_szSounds[0]);
 	return Plugin_Handled;
@@ -137,7 +146,8 @@ public void OnMapStart() {
 
 	AddModelToDownloadsTable(g_szVModel);
 	AddModelToDownloadsTable(g_szWModel);
-	AddModelToDownloadsTable(g_szTModel);
+	AddModelToDownloadsTable(g_szTModel1);
+	AddModelToDownloadsTable(g_szTModel2);
 	
 	for (int i = 0; i < sizeof(g_szSounds); i++) {
 		AddSoundToDownloadsTable(g_szSounds[i]);
