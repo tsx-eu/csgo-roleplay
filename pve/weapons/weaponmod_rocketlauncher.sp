@@ -38,12 +38,11 @@ char g_szSounds[][PLATFORM_MAX_PATH] = {
 	"physics/glass/glass_sheet_impact_hard3.wav",
 	"weapons/nova/nova_insertshell_01.wav",
 	"weapons/nova/nova_insertshell_02.wav",
-	"weapons/nova/nova_insertshell_03.wav",
-	"weapons/sg556/sg556_draw.wav"
+	"weapons/nova/nova_insertshell_03.wav"
 };
 
 #define MAX_PROJECTILES	8
-#define REMOVE_AFTER	30.0
+#define REMOVE_AFTER	60.0
 int g_iStack[MAX_ENTITIES][MAX_PROJECTILES];
 
 public void OnAllPluginsLoaded() {
@@ -81,7 +80,6 @@ public void OnReload(int client, int entity) {
 }
 public void OnDraw(int client, int entity) {
 	CWM_RunAnimation(entity, WAA_Draw);
-	EmitSoundToAllAny(g_szSounds[11], entity, SNDCHAN_WEAPON);
 }
 public void OnIdle(int client, int entity) {
 	CWM_RunAnimation(entity, WAA_Idle);
