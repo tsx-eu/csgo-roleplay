@@ -28,6 +28,8 @@ char g_szMaterials[][PLATFORM_MAX_PATH] = {
 	"materials/models/weapons/tsx/flamethrower/v_flamethrower_gauge.vtf",
 	"materials/models/weapons/tsx/flamethrower/w_flamethrower.vmt",
 	"materials/models/weapons/tsx/flamethrower/w_flamethrower.vtf",
+	"materials/models/weapons/tsx/flamethrower/flame.vmt",
+	"materials/models/weapons/tsx/flamethrower/flame.vtf",
 	"materials/models/weapons/v_hand/v_hand_sheet.vmt"
 };
 char g_szSounds[][PLATFORM_MAX_PATH] = {
@@ -67,6 +69,7 @@ public Action OnAttack(int client, int entity) {
 	CWM_RunAnimation(entity, WAA_Attack);
 	int ent = CWM_ShootProjectile(client, entity, NULL_MODEL, "flame", 3.0, 800.0, OnProjectileHit);
 	SetEntityGravity(ent, 0.5);
+	SetEntPropFloat(ent, Prop_Send, "m_flElasticity", 0.1);
 	Entity_SetMinMaxSize(ent, view_as<float>({-16.0, -16.0, -16.0}), view_as<float>({16.0, 16.0, 16.0}));
 	DispatchKeyValue(ent, "OnUser1", "!self,Kill,,0.5,-1");
 	AcceptEntityInput(ent, "FireUser1");
@@ -78,8 +81,24 @@ public Action OnAttack(int client, int entity) {
 	color[2] = RoundFloat(size * 2.0);
 	color[3] = RoundFloat((size / 16.0) * 255);
 	
-	TE_SetupBeamFollow(ent, g_cModel, 0, 0.5, size, 0.0, 1, color);
+	TE_SetupBeamFollow(ent, g_cModel, 0, 0.5, 2.0 + size, 0.0, 1, color);
 	TE_SendToAll();
+	
+	/*
+	int sub = CreateEntityByName("env_sprite");
+	DispatchKeyValue(sub, "model", "materials/models/weapons/tsx/flamethrower/flame.vmt");
+	DispatchKeyValueFloat(sub, "scale", size / 8.0);
+	DispatchKeyValue(sub, "rendermode", "5");
+	DispatchKeyValue(sub, "spawnflags", "1");
+	DispatchSpawn(sub);
+	
+	float pos[3];
+	Entity_GetAbsOrigin(ent, pos);
+	TeleportEntity(sub, pos, NULL_VECTOR, NULL_VECTOR);
+	SetVariantString("!activator");
+	AcceptEntityInput(sub, "SetParent", ent);
+	*/
+	
 	return Plugin_Continue;
 }
 public Action OnProjectileHit(int client, int wpnid, int entity, int target) {
@@ -106,6 +125,6 @@ public void OnMapStart() {
 		AddFileToDownloadsTable(g_szMaterials[i]);
 	}
 	
-	g_cModel = PrecacheModel("materials/sprites/laserbeam.vmt");
+	g_cModel = PrecacheModel("materials/models/weapons/tsx/flamethrower/flame.vmt");
 
 }
