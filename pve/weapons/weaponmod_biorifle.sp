@@ -19,8 +19,8 @@ char g_szReplace[PLATFORM_MAX_PATH]  =	"weapon_negev";
 
 char g_szVModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/bio_rifle/v_bio_rifle.mdl";
 char g_szWModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/bio_rifle/w_bio_rifle.mdl";
+char g_szTModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/bio_rifle/biomass.mdl";
 
-int g_cModel; 
 char g_szMaterials[][PLATFORM_MAX_PATH] = {
 	"materials/models/weapons/tsx/bio_rifle/BioRifleGlass0.vmt",
 	"materials/models/weapons/tsx/bio_rifle/BioRifleGlass0.vtf",
@@ -50,8 +50,16 @@ char g_szSounds[][PLATFORM_MAX_PATH] = {
 };
 
 #define MAX_WMODE	5
+char g_szColors[MAX_WMODE][32] = {
+	"0 200 0",
+	"0 0 200",
+	"200 0 0",
+	"200 100 200",
+	"200 200 0"
+};
 
 int g_iWeaponMode[MAX_ENTITIES];
+float g_fWeaponStart[MAX_ENTITIES];
 
 public void OnAllPluginsLoaded() {
 	int id = CWM_Create(g_szFullName, g_szName, g_szReplace, g_szVModel, g_szWModel);
@@ -65,7 +73,7 @@ public void OnAllPluginsLoaded() {
 	
 	CWM_SetFloat(id, WSF_Speed,			240.0);
 	CWM_SetFloat(id, WSF_ReloadSpeed,	0.0);
-	CWM_SetFloat(id, WSF_AttackSpeed,	59/30.0);
+	CWM_SetFloat(id, WSF_AttackSpeed,	0.5);
 	CWM_SetFloat(id, WSF_AttackRange,	RANGE_MELEE * 4.0);
 	CWM_SetFloat(id, WSF_Spread, 		0.0);
 	
@@ -88,26 +96,40 @@ public void OnIdle(int client, int entity) {
 }
 public Action OnAttack(int client, int entity) {
 	CWM_RunAnimation(entity, WAA_Attack);
+	g_fWeaponStart[entity] = GetGameTime();
 	return Plugin_Continue;
 }
+
 public Action OnAttackPost(int client, int entity) {
 	CWM_RunAnimation(entity, WAA_AttackPost);
+	float pc = (GetGameTime() - g_fWeaponStart[entity]) * (30 / 60.0);
+	if( pc > 1.0 )
+		pc = 1.0;
+	
+	int ent = CWM_ShootProjectile(client, entity, g_szTModel, "blob", 3.0, 800.0, OnProjectileHit);
+	SetEntityGravity(ent, 0.5);
+	SetEntPropFloat(ent, Prop_Send, "m_flElasticity", 0.2);
+	SetEntPropFloat(ent, Prop_Send, "m_flModelScale", 0.5 + pc);
+	SetEntProp(ent, Prop_Send, "m_nSkin", g_iWeaponMode[entity]);
+	
+	g_iWeaponMode[ent] = g_iWeaponMode[entity];
+}
+public Action OnProjectileHit(int client, int wpnid, int entity, int target) {
+	return Plugin_Stop;
 }
 public Action OnAttack2(int client, int entity) {
 	g_iWeaponMode[entity] = (g_iWeaponMode[entity] + 1) % MAX_WMODE;
 	CWM_SetEntityInt(entity, WSI_Skin, g_iWeaponMode[entity]);
 	CWM_RefreshHUD(client, entity);
 	
-	return Plugin_Continue;
-}
-public Action OnProjectileHit(int client, int wpnid, int entity, int target) {
-	return Plugin_Continue;
+	return Plugin_Handled;
 }
 
 public void OnMapStart() {
 
 	AddModelToDownloadsTable(g_szVModel);
 	AddModelToDownloadsTable(g_szWModel);
+	AddModelToDownloadsTable(g_szTModel);
 	
 	for (int i = 0; i < sizeof(g_szSounds); i++) {
 		AddSoundToDownloadsTable(g_szSounds[i]);
@@ -116,5 +138,4 @@ public void OnMapStart() {
 	for (int i = 0; i < sizeof(g_szMaterials); i++) {
 		AddFileToDownloadsTable(g_szMaterials[i]);
 	}
-
 }
