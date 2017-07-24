@@ -91,6 +91,9 @@ void HDV_Sell(int client, int itemID, int quantity, int sellPrice, int confirm) 
 		rp_GetItemData(itemID, item_type_name, tmp3, sizeof(tmp3));
 		menu.SetTitle("Hôtel des ventes: Vendre\nCombien voulez-vous vendre de\n%s?\n ", tmp3);
 		
+		Format(tmp, sizeof(tmp), "sell %d %d", itemID, quantity);
+		Format(tmp2, sizeof(tmp2), "%dx %s", quantity, tmp3);
+		menu.AddItem(tmp, tmp2);
 		
 		for (int i = 1; i <= quantity; i++) {
 			
