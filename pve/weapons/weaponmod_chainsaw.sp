@@ -2,10 +2,18 @@
 
 #include <sourcemod>
 #include <sdktools>
-#include <emitsoundany>
+#include <sdkhooks>
 #include <smlib>
+#include <emitsoundany>
+#include <colors_csgo>
 
 #include <custom_weapon_mod.inc>
+
+#define ROLEPLAY
+
+#if defined ROLEPLAY
+#include <roleplay>
+#endif
 
 char g_szFullName[PLATFORM_MAX_PATH] =	"Tronçoneuse";
 char g_szName[PLATFORM_MAX_PATH] 	 =	"chainsaw";
@@ -30,7 +38,7 @@ public void OnAllPluginsLoaded() {
 	
 	CWM_SetInt(id, WSI_AttackType,		view_as<int>(WSA_Automatic));
 	CWM_SetInt(id, WSI_ReloadType,		view_as<int>(WSR_Automatic));
-	CWM_SetInt(id, WSI_AttackDamage, 	10);
+	CWM_SetInt(id, WSI_AttackDamage, 	25);
 	CWM_SetInt(id, WSI_AttackBullet, 	1);
 	CWM_SetInt(id, WSI_MaxBullet, 		250);
 	CWM_SetInt(id, WSI_MaxAmmunition, 	500);
@@ -84,7 +92,15 @@ public Action OnAttack(int client, int entity) {
 		NormalizeVector(src, src);
 		TE_SetupSparks(hit, src, 1, 0);
 		TE_SendToAll();
-		return Plugin_Continue;
+		
+		
+#if defined ROLEPLAY
+		if ( rp_GetBuildingData(target, BD_owner) > 0 ) {
+			CWM_ShootDamage(client, entity, hit);
+			CWM_ShootDamage(client, entity, hit);
+			CWM_ShootDamage(client, entity, hit);
+		}
+#endif
 	}
 	
 	return Plugin_Handled;
