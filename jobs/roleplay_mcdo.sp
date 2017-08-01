@@ -472,7 +472,7 @@ public Action Delay_MenuVital(Handle timer, Handle dp) {
 }
 public int MenuVital(Handle menu, MenuAction action, int client, int param2) {
 	if( action == MenuAction_Select ) {
-		char szMenuItem[64], tmp[3][8];
+		char szMenuItem[64], tmp[2][8];
 		GetMenuItem(menu, param2, szMenuItem, sizeof(szMenuItem));
 		ExplodeString(szMenuItem, " ", tmp, sizeof(tmp), sizeof(tmp[]));
 		
