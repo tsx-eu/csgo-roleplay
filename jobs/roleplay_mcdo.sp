@@ -587,5 +587,3 @@ int GetLevelFrom(float vita) {
 float GetVitaFromLevel(int lvl) {
 	return Pow(2.0, lvl+3)*2.0;
 }
-}
-
