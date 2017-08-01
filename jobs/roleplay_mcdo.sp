@@ -264,15 +264,25 @@ public Action Cmd_ItemHamburger(int args) {
 	
 	int client = GetCmdArgInt(2);
 	int item_id = GetCmdArgInt(args);
+	int itemCount = rp_GetClientItem(client, item_id);
 	
-	if( StrEqual(arg1, "vital") || StrEqual(arg1, "max") ) {
-		float vita = rp_GetClientFloat(client, fl_Vitality);
+	if( StrEqual(arg1, "vital") ) {
+	
+		if( itemCount >= 9 ) {
+			Handle dp;
+			CreateDataTimer(0.1, Delay_MenuVital, dp, TIMER_DATA_HNDL_CLOSE);
+			WritePackCell(dp, client);
+			WritePackCell(dp, item_id);
+		}
+		else {
+			float vita = rp_GetClientFloat(client, fl_Vitality);
 		
-		rp_SetClientFloat(client, fl_Vitality, vita + 256.0);
-		ServerCommand("sm_effect_particles %d Trail12 5 facemask", client);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ressentez votre vitalité s'augmenter (%.1f -> %.1f).", vita, vita+256.0);
+			rp_SetClientFloat(client, fl_Vitality, vita + 256.0);
+			ServerCommand("sm_effect_particles %d Trail12 5 facemask", client);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ressentez votre vitalité s'augmenter (%.1f -> %.1f).", vita, vita+256.0);
+		}
 	}
-	if( StrEqual(arg1, "energy") || StrEqual(arg1, "max") ) {
+	if( StrEqual(arg1, "energy") ) {
 		rp_SetClientFloat(client, fl_Energy, 100.0);
 		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ressentez votre énergie s'augmenter.");
@@ -435,6 +445,51 @@ public Action Cmd_ItemHamburger(int args) {
 		rp_SetClientKnifeType(client, ball_type_fire);
 	}
 	return Plugin_Handled;
+}
+public Action Delay_MenuVital(Handle timer, Handle dp) {
+	ResetPack(dp);
+	int client = ReadPackCell(dp);
+	int itemID = ReadPackCell(dp);
+	int count = rp_GetClientItem(client, itemID);
+	
+	Menu menu = CreateMenu(MenuVital);
+	menu.SetTitle("Vous avez %d Hamburger vitaux.\nCombien voulez-vous en manger?\n ", count);
+		
+	char tmp[64], tmp2[64];
+		
+	/*for (int i = 0; i < 1000; i++) {
+		// TODO:
+		// Jusqu'au palier suivant (X burger)
+		// Tous
+		// 100...
+		Format(tmp, sizeof(tmp), "%d %d", itemID, i);
+		Format(tmp2, sizeof(tmp2), "Manger %d burgers", i);
+		
+		menu.AddItem(tmp, tmp2);
+	}*/
+	
+	menu.Display(client, 30);
+}
+public int MenuVital(Handle menu, MenuAction action, int client, int param2) {
+	if( action == MenuAction_Select ) {
+		char szMenuItem[64], tmp[3][8];
+		GetMenuItem(menu, param2, szMenuItem, sizeof(szMenuItem));
+		ExplodeString(szMenuItem, " ", tmp, sizeof(tmp), sizeof(tmp[]));
+		
+		int itemID = StringToInt(tmp[0]);
+		int amount = StringToInt(tmp[1]);
+		
+		float vita = rp_GetclientFloat(client, fl_Vitality);
+		float n_vita = vita + (float(amount) * 256.0);
+		
+		rp_SetClientFloat(client, fl_Vitality, n_vita);
+		ServerCommand("sm_effect_particles %d Trail12 5 facemask", client);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ressentez votre vitalité s'augmenter (%.1f -> %.1f).", vita, n_vita);
+	}
+	else if( action == MenuAction_End ) {
+		if( menu != INVALID_HANDLE )
+			CloseHandle(menu);
+	}
 }
 public Action AllowUltimate(Handle timer, any client) {
 
