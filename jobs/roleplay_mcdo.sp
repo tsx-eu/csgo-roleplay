@@ -574,7 +574,7 @@ public Action BuildingBanana_touch(int index, int client) {
 	
 	return Plugin_Continue;
 }
-int GetVitaLevel(float vita) {
+int GetLevelFrom(float vita) {
 	if( vita <= 64.0 )
 		return 0;
 	
@@ -584,3 +584,8 @@ int GetVitaLevel(float vita) {
 		
 	return vit_level;
 }
+float GetVitaFromLevel(int lvl) {
+	return Pow(2.0, lvl+3)*2.0;
+}
+}
+
