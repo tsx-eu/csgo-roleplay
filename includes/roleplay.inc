@@ -561,6 +561,7 @@ native ArrayList rp_GetClientDouble(int client);
 native void rp_ClientFloodIncrement(int client, int target, fd_user_data type, float cooldown);
 native bool rp_ClientFloodTriggered(int client, int target, fd_user_data type);
 native void rp_ClientAggroIncrement(int client, int target, int damage);
+native bool rp_ClientCanAttack(int client, int target);
 native void rp_ClientOverlays(int client, overlaysImg img, float duration = -1.0);
 native void rp_ClientXPIncrement(int client, int xp=1);
 native void rp_ClientMoney(int client, int_user_data type, int amount);
