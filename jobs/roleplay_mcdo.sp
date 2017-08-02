@@ -269,6 +269,8 @@ public Action Cmd_ItemHamburger(int args) {
 	if( StrEqual(arg1, "vital") ) {
 	
 		if( itemCount >= 9 ) {
+			rp_ClientGiveItem(client, item_id, 1);
+			
 			Handle dp;
 			CreateDataTimer(0.1, Delay_MenuVital, dp, TIMER_DATA_HNDL_CLOSE);
 			WritePackCell(dp, client);
@@ -447,6 +449,8 @@ public Action Cmd_ItemHamburger(int args) {
 	return Plugin_Handled;
 }
 public Action Delay_MenuVital(Handle timer, Handle dp) {
+	static int amountType[] =  { 1, 2, 3, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000 };
+	
 	ResetPack(dp);
 	int client = ReadPackCell(dp);
 	int itemID = ReadPackCell(dp);
@@ -456,17 +460,27 @@ public Action Delay_MenuVital(Handle timer, Handle dp) {
 	menu.SetTitle("Vous avez %d Hamburger vitaux.\nCombien voulez-vous en manger?\n ", count);
 		
 	char tmp[64], tmp2[64];
+	float vita = rp_GetClientFloat(client, fl_Vitality);
+	
+	int cpt = RoundToCeil(GetVitaFromLevel(GetLevelFromVita(vita) + 1) / 256.0);
+	Format(tmp, sizeof(tmp), "%d %d", itemID, cpt);
+	Format(tmp2, sizeof(tmp2), "Manger %d burgers pour atteindre le niveau suivant", cpt);
+	menu.AddItem(tmp, tmp2, cpt <= count ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );
+	
+	Format(tmp, sizeof(tmp), "%d %d", itemID, count);
+	Format(tmp2, sizeof(tmp2), "Manger tout mes %d burgers", count);
+	menu.AddItem(tmp, tmp2);
+	
 		
-	/*for (int i = 0; i < 1000; i++) {
-		// TODO:
-		// Jusqu'au palier suivant (X burger)
-		// Tous
-		// 100...
-		Format(tmp, sizeof(tmp), "%d %d", itemID, i);
-		Format(tmp2, sizeof(tmp2), "Manger %d burgers", i);
+	for (int i = 0; i < sizeof(amountType); i++) {
+		if( count < amountType[i] )
+			continue;
+		
+		Format(tmp, sizeof(tmp), "%d %d", itemID, amountType[i]);
+		Format(tmp2, sizeof(tmp2), "Manger %d burgers", amountType[i]);
 		
 		menu.AddItem(tmp, tmp2);
-	}*/
+	}
 	
 	menu.Display(client, 30);
 }
@@ -479,7 +493,14 @@ public int MenuVital(Handle menu, MenuAction action, int client, int param2) {
 		int itemID = StringToInt(tmp[0]);
 		int amount = StringToInt(tmp[1]);
 		
-		float vita = rp_GetclientFloat(client, fl_Vitality);
+		if( rp_GetClientItem(client, itemID) < amount ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas autant d'hamburger.");
+			return;
+		}
+		
+		rp_ClientGiveItem(client, itemID, -amount);
+		
+		float vita = rp_GetClientFloat(client, fl_Vitality);
 		float n_vita = vita + (float(amount) * 256.0);
 		
 		rp_SetClientFloat(client, fl_Vitality, n_vita);
@@ -574,7 +595,7 @@ public Action BuildingBanana_touch(int index, int client) {
 	
 	return Plugin_Continue;
 }
-int GetLevelFrom(float vita) {
+int GetLevelFromVita(float vita) {
 	if( vita <= 64.0 )
 		return 0;
 	
@@ -585,5 +606,5 @@ int GetLevelFrom(float vita) {
 	return vit_level;
 }
 float GetVitaFromLevel(int lvl) {
-	return Pow(2.0, lvl+3)*2.0;
+	return Pow(2.0, float(lvl)+3.0)*2.0;
 }
