@@ -264,15 +264,27 @@ public Action Cmd_ItemHamburger(int args) {
 	
 	int client = GetCmdArgInt(2);
 	int item_id = GetCmdArgInt(args);
+	int itemCount = rp_GetClientItem(client, item_id);
 	
-	if( StrEqual(arg1, "vital") || StrEqual(arg1, "max") ) {
-		float vita = rp_GetClientFloat(client, fl_Vitality);
+	if( StrEqual(arg1, "vital") ) {
+	
+		if( itemCount >= 9 ) {
+			rp_ClientGiveItem(client, item_id, 1);
+			
+			Handle dp;
+			CreateDataTimer(0.1, Delay_MenuVital, dp, TIMER_DATA_HNDL_CLOSE);
+			WritePackCell(dp, client);
+			WritePackCell(dp, item_id);
+		}
+		else {
+			float vita = rp_GetClientFloat(client, fl_Vitality);
 		
-		rp_SetClientFloat(client, fl_Vitality, vita + 256.0);
-		ServerCommand("sm_effect_particles %d Trail12 5 facemask", client);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ressentez votre vitalité s'augmenter (%.1f -> %.1f).", vita, vita+256.0);
+			rp_SetClientFloat(client, fl_Vitality, vita + 256.0);
+			ServerCommand("sm_effect_particles %d Trail12 5 facemask", client);
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ressentez votre vitalité s'augmenter (%.1f -> %.1f).", vita, vita+256.0);
+		}
 	}
-	if( StrEqual(arg1, "energy") || StrEqual(arg1, "max") ) {
+	if( StrEqual(arg1, "energy") ) {
 		rp_SetClientFloat(client, fl_Energy, 100.0);
 		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ressentez votre énergie s'augmenter.");
@@ -436,6 +448,70 @@ public Action Cmd_ItemHamburger(int args) {
 	}
 	return Plugin_Handled;
 }
+public Action Delay_MenuVital(Handle timer, Handle dp) {
+	static int amountType[] =  { 1, 2, 3, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000 };
+	
+	ResetPack(dp);
+	int client = ReadPackCell(dp);
+	int itemID = ReadPackCell(dp);
+	int count = rp_GetClientItem(client, itemID);
+	
+	Menu menu = CreateMenu(MenuVital);
+	menu.SetTitle("Vous avez %d Hamburger vitaux.\nCombien voulez-vous en manger?\n ", count);
+		
+	char tmp[64], tmp2[64];
+	float vita = rp_GetClientFloat(client, fl_Vitality);
+	
+	int cpt = RoundToCeil(GetVitaFromLevel(GetLevelFromVita(vita) + 1) / 256.0);
+	Format(tmp, sizeof(tmp), "%d %d", itemID, cpt);
+	Format(tmp2, sizeof(tmp2), "Manger %d burgers pour atteindre le niveau suivant", cpt);
+	menu.AddItem(tmp, tmp2, cpt <= count ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );
+	
+	Format(tmp, sizeof(tmp), "%d %d", itemID, count);
+	Format(tmp2, sizeof(tmp2), "Manger tout mes %d burgers", count);
+	menu.AddItem(tmp, tmp2);
+	
+		
+	for (int i = 0; i < sizeof(amountType); i++) {
+		if( count < amountType[i] )
+			continue;
+		
+		Format(tmp, sizeof(tmp), "%d %d", itemID, amountType[i]);
+		Format(tmp2, sizeof(tmp2), "Manger %d burgers", amountType[i]);
+		
+		menu.AddItem(tmp, tmp2);
+	}
+	
+	menu.Display(client, 30);
+}
+public int MenuVital(Handle menu, MenuAction action, int client, int param2) {
+	if( action == MenuAction_Select ) {
+		char szMenuItem[64], tmp[2][8];
+		GetMenuItem(menu, param2, szMenuItem, sizeof(szMenuItem));
+		ExplodeString(szMenuItem, " ", tmp, sizeof(tmp), sizeof(tmp[]));
+		
+		int itemID = StringToInt(tmp[0]);
+		int amount = StringToInt(tmp[1]);
+		
+		if( rp_GetClientItem(client, itemID) < amount ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas autant d'hamburger.");
+			return;
+		}
+		
+		rp_ClientGiveItem(client, itemID, -amount);
+		
+		float vita = rp_GetClientFloat(client, fl_Vitality);
+		float n_vita = vita + (float(amount) * 256.0);
+		
+		rp_SetClientFloat(client, fl_Vitality, n_vita);
+		ServerCommand("sm_effect_particles %d Trail12 5 facemask", client);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ressentez votre vitalité s'augmenter (%.1f -> %.1f).", vita, n_vita);
+	}
+	else if( action == MenuAction_End ) {
+		if( menu != INVALID_HANDLE )
+			CloseHandle(menu);
+	}
+}
 public Action AllowUltimate(Handle timer, any client) {
 
 	rp_SetClientBool(client, b_MayUseUltimate, true);
@@ -518,4 +594,17 @@ public Action BuildingBanana_touch(int index, int client) {
 	SDKUnhook(index, SDKHook_Touch, BuildingBanana_touch);
 	
 	return Plugin_Continue;
+}
+int GetLevelFromVita(float vita) {
+	if( vita <= 64.0 )
+		return 0;
+	
+	int vit_level = RoundToFloor(Logarithm(vita, 2.0) / 2.0 - 3.0);
+	if( vit_level < 0 )
+		vit_level = 0;
+		
+	return vit_level;
+}
+float GetVitaFromLevel(int lvl) {
+	return Pow(2.0, float(lvl)+3.0)*2.0;
 }
