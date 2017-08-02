@@ -80,11 +80,15 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 			CreateTimer(10.0, AllowTalking, client);
 		}
 		
+		char name[64];
+		GetClientName(client, name, sizeof(name));
+		
 		if( !rp_GetClientBool(client, b_Crayon)) {
-			CRemoveTags(arg, strlen(arg)+1);
+			CRemoveTags(arg, sizeof(arg));
+			CRemoveTags(name, sizeof(name));
 		}
 		
-		CPrintToChatAll("{lightblue}%N{default} ({olive}ANNONCE{default}): %s", client, arg);
+		CPrintToChatAll("{lightblue}%s{default} ({olive}ANNONCE{default}): %s", name, arg);
 		LogToGame("[TSX-RP] [ANNONCES] %L: %s", client, arg);
 
 		return Plugin_Handled;
