@@ -462,7 +462,10 @@ public Action Delay_MenuVital(Handle timer, Handle dp) {
 	char tmp[64], tmp2[64];
 	float vita = rp_GetClientFloat(client, fl_Vitality);
 	
-	int cpt = RoundToCeil(GetVitaFromLevel(GetLevelFromVita(vita) + 1) / 256.0);
+	int lvl = GetLevelFromVita(vita);
+	float delta = GetVitaFromLevel(lvl + 1) - vita;
+	int cpt = RoundToCeil(delta/256.0);	
+	
 	Format(tmp, sizeof(tmp), "%d %d", itemID, cpt);
 	Format(tmp2, sizeof(tmp2), "Manger %d burgers pour atteindre le niveau suivant", cpt);
 	menu.AddItem(tmp, tmp2, cpt <= count ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED );
@@ -493,7 +496,7 @@ public int MenuVital(Handle menu, MenuAction action, int client, int param2) {
 		int itemID = StringToInt(tmp[0]);
 		int amount = StringToInt(tmp[1]);
 		
-		if( rp_GetClientItem(client, itemID) < amount ) {
+		if( rp_GetClientItem(client, itemID) < amount && amount > 0 ) {
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous n'avez pas autant d'hamburger.");
 			return;
 		}
@@ -606,5 +609,5 @@ int GetLevelFromVita(float vita) {
 	return vit_level;
 }
 float GetVitaFromLevel(int lvl) {
-	return Pow(2.0, float(lvl)+3.0)*2.0;
+	return Pow(2.0, (float(lvl)+3.0)*2.0);
 }
