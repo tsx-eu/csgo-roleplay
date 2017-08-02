@@ -625,8 +625,8 @@ void VehicleRemove(int vehicle, bool explode = false) {
 			vecOrigin[1] += GetRandomFloat(-20.0, 20.0);
 			vecOrigin[2] += GetRandomFloat(5.0, 20.0);
 			
-			TE_SetupExplosion(vecOrigin, g_cExplode, GetRandomFloat(0.5, 2.0), 2, 1, Math_GetRandomInt(25, 100) , Math_GetRandomInt(25, 100) );
-			TE_SendToAll(time);
+			//TE_SetupExplosion(vecOrigin, g_cExplode, GetRandomFloat(0.5, 2.0), 2, 1, Math_GetRandomInt(25, 100) , Math_GetRandomInt(25, 100) );
+			//TE_SendToAll(time);
 		}
 	}
 	dettachVehicleLight(vehicle);
@@ -729,11 +729,11 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 			int particule = rp_GetVehicleInt(ent, car_particle);
 			int batterie = rp_GetVehicleInt(ent, car_battery);
 			
-			if( particule != -1 ) {
-				ServerCommand("sm_effect_particles %d %s 1 light_rl", ent, g_szParticles[particule][0]);
-				ServerCommand("sm_effect_particles %d %s 1 light_rr", ent, g_szParticles[particule][0]);	
-			}
-			attachVehicleLight(ent);
+			//if( particule != -1 ) {
+			//	ServerCommand("sm_effect_particles %d %s 1 light_rl", ent, g_szParticles[particule][0]);
+			//	ServerCommand("sm_effect_particles %d %s 1 light_rr", ent, g_szParticles[particule][0]);	
+			//}
+			//attachVehicleLight(ent);
 			
 			if( batterie != -1 && !rp_GetClientBool(driver, b_IsAFK) ) {
 				if( rp_GetVehicleInt(ent, car_battery) < 420 ) {
@@ -921,8 +921,8 @@ void DisplayGarageMenu(int client) {
 	AddMenuItem(menu, "to_bank", 	"Ranger la voiture");
 	AddMenuItem(menu, "from_bank", 	"Sortir la voiture");
 	AddMenuItem(menu, "colors", 	"Peindre la voiture");	
-	AddMenuItem(menu, "particles", 	"Ajouter des particules");
-	AddMenuItem(menu, "neons", 		"Ajouter un néon");
+//	AddMenuItem(menu, "particles", 	"Ajouter des particules");
+//	AddMenuItem(menu, "neons", 		"Ajouter un néon");
 	AddMenuItem(menu, "klaxon", 		"Changer de klaxon");
 	
 	AddMenuItem(menu, "repair", 	"Réparer la voiture");
