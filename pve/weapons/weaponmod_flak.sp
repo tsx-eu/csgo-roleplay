@@ -49,6 +49,7 @@ char g_szSounds[][PLATFORM_MAX_PATH] = {
 
 #define MAX_HIT	3
 int g_iHitcount[MAX_ENTITIES];
+int g_iParticleCount = 0;
 
 public void OnAllPluginsLoaded() {
 	int id = CWM_Create(g_szFullName, g_szName, g_szReplace, g_szVModel, g_szWModel);
@@ -94,17 +95,27 @@ public Action OnAttack(int client, int entity) {
 		
 		int ent = CWM_ShootProjectile(client, entity, g_szTModel[GetRandomInt(0, sizeof(g_szTModel)-1)], "flak", 4.0, 1600.0, OnProjectileHit);
 		g_iHitcount[ent] = GetRandomInt(-1, 1);
-		Format(tmp, sizeof(tmp), "!self,Kill,,%.1f,-1", GetRandomFloat(2.0, 3.0));
+		
+		float life = GetRandomFloat(2.0, 3.0);
+		Format(tmp, sizeof(tmp), "!self,Kill,,%.1f,-1", life);
 		SetEntPropFloat(ent,  Prop_Send, "m_flModelScale", 0.1);
 		SetEntityGravity(ent, 0.65);
 		SetEntPropFloat(ent, Prop_Send, "m_flElasticity", 0.65);
 		DispatchKeyValue(ent, "OnUser1", tmp);
 		AcceptEntityInput(ent, "FireUser1");
 		
-		TE_SetupBeamFollow(ent, g_cModel, 0, GetRandomFloat(0.2, 0.5), 0.25, 0.0, 1, {255, 255, 255, 50});
-		TE_SendToAll();
+		if( GetRandomInt(0, 50) >= g_iParticleCount ) {
+			TE_SetupBeamFollow(ent, g_cModel, 0, GetRandomFloat(0.2, 0.5), 0.25, 0.0, 1, {255, 255, 255, 50});
+			TE_SendToAll();
+			
+			g_iParticleCount++;
+			CreateTimer(life, DecreaseParticleCount);
+		}
 	}
 	return Plugin_Continue;
+}
+public Action DecreaseParticleCount(Handle timer, any none) {
+	g_iParticleCount--;
 }
 public Action OnProjectileHit(int client, int wpnid, int entity, int target) {
 	g_iHitcount[entity]++;
