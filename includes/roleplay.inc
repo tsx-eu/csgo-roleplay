@@ -16,25 +16,8 @@
 #include <rp_const.inc>
 
 // ----------------------------------------------------------------------------
-// Artisan:
-//forward int RP_CanClientCraftForFree(int client, int itemID);
-//forward void RP_ClientCraftOver(int client, int itemID);
-// Dealer
-//forward void RP_On18thStealWeapon(int client, int victim, int weaponID);
-//forward void RP_OnClientMaxPlantCount(int client, int& max);
-//forward void RP_OnClientPiedBiche(int client, int type );
-//forward Action RP_ClientCanTP(int client);
-forward void RP_OnMarcheNoireDealer(int client, int prix);
-// Mafia
-//forward Action RP_CanClientStealItem(int client, int target);
-//forward void RP_OnClientWeaponPick(int client, int type);
-forward void RP_OnMarcheNoireMafia(int client, int target, int victim, int itemID, int prix);
-// Police:
-//forward void RP_OnClientTazedItem(int client, int reward);
-//forward Action RP_OnClientSendJail(int client, int target);
-forward void RP_OnMarchePolice(int client, int prix, int realPrice);
-// Technicien:
-//forward void RP_OnClientMaxMachineCount(int client, int& max);
+void RP_OnPlayerGotPay(int client, int salary, int & topay, bool verbose);
+
 // ----------------------------------------------------------------------------
 enum rp_event {
 	RP_PreTakeDamage,			     /* Le joueur recoit des dégats, quelques soit l'arme. Attention, n'est jamais appelé en zone EVENT */
@@ -85,6 +68,7 @@ enum rp_event {
 	RP_OnBlackMarket,			/* Lorsqu'un joueur achète quelque chose au marché noire */
 	
 	RP_OnJugementOver,			/* Lorsqu'un jugement est prononcé */
+	RP_OnPlayerPay,
 
 	
 	RP_EventMax
@@ -137,6 +121,7 @@ typeset rp_event_enum {
 	function Action(int client, int reward);												/* RP_OnClientTazedItem */
 	function Action(int client, int jobID, int target, int victim, int& prix, int arg);		/* RP_OnBlackMarket */
 	function Action(int client, int data[6], int charges[28]);								/* RP_OnJugementOver */
+	function Action(int client, int base, int& amount, bool verbose);						/* RP_OnPlayerPay */
 };
 /**
  * Hook un évenement d'un joueur
