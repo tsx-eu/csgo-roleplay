@@ -40,6 +40,40 @@ public void OnPluginStart() {
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
 }
+public Action RP_OnPlayerGotPay(int client, int salary, int & topay, bool verbose) {
+	
+	bool changed = false;
+	int prestige = rp_GetClientInt(client, i_PlayerPrestige);
+	
+	if( prestige >= 1 ) {
+		int sum = RoundFloat(float(salary) * (float(prestige) / 10.0) );
+		if( verbose )
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre prestige a fait remporté %d$ supplémentaire.", sum);
+		
+		changed = true;
+		topay += sum;
+	}
+	
+	if( rp_GetServerRules(rules_Payes, rules_Enabled) == 1 ) {
+		int target = rp_GetServerRules(rules_Payes, rules_Target);
+		
+		if( rp_GetClientJobID(client) == target || rp_GetClientGroupID(client) == (target-1000) ) {
+
+			int sum = RoundFloat(float(salary) * (rp_GetServerRules(rules_Payes, rules_Arg) == 1 ? 0.05 : -0.1));
+			if( verbose ) {
+				if( rp_GetServerRules(rules_Payes, rules_Arg) == 1 )
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} La mairie vous a fait gagné %d$ supplémentaire.", sum);
+				else
+					CPrintToChat(client, "{lightblue}[TSX-RP]{default} La mairie vous a taxé %d$.", sum);
+			}
+			
+			changed = true;
+			topay += sum;
+		}
+	}
+	
+	return changed ? Plugin_Changed : Plugin_Continue;
+}
 public Action Timer_HUD(Handle timer, any none) {
 	float pos[3] = { 1006.0, 2140.0, -2026.0 };
 	float ang[3] = { 0.0, 0.0, 0.0 };
