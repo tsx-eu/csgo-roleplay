@@ -940,10 +940,8 @@ int BuildingPlant(int client, int type) {
 	SetEntityRenderMode(ent, RENDER_NONE);
 	ServerCommand("sm_effect_fading \"%i\" \"3.0\" \"0\"", ent);
 	
-	
-	SetEntityMoveType(client, MOVETYPE_NONE);
+	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 3.0);
 	SetEntityMoveType(ent, MOVETYPE_NONE);
-	
 	
 	rp_SetBuildingData(ent, BD_started, GetTime());
 	rp_SetBuildingData(ent, BD_max, 3);
@@ -958,7 +956,6 @@ int BuildingPlant(int client, int type) {
 }
 public Action BuildingPlant_post(Handle timer, any entity) {
 	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
-	SetEntityMoveType(client, MOVETYPE_WALK);
 	
 	rp_Effect_BeamBox(client, entity, NULL_VECTOR, 255, 255, 0);
 	SetEntProp(entity, Prop_Data, "m_takedamage", 2);

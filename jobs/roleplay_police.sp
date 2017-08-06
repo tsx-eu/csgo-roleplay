@@ -1333,17 +1333,12 @@ int BuildingBarriere(int client) {
 	SetEntityRenderMode(ent, RENDER_NONE);
 	ServerCommand("sm_effect_fading \"%i\" \"2.0\" \"0\"", ent);
 	
-	SetEntityMoveType(client, MOVETYPE_NONE);
+	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 3.0);
 	SetEntityMoveType(ent, MOVETYPE_NONE);
 	
 	CreateTimer(2.0, BuildingBarriere_post, ent);
-	CreateTimer(2.0, BuildingBarriere_client_post, client);
 	rp_SetBuildingData(ent, BD_owner, client);
 	return ent;
-}
-public Action BuildingBarriere_client_post(Handle timer, any client) {
-	SetEntityMoveType(client, MOVETYPE_WALK);
-	return Plugin_Handled;
 }
 public Action BuildingBarriere_post(Handle timer, any entity) {
 	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");

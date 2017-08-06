@@ -509,7 +509,7 @@ int BuidlingATM(int client) {
 	SetEntityRenderMode(ent, RENDER_NONE);
 	ServerCommand("sm_effect_fading \"%i\" \"3.0\" \"0\"", ent);
 	
-	SetEntityMoveType(client, MOVETYPE_NONE);
+	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 3.0);
 	SetEntityMoveType(ent, MOVETYPE_NONE);
 	
 	CreateTimer(3.0, BuildingATM_post, ent);
@@ -519,7 +519,6 @@ int BuidlingATM(int client) {
 
 public Action BuildingATM_post(Handle timer, any entity) {
 	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
-	SetEntityMoveType(client, MOVETYPE_WALK);
 	
 	rp_Effect_BeamBox(client, entity, NULL_VECTOR, 255, 255, 0);
 	
@@ -761,16 +760,19 @@ int BuidlingSIGN(int client) {
 	SetEntityRenderMode(ent, RENDER_NONE);
 	ServerCommand("sm_effect_fading \"%i\" \"3.0\" \"0\"", ent);
 	
-	SetEntityMoveType(client, MOVETYPE_NONE);
+	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 3.0);
 	SetEntityMoveType(ent, MOVETYPE_NONE);
 	
 	CreateTimer(3.0, BuildingSIGN_post, ent);
 	rp_SetBuildingData(ent, BD_owner, client);
 	return ent;
 }
+public Action fwdFrozen(int client, float& speed, float& gravity) {
+	speed = 0.0;
+	return Plugin_Stop;
+}
 public Action BuildingSIGN_post(Handle timer, any entity) {
 	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
-	SetEntityMoveType(client, MOVETYPE_WALK);
 	
 	rp_Effect_BeamBox(client, entity, NULL_VECTOR, 255, 255, 0);
 	SDKHook(entity, SDKHook_OnTakeDamage, DamageATM);

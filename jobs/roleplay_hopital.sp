@@ -544,7 +544,7 @@ int BuildingHealBox(int client) {
 	SetEntityRenderMode(ent, RENDER_NONE);
 	ServerCommand("sm_effect_fading \"%i\" \"2.5\" \"0\"", ent);
 	
-	SetEntityMoveType(client, MOVETYPE_NONE);
+	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 3.0);
 	SetEntityMoveType(ent, MOVETYPE_NONE);
 	
 	
@@ -559,9 +559,6 @@ public Action BuildingHealBox_post(Handle timer, any entity) {
 	
 	if( !IsValidEdict(entity) && !IsValidEntity(entity) )
 		return Plugin_Handled;
-	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
-	
-	SetEntityMoveType(client, MOVETYPE_WALK);
 	
 	if( rp_IsInPVP(entity) ) {
 		rp_ClientColorize(entity);

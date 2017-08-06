@@ -856,7 +856,7 @@ int BuidlingTABLE(int client) {
 	SetEntityRenderMode(ent, RENDER_NONE);
 	ServerCommand("sm_effect_fading \"%i\" \"3.0\" \"0\"", ent);
 	
-	SetEntityMoveType(client, MOVETYPE_NONE);
+	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, 3.0);
 	SetEntityMoveType(ent, MOVETYPE_NONE);
 	
 	CreateTimer(3.0, BuildingTABLE_post, ent);
@@ -865,7 +865,6 @@ int BuidlingTABLE(int client) {
 }
 public Action BuildingTABLE_post(Handle timer, any entity) {
 	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
-	SetEntityMoveType(client, MOVETYPE_WALK);
 	
 	rp_Effect_BeamBox(client, entity, NULL_VECTOR, 255, 255, 0);
 	SetEntProp(entity, Prop_Data, "m_takedamage", 2);
