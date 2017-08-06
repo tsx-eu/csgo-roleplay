@@ -17,7 +17,7 @@
 
 //#define DEBUG
 #define MAX_LOCATIONS			150
-#define MAX_ZONES				310
+#define MAX_ZONES				320
 #define MAX_GROUPS				150
 #define MAX_AREA_DIST			500
 #define CONTACT_DIST			150
