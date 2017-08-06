@@ -78,7 +78,6 @@ public void OnPluginStart() {
 	
 	RegAdminCmd("rp_force_appart", 		CmdForceAppart, 			ADMFLAG_ROOT);
 	
-	
 	for (int i = 1; i <= MaxClients; i++) 
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
@@ -96,6 +95,25 @@ public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 	g_cGlow = PrecacheModel("materials/sprites/glow01.vmt", true);
 	PrecacheModel(MODEL_GRAVE, true);
+}
+public Action RP_OnPlayerGotPay(int client, int salary, int & topay, bool verbose) {
+	int appart = rp_GetPlayerZoneAppart(client);
+	
+	if( appart > 0 && rp_GetClientKeyAppartement(client, appart) ) {
+		float multi = float(rp_GetAppartementInt(appart, appart_bonus_paye)) / 100.0;
+		
+		if( multi <= 1.5 && rp_GetClientJobID(client) == 61 && !rp_GetClientBool(client, b_GameModePassive) )
+			multi = 1.5;
+		
+		int sum = RoundToCeil(float(salary) * multi);
+		
+		if( verbose )
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre appartement a fait remporté %d$ supplémentaire.", sum);
+		
+		topay += sum;
+		return Plugin_Changed;
+	}
+	return Plugin_Continue;
 }
 public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerCommand, fwdCommand);
