@@ -325,7 +325,7 @@ public Action FlagThink(Handle timer, any data) {
 				int point = RoundFloat(FLAG_POINT_MAX - ((FLAG_POINT_MAX - FLAG_POINT_MIN) * float(GetTime() - g_iCaptureStart) / (30.0 * 60.0)));
 				
 				g_iCapture_POINT[g_iFlagData[entity][data_group]] += point;
-				g_iCapture_POINT[rp_GetCaptureInt(cap_bunker)] -= point;
+				// g_iCapture_POINT[rp_GetCaptureInt(cap_bunker)] -= point;
 				
 				GDM_RegisterFlag(g_iFlagData[entity][data_lastOwner]);
 				rp_ClientXPIncrement(g_iFlagData[entity][data_lastOwner], point);
@@ -675,7 +675,7 @@ public Action CAPTURE_Tick(Handle timer, any none) {
 	
 	Effect_DrawBeamBoxToAll(mins, maxs, g_cBeam, g_cBeam, 0, 30, 2.0, 5.0, 5.0, 2, 1.0, color, 0);
 	
-	if( winner != defense && GetTime() % 2 == 0 ) {
+	if( winner != defense ) {
 		g_iCapture_POINT[defense]++;
 	}
 	
@@ -796,7 +796,7 @@ public Action fwdDead(int victim, int attacker, float& respawn) {
 	if( victim != attacker && (rp_GetZoneBit(rp_GetPlayerZone(victim)) & BITZONE_PVP || rp_GetZoneBit(rp_GetPlayerZone(attacker)) & BITZONE_PVP) ) {
 		GDM_RegisterKill(attacker);
 		
-		int points = GDM_ELOKill(attacker, victim);
+		int points = GDM_ELOKill(attacker, victim, dropped);
 		if( dropped )
 			points += RoundFloat(float(points)*0.25);
 			
@@ -1258,7 +1258,7 @@ void GDM_RegisterShoot(int client) {
 	array[gdm_shot]++;
 	g_hGlobalDamage.SetArray(szSteamID, array, sizeof(array));
 }
-int GDM_ELOKill(int client, int target) {
+int GDM_ELOKill(int client, int target, bool flag = false) {
 	
 	char szSteamID[32], szSteamID2[32];
 	int attacker[gdm_max], victim[gdm_max], cgID, tgID, cElo, tElo;
@@ -1278,8 +1278,10 @@ int GDM_ELOKill(int client, int target) {
 	tgID = rp_GetClientGroupID(target);
 	
 	int tmp = cElo - attacker[gdm_elo];
-	g_iCapture_POINT[ tgID ] += tElo - victim[gdm_elo];
+	if( flag )
+		g_iCapture_POINT[ tgID ] += tElo - victim[gdm_elo];
 	g_iCapture_POINT[ cgID ] += cElo - attacker[gdm_elo];
+	
 	if( g_iCapture_POINT[ tgID ] < 0 ) {
 		g_iCapture_POINT[ cgID ] += g_iCapture_POINT[tgID];
 		g_iCapture_POINT[ tgID ] = 0;
