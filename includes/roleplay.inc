@@ -16,7 +16,7 @@
 #include <rp_const.inc>
 
 // ----------------------------------------------------------------------------
-void RP_OnPlayerGotPay(int client, int salary, int & topay, bool verbose);
+forward Action RP_OnPlayerGotPay(int client, int salary, int & topay, bool verbose);
 
 // ----------------------------------------------------------------------------
 enum rp_event {
@@ -138,6 +138,12 @@ native bool rp_HookEvent(int client, rp_event eventID, rp_event_enum hook, float
  * @param  rp_event_enum hook          la fonction à ne plus utiliser
  */
 native bool rp_UnhookEvent(int client, rp_event eventID, rp_event_enum hook);
+/**
+ * Permet d'exécuter manuellement un évennement
+ * @param  int           client        le joueur
+ * @param  rp_event      eventID       l'id de l'evenement
+ * @return Handle		Un pointeur utilisable dans un Call_StartForward.
+ */
 native Handle rp_GetForwardHandle(int client, rp_event eventID);
 // ----------------------------------------------------------------------------
 //                                                 Getter et Setter sur joueur
