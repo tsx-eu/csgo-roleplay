@@ -84,7 +84,7 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 		GetClientName(client, name, sizeof(name));
 		
 		if( !rp_GetClientBool(client, b_Crayon)) {
-			CRemoveTags(arg, sizeof(arg));
+			CRemoveTags(arg, strlen(arg));
 			CRemoveTags(name, sizeof(name));
 		}
 		
