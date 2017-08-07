@@ -66,6 +66,13 @@ public Action Cmd_ItemNade(int args) {
 	int client = GetCmdArgInt(2);
 	rp_SetClientInt(client, i_LastAgression, GetTime());
 	
+	for (int i = 1; i <= MaxClients; i++) {
+		if( !IsValidClient(i) || i == client )
+			continue;
+		
+		rp_ClientAggroIncrement(client, i, 1000);
+	}
+	
 	if( StrEqual(arg1, "conc") ) {
 		rp_CreateGrenade(client, "ctf_nade_conc", "models/grenades/conc/conc.mdl", throwClassic, concExplode, 3.0);
 	}
