@@ -118,8 +118,8 @@ public void Q1_End(int objectiveID, int client) {
 	menu.Display(client, 10);
 	
 	int cap = rp_GetClientJobID(client);
-	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 1000);
-	rp_ClientMoney(client, i_AddToPay, 1000);
+	rp_SetJobCapital(cap, rp_GetJobCapital(cap) - 2500);
+	rp_ClientMoney(client, i_AddToPay, 2500);
 	
 	rp_ClientXPIncrement(client, 2500);
 }
