@@ -71,7 +71,7 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Bonjour citoyen,", ITEMDRAW_DISABLED);
 	menu.AddItem("", "j'ai une nouvelle mission à te confier.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Je t'offre un bonus de 2500$", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Je t'offre un bonus de 1000$", ITEMDRAW_DISABLED);
 	menu.AddItem("", "si tu arrives à vendre pour plus de 10 000$", ITEMDRAW_DISABLED);
 	menu.AddItem("", "en moins de 24 heures.", ITEMDRAW_DISABLED);
 	
