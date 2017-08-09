@@ -49,7 +49,8 @@ public Plugin myinfo =  {
 };
 
 int g_iQuest;
-int g_iPlayerTeam[QUEST_POOL][2049], g_stkTeam[QUEST_POOL][QUEST_TEAMS + 1][MAXPLAYERS + 1], g_stkTeamCount[QUEST_POOL][QUEST_TEAMS], g_iPlayerPool[MAXPLAYERS+1];
+int g_iPlayerTeam[QUEST_POOL][2049], g_stkTeam[QUEST_POOL][QUEST_TEAMS + 1][MAXPLAYERS + 1], g_stkTeamCount[QUEST_POOL][QUEST_TEAMS];
+int g_iEntityPool[2049];
 bool g_bCanMakeQuest[QUEST_POOL];
 
 public void OnPluginStart() {
@@ -117,36 +118,37 @@ public Action newAttempt(Handle timer, any attempt) {
 }
 public void Q1_Start(int objectiveID, int client) {
 	
-	g_iPlayerPool[client] = 0;
+	g_iEntityPool[client] = 0;
 	
-	g_bCanMakeQuest[g_iPlayerPool[client]] = false;
-	addClientToTeam(client, TEAM_PLAYERS, g_iPlayerPool[client]);
+	g_bCanMakeQuest[g_iEntityPool[client]] = false;
+	addClientToTeam(client, TEAM_PLAYERS, g_iEntityPool[client]);
 	
-	g_hQueue[g_iPlayerPool[client]].Clear();
+	g_hQueue[g_iEntityPool[client]].Clear();
 	for (int i = 0; i < sizeof(g_szSpawnQueue); i++) {
 		int cpt = StringToInt(g_szSpawnQueue[i][0]);
 		int id = PVE_GetId(g_szSpawnQueue[i][1]);
 		
 		if( id >= 0 ) {
 			for (int j = 0; j < cpt; j++)
-				g_hQueue[g_iPlayerPool[client]].Push(id);
+				g_hQueue[g_iEntityPool[client]].Push(id);
 		}
 	}
 }
 public void Q1_Frame(int objectiveID, int client) {
 	float pos[3];
-	if( g_hQueue[g_iPlayerPool[client]].Length > 0 ) {
-		if( SQ_Pop(pos, g_iPlayerPool[client]) ) {
+	if( g_hQueue[g_iEntityPool[client]].Length > 0 ) {
+		if( SQ_Pop(pos, g_iEntityPool[client]) ) {
 			
-			int id = g_hQueue[g_iPlayerPool[client]].Get(0);
-			g_hQueue[g_iPlayerPool[client]].Erase(0);
+			int id = g_hQueue[g_iEntityPool[client]].Get(0);
+			g_hQueue[g_iEntityPool[client]].Erase(0);
 			
 			// TODO AIM TO PLAYER
 			// TODO: THINK HOOK
 			// TODO: ATTACK FORWARD
 			// TODO: MOVETO FORWARD
 			int entity = PVE_Spawn(id, pos, NULL_VECTOR);
-			addClientToTeam(entity, TEAM_NPC, g_iPlayerPool[client]);
+			g_iEntityPool[entity] = g_iEntityPool[client];
+			addClientToTeam(entity, TEAM_NPC, g_iEntityPool[client]);
 		}
 	}
 	else {
