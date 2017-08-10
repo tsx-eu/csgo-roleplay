@@ -43,6 +43,24 @@ public void OnPluginStart() {
 		if( IsValidClient(j) )
 			OnClientPostAdminCheck(j);
 }
+
+public Action RP_OnPlayerGotPay(int client, int salary, int & topay, bool verbose) {
+	
+	int vit_level = GetLevelFromVita(rp_GetClientFloat(client, fl_Vitality));
+	
+	if( vit_level > 0 ) {
+		float multi = GetVitaFactor(vit_level);
+		
+		int sum = RoundToCeil(float(salary) * multi) - salary;
+		
+		if( verbose )
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre vitalité de niveau %d vous fait remporté %d$ supplémentaire.", vit_level, sum);
+		
+		topay += sum;
+		return Plugin_Changed;
+	}
+	return Plugin_Continue;
+}
 public void OnMapStart() {
 	PrecacheSoundAny("ambient/tones/equip2.wav");
 	PrecacheSoundAny("ambient/machines/lab_loop1.wav");
@@ -610,4 +628,17 @@ int GetLevelFromVita(float vita) {
 }
 float GetVitaFromLevel(int lvl) {
 	return Pow(2.0, (float(lvl)+3.0)*2.0);
+}
+float GetVitaFactor(int level) {
+	float vit_factor = 1.0;
+	float prev = 0.2;
+	float factor = 0.1;
+		
+	while( level > 0 ) {
+		vit_factor += prev;
+		prev += factor;
+		level--;
+	}
+	
+	return vit_factor;
 }
