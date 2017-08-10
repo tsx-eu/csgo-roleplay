@@ -32,7 +32,7 @@
 #define		TEAM_NONE		0
 #define		TEAM_PLAYERS	1
 #define		TEAM_NPC		2
-#define 	QUEST_MID		view_as<float>({0.0, 0.0, 0.0})
+#define 	QUEST_MID		{{-4378.0, -10705.0, -7703.0}, {2760.0, -10705.0, -7703.0}}
 
 char g_szSpawnQueue[][] = {
 	{"5", "zombie"},
@@ -155,9 +155,14 @@ public void Q1_Frame(int objectiveID, int client) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 }
+// ----------------------------------------------------------------------------
 int SQ_GetArena(int pool) {
 	static int poolZone[QUEST_POOL] = QUEST_ARENA;
 	return poolZone[pool];
+}
+float[] SQ_GetMid(int pool) {
+	static float poolMid[QUEST_POOL][3] = QUEST_MID;
+	return poolMid[pool];
 }
 bool SQ_Pop(float pos[3], int pool) {
 	static const int attempt = 10;
@@ -184,7 +189,7 @@ bool SQ_Pop(float pos[3], int pool) {
 	return false;
 }
 bool SQ_Valid(float pos[3], int pool) {
-	float threshold = GetVectorDistance(pos, QUEST_MID) / 512.0;
+	float threshold = GetVectorDistance(pos, SQ_GetMid(pool)) / 512.0;
 	if( GetRandomFloat(0.5, 1.0) < threshold )
 		return false;
 	// TODO will not be stuck
