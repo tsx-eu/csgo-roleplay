@@ -33,6 +33,7 @@ native void PVE_SetInt(int id, PVE_DataInteger data, int value);
 
 native int PVE_Spawn(int id, float position[3], float angles[3]);
 native void PVE_RegHook(int id, PVE_HookType data, PVE_HookTypeForward fonction);
+native void PVE_RegEvent(int id, PVE_EventType data, PVE_HookTypeForward fonction);
 
 native void PVE_AddAnimation(int id, PVE_DataAnimation data, int sequence, int frames, int fps);
 native void PVE_RunAnimation(int entity, PVE_DataAnimation data, float time = -1.0);
@@ -141,11 +142,23 @@ enum PVE_HookType {
 	
 	ESH_Max
 };
+enum PVE_EventType {
+	ESE_FollowChange,
+	ESE_CanAttack,
+	ESE_Think,
+	
+	ESE_Max
+};
 typeset PVE_HookTypeForward {
 	function void(int id, int entity);					// ESH_Spawn
-	function Action(int id, int entity, int target); 			// ESH_PreAttack // Continue = attack, handled = pas d'attaque mais cooldown, stop = pas d'attaque ni de cooldown
-	function Action(int id, int entity, int target); 			// ESH_Attack 	 // Continue = attack, handled = pas d'attaque mais cooldown, stop = pas d'attaque ni de cooldown
+	function Action(int id, int entity, int target); 	// ESH_PreAttack // Continue = attack, handled = pas d'attaque mais cooldown, stop = pas d'attaque ni de cooldown
+	function Action(int id, int entity, int target); 	// ESH_Attack 	 // Continue = attack, handled = pas d'attaque mais cooldown, stop = pas d'attaque ni de cooldown
 	function void(int id, int entity);					// ESH_Dead
+}
+typeset PVE_EventTypeForward {
+	function Action(int id, int entity, int& target);				// ESE_FollowChange
+	function bool(int id, int entity, int target); 					// ESE_CanAttack
+	function void(int id, int entity, PVE_EntityState& state);		// ESE_Think
 }
 typeset PVE_HitCallback {
 	function void(int id, int entity, int ent, int target);
