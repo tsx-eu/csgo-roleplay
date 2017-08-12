@@ -47,7 +47,7 @@ enum TribunalData {
 int g_cBeam;
 
 // Numéro, Résumé, Heures, Amende, Dédo, Détails
-char g_szArticles[30][6][512] = {
+char g_szArticles[][][512] = {
 	{"221-1-a",		"Meurtre d'un civil",							"18",	"1250",		"1000",	"Toutes atteintes volontaires à la vie d’un citoyen sont condamnées à une peine maximale de 18h de prison et 1250$ d’amende." },
 	{"221-1-b",		"Meurtre d'un policier",						"24",	"5500",		"1500",	"Toutes atteintes volontaires à la vie d’un officier des forces de l’ordre sont condamnées à une peine maximale de 24h de prison et 5 500$ d’amende." },
 	{"221-1-c",		"Tentative de meurtre",							"12",	"500",		"500",	"Les coups et blessures volontaires ayant provoqué des lésions corporelles sont condamnés à une peine maximale de 12h de prison et 500$ d’amende." },
