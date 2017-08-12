@@ -182,9 +182,13 @@ stock void AddSoundToDownloadsTable(char file[PLATFORM_MAX_PATH]) {
 	if( FileExists(tmp, true) )
 		AddFileToDownloadsTable(tmp);
 }
+
+#if defined ROLEPLAY
+#else
 public Action Cmd_PluginReloadSelf(int args) {
 	static char name[64];
 	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
 	ServerCommand("sm plugins reload %s", name);
 	return Plugin_Continue;
 }
+#endif

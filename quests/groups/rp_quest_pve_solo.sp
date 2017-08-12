@@ -54,7 +54,7 @@ int g_iEntityPool[2049];
 bool g_bCanMakeQuest[QUEST_POOL];
 
 public void OnPluginStart() {
-	RegServerCmd("rp_quest_reload", Cmd_Reload);
+	RegServerCmd("rp_quest_reload", Cmd_PluginReloadSelf);
 }
 public void OnAllPluginsLoaded() {
 	g_iQuest = rp_RegisterQuest(QUEST_UNIQID, QUEST_NAME, QUEST_TYPE, fwdCanStart);
@@ -72,12 +72,6 @@ public void OnAllPluginsLoaded() {
 public void OnMapStart() {
 	
 }
-public Action Cmd_Reload(int args) {
-	char name[64];
-	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
-	ServerCommand("sm plugins reload %s", name);
-	return Plugin_Continue;
-}
 // ----------------------------------------------------------------------------
 public bool fwdCanStart(int client) {
 	
@@ -85,9 +79,9 @@ public bool fwdCanStart(int client) {
 		return false;
 	if( rp_GetClientInt(client, i_PlayerLVL) < 210 )
 		return false;
-	
-	if( rp_GetClientInt(client, i_TimePlays) < 210 )
-		return false;
+	//
+	//if( rp_GetClientInt(client, i_TimePlays) < 210 )
+	//	return false;
 	
 	// Uniquement sur le serveur TEST
 	if( GetConVarInt(FindConVar("hostport")) == 27015 )
@@ -134,18 +128,28 @@ public void Q1_Frame(int objectiveID, int client) {
 			int id = g_hQueue[g_iEntityPool[client]].Get(0);
 			g_hQueue[g_iEntityPool[client]].Erase(0);
 			
-			// TODO AIM TO PLAYER
-			// TODO: THINK HOOK
-			// TODO: ATTACK FORWARD
-			// TODO: MOVETO FORWARD
 			int entity = PVE_Spawn(id, pos, NULL_VECTOR);
 			g_iEntityPool[entity] = g_iEntityPool[client];
 			addClientToTeam(entity, TEAM_NPC, g_iEntityPool[client]);
+			
+			PVE_RegEvent(entity, ESE_Dead, OnDead);
+			PVE_RegEvent(entity, ESE_FollowChange, OnFollowChange);
+			PVE_RegEvent(entity, ESE_Think, OnThink);
 		}
 	}
 	else {
 		rp_QuestStepComplete(client, objectiveID);
 	}
+}
+public void OnDead(int id, int entity) {
+	removeClientTeam(entity, g_iEntityPool[entity]);
+}
+public Action OnFollowChange(int id, int entity, int& target) {
+	
+	PrintToChatAll("%d follow %d", entity, target);
+	return Plugin_Continue;
+}
+public void OnThink(int id, int entity, PVE_EntityState& state) {
 }
 // ----------------------------------------------------------------------------
 int SQ_GetArena(int pool) {
