@@ -106,16 +106,22 @@ public Action OnAttackPost(int client, int entity) {
 	if( pc > 1.0 )
 		pc = 1.0;
 	
+	float scale = 0.5 + Pow(pc, 2.0);
+	
 	int ent = CWM_ShootProjectile(client, entity, g_szTModel, "blob", 3.0, 800.0, OnProjectileHit);
 	SetEntityGravity(ent, 0.5);
 	SetEntPropFloat(ent, Prop_Send, "m_flElasticity", 0.2);
-	SetEntPropFloat(ent, Prop_Send, "m_flModelScale", 0.5 + pc);
+	SetEntPropFloat(ent, Prop_Send, "m_flModelScale", scale);
 	SetEntProp(ent, Prop_Send, "m_nSkin", g_iWeaponMode[entity]);
+	SetEntProp(ent, Prop_Send, "m_nSequence", 3);
+	
+	SetEntityRenderMode(ent, RENDER_TRANSTEXTURE);
+	SetEntityRenderColor(ent, 255, 255, 255, 200);
 	
 	g_iWeaponMode[ent] = g_iWeaponMode[entity];
 }
 public Action OnProjectileHit(int client, int wpnid, int entity, int target) {
-	return Plugin_Stop;
+	return Plugin_Handled;
 }
 public Action OnAttack2(int client, int entity) {
 	g_iWeaponMode[entity] = (g_iWeaponMode[entity] + 1) % MAX_WMODE;
