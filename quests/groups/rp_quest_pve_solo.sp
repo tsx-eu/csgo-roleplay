@@ -34,11 +34,11 @@
 #define		TEAM_NPC		2
 #define 	QUEST_MID		{{-4378.0, -10705.0, -7703.0}, {2760.0, -10705.0, -7703.0}}
 
-char g_szSpawnQueue[][] = {
+char g_szSpawnQueue[][][PLATFORM_MAX_PATH] = {
 	{"5", "zombie"},
 	{"1", "skeleton"},
 	{"2", "skeleton_arrow"},
-	{"1", "skeleton_heavy"},
+	{"1", "skeleton_heavy"}
 };
 ArrayList g_hQueue[QUEST_POOL];
 
@@ -62,7 +62,7 @@ public void OnAllPluginsLoaded() {
 		SetFailState("Erreur lors de la création de la quête %s %s", QUEST_UNIQID, QUEST_NAME);
 		
 	int i;
-	rp_QuestAddStep(g_iQuest, i++, Q1_Start,	Q1_Frame,	Q_Abort, QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, Q1_Start,	Q1_Frame,	Q_Abort, Q_Abort);
 	
 	for (int j = 0; j < QUEST_POOL; j++) {
 		g_hQueue[j] = new ArrayList(1, 1024);
@@ -80,25 +80,14 @@ public Action Cmd_Reload(int args) {
 }
 // ----------------------------------------------------------------------------
 public bool fwdCanStart(int client) {
+	
 	if( g_bCanMakeQuest[0] == false && g_bCanMakeQuest[1] == false )
 		return false;
 	if( rp_GetClientInt(client, i_PlayerLVL) < 210 )
 		return false;
 	
-	char szDayOfWeek[12], szHours[12];
-	FormatTime(szDayOfWeek, 11, "%w");
-	FormatTime(szHours, 11, "%H");
-	
-	if( StringToInt(szDayOfWeek) == 3 ) { // Mercredi
-		if( StringToInt(szHours) >= 17 && StringToInt(szHours) < 19  ) {	// 18h00m00s
-			return false;
-		}
-	}
-	if( StringToInt(szDayOfWeek) == 5 ) { // Vendredi
-		if( StringToInt(szHours) >= 20 && StringToInt(szHours) < 22) {	// 21h00m00s
-			return false;
-		}
-	}
+	if( rp_GetClientInt(client, i_TimePlays) < 210 )
+		return false;
 	
 	// Uniquement sur le serveur TEST
 	if( GetConVarInt(FindConVar("hostport")) == 27015 )
@@ -107,14 +96,15 @@ public bool fwdCanStart(int client) {
 	return true;
 }
 // ----------------------------------------------------------------------------
-public void Q_Abort(int objectiveID, int client) {	
-	Q_Clean();
+public void Q_Abort(int objectiveID, int client) {
+	PrintToChatAll("complete.");
+	Q_Clean(g_iEntityPool[client]);
 }
-void Q_Clean() {
-	CreateTimer(15.0 * 60.0, newAttempt);
+void Q_Clean(int pool) {
+	CreateTimer(15.0 * 60.0, newAttempt, pool);
 }
 public Action newAttempt(Handle timer, any attempt) {
-	g_bCanMakeQuest = true;
+	g_bCanMakeQuest[attempt] = true;
 }
 public void Q1_Start(int objectiveID, int client) {
 	
@@ -135,10 +125,12 @@ public void Q1_Start(int objectiveID, int client) {
 	}
 }
 public void Q1_Frame(int objectiveID, int client) {
+	PrintToChatAll("frame - pool: %d queue: %d", g_iEntityPool[client], g_hQueue[g_iEntityPool[client]].Length);
 	float pos[3];
+	
 	if( g_hQueue[g_iEntityPool[client]].Length > 0 ) {
 		if( SQ_Pop(pos, g_iEntityPool[client]) ) {
-			
+			PrintToChatAll("success?");
 			int id = g_hQueue[g_iEntityPool[client]].Get(0);
 			g_hQueue[g_iEntityPool[client]].Erase(0);
 			
@@ -169,7 +161,9 @@ bool SQ_Pop(float pos[3], int pool) {
 	static float min[QUEST_POOL][3], max[QUEST_POOL][3];
 	static bool init[QUEST_POOL];
 	
-	if( !init ) {
+	PrintToChatAll("pop");
+	
+	if( !init[pool] ) {
 		int area = SQ_GetArena(pool);
 		min[pool][0] = rp_GetZoneFloat(area, zone_type_min_x);
 		min[pool][1] = rp_GetZoneFloat(area, zone_type_min_y);
@@ -179,6 +173,8 @@ bool SQ_Pop(float pos[3], int pool) {
 		max[pool][1] = rp_GetZoneFloat(area, zone_type_max_y);
 		max[pool][2] = rp_GetZoneFloat(area, zone_type_max_z);
 		init[pool] = true;
+		
+		PrintToChatAll("initied pool: %d", pool);
 	}
 	
 	for (int i = 0; i < attempt; i++) {
@@ -189,15 +185,20 @@ bool SQ_Pop(float pos[3], int pool) {
 	return false;
 }
 bool SQ_Valid(float pos[3], int pool) {
-	float threshold = GetVectorDistance(pos, SQ_GetMid(pool)) / 512.0;
-	if( GetRandomFloat(0.5, 1.0) < threshold )
+	float threshold = GetVectorDistance(pos, SQ_GetMid(pool));
+	
+	// TODO : Augmenter les chances de pop loins du mid
+	if( threshold < 512.0 )
 		return false;
+	
 	// TODO will not be stuck
 	for (int i = 0; i < g_stkTeamCount[pool][TEAM_PLAYERS]; i++) {
 		int client = g_stkTeam[pool][TEAM_PLAYERS][i];
 		
-		if( IsAbleToSee(client, pos, pool) )
+		if( IsAbleToSee(client, pos, pool) ) {
+			PrintToChatAll("%N can see it", client);
 			return false;
+		}
 	}
 	
 	return true;
