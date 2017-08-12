@@ -105,7 +105,7 @@ public Action RP_OnPlayerGotPay(int client, int salary, int & topay, bool verbos
 		if( multi <= 1.5 && rp_GetClientJobID(client) == 61 && !rp_GetClientBool(client, b_GameModePassive) )
 			multi = 1.5;
 		
-		int sum = RoundToCeil(float(salary) * multi) - salary;
+		int sum = RoundToCeil(float(salary) * multi);
 		
 		if( verbose )
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre appartement a fait remporté %d$ supplémentaire.", sum);
