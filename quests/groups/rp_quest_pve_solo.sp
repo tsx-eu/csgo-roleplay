@@ -35,10 +35,12 @@
 #define 	QUEST_MID		{{-4378.0, -10705.0, -7703.0}, {2760.0, -10705.0, -7703.0}}
 
 char g_szSpawnQueue[][][PLATFORM_MAX_PATH] = {
+	{"1", "zombie"}, {"4", "skeleton"},
+	{"1", "zombie"}, {"4", "skeleton"},
+	{"1", "zombie"}, {"9", "skeleton_arrow"},
 	{"5", "zombie"},
-	{"1", "skeleton"},
-	{"2", "skeleton_arrow"},
-	{"1", "skeleton_heavy"}
+	{"1", "zombie"}, {"4", "skeleton_heavy"},
+	{"5", "zombie"}
 };
 ArrayList g_hQueue[QUEST_POOL];
 
@@ -52,6 +54,15 @@ int g_iQuest;
 int g_iPlayerTeam[QUEST_POOL][2049], g_stkTeam[QUEST_POOL][QUEST_TEAMS + 1][MAXPLAYERS + 1], g_stkTeamCount[QUEST_POOL][QUEST_TEAMS];
 int g_iEntityPool[2049];
 bool g_bCanMakeQuest[QUEST_POOL];
+
+enum QuestConfig {
+	QC_Killed = 0,
+	QC_Remainning,
+	QC_Alive,
+	QC_Health,
+	QC_Max
+};
+int g_iQuestConfig[QUEST_POOL][QC_Max];
 
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_PluginReloadSelf);
@@ -91,65 +102,126 @@ public bool fwdCanStart(int client) {
 }
 // ----------------------------------------------------------------------------
 public void Q_Abort(int objectiveID, int client) {
-	PrintToChatAll("complete.");
-	Q_Clean(g_iEntityPool[client]);
-}
-void Q_Clean(int pool) {
+	int pool = g_iEntityPool[client];
 	CreateTimer(15.0 * 60.0, newAttempt, pool);
+	
+	rp_UnhookEvent(client, RP_OnPlayerDead, fwdDead);
+	rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdZone);
+	rp_ClientSendToSpawn(client);
 }
 public Action newAttempt(Handle timer, any attempt) {
 	g_bCanMakeQuest[attempt] = true;
 }
 public void Q1_Start(int objectiveID, int client) {
 	
-	g_iEntityPool[client] = 0;
+	int pool = 0;
+	g_iEntityPool[client] = pool;
+	TeleportEntity(client, SQ_GetMid(pool), NULL_VECTOR, NULL_VECTOR);
 	
-	g_bCanMakeQuest[g_iEntityPool[client]] = false;
-	addClientToTeam(client, TEAM_PLAYERS, g_iEntityPool[client]);
+	g_bCanMakeQuest[pool] = false;
+	addClientToTeam(client, TEAM_PLAYERS, pool);
+	rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
+	rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZone);
 	
-	g_hQueue[g_iEntityPool[client]].Clear();
+	
+	g_hQueue[pool].Clear();
 	for (int i = 0; i < sizeof(g_szSpawnQueue); i++) {
 		int cpt = StringToInt(g_szSpawnQueue[i][0]);
 		int id = PVE_GetId(g_szSpawnQueue[i][1]);
 		
 		if( id >= 0 ) {
 			for (int j = 0; j < cpt; j++)
-				g_hQueue[g_iEntityPool[client]].Push(id);
+				g_hQueue[pool].Push(id);
 		}
 	}
+	
+	g_iQuestConfig[pool][QC_Killed] = 0;
+	g_iQuestConfig[pool][QC_Alive] = 0;
+	g_iQuestConfig[pool][QC_Health] = 5;
+	g_iQuestConfig[pool][QC_Remainning] = g_hQueue[pool].Length;
 }
 public void Q1_Frame(int objectiveID, int client) {
-	PrintToChatAll("frame - pool: %d queue: %d", g_iEntityPool[client], g_hQueue[g_iEntityPool[client]].Length);
 	float pos[3];
+	int pool = g_iEntityPool[client];
 	
-	if( g_hQueue[g_iEntityPool[client]].Length > 0 ) {
-		if( SQ_Pop(pos, g_iEntityPool[client]) ) {
-			PrintToChatAll("success?");
-			int id = g_hQueue[g_iEntityPool[client]].Get(0);
-			g_hQueue[g_iEntityPool[client]].Erase(0);
+	if( g_iQuestConfig[pool][QC_Remainning] <= 0 )
+		rp_QuestStepComplete(client, objectiveID);
+	else if( g_iQuestConfig[pool][QC_Health] <= 0 )
+		rp_QuestStepFail(client, objectiveID);
+	
+	if( g_hQueue[pool].Length > 0  && g_iQuestConfig[pool][QC_Alive] < 5 ) {
+		if( SQ_Pop(pos, pool) ) {
+			int id = g_hQueue[pool].Get(0);
+			g_hQueue[pool].Erase(0);
 			
 			int entity = PVE_Spawn(id, pos, NULL_VECTOR);
-			g_iEntityPool[entity] = g_iEntityPool[client];
-			addClientToTeam(entity, TEAM_NPC, g_iEntityPool[client]);
+			g_iEntityPool[entity] = pool;
+			addClientToTeam(entity, TEAM_NPC, pool);
+			
+			g_iQuestConfig[pool][QC_Alive]++;
 			
 			PVE_RegEvent(entity, ESE_Dead, OnDead);
 			PVE_RegEvent(entity, ESE_FollowChange, OnFollowChange);
 			PVE_RegEvent(entity, ESE_Think, OnThink);
 		}
 	}
-	else {
-		rp_QuestStepComplete(client, objectiveID);
-	}
+	
+	PrintHintText(client, "Arène SOLO\nZombie restant: %d\nPV restant: %d", 
+		g_iQuestConfig[pool][QC_Remainning], g_iQuestConfig[pool][QC_Health]
+	);
 }
 public void OnDead(int id, int entity) {
-	removeClientTeam(entity, g_iEntityPool[entity]);
+	int pool = g_iEntityPool[entity];
+	removeClientTeam(entity, pool);
+	g_iQuestConfig[pool][QC_Remainning]--;
+	g_iQuestConfig[pool][QC_Alive]--;
+	g_iQuestConfig[pool][QC_Killed]++;
 }
 public Action OnFollowChange(int id, int entity, int& target) {
+
+	if( !IsPlayerAlive(target) || rp_GetPlayerZone(entity) != rp_GetPlayerZone(target) )
+		target = 0;
 	
-	PrintToChatAll("%d follow %d", entity, target);
-	return Plugin_Continue;
+	int pool = g_iEntityPool[entity];
+	float tmp, dist = FLT_MAX, src[3], dst[3];
+	Entity_GetAbsOrigin(entity, src);
+	
+	int area = PHUN_Nav_GetAreaId(src);
+	int client;
+	
+	for (int i = 0; i < g_stkTeamCount[pool][TEAM_PLAYERS]; i++) {
+		client = g_stkTeam[pool][TEAM_PLAYERS][i];
+		
+		if( !IsPlayerAlive(client) )
+			continue;
+		
+		GetClientEyePosition(client, dst);
+		tmp = GetVectorDistance(src, dst);
+		
+		if( area == PHUN_Nav_GetAreaId(dst) )
+			tmp /= 4.0;
+		if( IsAbleToSee(entity, dst) )
+			tmp /= 4.0;
+				
+		if (tmp < dist) {
+			dist = tmp;
+			target = client;
+		}
+	}
+	
+	return Plugin_Changed;
 }
 public void OnThink(int id, int entity, PVE_EntityState& state) {
+	// TODO: Check stuck
+}
+public Action fwdDead(int client) {
+	int pool = g_iEntityPool[client];
+	g_iQuestConfig[pool][QC_Health]--;
+}
+public Action fwdZone(int client, int newZone, int oldZone) {
+	int pool = g_iEntityPool[client];
+	if( newZone != SQ_GetArena(pool) && g_iQuestConfig[pool][QC_Health] > 0 )
+		TeleportEntity(client, SQ_GetMid(pool), NULL_VECTOR, NULL_VECTOR);
 }
 // ----------------------------------------------------------------------------
 int SQ_GetArena(int pool) {
@@ -165,8 +237,6 @@ bool SQ_Pop(float pos[3], int pool) {
 	static float min[QUEST_POOL][3], max[QUEST_POOL][3];
 	static bool init[QUEST_POOL];
 	
-	PrintToChatAll("pop");
-	
 	if( !init[pool] ) {
 		int area = SQ_GetArena(pool);
 		min[pool][0] = rp_GetZoneFloat(area, zone_type_min_x);
@@ -177,8 +247,6 @@ bool SQ_Pop(float pos[3], int pool) {
 		max[pool][1] = rp_GetZoneFloat(area, zone_type_max_y);
 		max[pool][2] = rp_GetZoneFloat(area, zone_type_max_z);
 		init[pool] = true;
-		
-		PrintToChatAll("initied pool: %d", pool);
 	}
 	
 	for (int i = 0; i < attempt; i++) {
@@ -199,8 +267,7 @@ bool SQ_Valid(float pos[3], int pool) {
 	for (int i = 0; i < g_stkTeamCount[pool][TEAM_PLAYERS]; i++) {
 		int client = g_stkTeam[pool][TEAM_PLAYERS][i];
 		
-		if( IsAbleToSee(client, pos, pool) ) {
-			PrintToChatAll("%N can see it", client);
+		if( IsAbleToSee(client, pos) ) {
 			return false;
 		}
 	}
@@ -208,7 +275,7 @@ bool SQ_Valid(float pos[3], int pool) {
 	return true;
 }
 // ----------------------------------------------------------------------------
-stock bool IsAbleToSee(int client, float dst[3], int pool) {
+stock bool IsAbleToSee(int client, float dst[3]) {
 	static float src[3], ang[3], v_dir[3], d_dir[3];
 	static float threshold = 0.73;
 	GetClientEyePosition(client, src);
