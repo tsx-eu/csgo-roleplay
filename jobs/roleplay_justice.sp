@@ -902,8 +902,8 @@ public Action Timer_AUDIENCE(Handle timer, any type) {
 	}
 		
 	if( time < 60 && time % 20 == 0 ) {
-		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est convoqué par le {green}Tribunal n°%d{default} de Princeton [%d/3].", target, type, time/20 + 1);
-		LogToGame("[TRIBUNAL] [AUDIENCE] Le juge %L a convoque %L [%d/3].", g_iTribunalData[type][td_Owner], target, time/20 + 1);
+		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est convoqué par le {green}Tribunal n°%d{default} de Princeton [%d/3].", target, type, time/60 + 1);
+		LogToGame("[TRIBUNAL] [AUDIENCE] Le juge %L a convoque %L [%d/3].", g_iTribunalData[type][td_Owner], target, time/60 + 1);
 	}
 	else if( time % 60 == 0 ) {
 		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est recherché par le {green}Tribunal n°%d{default} de Princeton depuis %d minutes.", target, type, time/60);
