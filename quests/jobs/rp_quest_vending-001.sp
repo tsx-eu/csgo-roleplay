@@ -45,7 +45,7 @@ float g_flLocation[5][3] =  {
 };
 
 public void OnPluginStart() {
-	RegServerCmd("rp_quest_reload", Cmd_Reload);
+	RegServerCmd("rp_quest_reload", Cmd_PluginReloadSelf);
 }
 public void OnAllPluginsLoaded() {
 	g_iQuest = rp_RegisterQuest(QUEST_UNIQID, QUEST_NAME, QUEST_TYPE, fwdCanStart);
@@ -61,12 +61,6 @@ public void OnAllPluginsLoaded() {
 	rp_QuestAddStep(g_iQuest, i++, Q2_Start, Q1_Frame, Q1_Abort, Q1_Abort);
 	
 	rp_QuestAddStep(g_iQuest, i++, Q3_Start, Q3_Frame, QUEST_NULL, Q3_End);
-}
-public Action Cmd_Reload(int args) {
-	char name[64];
-	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
-	ServerCommand("sm plugins reload %s", name);
-	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------
 public bool fwdCanStart(int client) {

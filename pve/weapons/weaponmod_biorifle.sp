@@ -60,7 +60,9 @@ char g_szColors[MAX_WMODE][32] = {
 
 int g_iWeaponMode[MAX_ENTITIES];
 float g_fWeaponStart[MAX_ENTITIES];
-
+public void OnPluginStart() {
+	RegServerCmd("sm_cwm_reload", Cmd_PluginReloadSelf);
+}
 public void OnAllPluginsLoaded() {
 	int id = CWM_Create(g_szFullName, g_szName, g_szReplace, g_szVModel, g_szWModel);
 	

@@ -32,7 +32,9 @@ char g_szMaterials[][PLATFORM_MAX_PATH] = {
 char g_szSounds[][PLATFORM_MAX_PATH] = {
 	"physics/metal/metal_solid_strain5.wav"
 };
-
+public void OnPluginStart() {
+	RegServerCmd("sm_cwm_reload", Cmd_PluginReloadSelf);
+}
 public void OnAllPluginsLoaded() {
 	int id = CWM_Create(g_szFullName, g_szName, g_szReplace, g_szVModel, g_szWModel);
 	

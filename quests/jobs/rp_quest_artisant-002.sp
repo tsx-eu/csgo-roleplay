@@ -35,7 +35,7 @@ int g_iQuest, g_iItemsPrice[MAX_ITEMS], g_iCraftItem[65], g_iCraftLeft[65];
 bool g_bDoingQuest[65];
 
 public void OnPluginStart() {
-	RegServerCmd("rp_quest_reload", Cmd_Reload);
+	RegServerCmd("rp_quest_reload", Cmd_PluginReloadSelf);
 }
 public void OnAllPluginsLoaded() {
 	SQL_TQuery(rp_GetDatabase(), SQL_LoadReceipe, "SELECT `itemid`, `prix` FROM rp_craft C INNER JOIN rp_items I ON C.`itemid`=I.`id` WHERE I.`job_id`>0 AND I.`extra_cmd`<>'rp_item_spawnflag' GROUP BY `itemid`;", 0, DBPrio_Low);
@@ -153,13 +153,6 @@ int getRandomItem() {
 			stackItem[stackCount++] = i;
 	}
 	return stackItem[Math_GetRandomInt(0, stackCount - 1)];
-}
-public Action Cmd_Reload(int args) {
-	char name[64];
-	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
-	ServerCommand("sm plugins reload %s", name);
-	
-	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------
 public bool fwdCanStart(int client) {

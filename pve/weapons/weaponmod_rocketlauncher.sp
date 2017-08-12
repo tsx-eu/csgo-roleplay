@@ -44,7 +44,9 @@ char g_szSounds[][PLATFORM_MAX_PATH] = {
 #define MAX_PROJECTILES	8
 #define REMOVE_AFTER	60.0
 int g_iStack[MAX_ENTITIES][MAX_PROJECTILES];
-
+public void OnPluginStart() {
+	RegServerCmd("sm_cwm_reload", Cmd_PluginReloadSelf);
+}
 public void OnAllPluginsLoaded() {
 	int id = CWM_Create(g_szFullName, g_szName, g_szReplace, g_szVModel, g_szWModel);
 	

@@ -50,7 +50,9 @@ char g_szSounds[][PLATFORM_MAX_PATH] = {
 #define MAX_HIT	3
 int g_iHitcount[MAX_ENTITIES];
 int g_iParticleCount = 0;
-
+public void OnPluginStart() {
+	RegServerCmd("sm_cwm_reload", Cmd_PluginReloadSelf);
+}
 public void OnAllPluginsLoaded() {
 	int id = CWM_Create(g_szFullName, g_szName, g_szReplace, g_szVModel, g_szWModel);
 	

@@ -36,7 +36,7 @@ public Plugin myinfo =  {
 int g_iQuest, g_iDuration[MAXPLAYERS + 1], g_iCurrent[MAXPLAYERS + 1];
 
 public void OnPluginStart() {
-	RegServerCmd("rp_quest_reload", Cmd_Reload);
+	RegServerCmd("rp_quest_reload", Cmd_PluginReloadSelf);
 }
 public void OnAllPluginsLoaded() {
 	g_iQuest = rp_RegisterQuest(QUEST_UNIQID, QUEST_NAME, QUEST_TYPE, fwdCanStart);
@@ -45,12 +45,6 @@ public void OnAllPluginsLoaded() {
 	
 	int i;
 	rp_QuestAddStep(g_iQuest, i++, Q1_Start, Q1_Frame, Q1_Abort, Q1_End);
-}
-public Action Cmd_Reload(int args) {
-	char name[64];
-	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
-	ServerCommand("sm plugins reload %s", name);
-	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------
 public bool fwdCanStart(int client) {

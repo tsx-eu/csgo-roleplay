@@ -34,7 +34,9 @@ char g_szSounds[][PLATFORM_MAX_PATH] = {
 };
 
 int g_cBeam;
-
+public void OnPluginStart() {
+	RegServerCmd("sm_pve_reload", Cmd_PluginReloadSelf);
+}
 public void OnAllPluginsLoaded() {
 	int id = PVE_Create(g_szFullname, g_szName, g_szModel);
 	

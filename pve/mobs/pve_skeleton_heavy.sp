@@ -30,7 +30,9 @@ char g_szSounds[][PLATFORM_MAX_PATH] = {
 	"DeadlyDesire/halloween/zombie/die2.mp3",
 	"DeadlyDesire/halloween/zombie/die3.mp3"
 };
-
+public void OnPluginStart() {
+	RegServerCmd("sm_pve_reload", Cmd_PluginReloadSelf);
+}
 public void OnAllPluginsLoaded() {
 	int id = PVE_Create(g_szFullname, g_szName, g_szModel);
 	

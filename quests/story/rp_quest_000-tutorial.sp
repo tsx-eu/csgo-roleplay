@@ -47,7 +47,7 @@ public void OnPluginStart() {
 	g_iRecom[16] = g_iRecom[25] = g_iRecom[55] = g_iRecom[65] = g_iRecom[76] = g_iRecom[135] = g_iRecom[176] = g_iRecom[216] = 3;
 	g_iRecom[195] = 4;
 	
-	RegServerCmd("rp_quest_reload", Cmd_Reload);
+	RegServerCmd("rp_quest_reload", Cmd_PluginReloadSelf);
 	
 	for (int j = 1; j <= MaxClients; j++)
 		if( IsValidClient(j) )
@@ -81,12 +81,6 @@ public void OnAllPluginsLoaded() {
 	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q12_Frame,	QUEST_NULL,	QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q13_Frame,	QUEST_NULL,	QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q14_Frame,	QUEST_NULL,	QUEST_NULL);
-}
-public Action Cmd_Reload(int args) {
-	char name[64];
-	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
-	ServerCommand("sm plugins reload %s", name);
-	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------
 public void OnClientPostAdminCheck(int client) {

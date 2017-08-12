@@ -50,7 +50,7 @@ int g_iVehicle, g_iPlanque, g_iPlanqueZone, g_iQuestGain, g_iLastPlanque[3];
 int g_iPlayerTeam[2049], g_stkTeam[QUEST_TEAMS + 1][MAXPLAYERS + 1], g_stkTeamCount[QUEST_TEAMS + 1], g_iJobs[MAX_JOBS], g_iMaskEntity[MAXPLAYERS + 1];
 
 public void OnPluginStart() {
-	RegServerCmd("rp_quest_reload", Cmd_Reload);
+	RegServerCmd("rp_quest_reload", Cmd_PluginReloadSelf);
 	
 	HookEvent("hostage_follows", EV_PickupHostage, EventHookMode_Post);
 	HookEvent("hostage_rescued", EV_RescuseHostage, EventHookMode_Post);
@@ -75,12 +75,6 @@ public void OnAllPluginsLoaded() {
 }
 public void OnMapStart() {
 	PrecacheSoundAny("ui/beep22.wav");
-}
-public Action Cmd_Reload(int args) {
-	char name[64];
-	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
-	ServerCommand("sm plugins reload %s", name);
-	return Plugin_Continue;
 }
 // ----------------------------------------------------------------------------
 public bool fwdCanStart(int client) {

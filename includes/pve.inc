@@ -33,7 +33,7 @@ native void PVE_SetInt(int id, PVE_DataInteger data, int value);
 
 native int PVE_Spawn(int id, float position[3], float angles[3]);
 native void PVE_RegHook(int id, PVE_HookType data, PVE_HookTypeForward fonction);
-native void PVE_RegEvent(int entity, PVE_EventType data, PVE_HookTypeForward fonction);
+native void PVE_RegEvent(int entity, PVE_EventType data, PVE_EventTypeForward fonction);
 
 native void PVE_AddAnimation(int id, PVE_DataAnimation data, int sequence, int frames, int fps);
 native void PVE_RunAnimation(int entity, PVE_DataAnimation data, float time = -1.0);
@@ -182,4 +182,9 @@ stock void AddSoundToDownloadsTable(char file[PLATFORM_MAX_PATH]) {
 	if( FileExists(tmp, true) )
 		AddFileToDownloadsTable(tmp);
 }
-
+public Action Cmd_PluginReloadSelf(int args) {
+	static char name[64];
+	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
+	ServerCommand("sm plugins reload %s", name);
+	return Plugin_Continue;
+}
