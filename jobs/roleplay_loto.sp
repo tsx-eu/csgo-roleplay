@@ -398,6 +398,7 @@ public Action Delay_MenuLoto(Handle timer, Handle dp) {
 	Menu menu = CreateMenu(MenuLoto);
 	if( amount == -1 )
 		menu.SetTitle("Vous avez %d ticket cagnotte.\nCombien voulez-vous gratter?\n ", count);
+		int Nospam = count;
 	else
 		menu.SetTitle("Vous avez %d ticket de %d$.\nCombien voulez-vous gratter?\n ", count, amount);
 		
@@ -485,7 +486,9 @@ bool gratterTicket(int client, int amount, int itemID) {
 		Format(query, sizeof(query), "INSERT INTO `rp_loto` (`id`, `steamid`) VALUES (NULL, '%s');", szSteamID);
 		SQL_TQuery(rp_GetDatabase(), SQL_QueryCallBack, query, 0, DBPrio_High);
 		
+		if (count == Nospam){
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre ticket a été validé. Les tirages ont lieu le mardi et le samedi à 21h00.");
+		Nospam=0}
 		
 		return false;
 	}
