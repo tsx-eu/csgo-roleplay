@@ -284,7 +284,7 @@ public Action Cmd_ItemVehicle(int args) {
 		
 		DispatchKeyValue(car, "vehiclescript", 	"scripts/vehicles/natalya_mustang_csgo_20163.txt");
 		ServerCommand("vehicle_flushscript");
-		attachVehicleLight(car);
+		//attachVehicleLight(car);
 	}
 	
 	if( StrEqual(arg0, "rp_item_vehicle3") ) {
@@ -629,7 +629,7 @@ void VehicleRemove(int vehicle, bool explode = false) {
 			//TE_SendToAll(time);
 		}
 	}
-	dettachVehicleLight(vehicle);
+	//dettachVehicleLight(vehicle);
 	
 	ServerCommand("sm_effect_fading %i 2.5 1", vehicle);
 	rp_ScheduleEntityInput(vehicle, 2.5, "Kill");
@@ -719,8 +719,8 @@ public Action Timer_VehicleRemoveCheck(Handle timer, any ent) {
 	}
 	
 	int owner = rp_GetVehicleInt(ent, car_owner);
-	if( !Vehicle_HasDriver(ent) && (!IsValidClient(owner) || Entity_GetDistance(owner, ent) > 512) )
-		dettachVehicleLight(ent);
+	//if( !Vehicle_HasDriver(ent) && (!IsValidClient(owner) || Entity_GetDistance(owner, ent) > 512) )
+	//	dettachVehicleLight(ent);
 		
 	if( Vehicle_HasDriver(ent) ) {
 		IsNear = true;
@@ -1131,8 +1131,8 @@ public int eventGarageMenu(Handle menu, MenuAction action, int client, int param
 					rp_SetVehicleInt(target, car_light_r, StringToInt(data[1]));
 					rp_SetVehicleInt(target, car_light_g, StringToInt(data[2]));
 					rp_SetVehicleInt(target, car_light_b, StringToInt(data[3]));
-					dettachVehicleLight(target);
-					attachVehicleLight(target);
+					//dettachVehicleLight(target);
+					//attachVehicleLight(target);
 					displayNeonMenu(client);
 				}
 				else if( StrContains(arg1, "Particule ") == 0 ) {
