@@ -334,7 +334,9 @@ public void OnTouch(int entity, int target) {
 }
 public Action fwdDead(int client) {
 	int pool = g_iEntityPool[client];
-	g_iQuestConfig[pool][QC_Health]--;
+	
+	if( rp_GetPlayerZone(client) == SQ_GetArena(pool) )
+		g_iQuestConfig[pool][QC_Health]--;
 }
 public Action fwdZone(int client, int newZone, int oldZone) {
 	int pool = g_iEntityPool[client];
