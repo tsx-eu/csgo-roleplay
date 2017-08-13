@@ -815,6 +815,7 @@ enum float_user_data {
 	Float:fl_LastPoison,
 	Float:fl_LastCrochettage,
 	Float:fl_ProtectWorldSpawn,
+	Float:fl_MonthTime,
 
 	fl_udata_max
 };
