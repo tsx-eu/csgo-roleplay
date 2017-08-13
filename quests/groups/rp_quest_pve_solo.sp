@@ -54,6 +54,7 @@ int g_iQuest;
 int g_iPlayerTeam[QUEST_POOL][2049], g_stkTeam[QUEST_POOL][QUEST_TEAMS + 1][MAXPLAYERS + 1], g_stkTeamCount[QUEST_POOL][QUEST_TEAMS];
 int g_iEntityPool[2049];
 bool g_bCanMakeQuest[QUEST_POOL];
+int g_iPlayerObjective[MAXPLAYERS + 1];
 
 enum QuestConfig {
 	QC_Killed = 0,
@@ -73,6 +74,12 @@ public void OnAllPluginsLoaded() {
 		SetFailState("Erreur lors de la création de la quête %s %s", QUEST_UNIQID, QUEST_NAME);
 		
 	int i;
+	rp_QuestAddStep(g_iQuest, i++, Q0_Start,	Q01_Frame,	Q0_Abort, QUEST_NULL);
+	
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q02_Frame,	Q0_Abort, QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q03_Frame,	Q0_Abort, QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q04_Frame,	Q0_Abort, QUEST_NULL);
+	
 	rp_QuestAddStep(g_iQuest, i++, Q1_Start,	Q1_Frame,	Q_Abort, Q_Abort);
 	
 	for (int j = 0; j < QUEST_POOL; j++) {
@@ -86,19 +93,94 @@ public void OnMapStart() {
 // ----------------------------------------------------------------------------
 public bool fwdCanStart(int client) {
 	
-	if( g_bCanMakeQuest[0] == false && g_bCanMakeQuest[1] == false )
+	if( g_bCanMakeQuest[0] == false /*&& g_bCanMakeQuest[1] == false*/ )
 		return false;
 	if( rp_GetClientInt(client, i_PlayerLVL) < 210 )
 		return false;
-	//
-	//if( rp_GetClientInt(client, i_TimePlays) < 210 )
-	//	return false;
-	
-	// Uniquement sur le serveur TEST
-	if( GetConVarInt(FindConVar("hostport")) == 27015 )
+	if( rp_GetClientFloat(client, fl_MonthTime) < 7.5 )
 		return false;
-	
 	return true;
+}
+// ----------------------------------------------------------------------------
+public void Q0_Abort(int objectiveID, int client) {
+	int pool = g_iEntityPool[client];
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Désolé, vous ne pouvez pas essayer la PVE pour le moment.");
+	CreateTimer(10.0, newAttempt, pool);
+}
+
+public void Q01_Frame(int objectiveID, int client) {
+	g_iPlayerObjective[client] = objectiveID;
+	
+	Menu menu = new Menu(Q0_MenuComplete);
+	menu.SetTitle("Cette quête est toujours en développement.\nNous avons besoin de vous, pour l'améliorer.\nÉtant donné qu'il ne s'agit encore que d'un\nbref aperçu de la version final, la quête\nest réservée aux joueurs sachant à quoi\ns'attendre.\n \nRépondez correctement aux 3 questions suivantes\npour tenter l'expérience.\n ");
+	menu.AddItem("0", "J'ai bien compris, mais j'y participe pas.");
+	menu.AddItem("0", "J'ai besoin de plus d'info.");
+	menu.AddItem("1", "Lancez le questionnaire!");
+	
+	menu.Display(client, MENU_TIME_FOREVER);
+}
+public void Q02_Frame(int objectiveID, int client) {
+	g_iPlayerObjective[client] = objectiveID;
+	
+	Menu menu = new Menu(Q0_MenuComplete);
+	menu.SetTitle(QUEST_NAME ... " - BETA\n \nLe projet PVE sur le roleplay c'est...");
+	
+	menu.AddItem("0", "Un nouveau système de PVP beaucoup plus équilibré");
+	menu.AddItem("0", "Une nouvelle quête qui fait gagner plein de thune");
+	menu.AddItem("0", "Une nouvelle quête qui fait gagner plein d'expérience");
+	menu.AddItem("1", "Des combats en équipe contres des monstres dans une arène");
+	menu.AddItem("0", "Un défis pour devenir admin");
+	
+	menu.Display(client, MENU_TIME_FOREVER);
+}
+public void Q03_Frame(int objectiveID, int client) {
+	g_iPlayerObjective[client] = objectiveID;
+	
+	Menu menu = new Menu(Q0_MenuComplete);
+	menu.SetTitle(QUEST_NAME ... " - BETA\n \nQuand a été annoncé le projet PVE?");
+	
+	menu.AddItem("0", "Janvier 2016");
+	menu.AddItem("1", "Mars 2017");
+	menu.AddItem("0", "Mai 2017");
+	menu.AddItem("0", "Juillet 2017");	
+	
+	menu.Display(client, MENU_TIME_FOREVER);
+}
+public void Q04_Frame(int objectiveID, int client) {
+	g_iPlayerObjective[client] = objectiveID;
+	
+	Menu menu = new Menu(Q0_MenuComplete);
+	menu.SetTitle(QUEST_NAME ... " - BETA\n \nQuel mob n'existe pas dans la PVE?");
+	
+	menu.AddItem("0", "Squelette armé d'une épée et d'un bouclier");
+	menu.AddItem("1", "Squelette armé d'une lance");
+	menu.AddItem("0", "Squelette armé d'un arc");
+	menu.AddItem("0", "Squelette armé d'une hache");
+	
+	
+	menu.Display(client, MENU_TIME_FOREVER);
+}
+public void Q0_Start(int objectiveID, int client) {
+	int pool = 0;
+	g_iEntityPool[client] = pool;
+	g_bCanMakeQuest[pool] = false;
+}
+public int Q0_MenuComplete(Handle menu, MenuAction action, int client, int param2) {
+	if( action == MenuAction_Select ) {
+		char options[64];
+		GetMenuItem(menu, param2, options, sizeof(options));
+		
+		if( StringToInt(options) == 1 ) {
+			rp_QuestStepComplete(client, g_iPlayerObjective[client]);
+		}
+		else {
+			rp_QuestStepFail(client, g_iPlayerObjective[client]);
+		}
+	}
+	else if( action == MenuAction_End ) {
+		CloseHandle(menu);
+	}
+	return 0;
 }
 // ----------------------------------------------------------------------------
 public void Q_Abort(int objectiveID, int client) {
@@ -108,21 +190,29 @@ public void Q_Abort(int objectiveID, int client) {
 	rp_UnhookEvent(client, RP_OnPlayerDead, fwdDead);
 	rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdZone);
 	rp_ClientSendToSpawn(client);
+	
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Merci pour votre test! Donnez vos suggestions sur pve.ts-x.eu <3");
+	
+	for (int i = 0; i < g_stkTeamCount[pool][TEAM_NPC]; i++) {
+		int entity = g_stkTeam[pool][TEAM_NPC][i];
+		
+		rp_ScheduleEntityInput(entity, 0.1, "Kill");
+	}
+	
+	CreateTimer(60.0, newAttempt, pool);
 }
 public Action newAttempt(Handle timer, any attempt) {
 	g_bCanMakeQuest[attempt] = true;
 }
 public void Q1_Start(int objectiveID, int client) {
 	
-	int pool = 0;
-	g_iEntityPool[client] = pool;
-	TeleportEntity(client, SQ_GetMid(pool), NULL_VECTOR, NULL_VECTOR);
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ne donnez pas les réponses aux autres ;-)");
+	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Bonne chance pour ce test!");
 	
-	g_bCanMakeQuest[pool] = false;
+	int pool = g_iEntityPool[client];
 	addClientToTeam(client, TEAM_PLAYERS, pool);
 	rp_HookEvent(client, RP_OnPlayerDead, fwdDead);
 	rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZone);
-	
 	
 	g_hQueue[pool].Clear();
 	for (int i = 0; i < sizeof(g_szSpawnQueue); i++) {
@@ -163,12 +253,18 @@ public void Q1_Frame(int objectiveID, int client) {
 			PVE_RegEvent(entity, ESE_Dead, OnDead);
 			PVE_RegEvent(entity, ESE_FollowChange, OnFollowChange);
 			PVE_RegEvent(entity, ESE_Think, OnThink);
+			SDKHook(entity, SDKHook_Touch, OnTouch);
 		}
 	}
 	
-	PrintHintText(client, "Arène SOLO\nZombie restant: %d\nPV restant: %d", 
-		g_iQuestConfig[pool][QC_Remainning], g_iQuestConfig[pool][QC_Health]
-	);
+	if( rp_GetPlayerZone(client) == SQ_GetArena(pool) ) {
+		PrintHintText(client, "Arène SOLO\nZombie restant: %d\nPV restant: %d", 
+			g_iQuestConfig[pool][QC_Remainning], g_iQuestConfig[pool][QC_Health]
+		);
+	}
+	else {
+		PrintHintText(client, "Retournez dans un métro avec du stuff pour reprendre la partie.\nIl vous reste %d vie.", g_iQuestConfig[pool][QC_Health]);
+	}
 }
 public void OnDead(int id, int entity) {
 	int pool = g_iEntityPool[entity];
@@ -179,8 +275,10 @@ public void OnDead(int id, int entity) {
 }
 public Action OnFollowChange(int id, int entity, int& target) {
 
-	if( !IsPlayerAlive(target) || rp_GetPlayerZone(entity) != rp_GetPlayerZone(target) )
-		target = 0;
+	if( target > 0 ) {
+		if( !IsPlayerAlive(target) || rp_GetPlayerZone(entity) != rp_GetPlayerZone(target) )
+			target = 0;
+	}
 	
 	int pool = g_iEntityPool[entity];
 	float tmp, dist = FLT_MAX, src[3], dst[3];
@@ -192,7 +290,10 @@ public Action OnFollowChange(int id, int entity, int& target) {
 	for (int i = 0; i < g_stkTeamCount[pool][TEAM_PLAYERS]; i++) {
 		client = g_stkTeam[pool][TEAM_PLAYERS][i];
 		
+		
 		if( !IsPlayerAlive(client) )
+			continue;
+		if( rp_GetPlayerZone(entity) != rp_GetPlayerZone(client) )
 			continue;
 		
 		GetClientEyePosition(client, dst);
@@ -200,7 +301,7 @@ public Action OnFollowChange(int id, int entity, int& target) {
 		
 		if( area == PHUN_Nav_GetAreaId(dst) )
 			tmp /= 4.0;
-		if( IsAbleToSee(entity, dst) )
+		if( IsAbleToSee(client, src) )
 			tmp /= 4.0;
 				
 		if (tmp < dist) {
@@ -214,14 +315,31 @@ public Action OnFollowChange(int id, int entity, int& target) {
 public void OnThink(int id, int entity, PVE_EntityState& state) {
 	// TODO: Check stuck
 }
+public void OnTouch(int entity, int target) {
+	static char classname[32];
+	float pos[3];
+	
+	if( target > MaxClients ) {
+		int pool = g_iEntityPool[entity];
+		
+		GetEdictClassname(target, classname, sizeof(classname));
+		if( StrEqual(classname, "trigger_hurt") ) {
+			if( SQ_Pop(pos, pool) ) {
+				TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);
+			}
+		}
+	}
+}
 public Action fwdDead(int client) {
 	int pool = g_iEntityPool[client];
 	g_iQuestConfig[pool][QC_Health]--;
 }
 public Action fwdZone(int client, int newZone, int oldZone) {
 	int pool = g_iEntityPool[client];
-	if( newZone != SQ_GetArena(pool) && g_iQuestConfig[pool][QC_Health] > 0 )
-		TeleportEntity(client, SQ_GetMid(pool), NULL_VECTOR, NULL_VECTOR);
+	
+	if( newZone == 59 || newZone == 57 || newZone == 58 || newZone == 200 )
+		if ( g_iQuestConfig[pool][QC_Health] > 0 )
+			TeleportEntity(client, SQ_GetMid(pool), NULL_VECTOR, NULL_VECTOR);
 }
 // ----------------------------------------------------------------------------
 int SQ_GetArena(int pool) {
