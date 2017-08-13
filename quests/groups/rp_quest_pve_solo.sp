@@ -189,7 +189,8 @@ public void Q_Abort(int objectiveID, int client) {
 	
 	rp_UnhookEvent(client, RP_OnPlayerDead, fwdDead);
 	rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdZone);
-	rp_ClientSendToSpawn(client);
+	removeClientTeam(client, pool);
+	rp_ClientSendToSpawn(client);	
 	
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Merci pour votre test! Donnez vos suggestions sur pve.ts-x.eu <3");
 	
@@ -290,7 +291,8 @@ public Action OnFollowChange(int id, int entity, int& target) {
 	for (int i = 0; i < g_stkTeamCount[pool][TEAM_PLAYERS]; i++) {
 		client = g_stkTeam[pool][TEAM_PLAYERS][i];
 		
-		
+		if( !IsValidClient(client) )
+			continue;
 		if( !IsPlayerAlive(client) )
 			continue;
 		if( rp_GetPlayerZone(entity) != rp_GetPlayerZone(client) )
