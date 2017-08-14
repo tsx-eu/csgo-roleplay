@@ -116,7 +116,7 @@ public void Q01_Frame(int objectiveID, int client) {
 	g_iPlayerObjective[client] = objectiveID;
 	
 	Menu menu = new Menu(Q0_MenuComplete);
-	menu.SetTitle("Cette quête est toujours en développement.\nNous avons besoin de vous, pour l'améliorer.\nÉtant donné qu'il ne s'agit encore que d'un\nbref aperçu de la version final, la quête\nest réservée aux joueurs sachant à quoi\ns'attendre.\n \nRépondez correctement aux 3 questions suivantes\npour tenter l'expérience.\n ");
+	menu.SetTitle("Cette quête est toujours en développement.\nNous avons besoin de vous, pour l'améliorer.\nÉtant donné qu'il ne s'agit encore que d'un\nbref aperçu de la version final, la quête\nest réservée aux joueurs sachant à quoi\ns'attendre.\n \nRépondez correctement aux questions suivantes\npour tenter l'expérience.\n ");
 	menu.AddItem("0", "J'ai bien compris, mais j'y participe pas.");
 	menu.AddItem("0", "J'ai besoin de plus d'info.");
 	menu.AddItem("1", "Lancez le questionnaire!");
@@ -266,12 +266,12 @@ public void Q1_Frame(int objectiveID, int client) {
 	g_iPlayerObjective[client] = objectiveID;
 	
 	Menu menu = new Menu(Q1_MenuComplete);
-	menu.SetTitle(QUEST_NAME ... " - BETA\n \nQuel doit être le niveau de difficulté?\n ");
+	menu.SetTitle(QUEST_NAME ... " - BETA\n \nQuel doit être votre niveau de difficulté?\n ");
 	
 	menu.AddItem("0", "Je suis trop jeune pour mourir\n ");
-	menu.AddItem("1", "Pas trop vite, s'il te plait\n- Les items de regénération sont désactivés\n ",			ITEMDRAW_DISABLED);
-	menu.AddItem("2", "Vas y fait moi mal\n- Tout les items sont désactivés\n ", 								ITEMDRAW_DISABLED);
-	menu.AddItem("3", "Laissez moi mourir\n- Tous les items sont désactivés\n- Les monstres sont plus fort\n ",	ITEMDRAW_DISABLED);
+	menu.AddItem("1", "Hey, pas si fort\n- Les items de regénération sont désactivés\n ",						ITEMDRAW_DISABLED);
+	menu.AddItem("2", "Fais-moi mal\n- Tout les items sont désactivés\n ", 										ITEMDRAW_DISABLED);
+	menu.AddItem("3", "Laisse moi mourir\n- Tous les items sont désactivés\n- Les monstres sont plus fort\n ",	ITEMDRAW_DISABLED);
 	
 	
 	menu.Display(client, MENU_TIME_FOREVER);
@@ -334,7 +334,7 @@ public void Q2_Frame(int objectiveID, int client) {
 			g_iQuestConfig[pool][QC_Remainning], g_iQuestConfig[pool][QC_Health]
 		);
 	}
-	else {
+	else if( g_iQuestConfig[pool][QC_Health] > 0 ) {
 		PrintHintText(client, "Retournez dans un métro avec du stuff pour reprendre la partie.\nIl vous reste %d vie.", g_iQuestConfig[pool][QC_Health]);
 	}
 }
