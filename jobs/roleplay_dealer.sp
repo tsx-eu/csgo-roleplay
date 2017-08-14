@@ -227,8 +227,6 @@ public Action Cmd_ItemDrugs(int args) {
 	else if( StrEqual(arg0, "beuh") ) {
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdBeuh, dur);
 		
-		SetEntityHealth(client, GetClientHealth(client)+100);
-		
 		rp_Effect_Smoke(client, dur);
 	}
 	
