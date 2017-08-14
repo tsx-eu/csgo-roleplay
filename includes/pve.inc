@@ -24,7 +24,8 @@
 #define NPC_REMOVE		30.0
 #define NPC_FOOTSTEP	0.3
 
-#define ROLEPLAY
+#define PVE
+
 //#define DEBUG
 
 native int PVE_Create(char fullname[PLATFORM_MAX_PATH], char name[PLATFORM_MAX_PATH], char model[PLATFORM_MAX_PATH]);
@@ -183,7 +184,7 @@ stock void AddSoundToDownloadsTable(char file[PLATFORM_MAX_PATH]) {
 		AddFileToDownloadsTable(tmp);
 }
 
-#if defined ROLEPLAY
+#if defined _tsxrp_included_
 #else
 public Action Cmd_PluginReloadSelf(int args) {
 	static char name[64];

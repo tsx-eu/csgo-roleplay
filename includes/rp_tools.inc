@@ -582,9 +582,13 @@ stock int rp_PlayerIsInCasinoMachine(int client) {
 	}
 	return -1;
 }
+
+#if defined _pve_included
+#else
 public Action Cmd_PluginReloadSelf(int args) {
 	static char name[64];
 	GetPluginFilename(INVALID_HANDLE, name, sizeof(name));
 	ServerCommand("sm plugins reload %s", name);
 	return Plugin_Continue;
 }
+#endif

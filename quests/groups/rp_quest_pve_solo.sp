@@ -55,6 +55,7 @@ int g_iPlayerTeam[QUEST_POOL][2049], g_stkTeam[QUEST_POOL][QUEST_TEAMS + 1][MAXP
 int g_iEntityPool[2049];
 bool g_bCanMakeQuest[QUEST_POOL];
 int g_iPlayerObjective[MAXPLAYERS + 1];
+int g_iPoolDifficulty[QUEST_POOL];
 
 enum QuestConfig {
 	QC_Killed = 0,
@@ -79,8 +80,11 @@ public void OnAllPluginsLoaded() {
 	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q02_Frame,	Q0_Abort, QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q03_Frame,	Q0_Abort, QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q04_Frame,	Q0_Abort, QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q05_Frame,	Q0_Abort, QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q06_Frame,	Q0_Abort, QUEST_NULL);
 	
-	rp_QuestAddStep(g_iQuest, i++, Q1_Start,	Q1_Frame,	Q_Abort, Q_Abort);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q1_Frame,	QUEST_NULL, QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, Q2_Start,	Q2_Frame,	Q_Abort, Q_Abort);
 	
 	for (int j = 0; j < QUEST_POOL; j++) {
 		g_hQueue[j] = new ArrayList(1, 1024);
@@ -95,9 +99,9 @@ public bool fwdCanStart(int client) {
 	
 	if( g_bCanMakeQuest[0] == false /*&& g_bCanMakeQuest[1] == false*/ )
 		return false;
-	if( rp_GetClientInt(client, i_PlayerLVL) < 210 )
+	if( rp_GetClientInt(client, i_PlayerLVL) < 100 )
 		return false;
-	if( rp_GetClientFloat(client, fl_MonthTime) < 7.5 )
+	if( rp_GetClientFloat(client, fl_MonthTime) < 14.0 )
 		return false;
 	return true;
 }
@@ -128,12 +132,40 @@ public void Q02_Frame(int objectiveID, int client) {
 	menu.AddItem("0", "Un nouveau système de PVP beaucoup plus équilibré");
 	menu.AddItem("0", "Une nouvelle quête qui fait gagner plein de thune");
 	menu.AddItem("0", "Une nouvelle quête qui fait gagner plein d'expérience");
-	menu.AddItem("1", "Des combats en équipe contres des monstres dans une arène");
 	menu.AddItem("0", "Un défis pour devenir admin");
+	menu.AddItem("1", "Des combats en équipe contres des monstres dans une arène");
 	
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 public void Q03_Frame(int objectiveID, int client) {
+	g_iPlayerObjective[client] = objectiveID;
+	
+	Menu menu = new Menu(Q0_MenuComplete);
+	menu.SetTitle(QUEST_NAME ... " - BETA\n \nOù se situe l'affrontement de la PVE?");
+	
+	menu.AddItem("0", "Dans la mairie dans des locaux aménagés");
+	menu.AddItem("0", "Dans le BUNKER en face de la villa immo");
+	menu.AddItem("0", "Dans le cimetière de Princeton");
+	menu.AddItem("1", "Dans une arène, hors map");
+	
+	
+	menu.Display(client, MENU_TIME_FOREVER);
+}
+public void Q04_Frame(int objectiveID, int client) {
+	g_iPlayerObjective[client] = objectiveID;
+	
+	Menu menu = new Menu(Q0_MenuComplete);
+	menu.SetTitle(QUEST_NAME ... " - BETA\n \nQuelle aptitude les mobs PVE ne sont t-ils pas capable\nde réaliser, pour le moment?");
+	
+	menu.AddItem("0", "Monter une échelle");
+	menu.AddItem("0", "Envoyer des projectiles (ex: flèche)");
+	menu.AddItem("1", "Contourner un props posé par un joueur");
+	menu.AddItem("0", "Monter ou descendre une pente");
+	menu.AddItem("0", "Trouver leur chemin dans Princeton");	
+	
+	menu.Display(client, MENU_TIME_FOREVER);
+}
+public void Q05_Frame(int objectiveID, int client) {
 	g_iPlayerObjective[client] = objectiveID;
 	
 	Menu menu = new Menu(Q0_MenuComplete);
@@ -146,14 +178,14 @@ public void Q03_Frame(int objectiveID, int client) {
 	
 	menu.Display(client, MENU_TIME_FOREVER);
 }
-public void Q04_Frame(int objectiveID, int client) {
+public void Q06_Frame(int objectiveID, int client) {
 	g_iPlayerObjective[client] = objectiveID;
 	
 	Menu menu = new Menu(Q0_MenuComplete);
 	menu.SetTitle(QUEST_NAME ... " - BETA\n \nQuel mob n'existe pas dans la PVE?");
 	
-	menu.AddItem("0", "Squelette armé d'une épée et d'un bouclier");
 	menu.AddItem("1", "Squelette armé d'une lance");
+	menu.AddItem("0", "Squelette armé d'une épée et d'un bouclier");
 	menu.AddItem("0", "Squelette armé d'un arc");
 	menu.AddItem("0", "Squelette armé d'une hache");
 	
@@ -200,12 +232,51 @@ public void Q_Abort(int objectiveID, int client) {
 		rp_ScheduleEntityInput(entity, 0.1, "Kill");
 	}
 	
+	for (int i = MaxClients; i < MAX_ENTITIES; i++) {
+		if( !IsValidEdict(i) || !IsValidEntity(i) )
+			continue;
+		
+		if( rp_IsValidVehicle(i) ) {
+			rp_SetVehicleInt(i, car_health, -1);
+		}
+		if( rp_GetBuildingData(i, BD_owner) > 0 && Entity_GetHealth(i) > 0 ) {
+			Entity_Hurt(i, Entity_GetHealth(i));
+		}
+	}
+	
 	CreateTimer(60.0, newAttempt, pool);
 }
 public Action newAttempt(Handle timer, any attempt) {
 	g_bCanMakeQuest[attempt] = true;
 }
-public void Q1_Start(int objectiveID, int client) {
+public int Q1_MenuComplete(Handle menu, MenuAction action, int client, int param2) {
+	if( action == MenuAction_Select ) {
+		char options[64];
+		GetMenuItem(menu, param2, options, sizeof(options));
+		int pool = g_iEntityPool[client];
+		g_iPoolDifficulty[pool] = StringToInt(options);
+		rp_QuestStepComplete(client, g_iPlayerObjective[client]);
+	}
+	else if( action == MenuAction_End ) {
+		CloseHandle(menu);
+	}
+	return 0;
+}
+public void Q1_Frame(int objectiveID, int client) {
+	g_iPlayerObjective[client] = objectiveID;
+	
+	Menu menu = new Menu(Q1_MenuComplete);
+	menu.SetTitle(QUEST_NAME ... " - BETA\n \nQuel doit être le niveau de difficulté?\n ");
+	
+	menu.AddItem("0", "Je suis trop jeune pour mourir\n ");
+	menu.AddItem("1", "Pas trop vite, s'il te plait\n- Les items de regénération sont désactivés\n ",			ITEMDRAW_DISABLED);
+	menu.AddItem("2", "Vas y fait moi mal\n- Tout les items sont désactivés\n ", 								ITEMDRAW_DISABLED);
+	menu.AddItem("3", "Laissez moi mourir\n- Tous les items sont désactivés\n- Les monstres sont plus fort\n ",	ITEMDRAW_DISABLED);
+	
+	
+	menu.Display(client, MENU_TIME_FOREVER);
+}
+public void Q2_Start(int objectiveID, int client) {
 	
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Ne donnez pas les réponses aux autres ;-)");
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Bonne chance pour ce test!");
@@ -231,7 +302,7 @@ public void Q1_Start(int objectiveID, int client) {
 	g_iQuestConfig[pool][QC_Health] = 5;
 	g_iQuestConfig[pool][QC_Remainning] = g_hQueue[pool].Length;
 }
-public void Q1_Frame(int objectiveID, int client) {
+public void Q2_Frame(int objectiveID, int client) {
 	float pos[3];
 	int pool = g_iEntityPool[client];
 	
