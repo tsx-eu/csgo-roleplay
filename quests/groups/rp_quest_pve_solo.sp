@@ -235,6 +235,8 @@ public void Q_Abort(int objectiveID, int client) {
 	for (int i = MaxClients; i < MAX_ENTITIES; i++) {
 		if( !IsValidEdict(i) || !IsValidEntity(i) )
 			continue;
+		if( rp_GetPlayerZone(i) != SQ_GetArena(pool) )
+			continue;
 		
 		if( rp_IsValidVehicle(i) ) {
 			rp_SetVehicleInt(i, car_health, -1);
