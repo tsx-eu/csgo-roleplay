@@ -787,7 +787,7 @@ public Action BuildingSIGN_post(Handle timer, any entity) {
 	return Plugin_Handled;
 }
 public void OnEntityDestroyed(int entity) {
-	if( g_hSignData[entity] ) {
+	if( entity > 0 && g_hSignData[entity] ) {
 		g_hSignData[entity].Clear();
 		delete g_hSignData[entity];
 		g_iSignPermission[entity] = 0;
