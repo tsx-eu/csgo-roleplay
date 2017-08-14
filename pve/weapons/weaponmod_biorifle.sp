@@ -180,16 +180,16 @@ public Action OnProjectileHit(int client, int wpnid, int entity, int target) {
 			SetEntityRenderColor(ent, 255, 255, 255, 200);
 			TeleportEntity(ent, pos, ang, vel);
 			g_iWeaponMode[ent] = g_iWeaponMode[entity];
-		}		
+		}
 		
 		SetEntityGravity(entity, GetEntityGravity(entity) + 0.25);
 	}
 	
 	if( IsValidClient(target) ) {
-		TE_SetupBeamRingPoint(pos, 16.0, 64.0, g_cBeam, 0, 0, 0, 1.0, scale, 0.0, g_iColors[g_iWeaponMode[wpnid]], 0, 0);
+		TE_SetupBeamRingPoint(pos, 16.0, 64.0, g_cBeam, 0, 0, 0, 1.0, scale, 0.0, g_iColors[g_iWeaponMode[entity]], 0, 0);
 		TE_SendToAll();
 		
-		switch(g_iWeaponMode[wpnid]) {
+		switch(g_iWeaponMode[entity]) {
 			case 0: { // Vert
 				int arg = GetClientHealth(target) + (RoundToCeil(scale * 25.0));
 				if( arg > 500 )
