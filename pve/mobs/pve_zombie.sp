@@ -34,7 +34,7 @@ public void OnPluginStart() {
 public void OnAllPluginsLoaded() {
 	int id = PVE_Create(g_szFullname, g_szName, g_szModel);
 	
-	PVE_SetInt(id, ESI_MaxHealth, 		1000);
+	PVE_SetInt(id, ESI_MaxHealth, 		500);
 	PVE_SetInt(id, ESI_AttackType,		view_as<int>(ESA_Melee));
 	PVE_SetInt(id, ESI_AttackDamage,	100);
 	PVE_SetInt(id, ESI_MaxSkin, 		18);
@@ -78,11 +78,12 @@ public void OnDead(int id, int entity) {
 	char sound[PLATFORM_MAX_PATH];
 	Format(sound, sizeof(sound), "DeadlyDesire/halloween/zombie/die%d.mp3", GetRandomInt(1, 3));
 	EmitSoundToAllAny(sound, entity);
-	
+/*	
 	float pos[3];
 	Entity_GetAbsOrigin(entity, pos);
 	pos[2] += 8.0;
 	ServerCommand("rp_zombie_die %f %f %f", pos[0], pos[1], pos[2]);
+*/
 }
 
 public void OnMapStart() {

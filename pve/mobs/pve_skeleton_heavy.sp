@@ -38,7 +38,7 @@ public void OnAllPluginsLoaded() {
 	
 	PVE_SetInt(id, ESI_MaxHealth, 		1000);
 	PVE_SetInt(id, ESI_AttackType,		view_as<int>(ESA_Melee));
-	PVE_SetInt(id, ESI_AttackDamage,	250);
+	PVE_SetInt(id, ESI_AttackDamage,	100);
 	PVE_SetInt(id, ESI_MinSkin, 		15);
 	PVE_SetInt(id, ESI_MaxSkin, 		29);
 	

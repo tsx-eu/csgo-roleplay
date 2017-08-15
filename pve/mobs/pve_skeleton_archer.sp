@@ -40,13 +40,13 @@ public void OnPluginStart() {
 public void OnAllPluginsLoaded() {
 	int id = PVE_Create(g_szFullname, g_szName, g_szModel);
 	
-	PVE_SetInt(id, ESI_MaxHealth, 		1000);
+	PVE_SetInt(id, ESI_MaxHealth, 		500);
 	PVE_SetInt(id, ESI_AttackType,		view_as<int>(ESA_Weapon));
 	PVE_SetInt(id, ESI_AttackDamage,	100);
 	PVE_SetInt(id, ESI_MinSkin, 		0);
 	PVE_SetInt(id, ESI_MaxSkin, 		14);
 	
-	PVE_SetFloat(id, ESF_Speed,			300.0);
+	PVE_SetFloat(id, ESF_Speed,			200.0);
 	PVE_SetFloat(id, ESF_Gravity,		1.0);
 	PVE_SetFloat(id, ESF_ScaleSize,		1.0);
 	PVE_SetFloat(id, ESF_FeetSize,  	0.0);
@@ -70,6 +70,7 @@ public Action OnPreAttack(int id, int entity, int target) {
 }
 public Action OnAttack(int id, int entity, int target) {
 	int ent = PVE_ShootProjectile(entity, g_szModel2, "skeleton_arrow", 0.0, 2000.0, OnProjectileHit);
+	SetEntityGravity(ent, 0.1);
 	TE_SetupBeamFollow(ent, g_cBeam, g_cBeam, 1.0, 1.0, 0.0, 1, {200, 200, 200, 50} );
 	TE_SendToAll();
 	return Plugin_Continue;
