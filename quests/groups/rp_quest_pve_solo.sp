@@ -361,7 +361,7 @@ public void Q2_Frame(int objectiveID, int client) {
 				g_iQuestConfig[QC_Time]++;
 		}
 		
-		PrintHintText(client, "Retournez dans un métro avec du stuff pour reprendre la partie.\nIl vous reste %d vie - Temps: %d secondes", g_iQuestConfig[QC_Health]);
+		PrintHintText(client, "Retournez dans un métro avec du stuff pour reprendre la partie.\nIl vous reste %d vie - Temps: %d secondes", g_iQuestConfig[QC_Health], g_iQuestConfig[QC_Time]);
 	}
 }
 public void Q3_Start(int objectiveID, int client) {
