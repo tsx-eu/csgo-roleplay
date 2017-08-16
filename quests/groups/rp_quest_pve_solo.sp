@@ -32,6 +32,7 @@
 #define		TEAM_PLAYERS	1
 #define		TEAM_NPC		2
 #define 	QUEST_MID		view_as<float>({-4378.0, -10705.0, -7703.0})
+#define		QUEST_BONUS		view_as<float>({-4485.0, -9585.0, -7830.0})
 
 char g_szSpawnQueue[][][PLATFORM_MAX_PATH] = {
 	{"1", "zombie"}, {"4", "skeleton"},
@@ -60,6 +61,8 @@ enum QuestConfig {
 	QC_Alive,
 	QC_Health,
 	QC_Difficulty,
+	QC_Time,
+	QC_DeadTime,
 	QC_Max
 };
 int g_iQuestConfig[QC_Max];
@@ -73,16 +76,17 @@ public void OnAllPluginsLoaded() {
 		SetFailState("Erreur lors de la création de la quête %s %s", QUEST_UNIQID, QUEST_NAME);
 		
 	int i;
-	rp_QuestAddStep(g_iQuest, i++, Q0_Start,	Q01_Frame,	Q0_Abort, QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, Q0_Start,	Q01_Frame,	Q0_Abort, 	QUEST_NULL);
 	
-	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q02_Frame,	Q0_Abort, QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q03_Frame,	Q0_Abort, QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q04_Frame,	Q0_Abort, QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q05_Frame,	Q0_Abort, QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q06_Frame,	Q0_Abort, QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q02_Frame,	Q0_Abort, 	QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q03_Frame,	Q0_Abort, 	QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q04_Frame,	Q0_Abort, 	QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q05_Frame,	Q0_Abort, 	QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q06_Frame,	Q0_Abort, 	QUEST_NULL);
 	
-	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q1_Frame,	Q0_Abort, QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, i++, Q2_Start,	Q2_Frame,	Q_Abort, Q_Abort);
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q1_Frame,	Q0_Abort, 	QUEST_NULL);
+	rp_QuestAddStep(g_iQuest, i++, Q2_Start,	Q2_Frame,	Q_Abort, 	Q_Abort);
+	rp_QuestAddStep(g_iQuest, i++, Q3_Start,	Q3_Frame,	QUEST_NULL, QUEST_NULL);
 	
 	g_hQueue = new ArrayList(1, 1024);
 	g_bCanMakeQuest = true;
@@ -228,7 +232,7 @@ public int Q0_MenuComplete(Handle menu, MenuAction action, int client, int param
 // ----------------------------------------------------------------------------
 public void Q_Abort(int objectiveID, int client) {
 	
-	CreateTimer(15.0 * 60.0, newAttempt);
+	CreateTimer(5.0 * 60.0, newAttempt);
 	
 	rp_UnhookEvent(client, RP_OnPlayerDead, fwdDead);
 	rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdZone);
@@ -236,7 +240,6 @@ public void Q_Abort(int objectiveID, int client) {
 	rp_UnhookEvent(client, RP_PrePlayerPhysic, fwdPhysics);
 	
 	removeClientTeam(client);
-	rp_ClientSendToSpawn(client);	
 	
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Merci pour votre test! Donnez vos suggestions sur pve.ts-x.eu <3");
 	
@@ -283,7 +286,7 @@ public void Q1_Frame(int objectiveID, int client) {
 	menu.SetTitle(QUEST_NAME ... " - BETA\n \nQuel doit être votre niveau de difficulté?\n ");
 	
 	menu.AddItem("0", "Je suis trop jeune pour mourir\n ");
-	menu.AddItem("1", "Hey, pas si fort\n- Les boosts sont désactivés- Les items de regénération sont désactivés\n ");
+	menu.AddItem("1", "Hey, pas si fort\n- Les boosts sont désactivés- Les items de regénération sont désactivés\n- Les fusées et propulseurs sont désactivés ");
 	menu.AddItem("2", "Fais-moi mal\n- Les boosts sont désactivés- Tous les items sont désactivés\n ");
 	menu.AddItem("3", "Laisse moi mourir\n- Les boost de gravité et de vitesses sont désactivés- Tous les items sont désactivés\n- Les monstres sont plus fort\n ",	ITEMDRAW_DISABLED);
 	
@@ -312,7 +315,7 @@ public void Q2_Start(int objectiveID, int client) {
 		}
 	}
 	
-	g_iQuestConfig[QC_Killed] = g_iQuestConfig[QC_Alive] = 0;
+	g_iQuestConfig[QC_Time] = g_iQuestConfig[QC_Killed] = g_iQuestConfig[QC_Alive] = 0;
 	g_iQuestConfig[QC_Health] = 5;
 	g_iQuestConfig[QC_Remainning] = g_hQueue.Length;
 }
@@ -323,6 +326,7 @@ public void Q2_Frame(int objectiveID, int client) {
 		rp_QuestStepComplete(client, objectiveID);
 	else if( g_iQuestConfig[QC_Health] <= 0 )
 		rp_QuestStepFail(client, objectiveID);
+	
 	
 	if( g_hQueue.Length > 0  && g_iQuestConfig[QC_Alive] < (5+g_iQuestConfig[QC_Difficulty]) ) {
 		if( SQ_Pop(pos) ) {
@@ -342,12 +346,37 @@ public void Q2_Frame(int objectiveID, int client) {
 	}
 	
 	if( rp_GetPlayerZone(client) == QUEST_ARENA ) {
-		PrintHintText(client, "Arène SOLO\nZombie restant: %d\nPV restant: %d", 
-			g_iQuestConfig[QC_Remainning], g_iQuestConfig[QC_Health]
+		g_iQuestConfig[QC_Time]++;
+		
+		PrintHintText(client, "Arène SOLO\nZombie restant: %d\nPV restant: %d - Temps: %d secondes", 
+			g_iQuestConfig[QC_Remainning], g_iQuestConfig[QC_Health], g_iQuestConfig[QC_Time]
 		);
 	}
 	else if( g_iQuestConfig[QC_Health] > 0 ) {
-		PrintHintText(client, "Retournez dans un métro avec du stuff pour reprendre la partie.\nIl vous reste %d vie.", g_iQuestConfig[QC_Health]);
+		
+		if( IsPlayerAlive(client) ) {
+			if( g_iQuestConfig[QC_DeadTime] > 0 )
+				g_iQuestConfig[QC_DeadTime]--;
+			else
+				g_iQuestConfig[QC_Time]++;
+		}
+		
+		PrintHintText(client, "Retournez dans un métro avec du stuff pour reprendre la partie.\nIl vous reste %d vie - Temps: %d secondes", g_iQuestConfig[QC_Health]);
+	}
+}
+public void Q3_Start(int objectiveID, int client) {
+	g_iQuestConfig[QC_DeadTime] = 3;
+}
+public void Q3_Frame(int objectiveID, int client) {
+	g_iQuestConfig[QC_DeadTime]--;
+	
+	PrintHintText(client, "Fin de la partie.\n Vous allez être téléporté dans quelques instants.");
+	
+	if( g_iQuestConfig[QC_DeadTime] < 0 ) {
+		if( rp_GetPlayerZone(client) == QUEST_ARENA )
+			rp_ClientSendToSpawn(client);
+		else
+			rp_QuestStepComplete(client, objectiveID);
 	}
 }
 // ----------------------------------------------------------------------------
@@ -421,8 +450,8 @@ public Action fwdItem(int client, int itemID) {
 	if( rp_GetPlayerZone(client) == QUEST_ARENA ) {
 		
 		if( g_iQuestConfig[QC_Difficulty] == 1 ) {
-			// Les items de heal + médishoot
-			if( rp_GetItemInt(itemID, item_type_give_hp) > 0 || itemID == 258 )
+			// Les items de heal, médishoot, propu, fusée...
+			if( rp_GetItemInt(itemID, item_type_give_hp) > 0 || itemID == 258 || itemID == 48 || itemID == 89 )
 				return Plugin_Stop;
 		}
 		else if( g_iQuestConfig[QC_Difficulty] >= 2 ) {
@@ -443,8 +472,10 @@ public Action fwdPhysics(int client, float& speed, float& gravity) {
 }
 public Action fwdDead(int client) {
 
-	if( rp_GetPlayerZone(client) == QUEST_ARENA )
+	if( rp_GetPlayerZone(client) == QUEST_ARENA ) {
 		g_iQuestConfig[QC_Health]--;
+		g_iQuestConfig[QC_DeadTime] = 60;
+	}
 }
 public Action fwdZone(int client, int newZone, int oldZone) {
 	if( newZone == 59 || newZone == 57 || newZone == 58 || newZone == 200 )
@@ -452,7 +483,7 @@ public Action fwdZone(int client, int newZone, int oldZone) {
 			TeleportEntity(client, QUEST_MID, NULL_VECTOR, NULL_VECTOR);
 }
 // ----------------------------------------------------------------------------
-bool SQ_Pop(float pos[3]) {
+bool SQ_Pop(float pos[3], float size = 32.0) {
 	static const int attempt = 10;
 	static float min[3], max[3];
 	static bool init;
@@ -470,19 +501,20 @@ bool SQ_Pop(float pos[3]) {
 	
 	for (int i = 0; i < attempt; i++) {
 		if( PHUN_Nav_GetAreaHidingSpot(min, max, pos) )
-			if( SQ_Valid(pos) )
+			if( SQ_Valid(pos, size) )
 				return true;
 	}
 	return false;
 }
-bool SQ_Valid(float pos[3]) {
-	float threshold = GetVectorDistance(pos, QUEST_MID);
+bool SQ_Valid(float pos[3], float size) {
+	float abs[3], min[3], max[3];
 	
+	float threshold = GetVectorDistance(pos, QUEST_MID);
 	// TODO : Augmenter les chances de pop loins du mid
-	if( threshold < 512.0 )
+	if( threshold < 800.0 )
 		return false;
 	
-	// TODO will not be stuck
+	// Pas si un joueur nous vois.
 	for (int i = 0; i < g_stkTeamCount[TEAM_PLAYERS]; i++) {
 		int client = g_stkTeam[TEAM_PLAYERS][i];
 		
@@ -491,6 +523,29 @@ bool SQ_Valid(float pos[3]) {
 		}
 	}
 	
+	// Pas sur un navmesh plus petit que la taille
+	int id = PHUN_Nav_GetAreaId(pos);
+	PHUN_Nav_AreaIdToPosition(id, abs, min, max);
+	SubtractVectors(max, min, abs);
+	
+	float length = GetVectorLength(abs);
+	if( length < size )
+		return false;
+	
+	// Ni sur un truc qui semble bloqué
+	for (int i = 0; i < 2; i ++) {
+		min[i] = -size / 2.0;
+		max[i] =  size / 2.0;
+	}
+	min[2] = 0.0;
+	max[2] = size * 2.0;
+	
+	Handle tr = TR_TraceHullEx(pos, pos, min, max, MASK_SOLID);
+	if (TR_DidHit(tr)) {
+		CloseHandle(tr);
+		return false;
+	}
+	CloseHandle(tr);
 	return true;
 }
 // ----------------------------------------------------------------------------
