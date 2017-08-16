@@ -591,7 +591,10 @@ void CAPTURE_Reward(int totalPoints) {
 		if( gID == rp_GetCaptureInt(cap_bunker) ) {
 			amount = 10;
 			rp_IncrementSuccess(client, success_list_pvpkill, 100);
-			bonus += RoundToCeil((totalPoints-g_iCapture_POINT[gID]) / 200.0);
+			bonus += RoundToCeil((totalPoints-g_iCapture_POINT[gID]) / 300.0);
+			
+			if( bonus > 40 )
+				bonus = 30;
 			
 			if( array[gdm_elo] >= 1600 )
 				EmitSoundToClientAny(client, g_szSoundList[snd_FlawlessVictory], _, 6, _, _, 1.0);
@@ -601,7 +604,7 @@ void CAPTURE_Reward(int totalPoints) {
 		else {
 			amount = 1;
 			
-			if( array[gdm_damage] >= 500 || array[gdm_flag] >= 1 || array[gdm_kill] >= 3 ) {
+			if( array[gdm_flag] >= 1 || array[gdm_kill] >= 1 ) {
 				EmitSoundToClientAny(client, g_szSoundList[snd_YouHaveLostTheMatch], _, 6, _, _, 1.0);
 			}
 			else {
@@ -609,9 +612,9 @@ void CAPTURE_Reward(int totalPoints) {
 			}
 		}
 		
-		amount = RoundFloat( float(array[gdm_elo]) / 1500.0 * float(amount) );
+		amount = RoundFloat( float(array[gdm_elo]) / 1000.0 * float(amount) );
 		
-		if( array[gdm_damage] >= 500 || array[gdm_flag] >= 1 || array[gdm_kill] >= 3 ) {
+		if( array[gdm_flag] >= 1 || array[gdm_kill] >= 1 ) {
 			rp_ClientGiveItem(client, 215, amount + 3 + bonus, true);
 			rp_GetItemData(215, item_type_name, tmp, sizeof(tmp));
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez reçu %d %s, en récompense de la capture.", amount+3+bonus, tmp);
@@ -675,7 +678,7 @@ public Action CAPTURE_Tick(Handle timer, any none) {
 	
 	Effect_DrawBeamBoxToAll(mins, maxs, g_cBeam, g_cBeam, 0, 30, 2.0, 5.0, 5.0, 2, 1.0, color, 0);
 	
-	if( winner != defense ) {
+	if( winner != defense && GetTime() % 2 == 0 ) {
 		g_iCapture_POINT[defense]++;
 	}
 	
@@ -1278,8 +1281,7 @@ int GDM_ELOKill(int client, int target, bool flag = false) {
 	tgID = rp_GetClientGroupID(target);
 	
 	int tmp = cElo - attacker[gdm_elo];
-	if( flag )
-		g_iCapture_POINT[ tgID ] += tElo - victim[gdm_elo];
+	g_iCapture_POINT[ tgID ] += tElo - victim[gdm_elo];
 	g_iCapture_POINT[ cgID ] += cElo - attacker[gdm_elo];
 	
 	if( g_iCapture_POINT[ tgID ] < 0 ) {
