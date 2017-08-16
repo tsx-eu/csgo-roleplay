@@ -21,6 +21,7 @@
 #include <roleplay.inc>   // https://www.ts-x.eu
 #include <pve.inc>
 #include <phun_nav.inc>
+#include <custom_weapon_mod.inc>
 
 
 #define		QUEST_UNIQID   	"PVE_SOLO"
@@ -54,6 +55,7 @@ int g_iQuest;
 int g_iPlayerTeam[2049], g_stkTeam[QUEST_TEAMS + 1][MAXPLAYERS + 1], g_stkTeamCount[QUEST_TEAMS];
 bool g_bCanMakeQuest;
 int g_iPlayerObjective[MAXPLAYERS + 1];
+int g_cBeam;
 
 enum QuestConfig {
 	QC_Killed = 0,
@@ -63,6 +65,7 @@ enum QuestConfig {
 	QC_Difficulty,
 	QC_Time,
 	QC_DeadTime,
+	QC_Bonus,
 	QC_Max
 };
 int g_iQuestConfig[QC_Max];
@@ -92,7 +95,15 @@ public void OnAllPluginsLoaded() {
 	g_bCanMakeQuest = true;
 }
 public void OnMapStart() {
+	AddFileToDownloadsTable("models/DeadlyDesire/props/udamage.mdl");
+	AddFileToDownloadsTable("models/DeadlyDesire/props/udamage.dx90.vtx");
+	AddFileToDownloadsTable("models/DeadlyDesire/props/udamage.phy");
+	AddFileToDownloadsTable("models/DeadlyDesire/props/udamage.vvd");
+	AddFileToDownloadsTable("materials/DeadlyDesire/props/studmap.vmt");
+	AddFileToDownloadsTable("materials/DeadlyDesire/props/studmap.vtf");
+	PrecacheModel("models/DeadlyDesire/props/udamage.mdl", true);
 	
+	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 }
 // ----------------------------------------------------------------------------
 public bool fwdCanStart(int client) {
@@ -249,19 +260,30 @@ public void Q_Abort(int objectiveID, int client) {
 		rp_ScheduleEntityInput(entity, 0.1, "Kill");
 	}
 	
+	char classname[64];
 	for (int i = MaxClients; i < MAX_ENTITIES; i++) {
 		if( !IsValidEdict(i) || !IsValidEntity(i) )
 			continue;
+		if( !HasEntProp(i, Prop_Send, "m_vecOrigin") )
+			continue;
 		if( rp_GetPlayerZone(i) != QUEST_ARENA )
 			continue;
-		
+			
+		if( IsMonster(i) )
+			AcceptEntityInput(i, "Kill");
 		if( rp_IsValidVehicle(i) )
 			rp_SetVehicleInt(i, car_health, -1);
 		if( rp_GetBuildingData(i, BD_owner) > 0 && Entity_GetHealth(i) > 0 )
 			Entity_Hurt(i, Entity_GetHealth(i));
+		
+		GetEdictClassname(i, classname, sizeof(classname));
+		if( StrContains(classname, "weapon_") == 0 )
+			AcceptEntityInput(i, "Kill");
 	}
 	
-	CreateTimer(60.0, newAttempt);
+	int parent = EntRefToEntIndex(g_iQuestConfig[QC_Bonus]);
+	if( parent != INVALID_ENT_REFERENCE )
+		AcceptEntityInput(parent, "KillHierarchy");
 }
 public int Q1_MenuComplete(Handle menu, MenuAction action, int client, int param2) {
 	if( action == MenuAction_Select ) {
@@ -315,9 +337,31 @@ public void Q2_Start(int objectiveID, int client) {
 		}
 	}
 	
+	int ent = CreateEntityByName("func_rotating");
+	DispatchKeyValueVector(ent, "origin", QUEST_BONUS);
+	DispatchKeyValue(ent, "maxspeed", "128");
+	DispatchKeyValue(ent, "friction", "0");
+	DispatchKeyValue(ent, "solid", "0");
+	DispatchKeyValue(ent, "spawnflags", "64");
+	DispatchSpawn(ent);
+	TeleportEntity(ent, QUEST_BONUS, NULL_VECTOR, NULL_VECTOR);
+	AcceptEntityInput(ent, "Start");
+	
+	int sub = CreateEntityByName("prop_dynamic");
+	DispatchKeyValue(sub, "model", "models/DeadlyDesire/props/udamage.mdl");
+	DispatchSpawn(sub);
+	TeleportEntity(sub, QUEST_BONUS, NULL_VECTOR, NULL_VECTOR);
+	SetVariantString("!activator");
+	AcceptEntityInput(sub, "SetParent", ent);
+	SDKHook(sub, SDKHook_Touch, fwdTouch);
+	
+	SetEntityRenderColor(sub, 100, 50, 100, 200);
+	SetEntityRenderMode(sub, RENDER_TRANSCOLOR);
+	
 	g_iQuestConfig[QC_Time] = g_iQuestConfig[QC_Killed] = g_iQuestConfig[QC_Alive] = 0;
 	g_iQuestConfig[QC_Health] = 5;
 	g_iQuestConfig[QC_Remainning] = g_hQueue.Length;
+	g_iQuestConfig[QC_Bonus] = EntIndexToEntRef(ent);
 }
 public void Q2_Frame(int objectiveID, int client) {
 	float pos[3];
@@ -434,7 +478,6 @@ public void OnTouch(int entity, int target) {
 	
 	if( target > MaxClients ) {
 		
-		
 		GetEdictClassname(target, classname, sizeof(classname));
 		if( StrEqual(classname, "trigger_hurt") ) {
 			if( SQ_Pop(pos) ) {
@@ -444,14 +487,46 @@ public void OnTouch(int entity, int target) {
 	}
 }
 // ----------------------------------------------------------------------------
+public void fwdTouch(int entity, int target) {
+	
+	if( target > 0 && target < MaxClients ) {
+		int parent = EntRefToEntIndex(g_iQuestConfig[QC_Bonus]);
+		if( parent != INVALID_ENT_REFERENCE )
+			AcceptEntityInput(parent, "KillHierarchy");
+		else // Comment est-ce possible?
+			AcceptEntityInput(entity, "Kill");
+
+		TE_SetupBeamRingPoint(QUEST_BONUS, 32.0, 2048.0, g_cBeam, g_cBeam, 0, 30, 1.0, 64.0, 0.0, {100, 50, 100, 200}, 1, 0);
+		TE_SendToAll();
+		
+		for (int i = MaxClients; i < MAX_ENTITIES; i++) {
+			if( !IsValidEdict(i) || !IsValidEntity(i) )
+				continue;
+			if( !HasEntProp(i, Prop_Send, "m_vecOrigin") )
+				continue;
+			if( rp_GetPlayerZone(i) != QUEST_ARENA )
+				continue;
+			
+			if( IsMonster(i) )
+				Entity_Hurt(i, 5000, target);
+			if( CWM_IsCustom(i) )
+				CWM_Refill(i);
+		}
+	}
+}
 public Action fwdItem(int client, int itemID) {
 	
 	
 	if( rp_GetPlayerZone(client) == QUEST_ARENA ) {
 		
+		if( itemID == 294 || itemID == 295 )
+			return Plugin_Stop;
+		
 		if( g_iQuestConfig[QC_Difficulty] == 1 ) {
 			// Les items de heal, médishoot, propu, fusée...
-			if( rp_GetItemInt(itemID, item_type_give_hp) > 0 || itemID == 258 || itemID == 48 || itemID == 89 )
+			if( itemID == 48 || itemID == 89 || itemID == 258 )
+				return Plugin_Stop;
+			if( rp_GetItemInt(itemID, item_type_give_hp) > 0 )
 				return Plugin_Stop;
 		}
 		else if( g_iQuestConfig[QC_Difficulty] >= 2 ) {
@@ -576,6 +651,10 @@ stock bool IsAbleToSee(int client, float dst[3]) {
 	}
 	delete tr;
 	return true;
+}
+stock bool IsMonster(int ent) {
+	static char classname[64];	
+	return StrEqual(classname, "monster_generic");
 }
 public bool TraceEntityFilterPlayers(int entity, int contentsMask, any data ) {
 	return entity > MaxClients && entity != data;

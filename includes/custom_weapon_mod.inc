@@ -17,8 +17,6 @@
 //#define DEBUG
 
 native int CWM_Create(char fullname[PLATFORM_MAX_PATH], char name[PLATFORM_MAX_PATH], char weaponToReplace[PLATFORM_MAX_PATH], char v_model[PLATFORM_MAX_PATH], char w_model[PLATFORM_MAX_PATH]);
-native void CWM_SetInt(int id, CWM_DataInteger data, int value);
-native void CWM_SetFloat(int id, CWM_DataFloat data, float value);
 
 native void CWM_RegHook(int id, CWM_HookType data, CWM_HookTypeForward fonction);
 
@@ -34,10 +32,18 @@ native int CWM_ShootExplode(int client, int wpnid, int entity, float radius);
 native void CWM_RefreshHUD(int client, int entity);
 
 native int CWM_GetId(char name[PLATFORM_MAX_PATH]);
+
+native void CWM_SetInt(int id, CWM_DataInteger data, int value);
+native int CWM_GetInt(int id, CWM_DataInteger data);
 native void CWM_SetEntityInt(int entity, CWM_DataInteger data, int value);
-native void CWM_SetEntityFloat(int entity, CWM_DataFloat data, float value);
 native int CWM_GetEntityInt(int entity, CWM_DataInteger data);
+
+native void CWM_SetFloat(int id, CWM_DataFloat data, float value);
+native float CWM_GetFloat(int id, CWM_DataFloat data);
+native void CWM_SetEntityFloat(int entity, CWM_DataFloat data, float value);
 native float CWM_GetEntityFloat(int entity, CWM_DataFloat data);
+
+native bool CWM_IsCustom(int entity);
 
 enum CWM_DataAnimation {
 	WAA_Idle,
@@ -123,6 +129,15 @@ typeset CWM_HookTypeForward {
 typeset CWM_HitCallback {
 	function Action(int client, int wpnid, int entity, int target);	// Continue = subit les dégats, handle/stop = pas de dégat
 }
+stock void CWM_Refill(int entity) {
+	int id = CWM_GetEntityInt(entity, WSI_Identifier);
+	if( id >= 0 ) {
+		CWM_SetEntityInt(entity, WSI_Bullet, CWM_GetInt(entity, WSI_MaxBullet));
+		CWM_SetEntityInt(entity, WSI_Ammunition, CWM_GetInt(entity, WSI_MaxAmmunition));
+	}
+}
+
+#if !defined _pve_included
 stock void AddModelToDownloadsTable(char file[PLATFORM_MAX_PATH]) {
 	char tmp[PLATFORM_MAX_PATH], tmp2[PLATFORM_MAX_PATH];
 	int len = strlen(file);
@@ -140,4 +155,4 @@ stock void AddSoundToDownloadsTable(char file[PLATFORM_MAX_PATH]) {
 	if( FileExists(tmp, true) )
 		AddFileToDownloadsTable(tmp);
 }
-
+#endif
