@@ -495,9 +495,11 @@ public void fwdTouch(int entity, int target) {
 			AcceptEntityInput(parent, "KillHierarchy");
 		else // Comment est-ce possible?
 			AcceptEntityInput(entity, "Kill");
-
-		TE_SetupBeamRingPoint(QUEST_BONUS, 32.0, 2048.0, g_cBeam, g_cBeam, 0, 30, 1.0, 64.0, 0.0, {100, 50, 100, 200}, 1, 0);
-		TE_SendToAll();
+		
+		for (float size = 32.0; size <= 2048.0; size *= 2.0) { // 32, 64, 128, 256, 512, 1024, 2048.
+			TE_SetupBeamRingPoint(QUEST_BONUS, 16.0, size, g_cBeam, g_cBeam, 0, 30, 1.0, Logarithm(size, 2.0) * 4.0, 0.0, {100, 50, 100, 200}, 1, 0);
+			TE_SendToAll();
+		}
 		
 		for (int i = MaxClients; i < MAX_ENTITIES; i++) {
 			if( !IsValidEdict(i) || !IsValidEntity(i) )
@@ -506,12 +508,14 @@ public void fwdTouch(int entity, int target) {
 				continue;
 			if( rp_GetPlayerZone(i) != QUEST_ARENA )
 				continue;
-			
 			if( IsMonster(i) )
 				Entity_Hurt(i, 5000, target);
 			if( CWM_IsCustom(i) )
 				CWM_Refill(i);
 		}
+		
+		SetEntityHealth(target, 500);
+		rp_SetClientInt(target, i_Kevlar, 250);
 	}
 }
 public Action fwdItem(int client, int itemID) {
