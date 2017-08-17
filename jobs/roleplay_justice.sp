@@ -918,7 +918,12 @@ public Action Timer_AUDIENCE(Handle timer, any type) {
 	}
 	
 	if( zone == jail ) {
-		CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est arrivé après %d minutes.", target, time/60);
+	
+		if( time < 60 )
+			CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est arrivé sans être recherché.", target);
+		else
+			CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est arrivé après %d minutes.", target, time/60);
+		
 		LogToGame("[TRIBUNAL] [AUDIENCE] Le juge %L termine la convocation de %L après %d minute%s.", g_iTribunalData[type][td_Owner], target, time/60, time/60 >= 2 ? "s":"");
 		g_iTribunalData[type][td_SuspectArrive] = 1;
 		rp_SetClientBool(target, b_IsSearchByTribunal, false);
