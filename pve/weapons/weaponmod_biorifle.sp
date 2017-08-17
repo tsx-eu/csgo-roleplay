@@ -58,7 +58,7 @@ int g_iColors[MAX_WMODE][4] = {
 	{200, 200, 0, 200}
 };
 char g_szTypes[MAX_WMODE][64] = {
-	"<font color='#00FF00'>Vie</font>", "<font color='#0000FF'>Armure</font>", "<font color='#FF0000'>Dégat</font>", "<font color='#FF00FF'>Vitesse</font>", "<font color='#FFFF00'>Gravité</font>"
+	"<font color='#00FF00'>Vie</font>", "<font color='#0000FF'>Armure</font>", "<font color='#FF0000'>Bonus Dégat</font>", "<font color='#FF00FF'>Vitesse</font>", "<font color='#FFFF00'>Gravité</font>"
 };
 
 int g_iWeaponMode[MAX_ENTITIES];
