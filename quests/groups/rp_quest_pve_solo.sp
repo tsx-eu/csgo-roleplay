@@ -33,7 +33,7 @@
 #define		TEAM_PLAYERS	1
 #define		TEAM_NPC		2
 #define 	QUEST_MID		view_as<float>({-4378.0, -10705.0, -7703.0})
-#define		QUEST_BONUS		view_as<float>({-4485.0, -9585.0, -7830.0})
+#define		QUEST_BONUS		view_as<float>({-4485.0, -9585.0, -7828.0})
 
 char g_szSpawnQueue[][][PLATFORM_MAX_PATH] = {
 	{"1", "zombie"}, {"4", "skeleton"},
@@ -56,6 +56,7 @@ int g_iPlayerTeam[2049], g_stkTeam[QUEST_TEAMS + 1][MAXPLAYERS + 1], g_stkTeamCo
 bool g_bCanMakeQuest;
 int g_iPlayerObjective[MAXPLAYERS + 1];
 int g_cBeam;
+int g_iPort;
 
 enum QuestConfig {
 	QC_Killed = 0,
@@ -66,12 +67,14 @@ enum QuestConfig {
 	QC_Time,
 	QC_DeadTime,
 	QC_Bonus,
+	QC_Light,
 	QC_Max
 };
 int g_iQuestConfig[QC_Max];
 
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_PluginReloadSelf);
+	g_iPort = GetConVarInt(FindConVar("hostport"));
 }
 public void OnAllPluginsLoaded() {
 	g_iQuest = rp_RegisterQuest(QUEST_UNIQID, QUEST_NAME, QUEST_TYPE, fwdCanStart);
@@ -81,11 +84,13 @@ public void OnAllPluginsLoaded() {
 	int i;
 	rp_QuestAddStep(g_iQuest, i++, Q0_Start,	Q01_Frame,	Q0_Abort, 	QUEST_NULL);
 	
-	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q02_Frame,	Q0_Abort, 	QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q03_Frame,	Q0_Abort, 	QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q04_Frame,	Q0_Abort, 	QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q05_Frame,	Q0_Abort, 	QUEST_NULL);
-	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q06_Frame,	Q0_Abort, 	QUEST_NULL);
+	if ( g_iPort == 27015) {
+		rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q02_Frame,	Q0_Abort, 	QUEST_NULL);
+		rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q03_Frame,	Q0_Abort, 	QUEST_NULL);
+		rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q04_Frame,	Q0_Abort, 	QUEST_NULL);
+		rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q05_Frame,	Q0_Abort, 	QUEST_NULL);
+		rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q06_Frame,	Q0_Abort, 	QUEST_NULL);
+	}
 	
 	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q1_Frame,	Q0_Abort, 	QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++, Q2_Start,	Q2_Frame,	Q_Abort, 	Q_Abort);
@@ -110,10 +115,12 @@ public bool fwdCanStart(int client) {
 	
 	if( g_bCanMakeQuest == false )
 		return false;
-	if( rp_GetClientInt(client, i_PlayerLVL) < 100 )
-		return false;
-	if( rp_GetClientFloat(client, fl_MonthTime) < 14.0 )
-		return false;
+	if ( g_iPort == 27015) {
+		if( rp_GetClientInt(client, i_PlayerLVL) < 100 )
+			return false;
+		if( rp_GetClientFloat(client, fl_MonthTime) < 14.0 )
+			return false;
+	}
 	return true;
 }
 // ----------------------------------------------------------------------------
@@ -281,7 +288,11 @@ public void Q_Abort(int objectiveID, int client) {
 			AcceptEntityInput(i, "Kill");
 	}
 	
-	int parent = EntRefToEntIndex(g_iQuestConfig[QC_Bonus]);
+	int parent;
+	parent = EntRefToEntIndex(g_iQuestConfig[QC_Bonus]);
+	if( parent != INVALID_ENT_REFERENCE )
+		AcceptEntityInput(parent, "KillHierarchy");
+	parent = EntRefToEntIndex(g_iQuestConfig[QC_Light]);
 	if( parent != INVALID_ENT_REFERENCE )
 		AcceptEntityInput(parent, "KillHierarchy");
 }
@@ -307,10 +318,10 @@ public void Q1_Frame(int objectiveID, int client) {
 	Menu menu = new Menu(Q1_MenuComplete);
 	menu.SetTitle(QUEST_NAME ... " - BETA\n \nQuel doit être votre niveau de difficulté?\n ");
 	
-	menu.AddItem("0", "Je suis trop jeune pour mourir\n ");
-	menu.AddItem("1", "Hey, pas si fort\n- Les boosts sont désactivés- Les items de regénération sont désactivés\n- Les fusées et propulseurs sont désactivés ");
-	menu.AddItem("2", "Fais-moi mal\n- Les boosts sont désactivés- Tous les items sont désactivés\n ");
-	menu.AddItem("3", "Laisse moi mourir\n- Les boost de gravité et de vitesses sont désactivés- Tous les items sont désactivés\n- Les monstres sont plus fort\n ",	ITEMDRAW_DISABLED);
+	menu.AddItem("0", "Je suis trop jeune pour mourir\n- Les pillules sont désactivées");
+	menu.AddItem("1", "Hey, pas si fort\n- Les boosts sont désactivés\n- Les items de regénération sont désactivés\n- Les fusées propulseurs sont désactivés");
+	menu.AddItem("2", "Fais-moi mal\n- Les boosts sont désactivés\n- Tous les items sont désactivés");
+	menu.AddItem("3", "Laisse moi mourir\n- Les boost de gravité et de vitesses sont désactivés- Tous les items sont désactivés\n- Les monstres sont plus fort",	ITEMDRAW_DISABLED);
 	
 	
 	menu.Display(client, MENU_TIME_FOREVER);
@@ -337,31 +348,14 @@ public void Q2_Start(int objectiveID, int client) {
 		}
 	}
 	
-	int ent = CreateEntityByName("func_rotating");
-	DispatchKeyValueVector(ent, "origin", QUEST_BONUS);
-	DispatchKeyValue(ent, "maxspeed", "128");
-	DispatchKeyValue(ent, "friction", "0");
-	DispatchKeyValue(ent, "solid", "0");
-	DispatchKeyValue(ent, "spawnflags", "64");
-	DispatchSpawn(ent);
-	TeleportEntity(ent, QUEST_BONUS, NULL_VECTOR, NULL_VECTOR);
-	AcceptEntityInput(ent, "Start");
-	
-	int sub = CreateEntityByName("prop_dynamic");
-	DispatchKeyValue(sub, "model", "models/DeadlyDesire/props/udamage.mdl");
-	DispatchSpawn(sub);
-	TeleportEntity(sub, QUEST_BONUS, NULL_VECTOR, NULL_VECTOR);
-	SetVariantString("!activator");
-	AcceptEntityInput(sub, "SetParent", ent);
-	SDKHook(sub, SDKHook_Touch, fwdTouch);
-	
-	SetEntityRenderColor(sub, 100, 50, 100, 200);
-	SetEntityRenderMode(sub, RENDER_TRANSCOLOR);
+	int bonus = SQ_SpawnBonus();
+	int light = SQ_SpawnLight();
 	
 	g_iQuestConfig[QC_Time] = g_iQuestConfig[QC_Killed] = g_iQuestConfig[QC_Alive] = 0;
 	g_iQuestConfig[QC_Health] = 5;
 	g_iQuestConfig[QC_Remainning] = g_hQueue.Length;
-	g_iQuestConfig[QC_Bonus] = EntIndexToEntRef(ent);
+	g_iQuestConfig[QC_Bonus] = EntIndexToEntRef(bonus);
+	g_iQuestConfig[QC_Light] = EntIndexToEntRef(light);
 }
 public void Q2_Frame(int objectiveID, int client) {
 	float pos[3];
@@ -487,6 +481,14 @@ public void OnTouch(int entity, int target) {
 	}
 }
 // ----------------------------------------------------------------------------
+public void fwdThink(int entity) {
+	float ang[3];
+	Entity_GetAbsAngles(entity, ang);
+	ang[1] += 1.0;
+	if( ang[1] > 180.0 )
+		ang[1] -= 360.0;
+	TeleportEntity(entity, NULL_VECTOR, ang, NULL_VECTOR);
+}
 public void fwdTouch(int entity, int target) {
 	
 	if( target > 0 && target < MaxClients ) {
@@ -494,10 +496,10 @@ public void fwdTouch(int entity, int target) {
 		if( parent != INVALID_ENT_REFERENCE )
 			AcceptEntityInput(parent, "KillHierarchy");
 		else // Comment est-ce possible?
-			AcceptEntityInput(entity, "Kill");
+			AcceptEntityInput(entity, "KillHierarchy");
 		
-		for (float size = 32.0; size <= 2048.0; size *= 2.0) { // 32, 64, 128, 256, 512, 1024, 2048.
-			TE_SetupBeamRingPoint(QUEST_BONUS, 16.0, size, g_cBeam, g_cBeam, 0, 30, 1.0, Logarithm(size, 2.0) * 4.0, 0.0, {100, 50, 100, 200}, 1, 0);
+		for (float size = 256.0; size <= 2048.0; size *= 2.0) { // 256, 512, 1024, 2048.
+			TE_SetupBeamRingPoint(QUEST_BONUS, 32.0, size, g_cBeam, g_cBeam, 0, 30, 4.0, Logarithm(size, 2.0) * 8.0, 0.0, {100, 50, 100, 200}, 0, 0);
 			TE_SendToAll();
 		}
 		
@@ -510,8 +512,6 @@ public void fwdTouch(int entity, int target) {
 				continue;
 			if( IsMonster(i) )
 				Entity_Hurt(i, 5000, target);
-			if( CWM_IsCustom(i) )
-				CWM_Refill(i);
 		}
 		
 		SetEntityHealth(target, 500);
@@ -628,6 +628,65 @@ bool SQ_Valid(float pos[3], float size) {
 	return true;
 }
 // ----------------------------------------------------------------------------
+int SQ_SpawnLight() {
+	float pos[3];
+	pos = QUEST_BONUS;
+	pos[0] = (rp_GetZoneFloat(QUEST_ARENA, zone_type_min_x) + rp_GetZoneFloat(QUEST_ARENA, zone_type_max_x)) / 2.0;
+	pos[1] = (rp_GetZoneFloat(QUEST_ARENA, zone_type_min_y) + rp_GetZoneFloat(QUEST_ARENA, zone_type_max_y)) / 2.0;
+	pos[2] += 1024.0;
+	
+	int ent = CreateEntityByName("env_projectedtexture");
+	DispatchKeyValue(ent, "farz", "2048");
+	DispatchKeyValue(ent, "texturename", "effects/flashlight001_intro");
+	DispatchKeyValue(ent, "lightcolor", "255 255 200 400");
+	DispatchKeyValue(ent, "spawnflags", "1");
+	DispatchKeyValue(ent, "lightfov", "170");
+	DispatchKeyValue(ent, "brightnessscale", "50");
+	DispatchKeyValue(ent, "lightworld", "1");
+	
+	DispatchSpawn(ent);
+	TeleportEntity(ent, pos, view_as<float>({ 90.0, 0.0, 0.0 }), NULL_VECTOR);
+	return ent;
+}
+int SQ_SpawnBonus() {
+	int parent = CreateEntityByName("func_rotating");
+	DispatchKeyValueVector(parent, "origin", QUEST_BONUS);
+	DispatchKeyValue(parent, "maxspeed", "128");
+	DispatchKeyValue(parent, "friction", "0");
+	DispatchKeyValue(parent, "solid", "0");
+	DispatchKeyValue(parent, "spawnflags", "64");
+	DispatchSpawn(parent);
+	TeleportEntity(parent, QUEST_BONUS, NULL_VECTOR, NULL_VECTOR);
+	AcceptEntityInput(parent, "Start");
+	
+	int ent = CreateEntityByName("prop_dynamic");
+	DispatchKeyValue(ent, "model", "models/DeadlyDesire/props/udamage.mdl");
+	DispatchSpawn(ent);
+	TeleportEntity(ent, QUEST_BONUS, NULL_VECTOR, NULL_VECTOR);
+	
+	Entity_SetSolidFlags(ent, FSOLID_TRIGGER);
+	Entity_SetCollisionGroup(ent, COLLISION_GROUP_PLAYER);
+	
+	SDKHook(ent, SDKHook_Touch, fwdTouch);
+	
+	SetEntityRenderMode(ent, RENDER_TRANSALPHA);
+	SetEntityRenderColor(ent, 255, 0, 255, 200);
+	
+	int sub = CreateEntityByName("env_projectedtexture");
+	DispatchKeyValue(sub, "farz", "128");
+	DispatchKeyValue(sub, "texturename", "effects/flashlight001_intro");
+	DispatchKeyValue(sub, "lightcolor", "255 0 255 800");
+	DispatchKeyValue(sub, "spawnflags", "1");
+	DispatchKeyValue(sub, "lightfov", "160");
+	DispatchKeyValue(sub, "brightnessscale", "50");
+	DispatchKeyValue(sub, "lightworld", "1");
+	DispatchSpawn(sub);
+	SetVariantString("!activator");
+	AcceptEntityInput(sub, "SetParent", ent);
+	TeleportEntity(sub, view_as<float>({0.0, 0.0, 64.0}), view_as<float>({ 90.0, 0.0, 0.0 }), NULL_VECTOR);
+	
+	return parent;
+}
 stock bool IsAbleToSee(int client, float dst[3]) {
 	static float src[3], ang[3], v_dir[3], d_dir[3];
 	static float threshold = 0.73;
@@ -657,7 +716,8 @@ stock bool IsAbleToSee(int client, float dst[3]) {
 	return true;
 }
 stock bool IsMonster(int ent) {
-	static char classname[64];	
+	static char classname[64];
+	GetEdictClassname(ent, classname, sizeof(classname));
 	return StrEqual(classname, "monster_generic");
 }
 public bool TraceEntityFilterPlayers(int entity, int contentsMask, any data ) {
