@@ -47,7 +47,7 @@ enum TribunalData {
 int g_cBeam;
 
 // Numéro, Résumé, Heures, Amende, Dédo, Détails
-char g_szArticles[30][6][512] = {
+char g_szArticles[][][512] = {
 	{"221-1-a",		"Meurtre d'un civil",							"18",	"1250",		"1000",	"Toutes atteintes volontaires à la vie d’un citoyen sont condamnées à une peine maximale de 18h de prison et 1250$ d’amende." },
 	{"221-1-b",		"Meurtre d'un policier",						"24",	"5500",		"1500",	"Toutes atteintes volontaires à la vie d’un officier des forces de l’ordre sont condamnées à une peine maximale de 24h de prison et 5 500$ d’amende." },
 	{"221-1-c",		"Tentative de meurtre",							"12",	"500",		"500",	"Les coups et blessures volontaires ayant provoqué des lésions corporelles sont condamnés à une peine maximale de 12h de prison et 500$ d’amende." },
@@ -72,7 +72,6 @@ char g_szArticles[30][6][512] = {
 	{"221-13-c",	"Intrusion dans une propriété privée",			"6",	"800",		"500",	"La violation d’une propriété privée est punie d’une peine maximale de 6h de prison et 800$ d’amende." },
 	{"221-13-d",	"Intrusion dans un batiment fédéral",			"18",	"5000",		"500",	"La violation d’un batiment fédéral est punie d’une peine maximale de 18h de prison et 5000$ d’amende." },
 	{"221-14-a",	"Usage de produits illicites",					"6",	"1000",		"250",	"Droguer ou alcooliser une personne à son insu est un acte punis d’une peine maximale de 6h de prison et 1000$ d’amende. " },
-	{"221-14-b",	"Trafic d’armes",								"6",	"750",		"0",	"La vente ou la possession illégale d’armes est passible d’une peine maximale de 6h de prison et 750$ d'amende." },
 	{"221-15-a",	"Tentative de corruption",						"24",	"10000",	"0",	"Tout acte de corruption ou de tentative de corruption, est puni d’une peine maximale de 24h de prison et 10 000$ d’amende." },
 	{"221-15-b",	"Escroquerie",									"18",	"5000",		"-1",	"Tout acte d’escroquerie est puni d’une peine maximale de 24h de prison et 5 000$ d’amende." },
 	{"221-16",		"Séquestration",								"6",	"800",		"500",	"Les actes de séquestrations sont passibles d'une peine maximale de 6h de prison et 800$ d'amende." },
