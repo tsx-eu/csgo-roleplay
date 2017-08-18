@@ -125,7 +125,7 @@ public void OnClientPostAdminCheck(int client) {
 public Action RP_OnPlayerGotPay(int client, int salary, int& topay, bool verbose) {
 	int jobID = rp_GetClientJobID(client);
 	
-	if( jobID == 101 && rp_GetClientInt(i_KillJailDuration) > 0 ) {
+	if( jobID == 101 && rp_GetClientInt(client, i_KillJailDuration) > 0 ) {
 		
 		if( verbose )
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} La Justice ne paye pas ses membres tuant la population.");
