@@ -19,6 +19,7 @@ char g_szReplace[PLATFORM_MAX_PATH]  =	"weapon_negev";
 
 char g_szVModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/flamethrower/v_flamethrower.mdl";
 char g_szWModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/flamethrower/w_flamethrower.mdl";
+char g_szTModel[PLATFORM_MAX_PATH] = 	"materials/models/weapons/tsx/flamethrower/flame.vmt";
 
 int g_cModel; 
 char g_szMaterials[][PLATFORM_MAX_PATH] = {
@@ -28,13 +29,13 @@ char g_szMaterials[][PLATFORM_MAX_PATH] = {
 	"materials/models/weapons/tsx/flamethrower/v_flamethrower_gauge.vtf",
 	"materials/models/weapons/tsx/flamethrower/w_flamethrower.vmt",
 	"materials/models/weapons/tsx/flamethrower/w_flamethrower.vtf",
-	"materials/models/weapons/tsx/flamethrower/flame.vmt",
-	"materials/models/weapons/tsx/flamethrower/flame.vtf",
 	"materials/models/weapons/v_hand/v_hand_sheet.vmt"
 };
 char g_szSounds[][PLATFORM_MAX_PATH] = {
 };
-
+public void OnPluginStart() {
+	RegServerCmd("sm_cwm_reload", Cmd_PluginReloadSelf);
+}
 public void OnAllPluginsLoaded() {
 	int id = CWM_Create(g_szFullName, g_szName, g_szReplace, g_szVModel, g_szWModel);
 	
@@ -71,33 +72,10 @@ public Action OnAttack(int client, int entity) {
 	SetEntityGravity(ent, 0.5);
 	SetEntPropFloat(ent, Prop_Send, "m_flElasticity", 0.1);
 	Entity_SetMinMaxSize(ent, view_as<float>({-16.0, -16.0, -16.0}), view_as<float>({16.0, 16.0, 16.0}));
-	DispatchKeyValue(ent, "OnUser1", "!self,Kill,,0.5,-1");
+	DispatchKeyValue(ent, "OnUser1", "!self,KillHierarchy,,0.6,-1");
 	AcceptEntityInput(ent, "FireUser1");
 	
-	float size = 10.0 + -GetRandomFloat(-4.0, 4.0);
-	int color[4];
-	color[0] = 255;
-	color[1] = RoundFloat(64 + size * 3.0);
-	color[2] = RoundFloat(size * 2.0);
-	color[3] = RoundFloat((size / 16.0) * 255);
-	
-	TE_SetupBeamFollow(ent, g_cModel, 0, 0.5, 2.0 + size, 0.0, 1, color);
-	TE_SendToAll();
-	
-	/*
-	int sub = CreateEntityByName("env_sprite");
-	DispatchKeyValue(sub, "model", "materials/models/weapons/tsx/flamethrower/flame.vmt");
-	DispatchKeyValueFloat(sub, "scale", size / 8.0);
-	DispatchKeyValue(sub, "rendermode", "5");
-	DispatchKeyValue(sub, "spawnflags", "1");
-	DispatchSpawn(sub);
-	
-	float pos[3];
-	Entity_GetAbsOrigin(ent, pos);
-	TeleportEntity(sub, pos, NULL_VECTOR, NULL_VECTOR);
-	SetVariantString("!activator");
-	AcceptEntityInput(sub, "SetParent", ent);
-	*/
+	AttachParticle(ent, "office_child_flame01b", 0.6, view_as<float>({90.0, 0.0, 0.0}));
 	
 	return Plugin_Continue;
 }
@@ -125,6 +103,31 @@ public void OnMapStart() {
 		AddFileToDownloadsTable(g_szMaterials[i]);
 	}
 	
-	g_cModel = PrecacheModel("materials/models/weapons/tsx/flamethrower/flame.vmt");
+	g_cModel = PrecacheModel(g_szTModel);
 
+}
+
+
+
+stock int AttachParticle(int ent, const char[] name, float time, float ang[3] = {0.0, 0.0, 0.0}) {
+	char tmp[32];
+	float pos[3];
+	Entity_GetAbsOrigin(ent, pos);
+	
+	Format(tmp, sizeof(tmp), "!self,Kill,,%.2f,-1", time);
+	
+	int particle = CreateEntityByName("info_particle_system");
+	DispatchKeyValue(particle, "effect_name", name);
+	DispatchKeyValue(ent, "OnUser1", tmp);
+	DispatchSpawn(particle);
+	ActivateEntity(particle);
+	
+	TeleportEntity(particle, pos, ang, NULL_VECTOR);
+	
+	SetVariantString("!activator");
+	AcceptEntityInput(particle, "SetParent", ent);
+	
+	AcceptEntityInput(particle, "Start");
+	AcceptEntityInput(particle, "FireUser1");
+	return particle;
 }
