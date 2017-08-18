@@ -78,6 +78,7 @@ public void OnMapStart() {
 }
 // ----------------------------------------------------------------------------
 public bool fwdCanStart(int client) {
+	return false;
 	if( g_bDoingQuest == true )
 		return false;
 	if( g_bCanMakeQuest == false )
