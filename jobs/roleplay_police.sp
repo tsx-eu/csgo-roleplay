@@ -145,6 +145,31 @@ public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 		
 	}
 }
+public Action RP_OnPlayerGotPay(int client, int salary, int& topay, bool verbose) {
+	int jobID = rp_GetClientJobID(client);
+	
+	if( jobID == 1 && rp_GetClientInt(i_KillJailDuration) > 0 ) {
+		
+		if( verbose )
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} La police ne paye pas ses membres tuant la population.");
+		
+		topay = 0;
+		return Plugin_Stop;
+	}
+	
+	int zone = rp_GetZoneBit(rp_GetPlayerZone(client));
+	
+	if( zone & (BITZONE_JAIL|BITZONE_LACOURS|BITZONE_HAUTESECU) && rp_GetClientInt(client, i_JailTime) > 0 ) {
+		
+		if( verbose )
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} La police ne paye pas ses membres tuant la population.");
+		
+		topay = 0;
+		return Plugin_Stop;
+	}
+	
+	return Plugin_Continue;
+}
 public Action fwdSpawn(int client) {
 	if( rp_GetClientInt(client, i_JailTime) > 0 )
 		SendPlayerToJail(client, 0);

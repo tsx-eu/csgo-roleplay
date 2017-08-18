@@ -122,6 +122,19 @@ public void OnClientPostAdminCheck(int client) {
 			rp_HookEvent(client, RP_OnPlayerHUD, fwdHUD);
 	}
 }
+public Action RP_OnPlayerGotPay(int client, int salary, int& topay, bool verbose) {
+	int jobID = rp_GetClientJobID(client);
+	
+	if( jobID == 101 && rp_GetClientInt(i_KillJailDuration) > 0 ) {
+		
+		if( verbose )
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} La Justice ne paye pas ses membres tuant la population.");
+		
+		topay = 0;
+		return Plugin_Stop;
+	}
+	return Plugin_Continue;
+}
 public void OnClientDisconnect(int client) {
 	g_bClientDisconnected[client] = true;
 	
