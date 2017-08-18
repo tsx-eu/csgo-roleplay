@@ -32,8 +32,8 @@
 #define		TEAM_POLICE			4
 #define		TEAM_HOSTAGE		5
 #define		TEAM_NAME1			"Braqueur"
-#define 	REQUIRED_T			1
-#define 	REQUIRED_CT			1
+#define 	REQUIRED_T			4
+#define 	REQUIRED_CT			5
 
 
 public Plugin myinfo =  {
@@ -108,6 +108,8 @@ public bool fwdCanStart(int client) {
 		if( !IsValidClient(i) )
 			continue;
 		if( i == client )
+			continue;
+		if( rp_GetClientBool(i, b_IsAFK) )
 			continue;
 		if( policeMatch(i) )
 			ct++;
@@ -1182,7 +1184,8 @@ void updateTeamPolice() {
 	}
 }
 bool policeMatch(int client) {
-	int jobID = rp_GetClientJobID(client);	
+	int jobID = rp_GetClientJobID(client);
+	
 	if( jobID == 101 && GetClientTeam(client) == CS_TEAM_CT && (rp_GetPlayerZone(client) == TRIBUNAL_1 || rp_GetPlayerZone(client) == TRIBUNAL_2) )
 		return false;
 	
