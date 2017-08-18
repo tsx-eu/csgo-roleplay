@@ -920,7 +920,7 @@ public Action Timer_AUDIENCE(Handle timer, any type) {
 	if( zone == jail ) {
 	
 		if( time < 60 )
-			CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est arrivé sans être recherché.", target);
+			CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est arrivé sans retard.", target);
 		else
 			CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est arrivé après %d minutes.", target, time/60);
 		
