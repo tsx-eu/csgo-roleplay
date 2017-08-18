@@ -33,7 +33,7 @@
 #define		TEAM_PLAYERS	1
 #define		TEAM_NPC		2
 #define 	QUEST_MID		view_as<float>({-4378.0, -10705.0, -7703.0})
-#define		QUEST_BONUS		view_as<float>({-4485.0, -9585.0, -7828.0})
+#define		QUEST_BONUS		view_as<float>({-4494.0, -9573.0, -7828.0})
 
 char g_szSpawnQueue[][][PLATFORM_MAX_PATH] = {
 	{"1", "zombie"}, {"4", "skeleton"},
@@ -68,6 +68,7 @@ enum QuestConfig {
 	QC_DeadTime,
 	QC_Bonus,
 	QC_Light,
+	QC_Alert,
 	QC_Max
 };
 int g_iQuestConfig[QC_Max];
@@ -109,6 +110,7 @@ public void OnMapStart() {
 	PrecacheModel("models/DeadlyDesire/props/udamage.mdl", true);
 	
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
+	PrecacheSound("player/heartbeatloop.wav");
 }
 // ----------------------------------------------------------------------------
 public bool fwdCanStart(int client) {
@@ -353,6 +355,7 @@ public void Q2_Start(int objectiveID, int client) {
 	
 	g_iQuestConfig[QC_Time] = g_iQuestConfig[QC_Killed] = g_iQuestConfig[QC_Alive] = 0;
 	g_iQuestConfig[QC_Health] = 5;
+	g_iQuestConfig[QC_DeadTime] = 60;
 	g_iQuestConfig[QC_Remainning] = g_hQueue.Length;
 	g_iQuestConfig[QC_Bonus] = EntIndexToEntRef(bonus);
 	g_iQuestConfig[QC_Light] = EntIndexToEntRef(light);
@@ -365,30 +368,51 @@ public void Q2_Frame(int objectiveID, int client) {
 	else if( g_iQuestConfig[QC_Health] <= 0 )
 		rp_QuestStepFail(client, objectiveID);
 	
-	
-	if( g_hQueue.Length > 0  && g_iQuestConfig[QC_Alive] < (5+g_iQuestConfig[QC_Difficulty]) ) {
-		if( SQ_Pop(pos) ) {
-			int id = g_hQueue.Get(0);
-			g_hQueue.Erase(0);
-			
-			int entity = PVE_Spawn(id, pos, NULL_VECTOR);
-			addClientToTeam(entity, TEAM_NPC);
-			
-			g_iQuestConfig[QC_Alive]++;
-			
-			PVE_RegEvent(entity, ESE_Dead, OnDead);
-			PVE_RegEvent(entity, ESE_FollowChange, OnFollowChange);
-			PVE_RegEvent(entity, ESE_Think, OnThink);
-			SDKHook(entity, SDKHook_Touch, OnTouch);
-		}
-	}
-	
 	if( rp_GetPlayerZone(client) == QUEST_ARENA ) {
 		g_iQuestConfig[QC_Time]++;
 		
 		PrintHintText(client, "Arène SOLO\nZombie restant: %d\nPV restant: %d - Temps: %d secondes", 
 			g_iQuestConfig[QC_Remainning], g_iQuestConfig[QC_Health], g_iQuestConfig[QC_Time]
 		);
+		
+		if( g_hQueue.Length > 0  && g_iQuestConfig[QC_Alive] < (5+g_iQuestConfig[QC_Difficulty]) ) {
+			if( SQ_Pop(pos) ) {
+				int id = g_hQueue.Get(0);
+				g_hQueue.Erase(0);
+				
+				int entity = PVE_Spawn(id, pos, NULL_VECTOR);
+				addClientToTeam(entity, TEAM_NPC);
+				
+				g_iQuestConfig[QC_Alive]++;
+				
+				PVE_RegEvent(entity, ESE_Dead, OnDead);
+				PVE_RegEvent(entity, ESE_FollowChange, OnFollowChange);
+				PVE_RegEvent(entity, ESE_Think, OnThink);
+				SDKHook(entity, SDKHook_Touch, OnTouch);
+			}
+		}
+		
+		int health = GetClientHealth(client);
+		int light = EntRefToEntIndex(g_iQuestConfig[QC_Light]);
+		
+		if( light != INVALID_ENT_REFERENCE ) { // n'est normalement pas sensé arrivé.
+			
+			if( health < 100 && g_iQuestConfig[QC_Alert] == 0 ) {
+				SetVariantColor({255, 50, 50,8});
+				AcceptEntityInput(light, "LightColor");
+				EmitSoundToClient(client, "player/heartbeatloop.wav", client, SNDCHAN_BODY);
+			}
+			else if( health > 100 && g_iQuestConfig[QC_Alert] == 1 ) {
+				SetVariantColor({255,150,100,5});
+				AcceptEntityInput(light, "LightColor");
+				StopSound(client, SNDCHAN_BODY, "player/heartbeatloop.wav");
+			}
+			
+			g_iQuestConfig[QC_Alert] = (health < 100) ? 1 : 0;
+		}
+		
+		if( GetClientTeam(client) == CS_TEAM_CT )
+			ForcePlayerSuicide(client);
 	}
 	else if( g_iQuestConfig[QC_Health] > 0 ) {
 		
@@ -499,7 +523,7 @@ public void fwdTouch(int entity, int target) {
 			AcceptEntityInput(entity, "KillHierarchy");
 		
 		for (float size = 256.0; size <= 2048.0; size *= 2.0) { // 256, 512, 1024, 2048.
-			TE_SetupBeamRingPoint(QUEST_BONUS, 32.0, size, g_cBeam, g_cBeam, 0, 30, 4.0, Logarithm(size, 2.0) * 8.0, 0.0, {100, 50, 100, 200}, 0, 0);
+			TE_SetupBeamRingPoint(QUEST_BONUS, 32.0, size, g_cBeam, g_cBeam, 0, 30, 1.0, Logarithm(size, 2.0) * 8.0, 0.0, {100, 50, 100, 200}, 0, 0);
 			TE_SendToAll();
 		}
 		
@@ -558,8 +582,12 @@ public Action fwdDead(int client) {
 }
 public Action fwdZone(int client, int newZone, int oldZone) {
 	if( newZone == 59 || newZone == 57 || newZone == 58 || newZone == 200 )
-		if ( g_iQuestConfig[QC_Health] > 0 )
-			TeleportEntity(client, QUEST_MID, NULL_VECTOR, NULL_VECTOR);
+		if ( g_iQuestConfig[QC_Health] > 0) {
+			if( GetClientTeam(client) == CS_TEAM_T )
+				TeleportEntity(client, QUEST_MID, NULL_VECTOR, NULL_VECTOR);
+			else
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez être civil pour participer à la quête.");
+		}
 }
 // ----------------------------------------------------------------------------
 bool SQ_Pop(float pos[3], float size = 32.0) {
@@ -636,9 +664,10 @@ int SQ_SpawnLight() {
 	pos[2] += 1024.0;
 	
 	int ent = CreateEntityByName("env_projectedtexture");
+	DispatchKeyValue(ent, "targetname", "toto");
 	DispatchKeyValue(ent, "farz", "2048");
 	DispatchKeyValue(ent, "texturename", "effects/flashlight001_intro");
-	DispatchKeyValue(ent, "lightcolor", "255 255 200 400");
+	DispatchKeyValue(ent, "lightcolor", "255 150 100 5");
 	DispatchKeyValue(ent, "spawnflags", "1");
 	DispatchKeyValue(ent, "lightfov", "170");
 	DispatchKeyValue(ent, "brightnessscale", "50");
@@ -646,6 +675,7 @@ int SQ_SpawnLight() {
 	
 	DispatchSpawn(ent);
 	TeleportEntity(ent, pos, view_as<float>({ 90.0, 0.0, 0.0 }), NULL_VECTOR);
+	
 	return ent;
 }
 int SQ_SpawnBonus() {
@@ -663,6 +693,8 @@ int SQ_SpawnBonus() {
 	DispatchKeyValue(ent, "model", "models/DeadlyDesire/props/udamage.mdl");
 	DispatchSpawn(ent);
 	TeleportEntity(ent, QUEST_BONUS, NULL_VECTOR, NULL_VECTOR);
+	SetVariantString("!activator");
+	AcceptEntityInput(ent, "SetParent", parent);
 	
 	Entity_SetSolidFlags(ent, FSOLID_TRIGGER);
 	Entity_SetCollisionGroup(ent, COLLISION_GROUP_PLAYER);
@@ -675,14 +707,14 @@ int SQ_SpawnBonus() {
 	int sub = CreateEntityByName("env_projectedtexture");
 	DispatchKeyValue(sub, "farz", "128");
 	DispatchKeyValue(sub, "texturename", "effects/flashlight001_intro");
-	DispatchKeyValue(sub, "lightcolor", "255 0 255 800");
+	DispatchKeyValue(sub, "lightcolor", "255 0 255 50");
 	DispatchKeyValue(sub, "spawnflags", "1");
 	DispatchKeyValue(sub, "lightfov", "160");
-	DispatchKeyValue(sub, "brightnessscale", "50");
+	DispatchKeyValue(sub, "brightnessscale", "5");
 	DispatchKeyValue(sub, "lightworld", "1");
 	DispatchSpawn(sub);
 	SetVariantString("!activator");
-	AcceptEntityInput(sub, "SetParent", ent);
+	AcceptEntityInput(sub, "SetParent", parent);
 	TeleportEntity(sub, view_as<float>({0.0, 0.0, 64.0}), view_as<float>({ 90.0, 0.0, 0.0 }), NULL_VECTOR);
 	
 	return parent;
