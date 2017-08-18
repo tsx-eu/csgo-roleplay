@@ -360,8 +360,10 @@ public void Q5_Start(int objectiveID, int client) {
 			Weapon_SetPrimaryClip(wepid, 5000);
 			rp_SetWeaponBallType(wepid, ball_type_braquage);
 		}
-		if( Client_GetWeaponBySlot(g_stkTeam[TEAM_BRAQUEUR][i], CS_SLOT_SECONDARY) < 0 )
-			GivePlayerItem(g_stkTeam[TEAM_BRAQUEUR][i], "weapon_revolver");
+		if( Client_GetWeaponBySlot(g_stkTeam[TEAM_BRAQUEUR][i], CS_SLOT_SECONDARY) < 0 ) {
+			int wepid = GivePlayerItem(g_stkTeam[TEAM_BRAQUEUR][i], "weapon_revolver");
+			rp_SetWeaponBallType(wepid, ball_type_braquage);
+		}
 		
 		LogToGame("[BRAQUAGE] [DEBUT] %L est dans l'équipe des braqueurs.", g_stkTeam[TEAM_BRAQUEUR][i]);
 		
@@ -417,7 +419,7 @@ public void Q6_Start(int objectiveID, int client) {
 	g_iQuestGain = 1000;
 	g_stkTeamCount[TEAM_HOSTAGE] = 0;
 	
-	for (float i = 0.0; i <= 20.0; i += 1.5) {
+	for (float i = 0.0; i <= 30.0; i += 1.5) {
 		CreateTimer(i, tskAlarm);
 	}
 }
@@ -542,7 +544,7 @@ public void Q7_Frame(int objectiveID, int client) {
 			}
 		}
 		rp_QuestStepFail(client, objectiveID);
-		LogToGame("[BRAQUAGE] Le braquage est terminé, perdu: %d$", g_iQuestGain);
+		LogToGame("[BRAQUAGE] [END] Le braquage est terminé, perdu: %d$", g_iQuestGain);
 		return;
 	}
 	if( g_stkTeamCount[TEAM_POLICE] > 0 ) {
@@ -601,7 +603,7 @@ public void Q_Complete(int objectiveID, int client) {
 	
 	rp_SetJobCapital(g_iPlanque, rp_GetJobCapital(g_iPlanque) - gain*3/4);
 	
-	LogToGame("[BRAQUAGE] Le braquage est terminé, gagné: %d$", g_iQuestGain);
+	LogToGame("[BRAQUAGE] [END] Le braquage est terminé, gagné: %d$", g_iQuestGain);
 	
 	if( g_stkTeamCount[TEAM_POLICE] > 0 ) {
 		int amendePolice = (g_iQuestGain / 4) / g_stkTeamCount[TEAM_POLICE];
