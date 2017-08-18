@@ -32,9 +32,8 @@
 #define		TEAM_POLICE			4
 #define		TEAM_HOSTAGE		5
 #define		TEAM_NAME1			"Braqueur"
-#define 	REQUIRED_T			4
-#define 	REQUIRED_CT			5
-#define		MAX_ZONES			310
+#define 	REQUIRED_T			1
+#define 	REQUIRED_CT			1
 
 
 public Plugin myinfo =  {
@@ -78,7 +77,6 @@ public void OnMapStart() {
 }
 // ----------------------------------------------------------------------------
 public bool fwdCanStart(int client) {
-	return false;
 	if( g_bDoingQuest == true )
 		return false;
 	if( g_bCanMakeQuest == false )
@@ -357,7 +355,8 @@ public void Q5_Start(int objectiveID, int client) {
 	
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
 		if( Client_GetWeaponBySlot(g_stkTeam[TEAM_BRAQUEUR][i], CS_SLOT_PRIMARY) < 0 ) {
-			int wepid = Client_GiveWeapon(g_stkTeam[TEAM_BRAQUEUR][i], "weapon_ak47", true);
+			int wepid = GivePlayerItem(g_stkTeam[TEAM_BRAQUEUR][i], "weapon_ak47");
+			FakeClientCommand(g_stkTeam[TEAM_BRAQUEUR][i], "use weapon_ak47");
 			Weapon_SetPrimaryClip(wepid, 5000);
 			rp_SetWeaponBallType(wepid, ball_type_braquage);
 		}
@@ -517,6 +516,7 @@ public void Q7_Frame(int objectiveID, int client) {
 	
 	if( GetVectorDistance(pos, dst) <= 200.0 ) {
 		rp_QuestStepComplete(client, objectiveID);
+		return;
 	}
 	
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
@@ -534,7 +534,6 @@ public void Q7_Frame(int objectiveID, int client) {
 			int gainPolice = ((GainMax-(g_iQuestGain / 4)) / g_stkTeamCount[TEAM_POLICE]) - amendePolice;
 			
 			for (int j = 0; j < g_stkTeamCount[TEAM_POLICE]; j++) {
-				LogToGame("[BRAQUAGE] [FIN] %L est policier et a gagné à la fin.", g_stkTeam[TEAM_POLICE][j]);
 				
 				CPrintToChat(g_stkTeam[TEAM_POLICE][j], "{lightblue}[TSX-RP]{default} Vous avez gagné %d$ pour avoir tué tous les braqueurs de %s", gainPolice, tmp2[0]);
 				rp_ClientMoney(g_stkTeam[TEAM_POLICE][j], i_AddToPay, gainPolice);
@@ -576,7 +575,6 @@ public void Q_Complete(int objectiveID, int client) {
 	int gain = g_iQuestGain / (g_stkTeamCount[TEAM_BRAQUEUR]+g_stkTeamCount[TEAM_BRAQUEUR_DEAD]);
 	
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
-		LogToGame("[BRAQUAGE] [FIN] %L est braqueur et a gagné", g_stkTeam[TEAM_BRAQUEUR][i]);
 		CPrintToChat(g_stkTeam[TEAM_BRAQUEUR][i], "{lightblue}[TSX-RP]{default} Vous avez gagné %d$ pour votre braquage de %s.", gain, tmp2[0]);
 		rp_ClientMoney(g_stkTeam[TEAM_BRAQUEUR][i], i_AddToPay, gain);
 		
@@ -587,7 +585,6 @@ public void Q_Complete(int objectiveID, int client) {
 	}
 	
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR_DEAD]; i++) {
-		LogToGame("[BRAQUAGE] [FIN] %L est braqueur et a gagné", g_stkTeam[TEAM_BRAQUEUR_DEAD][i]);
 		CPrintToChat(g_stkTeam[TEAM_BRAQUEUR_DEAD][i], "{lightblue}[TSX-RP]{default} Vous avez gagné %d$ pour votre braquage de %s.", gain, tmp2[0]);
 		rp_ClientMoney(g_stkTeam[TEAM_BRAQUEUR_DEAD][i], i_AddToPay, gain);
 		
@@ -597,7 +594,6 @@ public void Q_Complete(int objectiveID, int client) {
 			rp_QuestComplete(g_stkTeam[TEAM_BRAQUEUR_DEAD][i], QUEST_UNIQID, true);
 	}
 	for (int i = 0; i < g_stkTeamCount[TEAM_POLICE]; i++) {
-		LogToGame("[BRAQUAGE] [FIN] %L est policier mais a perdu à la fin.", g_stkTeam[TEAM_POLICE][i]);
 		
 		if( client != g_stkTeam[TEAM_POLICE][i] )
 			rp_QuestComplete(g_stkTeam[TEAM_POLICE][i], QUEST_UNIQID, false);
@@ -788,6 +784,12 @@ public Action fwdDamage(int attacker, int victim, float& damage, int damagetype)
 		return Plugin_Handled;
 	}
 	
+	if( damagetype & DMG_BULLET ) {
+		int wpnid = Client_GetActiveWeapon(attacker);
+		if( wpnid > 0 && rp_GetWeaponBallType(wpnid) == ball_type_braquage )
+			damage *= 2.0;
+	}
+	
 	return Plugin_Continue;
 }
 public Action fwdTeleport(int client) {
@@ -842,13 +844,15 @@ public int MenuRespawnBraqueur(Handle menu, MenuAction action, int client, int p
 			rp_SetClientInt(target, i_Kevlar, 250);
 			
 			if( Client_GetWeaponBySlot(target, CS_SLOT_PRIMARY) < 0 ) {
-				int wepid = Client_GiveWeapon(target, "weapon_ak47", true);
+				int wepid = GivePlayerItem(target, "weapon_ak47");
+				FakeClientCommand(target, "use weapon_ak47");
 				Weapon_SetPrimaryClip(wepid, 5000);
 				rp_SetWeaponBallType(wepid, ball_type_braquage);
 			}
-			if( Client_GetWeaponBySlot(target, CS_SLOT_SECONDARY) < 0 )
-				GivePlayerItem(target, "weapon_revolver");
-			
+			if( Client_GetWeaponBySlot(target, CS_SLOT_SECONDARY) < 0 ) {
+				int wepid = GivePlayerItem(target, "weapon_revolver");
+				rp_SetWeaponBallType(wepid, ball_type_braquage);
+			}
 		}
 	}
 	else if( action == MenuAction_End ) {
@@ -1068,7 +1072,7 @@ bool findAreaInRoom(int jobID, float pos[3]) {
 	return false;
 }
 void OnBraqueurKilled(int client) {
-	 rp_SetClientBool(client, b_SpawnToGrave, false);
+	rp_SetClientBool(client, b_SpawnToGrave, false);
 	
 	addClientToTeam(client, TEAM_BRAQUEUR_DEAD);
 	
@@ -1168,11 +1172,9 @@ void updateTeamPolice() {
 			continue;
 		
 		if( g_iPlayerTeam[i] != TEAM_POLICE && policeMatch(i) ) {
-			LogToGame("[BRAQUAGE] [SWITCH] %L est dans l'équipe de la police.", i);
 			addClientToTeam(i, TEAM_POLICE);
 		}
 		else if( g_iPlayerTeam[i] == TEAM_POLICE && !policeMatch(i) ) {
-			LogToGame("[BRAQUAGE] [SWITCH] %L n'est plus dans l'équipe de la police.", i);
 			removeClientTeam(i);
 		}
 	}
