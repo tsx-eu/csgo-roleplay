@@ -449,7 +449,7 @@ public void Q6_Frame(int objectiveID, int client) {
 			}
 		}
 		rp_QuestStepFail(client, objectiveID);
-		LogToGame("[BRAQUAGE] Le braquage est terminé, perdu: %d$", g_iQuestGain);
+		LogToGame("[BRAQUAGE] [END] Le braquage est terminé, perdu: %d$", g_iQuestGain);
 		return;
 	}
 	
