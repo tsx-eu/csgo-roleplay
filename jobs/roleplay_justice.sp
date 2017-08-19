@@ -933,6 +933,8 @@ public Action Timer_AUDIENCE(Handle timer, any type) {
 	
 		if( time < 60 )
 			CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est arrivé sans retard.", target);
+		else if ( time > 300 )
+			CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est arrivé après %d minutes, il y a un {red}manquement{default} à la convocation!", target, time/60);
 		else
 			CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est arrivé après %d minutes.", target, time/60);
 		
