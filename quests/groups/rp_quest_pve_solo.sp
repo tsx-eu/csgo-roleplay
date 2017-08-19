@@ -157,10 +157,10 @@ public void Q02_Frame(int objectiveID, int client) {
 	menu.SetTitle(QUEST_NAME ... " - BETA\n \nLe projet PVE sur le roleplay c'est...");
 	
 	menu.AddItem("0", "Un nouveau système de PVP beaucoup plus équilibré");
+	menu.AddItem("1", "Des combats en équipe contres des monstres dans une arène");
 	menu.AddItem("0", "Une nouvelle quête qui fait gagner plein de thune");
 	menu.AddItem("0", "Une nouvelle quête qui fait gagner plein d'expérience");
 	menu.AddItem("0", "Un défis pour devenir admin");
-	menu.AddItem("1", "Des combats en équipe contres des monstres dans une arène");
 	
 	menu.Display(client, MENU_TIME_FOREVER);
 }
@@ -174,9 +174,9 @@ public void Q03_Frame(int objectiveID, int client) {
 	menu.SetTitle(QUEST_NAME ... " - BETA\n \nOù se situe l'affrontement de la PVE?");
 	
 	menu.AddItem("0", "Dans la mairie dans des locaux aménagés");
+	menu.AddItem("1", "Dans une arène, hors map");
 	menu.AddItem("0", "Dans le BUNKER en face de la villa immo");
 	menu.AddItem("0", "Dans le cimetière de Princeton");
-	menu.AddItem("1", "Dans une arène, hors map");
 	
 	
 	menu.Display(client, MENU_TIME_FOREVER);
@@ -191,8 +191,8 @@ public void Q04_Frame(int objectiveID, int client) {
 	menu.SetTitle(QUEST_NAME ... " - BETA\n \nQuelle aptitude les mobs PVE ne sont t-ils pas capable\nde réaliser, pour le moment?");
 	
 	menu.AddItem("0", "Monter une échelle");
-	menu.AddItem("0", "Envoyer des projectiles (ex: flèche)");
 	menu.AddItem("1", "Contourner un props posé par un joueur");
+	menu.AddItem("0", "Envoyer des projectiles (ex: flèche)");
 	menu.AddItem("0", "Monter ou descendre une pente");
 	menu.AddItem("0", "Trouver leur chemin dans Princeton");	
 	
@@ -223,9 +223,9 @@ public void Q06_Frame(int objectiveID, int client) {
 	Menu menu = new Menu(Q0_MenuComplete);
 	menu.SetTitle(QUEST_NAME ... " - BETA\n \nQuel mob n'existe pas dans la PVE?");
 	
-	menu.AddItem("1", "Squelette armé d'une lance");
 	menu.AddItem("0", "Squelette armé d'une épée et d'un bouclier");
 	menu.AddItem("0", "Squelette armé d'un arc");
+	menu.AddItem("1", "Squelette armé d'une lance");
 	menu.AddItem("0", "Squelette armé d'une hache");
 	
 	
