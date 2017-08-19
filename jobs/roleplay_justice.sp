@@ -934,9 +934,9 @@ public Action Timer_AUDIENCE(Handle timer, any type) {
 		if( time < 60 )
 			CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est arrivé sans retard.", target);
 		else if ( time > 300 )
-			CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est arrivé après %d minutes, il y a {green}manquement à la convocation!", target, time/60);
+			CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est arrivé après %d minutes, il y a un {red}manquement{default} à la convocation!", target, time/60);
 		else
-			CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est arrivé après %d minutes, Il n'y a {red}pas Manquement à la convocation !", target, time/60);
+			CPrintToChatSearch(type, "{lightblue}[TSX-RP]{default} %N est arrivé après %d minutes.", target, time/60);
 		
 		LogToGame("[TRIBUNAL] [AUDIENCE] Le juge %L termine la convocation de %L après %d minute%s.", g_iTribunalData[type][td_Owner], target, time/60, time/60 >= 2 ? "s":"");
 		g_iTribunalData[type][td_SuspectArrive] = 1;
