@@ -532,7 +532,7 @@ public void BuildingATM_break(const char[] output, int caller, int activator, fl
 	
 	int owner = GetEntPropEnt(caller, Prop_Send, "m_hOwnerEntity");
 	if( IsValidClient(owner) ) {
-		CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre banque a été détruite.");
+		CPrintToChat(owner, "{lightblue}[TSX-RP]{default} Votre distributeur portable a été détruit.");
 	}
 }
 public Action DamageATM(int victim, int &attacker, int &inflictor, float &damage, int &damagetype) {
