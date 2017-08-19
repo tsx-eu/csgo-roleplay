@@ -39,7 +39,7 @@ native void PVE_RegEvent(int entity, PVE_EventType data, PVE_EventTypeForward fo
 native void PVE_AddAnimation(int id, PVE_DataAnimation data, int sequence, int frames, int fps);
 native void PVE_RunAnimation(int entity, PVE_DataAnimation data, float time = -1.0);
 
-native int PVE_ShootProjectile(int entity, char model[PLATFORM_MAX_PATH], char name[32], float spreadAngle = 0.0, float speed = FLT_MAX, PVE_HitCallback fonction);
+native int PVE_ShootProjectile(int entity, char model[PLATFORM_MAX_PATH], char name[32], float spreadAngle = 0.0, float speed = FLT_MAX, float gravity = 1.0, PVE_HitCallback fonction);
 
 native int PVE_GetId(char name[PLATFORM_MAX_PATH]);
 native void PVE_SetEntityFloat(int id, PVE_DataFloat data, float value);

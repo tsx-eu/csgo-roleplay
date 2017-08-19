@@ -51,7 +51,7 @@ public void OnAllPluginsLoaded() {
 	PVE_SetFloat(id, ESF_ScaleSize,		1.0);
 	PVE_SetFloat(id, ESF_FeetSize,  	0.0);
 	PVE_SetFloat(id, ESF_AttackSpeed,	50/35.0);
-	PVE_SetFloat(id, ESF_AttackRange,	1024.0);
+	PVE_SetFloat(id, ESF_AttackRange,	2048.0);
 	
 	PVE_AddAnimation(id, EAA_Idle, 		48,	100, 35);
 	PVE_AddAnimation(id, EAA_Run, 		49,	 30, 35);
@@ -69,8 +69,7 @@ public Action OnPreAttack(int id, int entity, int target) {
 	return Plugin_Continue;
 }
 public Action OnAttack(int id, int entity, int target) {
-	int ent = PVE_ShootProjectile(entity, g_szModel2, "skeleton_arrow", 0.0, 2000.0, OnProjectileHit);
-	SetEntityGravity(ent, 0.1);
+	int ent = PVE_ShootProjectile(entity, g_szModel2, "skeleton_arrow", 0.5, 1500.0, 1.0, OnProjectileHit);
 	TE_SetupBeamFollow(ent, g_cBeam, g_cBeam, 1.0, 1.0, 0.0, 1, {200, 200, 200, 50} );
 	TE_SendToAll();
 	return Plugin_Continue;
