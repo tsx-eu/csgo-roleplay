@@ -65,7 +65,8 @@ public void OnPluginStart() {
 	// Epicier
 	RegServerCmd("rp_item_doorDefine",	Cmd_ItemDoorDefine,		"RP-ITEM",	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_doorprotect", Cmd_ItemDoorProtect,	"RP-ITEM",	FCVAR_UNREGISTERED);
-	RegServerCmd("rp_GetStoreItem",	Cmd_GetStoreItem,		"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_GetStoreItem",	Cmd_GetStoreItem,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_door_breakcadenas", CmdBreakCadenas);
 	
 	g_hBuyMenu = new DataPack();
 	g_hBuyMenu.WriteCell(0);
@@ -76,6 +77,40 @@ public void OnPluginStart() {
 	for (int i = 1; i <= MaxClients; i++)
 		if( IsValidClient(i) )
 			OnClientPostAdminCheck(i);
+}
+public Action CmdBreakCadenas(int args) {
+	int client = GetCmdArgInt(1);
+	int door = GetCmdArgInt(2);
+	
+	float difficulte = 0.7;
+	int tzone = rp_GetPlayerZone(door);
+	int doorID = rp_GetDoorID(door);
+	
+	int appartID = zoneToAppartID(rp_GetPlayerZone(door));
+	if( appartID > 0 && g_flAppartProtection[appartID] > GetGameTime() ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Impossible de crocheter cette porte pour encore %d minutes.", RoundFloat((g_flAppartProtection[appartID] - GetGameTime()) / 60.0));
+		return Plugin_Handled;
+	}
+	
+	if( rp_IsInPVP(client) || rp_GetZoneInt(tzone, zone_type_type) == 101 )
+		difficulte += 0.05;
+	if( rp_GetZoneBit( tzone ) & BITZONE_HAUTESECU || rp_GetZoneInt(tzone, zone_type_type) == 101 )
+		difficulte += 0.05;
+	if( g_iDoorDefine_LOCKER[doorID] )
+		difficulte += 0.1;
+	
+	if( GetRandomFloat() > difficulte ) {
+		
+		if( IsValidClient(g_iDoorDefine_LOCKER[doorID]) ) {
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Un cadenas est déja présent sur cette porte.");		
+			CPrintToChat(g_iDoorDefine_LOCKER[doorID], "{lightblue}[TSX-RP]{default} Votre cadenas a été détruit.");
+			g_iDoorDefine_LOCKER[doorID] = 0;
+		}
+		
+		rp_SetDoorLock(doorID, false); 
+		rp_ClientOpenDoor(client, doorID, true);
+	}
+	return Plugin_Handled;
 }
 public Action Cmd_GetStoreItem(int args) {
 	Cmd_BuyItemMenu(GetCmdArgInt(1), true);
@@ -376,10 +411,10 @@ public Action Cmd_ItemDoorDefine(int args) {
 	
 	int doorID = rp_GetDoorID(door);
 	if(g_iDoorDefine_LOCKER[doorID] != 0 ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Un cadenas est déja présent sur cette porte.");
-			ITEM_CANCEL(client, item_id);
-			return Plugin_Handled;
-		}
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Un cadenas est déja présent sur cette porte.");
+		ITEM_CANCEL(client, item_id);
+		return Plugin_Handled;
+	}
 	g_iDoorDefine_LOCKER[doorID] = client;
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Le cadenas a été placé avec succès.");
 	

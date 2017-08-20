@@ -17,7 +17,7 @@
 
 char g_szFullName[PLATFORM_MAX_PATH] =	"Tronçoneuse";
 char g_szName[PLATFORM_MAX_PATH] 	 =	"chainsaw";
-char g_szReplace[PLATFORM_MAX_PATH]  =	"weapon_negev";
+char g_szReplace[PLATFORM_MAX_PATH]  =	"weapon_glock";
 
 char g_szVModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/chainsaw/v_chainsaw.mdl";
 char g_szWModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/chainsaw/w_chainsaw.mdl";
@@ -72,7 +72,7 @@ public void OnReload(int client, int entity) {
 }
 public Action OnAttack(int client, int entity) {
 
-	float hit[3], src[3];
+	float hit[3], src[3], ang[3];
 	CWM_RunAnimation(entity, WAA_Attack);
 	EmitSoundToAllAny("physics/metal/metal_solid_strain5.wav", entity, _, _, _, 0.2);
 	
@@ -102,10 +102,30 @@ public Action OnAttack(int client, int entity) {
 			CWM_ShootDamage(client, entity, hit);
 			CWM_ShootDamage(client, entity, hit);
 		}
+		
+		if( GetRandomFloat() > 0.8 && rp_GetClientJobID(client) == 91 ) {
+			GetClientEyePosition(client, src);
+			GetClientEyeAngles(client, ang);
+			Handle trace = TR_TraceRayFilterEx(src, ang, MASK_SHOT, RayType_Infinite, TraceEntityFilterSelf, client);
+
+			if (TR_DidHit(trace)) {
+				TR_GetEndPosition(hit, trace);
+				target = TR_GetEntityIndex(trace);
+		
+				if (GetVectorDistance(src, hit) < RANGE_MELEE && rp_IsValidDoor(target) ) {
+					ServerCommand("rp_door_breakcadenas %d %d", client, target);
+				}
+			}
+			
+			delete trace;			
+		}
 #endif
 	}
 	
-	return Plugin_Handled;
+	return Plugin_Continue;
+}
+public bool TraceEntityFilterSelf(int entity, int contentsMask, any data) {
+	return entity != data;
 }
 public void OnMapStart() {
 	
