@@ -78,6 +78,7 @@ enum PVE_DataInteger {
 	ESI_CanJump,
 	ESI_Ladder,
 	ESI_Animation,
+	ESI_LastAttackBy,
 	
 	ESI_Max
 };
@@ -155,13 +156,13 @@ typeset PVE_HookTypeForward {
 	function void(int id, int entity);					// ESH_Spawn
 	function Action(int id, int entity, int target); 	// ESH_PreAttack // Continue = attack, handled = pas d'attaque mais cooldown, stop = pas d'attaque ni de cooldown
 	function Action(int id, int entity, int target); 	// ESH_Attack 	 // Continue = attack, handled = pas d'attaque mais cooldown, stop = pas d'attaque ni de cooldown
-	function void(int id, int entity);					// ESH_Dead
+	function void(int id, int entity,	int client);	// ESH_Dead
 }
 typeset PVE_EventTypeForward {
 	function Action(int id, int entity, int& target);				// ESE_FollowChange
 	function bool(int id, int entity, int target); 					// ESE_CanAttack
 	function void(int id, int entity, PVE_EntityState& state);		// ESE_Think
-	function void(int id, int entity);								// ESE_Dead
+	function void(int id, int entity, int client);					// ESE_Dead
 }
 typeset PVE_HitCallback {
 	function void(int id, int entity, int ent, int target);

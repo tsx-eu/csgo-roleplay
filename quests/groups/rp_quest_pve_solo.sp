@@ -53,10 +53,58 @@ public Plugin myinfo =  {
 
 int g_iQuest;
 int g_iPlayerTeam[2049], g_stkTeam[QUEST_TEAMS + 1][MAXPLAYERS + 1], g_stkTeamCount[QUEST_TEAMS];
+Handle g_hKillTimer[MAXPLAYERS + 1];
 bool g_bCanMakeQuest;
 int g_iPlayerObjective[MAXPLAYERS + 1];
 int g_cBeam;
 int g_iPort;
+
+enum soundList {
+	snd_YouHaveTheFlag,
+	snd_YouAreOnBlue, snd_YouAreOnRed,
+	snd_1MinuteRemain, snd_5MinutesRemain,
+	snd_EndOfRound,
+	snd_Congratulations, snd_YouHaveLostTheMatch, snd_FlawlessVictory, snd_HumiliatingDefeat,
+	snd_YouAreLeavingTheBattlefield,
+	snd_FirstBlood,
+	snd_DoubleKill, snd_MultiKill, snd_MegaKill, snd_UltraKill, snd_MonsterKill,
+	snd_KillingSpree, snd_Unstopppable, snd_Dominating, snd_Godlike
+};
+enum announcerData {
+	ann_Client,
+	ann_SoundID,
+	ann_Time,
+	ann_max
+};
+char g_szSoundList[soundList][] = {
+	"DeadlyDesire/announce/YouHaveTheFlag.mp3",
+	"DeadlyDesire/announce/YouAreOnBlue.mp3",
+	"DeadlyDesire/announce/YouAreOnRed.mp3",
+
+	"DeadlyDesire/announce/1MinutesRemain.mp3",
+	"DeadlyDesire/announce/5MinutesRemain.mp3",
+	
+	"DeadlyDesire/announce/EndOfRound.mp3",
+	"DeadlyDesire/announce/Congratulations.mp3",
+	"DeadlyDesire/announce/YouHaveLostTheMatch.mp3",
+	"DeadlyDesire/announce/FlawlessVictory.mp3",
+	"DeadlyDesire/announce/HumiliatingDefeat.mp3",
+	
+	"DeadlyDesire/announce/YouAreLeavingTheBattlefield.mp3",
+	
+	"DeadlyDesire/announce/FristBlood.mp3",
+	
+	"DeadlyDesire/announce/DoubleKill.mp3",
+	"DeadlyDesire/announce/MultiKill.mp3",
+	"DeadlyDesire/announce/MegaKill.mp3",
+	"DeadlyDesire/announce/UltraKill.mp3",
+	"DeadlyDesire/announce/MonsterKill.mp3",
+	
+	"DeadlyDesire/announce/KillingSpree.mp3",
+	"DeadlyDesire/announce/Unstopppable.mp3",
+	"DeadlyDesire/announce/Dominating.mp3",
+	"DeadlyDesire/announce/Godlike.mp3"
+};
 
 enum QuestConfig {
 	QC_Killed = 0,
@@ -69,9 +117,12 @@ enum QuestConfig {
 	QC_Bonus,
 	QC_Light,
 	QC_Alert,
+	QC_FirstBlood,
 	QC_Max
 };
 int g_iQuestConfig[QC_Max];
+int g_CyclAnnouncer[MAX_ANNOUNCES][announcerData], g_CyclAnnouncer_start, g_CyclAnnouncer_end;
+int g_iKillingSpree[65], g_iKilling[65];
 
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_PluginReloadSelf);
@@ -111,6 +162,13 @@ public void OnMapStart() {
 	
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 	PrecacheSound("player/heartbeatloop.wav");
+	
+	char tmp[PLATFORM_MAX_PATH];
+	for (int i = 0; i < sizeof(g_szSoundList); i++) {
+		PrecacheSoundAny(g_szSoundList[i]);
+		Format(tmp, sizeof(tmp), "sound/%s", g_szSoundList[i]);
+		AddFileToDownloadsTable(tmp);
+	}
 }
 // ----------------------------------------------------------------------------
 public bool fwdCanStart(int client) {
@@ -356,9 +414,13 @@ public void Q2_Start(int objectiveID, int client) {
 	g_iQuestConfig[QC_Time] = g_iQuestConfig[QC_Killed] = g_iQuestConfig[QC_Alive] = 0;
 	g_iQuestConfig[QC_Health] = 5;
 	g_iQuestConfig[QC_DeadTime] = 60;
+	g_iQuestConfig[QC_FirstBlood] = 0;
 	g_iQuestConfig[QC_Remainning] = g_hQueue.Length;
 	g_iQuestConfig[QC_Bonus] = EntIndexToEntRef(bonus);
 	g_iQuestConfig[QC_Light] = EntIndexToEntRef(light);
+	
+	g_iKillingSpree[client] = 0;
+	g_iKilling[client] = 0;
 }
 public void Q2_Frame(int objectiveID, int client) {
 	float pos[3];
@@ -367,6 +429,8 @@ public void Q2_Frame(int objectiveID, int client) {
 		rp_QuestStepComplete(client, objectiveID);
 	else if( g_iQuestConfig[QC_Health] <= 0 )
 		rp_QuestStepFail(client, objectiveID);
+	
+	CyclAnnouncer_Frame();
 	
 	if( rp_GetPlayerZone(client) == QUEST_ARENA ) {
 		g_iQuestConfig[QC_Time]++;
@@ -442,11 +506,22 @@ public void Q3_Frame(int objectiveID, int client) {
 	}
 }
 // ----------------------------------------------------------------------------
-public void OnDead(int id, int entity) {
+public void OnDead(int id, int entity, int client) {
 	removeClientTeam(entity);
 	g_iQuestConfig[QC_Remainning]--;
 	g_iQuestConfig[QC_Alive]--;
 	g_iQuestConfig[QC_Killed]++;
+	
+	if( client > 0 && IsValidClient(client) ) {
+		
+		g_iKillingSpree[client]++;
+		g_iKilling[client]++;
+		if( g_hKillTimer[client] != INVALID_HANDLE )
+			delete g_hKillTimer[client];
+		g_hKillTimer[client] = CreateTimer(10.0, ResetKillCount, client);
+		
+		CyclAnnouncer(client);
+	}
 }
 public Action OnFollowChange(int id, int entity, int& target) {
 
@@ -526,16 +601,9 @@ public void fwdTouch(int entity, int target) {
 			TE_SetupBeamRingPoint(QUEST_BONUS, 32.0, size, g_cBeam, g_cBeam, 0, 30, 1.0, Logarithm(size, 2.0) * 8.0, 0.0, {100, 50, 100, 200}, 0, 0);
 			TE_SendToAll();
 		}
-		
-		for (int i = MaxClients; i < MAX_ENTITIES; i++) {
-			if( !IsValidEdict(i) || !IsValidEntity(i) )
-				continue;
-			if( !HasEntProp(i, Prop_Send, "m_vecOrigin") )
-				continue;
-			if( rp_GetPlayerZone(i) != QUEST_ARENA )
-				continue;
-			if( IsMonster(i) )
-				Entity_Hurt(i, 5000, target);
+
+		for (int i = 0; i < g_stkTeamCount[TEAM_NPC]; i++) {
+			Entity_Hurt(g_stkTeam[TEAM_NPC][i], 5000, target);
 		}
 		
 		SetEntityHealth(target, 500);
@@ -578,6 +646,8 @@ public Action fwdDead(int client) {
 	if( rp_GetPlayerZone(client) == QUEST_ARENA ) {
 		g_iQuestConfig[QC_Health]--;
 		g_iQuestConfig[QC_DeadTime] = 60;
+		g_iKillingSpree[client] = 0;
+		g_iKilling[client] = 0;
 	}
 }
 public Action fwdZone(int client, int newZone, int oldZone) {
@@ -782,4 +852,123 @@ void removeClientTeam(int client) {
 // ----------------------------------------------------------------------------
 public Action newAttempt(Handle timer, any zboub) {
 	g_bCanMakeQuest = true;
+}
+
+
+// -----------------------------------------------------------------------------------------------------------------
+void announceSound(int client, int sound) {
+	static char msg[128];
+	
+	switch( sound ) {
+		case snd_FirstBlood: Format(msg, sizeof(msg), 	"%N\n<font color='#33ff33'><b>a versé le premier sang !</b></font>", client);
+		case snd_DoubleKill: Format(msg, sizeof(msg), 	"%N\n<font color='#33ff33'><b>   Double kill</b></font>", client);
+		case snd_MultiKill: Format(msg, sizeof(msg), 	"%N\n<font color='#33ff33'><b>   MULTI kill</b></font>", client);
+		case snd_MegaKill: Format(msg, sizeof(msg), 	"%N\n<font color='#33ff33'><b>   MEGA KILL</b></font>", client);
+		case snd_UltraKill: Format(msg, sizeof(msg), 	"%N\n<font color='#33ff33'><b>   ULTRAAA-KILL !</b></font>", client);
+		case snd_MonsterKill: Format(msg, sizeof(msg), 	"%N\n<font color='#33ff33'><b>MOOOONSTER KILL !</b></font>", client);
+		case snd_KillingSpree: Format(msg, sizeof(msg),	"%N\n<font color='#33ff33'><b>fait une série meurtrière</b></font>", client);
+		case snd_Unstopppable: Format(msg, sizeof(msg),	"%N\n<font color='#33ff33'><b> est inarrêtable!</b></font>", client);
+		case snd_Dominating: Format(msg, sizeof(msg),	"%N\n<font color='#33ff33'><b>   DOMINE !</b></font>", client);
+		case snd_Godlike: Format(msg, sizeof(msg),		"%N\n<font color='#33ff33'><b> EST DIVIN !</b></font>", client);
+	}
+	
+	for (int i = 0; i < g_stkTeamCount[TEAM_PLAYERS]; i++)
+		PrintHintText(g_stkTeam[TEAM_PLAYERS][i], msg);
+	
+	EmitSoundAny(g_stkTeam[TEAM_PLAYERS], g_stkTeamCount[TEAM_PLAYERS], g_szSoundList[sound], _, _, _, _, 1.0);
+}
+
+void CyclAnnouncer_Frame() {
+	int NowTime = GetTime();
+	int time, soundID, target;
+	
+	if( NowTime % 3 == 0 ) {
+		bool found = CyclAnnouncer_Empty();
+		
+		while( !found  ) {
+			time = g_CyclAnnouncer[g_CyclAnnouncer_end][ann_Time];
+			soundID = g_CyclAnnouncer[g_CyclAnnouncer_end][ann_SoundID];
+			target = g_CyclAnnouncer[g_CyclAnnouncer_end][ann_Client];
+			
+			g_CyclAnnouncer_end = (g_CyclAnnouncer_end+1) % MAX_ANNOUNCES;
+			
+			if( (time+ANNONCES_DELAY) >= NowTime && IsValidClient(target) ) {
+				announceSound(target, soundID);
+				found = true;
+			}
+			else {
+				found = CyclAnnouncer_Empty();
+			}
+		}
+	}
+}
+void CyclAnnouncer(int client) {
+	bool sound = false;
+	
+	if( g_iQuestConfig[QC_FirstBlood] == 0 ) {
+		g_iQuestConfig[QC_FirstBlood] = 1;
+		CyclAnnouncer_Push(client, snd_FirstBlood);
+	}
+	
+	switch( g_iKilling[client] ) {
+		case 2: sound = CyclAnnouncer_Push(client, snd_DoubleKill);
+		case 3: sound = CyclAnnouncer_Push(client, snd_MultiKill);
+		case 4: sound = CyclAnnouncer_Push(client, snd_MegaKill);
+		case 5: sound = CyclAnnouncer_Push(client, snd_UltraKill);
+		case 6: sound = CyclAnnouncer_Push(client, snd_MonsterKill);
+		default: {
+			if( g_iKilling[client] >= 6 && g_iKilling[client] % 2)
+				sound = CyclAnnouncer_Push(client, snd_MonsterKill);
+		}
+	}
+	
+	if( !sound ) {
+		switch( g_iKillingSpree[client] ) {
+			case 5: sound = CyclAnnouncer_Push(client, snd_KillingSpree);
+			case 10: sound = CyclAnnouncer_Push(client, snd_Dominating);
+			case 15: sound = CyclAnnouncer_Push(client, snd_Unstopppable);
+			case 20: sound = CyclAnnouncer_Push(client, snd_Godlike);
+			default: {
+				if( g_iKillingSpree[client] >= 12 && g_iKillingSpree[client] % 2 )
+					sound = CyclAnnouncer_Push(client, snd_Godlike);
+			}
+		}
+	}
+}
+bool CyclAnnouncer_Push(int client, int soundID) {
+	
+	if( !CyclAnnouncer_Empty() ) {
+		int i = g_CyclAnnouncer_end;
+		
+		while( i != g_CyclAnnouncer_start ) {
+			if( g_CyclAnnouncer[i][ann_Client] == client ) {
+				g_CyclAnnouncer[i][ann_SoundID] = soundID;
+				g_CyclAnnouncer[i][ann_Time] = GetTime();
+				return true;
+			}
+			
+			i = (i + 1) % MAX_ANNOUNCES;
+		}
+	}
+	if( CyclAnnouncer_Full() )
+		return false;
+	
+	g_CyclAnnouncer[g_CyclAnnouncer_start][ann_Client] = client;
+	g_CyclAnnouncer[g_CyclAnnouncer_start][ann_SoundID] = soundID;
+	g_CyclAnnouncer[g_CyclAnnouncer_start][ann_Time] = GetTime();
+	
+	g_CyclAnnouncer_start = (g_CyclAnnouncer_start+1) % MAX_ANNOUNCES;
+	
+	return true;
+}
+bool CyclAnnouncer_Full() {
+	return ((g_CyclAnnouncer_end + 1) % MAX_ANNOUNCES == g_CyclAnnouncer_start);
+}
+bool CyclAnnouncer_Empty() {
+	return (g_CyclAnnouncer_end == g_CyclAnnouncer_start);
+}
+public Action ResetKillCount(Handle timer, any client) {
+	if( g_hKillTimer[client] != INVALID_HANDLE )
+		g_iKilling[client] = 0;
+	g_hKillTimer[client] = INVALID_HANDLE;
 }
