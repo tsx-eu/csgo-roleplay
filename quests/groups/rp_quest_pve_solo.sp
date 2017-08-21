@@ -532,6 +532,7 @@ public Action OnFollowChange(int id, int entity, int& target) {
 	
 	float tmp, dist = FLT_MAX, src[3], dst[3];
 	Entity_GetAbsOrigin(entity, src);
+	src[2] += 48.0;
 	
 	int area = PHUN_Nav_GetAreaId(src);
 	int client;
@@ -551,7 +552,7 @@ public Action OnFollowChange(int id, int entity, int& target) {
 		
 		if( area == PHUN_Nav_GetAreaId(dst) )
 			tmp /= 4.0;
-		if( IsAbleToSee(client, src) )
+		if( IsAbleToSee(client, src, entity) )
 			tmp /= 4.0;
 				
 		if (tmp < dist) {
@@ -789,7 +790,7 @@ int SQ_SpawnBonus() {
 	
 	return parent;
 }
-stock bool IsAbleToSee(int client, float dst[3]) {
+stock bool IsAbleToSee(int client, float dst[3], int target = -1) {
 	static float src[3], ang[3], v_dir[3], d_dir[3];
 	static float threshold = 0.73;
 	GetClientEyePosition(client, src);
@@ -810,7 +811,7 @@ stock bool IsAbleToSee(int client, float dst[3]) {
 	
 	//
 	Handle tr = TR_TraceRayFilterEx(src, dst, MASK_SOLID, RayType_EndPoint, TraceEntityFilterPlayers, client);
-	if( TR_DidHit(tr) ) {
+	if( TR_DidHit(tr) && TR_GetEntityIndex(tr) != target ) {
 		delete tr;
 		return false;
 	}
