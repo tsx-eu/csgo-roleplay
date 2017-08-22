@@ -35,6 +35,8 @@
 #define 	REQUIRED_T			4
 #define 	REQUIRED_CT			5
 
+#define		BRAQUAGE_WEAPON		"weapon_p90"
+
 
 public Plugin myinfo =  {
 	name = "Quête: "...QUEST_NAME, author = "KoSSoLaX", 
@@ -357,8 +359,8 @@ public void Q5_Start(int objectiveID, int client) {
 	
 	for (int i = 0; i < g_stkTeamCount[TEAM_BRAQUEUR]; i++) {
 		if( Client_GetWeaponBySlot(g_stkTeam[TEAM_BRAQUEUR][i], CS_SLOT_PRIMARY) < 0 ) {
-			int wepid = GivePlayerItem(g_stkTeam[TEAM_BRAQUEUR][i], "weapon_ak47");
-			FakeClientCommand(g_stkTeam[TEAM_BRAQUEUR][i], "use weapon_ak47");
+			int wepid = GivePlayerItem(g_stkTeam[TEAM_BRAQUEUR][i], BRAQUAGE_WEAPON);
+			FakeClientCommand(g_stkTeam[TEAM_BRAQUEUR][i], "use " ... BRAQUAGE_WEAPON);
 			Weapon_SetPrimaryClip(wepid, 5000);
 			rp_SetWeaponBallType(wepid, ball_type_braquage);
 		}
@@ -848,8 +850,8 @@ public int MenuRespawnBraqueur(Handle menu, MenuAction action, int client, int p
 			rp_SetClientInt(target, i_Kevlar, 250);
 			
 			if( Client_GetWeaponBySlot(target, CS_SLOT_PRIMARY) < 0 ) {
-				int wepid = GivePlayerItem(target, "weapon_ak47");
-				FakeClientCommand(target, "use weapon_ak47");
+				int wepid = GivePlayerItem(target, BRAQUAGE_WEAPON);
+				FakeClientCommand(target, "use " ... BRAQUAGE_WEAPON);
 				Weapon_SetPrimaryClip(wepid, 5000);
 				rp_SetWeaponBallType(wepid, ball_type_braquage);
 			}
