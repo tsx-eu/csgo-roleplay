@@ -36,7 +36,7 @@ char g_szSpawnQueue[][][PLATFORM_MAX_PATH] = {
 	{"1", "zombie"}, {"1", "skeleton_arrow"}, {"3", "skeleton"},
 	{"1", "zombie"}, {"1", "skeleton_arrow"}, {"3", "skeleton_heavy"},
 	{"1", "zombie"}, {"1", "skeleton_arrow"}, {"3", "skeleton"},
-	{"5", "zombie"}, {"2", "skeleton_arrow"}
+	{"5", "zombie"}, {"2", "skeleton_arrow"},
 	{"5", "zombie"}
 };
 
