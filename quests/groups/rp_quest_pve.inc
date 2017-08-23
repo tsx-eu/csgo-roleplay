@@ -635,7 +635,7 @@ public void OnThink(int id, int entity, PVE_EntityState& state) {
 				Effect_DrawBeamBoxToAll(min, max, g_cBeam, g_cBeam, 0, 30, 0.1, 4.0, 4.0, 1, 0.0, { 0, 255, 0, 200 }, 1);
 			}
 			else {
-				pos[2] += 8.0;
+				vec[2] += 8.0;
 				TE_SetupBeamRingPoint(vec, 8.0, 64.0, g_cBeam, g_cBeam, 0, 30, 0.1, 4.0, 0.0, { 255, 0, 0, 200 }, 1, 0);
 				TE_SendToAll();
 			}
