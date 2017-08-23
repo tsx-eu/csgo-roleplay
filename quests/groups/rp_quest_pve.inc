@@ -144,6 +144,9 @@ public void OnAllPluginsLoaded() {
 	g_hQueue = new ArrayList(1, 1024);
 	g_bCanMakeQuest = true;
 }
+public void OnClientDisconnect(int client) {
+	removeClientTeam(client);
+}
 // ----------------------------------------------------------------------------
 public void OnMapStart() {
 	AddFileToDownloadsTable("models/DeadlyDesire/props/udamage.mdl");
@@ -293,14 +296,17 @@ public void Q_Abort(int objectiveID, int client) {
 	
 	CreateTimer(5.0 * 60.0, newAttempt);
 	
-	rp_UnhookEvent(client, RP_OnPlayerDead, fwdDead);
-	rp_UnhookEvent(client, RP_OnPlayerZoneChange, fwdZone);
-	rp_UnhookEvent(client, RP_PlayerCanUseItem, fwdItem);
-	rp_UnhookEvent(client, RP_PrePlayerPhysic, fwdPhysics);
-	
-	removeClientTeam(client);
-	
-	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Merci pour votre test! Donnez vos suggestions sur pve.ts-x.eu <3");
+	for (int i = 0; i < g_stkTeamCount[TEAM_PLAYERS]; i++) {
+		int target = g_stkTeam[TEAM_PLAYERS][i];
+		rp_UnhookEvent(target, RP_OnPlayerDead, fwdDead);
+		rp_UnhookEvent(target, RP_OnPlayerZoneChange, fwdZone);
+		rp_UnhookEvent(target, RP_PlayerCanUseItem, fwdItem);
+		rp_UnhookEvent(target, RP_PrePlayerPhysic, fwdPhysics);
+		
+		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Merci pour votre test! Donnez vos suggestions sur pve.ts-x.eu <3");
+		
+		removeClientTeam(target);
+	}
 	
 	for (int i = 0; i < g_stkTeamCount[TEAM_NPC]; i++) {
 		int entity = g_stkTeam[TEAM_NPC][i];
@@ -527,14 +533,17 @@ public void Q3_Frame(int objectiveID, int client) {
 	bool allOut = true;
 	
 	if( g_iQuestConfig[QC_DeadTime] <= 0 ) {
-		for (int i = 0; i < g_stkTeamCount[TEAM_PLAYERS]; i++) {
-			int target = g_stkTeam[TEAM_PLAYERS][i];
+		for (int target = 1; target <= MaxClients; target++) {
+			if( !IsValidClient(target) )
+				continue;
 		
 			if( rp_GetPlayerZone(target) == QUEST_ARENA ) {
 				allOut = false;
 				
 				if( g_iQuestConfig[QC_DeadTime] < -5 )
 					ForcePlayerSuicide(target);
+				else
+					rp_ClientSendToSpawn(target);
 			}
 		}
 		
@@ -626,6 +635,7 @@ public void OnThink(int id, int entity, PVE_EntityState& state) {
 				Effect_DrawBeamBoxToAll(min, max, g_cBeam, g_cBeam, 0, 30, 0.1, 4.0, 4.0, 1, 0.0, { 0, 255, 0, 200 }, 1);
 			}
 			else {
+				pos[2] += 8.0;
 				TE_SetupBeamRingPoint(vec, 8.0, 64.0, g_cBeam, g_cBeam, 0, 30, 0.1, 4.0, 0.0, { 255, 0, 0, 200 }, 1, 0);
 				TE_SendToAll();
 			}
