@@ -23,8 +23,8 @@
 #include <phun_nav.inc>
 #include <custom_weapon_mod.inc>
 
-#define		QUEST_UNIQID   	"PVE_SOLO"
-#define		QUEST_NAME      "PVE: Solo - BETA"
+#define		QUEST_UNIQID   	"pve-solo"
+#define		QUEST_NAME      "PVE: Solo - ALPHA"
 #define		QUEST_TYPE     	quest_group
 #define		QUEST_ARENA		310
 
@@ -33,11 +33,11 @@
 #define		QUEST_BONUS		view_as<float>({-4494.0, -9573.0, -7828.0})
 
 char g_szSpawnQueue[][][PLATFORM_MAX_PATH] = {
-	{"1", "zombie"}, {"4", "skeleton"},
-	{"1", "zombie"}, {"4", "skeleton_arrow"},
+	{"1", "zombie"}, {"1", "skeleton_arrow"}, {"3", "skeleton"},
+	{"1", "zombie"}, {"1", "skeleton_arrow"}, {"3", "skeleton_heavy"},
+	{"1", "zombie"}, {"1", "skeleton_arrow"}, {"3", "skeleton"},
+	{"5", "zombie"}, {"2", "skeleton_arrow"}
 	{"5", "zombie"},
-	{"1", "zombie"}, {"4", "skeleton_heavy"},
-	{"5", "zombie"}
 };
 
 public Plugin myinfo =  {

@@ -23,7 +23,7 @@
 #include <phun_nav.inc>
 #include <custom_weapon_mod.inc>
 
-#define		QUEST_UNIQID   	"PVE_DUO"
+#define		QUEST_UNIQID   	"pve-duo"
 #define		QUEST_NAME      "PVE: Duo - BETA"
 #define		QUEST_TYPE     	quest_group
 #define		QUEST_ARENA		311
@@ -33,11 +33,11 @@
 #define		QUEST_BONUS		view_as<float>({2688.0, -9573.0, -7828.0})
 
 char g_szSpawnQueue[][][PLATFORM_MAX_PATH] = {
-	{"2", "zombie"}, {"8", "skeleton"},
-	{"2", "zombie"}, {"8", "skeleton_arrow"},
-	{"10", "zombie"},
-	{"2", "zombie"}, {"8", "skeleton_heavy"},
-	{"10", "zombie"}
+	{"1", "zombie"}, {"2", "skeleton_arrow"}, {"3", "skeleton"},
+	{"1", "zombie"}, {"2", "skeleton_arrow"}, {"3", "skeleton_heavy"},
+	{"1", "zombie"}, {"2", "skeleton_arrow"}, {"3", "skeleton"},
+	{"5", "zombie"}, {"3", "skeleton_arrow"}
+	{"5", "zombie"},
 };
 
 public Plugin myinfo =  {

@@ -417,20 +417,22 @@ public void Q2_Frame(int objectiveID, int client) {
 	float pos[3];
 	
 	if( g_iQuestConfig[QC_Remainning] <= 0 ) {
-		rp_QuestStepComplete(client, objectiveID);
 		for (int i = 0; i < g_stkTeamCount[TEAM_PLAYERS]; i++) {
 			int target = g_stkTeam[TEAM_PLAYERS][i];
 			if( target != client )
 				rp_QuestComplete(target, QUEST_UNIQID, true);
 		}
+		
+		rp_QuestStepComplete(client, objectiveID);
 	}
 	else if( g_iQuestConfig[QC_Health] <= 0 ) {
-		rp_QuestStepFail(client, objectiveID);
 		for (int i = 0; i < g_stkTeamCount[TEAM_PLAYERS]; i++) {
 			int target = g_stkTeam[TEAM_PLAYERS][i];
 			if( target != client )
 				rp_QuestComplete(target, QUEST_UNIQID, false);
 		}
+		
+		rp_QuestStepFail(client, objectiveID);
 	}
 	
 	CyclAnnouncer_Frame();
@@ -565,7 +567,7 @@ public void OnDead(int id, int entity, int client) {
 		g_iKilling[client]++;
 		if( g_hKillTimer[client] != INVALID_HANDLE )
 			delete g_hKillTimer[client];
-		g_hKillTimer[client] = CreateTimer(5.0, ResetKillCount, client);
+		g_hKillTimer[client] = CreateTimer(3.0, ResetKillCount, client);
 		
 		CyclAnnouncer(client);
 	}
@@ -914,7 +916,7 @@ void addClientToTeam(int client, int team) {
 	
 	g_iPlayerTeam[client] = team;
 }
-void removeClientTeam(int client) { 
+void removeClientTeam(int client) {
 	if( g_iPlayerTeam[client] != TEAM_NONE ) {
 		for (int i = 0; i < g_stkTeamCount[g_iPlayerTeam[client]]; i++) {
 			if( g_stkTeam[ g_iPlayerTeam[client] ][ i ] == client ) {
