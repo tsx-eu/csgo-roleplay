@@ -421,7 +421,7 @@ public void Q2_Frame(int objectiveID, int client) {
 		for (int i = 0; i < g_stkTeamCount[TEAM_PLAYERS]; i++) {
 			int target = g_stkTeam[TEAM_PLAYERS][i];
 			if( target != client )
-				rp_QuestComplete(target, QUEST_NAME, true);
+				rp_QuestComplete(target, QUEST_UNIQID, true);
 		}
 	}
 	else if( g_iQuestConfig[QC_Health] <= 0 ) {
@@ -429,7 +429,7 @@ public void Q2_Frame(int objectiveID, int client) {
 		for (int i = 0; i < g_stkTeamCount[TEAM_PLAYERS]; i++) {
 			int target = g_stkTeam[TEAM_PLAYERS][i];
 			if( target != client )
-				rp_QuestComplete(target, QUEST_NAME, false);
+				rp_QuestComplete(target, QUEST_UNIQID, false);
 		}
 	}
 	
