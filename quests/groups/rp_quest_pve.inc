@@ -97,8 +97,6 @@ public bool fwdCanStart(int client) {
 	if ( g_iPort == 27015) {
 		if( rp_GetClientInt(client, i_PlayerLVL) < 100 )
 			return false;
-		if( rp_GetClientFloat(client, fl_MonthTime) < 21.0 )
-			return false;
 	}
 	
 	static char banned[][32] = { "STEAM_1:1:47247649" };
@@ -127,10 +125,6 @@ public void OnAllPluginsLoaded() {
 	
 	if ( g_iPort == 27015) {
 		rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q02_Frame,	Q0_Abort, 	QUEST_NULL);
-		rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q03_Frame,	Q0_Abort, 	QUEST_NULL);
-		rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q04_Frame,	Q0_Abort, 	QUEST_NULL);
-		rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q05_Frame,	Q0_Abort, 	QUEST_NULL);
-		rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q06_Frame,	Q0_Abort, 	QUEST_NULL);
 	}
 	
 	int count = REQUIRED_PLAYER; // petit hack pour le compilo qui refuse d'écrire REQUIRED_PLAYER > 1
@@ -196,40 +190,6 @@ public void Q02_Frame(int objectiveID, int client) {
 		return;
 	
 	Menu menu = new Menu(Q0_MenuComplete);
-	menu.SetTitle(QUEST_NAME ... " - BETA\n \nLe projet PVE sur le roleplay c'est...");
-	
-	menu.AddItem("0", "Un nouveau système de PVP beaucoup plus équilibré");
-	menu.AddItem("1", "Des combats en équipe contres des monstres dans une arène");
-	menu.AddItem("0", "Une nouvelle quête qui fait gagner plein de thune");
-	menu.AddItem("0", "Une nouvelle quête qui fait gagner plein d'expérience");
-	menu.AddItem("0", "Un défis pour devenir admin");
-	
-	menu.Display(client, MENU_TIME_FOREVER);
-}
-public void Q03_Frame(int objectiveID, int client) {
-	g_iPlayerObjective[client] = objectiveID;
-	
-	if( !rp_ClientCanDrawPanel(client) )
-		return;
-	
-	Menu menu = new Menu(Q0_MenuComplete);
-	menu.SetTitle(QUEST_NAME ... " - BETA\n \nOù se situe l'affrontement de la PVE?");
-	
-	menu.AddItem("0", "Dans la mairie dans des locaux aménagés");
-	menu.AddItem("1", "Dans une arène, hors map");
-	menu.AddItem("0", "Dans le BUNKER en face de la villa immo");
-	menu.AddItem("0", "Dans le cimetière de Princeton");
-	
-	
-	menu.Display(client, MENU_TIME_FOREVER);
-}
-public void Q04_Frame(int objectiveID, int client) {
-	g_iPlayerObjective[client] = objectiveID;
-	
-	if( !rp_ClientCanDrawPanel(client) )
-		return;
-	
-	Menu menu = new Menu(Q0_MenuComplete);
 	menu.SetTitle(QUEST_NAME ... " - BETA\n \nQuelle aptitude les mobs PVE ne sont t-ils pas capable\nde réaliser, pour le moment?");
 	
 	menu.AddItem("0", "Monter une échelle");
@@ -240,39 +200,7 @@ public void Q04_Frame(int objectiveID, int client) {
 	
 	menu.Display(client, MENU_TIME_FOREVER);
 }
-public void Q05_Frame(int objectiveID, int client) {
-	g_iPlayerObjective[client] = objectiveID;
-	
-	if( !rp_ClientCanDrawPanel(client) )
-		return;
-	
-	Menu menu = new Menu(Q0_MenuComplete);
-	menu.SetTitle(QUEST_NAME ... " - BETA\n \nQuand a été annoncé le projet PVE?");
-	
-	menu.AddItem("0", "Janvier 2016");
-	menu.AddItem("1", "Mars 2017");
-	menu.AddItem("0", "Mai 2017");
-	menu.AddItem("0", "Juillet 2017");	
-	
-	menu.Display(client, MENU_TIME_FOREVER);
-}
-public void Q06_Frame(int objectiveID, int client) {
-	g_iPlayerObjective[client] = objectiveID;
-	
-	if( !rp_ClientCanDrawPanel(client) )
-		return;
-	
-	Menu menu = new Menu(Q0_MenuComplete);
-	menu.SetTitle(QUEST_NAME ... " - BETA\n \nQuel mob n'existe pas dans la PVE?");
-	
-	menu.AddItem("0", "Squelette armé d'une épée et d'un bouclier");
-	menu.AddItem("0", "Squelette armé d'un arc");
-	menu.AddItem("1", "Squelette armé d'une lance");
-	menu.AddItem("0", "Squelette armé d'une hache");
-	
-	
-	menu.Display(client, MENU_TIME_FOREVER);
-}
+
 public int Q0_MenuComplete(Handle menu, MenuAction action, int client, int param2) {
 	if( action == MenuAction_Select ) {
 		char options[64];

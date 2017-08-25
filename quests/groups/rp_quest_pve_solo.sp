@@ -24,7 +24,7 @@
 #include <custom_weapon_mod.inc>
 
 #define		QUEST_UNIQID   	"pve-solo"
-#define		QUEST_NAME      "PVE: Solo - ALPHA"
+#define		QUEST_NAME      "PVE: Solo - BETA"
 #define		QUEST_TYPE     	quest_group
 #define		QUEST_ARENA		310
 
