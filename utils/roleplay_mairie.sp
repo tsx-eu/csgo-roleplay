@@ -451,6 +451,7 @@ void Draw_Mairie_AddRules(int client, int rulesID=-1, int arg=-1, int target=-1)
 		}
 	}
 	else if( target == -1 ) {
+		/*
 		
 		if( rulesID != 4 ) {
 			for (int i = 1; i < MAX_GROUPS; i+=10) {
@@ -466,6 +467,7 @@ void Draw_Mairie_AddRules(int client, int rulesID=-1, int arg=-1, int target=-1)
 				menu.AddItem(tmp, tmp2);
 			}
 		}
+		*/
 		
 		for (int i = 1; i < MAX_JOBS; i+=10) {
 			if( rp_GetJobInt(i, job_type_quota) <= 0 ) 
