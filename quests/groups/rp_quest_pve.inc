@@ -303,6 +303,7 @@ public void Q_Abort(int objectiveID, int client) {
 		rp_UnhookEvent(target, RP_PlayerCanUseItem, fwdItem);
 		rp_UnhookEvent(target, RP_PrePlayerPhysic, fwdPhysics);
 		rp_UnhookEvent(target, RP_PreTakeDamage, fwdDamage);
+		rp_UnhookEvent(target, RP_OnPlayerCommand, fwdCommand);
 		
 		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Merci pour votre test! Donnez vos suggestions sur pve.ts-x.eu <3");
 	}
@@ -389,6 +390,7 @@ public void Q2_Start(int objectiveID, int client) {
 		rp_HookEvent(target, RP_PlayerCanUseItem, fwdItem);
 		rp_HookEvent(target, RP_PrePlayerPhysic, fwdPhysics);
 		rp_HookEvent(target, RP_PreTakeDamage, fwdDamage);
+		rp_HookEvent(target, RP_OnPlayerCommand, fwdCommand);
 		
 		g_iKillingSpree[target] = 0;
 		g_iKilling[target] = 0;
@@ -720,6 +722,29 @@ public Action fwdDamage(int attacker, int victim, float& damage, int damagetype)
 	if( g_iPlayerTeam[attacker] == TEAM_PLAYERS && g_iPlayerTeam[victim] == TEAM_PLAYERS && rp_GetPlayerZone(victim) == QUEST_ARENA ) {
 		return Plugin_Handled;
 	}
+	return Plugin_Continue;
+}
+public Action fwdCommand(int client, char[] command, char[] arg) {
+	if( StrEqual(command, "q") || StrEqual(command, "quest") ) {
+		
+		if( g_iPlayerTeam[client] != TEAM_PLAYERS )
+			return Plugin_Continue;
+		
+		if( !rp_GetClientBool(client, b_Crayon)) {
+			CRemoveTags(arg, strlen(arg)+1);
+		}
+		
+		for (int i = 1; i <= MaxClients; i++) {
+			if( !IsValidClient(i) )
+				continue;
+			if( g_iPlayerTeam[i] != TEAM_PLAYERS )
+				continue;
+			
+			CPrintToChat(i, "{lightblue}%N{default} ({lime}QUÊTES{default}): %s", client, arg);
+		}
+		return Plugin_Handled;
+	}
+	return Plugin_Continue;
 }
 public Action fwdPhysics(int client, float& speed, float& gravity) {
 	
