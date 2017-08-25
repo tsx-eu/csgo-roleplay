@@ -70,7 +70,7 @@ public void Q1_Start(int objectiveID, int client) {
 	
 	menu.AddItem("", "Tu dois enquêter sur ses traces pour le retrouver.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Infiltres-toi dans les bâtiments que nous t'indiquons.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Nous t'offrons 1000$ par bâtiment infiltré.", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Nous t'offrons 500$ par bâtiment infiltré.", ITEMDRAW_DISABLED);
 	
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Pendant toute la durée de ta mission,", ITEMDRAW_DISABLED);
