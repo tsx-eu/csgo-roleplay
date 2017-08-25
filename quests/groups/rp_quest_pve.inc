@@ -293,7 +293,7 @@ public int Q0_MenuComplete(Handle menu, MenuAction action, int client, int param
 }
 // ----------------------------------------------------------------------------
 public void Q_Abort(int objectiveID, int client) {
-	
+
 	CreateTimer(5.0 * 60.0, newAttempt);
 	
 	for (int i = 0; i < g_stkTeamCount[TEAM_PLAYERS]; i++) {
@@ -302,10 +302,13 @@ public void Q_Abort(int objectiveID, int client) {
 		rp_UnhookEvent(target, RP_OnPlayerZoneChange, fwdZone);
 		rp_UnhookEvent(target, RP_PlayerCanUseItem, fwdItem);
 		rp_UnhookEvent(target, RP_PrePlayerPhysic, fwdPhysics);
+		rp_UnhookEvent(target, RP_PreTakeDamage, fwdDamage);
 		
 		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Merci pour votre test! Donnez vos suggestions sur pve.ts-x.eu <3");
-		
-		removeClientTeam(target);
+	}
+	for (int i = 1; i <= MaxClients; i++) {
+		if( IsValidClient(i) )
+			removeClientTeam(i);
 	}
 	
 	for (int i = 0; i < g_stkTeamCount[TEAM_NPC]; i++) {
@@ -385,6 +388,7 @@ public void Q2_Start(int objectiveID, int client) {
 		rp_HookEvent(target, RP_OnPlayerZoneChange, fwdZone);
 		rp_HookEvent(target, RP_PlayerCanUseItem, fwdItem);
 		rp_HookEvent(target, RP_PrePlayerPhysic, fwdPhysics);
+		rp_HookEvent(target, RP_PreTakeDamage, fwdDamage);
 		
 		g_iKillingSpree[target] = 0;
 		g_iKilling[target] = 0;
@@ -417,6 +421,7 @@ public void Q2_Frame(int objectiveID, int client) {
 	float pos[3];
 	
 	if( g_iQuestConfig[QC_Remainning] <= 0 ) {
+		
 		for (int i = 0; i < g_stkTeamCount[TEAM_PLAYERS]; i++) {
 			int target = g_stkTeam[TEAM_PLAYERS][i];
 			if( target != client )
@@ -426,6 +431,7 @@ public void Q2_Frame(int objectiveID, int client) {
 		rp_QuestStepComplete(client, objectiveID);
 	}
 	else if( g_iQuestConfig[QC_Health] <= 0 ) {
+		
 		for (int i = 0; i < g_stkTeamCount[TEAM_PLAYERS]; i++) {
 			int target = g_stkTeam[TEAM_PLAYERS][i];
 			if( target != client )
@@ -710,6 +716,11 @@ public Action fwdItem(int client, int itemID) {
 	
 	return Plugin_Continue;
 }
+public Action fwdDamage(int attacker, int victim, float& damage, int damagetype) {
+	if( g_iPlayerTeam[attacker] == TEAM_PLAYERS && g_iPlayerTeam[victim] == TEAM_PLAYERS && rp_GetPlayerZone(victim) == QUEST_ARENA ) {
+		return Plugin_Handled;
+	}
+}
 public Action fwdPhysics(int client, float& speed, float& gravity) {
 	
 	if( g_iQuestConfig[QC_Difficulty] >= 1 ) {
@@ -917,6 +928,7 @@ void addClientToTeam(int client, int team) {
 	g_iPlayerTeam[client] = team;
 }
 void removeClientTeam(int client) {
+	
 	if( g_iPlayerTeam[client] != TEAM_NONE ) {
 		for (int i = 0; i < g_stkTeamCount[g_iPlayerTeam[client]]; i++) {
 			if( g_stkTeam[ g_iPlayerTeam[client] ][ i ] == client ) {
