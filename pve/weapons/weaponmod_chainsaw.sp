@@ -71,12 +71,12 @@ public void OnReload(int client, int entity) {
 	CWM_RunAnimation(entity, WAA_Reload);
 }
 public Action OnAttack(int client, int entity) {
-
-	float hit[3], src[3], ang[3];
+	static float size = 10.0;
+	float hit[3], src[3], ang[3], dst[3], min[3], max[3];
 	CWM_RunAnimation(entity, WAA_Attack);
 	EmitSoundToAllAny("physics/metal/metal_solid_strain5.wav", entity, _, _, _, 0.2);
 	
-	int target = CWM_ShootDamage(client, entity, hit);
+	int target = CWM_ShootHull(client, entity, size, hit);
 	if( target >= 0 ) {
 		
 		GetClientEyePosition(client, src);
@@ -98,16 +98,24 @@ public Action OnAttack(int client, int entity) {
 		
 #if defined ROLEPLAY
 		if ( rp_GetBuildingData(target, BD_owner) > 0 ) {
-			CWM_ShootDamage(client, entity, hit);
-			CWM_ShootDamage(client, entity, hit);
-			CWM_ShootDamage(client, entity, hit);
+			CWM_ShootHull(client, entity, size, hit);
+			CWM_ShootHull(client, entity, size, hit);
+			CWM_ShootHull(client, entity, size, hit);
 		}
 		
 		if( GetRandomFloat() > 0.8 && rp_GetClientJobID(client) == 91 ) {
 			GetClientEyePosition(client, src);
 			GetClientEyeAngles(client, ang);
-			Handle trace = TR_TraceRayFilterEx(src, ang, MASK_SHOT, RayType_Infinite, TraceEntityFilterSelf, client);
-
+			GetAngleVectors(ang, dst, NULL_VECTOR, NULL_VECTOR);
+			ScaleVector(dst, 10000.0);
+			AddVectors(src, dst, dst);
+			
+			for (int i = 0; i < 3; i++) {
+				min[i] = -size;
+				max[i] =  size;
+			}
+			Handle trace = TR_TraceHullFilterEx(src, dst, min, max, MASK_SHOT, TraceEntityFilterSelf, client);
+			
 			if (TR_DidHit(trace)) {
 				TR_GetEndPosition(hit, trace);
 				target = TR_GetEntityIndex(trace);
