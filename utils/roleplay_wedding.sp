@@ -292,7 +292,7 @@ Menu Menu_Mariage(int& client, int a, int b, int c, int d, int e, int f) {
 		int pos_1 = rp_GetPlayerZone(a);
 		
 		if( e == 2 ) {
-			PrintToChatZone(pos_1, "{lightblue}[TSX-RP]{default} %N répond: NON, %N fond en pleurs... Stupéfaction dans la salle .", b, c);
+			PrintToChatZone(pos_1, "{lightblue}[TSX-RP]{default} %N répond: NON, %N fond en larmes... Stupéfaction dans la salle .", b, c);
 		}
 		else {			
 			// Messages à toute la salle
@@ -315,7 +315,7 @@ Menu Menu_Mariage(int& client, int a, int b, int c, int d, int e, int f) {
 		int pos_1 = rp_GetPlayerZone(a);
 		
 		if( e == 2 ) {
-			PrintToChatZone(pos_1, "{lightblue}[TSX-RP]{default} %N répond: NON, %N fond en pleurs... Stupéfaction dans la salle .", c, b);
+			PrintToChatZone(pos_1, "{lightblue}[TSX-RP]{default} %N répond: NON, %N fond en larmes... Stupéfaction dans la salle .", c, b);
 		}
 		else {
 			
