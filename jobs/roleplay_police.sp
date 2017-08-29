@@ -148,7 +148,7 @@ public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 public Action RP_OnPlayerGotPay(int client, int salary, int& topay, bool verbose) {
 	int jobID = rp_GetClientJobID(client);
 	
-	if( jobID == 1 || jobID == 101 && rp_GetClientInt(client, i_KillJailDuration) > 0 ) {
+	if( (jobID == 1 || jobID == 101) && rp_GetClientInt(client, i_KillJailDuration) > 0 ) {
 		
 		if( verbose )
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} La police ne paye pas ses membres tuant la population.");
