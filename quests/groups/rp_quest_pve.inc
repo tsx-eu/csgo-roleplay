@@ -239,6 +239,7 @@ public void Q_Abort(int objectiveID, int client) {
 		rp_UnhookEvent(target, RP_PrePlayerPhysic, fwdPhysics);
 		rp_UnhookEvent(target, RP_PreTakeDamage, fwdDamage);
 		rp_UnhookEvent(target, RP_OnPlayerCommand, fwdCommand);
+		rp_UnhookEvent(target, RP_OnPlayerHear, fwdHear);
 		
 		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Merci pour votre test! Donnez vos suggestions sur pve.ts-x.eu <3");
 	}
@@ -326,6 +327,7 @@ public void Q2_Start(int objectiveID, int client) {
 		rp_HookEvent(target, RP_PrePlayerPhysic, fwdPhysics);
 		rp_HookEvent(target, RP_PreTakeDamage, fwdDamage);
 		rp_HookEvent(target, RP_OnPlayerCommand, fwdCommand);
+		rp_HookEvent(target, RP_OnPlayerHear, fwdHear);
 		
 		g_iKillingSpree[target] = 0;
 		g_iKilling[target] = 0;
@@ -601,6 +603,18 @@ public void OnTouch(int entity, int target) {
 	}
 }
 // ----------------------------------------------------------------------------
+
+public Action fwdHear(int client, int target, float& dist) {
+	int Czone = rp_GetPlayerZone(client);
+	int Tzone = rp_GetPlayerZone(target);
+	
+	if( Czone == Tzone && Czone == QUEST_ARENA ) {
+		dist = 1.0;
+		return Plugin_Continue;
+	}
+	
+	return Plugin_Continue;
+}
 public void fwdThink(int entity) {
 	float ang[3];
 	Entity_GetAbsAngles(entity, ang);
