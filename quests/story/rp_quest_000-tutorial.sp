@@ -15,6 +15,8 @@
 #include <colors_csgo>	// https://forums.alliedmods.net/showthread.php?p=2205447#post2205447
 #include <smlib>		// https://github.com/bcserv/smlib
 #include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
+#include <emitsoundany> // https://forums.alliedmods.net/showthread.php?t=237045
+#include <advanced_motd>
 
 #pragma newdecls required
 #include <roleplay.inc>	// https://www.ts-x.eu
@@ -94,8 +96,13 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 		return Plugin_Handled;
 	}
 	else if( StrEqual(command, "wiki") ) {
+		
+		char url[1024], sso[256];
+		rp_GetClientSSO(client, sso, sizeof(sso));
+		Format(url, sizeof(url), "http://www.ts-x.eu/index.php?page=aide%s", sso);
+		
 		QueryClientConVar(client, "cl_disablehtmlmotd", view_as<ConVarQueryFinished>(ClientConVar), client);
-		ShowMOTDPanel(client, "Role-Play: WiKi", "http://www.ts-x.eu/popup.php?url=/index.php?page=aide", MOTDPANEL_TYPE_URL);
+		RP_ShowMOTD(client, url);
 		
 		return Plugin_Handled;
 	}
