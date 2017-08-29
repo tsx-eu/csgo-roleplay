@@ -127,11 +127,11 @@ public void OnAllPluginsLoaded() {
 		rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q02_Frame,	Q0_Abort, 	QUEST_NULL);
 	}
 	
-	int count = REQUIRED_PLAYER; // petit hack pour le compilo qui refuse d'écrire REQUIRED_PLAYER > 1
-	if( count > 1 )
-		rp_QuestAddStep(g_iQuest, i++, QI_Start,	QI_Frame,	Q0_Abort, 	QUEST_NULL);
-	
-	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q1_Frame,	Q0_Abort, 	QUEST_NULL);
+#if REQUIRED_PLAYER > 1
+	rp_QuestAddStep(g_iQuest, i++, QI_Start,	QI_Frame,	QI_Abort, 	QUEST_NULL);
+#endif
+
+	rp_QuestAddStep(g_iQuest, i++, QUEST_NULL,	Q1_Frame,	QI_Abort, 	QUEST_NULL);
 	rp_QuestAddStep(g_iQuest, i++, Q2_Start,	Q2_Frame,	Q_Abort, 	Q_Abort);
 	rp_QuestAddStep(g_iQuest, i++, Q3_Start,	Q3_Frame,	QUEST_NULL, QUEST_NULL);
 	
@@ -220,6 +220,13 @@ public int Q0_MenuComplete(Handle menu, MenuAction action, int client, int param
 	return 0;
 }
 // ----------------------------------------------------------------------------
+public void QI_Abort(int objectiveID, int client) {
+	CreateTimer(10.0, newAttempt);
+	for (int i = 1; i <= MaxClients; i++) {
+		if( IsValidClient(i) )
+			removeClientTeam(i);
+	}
+}
 public void Q_Abort(int objectiveID, int client) {
 
 	CreateTimer(5.0 * 60.0, newAttempt);
@@ -690,6 +697,9 @@ public Action fwdDead(int client) {
 		g_iQuestConfig[QC_DeadTime] = 60;
 		g_iKillingSpree[client] = 0;
 		g_iKilling[client] = 0;
+		
+		rp_SetClientBool(client, b_SpawnToMetro, true);		
+		CS_RespawnPlayer(client);
 	}
 }
 public Action fwdZone(int client, int newZone, int oldZone) {
