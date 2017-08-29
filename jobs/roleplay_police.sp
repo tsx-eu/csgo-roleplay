@@ -148,7 +148,7 @@ public Action fwdOnZoneChange(int client, int newZone, int oldZone) {
 public Action RP_OnPlayerGotPay(int client, int salary, int& topay, bool verbose) {
 	int jobID = rp_GetClientJobID(client);
 	
-	if( jobID == 1 && rp_GetClientInt(client, i_KillJailDuration) > 0 ) {
+	if( jobID == 1 || jobID == 101 && rp_GetClientInt(client, i_KillJailDuration) > 0 ) {
 		
 		if( verbose )
 			CPrintToChat(client, "{lightblue}[TSX-RP]{default} La police ne paye pas ses membres tuant la population.");
@@ -162,7 +162,7 @@ public Action RP_OnPlayerGotPay(int client, int salary, int& topay, bool verbose
 	if( zone & (BITZONE_JAIL|BITZONE_LACOURS|BITZONE_HAUTESECU) && rp_GetClientInt(client, i_JailTime) > 0 ) {
 		
 		if( verbose )
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} La police ne paye pas ses membres tuant la population.");
+			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Etant en prison, votre employeur vous verse seulement 10% de votre salaire.");
 		
 		topay = 0;
 		return Plugin_Stop;
