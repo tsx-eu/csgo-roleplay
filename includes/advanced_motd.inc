@@ -3,7 +3,6 @@
 #endif
 #define _advmotd_enabled
 
-#include <weblync>
 #include <SteamWorks>
 
 #define URL_PATH "https://www.ts-x.eu/api/redirect/%s"
