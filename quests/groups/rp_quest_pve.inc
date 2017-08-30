@@ -603,12 +603,9 @@ public void OnTouch(int entity, int target) {
 	}
 }
 // ----------------------------------------------------------------------------
-
 public Action fwdHear(int client, int target, float& dist) {
-	int Czone = rp_GetPlayerZone(client);
-	int Tzone = rp_GetPlayerZone(target);
 	
-	if( Czone == Tzone && Czone == QUEST_ARENA ) {
+	if( g_iPlayerTeam[client] == TEAM_PLAYERS && g_iPlayerTeam[target] == TEAM_PLAYERS ) {
 		dist = 1.0;
 		return Plugin_Continue;
 	}
