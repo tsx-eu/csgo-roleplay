@@ -1,26 +1,41 @@
 #if defined _advmotd_enabled
- #endinput
+#endinput
 #endif
 #define _advmotd_enabled
 
-stock void RP_ShowMOTD(int client, char url[1024]) {
-	static const char REDIRECT[128] = "https://www.ts-x.eu/popup.php?&url=";
+#include <weblync>
+#include <SteamWorks>
+
+#define URL_PATH "https://www.ts-x.eu/api/redirect/%s"
+
+
+stock void RP_ShowMOTD(int client, char url[1024]) {	
+	QueryClientConVar(client, "cl_disablehtmlmotd", view_as<ConVarQueryFinished>(MOTD_ClientConVar), client);
 	
-	ShowMOTDPanel(client, "", url, MOTDPANEL_TYPE_URL);
+	char tmp[128], szSteamID[32];
+	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
+	Format(tmp, sizeof(tmp), URL_PATH, szSteamID);
 	
-	Format(url, sizeof(url), "%s%s", REDIRECT, url);
-	
-	Handle dp;
-	CreateDataTimer(0.5, RP_ShowMOTD_Post, dp, TIMER_DATA_HNDL_CLOSE);
-	WritePackCell(dp, client);
-	WritePackString(dp, url);
+	Handle req = SteamWorks_CreateHTTPRequest(k_EHTTPMethodPOST, tmp);
+	SteamWorks_SetHTTPCallbacks(req, MOTD_OnSteamWorksHTTPComplete);
+	SteamWorks_SetHTTPRequestContextValue(req, client);
+	SteamWorks_SetHTTPRequestGetOrPostParameter(req, "url", url);
+	SteamWorks_SendHTTPRequest(req);
 }
-public Action RP_ShowMOTD_Post(Handle timer, DataPack dp) {
-	char url[1024];
-	ResetPack(dp);
-	int client = ReadPackCell(dp);
-	ReadPackString(dp, url, sizeof(url));
+
+public int MOTD_OnSteamWorksHTTPComplete(Handle HTTPRequest, bool fail, bool success, EHTTPStatusCode statusCode, any client) {
+	if (success && statusCode == k_EHTTPStatusCode200OK )  { 
+		char tmp[128], szSteamID[32];
+		GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
+		Format(tmp, sizeof(tmp), URL_PATH, szSteamID);
+		
+		ShowMOTDPanel(client, "MOTD", tmp, MOTDPANEL_TYPE_URL);
+	}
 	
-	ShowMOTDPanel(client, "", url, MOTDPANEL_TYPE_URL);
-	return Plugin_Stop;
+	delete HTTPRequest;
+}
+public void MOTD_ClientConVar(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue) {
+	if (StrEqual(cvarValue, "0") == false) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Des problèmes d'affichage ? Entrez cl_disablehtmlmotd 0 dans votre console puis relancez CS:GO.");
+	}
 }

@@ -627,7 +627,7 @@ Menu AUDIENCE_Enquete(int type, int a, int b) {
 			rp_GetClientSSO(g_iTribunalData[type][td_Owner], tmp, sizeof(tmp));
 			GetClientAuthId(b, AuthId_Engine, tmp2, sizeof(tmp2));
 			
-			Format(szURL, sizeof(szURL), "https://www.ts-x.eu/index.php?page=roleplay2%s&hashh=/tribunal/case/%s", tmp, tmp2);
+			Format(szURL, sizeof(szURL), "https://www.ts-x.eu/index.php?page=roleplay2%s#/tribunal/case/%s", tmp, tmp2);
 			PrintToConsole(g_iTribunalData[type][td_Owner], "https://www.ts-x.eu/index.php?page=roleplay2#/tribunal/case/%s", tmp2);
 			
 			RP_ShowMOTD(g_iTribunalData[type][td_Owner], szURL);
@@ -715,7 +715,7 @@ Menu AUDIENCE_Forum(int client, int a, int b) {
 		
 		rp_GetClientSSO(client, tmp, sizeof(tmp));
 			
-		Format(query, sizeof(query), "https://www.ts-x.eu/index.php?page=roleplay2%s&hashh=/tribunal/case/%d", tmp, a);
+		Format(query, sizeof(query), "https://www.ts-x.eu/index.php?page=roleplay2%s#/tribunal/case/%d", tmp, a);
 		PrintToConsole(client, "https://www.ts-x.eu/index.php?page=roleplay2#/tribunal/case/%d", a);
 		RP_ShowMOTD(client, query);
 		

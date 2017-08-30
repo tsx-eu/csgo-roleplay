@@ -99,21 +99,13 @@ public Action fwdCommand(int client, char[] command, char[] arg) {
 		
 		char url[1024], sso[256];
 		rp_GetClientSSO(client, sso, sizeof(sso));
-		Format(url, sizeof(url), "http://www.ts-x.eu/index.php?page=aide%s", sso);
+		Format(url, sizeof(url), "https://www.ts-x.eu/index.php?page=aide%s", sso);
 		
-		QueryClientConVar(client, "cl_disablehtmlmotd", view_as<ConVarQueryFinished>(ClientConVar), client);
 		RP_ShowMOTD(client, url);
 		
 		return Plugin_Handled;
 	}
 	return Plugin_Continue;
-}
-public void ClientConVar(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue) {
-	if( StrEqual(cvarName, "cl_disablehtmlmotd", false) ) {
-		if( StrEqual(cvarValue, "0") == false ) {
-			CPrintToChat(client, "{lightblue}[TSX-RP]{default} Des problèmes d'affichage? Entrez cl_disablehtmlmotd 0 dans votre console puis relancez CS:GO.");
-		}
-	}	
 }
 // ----------------------------------------------------------------------------
 public bool fwdCanStart(int client) {
