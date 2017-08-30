@@ -164,6 +164,7 @@ void Q_Clean() {
 			rp_UnhookEvent(i, RP_PreClientSendToJail, fwdSendToJail);
 			rp_UnhookEvent(i, RP_OnPlayerZoneChange, fwdZoneChangeTUTO);
 			rp_UnhookEvent(i, RP_PlayerCanKill, fwdCanKill);
+			rp_UnhookEvent(i, RP_OnPlayerHear, fwdHear);
 		}
 	}
 	if( g_bByPassDoor ) {
@@ -390,7 +391,24 @@ public void Q5_Start(int objectiveID, int client) {
 		rp_HookEvent(i, RP_PreClientSendToJail, fwdSendToJail);
 		rp_HookEvent(i, RP_OnPlayerZoneChange, fwdZoneChangeTUTO);
 		rp_HookEvent(i, RP_PlayerCanKill, fwdCanKill);
+		rp_HookEvent(i, RP_OnPlayerHear, fwdHear);
 	}
+}
+public Action fwdHear(int client, int target, float& dist) {
+	
+	bool clientB = (g_iPlayerTeam[client] == TEAM_BRAQUEUR || g_iPlayerTeam[client] == TEAM_BRAQUEUR_DEAD);
+	bool targetB = (g_iPlayerTeam[target] == TEAM_BRAQUEUR || g_iPlayerTeam[target] == TEAM_BRAQUEUR_DEAD);
+	
+	if( clientB && targetB ) {
+		dist = 1.0;
+		return Plugin_Continue;
+	}
+	if( g_iPlayerTeam[client] == TEAM_POLICE && g_iPlayerTeam[target] == TEAM_POLICE ) {
+		dist = 1.0;
+		return Plugin_Continue;
+	}
+	
+	return Plugin_Continue;
 }
 public Action fwdCanKill(int attacker, int victim) {
 	if( g_iPlayerTeam[attacker] == TEAM_BRAQUEUR && rp_GetZoneInt(rp_GetPlayerZone(victim), zone_type_type) == g_iPlanque )
@@ -661,6 +679,7 @@ public void OnClientPostAdminCheck(int client) {
 		rp_HookEvent(client, RP_PreClientSendToJail, fwdSendToJail);
 		rp_HookEvent(client, RP_OnPlayerZoneChange, fwdZoneChangeTUTO);
 		rp_HookEvent(client, RP_PlayerCanKill, fwdCanKill);
+		rp_HookEvent(client, RP_OnPlayerHear, fwdHear);
 	}
 	
 	if( g_bByPassDoor ) {
