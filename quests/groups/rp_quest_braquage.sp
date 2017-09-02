@@ -244,6 +244,8 @@ public void Q1_Frame(int objectiveID, int client) {
 					continue;
 				if( rp_GetClientBool(i, b_IsMuteEvent) == true )
 					continue;
+				if( rp_GetClientInt(i, i_JailTime) > 0 )
+					continue;
 				if( rp_GetClientInt(i, i_PlayerLVL) < 132 )
 					continue;
 				
