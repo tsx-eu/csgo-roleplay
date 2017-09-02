@@ -94,10 +94,8 @@ public bool fwdCanStart(int client) {
 	
 	if( g_bCanMakeQuest == false )
 		return false;
-	if ( g_iPort == 27015) {
-		if( rp_GetClientInt(client, i_PlayerLVL) < 100 )
-			return false;
-	}
+	if ( g_iPort == 27015 && rp_GetClientInt(client, i_PlayerLVL) < 100 )
+		return false;
 	
 	static char banned[][32] = { "STEAM_1:1:47247649" };
 	char szSteamID[32];
@@ -108,8 +106,13 @@ public bool fwdCanStart(int client) {
 			return false;
 	}
 	
+	GetClientName(client, szSteamID, sizeof(szSteamID));
+	if( StrContains(szSteamID, "rp-csgo.fr") > 0 || StrContains(szSteamID, "rpcsgo.fr") > 0 )
+		return true;
+	if( StrContains(szSteamID, "csgo-rp.fr") > 0 || StrContains(szSteamID, "csgorp.fr") > 0 )
+		return true;	
 	
-	return true;
+	return false;
 }
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_PluginReloadSelf);
