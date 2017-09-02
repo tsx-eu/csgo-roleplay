@@ -49,6 +49,7 @@ public void OnPluginStart() {
 	RegServerCmd("rp_item_kevlarbox",	Cmd_ItemKevlarBox,		"RP-ITEM", 	FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_cig", 		Cmd_ItemCigarette,		"RP-ITEM",	FCVAR_UNREGISTERED);	
 	RegServerCmd("rp_item_ruban",		Cmd_ItemRuban,			"RP-ITEM",	FCVAR_UNREGISTERED);
+	RegServerCmd("rp_item_disco",		Cmd_ItemDisco,			"RP-ITEM",	FCVAR_UNREGISTERED);
 	
 	for (int i = 1; i <= MaxClients; i++) 
 		if( IsValidClient(i) )
@@ -81,6 +82,55 @@ public Action Cmd_ItemPreserv(int args) {
 	
 	rp_SetClientInt(client, i_Kevlar, kevlar);
 	return Plugin_Handled;
+}
+public Action Cmd_ItemDisco(int args) {
+	char type[32], classname[64], tmp[64];
+	float src[3], dst[3];
+	
+	GetCmdArg(1, type, sizeof(type));
+	
+	int client = GetCmdArgInt(2);
+	int item_id = GetCmdArgInt(args);
+	
+	if( !rp_IsBuildingAllowed(client) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas construire ici.");
+		ITEM_CANCEL(client, item_id);
+		return;
+	}
+	
+	int cpt = 0;
+	Entity_GetAbsOrigin(client, src);
+	Format(classname, sizeof(classname), "rp_disco%s", type);
+	
+	for (int i = MaxClients; i <= 2048; i++) {
+		if( !IsValidEdict(i) || !IsValidEntity(i) )
+			continue;
+		
+		GetEdictClassname(i, tmp, sizeof(tmp));
+		if( StrEqual(tmp, classname) ) {
+			cpt++;
+			Entity_GetAbsOrigin(i, dst);
+			if( GetVectorDistance(src, dst) < 256.0 ) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il existe déjà un objet de ce type à proximité.");
+				ITEM_CANCEL(client, item_id);
+				return;
+			}
+			if( rp_GetBuildingData(i, BD_owner) == client) {
+				CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous possédé déjà un objet de ce type.");
+				ITEM_CANCEL(client, item_id);
+				return;
+			}
+		}
+	}
+	
+	if( cpt >= 5 ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Il existe déjà trop d'objet de ce type.");
+		ITEM_CANCEL(client, item_id);
+		return;
+	}
+	
+	ServerCommand("sm_effect_%s %d", type, client);
+	
 }
 public Action fwdInvincible(int client, int attacker, float& damage, int damagetype) {
 	damage = 0.0;
