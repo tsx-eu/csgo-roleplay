@@ -88,8 +88,10 @@ public void OnPluginStart() {
 public Action taskVillaProp(Handle timer, any none) {
 	for(int i=0; i<view_as<int>(appart_bonus_paye); i++) {
 		rp_SetAppartementInt(50, view_as<type_appart_bonus>(i), 1);
+		rp_SetAppartementInt(51, view_as<type_appart_bonus>(i), 1);
 	}
 	rp_SetAppartementInt(50, appart_bonus_paye, 200);
+	rp_SetAppartementInt(51, appart_bonus_paye, 200);
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
@@ -120,9 +122,18 @@ public void OnClientPostAdminCheck(int client) {
 	rp_HookEvent(client, RP_OnPlayerDataLoaded, fwdLoaded);
 }
 public Action fwdLoaded(int client) {
+	
 	rp_SetClientKeyAppartement(client, 50, rp_GetClientBool(client, b_HasVilla) );
 	if( rp_GetClientBool(client, b_HasVilla) )
 		rp_SetClientInt(client, i_AppartCount, rp_GetClientInt(client, i_AppartCount) + 1);
+	
+	char tmp[32], tmp2[32];
+	GetClientAuthId(client, AuthId_Engine, tmp, sizeof(tmp));
+	rp_SetServerString(mairieID, tmp2, sizeof(tmp2));
+	if( StrEqual(tmp, tmp2) ) {
+		rp_SetClientKeyAppartement(client, 51, true );
+		rp_SetClientInt(client, i_AppartCount, rp_GetClientInt(client, i_AppartCount) + 1);
+	}
 }
 // ----------------------------------------------------------------------------
 public Action fwdCommand(int client, char[] command, char[] arg) {

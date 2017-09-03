@@ -983,6 +983,7 @@ enum rp_serv {
 	lotoCagnotte,
 	mairieID,
 	annonceID,
+	maireName,
 
 	rp_serv_max
 };
