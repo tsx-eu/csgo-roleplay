@@ -15,7 +15,7 @@
 
 char g_szFullName[PLATFORM_MAX_PATH] =	"Pistolet bioniques";
 char g_szName[PLATFORM_MAX_PATH] 	 =	"biorifle";
-char g_szReplace[PLATFORM_MAX_PATH]  =	"weapon_negev";
+char g_szReplace[PLATFORM_MAX_PATH]  =	"weapon_glock";
 
 char g_szVModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/bio_rifle/v_bio_rifle.mdl";
 char g_szWModel[PLATFORM_MAX_PATH] =	"models/weapons/tsx/bio_rifle/w_bio_rifle.mdl";
@@ -76,8 +76,8 @@ public void OnAllPluginsLoaded() {
 	CWM_SetInt(id, WSI_ReloadType,		view_as<int>(WSR_OneByOne));
 	CWM_SetInt(id, WSI_AttackDamage, 	0);
 	CWM_SetInt(id, WSI_AttackBullet, 	1);
-	CWM_SetInt(id, WSI_MaxBullet, 		25);
-	CWM_SetInt(id, WSI_MaxAmmunition, 	25);
+	CWM_SetInt(id, WSI_MaxBullet, 		10);
+	CWM_SetInt(id, WSI_MaxAmmunition, 	50);
 	
 	CWM_SetFloat(id, WSF_Speed,			240.0);
 	CWM_SetFloat(id, WSF_ReloadSpeed,	0.1);
@@ -206,10 +206,10 @@ public Action OnProjectileHit(int client, int wpnid, int entity, int target) {
 				rp_HookEvent(target, RP_PostGiveDamageWeapon, fwdDamage, scale * 5.0);
 			}
 			case 3: { // Rose
-				rp_HookEvent(target, RP_PrePlayerPhysic, fwdSlow, scale * 10.0);
+				rp_HookEvent(target, RP_PrePlayerPhysic, fwdSlow, scale * 20.0);
 			}
 			case 4: { // Jaune
-				rp_HookEvent(target, RP_PrePlayerPhysic, fwdGravity, scale * 10.0);
+				rp_HookEvent(target, RP_PrePlayerPhysic, fwdGravity, scale * 20.0);
 			}
 			default: {
 				SlapPlayer(client, 0, true);
