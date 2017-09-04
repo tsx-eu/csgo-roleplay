@@ -252,7 +252,7 @@ void Cmd_job(int client) {
 	
 	char tmp[12], tmp2[64];
 	bool bJob[MAX_JOBS];
-	bool hasAvocat;
+	//bool hasAvocat;
 
 	for(int i = 1; i <= MaxClients; i++) {
 
@@ -272,11 +272,11 @@ void Cmd_job(int client) {
 
 		bJob[job] = true;
 		
-		if (!hasAvocat) hasAvocat = ( rp_GetClientInt(i, i_Avocat) > 0 );
+	//	if (!hasAvocat) hasAvocat = ( rp_GetClientInt(i, i_Avocat) > 0 );
 	}
 	
-	if( hasAvocat )
-		AddMenuItem(jobmenu, "-2", "Avocats");
+	//if( hasAvocat )
+	//	AddMenuItem(jobmenu, "-2", "Avocats");
 	
 	char tmp3[2][64];
 
@@ -378,11 +378,11 @@ public int MenuJobs2(Handle p_hItemMenu, MenuAction p_oAction, int client, int p
 				AddMenuItem(menu, tmp2, "Acheter / Vendre une arme");
 				amount++;
 			}
-			if(rp_GetClientInt(target, i_Avocat) > 0) {
-				Format(tmp2, sizeof(tmp2), "%i_-5", target);
-				AddMenuItem(menu, tmp2, "Demander ses services d'avocat");
-				amount++;
-			}
+			//if(rp_GetClientInt(target, i_Avocat) > 0) {
+			//	Format(tmp2, sizeof(tmp2), "%i_-5", target);
+			//	AddMenuItem(menu, tmp2, "Demander ses services d'avocat");
+			//	amount++;
+			//}
 			if(jobid == 101) {
 				Format(tmp2, sizeof(tmp2), "%i_-4", target);
 				AddMenuItem(menu, tmp2, "Demander pour une audience");
