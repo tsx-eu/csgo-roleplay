@@ -129,7 +129,7 @@ public Action fwdLoaded(int client) {
 	
 	char tmp[32], tmp2[32];
 	GetClientAuthId(client, AuthId_Engine, tmp, sizeof(tmp));
-	rp_SetServerString(mairieID, tmp2, sizeof(tmp2));
+	rp_GetServerString(mairieID, tmp2, sizeof(tmp2));
 	if( StrEqual(tmp, tmp2) ) {
 		rp_SetClientKeyAppartement(client, 51, true );
 		rp_SetClientInt(client, i_AppartCount, rp_GetClientInt(client, i_AppartCount) + 1);
