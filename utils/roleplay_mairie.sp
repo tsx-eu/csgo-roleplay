@@ -109,7 +109,7 @@ public void QUERY_SetMaireName(Handle owner, Handle handle, const char[] error, 
 public Action CmdForceMaire(int client, int args) {
 	SQL_TQuery(rp_GetDatabase(), QUERY_SetMaire, "SELECT `name`, M.`steamid` FROM `rp_maire` M INNER JOIN `rp_users` U ON U.`steamid`=M.`steamid` INNER JOIN `rp_maire_vote` V ON V.`target`=M.`id` GROUP BY M.`id` HAVING COUNT(*)=( SELECT COUNT(*) as `a` FROM `rp_maire` M INNER JOIN `rp_maire_vote` V ON V.`target`=M.`id` GROUP BY M.`id` ORDER BY `a` DESC LIMIT 1) ORDER BY RAND() LIMIT 1;");	
 }
-public void QUERY_SetMaire(Handle owner, Handle handle, const char[] error, any client) {
+public void QUERY_SetMaire(Handle owner, Handle handle, const char[] error, any cccc) {
 	char tmp[64], tmp2[32], query[1024];
 	
 	if( SQL_FetchRow(handle) ) {
@@ -121,6 +121,7 @@ public void QUERY_SetMaire(Handle owner, Handle handle, const char[] error, any 
 		CPrintToChatAll("{lightblue}[TSX-RP]{default} Félicitation à %s, qui devient notre nouveau maire!", tmp);
 		CPrintToChatAll("{lightblue} ================================== {default}");
 		
+		rp_SetServerString(maireName, tmp, sizeof(tmp));
 		rp_SetServerString(mairieID, tmp2, sizeof(tmp2));
 		Format(query, sizeof(query), "UPDATE `rp_servers` SET `maire`='%s';", tmp2);
 		
@@ -133,18 +134,17 @@ public void QUERY_SetMaire(Handle owner, Handle handle, const char[] error, any 
 			rp_SetServerRules(i, rules_Enabled, 0);
 		rp_StoreServerRules();
 		
-		rp_SetServerString(mairieID, tmp2, sizeof(tmp2));
 		for (int i = 1; i <= MaxClients; i++) {
 			if( !IsValidClient(i) )
 				continue;
 			if( rp_GetClientKeyAppartement(i, 51) ) {
-				rp_SetClientKeyAppartement(client, 51, false );
-				rp_SetClientInt(client, i_AppartCount, rp_GetClientInt(client, i_AppartCount) - 1);
+				rp_SetClientKeyAppartement(i, 51, false );
+				rp_SetClientInt(i, i_AppartCount, rp_GetClientInt(i, i_AppartCount) - 1);
 			}
 			GetClientAuthId(i, AuthId_Engine, tmp, sizeof(tmp));
 			if( StrEqual(tmp, tmp2) ) {
-				rp_SetClientKeyAppartement(client, 51, true );
-				rp_SetClientInt(client, i_AppartCount, rp_GetClientInt(client, i_AppartCount) + 1);
+				rp_SetClientKeyAppartement(i, 51, true );
+				rp_SetClientInt(i, i_AppartCount, rp_GetClientInt(i, i_AppartCount) + 1);
 			}
 		}
 	}
@@ -425,7 +425,7 @@ void Draw_Mairie_Rules(int client) {
 	rp_GetServerString(mairieID, tmp2, sizeof(tmp2));
 	GetClientAuthId(client, AuthId_Engine, tmp, sizeof(tmp));
 	
-	if( cpt < 4 && StrEqual(tmp, tmp2) )
+	if( cpt < 5 && StrEqual(tmp, tmp2) )
 		menu.AddItem("4 -1 -1 -1", "Ajouter une nouvelle règle");
 	menu.Display(client, MENU_TIME_FOREVER);
 }
@@ -443,7 +443,7 @@ void Draw_Mairie_AddRules(int client, int rulesID=-1, int arg=-1, int target=-1)
 		
 		menu.AddItem("4 2 0 -1", "Interdir les réductions", rp_GetServerRules(rules_reductions, rules_Enabled) ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
 		menu.AddItem("4 4 0 -1", "Interdir les braquages", rp_GetServerRules(rules_Braquages, rules_Enabled) ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
-		menu.AddItem("4 5 0 -1", "Interdir un item en pvp", rp_GetServerRules(rules_ItemsDisabled, rules_Enabled) ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
+		//menu.AddItem("4 5 0 -1", "Interdir un item en pvp", rp_GetServerRules(rules_ItemsDisabled, rules_Enabled) ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
 		menu.AddItem("4 7 0 -1", "Interdir l'hotel des ventes", rp_GetServerRules(rules_ItemsDisabled, rules_Enabled) ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
 		
 		
