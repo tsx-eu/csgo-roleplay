@@ -412,7 +412,7 @@ public void Q2_Frame(int objectiveID, int client) {
 			allOut = false;
 			g_iQuestConfig[QC_Reset] = 0;
 			
-			PrintHintText(target, "<u>Arène %s</u>\nZombie: %d\tVie: %d\nScore: %d\tTemps: %d", 
+			PrintHintText(target, "<u>Arène %s</u>\nZombie: %d\t\tVie: %d\nScore: %d\t\tTemps: %d", 
 				QUEST_NAME,
 				g_iQuestConfig[QC_Remainning], g_iQuestConfig[QC_Health],
 				g_iQuestConfig[QC_Score], g_iQuestConfig[QC_Time]
@@ -448,10 +448,10 @@ public void Q2_Frame(int objectiveID, int client) {
 				}
 			}
 		}
-		
-		g_iQuestConfig[QC_Time]++;
 	}
 	else {
+		g_iQuestConfig[QC_Time]++;
+		
 		if( g_hQueue.Length > 0  && g_iQuestConfig[QC_Alive] < (5+g_iQuestConfig[QC_Difficulty]) ) {
 			if( SQ_Pop(pos) ) {
 				int id = g_hQueue.Get(0);
@@ -535,7 +535,7 @@ public void OnDead(int id, int entity, int client) {
 		
 		CyclAnnouncer(client);
 		
-		g_iQuestConfig[QC_Score] += (g_iKilling[client] * g_iQuestConfig[QC_Difficulty]) + (g_iKillingSpree[client] * g_iQuestConfig[QC_Difficulty]);
+		g_iQuestConfig[QC_Score] += RoundToCeil(Pow(float(g_iQuestConfig[QC_Difficulty])+1.0, float(g_iKilling[client]))) + (g_iKillingSpree[client] * g_iQuestConfig[QC_Difficulty]);
 	}
 }
 public Action OnFollowChange(int id, int entity, int& target) {
@@ -722,15 +722,15 @@ public Action fwdPhysics(int client, float& speed, float& gravity) {
 	}
 	return Plugin_Continue;
 }
-public Action fwdDead(int client) {
+public Action fwdDead(int client, int target, float& respawn) {
 
 	if( rp_GetPlayerZone(client) == QUEST_ARENA ) {
 		g_iQuestConfig[QC_Health]--;
 		g_iKillingSpree[client] = 0;
 		g_iKilling[client] = 0;
 		
-		rp_SetClientBool(client, b_SpawnToMetro, true);		
-		CS_RespawnPlayer(client);
+		respawn = 0.1;
+		rp_SetClientBool(client, b_SpawnToMetro, true);
 	}
 }
 public Action fwdZone(int client, int newZone, int oldZone) {
