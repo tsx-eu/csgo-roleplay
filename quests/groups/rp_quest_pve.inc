@@ -84,6 +84,7 @@ enum QuestConfig {
 	QC_Alert,
 	QC_FirstBlood,
 	QC_Reset,
+	QC_Score,
 	QC_Max
 };
 int g_iQuestConfig[QC_Max];
@@ -97,7 +98,7 @@ public bool fwdCanStart(int client) {
 	if ( g_iPort == 27015 && rp_GetClientInt(client, i_PlayerLVL) < 100 )
 		return false;
 	
-	static char banned[][32] = { "STEAM_1:1:47247649" };
+	static char banned[][32] = { "STEAM_1:1:47247649", "STEAM_1:0:72242198" };
 	char szSteamID[32];
 	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
 	
@@ -231,11 +232,21 @@ public void QI_Abort(int objectiveID, int client) {
 	}
 }
 public void Q_Abort(int objectiveID, int client) {
-
+	char query[1024], tmp[32];
 	CreateTimer(5.0 * 60.0, newAttempt);
+	
+	Format(query, sizeof(query), "INSERT INTO `rp_pve` (`id`, `difficulty`, `score`, `time`, `type`) VALUES (NULL, '%d', '%d', '%d', '%s');", 
+		g_iQuestConfig[QC_Difficulty], g_iQuestConfig[QC_Score], g_iQuestConfig[QC_Time], QUEST_UNIQID);
+	Handle db = rp_GetDatabase();
+	
+	SQL_LockDatabase(db);
+	SQL_Query(db, query);
+	int id = SQL_GetInsertId(db);
+	SQL_UnlockDatabase(db);	
 	
 	for (int i = 0; i < g_stkTeamCount[TEAM_PLAYERS]; i++) {
 		int target = g_stkTeam[TEAM_PLAYERS][i];
+		
 		rp_UnhookEvent(target, RP_OnPlayerDead, fwdDead);
 		rp_UnhookEvent(target, RP_OnPlayerZoneChange, fwdZone);
 		rp_UnhookEvent(target, RP_PlayerCanUseItem, fwdItem);
@@ -245,6 +256,12 @@ public void Q_Abort(int objectiveID, int client) {
 		rp_UnhookEvent(target, RP_OnPlayerHear, fwdHear);
 		
 		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Merci pour votre test! Donnez vos suggestions sur pve.ts-x.eu <3");
+		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Votre score final est de %d points!", g_iQuestConfig[QC_Score]);
+		
+		GetClientAuthId(target, AuthId_Engine, tmp, sizeof(tmp));
+		
+		Format(query, sizeof(query), "INSERT INTO `rp_pve_team` (`id`, `steamid`) VALUES ('%d', '%s');", id, tmp);
+		SQL_TQuery(db, SQL_QueryCallBack, query);		
 	}
 	for (int i = 1; i <= MaxClients; i++) {
 		if( IsValidClient(i) )
@@ -352,8 +369,8 @@ public void Q2_Start(int objectiveID, int client) {
 	
 	g_iQuestConfig[QC_Time] = g_iQuestConfig[QC_Killed] = g_iQuestConfig[QC_Alive] = 0;
 	g_iQuestConfig[QC_Health] = 5;
-	g_iQuestConfig[QC_DeadTime] = 60;
 	g_iQuestConfig[QC_FirstBlood] = 0;
+	g_iQuestConfig[QC_Score] = 0;
 	g_iQuestConfig[QC_Remainning] = g_hQueue.Length;
 	g_iQuestConfig[QC_Bonus] = EntIndexToEntRef(bonus);
 	g_iQuestConfig[QC_Light] = EntIndexToEntRef(light);
@@ -395,8 +412,10 @@ public void Q2_Frame(int objectiveID, int client) {
 			allOut = false;
 			g_iQuestConfig[QC_Reset] = 0;
 			
-			PrintHintText(target, "Arène SOLO\nZombie restant: %d\nPV restant: %d - Temps: %d secondes", 
-				g_iQuestConfig[QC_Remainning], g_iQuestConfig[QC_Health], g_iQuestConfig[QC_Time]
+			PrintHintText(target, "<u>Arène %s</u>\nZombie: %d\tVie: %d\nScore: %d\tTemps: %d", 
+				QUEST_NAME,
+				g_iQuestConfig[QC_Remainning], g_iQuestConfig[QC_Health],
+				g_iQuestConfig[QC_Score], g_iQuestConfig[QC_Time]
 			);
 			
 			int health = GetClientHealth(target);
@@ -409,7 +428,7 @@ public void Q2_Frame(int objectiveID, int client) {
 				ForcePlayerSuicide(target);
 		}
 		else if( g_iQuestConfig[QC_Health] > 0 ) {
-			PrintHintText(target, "Retournez dans un métro avec du stuff pour reprendre la partie.\nIl vous reste %d vie - Temps: %d secondes", g_iQuestConfig[QC_Health], g_iQuestConfig[QC_Time]);
+			PrintHintText(target, "Retournez dans un métro avec du stuff pour reprendre la partie.");
 		}
 	}
 	
@@ -430,10 +449,7 @@ public void Q2_Frame(int objectiveID, int client) {
 			}
 		}
 		
-		if( g_iQuestConfig[QC_DeadTime] > 0 )
-			g_iQuestConfig[QC_DeadTime]--;
-		else
-			g_iQuestConfig[QC_Time]++;
+		g_iQuestConfig[QC_Time]++;
 	}
 	else {
 		if( g_hQueue.Length > 0  && g_iQuestConfig[QC_Alive] < (5+g_iQuestConfig[QC_Difficulty]) ) {
@@ -518,6 +534,8 @@ public void OnDead(int id, int entity, int client) {
 		g_hKillTimer[client] = CreateTimer(3.0, ResetKillCount, client);
 		
 		CyclAnnouncer(client);
+		
+		g_iQuestConfig[QC_Score] += (g_iKilling[client] * g_iQuestConfig[QC_Difficulty]) + (g_iKillingSpree[client] * g_iQuestConfig[QC_Difficulty]);
 	}
 }
 public Action OnFollowChange(int id, int entity, int& target) {
@@ -708,7 +726,6 @@ public Action fwdDead(int client) {
 
 	if( rp_GetPlayerZone(client) == QUEST_ARENA ) {
 		g_iQuestConfig[QC_Health]--;
-		g_iQuestConfig[QC_DeadTime] = 60;
 		g_iKillingSpree[client] = 0;
 		g_iKilling[client] = 0;
 		
