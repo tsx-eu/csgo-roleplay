@@ -34,6 +34,7 @@ public Plugin myinfo =  {
 
 int g_iPlayerTeam[MAXPLAYERS], g_stkTeam[TEAM_MAX][MAXPLAYERS + 1], g_stkTeamCount[TEAM_MAX];
 int g_cBeam;
+bool g_bStarted;
 
 public void OnPluginStart() {
 	RegAdminCmd("rp_hg", Cmd_HG, ADMFLAG_BAN);
@@ -42,9 +43,17 @@ public void OnPluginStart() {
 }
 public void OnMapStart() {
 	g_cBeam = PrecacheModel("materials/sprites/laserbeam.vmt", true);
+	g_bStarted = false;
 }
 public void OnClientDisconnect(int client) {
 	removeClientTeam(client);
+}
+public void OnClientPostAdminCheck(int client) {
+	if( g_bStarted ) {
+		rp_HookEvent(client, RP_PlayerCanKill,	fwdCanKill);
+		rp_HookEvent(client, RP_OnPlayerDead,	fwdOnDead);
+		rp_HookEvent(client, RP_PreTakeDamage,	fwdOnDamage);
+	} 
 }
 // ----------------------------------------------------------------------------
 public Action OnFrameSecond(Handle timer, any none) {
@@ -58,6 +67,8 @@ public Action OnFrameSecond(Handle timer, any none) {
 		
 		TE_SetupBeamRingPoint(pos, 8.0, 42.0, g_cBeam, g_cBeam, 0, 0, 1.0, 4.0, 0.0, {0, 0, 255, 255}, 0, 0);
 		TE_Send(g_stkTeam[TEAM_DEF], g_stkTeamCount[TEAM_DEF]);
+		TE_SetupBeamRingPoint(pos, 8.0, 42.0, g_cBeam, g_cBeam, 0, 0, 1.0, 4.0, 0.0, {0, 0, 255, 255}, 0, 0);
+		TE_Send(g_stkTeam[TEAM_VIP], g_stkTeamCount[TEAM_VIP]);
 	}
 	for (int i = 0; i < g_stkTeamCount[TEAM_VIP]; i++) {
 		int client = g_stkTeam[TEAM_VIP][i];
@@ -66,7 +77,11 @@ public Action OnFrameSecond(Handle timer, any none) {
 		pos[2] += 8.0;
 		
 		TE_SetupBeamRingPoint(pos, 8.0, 42.0, g_cBeam, g_cBeam, 0, 0, 1.0, 4.0, 0.0, {0, 255, 0, 255}, 0, 0);
+		TE_Send(g_stkTeam[TEAM_VIP], g_stkTeamCount[TEAM_VIP]);
+		TE_SetupBeamRingPoint(pos, 8.0, 42.0, g_cBeam, g_cBeam, 0, 0, 1.0, 4.0, 0.0, {0, 255, 0, 255}, 0, 0);
 		TE_Send(g_stkTeam[TEAM_DEF], g_stkTeamCount[TEAM_DEF]);
+		TE_SetupBeamRingPoint(pos, 8.0, 42.0, g_cBeam, g_cBeam, 0, 0, 1.0, 4.0, 0.0, {0, 255, 0, 255}, 0, 0);
+		TE_Send(g_stkTeam[TEAM_ATK], g_stkTeamCount[TEAM_ATK]);
 	}
 	for (int i = 0; i < g_stkTeamCount[TEAM_ATK]; i++) {
 		int client = g_stkTeam[TEAM_ATK][i];
@@ -117,16 +132,76 @@ public Action Cmd_HG(int client, int args) {
 		}
 	}
 	else {
-		if( StrContains(arg, "start") >= 0) {
-			// TODO
+		if( StrContains(arg, "star") >= 0 )
+			Game_StartStop(true);
+		if( StrContains(arg, "stop") >= 0 ) {
+			Game_StartStop(false);
+			PrintToChatAll("[HG-VIP] Victoire de la défense");
 		}
-		if( StrContains(arg, "stop") >= 0) {
-			// TODO
+	}
+	return Plugin_Handled;
+}
+// ----------------------------------------------------------------------------
+public Action fwdOnDamage(int victim, int attacker, float& damage, int damagetype) {
+	if( g_iPlayerTeam[victim] == TEAM_NONE || g_iPlayerTeam[attacker] == TEAM_NONE )
+		return Plugin_Continue;
+	
+	return !IsKillAllowed(attacker, victim) ? Plugin_Stop : Plugin_Continue;
+}
+public Action fwdCanKill(int attacker, int victim) {
+	return IsKillAllowed(attacker, victim) ? Plugin_Stop : Plugin_Continue;
+}
+public Action fwdOnDead(int victim, int attacker, float& respawn) {
+	Action ret = IsKillAllowed(attacker, victim) ? Plugin_Stop : Plugin_Continue;
+	
+	if( g_iPlayerTeam[victim] == TEAM_VIP && ret == Plugin_Stop ) {
+		removeClientTeam(victim);
+		if( g_stkTeamCount[TEAM_VIP] == 0 ) {
+			Game_StartStop(false);
+			PrintToChatAll("[HG-VIP] Victoire des attaquants");
 		}
 	}
 	
-	
-	return Plugin_Handled;
+	return ret;
+}
+bool IsKillAllowed(int victim, int attacker) {
+	if( g_iPlayerTeam[victim] == TEAM_NONE || g_iPlayerTeam[attacker] == TEAM_NONE )
+		return false;
+	if( g_iPlayerTeam[attacker] == g_iPlayerTeam[victim] )
+		return false;
+	if( g_iPlayerTeam[attacker] == TEAM_DEF && g_iPlayerTeam[attacker] == TEAM_VIP )
+		return false;
+	if( g_iPlayerTeam[attacker] == TEAM_VIP && g_iPlayerTeam[attacker] == TEAM_DEF )
+		return false;
+	return true;
+}
+// ----------------------------------------------------------------------------
+void Game_StartStop(bool status) {
+	if( status == false && g_bStarted == true ) {
+		for (int i = 1; i <= MaxClients; i++) {
+			if( !IsValidClient(i) )
+				continue;
+				
+			rp_UnhookEvent(i, RP_PlayerCanKill,	fwdCanKill);
+			rp_UnhookEvent(i, RP_OnPlayerDead,	fwdOnDead);
+			rp_UnhookEvent(i, RP_PreTakeDamage,	fwdOnDamage);
+		}
+		
+		PrintToChatAll("[HG-VIP] Fin du game.");
+		g_bStarted = false;
+	}
+	else if( status == true && g_bStarted == false ) {
+		for (int i = 1; i <= MaxClients; i++) {
+			if( !IsValidClient(i) )
+				continue;
+			
+			rp_HookEvent(i, RP_PlayerCanKill,	fwdCanKill);
+			rp_HookEvent(i, RP_OnPlayerDead,	fwdOnDead);
+			rp_HookEvent(i, RP_PreTakeDamage,	fwdOnDamage);
+		}
+		PrintToChatAll("[HG-VIP] Début du game.");
+		g_bStarted = true;
+	}
 }
 // ----------------------------------------------------------------------------
 void addClientToTeam(int client, int team) {
