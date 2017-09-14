@@ -1061,9 +1061,9 @@ int getMaxArticles(int client) {
 		case 102: return 20;
 		case 103: return 15;
 		case 104: return 10;
-		case 105: return 5;
-		case 106: return 3;
-		case 107: return 2;		
+		case 105: return 7;
+		case 106: return 5;
+		case 107: return 3;		
 	}
 	return 0;
 }
