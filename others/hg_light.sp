@@ -35,6 +35,7 @@ public Plugin myinfo =  {
 int g_iPlayerTeam[MAXPLAYERS], g_stkTeam[TEAM_MAX][MAXPLAYERS + 1], g_stkTeamCount[TEAM_MAX];
 int g_cBeam;
 bool g_bStarted;
+int g_iPlayerKill[MAXPLAYERS], g_iPlayerDamage[MAXPLAYERS];
 
 public void OnPluginStart() {
 	RegAdminCmd("rp_hg", Cmd_HG, ADMFLAG_BAN);
@@ -53,6 +54,7 @@ public void OnClientPostAdminCheck(int client) {
 		rp_HookEvent(client, RP_PlayerCanKill,	fwdCanKill);
 		rp_HookEvent(client, RP_OnPlayerDead,	fwdOnDead);
 		rp_HookEvent(client, RP_PreTakeDamage,	fwdOnDamage);
+		g_iPlayerDamage[client] = g_iPlayerKill[client] = 0;
 	} 
 }
 // ----------------------------------------------------------------------------
@@ -116,7 +118,7 @@ public Action Cmd_HG(int client, int args) {
 			int stkTarget[MAXPLAYERS], stkCpt;
 			bool tn_is_ml;
 			
-			if( (stkCpt = ProcessTargetString(trg, client, stkTarget, MAXPLAYERS, COMMAND_FILTER_CONNECTED|COMMAND_FILTER_NO_MULTI, name, sizeof(name), tn_is_ml)) <= 0) {
+			if( (stkCpt = ProcessTargetString(trg, client, stkTarget, MAXPLAYERS, COMMAND_FILTER_CONNECTED|COMMAND_FILTER_NO_IMMUNITY, name, sizeof(name), tn_is_ml)) <= 0) {
 				ReplyToTargetError(client, stkCpt);
 				return Plugin_Handled;
 			}
@@ -132,52 +134,78 @@ public Action Cmd_HG(int client, int args) {
 		}
 	}
 	else {
-		if( StrContains(arg, "star") >= 0 )
+		if( StrContains(arg, "star") >= 0 ) {
 			Game_StartStop(true);
+		}
 		if( StrContains(arg, "stop") >= 0 ) {
 			Game_StartStop(false);
-			PrintToChatAll("[HG-VIP] Victoire de la défense");
+			PrintToChatAll("[HG] Victoire de la défense");
+			LogToGame("[HG] [END] Gagnant: Le camps de la défense");
 		}
 	}
 	return Plugin_Handled;
 }
 // ----------------------------------------------------------------------------
 public Action fwdOnDamage(int victim, int attacker, float& damage, int damagetype) {
-	if( g_iPlayerTeam[victim] == TEAM_NONE || g_iPlayerTeam[attacker] == TEAM_NONE )
+	if( g_iPlayerTeam[attacker] == TEAM_NONE && g_iPlayerTeam[victim] == TEAM_NONE )
 		return Plugin_Continue;
+	
+	if( (g_iPlayerTeam[attacker] == TEAM_ATK && g_iPlayerTeam[victim] == TEAM_VIP) ||
+		(g_iPlayerTeam[attacker] == TEAM_DEF && g_iPlayerTeam[victim] == TEAM_ATK) )
+		g_iPlayerDamage[attacker] += RoundToCeil(damage);
 	
 	return !IsKillAllowed(attacker, victim) ? Plugin_Stop : Plugin_Continue;
 }
 public Action fwdCanKill(int attacker, int victim) {
+	if( g_iPlayerTeam[attacker] == TEAM_NONE && g_iPlayerTeam[victim] == TEAM_NONE )
+		return Plugin_Continue;
+	
 	return IsKillAllowed(attacker, victim) ? Plugin_Stop : Plugin_Continue;
 }
 public Action fwdOnDead(int victim, int attacker, float& respawn) {
+	if( g_iPlayerTeam[attacker] == TEAM_NONE && g_iPlayerTeam[victim] == TEAM_NONE )
+		return Plugin_Continue;
+	
+	if( IsValidClient(attacker) ) {
+		if( (g_iPlayerTeam[attacker] == TEAM_ATK && g_iPlayerTeam[victim] == TEAM_VIP) ||
+		(g_iPlayerTeam[attacker] == TEAM_DEF && g_iPlayerTeam[victim] == TEAM_ATK) )
+			g_iPlayerKill[attacker]++;
+	}
+	
 	Action ret = IsKillAllowed(attacker, victim) ? Plugin_Stop : Plugin_Continue;
 	
 	if( g_iPlayerTeam[victim] == TEAM_VIP && ret == Plugin_Stop ) {
+		
+		LogToGame("[HG] %L a tué le VIP %L", attacker, victim);
+		PrintToChatAll("[HG] %N a tué le VIP %N.", attacker, victim);
+		
 		removeClientTeam(victim);
 		if( g_stkTeamCount[TEAM_VIP] == 0 ) {
 			Game_StartStop(false);
-			PrintToChatAll("[HG-VIP] Victoire des attaquants");
+			PrintToChatAll("[HG] Victoire des attaquants");
+			LogToGame("[HG] [END] Gagnant: Le camps des attaquants");
 		}
 	}
 	
 	return ret;
 }
 bool IsKillAllowed(int victim, int attacker) {
-	if( g_iPlayerTeam[victim] == TEAM_NONE || g_iPlayerTeam[attacker] == TEAM_NONE )
+	if( g_iPlayerTeam[attacker] == TEAM_NONE || g_iPlayerTeam[victim] == TEAM_NONE )
 		return false;
 	if( g_iPlayerTeam[attacker] == g_iPlayerTeam[victim] )
 		return false;
-	if( g_iPlayerTeam[attacker] == TEAM_DEF && g_iPlayerTeam[attacker] == TEAM_VIP )
+	if( g_iPlayerTeam[attacker] == TEAM_DEF && g_iPlayerTeam[victim] == TEAM_VIP )
 		return false;
-	if( g_iPlayerTeam[attacker] == TEAM_VIP && g_iPlayerTeam[attacker] == TEAM_DEF )
+	if( g_iPlayerTeam[attacker] == TEAM_VIP && g_iPlayerTeam[victim] == TEAM_DEF )
 		return false;
 	return true;
 }
 // ----------------------------------------------------------------------------
 void Game_StartStop(bool status) {
 	if( status == false && g_bStarted == true ) {
+		int bestAttack, bestAttackCount;
+		int bestDef, bestDefCount;
+		
 		for (int i = 1; i <= MaxClients; i++) {
 			if( !IsValidClient(i) )
 				continue;
@@ -185,9 +213,31 @@ void Game_StartStop(bool status) {
 			rp_UnhookEvent(i, RP_PlayerCanKill,	fwdCanKill);
 			rp_UnhookEvent(i, RP_OnPlayerDead,	fwdOnDead);
 			rp_UnhookEvent(i, RP_PreTakeDamage,	fwdOnDamage);
+			
+			if( g_iPlayerTeam[i] == TEAM_DEF ) {
+				if( g_iPlayerDamage[i] > bestDefCount ) {
+					bestDefCount = g_iPlayerDamage[i];
+					bestDef = i;
+				}
+				LogToGame("[HG] %L - dégat: %d - victimes: %d", i, g_iPlayerDamage[i], g_iPlayerKill[i]);
+			}
+			else if( g_iPlayerTeam[i] == TEAM_ATK ) {
+				if( g_iPlayerDamage[i] > bestAttackCount ) {
+					bestAttackCount = g_iPlayerDamage[i];
+					bestAttack = i;
+				}
+				LogToGame("[HG] %L - dégat: %d - victimes: %d", i, g_iPlayerDamage[i], g_iPlayerKill[i]);
+			}
+			
+			removeClientTeam(i);
 		}
 		
-		PrintToChatAll("[HG-VIP] Fin du game.");
+		if( bestAttack > 0 )
+			PrintToChatAll("[HG] Le meilleur attaquant est %N.", bestAttack);
+		if( bestDef > 0 )
+			PrintToChatAll("[HG] Le meilleur attaquant est %N.", bestDef);
+			
+		PrintToChatAll("[HG] Fin du game.");		
 		g_bStarted = false;
 	}
 	else if( status == true && g_bStarted == false ) {
@@ -198,8 +248,10 @@ void Game_StartStop(bool status) {
 			rp_HookEvent(i, RP_PlayerCanKill,	fwdCanKill);
 			rp_HookEvent(i, RP_OnPlayerDead,	fwdOnDead);
 			rp_HookEvent(i, RP_PreTakeDamage,	fwdOnDamage);
+			
+			g_iPlayerDamage[i] = g_iPlayerKill[i] = 0;
 		}
-		PrintToChatAll("[HG-VIP] Début du game.");
+		PrintToChatAll("[HG] Début du game.");
 		g_bStarted = true;
 	}
 }
