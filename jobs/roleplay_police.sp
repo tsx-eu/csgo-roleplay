@@ -1524,44 +1524,6 @@ public Action Cmd_ItemPickLock(int args) {
 	
 	return Plugin_Handled;
 }
-public Action ItemPickLockOver_mandat(Handle timer, Handle dp) {
-	if (dp == INVALID_HANDLE) {
-		return Plugin_Handled;
-	}
-	
-	ResetPack(dp);
-	int client = ReadPackCell(dp);
-	int door = ReadPackCell(dp);
-	int doorID = rp_GetDoorID(door);
-	
-	rp_ClientColorize(client);
-	
-	if (!rp_IsEntitiesNear(client, door, true)) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} ~ [ECHEC] ~ Rapprochez-vous de la porte pour utiliser votre mandat");
-		return Plugin_Handled;
-	}
-	
-	rp_SetDoorLock(doorID, false);
-	rp_ClientOpenDoor(client, doorID, true);
-	
-	float vecOrigin[3], vecOrigin2[3];
-	Entity_GetAbsOrigin(door, vecOrigin);
-	
-	for (int i = 1; i <= MaxClients; i++) {
-		if (!IsValidClient(i))
-			continue;
-		
-		Entity_GetAbsOrigin(i, vecOrigin2);
-		
-		if (GetVectorDistance(vecOrigin, vecOrigin2) > MAX_AREA_DIST.0)
-			continue;
-		
-		CPrintToChat(i, "{lightblue}[TSX-RP]{default} La porte a été ouverte avec un mandat.");
-	}
-	
-	return Plugin_Continue;
-}
-
 public Action fwdDmg(int attacker, int victim, float & damage) {
 	if (!rp_GetClientBool(attacker, b_Stealing) && !rp_IsInPVP(attacker))
 		rp_SetClientInt(attacker, i_LastAgression, GetTime());
