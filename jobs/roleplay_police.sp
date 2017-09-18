@@ -1484,45 +1484,7 @@ void displayTribunal(int client, const char szSteamID[64]) {
 	RP_ShowMOTD(client, szURL);
 }
 // ----------------------------------------------------------------------------
-public Action Cmd_ItemPickLock(int args) {
-	
-	int client = GetCmdArgInt(1);
-	int item_id = GetCmdArgInt(args);
-	
-	rp_ClientReveal(client);
-	
-	if (rp_GetClientJobID(client) != 1 && rp_GetClientJobID(client) != 101) {
-		return Plugin_Continue;
-	}
-	
-	int door = GetClientAimTarget(client, false);
-	
-	if (!rp_IsValidDoor(door) && IsValidEdict(door) && rp_IsValidDoor(Entity_GetParent(door)))
-		door = Entity_GetParent(door);
-	
-	
-	
-	if (!rp_IsValidDoor(door) || !rp_IsEntitiesNear(client, door, true)) {
-		ITEM_CANCEL(client, item_id);
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous devez viser une porte.");
-		return Plugin_Handled;
-	}
-	
-	float time = 0.5;
-	
-	rp_HookEvent(client, RP_PrePlayerPhysic, fwdFrozen, time);
-	ServerCommand("sm_effect_panel %d %f \"Ouverture de la porte...\"", client, time);
-	
-	rp_ClientColorize(client, { 255, 0, 0, 190 } );
-	rp_ClientReveal(client);
-	
-	Handle dp;
-	CreateDataTimer(time - 0.25, ItemPickLockOver_mandat, dp, TIMER_DATA_HNDL_CLOSE);
-	WritePackCell(dp, client);
-	WritePackCell(dp, door);
-	
-	return Plugin_Handled;
-}
+
 public Action fwdDmg(int attacker, int victim, float & damage) {
 	if (!rp_GetClientBool(attacker, b_Stealing) && !rp_IsInPVP(attacker))
 		rp_SetClientInt(attacker, i_LastAgression, GetTime());
