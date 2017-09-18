@@ -86,7 +86,6 @@ public Action Cmd_Reload(int args) {
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_Reload);
 	
-	RegServerCmd("rp_item_mandat", Cmd_ItemPickLock, "RP-ITEM", FCVAR_UNREGISTERED);
 	RegServerCmd("rp_item_ratio", Cmd_ItemRatio, "RP-ITEM", FCVAR_UNREGISTERED);
 	RegServerCmd("rp_SendToJail", Cmd_SendToJail, "RP-ITEM", FCVAR_UNREGISTERED);
 	RegServerCmd("rp_GetStoreWeapon", Cmd_GetStoreWeapon, "RP-ITEM", FCVAR_UNREGISTERED);
