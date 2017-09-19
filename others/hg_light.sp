@@ -235,7 +235,7 @@ void Game_StartStop(bool status) {
 		if( bestAttack > 0 )
 			PrintToChatAll("[HG] Le meilleur attaquant est %N.", bestAttack);
 		if( bestDef > 0 )
-			PrintToChatAll("[HG] Le meilleur attaquant est %N.", bestDef);
+			PrintToChatAll("[HG] Le meilleur défenseur est %N.", bestDef);
 			
 		PrintToChatAll("[HG] Fin du game.");		
 		g_bStarted = false;
