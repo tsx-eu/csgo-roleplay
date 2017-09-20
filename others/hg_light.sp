@@ -93,6 +93,9 @@ public Action OnFrameSecond(Handle timer, any none) {
 		
 		TE_SetupBeamRingPoint(pos, 8.0, 42.0, g_cBeam, g_cBeam, 0, 0, 1.0, 4.0, 0.0, {255, 0, 0, 255}, 0, 0);
 		TE_Send(g_stkTeam[TEAM_ATK], g_stkTeamCount[TEAM_ATK]);
+		
+		TE_SetupBeamRingPoint(pos, 8.0, 42.0, g_cBeam, g_cBeam, 0, 0, 1.0, 4.0, 0.0, {255, 0, 0, 255}, 0, 0);
+		TE_Send(g_stkTeam[TEAM_VIP], g_stkTeamCount[TEAM_VIP]);
 	}
 }
 // ----------------------------------------------------------------------------
