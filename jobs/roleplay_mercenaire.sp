@@ -414,13 +414,14 @@ public Action fwfCommand(int client, char[] command, char[] arg) {
 void OpenSelectSkill(int client) {
 	
 	char tmp[255];
-	Format(tmp, 254, "Sélectionner les compétences à utiliser (%i)", g_iKillerPoint[client][competance_left]);
+	int target = rp_GetClientInt(client, i_ToKill);
+	
+	Format(tmp, 254, "Sélectionner les compétences à utiliser pour votre contrat sur %N (%i)", target, g_iKillerPoint[client][competance_left]);
 	
 	Handle menu = CreateMenu(AddCompetanceToAssassin);
 	SetMenuTitle(menu, tmp);
-	
 	AddMenuItem(menu, "annule", "Annuler mon contrat");
-	int target = rp_GetClientInt(client, i_ToKill);
+
 	if( IsValidClient(target) && g_iKillerPoint[client][competance_left] > 0 ) {
 		AddMenuItem(menu, "cut", "Cut Maximum", g_iKillerPoint[client][competance_cut] ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
 		AddMenuItem(menu, "tir", "Precision Maximum", g_iKillerPoint[client][competance_tir]);
