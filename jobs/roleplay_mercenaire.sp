@@ -420,7 +420,6 @@ void OpenSelectSkill(int client) {
 	
 	Handle menu = CreateMenu(AddCompetanceToAssassin);
 	SetMenuTitle(menu, tmp);
-	AddMenuItem(menu, "annule", "Annuler mon contrat");
 
 	if( IsValidClient(target) && g_iKillerPoint[client][competance_left] > 0 ) {
 		AddMenuItem(menu, "cut", "Cut Maximum", g_iKillerPoint[client][competance_cut] ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
@@ -436,6 +435,7 @@ void OpenSelectSkill(int client) {
 		if(g_iKillerPoint[client][competance_type] == 1005)
 			AddMenuItem(menu, "nano", "Nano-Cryogénisation", g_iKillerPoint[client][competance_cryo] ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
 	}
+	AddMenuItem(menu, "annule", "Annuler mon contrat");
 	
 	DisplayMenu(menu, client, MENU_TIME_DURATION);
 }
