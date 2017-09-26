@@ -158,29 +158,59 @@ public Action Cmd_ItemPermi(int args) {
 }
 public Action Cmd_ItemBankCard(int args) {
 	
+	int item_id = GetCmdArgInt(args);
 	int client = GetCmdArgInt(1);
+
+	if(rp_GetClientBool(client, b_HaveCard)){
+		rp_ClientGiveItem(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous disposez déjà d'une carte bancaire.");
+		return Plugin_Handled;
+	}
 	rp_SetClientBool(client, b_HaveCard, true);
 	
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre carte bancaire est maintenant activée.");
 	rp_ClientSave(client);
 }
 public Action Cmd_ItemBankSort(int args) {
-	
+
+	int item_id = GetCmdArgInt(args);
 	int client = GetCmdArgInt(1);
+
+	if(rp_GetClientBool(client, b_CanSort)){
+		rp_ClientGiveItem(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez déjà trier votre inventaire.");
+		return Plugin_Handled;
+	}
+
 	rp_SetClientBool(client, b_CanSort, true);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous pouvez maintenant trier votre inventaire jusqu'à votre déconnexion.");
 }
 public Action Cmd_ItemBankKey(int args) {
 	
+	int item_id = GetCmdArgInt(args);
 	int client = GetCmdArgInt(1);
+
+	if(rp_GetClientBool(client, b_HaveAccount)){
+		rp_ClientGiveItem(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre compte bancaire est déjà actif.");
+		return Plugin_Handled;
+	}
+
 	rp_SetClientBool(client, b_HaveAccount, true);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre compte bancaire est maintenant actif.");
 	rp_ClientSave(client);
 }
 public Action Cmd_ItemBankSwap(int args) {
 	
-	
+	int item_id = GetCmdArgInt(args);
 	int client = GetCmdArgInt(1);
+
+	if(rp_GetClientBool(client, b_PayToBank)){
+		rp_ClientGiveItem(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Votre paye va déjà en banque.");
+		return Plugin_Handled;
+	}
+
 	rp_SetClientBool(client, b_PayToBank, true);
 	CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous recevrez maintenant votre paye en banque.");
 	rp_ClientSave(client);
@@ -188,11 +218,16 @@ public Action Cmd_ItemBankSwap(int args) {
 // ----------------------------------------------------------------------------
 public Action Cmd_ItemAssurance(int args) {
 	
-	
+	int item_id = GetCmdArgInt(args);
 	int client = GetCmdArgInt(1);
 	
 	if( !rp_GetClientBool(client, b_Assurance) ) {
 		rp_IncrementSuccess(client, success_list_assurance);
+	}
+	else{
+		rp_ClientGiveItem(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes déjà assuré.");
+		return Plugin_Handled;
 	}
 	
 	rp_SetClientBool(client, b_Assurance, true);
@@ -205,11 +240,17 @@ public Action Cmd_ItemAssurance(int args) {
 
 public Action Cmd_ItemAssuVie(int args){
 	
+	int item_id = GetCmdArgInt(args);
 	int client = GetCmdArgInt(1);
 	
 	if( !rp_GetClientBool(client, b_AssuranceVie) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous etes maintenant couvert par l'assurance vie.");
 		rp_IncrementSuccess(client, success_list_assurance);
+	}
+	else{
+		rp_ClientGiveItem(client, item_id);
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous êtes déjà assuré.");
+		return Plugin_Handled;
 	}
 	
 	rp_SetClientBool(client, b_AssuranceVie, true);
