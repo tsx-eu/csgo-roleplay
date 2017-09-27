@@ -1130,7 +1130,7 @@ void SQL_Insert(int type, int condamne, int condamnation, int heure, int amende)
 	rp_SetJobCapital(101, rp_GetJobCapital(101) + amende);
 
 	
-	int suspectJob = condamne ? rp_GetClientJobID(g_iTribunalData[type][td_EnqueteSuspect]) : 101;
+	int suspectJob = condamne ? rp_GetClientJobID(g_iTribunalData[type][td_Suspect]) : 101;
 	int takeFromCapital = 500;
 	
 	if( g_iTribunalData[type][td_EnquetePlaignant] ) {
