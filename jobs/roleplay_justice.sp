@@ -1128,18 +1128,21 @@ void SQL_Insert(int type, int condamne, int condamnation, int heure, int amende)
 	charges[strlen(charges) - 2] = 0;
 	
 	rp_SetJobCapital(101, rp_GetJobCapital(101) + amende);
+
 	
-	rp_ClientMoney(g_iTribunalData[type][td_Owner], i_AddToPay, 500);
-	rp_SetJobCapital(101, rp_GetJobCapital(101) - 500);
+	int suspectJob = condamne ? rp_GetClientJobID(g_iTribunalData[type][td_Suspect]) : 101;
+	int takeFromCapital = 500;
 	
 	if( g_iTribunalData[type][td_EnquetePlaignant] ) {
-		rp_ClientMoney(g_iTribunalData[type][td_Owner], i_AddToPay, 100);
-		rp_SetJobCapital(101, rp_GetJobCapital(101) - 100);
+		takeFromCapital += 100;
 	}
 	if( g_iTribunalData[type][td_EnqueteSuspect] ) {
-		rp_ClientMoney(g_iTribunalData[type][td_Owner], i_AddToPay, 100);
-		rp_SetJobCapital(101, rp_GetJobCapital(101) - 100);
+		takeFromCapital += 100;
 	}
+
+
+	rp_ClientMoney(g_iTribunalData[type][td_Owner], i_AddToPay, takeFromCapital);
+	rp_SetJobCapital(suspectJob, rp_GetJobCapital(suspectJob) - takeFromCapital);
 	
 	rp_ClientXPIncrement(g_iTribunalData[type][td_Owner], 250);
 	
