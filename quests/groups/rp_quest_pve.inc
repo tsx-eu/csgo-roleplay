@@ -100,7 +100,7 @@ public bool fwdCanStart(int client) {
 	
 	static char name[32];
 	
-	GetClientName(client, name, sizeof(szStenameamID));
+	GetClientName(client, name, sizeof(name));
 	if( StrContains(name, "rp-csgo.fr") > 0 || StrContains(name, "rpcsgo.fr") > 0 )
 		return true;
 	if( StrContains(name, "csgo-rp.fr") > 0 || StrContains(name, "csgorp.fr") > 0 )
