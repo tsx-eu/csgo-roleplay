@@ -98,19 +98,12 @@ public bool fwdCanStart(int client) {
 	if ( g_iPort == 27015 && rp_GetClientInt(client, i_PlayerLVL) < 100 )
 		return false;
 	
-	static char banned[][32] = { "STEAM_1:1:47247649", "STEAM_1:0:72242198" };
-	char szSteamID[32];
-	GetClientAuthId(client, AuthId_Engine, szSteamID, sizeof(szSteamID));
+	static char name[32];
 	
-	for (int i = 0; i < sizeof(banned); i++) {
-		if( StrEqual(banned[i], szSteamID) )
-			return false;
-	}
-	
-	GetClientName(client, szSteamID, sizeof(szSteamID));
-	if( StrContains(szSteamID, "rp-csgo.fr") > 0 || StrContains(szSteamID, "rpcsgo.fr") > 0 )
+	GetClientName(client, name, sizeof(szStenameamID));
+	if( StrContains(name, "rp-csgo.fr") > 0 || StrContains(name, "rpcsgo.fr") > 0 )
 		return true;
-	if( StrContains(szSteamID, "csgo-rp.fr") > 0 || StrContains(szSteamID, "csgorp.fr") > 0 )
+	if( StrContains(name, "csgo-rp.fr") > 0 || StrContains(name, "csgorp.fr") > 0 )
 		return true;	
 	
 	return false;
