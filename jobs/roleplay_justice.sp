@@ -1196,8 +1196,15 @@ bool hasMercenaire() {
 	for (int i = 1; i <= MaxClients; i++) {
 		if( !IsValidClient(i) )
 			continue;
-		if( rp_GetClientJobID(i) == 41 )
+		if( rp_GetClientJobID(i) == 41 ){
+			if(rp_GetClientBool(i, b_IsAFK))
+				continue;
+			if(rp_GetClientInt(i, i_JailTime) > 0)
+				continue;
+			if(rp_GetZoneBit(rp_GetPlayerZone(i)) & BITZONE_EVENT)
+				continue;
 			return true;
+		}
 	}
 	return false;
 }
