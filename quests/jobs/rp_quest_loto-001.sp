@@ -71,7 +71,7 @@ public void Q1_Start(int objectiveID, int client) {
 	g_iDuration[client] = 12 * 60;
 	g_iStep[client] = 0;
 	
-	for (int i = 0; i <= sizeof(g_iDone[]); i++) 
+	for (int i = 0; i < sizeof(g_iDone[]); i++) 
 		g_iDone[client][i] = 0;
 }
 public void Q1_Frame(int objectiveID, int client) {
