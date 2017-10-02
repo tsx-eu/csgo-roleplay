@@ -142,6 +142,8 @@ public Action Cmd_ItemContrat(int args) {
 		rp_SetClientInt(target, i_ContratTotal, rp_GetClientInt(target, i_ContratTotal) + 1);
 	if( rp_GetClientBool(target, b_GameModePassive) )
 		rp_SetClientInt(target, i_ContratTotal, rp_GetClientInt(target, i_ContratTotal) + 2);
+	if( rp_IsClientNew(target) )
+		rp_SetClientInt(target, i_ContratTotal, rp_GetClientInt(target, i_ContratTotal) + 2);
 	
 	switch( rp_GetClientInt(vendeur, i_Job) ) {
 		case 41: g_iKillerPoint[vendeur][competance_left] = 6;
@@ -222,6 +224,7 @@ public Action fwdFrame(int client) {
 	}
 	else {
 		rp_Effect_BeamBox(client, target, NULL_VECTOR, 255, 0, 0);
+		PrintHintText(client, "Cible: %N", target);
 	}
 	
 	return Plugin_Continue;
@@ -359,10 +362,9 @@ public Action fwdDamage(int client, int victim, float& damage, int damagetype) {
 	if( target > 0 && target == victim ) {
 		if( !rp_IsTargetSeen(victim, client) )
 			damage *= 2.0;
-		if( rp_IsClientNew(victim) )
+		if( !rp_IsClientNew(victim) )
 			damage *= 2.0;
-			
-		damage *= 2.0;
+		
 		return Plugin_Changed;
 	}
 	else if( target > 0 && target != victim ) {
