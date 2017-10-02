@@ -173,7 +173,7 @@ public bool IsKillEligible(int attacker, int victim, const char weapon[64]) {
 		return false;
 	if( attacker == victim )
 		return false;
-	if( !rp_IsTutorialOver(victim) )
+	if( rp_IsClientNew(victim) || !rp_IsTutorialOver(victim) )
 		return false;
 	if( rp_GetClientBool(victim, b_GameModePassive) )
 		return false;
