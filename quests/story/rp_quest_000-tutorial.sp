@@ -455,7 +455,7 @@ public Action fwdUsePhone(int client) {
 	GetClientAbsOrigin(client, origin);
 	
 	if( GetVectorDistance(origin, target) < 40.0 ) {
-		ServerCommand("sm_effect_copter 0 -2364");
+		ServerCommand("sm_effect_copter2 0 -2364 %d", client);
 		rp_UnhookEvent(client, RP_OnPlayerUse, fwdUsePhone);
 		rp_QuestStepComplete(client, g_iQ92);
 		
