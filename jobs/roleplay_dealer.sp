@@ -681,7 +681,17 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	if( rp_GetZoneBit( rp_GetPlayerZone(target) ) & BITZONE_BLOCKSTEAL ) {
 		ACCESS_DENIED(client);
 	}
-	
+	if( rp_GetClientInt(client, i_PlayerLVL) <= 5 ) {
+		ACCESS_DENIED(client);
+	}
+	if( rp_GetClientInt(client, i_LastVolTime)+60 > GetTime() ) {
+		ACCESS_DENIED(client);
+	}
+	if( rp_IsClientNew(target) ) {
+		if( rp_GetClientInt(client, i_LastVolTime)+300 > GetTime() ) {
+			ACCESS_DENIED(client);
+		}
+	}
 	if( rp_GetZoneInt(rp_GetPlayerZone(target), zone_type_type) == 81 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler %N ici.", target);
 		return Plugin_Handled;
@@ -745,6 +755,13 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		rp_SetClientBool(target, b_Stealing, true);
 		SDKHook(target, SDKHook_WeaponDrop, OnWeaponDrop);
 		
+		for (int i = 1; i <= MaxClients; i++) {
+			if( !IsValidClient(i) )
+				continue;
+			if( rp_GetClientJobID(i) == 81 && i != client )
+				rp_ClientFloodIncrement(i, target, fd_vol, cooldown);
+		}
+		rp_ClientFloodIncrement(client, target, fd_vol, 2.0 * cooldown);
 		rp_ClientAggroIncrement(client, target, 1000);
 		if( rp_GetClientBool(client, b_GameModePassive) == false ) {
 			rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, 5.0);
@@ -788,7 +805,13 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		if( amount > 2000 )
 			rp_SetClientFloat(client, fl_LastVente, GetGameTime() + 30.0);
 		
-		rp_ClientFloodIncrement(client, target, fd_vol, cooldown);
+		for (int i = 1; i <= MaxClients; i++) {
+			if( !IsValidClient(i) )
+				continue;
+			if( rp_GetClientJobID(i) == 81 && i != client )
+				rp_ClientFloodIncrement(i, target, fd_vol, cooldown);
+		}
+		rp_ClientFloodIncrement(client, target, fd_vol, 2.0 * cooldown);
 		rp_Effect_Cashflow(client, amount);
 		
 		int cpt = rp_GetRandomCapital(81);

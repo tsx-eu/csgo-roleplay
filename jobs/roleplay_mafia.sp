@@ -195,6 +195,17 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	if( rp_GetClientJobID(target) == 91 ) {
 		ACCESS_DENIED(client);
 	}
+	if( rp_GetClientInt(client, i_PlayerLVL) <= 5 ) {
+		ACCESS_DENIED(client);
+	}
+	if( rp_GetClientInt(client, i_LastVolTime)+60 > GetTime() ) {
+		ACCESS_DENIED(client);
+	}
+	if( rp_IsClientNew(target) ) {
+		if( rp_GetClientInt(client, i_LastVolTime)+300 > GetTime() ) {
+			ACCESS_DENIED(client);
+		}
+	}
 	if( rp_GetZoneBit( rp_GetPlayerZone(target) ) & BITZONE_BLOCKSTEAL ) {
 		ACCESS_DENIED(client);
 	}
@@ -241,10 +252,10 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 			return Plugin_Stop;
 		}
 		
-		int i = RandomItem[ Math_GetRandomInt(0, (amount-1)) ];
-		prix = rp_GetItemInt(i, item_type_prix) / 2;
+		int it = RandomItem[ Math_GetRandomInt(0, (amount-1)) ];
+		prix = rp_GetItemInt(it, item_type_prix) / 2;
 		
-		rp_ClientGiveItem(target, i, -1);
+		rp_ClientGiveItem(target, it, -1);
 		
 		rp_SetClientInt(client, i_LastVolTime, GetTime());
 		rp_SetClientInt(client, i_LastVolAmount, (prix * MARCHEMAFIA_PC) / 100);
@@ -252,10 +263,10 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		rp_SetClientInt(target, i_LastVol, client);		
 		rp_SetClientFloat(target, fl_LastVente, GetGameTime() + 10.0);
 		
-		rp_GetItemData(i, item_type_name, tmp, sizeof(tmp));
+		rp_GetItemData(it, item_type_name, tmp, sizeof(tmp));
 		
-		addBuyMenu(client, target, i);
-		amount = rp_GetItemInt(i, item_type_prix);
+		addBuyMenu(client, target, it);
+		amount = rp_GetItemInt(it, item_type_prix);
 		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez volé %s à %N, il a été envoyé au marché noir.", tmp, target);
 		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Quelqu'un vous a volé: %s.", tmp);
@@ -264,7 +275,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		
 		GetClientAuthId(client, AuthId_Engine, tmp, sizeof(tmp), false);
 		Format(szQuery, sizeof(szQuery), "INSERT INTO `rp_sell` (`id`, `steamid`, `job_id`, `timestamp`, `item_type`, `item_id`, `item_name`, `amount`) VALUES (NULL, '%s', '%i', '%i', '2', '%i', '%s', '%i');",
-			tmp, rp_GetClientJobID(client), GetTime(), i, "Vol: Objet", amount);
+			tmp, rp_GetClientJobID(client), GetTime(), it, "Vol: Objet", amount);
 
 		SQL_TQuery( rp_GetDatabase(), SQL_QueryCallBack, szQuery);
 		
@@ -285,9 +296,13 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		if( amount < 5 )
 			cooldown *= 0.5;
 		
-		rp_ClientFloodIncrement(client, target, fd_vol, cooldown);
-		
-		
+		for (int i = 1; i <= MaxClients; i++) {
+			if( !IsValidClient(i) )
+				continue;
+			if( rp_GetClientJobID(i) == 91 && i != client )
+				rp_ClientFloodIncrement(i, target, fd_vol, cooldown);
+		}
+		rp_ClientFloodIncrement(client, target, fd_vol, 2.0 * cooldown);
 		
 		float vecTarget[3];
 		GetClientAbsOrigin(client, vecTarget);
@@ -337,7 +352,13 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		if( amount > 2000 )
 			rp_SetClientFloat(client, fl_LastVente, GetGameTime() + 30.0);
 		
-		rp_ClientFloodIncrement(client, target, fd_vol, cooldown);
+		for (int i = 1; i <= MaxClients; i++) {
+			if( !IsValidClient(i) )
+				continue;
+			if( rp_GetClientJobID(i) == 91 && i != client )
+				rp_ClientFloodIncrement(i, target, fd_vol, cooldown);
+		}
+		rp_ClientFloodIncrement(client, target, fd_vol, 2.0 * cooldown);
 		rp_Effect_Cashflow(client, Math_Clamp(RoundToNearest(Pow(amount*2.0, 0.85)), 1, 1000)  );
 		
 		int cpt = rp_GetRandomCapital(91);
@@ -1220,7 +1241,7 @@ public int Menu_BuyWeapon(Handle p_hMenu, MenuAction p_oAction, int client, int 
 			
 			for (int i = 1; i <= MaxClients; i++) {
 				if( rp_GetClientJobID(i) == 91 )
-					rp_ClientFloodIncrement(i, client, fd_vol, STEAL_TIME);
+					rp_ClientFloodIncrement(i, client, fd_vol, 2.0 * STEAL_TIME);
 			}
 		}
 	}
