@@ -681,24 +681,16 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	if( rp_GetZoneBit( rp_GetPlayerZone(target) ) & BITZONE_BLOCKSTEAL ) {
 		ACCESS_DENIED(client);
 	}
-	if( rp_GetClientInt(client, i_PlayerLVL) <= 5 ) {
-		ACCESS_DENIED(client);
-	}
-	if( rp_GetClientInt(client, i_LastVolTime)+60 > GetTime() ) {
-		ACCESS_DENIED(client);
-	}
-	if( rp_IsClientNew(target) ) {
-		if( rp_GetClientInt(client, i_LastVolTime)+300 > GetTime() ) {
-			ACCESS_DENIED(client);
-		}
+	if( rp_GetClientInt(client, i_PlayerLVL) <= 5 ||
+		rp_GetClientInt(client, i_LastVolTime)+60 > GetTime() ||
+		rp_ClientFloodTriggered(client, target, fd_vol) ||
+		( rp_IsClientNew(target) && rp_GetClientInt(client, i_LastVolTime)+300 > GetTime() ) ) {
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'a pas d'argent sur lui.", target);
+		cooldown = 1.0;
+		return Plugin_Stop;
 	}
 	if( rp_GetZoneInt(rp_GetPlayerZone(target), zone_type_type) == 81 ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler %N ici.", target);
-		return Plugin_Handled;
-	}
-	
-	if( rp_ClientFloodTriggered(client, target, fd_vol) ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous ne pouvez pas voler %N, pour le moment.", target);
 		return Plugin_Handled;
 	}
 	
