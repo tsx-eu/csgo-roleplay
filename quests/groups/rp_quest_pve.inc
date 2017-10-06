@@ -98,7 +98,7 @@ public bool fwdCanStart(int client) {
 	if ( g_iPort == 27015 && rp_GetClientInt(client, i_PlayerLVL) < 100 )
 		return false;
 	
-	static char name[32];
+	static char name[MAX_NAME_LENGTH + 1];
 	
 	GetClientName(client, name, sizeof(name));
 	if( StrContains(name, "rp-csgo.fr") > 0 || StrContains(name, "rpcsgo.fr") > 0 )
