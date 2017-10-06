@@ -604,7 +604,7 @@ public Action Cmd_Jail(int client) {
 		ACCESS_DENIED(client);
 	}
 	
-	if (rp_GetClientJobID(client) == 101 && rp_GetClientBool(target, b_IsSearchByTribunal) == false) {  // Jail dans la rue sur non recherché.
+	if( IsValidClient(target) && rp_GetClientJobID(client) == 101 && rp_GetClientBool(target, b_IsSearchByTribunal) == false) {  // Jail dans la rue sur non recherché.
 		if (ct >= 3 && rp_GetZoneInt(rp_GetPlayerZone(client), zone_type_type) != 101) {
 			ACCESS_DENIED(client);
 		}
