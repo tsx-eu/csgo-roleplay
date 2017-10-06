@@ -195,10 +195,10 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	if( rp_GetClientJobID(target) == 91 ) {
 		ACCESS_DENIED(client);
 	}
-	if( rp_GetClientInt(client, i_PlayerLVL) <= 5 ||
-		rp_GetClientInt(client, i_LastVolTime)+60 > GetTime() ||
+	if( rp_GetClientInt(target, i_PlayerLVL) <= 5 ||
+		rp_GetClientFloat(target, fl_LastStolen)+60.0 > GetGameTime() ||
 		rp_ClientFloodTriggered(client, target, fd_vol) ||
-		( rp_IsClientNew(target) && rp_GetClientInt(client, i_LastVolTime)+300 > GetTime() ) ) {
+		( rp_IsClientNew(target) && rp_GetClientFloat(target, fl_LastStolen)+300.0 > GetGameTime() ) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'a pas d'argent sur lui.", target);
 		cooldown = 1.0;
 		return Plugin_Stop;
@@ -254,6 +254,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		rp_SetClientInt(client, i_LastVolTarget, target);
 		rp_SetClientInt(target, i_LastVol, client);		
 		rp_SetClientFloat(target, fl_LastVente, GetGameTime() + 10.0);
+		rp_SetClientFloat(target, fl_LastStolen, GetGameTime() + (rp_GetClientBool(target, b_IsAFK) ? 300.0 : 0.0));
 		
 		rp_GetItemData(it, item_type_name, tmp, sizeof(tmp));
 		
@@ -318,6 +319,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		rp_SetClientInt(client, i_LastVolAmount, amount);
 		rp_SetClientInt(client, i_LastVolTarget, target);
 		rp_SetClientInt(target, i_LastVol, client);
+		rp_SetClientFloat(target, fl_LastStolen, GetGameTime() + (rp_GetClientBool(target, b_IsAFK) ? 300.0 : 0.0));
 		
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Vous avez volé %d$ à %N.", amount, target);
 		CPrintToChat(target, "{lightblue}[TSX-RP]{default} Quelqu'un vous a volé %d$.", amount);
@@ -871,14 +873,14 @@ int getDistrib(int client, int& type) {
 	if( StrEqual(classname, "rp_weaponbox") )
 		type = 3;
 	if( (StrEqual(classname, "rp_cashmachine") ) && rp_GetClientJobID(owner) != 91 &&
-		!rp_IsClientNew(owner) && !rp_GetClientBool(owner, b_IsAFK) && Entity_GetHealth(target) == 100)
+		!rp_IsClientNew(owner) && !rp_GetClientBool(owner, b_IsAFK) && Entity_GetHealth(target) >= 500)
 		type = 4;
 	if( (StrEqual(classname, "rp_bigcashmachine") ) && rp_GetClientJobID(owner) != 91 &&
-		!rp_IsClientNew(owner) && !rp_GetClientBool(owner, b_IsAFK) && Entity_GetHealth(target) == 1000)
+		!rp_IsClientNew(owner) && !rp_GetClientBool(owner, b_IsAFK) && Entity_GetHealth(target) >= 5000 )
 		type = 5;
 	if( StrEqual(classname, "rp_phone") )
 		type = 6;
-	if( (StrEqual(classname, "rp_plant") ) && rp_GetClientJobID(owner) != 91 && Entity_GetHealth(target) == 250 && 
+	if( (StrEqual(classname, "rp_plant") ) && rp_GetClientJobID(owner) != 91 && Entity_GetHealth(target) >= 2500 && 
 		!rp_IsClientNew(owner) && !rp_GetClientBool(owner, b_IsAFK) && rp_GetBuildingData(target, BD_count) > 0 )
 		type = 7;
 		

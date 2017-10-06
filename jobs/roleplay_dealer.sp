@@ -681,10 +681,10 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 	if( rp_GetZoneBit( rp_GetPlayerZone(target) ) & BITZONE_BLOCKSTEAL ) {
 		ACCESS_DENIED(client);
 	}
-	if( rp_GetClientInt(client, i_PlayerLVL) <= 5 ||
-		rp_GetClientInt(client, i_LastVolTime)+60 > GetTime() ||
+	if( rp_GetClientInt(target, i_PlayerLVL) <= 5 ||
+		rp_GetClientFloat(target, fl_LastStolen)+60.0 > GetGameTime() ||
 		rp_ClientFloodTriggered(client, target, fd_vol) ||
-		( rp_IsClientNew(target) && rp_GetClientInt(client, i_LastVolTime)+300 > GetTime() ) ) {
+		( rp_IsClientNew(target) && rp_GetClientFloat(target, fl_LastStolen)+300.0 > GetGameTime() ) ) {
 		CPrintToChat(client, "{lightblue}[TSX-RP]{default} %N n'a pas d'argent sur lui.", target);
 		cooldown = 1.0;
 		return Plugin_Stop;
@@ -731,6 +731,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		rp_SetClientInt(client, i_LastVolVehicleTime, GetTime());
 		rp_SetClientInt(client, i_LastVolAmount, 100);
 		rp_SetClientInt(client, i_LastVolTarget, target);
+		rp_SetClientFloat(target, fl_LastStolen, GetGameTime() + (rp_GetClientBool(target, b_IsAFK) ? 300.0 : 0.0));
 		rp_Effect_Cashflow(client, price / 4);
 		
 		rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, StealTime);
@@ -755,6 +756,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		}
 		rp_ClientFloodIncrement(client, target, fd_vol, 2.0 * cooldown);
 		rp_ClientAggroIncrement(client, target, 1000);
+		rp_SetClientFloat(target, fl_LastStolen, GetGameTime() + (rp_GetClientBool(target, b_IsAFK) ? 300.0 : 0.0));
 		if( rp_GetClientBool(client, b_GameModePassive) == false ) {
 			rp_HookEvent(client, RP_PrePlayerPhysic, fwdAccelerate, 5.0);
 		}
@@ -805,6 +807,7 @@ public Action fwdOnPlayerSteal(int client, int target, float& cooldown) {
 		}
 		rp_ClientFloodIncrement(client, target, fd_vol, 2.0 * cooldown);
 		rp_Effect_Cashflow(client, amount);
+		rp_SetClientFloat(target, fl_LastStolen, GetGameTime() + (rp_GetClientBool(target, b_IsAFK) ? 300.0 : 0.0));
 		
 		int cpt = rp_GetRandomCapital(81);
 		rp_SetJobCapital(81, rp_GetJobCapital(81) + (amount/4));
@@ -1349,11 +1352,8 @@ public Action ItemPickLockOver_18th(Handle timer, Handle dp) {
 		return Plugin_Handled;
 	}
 	
-	float time = GetGameTime();
-	if( rp_GetClientBool(target, b_IsAFK) )
-		time += 5.0 * 60.0;
 	
-	rp_SetClientFloat(target, fl_LastStolen, time);
+	rp_SetClientFloat(target, fl_LastStolen, GetGameTime() + (rp_GetClientBool(target, b_IsAFK) ? 300.0 : 0.0));
 	rp_SetClientInt(client, i_LastVolTime, GetTime());
 	rp_SetClientInt(client, i_LastVolAmount, price/4);
 	rp_SetClientInt(client, i_LastVolTarget, target);
