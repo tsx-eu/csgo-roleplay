@@ -72,7 +72,7 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Collègue, nous avons besoin que vous", ITEMDRAW_DISABLED);
 	menu.AddItem("", "surveillez la prison. Pendant les prochaines 24h.", ITEMDRAW_DISABLED);
-	menu.AddItem("", "Nous t'offrons 35$ toutes les 10 minutes", ITEMDRAW_DISABLED);
+	menu.AddItem("", "Nous t'offrons 20$ toutes les 10 minutes", ITEMDRAW_DISABLED);
 	menu.AddItem("", "passées à surveiller les prisonniers.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Attention, si tu t'absentes nous t'infligerons", ITEMDRAW_DISABLED);
@@ -96,7 +96,7 @@ public void Q1_Frame(int objectiveID, int client) {
 			int mnt = RoundToFloor(1.5 * 3.0 * 60.0);
 			rp_SetJobCapital(1, rp_GetJobCapital(1) + mnt);
 			rp_ClientMoney(client, i_AddToPay, - mnt);
-			g_iTickXp[client]-=mnt;
+			g_iTickXp[client]-=(3*60);
 		}
 		
 		wasAFK[client] = rp_GetClientBool(client, b_IsAFK);
