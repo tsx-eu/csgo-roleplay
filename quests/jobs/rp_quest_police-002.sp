@@ -93,7 +93,7 @@ public void Q1_Frame(int objectiveID, int client) {
 	if( zoneJail(client) ) {
 		
 		if( wasAFK[client] == false && rp_GetClientBool(client, b_IsAFK) ) {
-			int mnt = RoundToFloor(2.5 * 3.0 * 60.0);
+			int mnt = RoundToFloor(1.5 * 3.0 * 60.0);
 			rp_SetJobCapital(1, rp_GetJobCapital(1) + mnt);
 			rp_ClientMoney(client, i_AddToPay, - mnt);
 			g_iTickXp[client]-=mnt;
@@ -102,7 +102,7 @@ public void Q1_Frame(int objectiveID, int client) {
 		wasAFK[client] = rp_GetClientBool(client, b_IsAFK);
 		if( !wasAFK[client] ) {
 			int cap = rp_GetRandomCapital(1);
-			int mnt = Math_GetRandomInt(2, 3);
+			int mnt = Math_GetRandomInt(1,2);
 			rp_SetJobCapital(cap, rp_GetJobCapital(cap) - mnt);
 			rp_ClientMoney(client, i_AddToPay, mnt);
 			g_iTickXp[client]++;
