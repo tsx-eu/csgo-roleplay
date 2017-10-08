@@ -35,7 +35,7 @@ public Plugin myinfo = {
 	version = __LAST_REV__, url = "https://www.ts-x.eu"
 };
 
-int g_iQuest, g_iDuration[MAXPLAYERS + 1];
+int g_iQuest, g_iDuration[MAXPLAYERS + 1], g_iTickXp[MAXPLAYERS + 1];
 
 public void OnPluginStart() {
 	RegServerCmd("rp_quest_reload", Cmd_PluginReloadSelf);
@@ -70,7 +70,7 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.AddItem("", "Interlocuteur anonyme :", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Collègue, nous avons besoin que vous", ITEMDRAW_DISABLED);
 	menu.AddItem("", "attendez des plaintes dans le Tribunal. Pendant les", ITEMDRAW_DISABLED);
-	menu.AddItem("", "prochaine 48h nous t'offrons 15$ toutes les 10", ITEMDRAW_DISABLED);
+	menu.AddItem("", "prochaine 24h nous t'offrons 20$ toutes les 10", ITEMDRAW_DISABLED);
 	menu.AddItem("", "minutes passées à patienter dans le tribunal.", ITEMDRAW_DISABLED);
 	menu.AddItem("", "-----------------", ITEMDRAW_DISABLED);
 	menu.AddItem("", "Attention, si tu t'absentes nous t'infligerons", ITEMDRAW_DISABLED);
@@ -79,7 +79,8 @@ public void Q1_Start(int objectiveID, int client) {
 	menu.ExitButton = false;
 	menu.Display(client, 60);
 	
-	g_iDuration[client] = 48 * 60;
+	g_iTickXp[client] = 0;
+	g_iDuration[client] = 24 * 60;
 }
 public void Q1_Frame(int objectiveID, int client) {
 	
@@ -89,17 +90,19 @@ public void Q1_Frame(int objectiveID, int client) {
 	if( zoneJail(client) ) {
 		
 		if( wasAFK[client] == false && rp_GetClientBool(client, b_IsAFK) ) {
-			int mnt = RoundToFloor(2.5 * 3.0 * 60.0);
+			int mnt = RoundToFloor(1.25 * 3.0 * 60.0);
 			rp_SetJobCapital(QUEST_JOBID, rp_GetJobCapital(QUEST_JOBID) + mnt);
 			rp_ClientMoney(client, i_AddToPay, - mnt);
+			g_iTickXp[client]-=(3*60);
 		}
 		
 		wasAFK[client] = rp_GetClientBool(client, b_IsAFK);
 		if( !wasAFK[client] ) {
 			int cap = rp_GetRandomCapital(QUEST_JOBID);
-			int mnt = Math_GetRandomInt(1, 2);
+			int mnt = Math_GetRandomInt(1,2);
 			rp_SetJobCapital(cap, rp_GetJobCapital(cap) - mnt);
 			rp_ClientMoney(client, i_AddToPay, mnt);
+			g_iTickXp[client]++;
 		}
 	}
 	
@@ -112,6 +115,10 @@ public void Q1_Frame(int objectiveID, int client) {
 }
 public void Q1_Abort(int objectiveID, int client) {
 	PrintHintText(client, "<b>Quête</b>: %s\nLa quête est terminée.", QUEST_NAME);
+	if(g_iTickXp[client] > 0){
+		int xp = RoundToFloor( g_iTickXp[client] * ( (24*60) / 1500 ) );
+		rp_ClientXPIncrement(client, xp);
+	}
 }
 // ----------------------------------------------------------------------------
 public int MenuNothing(Handle menu, MenuAction action, int client, int param2) {
