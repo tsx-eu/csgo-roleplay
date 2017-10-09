@@ -593,6 +593,10 @@ public Action Cmd_Jail(int client) {
 	int target = rp_GetClientTarget(client);
 	if (target <= 0 || !IsValidEdict(target) || !IsValidEntity(target))
 		return Plugin_Handled;
+
+	if (rp_GetZoneBit(rp_GetPlayerZone(client)) & BITZONE_PERQUIZ || rp_GetZoneBit(rp_GetPlayerZone(target)) & BITZONE_PERQUIZ) { // Les juges peuvent jail en perqui
+		ct = 0;
+	}
 	
 	if (IsValidClient(target) && rp_GetClientFloat(target, fl_Invincible) > GetGameTime()) {  //le target utilise une poupée gonflable
 		ACCESS_DENIED(client);
