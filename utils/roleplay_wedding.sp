@@ -211,7 +211,7 @@ Menu Menu_Mariage(int& client, int a, int b, int c, int d, int e, int f) {
 		subMenu.SetTitle("Qui voulez-vous marier ?\n ");
 		
 		for(int i=1; i<=MaxClients; i++) {
-			if( !IsValidClient(i) || i == client || rp_GetPlayerZone(i) != zone )
+			if( !IsValidClient(i) || rp_GetPlayerZone(i) != zone )
 				continue;
 			if( rp_GetClientInt(i, i_MarriedTo) > 0 )
 				continue;
@@ -226,7 +226,7 @@ Menu Menu_Mariage(int& client, int a, int b, int c, int d, int e, int f) {
 		subMenu.SetTitle("À qui voulez-vous marier %N?\n ", b);
 		
 		for(int i=1; i<=MaxClients; i++) {
-			if( !IsValidClient(i) || i == client || b == i || rp_GetPlayerZone(i) != zone )
+			if( !IsValidClient(i) || b == i || rp_GetPlayerZone(i) != zone )
 				continue;
 			if( rp_GetClientInt(i, i_MarriedTo) > 0 )
 				continue;
@@ -444,7 +444,7 @@ Menu Menu_Divorce(int& client, int a, int b, int c) {
 	
 	if( b == 0 ) {
 		for (int i = 1; i <= MaxClients; i++) {
-			if( !IsValidClient(i) || i == client )
+			if( !IsValidClient(i) )
 				continue;
 			if( rp_GetPlayerZone(i) == zone ) {
 				GetClientAuthId(i, AuthId_Engine, tmp, sizeof(tmp));
@@ -453,8 +453,7 @@ Menu Menu_Divorce(int& client, int a, int b, int c) {
 		}
 		
 		szSteamIDs[strlen(szSteamIDs) - 1] = 0;
-		Format(query, sizeof(query), "SELECT W.`steamid`, U1.`name`, W.`steamid2`, U2.`name` FROM `rp_wedding` W INNER JOIN `rp_users` U1 ON U1.`steamid`=W.`steamid` INNER JOIN `rp_users` U2 ON U2.`steamid`=W.`steamid2` WHERE`time` >= UNIX_TIMESTAMP() AND (W.`steamid` IN (%s) OR W.`steamid` IN (%s))", szSteamIDs, szSteamIDs);
-		PrintToConsole(client, query);
+		Format(query, sizeof(query), "SELECT W.`steamid`, U1.`name`, W.`steamid2`, U2.`name` FROM `rp_wedding` W INNER JOIN `rp_users` U1 ON U1.`steamid`=W.`steamid` INNER JOIN `rp_users` U2 ON U2.`steamid`=W.`steamid2` WHERE`time` >= UNIX_TIMESTAMP() AND (W.`steamid` IN (%s) OR W.`steamid2` IN (%s))", szSteamIDs, szSteamIDs);
 		SQL_TQuery(rp_GetDatabase(), SQL_CheckDivorce, query, client);
 	}
 	else if( c == 0 ) {
