@@ -36,13 +36,13 @@ public void OnPluginStart() {
 public void OnAllPluginsLoaded() {
 	int id = PVE_Create(g_szFullname, g_szName, g_szModel);
 	
-	PVE_SetInt(id, ESI_MaxHealth, 		1000);
+	PVE_SetInt(id, ESI_MaxHealth, 		500);
 	PVE_SetInt(id, ESI_AttackType,		view_as<int>(ESA_Melee));
-	PVE_SetInt(id, ESI_AttackDamage,	100);
+	PVE_SetInt(id, ESI_AttackDamage,	50);
 	PVE_SetInt(id, ESI_MinSkin, 		15);
 	PVE_SetInt(id, ESI_MaxSkin, 		29);
 	
-	PVE_SetFloat(id, ESF_Speed,			240.0);
+	PVE_SetFloat(id, ESF_Speed,			230.0);
 	PVE_SetFloat(id, ESF_Gravity,		1.0);
 	PVE_SetFloat(id, ESF_ScaleSize,		1.0);
 	PVE_SetFloat(id, ESF_FeetSize,  	0.0);

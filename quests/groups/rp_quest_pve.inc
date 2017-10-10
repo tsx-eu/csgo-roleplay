@@ -445,7 +445,7 @@ public void Q2_Frame(int objectiveID, int client) {
 	else {
 		g_iQuestConfig[QC_Time]++;
 		
-		if( g_hQueue.Length > 0  && g_iQuestConfig[QC_Alive] < (5+g_iQuestConfig[QC_Difficulty]) ) {
+		if( g_hQueue.Length > 0  && g_iQuestConfig[QC_Alive] < (2 + 3*g_stkTeamCount[TEAM_PLAYERS]) ) {
 			if( SQ_Pop(pos) ) {
 				int id = g_hQueue.Get(0);
 				g_hQueue.Erase(0);

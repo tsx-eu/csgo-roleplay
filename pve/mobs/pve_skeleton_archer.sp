@@ -40,9 +40,9 @@ public void OnPluginStart() {
 public void OnAllPluginsLoaded() {
 	int id = PVE_Create(g_szFullname, g_szName, g_szModel);
 	
-	PVE_SetInt(id, ESI_MaxHealth, 		500);
+	PVE_SetInt(id, ESI_MaxHealth, 		200);
 	PVE_SetInt(id, ESI_AttackType,		view_as<int>(ESA_Weapon));
-	PVE_SetInt(id, ESI_AttackDamage,	100);
+	PVE_SetInt(id, ESI_AttackDamage,	50);
 	PVE_SetInt(id, ESI_MinSkin, 		0);
 	PVE_SetInt(id, ESI_MaxSkin, 		14);
 	

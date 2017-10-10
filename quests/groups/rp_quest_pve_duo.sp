@@ -33,10 +33,15 @@
 #define		QUEST_BONUS		view_as<float>({2688.0, -9573.0, -7828.0})
 
 char g_szSpawnQueue[][][PLATFORM_MAX_PATH] = {
-	{"1", "zombie"}, {"2", "skeleton_arrow"}, {"3", "skeleton"},
-	{"1", "zombie"}, {"2", "skeleton_arrow"}, {"3", "skeleton_heavy"},
-	{"1", "zombie"}, {"2", "skeleton_arrow"}, {"3", "skeleton"},
-	{"5", "zombie"}, {"3", "skeleton_arrow"},
+	{"1", "zombie"}, {"2", "skeleton_arrow"}, {"5", "skeleton"},
+	{"1", "zombie"}, {"2", "skeleton_arrow"}, {"5", "skeleton"},
+	{"1", "zombie"}, {"2", "skeleton"}, 	  {"5", "skeleton_heavy"},
+	{"1", "zombie"}, {"2", "skeleton_arrow"}, {"5", "skeleton_heavy"},
+	{"1", "zombie"}, {"2", "skeleton_heavy"}, {"5", "skeleton"},
+	{"1", "zombie"}, {"2", "skeleton_arrow"}, {"5", "skeleton"},
+	{"1", "zombie"}, {"3", "skeleton_arrow"},
+	{"1", "zombie"}, {"2", "skeleton_heavy"}, {"5", "skeleton"},
+	{"1", "zombie"}, {"3", "skeleton_arrow"}, {"5", "skeleton_heavy"},
 	{"5", "zombie"}
 };
 
