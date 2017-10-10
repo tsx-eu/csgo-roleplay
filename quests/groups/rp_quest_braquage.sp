@@ -498,7 +498,7 @@ public void Q6_Frame(int objectiveID, int client) {
 			}
 		}
 		
-		if( Math_GetRandomInt(0, 4)  == 0 )
+		if( Math_GetRandomInt(0, 2)  == 0 )
 			rp_Effect_BeamBox(g_stkTeam[TEAM_BRAQUEUR][i], g_iVehicle, NULL_VECTOR, 255, 255, 255);
 	}
 	
