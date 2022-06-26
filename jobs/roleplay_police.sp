@@ -218,7 +218,7 @@ public Action Cmd_Amende(int client, const char[] arg) {
 
 	}
 	if( amount > maxAmount ) {
-		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Amende trop élevée.");
+		CPrintToChat(client, "{lightblue}[TSX-RP]{default} Amende trop élevée. Veuillez réduire le montant");
 		return Plugin_Handled;
 	}
 
